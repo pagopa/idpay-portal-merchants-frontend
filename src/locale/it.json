@@ -1,0 +1,99 @@
+{
+  "navigation": {
+    "back": "Indietro"
+  },
+  "components": {
+    "exitModal": {
+      "body": "Tutte le informazioni che hai inserito andranno perse. \nSe vuoi riprendere la compilazione dell’iniziativa in un secondo momento, torna indietro e premi “Salva bozza”.",
+      "cancelBtn": "Torna indietro",
+      "exitBtn": "Esci",
+      "title": "Vuoi uscire?"
+    }
+  },
+  "pages": {
+    "assistance": {
+      "exitModal": {
+        "body": "Il team di Assistenza non riceverà la tua richiesta."
+      },
+      "form": {
+        "message": "Descrivi il tuo problema",
+        "sendBtn": "Iniva",
+        "subject": "Oggetto"
+      },
+      "subtitle": "Compila e invia il modulo. Ti risponderemo al più presto.",
+      "title": "Come possiamo aiutarti?"
+    },
+    "home": {},
+    "thankyouPage": {
+      "buttonLabel": "Chiudi",
+      "description": "Ti risponderemo al più presto all’indirizzo e-mail che hai indicato.",
+      "title": "Abbiamo ricevuto la tua richiesta!"
+    }
+  },
+  "roles": {
+    "admin": "Amministratore"
+  },
+  "session": {
+    "expired": {
+      "message": "Ti stiamo reindirizzando alla pagina di accesso",
+      "title": "La tua sessione è scaduta"
+    }
+  },
+  "sideMenu": {},
+  "subHeader": {
+    "backButton": "Esci",
+    "partySelectionSearch": {
+      "label": "I tuoi enti",
+      "title": "I tuoi enti"
+    }
+  },
+  "tos": {
+    "and": "e l’",
+    "backHome": "Torna alla home",
+    "linkPrivacy": "Informativa Privacy",
+    "linkTos": "Termini e condizioni d’uso",
+    "termsDescription": "Accedendo, accetti i",
+    "termsDescription2": "del servizio e confermi di aver letto l’",
+    "termsDescriptionChanged": "Recentemente abbiamo cambiato i",
+    "title": "Portale Bonus"
+  },
+  "validation": {
+    "celNum": "Numero di telefono non valido",
+    "celNumValid": "Inserisci un numero di telefono",
+    "email": "Indirizzo e-mail non valido",
+    "emailValid": "Inserisci un indirizzo e-mail",
+    "formatTimeInvalid": "Ora non valida",
+    "indicateAssistanceSubject": "Inserisci l’argomento della tua richiesta",
+    "integer": "Inserisci un numero intero",
+    "invalidDate": "Data non valida",
+    "maxArgumentsChar": "Scrivi massimo 100 caratteri",
+    "maxDescriptionChar": "Scrivi massimo 350 caratteri",
+    "maxFiveHundred": "Scrivi massimo 500 caratteri",
+    "maxServiceNameChar": "Scrivi massimo 50 caratteri",
+    "maxTwoHundred": "Scrivi massimo 200 caratteri",
+    "maxValue": "Il valore deve essere inferiore o uguale a {{value}}",
+    "minOne": "Inserisci un valore maggiore o uguale a 1",
+    "notValidMccLis": "Alcuni valori non sono validi",
+    "numeric": "Inserisci un numero",
+    "outBudgetPerPerson": "Il budget a persona deve essere inferiore al budget totale",
+    "outDateTo": "La data di fine deve essere successiva a quella di inizio",
+    "outFixedPremiumValue": "Il valore massimo non può essere maggiore del budget per persona",
+    "outJoinFrom": "La data di inizio adesione non può essere antecedente ad oggi",
+    "outJoinTo": "La data di fine adesione deve essere successiva a quella di inizio",
+    "outMaxSpendingLimit": "Il valore di spesa massimo deve essere maggiore del minimo",
+    "outPercentageRecognized": "La percentuale massima non può essere maggiore di 100",
+    "outSpendFrom": "La data di inizio periodo spesa deve essere successiva alla data di fine adesione",
+    "outSpendFromWithRanking": "Devono passare almeno 10 giorni tra la fine del periodo di adesione e l’inizio di quello di spesa",
+    "outSpendTo": "La data di fine deve essere successiva a quella di inizio",
+    "outTransactionNumberLimit": "Il numero massimo di transazioni deve essere maggiore del minimo",
+    "outTransactionTime": "L'orario di fine deve essere maggiore di quello d'inizio",
+    "outValue": "Il secondo valore deve essere maggiore del primo",
+    "positive": "Inserisci un valore positivo",
+    "required": "Campo obbligatorio",
+    "trxCountMinCap": "Il valore minimo deve essere maggiore o uguale a {{x}} €",
+    "uniqueFrequency": "Non puoi inserire due importi diversi per lo stesso limite",
+    "uniqueInterval": "Non puoi inserire due intervalli uguali per lo stesso giorno",
+    "web": "Indirizzo web non valido",
+    "webValid": "Inserisci un indirizzo web"
+  }
+}
