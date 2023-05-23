@@ -31,10 +31,10 @@ variables:
 
     react_app_url_cdn: '$(UAT_REACT_APP_URL_CDN)'
 
-    react_app_url_fe_pre_login: '$(UAT_REACT_APP_URL_FE_PRE_LOGIN)'
+    react_app_url_fe_pre_login: '$(UAT_REACT_APP_URL_FE_PRE_LOGIN_MERCHANTS)'
     react_app_url_fe_auth: '$(UAT_REACT_APP_URL_FE_LOGIN)'
     react_app_url_fe_landing: '$(UAT_REACT_APP_URL_FE_LANDING)'
-    react_app_url_fe_assistance: '$(UAT_REACT_APP_URL_FE_ASSISTANCE)'
+    react_app_url_fe_assistance: '$(UAT_REACT_APP_URL_FE_ASSISTANCE_MERCHANTS)'
 
     react_app_url_api_merchants: '$(UAT_REACT_APP_URL_API_MERCHANTS)'
     react_app_url_api_role_permission: '$(UAT_REACT_APP_URL_API_ROLE_PERMISSION)'
@@ -65,10 +65,10 @@ variables:
 
     react_app_url_cdn: '$(PROD_REACT_APP_URL_CDN)'
 
-    react_app_url_fe_pre_login: '$(PROD_REACT_APP_URL_FE_PRE_LOGIN)'
+    react_app_url_fe_pre_login: '$(PROD_REACT_APP_URL_FE_PRE_LOGIN_MERCHANTS)'
     react_app_url_fe_auth: '$(PROD_REACT_APP_URL_FE_LOGIN)'
     react_app_url_fe_landing: '$(PROD_REACT_APP_URL_FE_LANDING)'
-    react_app_url_fe_assistance: '$(PROD_REACT_APP_URL_FE_ASSISTANCE)'
+    react_app_url_fe_assistance: '$(PROD_REACT_APP_URL_FE_ASSISTANCE_MERCHANTS)'
 
     react_app_url_api_merchants: '$(PROD_REACT_APP_URL_API_MERCHANTS)'
     react_app_url_api_role_permission: '$(PROD_REACT_APP_URL_API_ROLE_PERMISSION)'
@@ -101,10 +101,10 @@ variables:
 
     react_app_url_cdn: '$(DEV_REACT_APP_URL_CDN)'
 
-    react_app_url_fe_pre_login: '$(DEV_REACT_APP_URL_FE_PRE_LOGIN)'
+    react_app_url_fe_pre_login: '$(DEV_REACT_APP_URL_FE_PRE_LOGIN_MERCHANTS)'
     react_app_url_fe_auth: '$(DEV_REACT_APP_URL_FE_LOGIN)'
     react_app_url_fe_landing: '$(DEV_REACT_APP_URL_FE_LANDING)'
-    react_app_url_fe_assistance: '$(DEV_REACT_APP_URL_FE_ASSISTANCE)'
+    react_app_url_fe_assistance: '$(DEV_REACT_APP_URL_FE_ASSISTANCE_MERCHANTS)'
 
     react_app_url_api_merchants: '$(DEV_REACT_APP_URL_API_MERCHANTS)'
     react_app_url_api_role_permission: '$(DEV_REACT_APP_URL_API_ROLE_PERMISSION)'
