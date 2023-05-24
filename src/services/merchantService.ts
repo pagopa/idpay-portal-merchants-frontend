@@ -1,6 +1,6 @@
-import { SyncTrxStatus } from '../api/generated/payment-qr-code/SyncTrxStatus';
-import { TransactionCreationRequest } from '../api/generated/payment-qr-code/TransactionCreationRequest';
-import { TransactionResponse } from '../api/generated/payment-qr-code/TransactionResponse';
+import { SyncTrxStatus } from '../api/generated/merchants/SyncTrxStatus';
+import { TransactionCreationRequest } from '../api/generated/merchants/TransactionCreationRequest';
+import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
 import { MerchantApi } from '../api/MerchantsApiClient';
 
 export const createTransaction = (
