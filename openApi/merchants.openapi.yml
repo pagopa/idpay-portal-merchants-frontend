@@ -1,307 +1,75 @@
 openapi: 3.0.1
 info:
-  title: IDPAY QR-CODE PAYMENT MOCK MERCHANT API
-  description: IDPAY QR-CODE PAYMENT MOCK MERCHANT
+  title: IDPAY Welfare Portal Merchant API
+  description: IDPAY Welfare Portal Merchant
   version: '1.0'
 servers:
-  - url: http://api.dev.cstar.pagopa.it/idpay/payment/qr-code/mock/merchant
-  - url: http://apim.internal.dev.cstar.pagopa.it/idpay/payment/qr-code/mock/merchant
-  - url: https://api.dev.cstar.pagopa.it/idpay/payment/qr-code/mock/merchant
-  - url: https://apim.internal.dev.cstar.pagopa.it/idpay/payment/qr-code/mock/merchant
+  - url: https://api-io.dev.cstar.pagopa.it/idpay/merchant/portal
 paths:
-  /:
-    post:
+  /initiatives:
+    get:
       tags:
-        - payment
-      summary: Merchant create transaction
-      description: Merchant create transaction
-      operationId: createTransaction
-      parameters:
-        - name: x-merchant-id
-          in: header
-          description: Merchant ID
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: General information about Transaction
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TransactionCreationRequest'
-            example:
-              merchantFiscalCode: string
-              vat: string
-              idTrxIssuer: string
-              initiativeId: string
-              trxDate: string
-              amountCents: 0
-              mcc: string
+        - merchant-initiatives
+      summary: Returns the list of initiatives of a specific merchant
+      description: Returns the list of initiatives of a specific merchant
+      operationId: getMerchantInitiativeList
       responses:
-        '201':
-          description: Created
+        '200':
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionResponse'
-              example:
-                id: string
-                trxCode: string
-                initiativeId: string
-                merchantId: string
-                idTrxIssuer: string
-                trxDate: string
-                amountCents: 0
-                mcc: string
-                acquirerId: string
-                status: CREATED
-        '404':
-          description: Transaction not found
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/InitiativeDTO'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorDTO'
-              example:
-                title: string
-                message: string
-  '/{transactionId}/confirm':
-    put:
-      tags:
-        - payment
-      summary: Merchant confirms the payment and the event is notified to IDPay
-      description: Merchant confirms the payment and the event is notified to IDPay
-      operationId: confirmPaymentQRCode
-      parameters:
-        - name: transactionId
-          in: path
-          description: Transaction ID
-          required: true
-          schema:
-            type: string
-        - name: x-merchant-id
-          in: header
-          description: Merchant ID
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Ok
+        '404':
+          description: The merchant ID was not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionResponse'
-              example:
-                id: string
-                trxCode: string
-                initiativeId: string
-                merchantId: string
-                idTrxIssuer: string
-                trxDate: string
-                amountCents: 0
-                mcc: string
-                acquirerId: string
-                status: CREATED
-        '400':
-          description: Transaction is not AUTHORIZED
-        '403':
-          description: Merchant not allowed to operate on this transaction
-        '404':
-          description: Transaction does not exist
-        '429':
-          description: Too many Request
-        '500':
-          description: Server ERROR
-  '/status/{transactionId}':
-    get:
-      tags:
-        - payment
-      summary: Returns the detail of a transaction
-      description: Returns the detail of a transaction
-      operationId: getStatusTransaction
-      parameters:
-        - name: transactionId
-          in: path
-          description: The initiative ID
-          required: true
-          schema:
-            type: string
-        - name: x-merchant-id
-          in: header
-          description: Merchant ID
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SyncTrxStatus'
-              example:
-                id: string
-                idTrxIssuer: string
-                trxCode: string
-                trxDate: string
-                authDate: string
-                operationType: CHARGE
-                amountCents: 0
-                amountCurrency: string
-                mcc: string
-                acquirerId: string
-                merchantId: string
-                initiativeId: string
-                rewardCents: 0
-                rejectionReasons:
-                  - string
-                status: CREATED
-        '404':
-          description: Transaction does not exist
+                $ref: '#/components/schemas/ErrorDTO'
 components:
   schemas:
-    TransactionCreationRequest:
-      required:
-        - merchantFiscalCode
-        - vat
-        - idTrxIssuer
-        - initiativeId
-        - trxDate
-        - amountCents
-        - mcc
+    InitiativeDTO:
       type: object
       properties:
-        merchantFiscalCode:
-          type: string
-        vat:
-          type: string
-        idTrxIssuer:
-          type: string
         initiativeId:
           type: string
-        trxDate:
+        initiativeName:
           type: string
-          format: date-time
-        amountCents:
-          type: integer
-          format: int64
-        mcc:
-          type: string
-    TransactionResponse:
-      required:
-        - id
-        - trxCode
-        - initiativeId
-        - merchantId
-        - idTrxIssuer
-        - trxDate
-        - amountCents
-        - mcc
-        - acquirerId
-        - status
-      type: object
-      properties:
-        id:
-          type: string
-        trxCode:
-          type: string
-        initiativeId:
-          type: string
-        merchantId:
-          type: string
-        idTrxIssuer:
-          type: string
-        trxDate:
-          type: string
-          format: date-time
-        amountCents:
-          type: integer
-          format: int64
-        mcc:
-          type: string
-        acquirerId:
+        organizationName:
           type: string
         status:
-          enum:
-            - CREATED
-            - IDENTIFIED
-            - AUTHORIZED
-            - REWARDED
-            - REJECTED
           type: string
-    SyncTrxStatus:
-      required:
-        - id
-        - idTrxIssuer
-        - trxCode
-        - trxDate
-        - operationType
-        - amountCents
-        - amountCurrency
-        - mcc
-        - acquirerId
-        - merchantId
-        - initiativeId
-        - rejectionReasons
-        - status
-      type: object
-      properties:
-        id:
+        startDate:
           type: string
-        idTrxIssuer:
+          format: date
+        endDate:
           type: string
-        trxCode:
+          format: date
+        serviceId:
           type: string
-        trxDate:
-          type: string
-          format: date-time
-        authDate:
-          type: string
-          format: date-time
-        operationType:
-          enum:
-            - CHARGE
-            - REFUND
-          type: string
-        amountCents:
-          type: integer
-          format: int64
-        amountCurrency:
-          type: string
-        mcc:
-          type: string
-        acquirerId:
-          type: string
-        merchantId:
-          type: string
-        initiativeId:
-          type: string
-        rewardCents:
-          type: integer
-          format: int64
-        rejectionReasons:
-          type: array
-          items:
-            type: string
-          description: The list of rejection reasons
-        status:
-          enum:
-            - CREATED
-            - IDENTIFIED
-            - AUTHORIZED
-            - REWARDED
-            - REJECTED
-          type: string
+        enabled:
+          type: boolean
     ErrorDTO:
-      required:
-        - title
-        - message
       type: object
       properties:
-        title:
+        code:
           type: string
         message:
           type: string
-tags:
-  - name: payment
-    description: ''
+
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+security:
+  - Bearer: []

@@ -49,6 +49,9 @@ const SecuredRoutes = withLogin(
     return (
       <Layout>
         <Switch>
+          <Route path={routes.HOME} exact={true}>
+            <Home />
+          </Route>
           <Route path={routes.ASSISTANCE} exact={true}>
             <Assistance />
           </Route>
@@ -75,9 +78,6 @@ const App = () => (
     <Switch>
       <Route path={routes.AUTH}>
         <Auth />
-      </Route>
-      <Route path={routes.HOME} exact={true}>
-        <Home />
       </Route>
       <Route path="*">
         <SecuredRoutes />

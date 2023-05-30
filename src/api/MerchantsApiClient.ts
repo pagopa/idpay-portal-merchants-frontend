@@ -5,11 +5,9 @@ import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
-import { TransactionCreationRequest } from './generated/merchants/TransactionCreationRequest';
-import { TransactionResponse } from './generated/merchants/TransactionResponse';
-import { SyncTrxStatus } from './generated/merchants/SyncTrxStatus';
+import { InitiativeDTO } from './generated/merchants/InitiativeDTO';
 
-const withBearer: WithDefaultsT<any> = (wrappedOperation) => (params: any) => {
+const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
   return wrappedOperation({
     ...params,
@@ -38,33 +36,8 @@ const onRedirectToLogin = () =>
   );
 
 export const MerchantApi = {
-  createTransaction: async (
-    merchantId: string,
-    trx: TransactionCreationRequest
-  ): Promise<TransactionResponse> => {
-    const result = await apiClient.createTransaction({ 'x-merchant-id': merchantId, body: trx });
-    return extractResponse(result, 201, onRedirectToLogin);
-  },
-
-  getStatusTransaction: async (
-    merchantId: string,
-    transactionId: string
-  ): Promise<SyncTrxStatus> => {
-    const result = await apiClient.getStatusTransaction({
-      'x-merchant-id': merchantId,
-      transactionId,
-    });
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
-
-  confirmPaymentQRCode: async (
-    merchantId: string,
-    transactionId: string
-  ): Promise<TransactionResponse> => {
-    const result = await apiClient.confirmPaymentQRCode({
-      'x-merchant-id': merchantId,
-      transactionId,
-    });
+  getMerchantInitiativeList: async (): Promise<Array<InitiativeDTO>> => {
+    const result = await apiClient.getMerchantInitiativeList({});
     return extractResponse(result, 200, onRedirectToLogin);
   },
 };
