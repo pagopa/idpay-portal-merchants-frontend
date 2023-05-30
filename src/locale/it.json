@@ -39,7 +39,10 @@
       "title": "La tua sessione è scaduta"
     }
   },
-  "sideMenu": {},
+  "sideMenu": {
+    "initiativesListTitle": "Iniziative",
+    "initiativeDiscountsTitle": "Sconti"
+  },
   "subHeader": {
     "backButton": "Esci",
     "partySelectionSearch": {

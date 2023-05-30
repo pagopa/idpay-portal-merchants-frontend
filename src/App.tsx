@@ -17,6 +17,7 @@ import routes from './routes';
 import useTCAgreement from './hooks/useTCAgreement';
 import Home from './pages/home/Home';
 import Assistance from './pages/assistance/assistance';
+import InitiativeDiscounts from './pages/initiativeDiscounts/initiativeDiscounts';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -60,6 +61,9 @@ const SecuredRoutes = withLogin(
           </Route>
           <Route path={routes.PRIVACY_POLICY} exact={true}>
             <PrivacyPolicy />
+          </Route>
+          <Route path={routes.DISCOUNTS} exact={true}>
+            <InitiativeDiscounts />
           </Route>
           <Route path="*">
             <Redirect to={routes.HOME} />
