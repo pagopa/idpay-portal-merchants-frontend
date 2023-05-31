@@ -1,4 +1,4 @@
-import { InitiativeDTO } from '../generated/merchants/InitiativeDTO';
+import { InitiativeDTO, StatusEnum } from '../generated/merchants/InitiativeDTO';
 
 const startDate = new Date();
 const endDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
@@ -12,7 +12,7 @@ const mockedInitiativesList = [
     organizationName: 'Organizzazione mock 1234',
     serviceId: '1234',
     startDate,
-    status: 'PUBLISHED',
+    status: StatusEnum.PUBLISHED,
   },
   {
     enabled: true,
@@ -22,7 +22,7 @@ const mockedInitiativesList = [
     organizationName: 'Organizzazione mock 5678',
     serviceId: '5678',
     startDate,
-    status: 'CLOSED',
+    status: StatusEnum.CLOSED,
   },
 ];
 

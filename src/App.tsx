@@ -15,7 +15,7 @@ import TOS from './pages/tos/TOS';
 import PrivacyPolicy from './pages/privacyPolicy/PrivacyPolicy';
 import routes from './routes';
 import useTCAgreement from './hooks/useTCAgreement';
-import Home from './pages/home/Home';
+import InitiativesList from './pages/initiativesList/initiativesList';
 import Assistance from './pages/assistance/assistance';
 import InitiativeDiscounts from './pages/initiativeDiscounts/initiativeDiscounts';
 
@@ -51,7 +51,7 @@ const SecuredRoutes = withLogin(
       <Layout>
         <Switch>
           <Route path={routes.HOME} exact={true}>
-            <Home />
+            <InitiativesList />
           </Route>
           <Route path={routes.ASSISTANCE} exact={true}>
             <Assistance />

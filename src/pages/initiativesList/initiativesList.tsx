@@ -20,10 +20,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import { grey } from '@mui/material/colors';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useInitiativesList } from '../../hooks/useInitiativesList';
 import { useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import EmptyList from '../components/EmptyList';
+import { StatusEnum } from '../../api/generated/merchants/InitiativeDTO';
+import { BASE_ROUTE } from '../../routes';
 import { Data, EnhancedTableProps, HeadCell, Order, getComparator, stableSort } from './helpers';
 
 function EnhancedTableHead(props: EnhancedTableProps) {
@@ -77,9 +80,11 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
-              active={orderBy === headCell.id}
+              active={orderBy === headCell.id && headCell.id !== 'spendingPeriod'}
               direction={orderBy === headCell.id ? order : 'asc'}
               onClick={createSortHandler(headCell.id)}
+              hideSortIcon={headCell.id === 'spendingPeriod'}
+              disabled={headCell.id === 'spendingPeriod'}
             >
               {headCell.label}
               {orderBy === headCell.id ? (
@@ -95,18 +100,20 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-const Home = () => {
+const InitiativesList = () => {
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<keyof Data>('initiativeName');
   const [initiativeList, setInitiativeList] = useState<Array<Data>>([]);
   const [initiativeListFiltered, setInitiativeListFiltered] = useState<Array<Data>>([]);
+  const history = useHistory();
   useInitiativesList();
 
-  const initiativesList = useAppSelector(intiativesListSelector);
+  const initiativesListSel = useAppSelector(intiativesListSelector);
 
   useEffect(() => {
-    if (Array.isArray(initiativesList)) {
-      const mappedInitativeList = initiativesList?.map((item, index) => ({
+    if (Array.isArray(initiativesListSel)) {
+      const mappedInitativeList = initiativesListSel?.map((item, index) => ({
+        initiativeId: item.initiativeId || '',
         initiativeName: item.initiativeName || '',
         organizationName: item.organizationName || '',
         spendingPeriod:
@@ -120,7 +127,7 @@ const Home = () => {
       setInitiativeList(mappedInitativeList);
       setInitiativeListFiltered(mappedInitativeList);
     }
-  }, [initiativesList]);
+  }, [initiativesListSel]);
 
   const handleSearchInitiatives = (s: string) => {
     const search = s.toLocaleLowerCase();
@@ -148,9 +155,9 @@ const Home = () => {
 
   const renderInitiativeStatus = (status: string) => {
     switch (status) {
-      case 'PUBLISHED':
+      case StatusEnum.PUBLISHED:
         return <Chip sx={{ fontSize: '14px' }} label="In corso" color="success" />;
-      case 'CLOSED':
+      case StatusEnum.CLOSED:
         return <Chip sx={{ fontSize: '14px' }} label="Terminata" color="default" />;
       default:
         return null;
@@ -209,7 +216,7 @@ const Home = () => {
           backgroundColor: grey.A100,
         }}
       >
-        <TableContainer >
+        <TableContainer>
           {initiativeListFiltered.length > 0 ? (
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
               <EnhancedTableHead
@@ -232,7 +239,9 @@ const Home = () => {
                               fontSize: '1em',
                               textAlign: 'left',
                             }}
-                            // onClick={() =>   history.replace(   `${BASE_ROUTE}/panoramica-iniziativa/${row.initiativeId}` )   }
+                            onClick={() =>
+                              history.replace(`${BASE_ROUTE}/sconti-iniziativa/${row.initiativeId}`)
+                            }
                             data-testid="initiative-btn-test"
                           >
                             {row.initiativeName}
@@ -241,7 +250,7 @@ const Home = () => {
                         <TableCell>{row.organizationName}</TableCell>
                         <TableCell>{row.spendingPeriod}</TableCell>
                         <TableCell>{row.serviceId}</TableCell>
-                        <TableCell>{renderInitiativeStatus(row.status)}</TableCell>
+                        <TableCell>{renderInitiativeStatus(row.status as StatusEnum)}</TableCell>
                       </TableRow>
                     );
                   }
@@ -276,4 +285,4 @@ const Home = () => {
     </Box>
   );
 };
-export default Home;
+export default InitiativesList;
