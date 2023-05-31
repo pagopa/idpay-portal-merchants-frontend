@@ -13,8 +13,8 @@ export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> => {
 export const getMerchantTransactions = (
   initiativeId: string,
   page: number,
-  fiscalCode: string,
-  status: string
+  fiscalCode?: string,
+  status?: string
 ): Promise<MerchantTransactionsListDTO> => {
   if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
     return MerchantsApiMocked.getMerchantTransactions(initiativeId, page, fiscalCode, status);

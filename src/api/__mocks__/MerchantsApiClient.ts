@@ -76,8 +76,8 @@ export const MerchantsApiMocked = {
   getMerchantTransactions: async (
     _initiativeId: string,
     _page: number,
-    _fiscalCode: string,
-    _status: string
+    _fiscalCode?: string,
+    _status?: string
   ): Promise<MerchantTransactionsListDTO> =>
     new Promise((resolve) => resolve(mockedMerchantTransactionList)),
 };

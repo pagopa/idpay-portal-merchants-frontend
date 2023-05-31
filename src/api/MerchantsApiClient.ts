@@ -44,8 +44,8 @@ export const MerchantApi = {
   getMerchantTransactions: async (
     initiativeId: string,
     page: number,
-    fiscalCode: string,
-    status: string
+    fiscalCode?: string,
+    status?: string
   ): Promise<MerchantTransactionsListDTO> => {
     const result = await apiClient.getMerchantTransactions({
       initiativeId,
