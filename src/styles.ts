@@ -4,16 +4,15 @@ export const genericContainerStyle = {
   gridTemplateColumns: 'repeat(12, 1fr)',
 };
 
-export const initiativePagesTableContainerStyle = {
+export const pagesTableContainerStyle = {
   display: 'grid',
   width: '100%',
-  height: '100%',
+
   gridTemplateColumns: 'repeat(12, 1fr)',
   alignItems: 'center',
 };
 
-
-export const initiativePagesFiltersFormContainerStyle = {
+export const pagesFiltersFormContainerStyle = {
   display: 'grid',
   width: '100%',
   gridTemplateColumns: 'repeat(12, 1fr)',

@@ -2,6 +2,7 @@ import MoreIcon from '@mui/icons-material/MoreVert';
 import {
   Box,
   Button,
+  Chip,
   FormControl,
   IconButton,
   InputLabel,
@@ -33,8 +34,8 @@ import ROUTES, { BASE_ROUTE } from '../../routes';
 import { getMerchantTransactions } from '../../services/merchantService';
 import {
   genericContainerStyle,
-  initiativePagesFiltersFormContainerStyle,
-  initiativePagesTableContainerStyle,
+  pagesFiltersFormContainerStyle,
+  pagesTableContainerStyle,
 } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import EmptyList from '../components/EmptyList';
@@ -147,6 +148,19 @@ const InitiativeDiscounts = () => {
     setPage(newPage);
   };
 
+  const renderTrasactionStatus = (status: string) => {
+    switch (status) {
+      case TransactionStatusEnum.AUTHORIZED:
+        return <Chip sx={{ fontSize: '14px' }} label="Autorizzato" color="success" />;
+      case TransactionStatusEnum.CREATED:
+      case TransactionStatusEnum.IDENTIFIED:
+      case TransactionStatusEnum.REJECTED:
+        return <Chip sx={{ fontSize: '14px' }} label="Da autorizzare" color="default" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <Box sx={{ width: '100%', padding: 2 }}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
@@ -186,7 +200,7 @@ const InitiativeDiscounts = () => {
         <Typography variant="h6">{'Buoni sconto emessi'}</Typography>
       </Box>
 
-      <Box sx={initiativePagesFiltersFormContainerStyle}>
+      <Box sx={pagesFiltersFormContainerStyle}>
         <FormControl sx={{ gridColumn: 'span 4' }}>
           <TextField
             label={'Cerca per codice fiscale'}
@@ -218,22 +232,13 @@ const InitiativeDiscounts = () => {
               value={TransactionStatusEnum.AUTHORIZED}
               data-testid="filterStatusAuthorized-test"
             >
-              {TransactionStatusEnum.AUTHORIZED}
-            </MenuItem>
-            <MenuItem value={TransactionStatusEnum.CREATED} data-testid="filterStatusCreated-test">
-              {TransactionStatusEnum.CREATED}
+              {'Autorizzato'}
             </MenuItem>
             <MenuItem
               value={TransactionStatusEnum.IDENTIFIED}
               data-testid="filterStatusIdentified-test"
             >
-              {TransactionStatusEnum.IDENTIFIED}
-            </MenuItem>
-            <MenuItem
-              value={TransactionStatusEnum.REJECTED}
-              data-testid="filterStatusRejected-test"
-            >
-              {TransactionStatusEnum.REJECTED}
+              {'Da autorizzare'}
             </MenuItem>
           </Select>
         </FormControl>
@@ -262,12 +267,12 @@ const InitiativeDiscounts = () => {
       {rows.length > 0 ? (
         <Box
           sx={{
-            ...initiativePagesTableContainerStyle,
+            ...pagesTableContainerStyle,
             mt: 3,
           }}
         >
           <Box sx={{ display: 'grid', gridColumn: 'span 12', height: '100%' }}>
-            <Box sx={{ width: '100%', height: '100%' }}>
+            <Box sx={{ width: '100%' }}>
               <Table>
                 <TableHead>
                   <TableRow>
@@ -286,7 +291,7 @@ const InitiativeDiscounts = () => {
                       </TableCell>
                       <TableCell>{r.fiscalCode}</TableCell>
                       <TableCell>{r.effectiveAmount}</TableCell>
-                      <TableCell>{r.status}</TableCell>
+                      <TableCell>{renderTrasactionStatus(r.status)}</TableCell>
                       <TableCell align="right">
                         <IconButton
                           data-testid="open-modal-discount-arrow"
