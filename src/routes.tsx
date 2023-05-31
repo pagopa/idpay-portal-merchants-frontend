@@ -8,6 +8,7 @@ const ROUTES = {
   ASSISTANCE: `${BASE_ROUTE}/assistenza`,
   TOS: `${BASE_ROUTE}/terms-of-service`,
   PRIVACY_POLICY: `${BASE_ROUTE}/privacy-policy`,
+  DISCOUNTS: `${BASE_ROUTE}/sconti-iniziativa/:id`,
 };
 
 export default ROUTES;
