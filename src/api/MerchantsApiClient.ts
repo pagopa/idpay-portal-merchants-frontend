@@ -6,6 +6,7 @@ import { store } from '../redux/store';
 import { ENV } from '../utils/env';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
 import { InitiativeDTO } from './generated/merchants/InitiativeDTO';
+import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -38,6 +39,21 @@ const onRedirectToLogin = () =>
 export const MerchantApi = {
   getMerchantInitiativeList: async (): Promise<Array<InitiativeDTO>> => {
     const result = await apiClient.getMerchantInitiativeList({});
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+  getMerchantTransactions: async (
+    initiativeId: string,
+    page: number,
+    fiscalCode: string,
+    status: string
+  ): Promise<MerchantTransactionsListDTO> => {
+    const result = await apiClient.getMerchantTransactions({
+      initiativeId,
+      page,
+      size: 10,
+      fiscalCode,
+      status,
+    });
     return extractResponse(result, 200, onRedirectToLogin);
   },
 };
