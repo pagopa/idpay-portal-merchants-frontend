@@ -41,6 +41,7 @@ import {
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import EmptyList from '../components/EmptyList';
 import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
+import CancelTransactionModal from './CancelTransactionModal';
 
 interface MatchParams {
   id: string;
@@ -53,8 +54,10 @@ type ActionsMenuProps = {
 
 const ActionMenu = ({ status, trxId }: ActionsMenuProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [openCancelTrxModal, setOpenCancelTrxModal] = useState<boolean>(false);
   const open = Boolean(anchorEl);
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
+
   const handleClickActionsMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -62,10 +65,28 @@ const ActionMenu = ({ status, trxId }: ActionsMenuProps) => {
     setAnchorEl(null);
   };
 
-  const RenderCancel = (status: any) => {
+  type RenderCancelTrxProps = {
+    status: TransactionStatusEnum;
+  };
+
+  const RenderCancelTransaction = ({ status }: RenderCancelTrxProps) => {
     switch (status) {
       case TransactionStatusEnum.AUTHORIZED:
-        return <MenuItem disabled>Annulla buono sconto</MenuItem>;
+      case TransactionStatusEnum.IDENTIFIED:
+      case TransactionStatusEnum.CREATED:
+      case TransactionStatusEnum.REJECTED:
+        return (
+          <>
+            <MenuItem onClick={() => setOpenCancelTrxModal(true)}>
+              {t('pages.initiativeDiscounts.cancelDiscount')}
+            </MenuItem>
+            <CancelTransactionModal
+              openCancelTrxModal={openCancelTrxModal}
+              setOpenCancelTrxModal={setOpenCancelTrxModal}
+              status={status}
+            />
+          </>
+        );
       default:
         return null;
     }
@@ -93,7 +114,7 @@ const ActionMenu = ({ status, trxId }: ActionsMenuProps) => {
         }}
         data-testid="menu-close-test"
       >
-        <RenderCancel status={status} />
+        <RenderCancelTransaction status={status} />
       </Menu>
     </TableCell>
   );
@@ -230,8 +251,17 @@ const InitiativeDiscounts = () => {
     }
   };
 
-  const showActionMenu = (status: TransactionStatusEnum) =>
-    !!(status && status === TransactionStatusEnum.AUTHORIZED);
+  const showActionMenu = (status: TransactionStatusEnum) => {
+    switch (status) {
+      case TransactionStatusEnum.AUTHORIZED:
+      case TransactionStatusEnum.CREATED:
+      case TransactionStatusEnum.IDENTIFIED:
+      case TransactionStatusEnum.REJECTED:
+        return true;
+      default:
+        return false;
+    }
+  };
 
   return (
     <Box sx={{ width: '100%', padding: 2 }}>
