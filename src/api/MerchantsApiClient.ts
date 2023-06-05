@@ -7,6 +7,8 @@ import { ENV } from '../utils/env';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
 import { InitiativeDTO } from './generated/merchants/InitiativeDTO';
 import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
+import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsDTO';
+import { MerchantDetailDTO } from './generated/merchants/MerchantDetailDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -41,6 +43,7 @@ export const MerchantApi = {
     const result = await apiClient.getMerchantInitiativeList({});
     return extractResponse(result, 200, onRedirectToLogin);
   },
+
   getMerchantTransactions: async (
     initiativeId: string,
     page: number,
@@ -54,6 +57,16 @@ export const MerchantApi = {
       fiscalCode,
       status,
     });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  getMerchantInitiativeStatistics: async (initiativeId: string): Promise<MerchantStatisticsDTO> => {
+    const result = await apiClient.getMerchantInitiativeStatistics({ initiativeId });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  getMerchantDetail: async (initiativeId: string): Promise<MerchantDetailDTO> => {
+    const result = await apiClient.getMerchantDetail({ initiativeId });
     return extractResponse(result, 200, onRedirectToLogin);
   },
 };
