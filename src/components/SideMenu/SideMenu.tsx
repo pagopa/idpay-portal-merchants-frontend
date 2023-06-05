@@ -71,7 +71,7 @@ export default function SideMenu() {
       <Box gridColumn="auto">
         <List data-testid="list-test">
           <SidenavItem
-            title={t('sideMenu.initiativesListTitle')}
+            title={t('pages.initiativesList.title')}
             handleClick={() => onExit(() => history.replace(ROUTES.HOME))}
             isSelected={pathname === ROUTES.HOME}
             icon={ListAltIcon}
@@ -103,7 +103,7 @@ export default function SideMenu() {
               <AccordionDetails sx={{ p: 0 }}>
                 <List disablePadding>
                   <SidenavItem
-                    title={t('sideMenu.initiativeDiscountsTitle')}
+                    title={t('pages.initiativeDiscounts.title')}
                     handleClick={() =>
                       onExit(() => {
                         history.replace(`${BASE_ROUTE}/sconti-iniziativa/${item.initiativeId}`);

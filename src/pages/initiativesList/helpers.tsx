@@ -1,4 +1,3 @@
-// import i18n from 'i18next';
 export interface Data {
   initiativeId: string;
   initiativeName: string;
@@ -51,39 +50,6 @@ export interface HeadCell {
   label: string;
   numeric: boolean;
 }
-
-export const headCells: ReadonlyArray<HeadCell> = [
-  {
-    id: 'initiativeName',
-    numeric: false,
-    disablePadding: false,
-    label: 'Nome',
-  },
-  {
-    id: 'organizationName',
-    numeric: false,
-    disablePadding: true,
-    label: 'Creata da',
-  },
-  {
-    id: 'spendingPeriod',
-    numeric: false,
-    disablePadding: true,
-    label: 'Periodo di spesa',
-  },
-  {
-    id: 'status',
-    numeric: false,
-    disablePadding: false,
-    label: 'Stato',
-  },
-  {
-    id: 'id',
-    numeric: true,
-    disablePadding: false,
-    label: '',
-  },
-];
 
 export interface EnhancedTableProps {
   order: Order;

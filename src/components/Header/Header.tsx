@@ -19,19 +19,20 @@ type Props = WithPartiesProps & {
   loggedUser?: User;
 };
 
-const welfareProduct: ProductEntity = {
-  // TODO check if correct
-  id: 'prod-idpay-merchants',
-  title: 'Portale Esercenti',
-  productUrl: CONFIG.HEADER.LINK.PRODUCTURL,
-  linkType: 'internal',
-};
-
 const Header = ({ withSecondHeader, onExit, loggedUser }: /* , parties */ Props) => {
   const { t } = useTranslation();
   const products = useAppSelector(partiesSelectors.selectPartySelectedProducts);
   const selectedParty = useAppSelector(partiesSelectors.selectPartySelected);
   const [party2Show, setParty2Show] = useState<Array<Party>>();
+  const title = t('commons.title');
+
+  const welfareProduct: ProductEntity = {
+    // TODO check if correct
+    id: 'prod-idpay-merchants',
+    title,
+    productUrl: CONFIG.HEADER.LINK.PRODUCTURL,
+    linkType: 'internal',
+  };
 
   useEffect(() => setParty2Show([{ ...(selectedParty as Party) }]), [selectedParty]);
 

@@ -97,14 +97,14 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
             variant="overline"
             color="text.primary"
           >
-            Stato rimborsi
+            {t('pages.initiativeDiscounts.refundsStatusTitle')}
           </Typography>
           <Typography
             sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 1' }}
             variant="body2"
             color="text.primary"
           >
-            Totale erogato
+            {t('pages.initiativeDiscounts.totalAmount')}
           </Typography>
           <Typography
             sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 5' }}
@@ -118,7 +118,7 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
             variant="body2"
             color="text.primary"
           >
-            Totale rimborsato
+            {t('pages.initiativeDiscounts.totalRefunded')}
           </Typography>
           <Typography
             sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 5' }}
@@ -133,14 +133,14 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
             variant="overline"
             color="text.primary"
           >
-            DATI RIMBORSO
+            {t('pages.initiativeDiscounts.refundsDataTitle')}
           </Typography>
           <Typography
             sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 1' }}
             variant="body2"
             color="text.primary"
           >
-            IBAN
+            {t('pages.initiativeDiscounts.iban')}
           </Typography>
           <Typography
             sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 5' }}

@@ -153,11 +153,23 @@ const InitiativeDiscounts = () => {
   const renderTrasactionStatus = (status: string) => {
     switch (status) {
       case TransactionStatusEnum.AUTHORIZED:
-        return <Chip sx={{ fontSize: '14px' }} label="Autorizzato" color="success" />;
+        return (
+          <Chip
+            sx={{ fontSize: '14px' }}
+            label={t('commons.discountStatusEnum.authorized')}
+            color="success"
+          />
+        );
       case TransactionStatusEnum.CREATED:
       case TransactionStatusEnum.IDENTIFIED:
       case TransactionStatusEnum.REJECTED:
-        return <Chip sx={{ fontSize: '14px' }} label="Da autorizzare" color="default" />;
+        return (
+          <Chip
+            sx={{ fontSize: '14px' }}
+            label={t('commons.discountStatusEnum.identified')}
+            color="default"
+          />
+        );
       default:
         return null;
     }
@@ -168,15 +180,19 @@ const InitiativeDiscounts = () => {
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
         <BreadcrumbsBox
           backUrl={`${BASE_ROUTE}`}
-          backLabel={'Indietro'}
-          items={['Iniziative', initiativeName, 'Buoni sconto']}
+          backLabel={t('commons.backBtn')}
+          items={[
+            t('pages.initiativesList.title'),
+            initiativeName,
+            t('pages.initiativeDiscounts.title'),
+          ]}
         />
       </Box>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
         <Box sx={{ display: 'grid', gridColumn: 'span 10', mt: 2 }}>
           <TitleBox
-            title={'Buoni sconto'}
-            subTitle={'Visualizza e gestisci i buoni sconto emessi per l’iniziativa.'}
+            title={t('pages.initiativeDiscounts.title')}
+            subTitle={t('pages.initiativeDiscounts.subtitle')}
             mbTitle={3}
             mtTitle={2}
             mbSubTitle={5}
@@ -193,7 +209,7 @@ const InitiativeDiscounts = () => {
             }}
             data-testid="goToWizard-btn-test"
           >
-            {'Crea buono sconto'}
+            {t('pages.initiativeDiscounts.createBtn')}
           </Button>
         </Box>
       </Box>
@@ -201,14 +217,14 @@ const InitiativeDiscounts = () => {
       <InitiativeDiscountsSummary id={id} setInitiativeName={setInitativeName} />
 
       <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 4, mb: 3 }}>
-        <Typography variant="h6">{'Buoni sconto emessi'}</Typography>
+        <Typography variant="h6">{t('pages.initiativeDiscounts.listTitle')}</Typography>
       </Box>
 
       <Box sx={pagesFiltersFormContainerStyle}>
         <FormControl sx={{ gridColumn: 'span 4' }}>
           <TextField
-            label={'Cerca per codice fiscale'}
-            placeholder={'Cerca per codice fiscale'}
+            label={t('pages.initiativeDiscounts.searchByFiscalCode')}
+            placeholder={t('pages.initiativeDiscounts.searchByFiscalCode')}
             name="searchByFiscalCode"
             aria-label="searchByFiscalCode"
             role="input"
@@ -220,15 +236,15 @@ const InitiativeDiscounts = () => {
           />
         </FormControl>
         <FormControl sx={{ gridColumn: 'span 2' }} size="small">
-          <InputLabel>{'Stato'}</InputLabel>
+          <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
           <Select
             id="filterStatus"
             inputProps={{
               'data-testid': 'filterStatus-select',
             }}
             name="filterStatus"
-            label={'Stato'}
-            placeholder={'Stato'}
+            label={t('pages.initiativeDiscounts.filterByStatus')}
+            placeholder={t('pages.initiativeDiscounts.filterByStatus')}
             onChange={(e) => formik.handleChange(e)}
             value={formik.values.filterStatus}
           >
@@ -236,13 +252,13 @@ const InitiativeDiscounts = () => {
               value={TransactionStatusEnum.AUTHORIZED}
               data-testid="filterStatusAuthorized-test"
             >
-              {'Autorizzato'}
+              {t('commons.discountStatusEnum.authorized')}
             </MenuItem>
             <MenuItem
               value={TransactionStatusEnum.IDENTIFIED}
               data-testid="filterStatusIdentified-test"
             >
-              {'Da autorizzare'}
+              {t('commons.discountStatusEnum.identified')}
             </MenuItem>
           </Select>
         </FormControl>
@@ -254,7 +270,7 @@ const InitiativeDiscounts = () => {
             onClick={() => formik.handleSubmit()}
             data-testid="apply-filters-test"
           >
-            {'Filtra'}
+            {t('commons.filterBtn')}
           </Button>
         </FormControl>
         <FormControl sx={{ gridColumn: 'span 1' }}>
@@ -263,7 +279,7 @@ const InitiativeDiscounts = () => {
             sx={{ color: 'primary.main', fontWeight: 600, fontSize: '0.865rem' }}
             onClick={resetForm}
           >
-            {'Rimuovi filtri'}
+            {t('commons.removeFiltersBtn')}
           </ButtonNaked>
         </FormControl>
       </Box>
@@ -280,10 +296,12 @@ const InitiativeDiscounts = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell width="20%">Data e ora</TableCell>
-                    <TableCell width="40%">Beneficiario</TableCell>
-                    <TableCell width="15%">Importo</TableCell>
-                    <TableCell width="15%">Stato</TableCell>
+                    <TableCell width="20%">{t('pages.initiativeDiscounts.dateAndHours')}</TableCell>
+                    <TableCell width="40%">{t('pages.initiativeDiscounts.beneficiary')}</TableCell>
+                    <TableCell width="15%">{t('pages.initiativeDiscounts.amount')}</TableCell>
+                    <TableCell width="15%">
+                      {t('pages.initiativeDiscounts.discountStatus')}
+                    </TableCell>
                     <TableCell width="5%"></TableCell>
                   </TableRow>
                 </TableHead>
@@ -327,7 +345,7 @@ const InitiativeDiscounts = () => {
           </Box>
         </Box>
       ) : (
-        <EmptyList message={'Non ci sono buoni sconto in corso per questa iniziativa.'} />
+        <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
       )}
     </Box>
   );

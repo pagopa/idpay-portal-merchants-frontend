@@ -1,14 +1,17 @@
 {
-  "navigation": {
-    "back": "Indietro"
-  },
-  "components": {
-    "exitModal": {
-      "body": "Tutte le informazioni che hai inserito andranno perse. \nSe vuoi riprendere la compilazione dell’iniziativa in un secondo momento, torna indietro e premi “Salva bozza”.",
-      "cancelBtn": "Torna indietro",
-      "exitBtn": "Esci",
-      "title": "Vuoi uscire?"
-    }
+  "commons": {
+    "backBtn": "Indietro",
+    "discountStatusEnum": {
+      "authorized": "Autorizzato",
+      "identified": "Da autorizzare"
+    },
+    "filterBtn": "Filtra",
+    "initiativeStatusEnum": {
+      "published": "In corso",
+      "closed": "Terminata"
+    },
+    "removeFiltersBtn": "Rimuovi filtri",
+    "title": "Portale Esercenti"
   },
   "pages": {
     "assistance": {
@@ -23,11 +26,51 @@
       "subtitle": "Compila e invia il modulo. Ti risponderemo al più presto.",
       "title": "Come possiamo aiutarti?"
     },
-    "home": {},
     "thankyouPage": {
       "buttonLabel": "Chiudi",
       "description": "Ti risponderemo al più presto all’indirizzo e-mail che hai indicato.",
       "title": "Abbiamo ricevuto la tua richiesta!"
+    },
+    "tos": {
+      "and": "e l’",
+      "backHome": "Torna alla home",
+      "linkPrivacy": "Informativa Privacy",
+      "linkTos": "Termini e condizioni d’uso",
+      "termsDescription": "Accedendo, accetti i",
+      "termsDescription2": "del servizio e confermi di aver letto l’",
+      "termsDescriptionChanged": "Recentemente abbiamo cambiato i",
+      "title": "Portale Bonus"
+    },
+    "initiativeDiscounts": {
+      "amount": "Importo",
+      "beneficiary": "Beneficiario",
+      "cancelDiscount": "Annulla buono sconto",
+      "createBtn": "Crea buono sconto",
+      "dateAndHours": "Data e ora",
+      "discountAuthorized": "Autorizzato",
+      "discountStatus": "Stato",
+      "emptyList": "Non ci sono buoni sconto in corso per questa iniziativa.",
+      "filterByStatus": "Stato",
+      "listTitle": "Buoni sconto emessi",
+      "refundsDataTitle": "Dati rimborso",
+      "refundsStatusTitle": "Stato rimborsi",
+      "requestAuthorization": "Richiedi autorizzazione",
+      "searchByFiscalCode": "Cerca per Codice Fiscale",
+      "subtitle": "Visualizza e gestisci i buoni sconto emessi per l’iniziativa.",
+      "title": "Buoni sconto",
+      "totalAmount": "Totale erogato",
+      "totalRefunded": "Totale rimborsato",
+      "iban": "IBAN"
+    },
+    "initiativesList": {
+      "initiativeStatus": "Stato",
+      "organizationName": "Creata da",
+      "searchByInitiativeName": "Cerca per nome dell'iniziativa",
+      "serviceId": "Codice identificativo",
+      "spendingPeriod": "Periodo di spesa",
+      "subtitle": "Visualizza e gestisci le iniziative di supporto alla spesa a cui hai aderito.",
+      "title": "Iniziative",
+      "initiativeName": "Nome"
     }
   },
   "roles": {
@@ -38,27 +81,6 @@
       "message": "Ti stiamo reindirizzando alla pagina di accesso",
       "title": "La tua sessione è scaduta"
     }
-  },
-  "sideMenu": {
-    "initiativesListTitle": "Iniziative",
-    "initiativeDiscountsTitle": "Sconti"
-  },
-  "subHeader": {
-    "backButton": "Esci",
-    "partySelectionSearch": {
-      "label": "I tuoi enti",
-      "title": "I tuoi enti"
-    }
-  },
-  "tos": {
-    "and": "e l’",
-    "backHome": "Torna alla home",
-    "linkPrivacy": "Informativa Privacy",
-    "linkTos": "Termini e condizioni d’uso",
-    "termsDescription": "Accedendo, accetti i",
-    "termsDescription2": "del servizio e confermi di aver letto l’",
-    "termsDescriptionChanged": "Recentemente abbiamo cambiato i",
-    "title": "Portale Bonus"
   },
   "validation": {
     "celNum": "Numero di telefono non valido",
@@ -98,5 +120,10 @@
     "uniqueInterval": "Non puoi inserire due intervalli uguali per lo stesso giorno",
     "web": "Indirizzo web non valido",
     "webValid": "Inserisci un indirizzo web"
+  },
+  "errors": {
+    "invalidDataDescription": "Verifica che i dati inseriti siano corretti",
+    "getDataDescription": "Riprovare",
+    "title": "Si è verificato un errore"
   }
 }

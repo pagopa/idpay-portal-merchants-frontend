@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import SearchIcon from '@mui/icons-material/Search';
 import { grey } from '@mui/material/colors';
 import { ButtonNaked } from '@pagopa/mui-italia';
@@ -34,38 +34,38 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   const createSortHandler = (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
   };
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
 
   const headCells: ReadonlyArray<HeadCell> = [
     {
       id: 'initiativeName',
       numeric: false,
       disablePadding: false,
-      label: 'Nome',
+      label: `${t('pages.initiativesList.initiativeName')}`,
     },
     {
       id: 'organizationName',
       numeric: false,
       disablePadding: false,
-      label: 'Creata da',
+      label: `${t('pages.initiativesList.organizationName')}`,
     },
     {
       id: 'spendingPeriod',
       numeric: false,
       disablePadding: false,
-      label: 'Periodo di spesa',
+      label: `${t('pages.initiativesList.spendingPeriod')}`,
     },
     {
       id: 'serviceId',
       numeric: false,
       disablePadding: true,
-      label: 'Codice identificativo',
+      label: `${t('pages.initiativesList.serviceId')}`,
     },
     {
       id: 'status',
       numeric: false,
       disablePadding: false,
-      label: 'Stato',
+      label: `${t('pages.initiativesList.initiativeStatus')}`,
     },
   ];
 
@@ -107,7 +107,7 @@ const InitiativesList = () => {
   const [initiativeListFiltered, setInitiativeListFiltered] = useState<Array<Data>>([]);
   const history = useHistory();
   useInitiativesList();
-
+  const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
 
   useEffect(() => {
@@ -156,9 +156,21 @@ const InitiativesList = () => {
   const renderInitiativeStatus = (status: string) => {
     switch (status) {
       case StatusEnum.PUBLISHED:
-        return <Chip sx={{ fontSize: '14px' }} label="In corso" color="success" />;
+        return (
+          <Chip
+            sx={{ fontSize: '14px' }}
+            label={t('commons.initiativeStatusEnum.published')}
+            color="success"
+          />
+        );
       case StatusEnum.CLOSED:
-        return <Chip sx={{ fontSize: '14px' }} label="Terminata" color="default" />;
+        return (
+          <Chip
+            sx={{ fontSize: '14px' }}
+            label={t('commons.initiativeStatusEnum.closed')}
+            color="default"
+          />
+        );
       default:
         return null;
     }
@@ -167,8 +179,8 @@ const InitiativesList = () => {
   return (
     <Box width="100%" px={2}>
       <TitleBox
-        title="Portale esercente"
-        subTitle="Pagine disponibili"
+        title={t('pages.initiativesList.title')}
+        subTitle={t('pages.initiativesList.subtitle')}
         mbTitle={2}
         mtTitle={2}
         mbSubTitle={5}
@@ -190,7 +202,7 @@ const InitiativesList = () => {
         <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
           <TextField
             id="search-initiative"
-            placeholder="Cerca per nome dell'iniziativa"
+            placeholder={t('pages.initiativesList.searchByInitiativeName')}
             variant="outlined"
             size="small"
             InputProps={{
