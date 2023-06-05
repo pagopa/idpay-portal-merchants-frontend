@@ -9,6 +9,7 @@ import { InitiativeDTO } from './generated/merchants/InitiativeDTO';
 import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
 import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsDTO';
 import { MerchantDetailDTO } from './generated/merchants/MerchantDetailDTO';
+import { TransactionResponse } from './generated/merchants/TransactionResponse';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -68,5 +69,22 @@ export const MerchantApi = {
   getMerchantDetail: async (initiativeId: string): Promise<MerchantDetailDTO> => {
     const result = await apiClient.getMerchantDetail({ initiativeId });
     return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  deleteTransaction: async (transactionId: string): Promise<void> => {
+    const result = await apiClient.deleteTransaction({ transactionId });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  createTransaction: async (
+    amountCents: number,
+    idTrxIssuer: string,
+    initiativeId: string,
+    trxDate: Date,
+    mcc: string | undefined
+  ): Promise<TransactionResponse> => {
+    const body = { body: { amountCents, idTrxIssuer, initiativeId, trxDate, mcc } };
+    const result = await apiClient.createTransaction(body);
+    return extractResponse(result, 201, onRedirectToLogin);
   },
 };

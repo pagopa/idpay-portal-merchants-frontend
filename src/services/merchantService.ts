@@ -4,6 +4,7 @@ import { InitiativeDTO } from '../api/generated/merchants/InitiativeDTO';
 import { MerchantDetailDTO } from '../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../api/generated/merchants/MerchantStatisticsDTO';
 import { MerchantTransactionsListDTO } from '../api/generated/merchants/MerchantTransactionsListDTO';
+import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
 
 export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> => {
   if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
@@ -38,4 +39,30 @@ export const getMerchantDetail = (initiativeId: string): Promise<MerchantDetailD
     return MerchantsApiMocked.getMerchantDetail(initiativeId);
   }
   return MerchantApi.getMerchantDetail(initiativeId);
+};
+
+export const deleteTransaction = (transactionId: string): Promise<void> => {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
+    return MerchantsApiMocked.deleteTransaction(transactionId);
+  }
+  return MerchantApi.deleteTransaction(transactionId);
+};
+
+export const createTransaction = (
+  amountCents: number,
+  idTrxIssuer: string,
+  initiativeId: string,
+  trxDate: Date,
+  mcc: string | undefined
+): Promise<TransactionResponse> => {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
+    return MerchantsApiMocked.createTransaction(
+      amountCents,
+      idTrxIssuer,
+      initiativeId,
+      trxDate,
+      mcc
+    );
+  }
+  return MerchantApi.createTransaction(amountCents, idTrxIssuer, initiativeId, trxDate, mcc);
 };

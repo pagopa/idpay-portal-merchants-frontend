@@ -6,6 +6,10 @@ import {
   StatusEnum as MerchantStatusEnum,
 } from '../generated/merchants/MerchantDetailDTO';
 import { MerchantTransactionsListDTO } from '../generated/merchants/MerchantTransactionsListDTO';
+import {
+  StatusEnum as TransactionCreatedStatusEnum,
+  TransactionResponse,
+} from '../generated/merchants/TransactionResponse';
 
 const startDate = new Date();
 const endDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
@@ -97,6 +101,25 @@ const mockedMerchantDetail = {
   vatNumber: '123456787',
 };
 
+const transactionResponseMocked = {
+  acquirerId: '12345',
+  amountCents: 10000,
+  amountCurrency: '€',
+  id: '000001',
+  idTrxAcquirer: '1234qwerty',
+  idTrxIssuer: '1234qwerty',
+  initiativeId: '1234',
+  mcc: '',
+  merchantId: '121212',
+  status: TransactionCreatedStatusEnum.IDENTIFIED,
+  trxCode: 'asdfdfgfdg',
+  trxDate: new Date(),
+  merchantFiscalCode: 'XXXDDD12ABBBB',
+  residualAmountCents: 1,
+  splitPayment: false,
+  vat: 'ppppp',
+};
+
 export const MerchantsApiMocked = {
   getMerchantInitiativeList: async (): Promise<Array<InitiativeDTO>> =>
     new Promise((resolve) => resolve(mockedInitiativesList)),
@@ -114,4 +137,15 @@ export const MerchantsApiMocked = {
 
   getMerchantDetail: async (_initiativeId: string): Promise<MerchantDetailDTO> =>
     new Promise((resolve) => resolve(mockedMerchantDetail)),
+
+  deleteTransaction: async (_transactionId: string): Promise<void> =>
+    new Promise((resolve) => resolve()),
+
+  createTransaction: async (
+    _amountCents: number,
+    _idTrxIssuer: string,
+    _initiativeId: string,
+    _trxDate: Date,
+    _mcc: string | undefined
+  ): Promise<TransactionResponse> => new Promise((resolve) => resolve(transactionResponseMocked)),
 };

@@ -3,6 +3,7 @@ import { InitiativeDTO } from '../../api/generated/merchants/InitiativeDTO';
 import { MerchantDetailDTO } from '../../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../../api/generated/merchants/MerchantStatisticsDTO';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
+import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
 
 export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> =>
   MerchantsApiMocked.getMerchantInitiativeList();
@@ -22,3 +23,15 @@ export const getMerchantInitiativeStatistics = (
 
 export const getMerchantDetail = (initiativeId: string): Promise<MerchantDetailDTO> =>
   MerchantsApiMocked.getMerchantDetail(initiativeId);
+
+export const deleteTransaction = (transactionId: string): Promise<void> =>
+  MerchantsApiMocked.deleteTransaction(transactionId);
+
+export const createTransaction = (
+  amountCents: number,
+  idTrxIssuer: string,
+  initiativeId: string,
+  trxDate: Date,
+  mcc: string | undefined
+): Promise<TransactionResponse> =>
+  MerchantsApiMocked.createTransaction(amountCents, idTrxIssuer, initiativeId, trxDate, mcc);

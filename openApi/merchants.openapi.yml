@@ -93,12 +93,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorDTO'
+  /transactions/{transactionId}:
+    delete:
+      tags:
+        - merchant-transactions
+      summary: Merchant delete transaction
+      operationId: deleteTransaction
+      parameters:
+        - name: transactionId
+          in: path
+          description: The transaction ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+        '403':
+          description: Merchant not allowed to operate on this transaction
+        '404':
+          description: Transaction does not exist
+        '429':
+          description: Too many Request
   /initiatives/{initiativeId}/transactions:
     get:
       tags:
         - merchant-transactions
       summary: Returns the list of in progress transactions associated to a merchant
-      description: "ENG: Returns the list of in progress transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni in corso associate ad un esercente"
+      description: 'ENG: Returns the list of in progress transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni in corso associate ad un esercente'
       operationId: getMerchantTransactions
       parameters:
         - name: initiativeId
@@ -281,7 +303,7 @@ components:
         totalPages:
           type: integer
           format: int32
-    
+
     MerchantTransactionDTO:
       type: object
       required:
@@ -326,13 +348,13 @@ components:
           description: "ENG: The address of the legal office <br> IT: L'indirizzo della sede legale"
         legalOfficeMunicipality:
           type: string
-          description: "ENG: The municipality of the legal office <br> IT: Il comune della sede legale"
+          description: 'ENG: The municipality of the legal office <br> IT: Il comune della sede legale'
         legalOfficeProvince:
           type: string
-          description: "ENG: The province of the legal office <br> IT: La provincia della sede legale"
+          description: 'ENG: The province of the legal office <br> IT: La provincia della sede legale'
         legalOfficeZipCode:
           type: string
-          description: "ENG: The zipcode of the legal office <br> IT: Il CAP della sede legale"
+          description: 'ENG: The zipcode of the legal office <br> IT: Il CAP della sede legale'
         certifiedEmail:
           type: string
           description: "ENG: The certified email address of the merchant <br> IT: L'indirizzo email PEC dell' esercente"
