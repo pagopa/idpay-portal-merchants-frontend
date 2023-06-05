@@ -40,7 +40,7 @@ import {
 } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import EmptyList from '../components/EmptyList';
-import InitiativeDiscountsSummary from '../components/InitiativeDiscountsSummary';
+import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
 
 interface MatchParams {
   id: string;
