@@ -1,16 +1,50 @@
 import { Backdrop, Box, Button, Fade, Modal, Typography } from '@mui/material';
 import { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+// import { useHistory } from 'react-router-dom';
 import { StatusEnum as TransactionStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
+import { deleteTransaction } from '../../services/merchantService';
+// import { BASE_ROUTE } from '../../routes';
 
 type Props = {
   openCancelTrxModal: boolean;
   setOpenCancelTrxModal: Dispatch<SetStateAction<boolean>>;
+  initiativeId: string;
+  trxId: string;
   status: TransactionStatusEnum;
 };
 
-const CancelTransactionModal = ({ openCancelTrxModal, setOpenCancelTrxModal, status }: Props) => {
+const CancelTransactionModal = ({
+  openCancelTrxModal,
+  setOpenCancelTrxModal,
+  trxId,
+  status,
+}: Props) => {
   const { t } = useTranslation();
+  const addError = useErrorDispatcher();
+  // const history = useHistory();
+
+  const handleCancelTransaction = (trxId: string) => {
+    deleteTransaction(trxId)
+      .then((_res) => {
+        // history.replace(`${BASE_ROUTE}/sconti-iniziativa/${initiativeId}`);
+        window.location.reload();
+      })
+      .catch((error) => {
+        addError({
+          id: 'DELETE_TRANSACTION_ERROR',
+          blocking: false,
+          error,
+          techDescription: 'An error occurred deleting a transaction',
+          displayableTitle: t('errors.title'),
+          displayableDescription: t('errors.getDataDescription'),
+          toNotify: true,
+          component: 'Toast',
+          showCloseIcon: true,
+        });
+      });
+  };
 
   return (
     <Modal
@@ -47,16 +81,15 @@ const CancelTransactionModal = ({ openCancelTrxModal, setOpenCancelTrxModal, sta
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(6, 1fr)',
+              gridTemplateColumns: 'repeat(8, 1fr)',
               gridTemplateRows: 'auto',
-              gridTemplateAreas: `". backBtn backBtn cancelTrxBtn cancelTrxBtn cancelTrxBtn"`,
-              gap: 2,
+              gridTemplateAreas: `". . backBtn backBtn backBtn cancelTrxBtn cancelTrxBtn cancelTrxBtn"`,
               mt: 2,
             }}
           >
             <Button
               variant="outlined"
-              sx={{ gridArea: 'backBtn', justifySelf: 'start' }}
+              sx={{ gridArea: 'backBtn', mr: 1, justifySelf: 'end' }}
               onClick={() => setOpenCancelTrxModal(false)}
               data-testid="cancel-button-test"
             >
@@ -66,7 +99,7 @@ const CancelTransactionModal = ({ openCancelTrxModal, setOpenCancelTrxModal, sta
               variant="contained"
               sx={{ gridArea: 'cancelTrxBtn', justifySelf: 'end' }}
               onClick={() => {
-                // handlePusblishInitiative(initiative.initiativeId, userCanPublishInitiative);
+                handleCancelTransaction(trxId);
                 setOpenCancelTrxModal(false);
               }}
               data-testid="publish-button-test"

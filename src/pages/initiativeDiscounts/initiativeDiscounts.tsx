@@ -16,10 +16,11 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  ThemeProvider,
   Typography,
 } from '@mui/material';
-import { ButtonNaked, theme } from '@pagopa/mui-italia';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { itIT } from '@mui/material/locale';
+import { ButtonNaked } from '@pagopa/mui-italia';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
@@ -48,11 +49,12 @@ interface MatchParams {
 }
 
 type ActionsMenuProps = {
+  initiativeId: string;
   status: TransactionStatusEnum;
   trxId: string;
 };
 
-const ActionMenu = ({ status, trxId }: ActionsMenuProps) => {
+const ActionMenu = ({ initiativeId, status, trxId }: ActionsMenuProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openCancelTrxModal, setOpenCancelTrxModal] = useState<boolean>(false);
   const open = Boolean(anchorEl);
@@ -66,10 +68,12 @@ const ActionMenu = ({ status, trxId }: ActionsMenuProps) => {
   };
 
   type RenderCancelTrxProps = {
+    initiativeId: string;
     status: TransactionStatusEnum;
+    trxId: string;
   };
 
-  const RenderCancelTransaction = ({ status }: RenderCancelTrxProps) => {
+  const RenderCancelTransaction = ({ initiativeId, status, trxId }: RenderCancelTrxProps) => {
     switch (status) {
       case TransactionStatusEnum.AUTHORIZED:
       case TransactionStatusEnum.IDENTIFIED:
@@ -83,6 +87,8 @@ const ActionMenu = ({ status, trxId }: ActionsMenuProps) => {
             <CancelTransactionModal
               openCancelTrxModal={openCancelTrxModal}
               setOpenCancelTrxModal={setOpenCancelTrxModal}
+              initiativeId={initiativeId}
+              trxId={trxId}
               status={status}
             />
           </>
@@ -114,7 +120,7 @@ const ActionMenu = ({ status, trxId }: ActionsMenuProps) => {
         }}
         data-testid="menu-close-test"
       >
-        <RenderCancelTransaction status={status} />
+        <RenderCancelTransaction initiativeId={initiativeId} trxId={trxId} status={status} />
       </Menu>
     </TableCell>
   );
@@ -129,7 +135,7 @@ const InitiativeDiscounts = () => {
   const [filterByFiscalCode, setFilterByFiscalCode] = useState<string | undefined>();
   const [filterByStatus, setFilterByStatus] = useState<string | undefined>();
   const [initiativeName, setInitativeName] = useState<string | undefined>();
-
+  const theme = createTheme(itIT);
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
   const addError = useErrorDispatcher();
 
@@ -403,7 +409,7 @@ const InitiativeDiscounts = () => {
                       <TableCell>{r.effectiveAmount}</TableCell>
                       <TableCell>{renderTrasactionStatus(r.status)}</TableCell>
                       {showActionMenu(r.status) ? (
-                        <ActionMenu status={r.status} trxId={r.trxId} />
+                        <ActionMenu initiativeId={id} status={r.status} trxId={r.trxId} />
                       ) : (
                         <TableCell />
                       )}
