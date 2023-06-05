@@ -39,6 +39,7 @@ import {
 } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import EmptyList from '../components/EmptyList';
+import InitiativeDiscountsSummary from '../components/initiativeDiscountsSummary';
 interface MatchParams {
   id: string;
 }
@@ -51,6 +52,7 @@ const InitiativeDiscounts = () => {
   const [totalElements, setTotalElements] = useState<number>(0);
   const [filterByFiscalCode, setFilterByFiscalCode] = useState<string | undefined>();
   const [filterByStatus, setFilterByStatus] = useState<string | undefined>();
+  const [initiativeName, setInitativeName] = useState<string | undefined>();
 
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
   const addError = useErrorDispatcher();
@@ -167,7 +169,7 @@ const InitiativeDiscounts = () => {
         <BreadcrumbsBox
           backUrl={`${BASE_ROUTE}`}
           backLabel={'Indietro'}
-          items={['Iniziative', 'TODO', 'Buoni sconto']}
+          items={['Iniziative', initiativeName, 'Buoni sconto']}
         />
       </Box>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
@@ -195,6 +197,8 @@ const InitiativeDiscounts = () => {
           </Button>
         </Box>
       </Box>
+
+      <InitiativeDiscountsSummary id={id} setInitiativeName={setInitativeName} />
 
       <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 4, mb: 3 }}>
         <Typography variant="h6">{'Buoni sconto emessi'}</Typography>
