@@ -6,6 +6,7 @@ import {
   FormControl,
   IconButton,
   InputLabel,
+  Menu,
   MenuItem,
   Select,
   Table,
@@ -39,10 +40,64 @@ import {
 } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import EmptyList from '../components/EmptyList';
-import InitiativeDiscountsSummary from '../components/initiativeDiscountsSummary';
+import InitiativeDiscountsSummary from '../components/InitiativeDiscountsSummary';
+
 interface MatchParams {
   id: string;
 }
+
+type ActionsMenuProps = {
+  status: TransactionStatusEnum;
+  trxId: string;
+};
+
+const ActionMenu = ({ status, trxId }: ActionsMenuProps) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  // const { t } = useTranslation();
+  const handleClickActionsMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseActionsMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const RenderCancel = (status: any) => {
+    switch (status) {
+      case TransactionStatusEnum.AUTHORIZED:
+        return <MenuItem disabled>Annulla buono sconto</MenuItem>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <TableCell align="right">
+      <IconButton
+        id={`actions_button-${trxId}`}
+        aria-controls={open ? `actions-menu_${trxId}` : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleClickActionsMenu}
+        data-testid="menu-open-test"
+      >
+        <MoreIcon color="primary" />
+      </IconButton>
+      <Menu
+        id={`actions-menu_${trxId}`}
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleCloseActionsMenu}
+        MenuListProps={{
+          'aria-labelledby': `actions_button-${trxId}`,
+        }}
+        data-testid="menu-close-test"
+      >
+        <RenderCancel status={status} />
+      </Menu>
+    </TableCell>
+  );
+};
 
 const InitiativeDiscounts = () => {
   const { t } = useTranslation();
@@ -162,6 +217,9 @@ const InitiativeDiscounts = () => {
         return null;
     }
   };
+
+  const showActionMenu = (status: TransactionStatusEnum) =>
+    !!(status && status === TransactionStatusEnum.AUTHORIZED);
 
   return (
     <Box sx={{ width: '100%', padding: 2 }}>
@@ -296,14 +354,11 @@ const InitiativeDiscounts = () => {
                       <TableCell>{r.fiscalCode}</TableCell>
                       <TableCell>{r.effectiveAmount}</TableCell>
                       <TableCell>{renderTrasactionStatus(r.status)}</TableCell>
-                      <TableCell align="right">
-                        <IconButton
-                          data-testid="open-modal-discount-arrow"
-                          onClick={() => console.log('open-modal')}
-                        >
-                          <MoreIcon color="primary" />
-                        </IconButton>
-                      </TableCell>
+                      {showActionMenu(r.status) ? (
+                        <ActionMenu status={r.status} trxId={r.trxId} />
+                      ) : (
+                        <TableCell />
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
