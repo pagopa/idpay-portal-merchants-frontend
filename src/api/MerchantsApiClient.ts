@@ -5,11 +5,11 @@ import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
-import { InitiativeDTO } from './generated/merchants/InitiativeDTO';
 import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
 import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsDTO';
 import { MerchantDetailDTO } from './generated/merchants/MerchantDetailDTO';
 import { TransactionResponse } from './generated/merchants/TransactionResponse';
+import { InitiativeDTOArray } from './generated/merchants/InitiativeDTOArray';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -40,7 +40,7 @@ const onRedirectToLogin = () =>
   );
 
 export const MerchantApi = {
-  getMerchantInitiativeList: async (): Promise<Array<InitiativeDTO>> => {
+  getMerchantInitiativeList: async (): Promise<InitiativeDTOArray> => {
     const result = await apiClient.getMerchantInitiativeList({});
     return extractResponse(result, 200, onRedirectToLogin);
   },

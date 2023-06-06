@@ -1,78 +1,66 @@
-import EuroSymbolIcon from '@mui/icons-material/EuroSymbol';
-import {
-  Box,
-  Button,
-  FormControl,
-  InputAdornment,
-  Paper,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { BASE_ROUTE } from '../../routes';
+import { matchPath } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+import ROUTES, { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
+import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
+import CreateForm from './CreateForm';
+import DiscountCreatedRecap from './DiscountCreatedRecap';
+
+interface MatchParams {
+  name: string;
+  id: string;
+}
 
 const NewDiscount = () => {
-  console.log('new discount');
+  const [discountCreated, setDiscountCreated] = useState(false);
+  const [discountResponse, setDiscountResponse] = useState<TransactionResponse | undefined>();
+  const { t } = useTranslation();
+
+  const match = matchPath(location.pathname, {
+    path: [ROUTES.NEW_DISCOUNT],
+    exact: true,
+    strict: false,
+  });
+  const { name, id } = (match?.params as MatchParams) || {};
 
   return (
-    <>
-      <Box
-        sx={{
-          ...genericContainerStyle,
-        }}
-      >
-        <BreadcrumbsBox
-          backUrl={`${BASE_ROUTE}`}
-          backLabel={'Back'}
-          items={['Iniziative', 'Nome', 'temp']}
-        />
+    <Box sx={genericContainerStyle}>
+      <BreadcrumbsBox
+        backUrl={`${BASE_ROUTE}/sconti-iniziativa/${id}`}
+        backLabel={t('commons.backBtn')}
+        items={[t('pages.initiativesList.title'), decodeURIComponent(name), 'Crea buono sconto']}
+      />
 
-        <Box sx={{ gridColumn: 'span 12' }}>
-          <TitleBox
-            title={'Crea un nuovo buono sconto'}
-            subTitle={
-              'Compila i campi e genera buoni sconto da inviare ai tuoi clienti per usufruire dell’iniziativa.'
-            }
-            mbTitle={2}
-            mtTitle={2}
-            mbSubTitle={5}
-            variantTitle="h4"
-            variantSubTitle="body1"
-          />
-        </Box>
-        <Paper sx={{ gridColumn: 'span 12', my: 4, px: 3 }}>
-          <Box sx={{ py: 3 }}>
-            <Typography variant="h6">Informazioni sulla spesa</Typography>
-          </Box>
-          <Typography variant="body2">
-            Inserisci l’importo totale della spesa, ci servirà per calcolare lo sconto applicabile.
-          </Typography>
-          <FormControl sx={{ my: 3 }}>
-            <TextField
-              id={`spendingAmount`}
-              name={`spendingAmount`}
-              label={`Importo spesa`}
-              // value={formik.values.}
-              // onChange={(value) => console.log(value)}
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EuroSymbolIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </FormControl>
-        </Paper>
+      <Box sx={{ gridColumn: 'span 12' }}>
+        <TitleBox
+          title={!discountCreated ? 'Crea un nuovo buono sconto' : 'Buono sconto creato!'}
+          subTitle={
+            !discountCreated
+              ? 'Compila i campi e genera buoni sconto da inviare ai tuoi clienti per usufruire dell’iniziativa.'
+              : 'Invia il buono sconto al tuo cliente, gli servirà per autorizzare la spesa con l’app IO.'
+          }
+          mbTitle={2}
+          mtTitle={2}
+          mbSubTitle={5}
+          variantTitle="h4"
+          variantSubTitle="body1"
+        />
       </Box>
-      <Box sx={{ display: 'flex', width: '100%', justifyContent: 'space-between', py: 2 }}>
-        <Button variant='outlined'>Indietro</Button>
-        <Button variant='contained'>Continua</Button>
-      </Box>
-    </>
+
+      {!discountCreated ? (
+        <CreateForm
+          id={id}
+          setDiscountCreated={setDiscountCreated}
+          setDiscountResponse={setDiscountResponse}
+        />
+      ) : (
+        <DiscountCreatedRecap data={discountResponse} />
+      )}
+    </Box>
   );
 };
 

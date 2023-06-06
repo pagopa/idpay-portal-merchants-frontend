@@ -21,8 +21,7 @@ paths:
               schema:
                 type: array
                 items:
-                  allOf:
-                    - $ref: '#/components/schemas/InitiativeDTO'
+                  $ref: '#/components/schemas/InitiativeDTO'
         '400':
           description: Bad request
           content:
@@ -120,7 +119,7 @@ paths:
       tags:
         - merchant-transactions
       summary: Returns the list of in progress transactions associated to a merchant
-      description: "ENG: Returns the list of in progress transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni in corso associate ad un esercente"
+      description: 'ENG: Returns the list of in progress transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni in corso associate ad un esercente'
       operationId: getMerchantTransactions
       parameters:
         - name: initiativeId
@@ -351,13 +350,13 @@ components:
           description: "ENG: The address of the legal office <br> IT: L'indirizzo della sede legale"
         legalOfficeMunicipality:
           type: string
-          description: "ENG: The municipality of the legal office <br> IT: Il comune della sede legale"
+          description: 'ENG: The municipality of the legal office <br> IT: Il comune della sede legale'
         legalOfficeProvince:
           type: string
-          description: "ENG: The province of the legal office <br> IT: La provincia della sede legale"
+          description: 'ENG: The province of the legal office <br> IT: La provincia della sede legale'
         legalOfficeZipCode:
           type: string
-          description: "ENG: The zipcode of the legal office <br> IT: Il CAP della sede legale"
+          description: 'ENG: The zipcode of the legal office <br> IT: Il CAP della sede legale'
         certifiedEmail:
           type: string
           description: "ENG: The certified email address of the merchant <br> IT: L'indirizzo email PEC dell' esercente"
@@ -415,7 +414,6 @@ components:
         - trxDate
         - amountCents
         - amountCurrency
-        - mcc
         - acquirerId
         - status
       properties:

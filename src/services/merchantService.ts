@@ -1,12 +1,13 @@
 import { MerchantApi } from '../api/MerchantsApiClient';
 import { MerchantsApiMocked } from '../api/__mocks__/MerchantsApiClient';
-import { InitiativeDTO } from '../api/generated/merchants/InitiativeDTO';
+
+import { InitiativeDTOArray } from '../api/generated/merchants/InitiativeDTOArray';
 import { MerchantDetailDTO } from '../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../api/generated/merchants/MerchantStatisticsDTO';
 import { MerchantTransactionsListDTO } from '../api/generated/merchants/MerchantTransactionsListDTO';
 import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
 
-export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> => {
+export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> => {
   if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
     return MerchantsApiMocked.getMerchantInitiativeList();
   }

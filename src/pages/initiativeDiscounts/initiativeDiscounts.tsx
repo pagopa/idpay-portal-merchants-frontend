@@ -300,7 +300,7 @@ const InitiativeDiscounts = () => {
             variant="contained"
             size="small"
             onClick={() => {
-              history.replace(`${BASE_ROUTE}/crea-sconto`);
+              history.replace(`${BASE_ROUTE}/crea-sconto/${initiativeName}/${id}`);
             }}
             data-testid="goToWizard-btn-test"
           >

@@ -1,4 +1,4 @@
-import { InitiativeDTO, StatusEnum } from '../generated/merchants/InitiativeDTO';
+import { StatusEnum } from '../generated/merchants/InitiativeDTO';
 import { MerchantStatisticsDTO } from '../generated/merchants/MerchantStatisticsDTO';
 import { StatusEnum as TransactionStatusEnum } from '../generated/merchants/MerchantTransactionDTO';
 import {
@@ -10,6 +10,7 @@ import {
   StatusEnum as TransactionCreatedStatusEnum,
   TransactionResponse,
 } from '../generated/merchants/TransactionResponse';
+import { InitiativeDTOArray } from '../generated/merchants/InitiativeDTOArray';
 
 const startDate = new Date();
 const endDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
@@ -121,7 +122,7 @@ const transactionResponseMocked = {
 };
 
 export const MerchantsApiMocked = {
-  getMerchantInitiativeList: async (): Promise<Array<InitiativeDTO>> =>
+  getMerchantInitiativeList: async (): Promise<InitiativeDTOArray> =>
     new Promise((resolve) => resolve(mockedInitiativesList)),
 
   getMerchantTransactions: async (

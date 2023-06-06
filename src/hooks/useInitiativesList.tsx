@@ -15,6 +15,7 @@ export const useInitiativesList = (match: match | null) => {
     if (match !== null) {
       getMerchantInitiativeList()
         .then((response) => {
+          console.log(response);
           dispatch(setInitiativesList(response));
         })
         .catch((error) => {
