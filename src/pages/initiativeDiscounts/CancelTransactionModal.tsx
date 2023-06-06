@@ -2,10 +2,8 @@ import { Backdrop, Box, Button, Fade, Modal, Typography } from '@mui/material';
 import { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
-// import { useHistory } from 'react-router-dom';
 import { StatusEnum as TransactionStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { deleteTransaction } from '../../services/merchantService';
-// import { BASE_ROUTE } from '../../routes';
 
 type Props = {
   openCancelTrxModal: boolean;
@@ -23,12 +21,10 @@ const CancelTransactionModal = ({
 }: Props) => {
   const { t } = useTranslation();
   const addError = useErrorDispatcher();
-  // const history = useHistory();
 
   const handleCancelTransaction = (trxId: string) => {
     deleteTransaction(trxId)
       .then((_res) => {
-        // history.replace(`${BASE_ROUTE}/sconti-iniziativa/${initiativeId}`);
         window.location.reload();
       })
       .catch((error) => {
