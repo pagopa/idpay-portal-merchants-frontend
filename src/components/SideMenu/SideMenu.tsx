@@ -18,7 +18,6 @@ import { matchPath } from 'react-router';
 import ROUTES, { BASE_ROUTE } from '../../routes';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../redux/hooks';
-import { useInitiativesList } from '../../hooks/useInitiativesList';
 import SidenavItem from './SidenavItem';
 
 interface MatchParams {
@@ -30,7 +29,6 @@ export default function SideMenu() {
   const { t } = useTranslation();
   const history = useHistory();
   const onExit = useUnloadEventOnExit();
-  useInitiativesList();
   const initiativesList = useAppSelector(intiativesListSelector);
   const [expanded, setExpanded] = useState<string | false>(false);
   const [pathname, setPathName] = useState(() => {

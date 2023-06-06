@@ -239,7 +239,7 @@ const InitiativeDiscounts = () => {
           <Chip
             sx={{ fontSize: '14px' }}
             label={t('commons.discountStatusEnum.authorized')}
-            color="success"
+            color="info"
           />
         );
       case TransactionStatusEnum.CREATED:

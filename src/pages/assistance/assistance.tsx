@@ -196,10 +196,10 @@ const Assistance = () => {
           </Box>
           <Box sx={{ display: 'grid', gridColumn: 'span 2' }}>
             <Button variant="outlined" onClick={handleOpenExitModal} data-testid="open-exit-test">
-              {t('navigation.back')}
+              {t('commons.backBtn')}
             </Button>
             <ExitModal
-              title={t('components.exitModal.title')}
+              title={t('pages.assistance.exitModal.title')}
               subtitle={t('pages.assistance.exitModal.body')}
               openExitModal={openExitModal}
               handleCloseExitModal={handleCloseExitModal}

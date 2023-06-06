@@ -1,6 +1,8 @@
 {
   "commons": {
     "backBtn": "Indietro",
+    "cancelBtn": "Torna indietro",
+    "exitBtn": "Esci",
     "discountStatusEnum": {
       "authorized": "Autorizzato",
       "identified": "Da autorizzare"
@@ -16,6 +18,7 @@
   "pages": {
     "assistance": {
       "exitModal": {
+        "title": "Vuoi uscire?",
         "body": "Il team di Assistenza non riceverà la tua richiesta."
       },
       "form": {

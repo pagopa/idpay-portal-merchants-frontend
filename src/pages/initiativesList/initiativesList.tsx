@@ -1,7 +1,6 @@
 import {
   Box,
   Chip,
-  // Button,
   InputAdornment,
   Paper,
   Table,
@@ -21,7 +20,6 @@ import { grey } from '@mui/material/colors';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useInitiativesList } from '../../hooks/useInitiativesList';
 import { useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import EmptyList from '../components/EmptyList';
@@ -106,7 +104,6 @@ const InitiativesList = () => {
   const [initiativeList, setInitiativeList] = useState<Array<Data>>([]);
   const [initiativeListFiltered, setInitiativeListFiltered] = useState<Array<Data>>([]);
   const history = useHistory();
-  useInitiativesList();
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
 

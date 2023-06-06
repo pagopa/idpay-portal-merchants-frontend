@@ -10,6 +10,7 @@ import Header from '../Header/Header';
 import SideMenu from '../SideMenu/SideMenu';
 import ROUTES from '../../routes';
 import routes from '../../routes';
+import { useInitiativesList } from '../../hooks/useInitiativesList';
 
 type Props = {
   children?: React.ReactNode;
@@ -30,6 +31,8 @@ const Layout = ({ children }: Props) => {
   useEffect(() => {
     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
   }, [location.pathname]);
+
+  useInitiativesList(match);
 
   return (
     <Box
