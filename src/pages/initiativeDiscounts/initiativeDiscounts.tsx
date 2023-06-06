@@ -27,7 +27,7 @@ import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useFormik } from 'formik';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { matchPath } from 'react-router-dom';
+import { matchPath, useHistory } from 'react-router-dom';
 import {
   MerchantTransactionDTO,
   StatusEnum as TransactionStatusEnum,
@@ -138,6 +138,7 @@ const InitiativeDiscounts = () => {
   const theme = createTheme(itIT);
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
   const addError = useErrorDispatcher();
+  const history = useHistory();
 
   const match = matchPath(location.pathname, {
     path: [ROUTES.DISCOUNTS],
@@ -299,7 +300,7 @@ const InitiativeDiscounts = () => {
             variant="contained"
             size="small"
             onClick={() => {
-              console.log('TODO go to wizard');
+              history.replace(`${BASE_ROUTE}/crea-sconto`);
             }}
             data-testid="goToWizard-btn-test"
           >
