@@ -79,7 +79,13 @@ const DiscountCreatedRecap = ({ data }: Props) => {
         onCloseToast={() => setOpenDownloadSuccesToast(false)}
       />
       <Box sx={{ gridColumn: 'span 12' }}>
-        <Alert color="info">{`Il buono sconto ha una durata di ${expirationDays} giorni: è necessario autorizzare la spesa entro le ${expirationTime} del ${expirationDate}.`}</Alert>
+        <Alert color="info">
+          {t('pages.newDiscount.expiringDiscountInfoAlertText', {
+            days: expirationDays,
+            hour: expirationTime,
+            date: expirationDate,
+          })}
+        </Alert>
       </Box>
       <Paper sx={{ gridColumn: 'span 12', p: 3 }}>
         <TitleBox
