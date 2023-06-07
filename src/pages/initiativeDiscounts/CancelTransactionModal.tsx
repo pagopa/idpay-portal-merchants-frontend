@@ -1,7 +1,7 @@
 import { Backdrop, Box, Button, Fade, Modal, Typography } from '@mui/material';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { StatusEnum as TransactionStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { deleteTransaction } from '../../services/merchantService';
 
@@ -98,7 +98,7 @@ const CancelTransactionModal = ({
                 handleCancelTransaction(trxId);
                 setOpenCancelTrxModal(false);
               }}
-              data-testid="publish-button-test"
+              data-testid="cancel-button-test"
             >
               {t('pages.initiativeDiscounts.cancelDiscount')}
             </Button>
