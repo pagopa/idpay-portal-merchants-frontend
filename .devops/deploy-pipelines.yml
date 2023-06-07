@@ -205,8 +205,8 @@ stages:
               REACT_APP_URL_FE_ASSISTANCE: '$(react_app_url_fe_assistance)'
 
               REACT_APP_URL_API_MERCHANTS_PORTAL: '$(react_app_url_api_merchants_portal)'
-              REACT_APP_URL_API_ROLE_PERMISSION: '$(react_app_url_api_merchants_portal)/authorization'
-              REACT_APP_URL_API_EMAIL_NOTIFICATION: '$(react_app_url_api_merchants_portal)/email-notification'
+              REACT_APP_URL_API_ROLE_PERMISSION: '$(react_app_url_api_merchants)/authorization'
+              REACT_APP_URL_API_EMAIL_NOTIFICATION: '$(react_app_url_api_merchants)/email-notification'
 
               REACT_APP_PAGOPA_HELP_EMAIL: '$(react_app_pagopa_help_email)'
 
