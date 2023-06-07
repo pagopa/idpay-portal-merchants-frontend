@@ -32,15 +32,19 @@ const NewDiscount = () => {
       <BreadcrumbsBox
         backUrl={`${BASE_ROUTE}/sconti-iniziativa/${id}`}
         backLabel={t('commons.backBtn')}
-        items={[t('pages.initiativesList.title'), decodeURIComponent(name), 'Crea buono sconto']}
+        items={[
+          t('pages.initiativesList.title'),
+          decodeURIComponent(name),
+          t('pages.initiativeDiscounts.createBtn'),
+        ]}
       />
 
       <Box sx={{ gridColumn: 'span 12' }}>
         <TitleBox
-          title={!discountCreated ? 'Crea un nuovo buono sconto' : 'Buono sconto creato!'}
+          title={!discountCreated ? t('pages.newDiscount.title') : 'Buono sconto creato!'}
           subTitle={
             !discountCreated
-              ? 'Compila i campi e genera buoni sconto da inviare ai tuoi clienti per usufruire dell’iniziativa.'
+              ? t('pages.newDiscount.subtitle')
               : 'Invia il buono sconto al tuo cliente, gli servirà per autorizzare la spesa con l’app IO.'
           }
           mbTitle={2}

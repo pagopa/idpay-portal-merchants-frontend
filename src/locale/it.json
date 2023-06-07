@@ -2,6 +2,10 @@
   "commons": {
     "backBtn": "Indietro",
     "cancelBtn": "Torna indietro",
+    "confirmBtn": "Conferma",
+    "continueBtn": "Continua",
+    "copyLinkBtn": "Copia link",
+    "downloadQrBtn": "Scarica codice QR",
     "exitBtn": "Esci",
     "discountStatusEnum": {
       "authorized": "Autorizzato",
@@ -74,6 +78,15 @@
       "subtitle": "Visualizza e gestisci le iniziative di supporto alla spesa a cui hai aderito.",
       "title": "Iniziative",
       "initiativeName": "Nome"
+    },
+    "newDiscount": {
+      "sendAuthorizationRequestSubtitle": "Invia al tuo cliente una richiesta di autorizzazione della spesa del buono sconto.",
+      "sendAuthorizationRequestTitle": "Invio richiesta di autorizzazione",
+      "spendingAmountLabel": "Importo spesa",
+      "spendingInfoSubtitle": "Inserisci l’importo totale della spesa, ci servirà per calcolare lo sconto applicabile.",
+      "spendingInfoTitle": "Informazioni sulla spesa",
+      "subtitle": "Compila i campi e genera buoni sconto da inviare ai tuoi clienti per usufruire dell’iniziativa.",
+      "title": "Crea un nuovo buono sconto"
     }
   },
   "roles": {

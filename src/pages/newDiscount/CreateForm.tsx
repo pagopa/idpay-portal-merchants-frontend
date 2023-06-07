@@ -76,16 +76,14 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
     <>
       <Paper sx={{ gridColumn: 'span 12', my: 4, px: 3 }}>
         <Box sx={{ py: 3 }}>
-          <Typography variant="h6">Informazioni sulla spesa</Typography>
+          <Typography variant="h6">{t('pages.newDiscount.spendingInfoTitle')}</Typography>
         </Box>
-        <Typography variant="body2">
-          Inserisci l’importo totale della spesa, ci servirà per calcolare lo sconto applicabile.
-        </Typography>
+        <Typography variant="body2">{t('pages.newDiscount.spendingInfoSubtitle')}</Typography>
         <FormControl sx={{ my: 3 }}>
           <TextField
             id={`spendingAmount`}
             name={`spendingAmount`}
-            label={`Importo spesa`}
+            label={t('pages.newDiscount.spendingAmountLabel')}
             value={formik.values.spendingAmount}
             onChange={(e) => formik.handleChange(e)}
             size="small"
@@ -111,7 +109,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
               variant="outlined"
               onClick={() => history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`)}
             >
-              Indietro
+              {t('commons.backBtn')}
             </Button>
           </Box>
           <Box>
@@ -120,7 +118,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
               disabled={!formik.isValid}
               onClick={() => formik.handleSubmit()}
             >
-              Crea buono sconto
+              {t('pages.initiativeDiscounts.createBtn')}
             </Button>
           </Box>
         </Box>

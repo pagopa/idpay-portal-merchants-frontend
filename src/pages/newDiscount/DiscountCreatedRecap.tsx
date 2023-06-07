@@ -2,25 +2,29 @@
 /* eslint-disable no-prototype-builtins */
 import { Paper, Box, Alert, FormControl, TextField, Button, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox, useErrorDispatcher } from '@pagopa/selfcare-common-frontend';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { QRCodeSVG } from 'qrcode.react';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
 import { BASE_ROUTE } from '../../routes';
 import { copyTextToClipboard, downloadQRCode } from '../../helpers';
+import { confirmPaymentQRCode } from '../../services/merchantService';
 
 interface Props {
   data: TransactionResponse | undefined;
 }
 
 const DiscountCreatedRecap = ({ data }: Props) => {
+  const { t } = useTranslation();
   const history = useHistory();
   const [expirationDays, setExpirationDays] = useState<number>();
   const [expirationDate, setExpirationDate] = useState<string>();
   const [expirationTime, setExpirationTime] = useState<string>();
   const [magicLink, setMagicLink] = useState<string>();
+  const addError = useErrorDispatcher();
 
   useEffect(() => {
     if (
@@ -58,6 +62,26 @@ const DiscountCreatedRecap = ({ data }: Props) => {
     }
   }, [data]);
 
+  const handleConfirmPayment = (transactionId: string | undefined) => {
+    if (typeof transactionId === 'string') {
+      confirmPaymentQRCode(transactionId)
+        .then((response) => console.log(response))
+        .catch((error) => {
+          addError({
+            id: 'CONFIRM_PAYMENT_QR_CODE_ERROR',
+            blocking: false,
+            error,
+            techDescription: 'An error occurred confirming payment qr code',
+            displayableTitle: t('errors.title'),
+            displayableDescription: t('errors.getDataDescription'),
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          });
+        });
+    }
+  };
+
   return (
     <>
       <Box sx={{ gridColumn: 'span 12' }}>
@@ -89,7 +113,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               sx={{ height: '43px' }}
               onClick={() => copyTextToClipboard(magicLink)}
             >
-              Copia link
+              {t('commons.copyLinkBtn')}
             </Button>
           </FormControl>
         </Box>
@@ -106,7 +130,6 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               variantTitle="h6"
               variantSubTitle="body2"
             />
-
             <Button
               startIcon={<FileDownloadIcon />}
               size="small"
@@ -114,7 +137,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               sx={{ height: '43px' }}
               onClick={() => downloadQRCode('qr-container', data?.trxCode)}
             >
-              Scarica codice QR
+              {t('commons.downloadQrBtn')}
             </Button>
           </Box>
           <Box sx={{ gridColumn: 'span 2', pt: 2, justifySelf: 'end' }}>
@@ -122,13 +145,24 @@ const DiscountCreatedRecap = ({ data }: Props) => {
           </Box>
         </Box>
       </Paper>
-      <Box sx={{ gridColumn: 'span 12' }}>
-        <Button
-          variant="outlined"
-          onClick={() => history.replace(`${BASE_ROUTE}/sconti-iniziativa/${data?.initiativeId}`)}
-        >
-          Gestisci buoni sconto
-        </Button>
+      <Box sx={{ gridColumn: 'span 12', py: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box>
+            <Button
+              variant="outlined"
+              onClick={() =>
+                history.replace(`${BASE_ROUTE}/sconti-iniziativa/${data?.initiativeId}`)
+              }
+            >
+              Gestisci buoni sconto
+            </Button>
+          </Box>
+          <Box>
+            <Button variant="contained" onClick={() => handleConfirmPayment(data?.id)}>
+              {t('commons.confirmBtn')}
+            </Button>
+          </Box>
+        </Box>
       </Box>
     </>
   );
