@@ -39,3 +39,17 @@ export const formatIban = (iban: string | undefined) => {
   }
   return '';
 };
+
+export const formatDate = (date: Date | undefined) => {
+  if (date) {
+    return date.toLocaleString('fr-BE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'Europe/Rome',
+      hour: 'numeric',
+      minute: 'numeric',
+    });
+  }
+  return '';
+};

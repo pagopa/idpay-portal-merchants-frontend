@@ -18,8 +18,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { itIT } from '@mui/material/locale';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import { TitleBox, Toast } from '@pagopa/selfcare-common-frontend';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
@@ -32,6 +32,7 @@ import {
   MerchantTransactionDTO,
   StatusEnum as TransactionStatusEnum,
 } from '../../api/generated/merchants/MerchantTransactionDTO';
+import { formatDate, formattedCurrency } from '../../helpers';
 import ROUTES, { BASE_ROUTE } from '../../routes';
 import { confirmPaymentQRCode, getMerchantTransactions } from '../../services/merchantService';
 import {
@@ -41,10 +42,9 @@ import {
 } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import EmptyList from '../components/EmptyList';
-import { formattedCurrency } from '../../helpers';
-import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
-import CancelTransactionModal from './CancelTransactionModal';
 import AuthorizeTransactionModal from './AuthorizeTransactionModal';
+import CancelTransactionModal from './CancelTransactionModal';
+import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
 
 interface MatchParams {
   id: string;
@@ -482,7 +482,7 @@ const InitiativeDiscounts = () => {
                   {rows.map((r, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <Typography> {r.updateDate?.toLocaleString()}</Typography>
+                        <Typography> {formatDate(r.updateDate)}</Typography>
                       </TableCell>
                       <TableCell>{r.fiscalCode}</TableCell>
                       <TableCell>{formattedCurrency(r.effectiveAmount)}</TableCell>

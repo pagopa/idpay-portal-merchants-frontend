@@ -1,16 +1,16 @@
 /* eslint-disable functional/immutable-data */
 /* eslint-disable no-prototype-builtins */
-import { Paper, Box, Alert, FormControl, TextField, Button, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { Alert, Box, Button, FormControl, Paper, TextField, Typography } from '@mui/material';
+import { TitleBox, Toast } from '@pagopa/selfcare-common-frontend';
 import { QRCodeSVG } from 'qrcode.react';
-import { useHistory } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
-import { BASE_ROUTE } from '../../routes';
 import { copyTextToClipboard, downloadQRCode } from '../../helpers';
+import { BASE_ROUTE } from '../../routes';
 
 interface Props {
   data: TransactionResponse | undefined;
@@ -23,6 +23,8 @@ const DiscountCreatedRecap = ({ data }: Props) => {
   const [expirationDate, setExpirationDate] = useState<string>();
   const [expirationTime, setExpirationTime] = useState<string>();
   const [magicLink, setMagicLink] = useState<string>();
+  const [openCopySuccesToast, setOpenCopySuccesToast] = useState<boolean>(false);
+  const [openDownloadSuccesToast, setOpenDownloadSuccesToast] = useState<boolean>(false);
 
   useEffect(() => {
     if (
@@ -35,8 +37,10 @@ const DiscountCreatedRecap = ({ data }: Props) => {
       const expDays = data?.trxExpirationMinutes / 1440;
       setExpirationDays(expDays);
       const t = data.trxDate.getDate();
+
       const expDate = new Date();
       expDate.setDate(t + expDays);
+
       const expDateStrArr = expDate
         .toLocaleString('it-IT', {
           day: '2-digit',
@@ -62,14 +66,20 @@ const DiscountCreatedRecap = ({ data }: Props) => {
 
   return (
     <>
-      <Box sx={{ gridColumn: 'span 12', my: 5 }}>
-        <Alert color="info">
-          {t('pages.newDiscount.expiringDiscountInfoAlertText', {
-            days: expirationDays,
-            hour: expirationTime,
-            date: expirationDate,
-          })}
-        </Alert>
+      <Toast
+        open={openCopySuccesToast}
+        title={'Link Copiato'}
+        showToastCloseIcon={true}
+        onCloseToast={() => setOpenCopySuccesToast(false)}
+      />
+      <Toast
+        open={openDownloadSuccesToast}
+        title={'Codice QR scaricato'}
+        showToastCloseIcon={true}
+        onCloseToast={() => setOpenDownloadSuccesToast(false)}
+      />
+      <Box sx={{ gridColumn: 'span 12' }}>
+        <Alert color="info">{`Il buono sconto ha una durata di ${expirationDays} giorni: è necessario autorizzare la spesa entro le ${expirationTime} del ${expirationDate}.`}</Alert>
       </Box>
       <Paper sx={{ gridColumn: 'span 12', p: 3 }}>
         <TitleBox
@@ -94,7 +104,10 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               size="small"
               variant="contained"
               sx={{ height: '43px' }}
-              onClick={() => copyTextToClipboard(magicLink)}
+              onClick={() => {
+                copyTextToClipboard(magicLink);
+                setOpenCopySuccesToast(true);
+              }}
             >
               {t('commons.copyLinkBtn')}
             </Button>
@@ -117,7 +130,11 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               startIcon={<FileDownloadIcon />}
               size="small"
               variant="contained"
-              onClick={() => downloadQRCode('qr-container', data?.trxCode)}
+              sx={{ height: '43px' }}
+              onClick={() => {
+                downloadQRCode('qr-container', data?.trxCode);
+                setOpenDownloadSuccesToast(true);
+              }}
             >
               {t('commons.downloadQrBtn')}
             </Button>
