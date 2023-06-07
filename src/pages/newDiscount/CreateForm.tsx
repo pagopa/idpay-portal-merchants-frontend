@@ -74,7 +74,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
 
   return (
     <>
-      <Paper sx={{ gridColumn: 'span 12', pt: 3, px: 3, pb: 0 }}>
+      <Paper sx={{ gridColumn: 'span 12', p: 3 }}>
         <Typography variant="h6" sx={{ mb: 3 }}>
           {t('pages.newDiscount.spendingInfoTitle')}
         </Typography>

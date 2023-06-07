@@ -28,7 +28,7 @@ const NewDiscount = () => {
   const { name, id } = (match?.params as MatchParams) || {};
 
   return (
-    <Box sx={{ ...genericContainerStyle, mt: 3 }}>
+    <Box sx={{ ...genericContainerStyle, mt: 3, alignItems: 'start' }}>
       <BreadcrumbsBox
         backUrl={`${BASE_ROUTE}/sconti-iniziativa/${id}`}
         backLabel={t('commons.backBtn')}
@@ -51,7 +51,7 @@ const NewDiscount = () => {
           }
           mbTitle={2}
           mtTitle={2}
-          mbSubTitle={0}
+          mbSubTitle={3}
           variantTitle="h4"
           variantSubTitle="body1"
         />

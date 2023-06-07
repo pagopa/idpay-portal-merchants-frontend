@@ -80,7 +80,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
         showToastCloseIcon={true}
         onCloseToast={() => setOpenDownloadSuccesToast(false)}
       />
-      <Box sx={{ gridColumn: 'span 12' }}>
+      <Box sx={{ gridColumn: 'span 12', mt: 2, mb: 5 }}>
         <Alert color="info">
           {t('pages.newDiscount.expiringDiscountInfoAlertText', {
             days: expirationDays,
