@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable functional/immutable-data */
 /* eslint-disable no-prototype-builtins */
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -36,10 +37,17 @@ const DiscountCreatedRecap = ({ data }: Props) => {
     ) {
       const expDays = data?.trxExpirationMinutes / 1440;
       setExpirationDays(expDays);
-      const t = data.trxDate.getDate();
 
-      const expDate = new Date();
-      expDate.setDate(t + expDays);
+      const trxDateStr = data.trxDate.toString();
+      const expDate = new Date(trxDateStr);
+      const days = expDate.getDate();
+      expDate.setDate(days + expDays);
+
+      // const t = data.trxDate.getDate();
+      // t.setDate(t + expDays);
+
+      // const expDate = new Date();
+      // expDate.setDate(t + expDays);
 
       const expDateStrArr = expDate
         .toLocaleString('it-IT', {

@@ -37,9 +37,12 @@ const AuthorizeTransactionModal = ({
     ) {
       const expDays = data?.trxExpirationMinutes / 1440;
       setExpirationDays(expDays);
-      const t = data.trxDate.getDate();
-      const expDate = new Date();
-      expDate.setDate(t + expDays);
+
+      const trxDateStr = data.trxDate.toString();
+      const expDate = new Date(trxDateStr);
+      const days = expDate.getDate();
+      expDate.setDate(days + expDays);
+
       const expDateStrArr = expDate
         .toLocaleString('it-IT', {
           day: '2-digit',
