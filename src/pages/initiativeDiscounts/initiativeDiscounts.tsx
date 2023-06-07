@@ -44,6 +44,7 @@ import EmptyList from '../components/EmptyList';
 import { formattedCurrency } from '../../helpers';
 import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
 import CancelTransactionModal from './CancelTransactionModal';
+import AuthorizeTransactionModal from './AuthorizeTransactionModal';
 
 interface MatchParams {
   id: string;
@@ -53,11 +54,13 @@ type ActionsMenuProps = {
   initiativeId: string;
   status: TransactionStatusEnum;
   trxId: string;
+  data: MerchantTransactionDTO;
 };
 
-const ActionMenu = ({ initiativeId, status, trxId }: ActionsMenuProps) => {
+const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openCancelTrxModal, setOpenCancelTrxModal] = useState<boolean>(false);
+  const [openAuthorizeTrxModal, setOpenAuthorizeTrxModal] = useState<boolean>(false);
   const open = Boolean(anchorEl);
   const { t } = useTranslation();
 
@@ -72,6 +75,32 @@ const ActionMenu = ({ initiativeId, status, trxId }: ActionsMenuProps) => {
     initiativeId: string;
     status: TransactionStatusEnum;
     trxId: string;
+  };
+
+  type RenderAuthorizeTrxProps = {
+    data: MerchantTransactionDTO;
+  };
+
+  const RenderAuthorizeTransaction = ({ data }: RenderAuthorizeTrxProps) => {
+    switch (status) {
+      case TransactionStatusEnum.IDENTIFIED:
+      case TransactionStatusEnum.CREATED:
+      case TransactionStatusEnum.REJECTED:
+        return (
+          <>
+            <MenuItem onClick={() => setOpenAuthorizeTrxModal(true)}>
+              {'Richiedi autorizzazione'}
+            </MenuItem>
+            <AuthorizeTransactionModal
+              openAuthorizeTrxModal={openAuthorizeTrxModal}
+              setOpenAuthorizeTrxModal={setOpenAuthorizeTrxModal}
+              data={data}
+            />
+          </>
+        );
+      default:
+        return null;
+    }
   };
 
   const RenderCancelTransaction = ({ initiativeId, status, trxId }: RenderCancelTrxProps) => {
@@ -121,6 +150,7 @@ const ActionMenu = ({ initiativeId, status, trxId }: ActionsMenuProps) => {
         }}
         data-testid="menu-close-test"
       >
+        <RenderAuthorizeTransaction data={data} />
         <RenderCancelTransaction initiativeId={initiativeId} trxId={trxId} status={status} />
       </Menu>
     </TableCell>
@@ -411,7 +441,7 @@ const InitiativeDiscounts = () => {
                       <TableCell>{formattedCurrency(r.effectiveAmount)}</TableCell>
                       <TableCell>{renderTrasactionStatus(r.status)}</TableCell>
                       {showActionMenu(r.status) ? (
-                        <ActionMenu initiativeId={id} status={r.status} trxId={r.trxId} />
+                        <ActionMenu initiativeId={id} status={r.status} trxId={r.trxId} data={r} />
                       ) : (
                         <TableCell />
                       )}
