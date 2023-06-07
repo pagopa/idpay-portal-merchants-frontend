@@ -43,12 +43,6 @@ const DiscountCreatedRecap = ({ data }: Props) => {
       const days = expDate.getDate();
       expDate.setDate(days + expDays);
 
-      // const t = data.trxDate.getDate();
-      // t.setDate(t + expDays);
-
-      // const expDate = new Date();
-      // expDate.setDate(t + expDays);
-
       const expDateStrArr = expDate
         .toLocaleString('it-IT', {
           day: '2-digit',

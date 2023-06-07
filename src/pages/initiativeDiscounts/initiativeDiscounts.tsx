@@ -484,7 +484,9 @@ const InitiativeDiscounts = () => {
                       <TableCell>
                         <Typography> {formatDate(r.updateDate)}</Typography>
                       </TableCell>
-                      <TableCell>{r.fiscalCode}</TableCell>
+                      <TableCell>
+                        {r.status === TransactionStatusEnum.AUTHORIZED ? r.fiscalCode : ''}
+                      </TableCell>
                       <TableCell>{formattedCurrency(r.effectiveAmount)}</TableCell>
                       <TableCell>{renderTrasactionStatus(r.status)}</TableCell>
                       {showActionMenu(r.status) ? (
