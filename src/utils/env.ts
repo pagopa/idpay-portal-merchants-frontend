@@ -26,7 +26,6 @@ export const ENV = {
   },
 
   API_TIMEOUT_MS: {
-    MERCHANTS: env.get('REACT_APP_URL_API_MERCHANTS_TIMEOUT_MS').required().asString(),
     MERCHANTS_PORTAL: env.get('REACT_APP_API_MERCHANTS_PORTAL_TIMEOUT_MS').required().asInt(),
     ROLE_PERMISSION: env.get('REACT_APP_API_ROLE_PERMISSION_TIMEOUT_MS').required().asInt(),
     EMAIL_NOTIFICATION: env.get('REACT_APP_API_EMAIL_NOTIFICATION_TIMEOUT_MS').required().asInt(),
