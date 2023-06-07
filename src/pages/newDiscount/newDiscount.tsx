@@ -28,7 +28,7 @@ const NewDiscount = () => {
   const { name, id } = (match?.params as MatchParams) || {};
 
   return (
-    <Box sx={genericContainerStyle}>
+    <Box sx={{ ...genericContainerStyle, mt: 3 }}>
       <BreadcrumbsBox
         backUrl={`${BASE_ROUTE}/sconti-iniziativa/${id}`}
         backLabel={t('commons.backBtn')}
@@ -41,15 +41,17 @@ const NewDiscount = () => {
 
       <Box sx={{ gridColumn: 'span 12' }}>
         <TitleBox
-          title={!discountCreated ? t('pages.newDiscount.title') : 'Buono sconto creato!'}
+          title={
+            !discountCreated ? t('pages.newDiscount.title') : t('pages.newDiscount.createdTitle')
+          }
           subTitle={
             !discountCreated
               ? t('pages.newDiscount.subtitle')
-              : 'Invia il buono sconto al tuo cliente, gli servirà per autorizzare la spesa con l’app IO.'
+              : t('pages.newDiscount.createdSubtitle')
           }
           mbTitle={2}
           mtTitle={2}
-          mbSubTitle={5}
+          mbSubTitle={0}
           variantTitle="h4"
           variantSubTitle="body1"
         />

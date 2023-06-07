@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable no-prototype-builtins */
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -5,7 +6,7 @@ import { Alert, Backdrop, Box, Button, Fade, FormControl, Modal, TextField } fro
 import TitleBox from '@pagopa/selfcare-common-frontend/components/TitleBox';
 import { QRCodeSVG } from 'qrcode.react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { copyTextToClipboard, downloadQRCode } from '../../helpers';
 
@@ -24,7 +25,7 @@ const AuthorizeTransactionModal = ({
   const [expirationDays, setExpirationDays] = useState<number>();
   const [expirationDate, setExpirationDate] = useState<string>();
   const [expirationTime, setExpirationTime] = useState<string>();
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (
@@ -89,26 +90,30 @@ const AuthorizeTransactionModal = ({
           }}
         >
           <TitleBox
-            title={'Vuoi richiedere l’autorizzazione?'}
-            subTitle={
-              'Invia il buono sconto al tuo cliente, gli servirà per autorizzare la spesa con l’app IO.'
-            }
+            title={t('pages.initiativeDiscounts.authorizationRequestModalTitle')}
+            subTitle={t('pages.newDiscount.createdSubtitle')}
             mbTitle={2}
-            mtTitle={2}
-            mbSubTitle={2}
+            mtTitle={0}
+            mbSubTitle={0}
             variantTitle="h6"
             variantSubTitle="body2"
           />
-          <Box sx={{ gridColumn: 'span 12' }}>
-            <Alert color="info">{`Il buono sconto ha una durata di ${expirationDays} giorni: è necessario autorizzare la spesa entro le ${expirationTime} del ${expirationDate}.`}</Alert>
+          <Box sx={{ gridColumn: 'span 12', my: 2 }}>
+            <Alert color="info">
+              {t('pages.newDiscount.expiringDiscountInfoAlertText', {
+                days: expirationDays,
+                hour: expirationTime,
+                date: expirationDate,
+              })}
+            </Alert>
           </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
-            <Box sx={{ gridColumn: 'span 12', mb: 1, mt: 2 }}>
+            <Box sx={{ gridColumn: 'span 12' }}>
               <TitleBox
-                title={'Invia un link magico'}
-                subTitle={'Copia il link e invialo al tuo cliente con la modalità che preferisci.'}
+                title={t('pages.newDiscount.sendMagicLinkTitle')}
+                subTitle={t('pages.newDiscount.sendMagicLinkSubtitle')}
                 mbTitle={2}
-                mtTitle={2}
+                mtTitle={0}
                 mbSubTitle={2}
                 variantTitle="subtitle1"
                 variantSubTitle="body2"
@@ -117,7 +122,6 @@ const AuthorizeTransactionModal = ({
             <FormControl sx={{ mr: 2, gridColumn: 'span 9' }}>
               <TextField disabled value={magicLink} size="small" id="magic-link" fullWidth />
             </FormControl>
-
             <FormControl sx={{ gridColumn: 'span 3' }}>
               <Button
                 startIcon={<ContentCopyIcon />}
@@ -126,7 +130,7 @@ const AuthorizeTransactionModal = ({
                 sx={{ height: '43px' }}
                 onClick={() => copyTextToClipboard(magicLink)}
               >
-                Copia link
+                {t('commons.copyLinkBtn')}
               </Button>
             </FormControl>
           </Box>
@@ -134,17 +138,14 @@ const AuthorizeTransactionModal = ({
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
             <Box sx={{ gridColumn: 'span 12' }}>
               <TitleBox
-                title={'Oppure invia un codice QR'}
-                subTitle={
-                  'Salva l’immagine e inviala al tuo cliente con la modalità che preferisci.'
-                }
+                title={t('pages.newDiscount.sendQrTitle')}
+                subTitle={t('pages.newDiscount.sendQrSubtitle')}
                 mbTitle={2}
-                mtTitle={2}
+                mtTitle={4}
                 mbSubTitle={2}
                 variantTitle="subtitle1"
                 variantSubTitle="body2"
               />
-
               <Button
                 startIcon={<FileDownloadIcon />}
                 size="small"
@@ -152,15 +153,15 @@ const AuthorizeTransactionModal = ({
                 sx={{ height: '43px' }}
                 onClick={() => downloadQRCode('qr-container', data?.trxCode)}
               >
-                Scarica codice QR
+                {t('commons.downloadQrBtn')}
               </Button>
             </Box>
-            <Box sx={{ gridColumn: 'span 2', pt: 2, justifySelf: 'end', display: 'none' }}>
+            <Box sx={{ gridColumn: 'span 2', display: 'none' }}>
               <QRCodeSVG id="qr-container" value={magicLink || ''} />
             </Box>
           </Box>
 
-          <Box sx={{ display: 'grid', gridColumn: 'span 2', justifyContent: 'end', pt: 4 }}>
+          <Box sx={{ display: 'grid', gridColumn: 'span 2', justifyContent: 'end', mt: 5 }}>
             <Button
               variant="outlined"
               size="small"
@@ -168,7 +169,7 @@ const AuthorizeTransactionModal = ({
                 setOpenAuthorizeTrxModal(false);
               }}
             >
-              Chiudi
+              {t('commons.closeBtn')}
             </Button>
           </Box>
         </Box>

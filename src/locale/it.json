@@ -1,6 +1,7 @@
 {
   "commons": {
     "backBtn": "Indietro",
+    "closeBtn": "Chiudi",
     "cancelBtn": "Torna indietro",
     "confirmBtn": "Conferma",
     "continueBtn": "Continua",
@@ -50,6 +51,7 @@
     },
     "initiativeDiscounts": {
       "amount": "Importo",
+      "authorizationRequestModalTitle": "Vuoi richiedere l’autorizzazione?",
       "beneficiary": "Beneficiario",
       "cancelDiscount": "Annulla buono sconto",
       "createBtn": "Crea buono sconto",
@@ -80,8 +82,17 @@
       "initiativeName": "Nome"
     },
     "newDiscount": {
+      "createdSubtitle": "Invia il buono sconto al tuo cliente, gli servirà per autorizzare la spesa con l’app IO.",
+      "createdTitle": "Buono sconto creato!",
+      "expiringDiscountInfoAlertText": "Il buono sconto ha una durata di {{days}} giorni: è necessario autorizzare la spesa entro le {{hour}} del {{date}}.",
+      "handleDiscountsBtn": "Gestisci buoni sconto",
+      "magicLinkLabel": "Link magico",
       "sendAuthorizationRequestSubtitle": "Invia al tuo cliente una richiesta di autorizzazione della spesa del buono sconto.",
       "sendAuthorizationRequestTitle": "Invio richiesta di autorizzazione",
+      "sendMagicLinkSubtitle": "Copia il link e invialo al tuo cliente con la modalità che preferisci.",
+      "sendMagicLinkTitle": "Invia un link magico",
+      "sendQrSubtitle": "Salva l’immagine e inviala al tuo cliente con la modalità che preferisci.",
+      "sendQrTitle": "Oppure invia un codice QR",
       "spendingAmountLabel": "Importo spesa",
       "spendingInfoSubtitle": "Inserisci l’importo totale della spesa, ci servirà per calcolare lo sconto applicabile.",
       "spendingInfoTitle": "Informazioni sulla spesa",

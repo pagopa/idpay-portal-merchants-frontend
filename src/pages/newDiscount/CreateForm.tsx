@@ -74,12 +74,14 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
 
   return (
     <>
-      <Paper sx={{ gridColumn: 'span 12', my: 4, px: 3 }}>
-        <Box sx={{ py: 3 }}>
-          <Typography variant="h6">{t('pages.newDiscount.spendingInfoTitle')}</Typography>
-        </Box>
-        <Typography variant="body2">{t('pages.newDiscount.spendingInfoSubtitle')}</Typography>
-        <FormControl sx={{ my: 3 }}>
+      <Paper sx={{ gridColumn: 'span 12', pt: 3, px: 3, pb: 0 }}>
+        <Typography variant="h6" sx={{ mb: 3 }}>
+          {t('pages.newDiscount.spendingInfoTitle')}
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 3 }}>
+          {t('pages.newDiscount.spendingInfoSubtitle')}
+        </Typography>
+        <FormControl>
           <TextField
             id={`spendingAmount`}
             name={`spendingAmount`}
@@ -102,7 +104,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
           />
         </FormControl>
       </Paper>
-      <Box sx={{ gridColumn: 'span 12', py: 2 }}>
+      <Box sx={{ gridColumn: 'span 12', mt: 5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Box>
             <Button

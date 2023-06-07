@@ -62,27 +62,32 @@ const DiscountCreatedRecap = ({ data }: Props) => {
 
   return (
     <>
-      <Box sx={{ gridColumn: 'span 12' }}>
-        <Alert color="info">{`Il buono sconto ha una durata di ${expirationDays} giorni: è necessario autorizzare la spesa entro le ${expirationTime} del ${expirationDate}.`}</Alert>
+      <Box sx={{ gridColumn: 'span 12', my: 5 }}>
+        <Alert color="info">
+          {t('pages.newDiscount.expiringDiscountInfoAlertText', {
+            days: expirationDays,
+            hour: expirationTime,
+            date: expirationDate,
+          })}
+        </Alert>
       </Box>
-      <Paper sx={{ gridColumn: 'span 12', mt: 2, mb: 4, px: 3, pb: 3 }}>
+      <Paper sx={{ gridColumn: 'span 12', p: 3 }}>
         <TitleBox
-          title={'Invia un link magico'}
-          subTitle={'Copia il link e invialo al tuo cliente con la modalità che preferisci.'}
+          title={t('pages.newDiscount.sendMagicLinkTitle')}
+          subTitle={t('pages.newDiscount.sendMagicLinkSubtitle')}
           mbTitle={2}
-          mtTitle={2}
-          mbSubTitle={2}
+          mtTitle={0}
+          mbSubTitle={3}
           variantTitle="h6"
           variantSubTitle="body2"
         />
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
           <Box sx={{ gridColumn: 'span 12', mb: 1 }}>
-            <Typography variant="subtitle1">Link magico</Typography>
+            <Typography variant="subtitle1">{t('pages.newDiscount.magicLinkLabel')}</Typography>
           </Box>
           <FormControl sx={{ mr: 2, gridColumn: 'span 6' }}>
             <TextField disabled value={magicLink} size="small" id="magic-link" fullWidth />
           </FormControl>
-
           <FormControl sx={{ gridColumn: 'span 2' }}>
             <Button
               startIcon={<ContentCopyIcon />}
@@ -96,15 +101,15 @@ const DiscountCreatedRecap = ({ data }: Props) => {
           </FormControl>
         </Box>
       </Paper>
-      <Paper sx={{ gridColumn: 'span 12', mt: 2, mb: 4, px: 3, pb: 3 }}>
+      <Paper sx={{ gridColumn: 'span 12', my: 5, p: 3 }}>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
           <Box sx={{ gridColumn: 'span 10' }}>
             <TitleBox
-              title={'Oppure invia un codice QR'}
-              subTitle={'Salva l’immagine e inviala al tuo cliente con la modalità che preferisci.'}
+              title={t('pages.newDiscount.sendQrTitle')}
+              subTitle={t('pages.newDiscount.sendQrSubtitle')}
               mbTitle={2}
-              mtTitle={2}
-              mbSubTitle={2}
+              mtTitle={0}
+              mbSubTitle={3}
               variantTitle="h6"
               variantSubTitle="body2"
             />
@@ -112,18 +117,17 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               startIcon={<FileDownloadIcon />}
               size="small"
               variant="contained"
-              sx={{ height: '43px' }}
               onClick={() => downloadQRCode('qr-container', data?.trxCode)}
             >
               {t('commons.downloadQrBtn')}
             </Button>
           </Box>
-          <Box sx={{ gridColumn: 'span 2', pt: 2, justifySelf: 'end' }}>
+          <Box sx={{ gridColumn: 'span 2', justifySelf: 'end' }}>
             <QRCodeSVG id="qr-container" value={magicLink || ''} />
           </Box>
         </Box>
       </Paper>
-      <Box sx={{ gridColumn: 'span 12', py: 2 }}>
+      <Box sx={{ gridColumn: 'span 12' }}>
         <Box sx={{ display: 'flex' }}>
           <Box>
             <Button
@@ -132,7 +136,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
                 history.replace(`${BASE_ROUTE}/sconti-iniziativa/${data?.initiativeId}`)
               }
             >
-              Gestisci buoni sconto
+              {t('pages.newDiscount.handleDiscountsBtn')}
             </Button>
           </Box>
         </Box>

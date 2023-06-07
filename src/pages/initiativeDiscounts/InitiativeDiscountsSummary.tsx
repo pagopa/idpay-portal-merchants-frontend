@@ -47,19 +47,7 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
           setAmount(response?.amount);
           setRefunded(response?.refunded);
         })
-        .catch((error) =>
-          addError({
-            id: 'GET_MERCHANT_INITATIVE_STATISTICS',
-            blocking: false,
-            error,
-            techDescription: 'An error occurred getting merchant initative statistics',
-            displayableTitle: t('errors.title'),
-            displayableDescription: t('errors.getDataDescription'),
-            toNotify: true,
-            component: 'Toast',
-            showCloseIcon: true,
-          })
-        );
+        .catch((_error) => {});
     }
   }, [id]);
 
@@ -71,7 +59,7 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
           display: 'grid',
           width: '100%',
           gridTemplateColumns: 'repeat(12, 1fr)',
-          alignItems: 'center',
+          alignItems: 'baseline',
           rowGap: 1,
         }}
       >
