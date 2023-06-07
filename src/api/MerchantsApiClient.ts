@@ -20,9 +20,9 @@ const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) 
 };
 
 const apiClient = createClient({
-  baseUrl: ENV.URL_API.MERCHANTS,
+  baseUrl: ENV.URL_API.MERCHANTS_PORTAL,
   basePath: '',
-  fetchApi: buildFetchApi(ENV.API_TIMEOUT_MS.MERCHANTS),
+  fetchApi: buildFetchApi(ENV.API_TIMEOUT_MS.MERCHANTS_PORTAL),
   withDefaults: withBearer,
 });
 

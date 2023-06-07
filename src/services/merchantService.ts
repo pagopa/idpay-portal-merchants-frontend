@@ -8,7 +8,7 @@ import { MerchantTransactionsListDTO } from '../api/generated/merchants/Merchant
 import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
 
 export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> => {
-  if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
     return MerchantsApiMocked.getMerchantInitiativeList();
   }
   return MerchantApi.getMerchantInitiativeList();
@@ -20,7 +20,7 @@ export const getMerchantTransactions = (
   fiscalCode?: string,
   status?: string
 ): Promise<MerchantTransactionsListDTO> => {
-  if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
     return MerchantsApiMocked.getMerchantTransactions(initiativeId, page, fiscalCode, status);
   }
   return MerchantApi.getMerchantTransactions(initiativeId, page, fiscalCode, status);
@@ -29,21 +29,21 @@ export const getMerchantTransactions = (
 export const getMerchantInitiativeStatistics = (
   initiativeId: string
 ): Promise<MerchantStatisticsDTO> => {
-  if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
     return MerchantsApiMocked.getMerchantInitiativeStatistics(initiativeId);
   }
   return MerchantApi.getMerchantInitiativeStatistics(initiativeId);
 };
 
 export const getMerchantDetail = (initiativeId: string): Promise<MerchantDetailDTO> => {
-  if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
     return MerchantsApiMocked.getMerchantDetail(initiativeId);
   }
   return MerchantApi.getMerchantDetail(initiativeId);
 };
 
 export const deleteTransaction = (transactionId: string): Promise<void> => {
-  if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
     return MerchantsApiMocked.deleteTransaction(transactionId);
   }
   return MerchantApi.deleteTransaction(transactionId);
@@ -56,7 +56,7 @@ export const createTransaction = (
   trxDate: Date,
   mcc: string | undefined
 ): Promise<TransactionResponse> => {
-  if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
     return MerchantsApiMocked.createTransaction(
       amountCents,
       idTrxIssuer,
@@ -69,7 +69,7 @@ export const createTransaction = (
 };
 
 export const confirmPaymentQRCode = (transactionId: string) => {
-  if (process.env.REACT_APP_API_MOCK_MERCHANTS === 'true') {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
     return MerchantsApiMocked.confirmPaymentQRCode(transactionId);
   }
   return MerchantApi.confirmPaymentQRCode(transactionId);
