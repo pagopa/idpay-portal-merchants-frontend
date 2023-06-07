@@ -9,6 +9,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useHistory } from 'react-router-dom';
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
 import { BASE_ROUTE } from '../../routes';
+import { copyTextToClipboard, downloadQRCode } from '../../helpers';
 
 interface Props {
   data: TransactionResponse | undefined;
@@ -34,7 +35,6 @@ const DiscountCreatedRecap = ({ data }: Props) => {
       const t = data.trxDate.getDate();
       const expDate = new Date();
       expDate.setDate(t + expDays);
-
       const expDateStrArr = expDate
         .toLocaleString('it-IT', {
           day: '2-digit',
@@ -45,7 +45,6 @@ const DiscountCreatedRecap = ({ data }: Props) => {
           minute: 'numeric',
         })
         .split(', ');
-
       setExpirationDate(expDateStrArr[0]);
       setExpirationTime(expDateStrArr[1]);
     }
@@ -58,29 +57,6 @@ const DiscountCreatedRecap = ({ data }: Props) => {
       setMagicLink(`https://www.idpay.it/authorizationlink/${data?.trxCode}`);
     }
   }, [data]);
-
-  const copyTextToClipboard = () => {
-    if (typeof magicLink === 'string') {
-      void navigator.clipboard.writeText(magicLink);
-    }
-  };
-
-  const downloadQRCode = () => {
-    const content = document.getElementById('qr-container');
-    if (content !== null) {
-      content.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      const svgData = content.outerHTML;
-      const preface = '<?xml version="1.0" standalone="no"?>\r\n';
-      const svgBlob = new Blob([preface, svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const svgUrl = URL.createObjectURL(svgBlob);
-      const downloadLink = document.createElement('a');
-      downloadLink.href = svgUrl;
-      downloadLink.download = 'QRCode.svg';
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    }
-  };
 
   return (
     <>
@@ -111,7 +87,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               size="small"
               variant="contained"
               sx={{ height: '43px' }}
-              onClick={copyTextToClipboard}
+              onClick={() => copyTextToClipboard(magicLink)}
             >
               Copia link
             </Button>
@@ -136,7 +112,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               size="small"
               variant="contained"
               sx={{ height: '43px' }}
-              onClick={downloadQRCode}
+              onClick={() => downloadQRCode('qr-container', data?.trxCode)}
             >
               Scarica codice QR
             </Button>

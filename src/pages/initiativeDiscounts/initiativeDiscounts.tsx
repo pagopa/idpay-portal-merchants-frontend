@@ -41,6 +41,7 @@ import {
 } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import EmptyList from '../components/EmptyList';
+import { formattedCurrency } from '../../helpers';
 import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
 import CancelTransactionModal from './CancelTransactionModal';
 
@@ -407,7 +408,7 @@ const InitiativeDiscounts = () => {
                         <Typography> {r.updateDate?.toLocaleString()}</Typography>
                       </TableCell>
                       <TableCell>{r.fiscalCode}</TableCell>
-                      <TableCell>{r.effectiveAmount}</TableCell>
+                      <TableCell>{formattedCurrency(r.effectiveAmount)}</TableCell>
                       <TableCell>{renderTrasactionStatus(r.status)}</TableCell>
                       {showActionMenu(r.status) ? (
                         <ActionMenu initiativeId={id} status={r.status} trxId={r.trxId} />

@@ -3,6 +3,7 @@ import { useErrorDispatcher } from '@pagopa/selfcare-common-frontend';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
+import { formatIban, formattedCurrency } from '../../helpers';
 
 type Props = {
   id: string;
@@ -62,23 +63,6 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
     }
   }, [id]);
 
-  const formatedCurrency = (number: number | undefined, symbol: string = '-') => {
-    if (number) {
-      return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(number);
-    }
-    return symbol;
-  };
-
-  const formatIban = (iban: string | undefined) => {
-    if (iban) {
-      return `${iban.slice(0, 2)} ${iban.slice(2, 4)} ${iban.slice(4, 5)} ${iban.slice(
-        5,
-        10
-      )} ${iban.slice(10, 15)} ${iban.slice(15, 32)}`;
-    }
-    return '';
-  };
-
   return (
     <Card sx={{ display: 'grid', gridColumn: 'span 12' }}>
       <CardContent
@@ -110,7 +94,7 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
             sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 5' }}
             variant="body2"
           >
-            {formatedCurrency(amount, '0,00 €')}
+            {formattedCurrency(amount, '0,00 €')}
           </Typography>
 
           <Typography
@@ -124,7 +108,7 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
             sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 5' }}
             variant="body2"
           >
-            {formatedCurrency(refunded, '0,00 €')}
+            {formattedCurrency(refunded, '0,00 €')}
           </Typography>
         </Box>
         <Box sx={{ display: 'grid', gridColumn: 'span 6', rowGap: 1 }}>
