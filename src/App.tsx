@@ -15,8 +15,10 @@ import TOS from './pages/tos/TOS';
 import PrivacyPolicy from './pages/privacyPolicy/PrivacyPolicy';
 import routes from './routes';
 import useTCAgreement from './hooks/useTCAgreement';
-import Home from './pages/home/Home';
+import InitiativesList from './pages/initiativesList/initiativesList';
 import Assistance from './pages/assistance/assistance';
+import InitiativeDiscounts from './pages/initiativeDiscounts/initiativeDiscounts';
+import NewDiscount from './pages/newDiscount/newDiscount';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -49,6 +51,9 @@ const SecuredRoutes = withLogin(
     return (
       <Layout>
         <Switch>
+          <Route path={routes.HOME} exact={true}>
+            <InitiativesList />
+          </Route>
           <Route path={routes.ASSISTANCE} exact={true}>
             <Assistance />
           </Route>
@@ -57,6 +62,12 @@ const SecuredRoutes = withLogin(
           </Route>
           <Route path={routes.PRIVACY_POLICY} exact={true}>
             <PrivacyPolicy />
+          </Route>
+          <Route path={routes.DISCOUNTS} exact={true}>
+            <InitiativeDiscounts />
+          </Route>
+          <Route path={routes.NEW_DISCOUNT} exact={true}>
+            <NewDiscount />
           </Route>
           <Route path="*">
             <Redirect to={routes.HOME} />
@@ -75,9 +86,6 @@ const App = () => (
     <Switch>
       <Route path={routes.AUTH}>
         <Auth />
-      </Route>
-      <Route path={routes.HOME} exact={true}>
-        <Home />
       </Route>
       <Route path="*">
         <SecuredRoutes />

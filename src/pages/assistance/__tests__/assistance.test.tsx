@@ -9,7 +9,7 @@ jest.mock('react-router-dom', () => Function());
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: () => ({
-    pathname: 'localhost:3000/portale-enti',
+    pathname: 'localhost:3000/portale-esercenti',
   }),
 }));
 

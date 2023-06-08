@@ -20,12 +20,13 @@ export const ENV = {
 
   URL_API: {
     MERCHANTS: env.get('REACT_APP_URL_API_MERCHANTS').required().asString(),
+    MERCHANTS_PORTAL: env.get('REACT_APP_URL_API_MERCHANTS_PORTAL').required().asString(),
     ROLE_PERMISSION: env.get('REACT_APP_URL_API_ROLE_PERMISSION').required().asString(),
     EMAIL_NOTIFICATION: env.get('REACT_APP_URL_API_EMAIL_NOTIFICATION').required().asString(),
   },
 
   API_TIMEOUT_MS: {
-    MERCHANTS: env.get('REACT_APP_API_MERCHANTS_TIMEOUT_MS').required().asInt(),
+    MERCHANTS_PORTAL: env.get('REACT_APP_API_MERCHANTS_PORTAL_TIMEOUT_MS').required().asInt(),
     ROLE_PERMISSION: env.get('REACT_APP_API_ROLE_PERMISSION_TIMEOUT_MS').required().asInt(),
     EMAIL_NOTIFICATION: env.get('REACT_APP_API_EMAIL_NOTIFICATION_TIMEOUT_MS').required().asInt(),
   },

@@ -19,7 +19,7 @@ const OneTrustContentWrapper = ({ idSelector }: Props) => {
         ></Grid>
         <Grid sx={{ display: 'grid', gridColumn: 'span 10', mt: 5, justifyContent: 'center' }}>
           <Link underline="hover" href={routes.HOME}>
-            {t('tos.backHome')}
+            {t('pages.tos.backHome')}
           </Link>
         </Grid>
       </Box>

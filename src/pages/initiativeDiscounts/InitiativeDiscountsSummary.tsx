@@ -1,0 +1,129 @@
+import { Box, Card, CardContent, Typography } from '@mui/material';
+import { useErrorDispatcher } from '@pagopa/selfcare-common-frontend';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
+import { formatIban, formattedCurrency } from '../../helpers';
+
+type Props = {
+  id: string;
+  setInitiativeName: Dispatch<SetStateAction<string | undefined>>;
+};
+
+const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
+  const { t } = useTranslation();
+  const [amount, setAmount] = useState<number | undefined>(undefined);
+  const [refunded, setRefunded] = useState<number | undefined>(undefined);
+  const [iban, setIban] = useState<string | undefined>();
+  const addError = useErrorDispatcher();
+
+  useEffect(() => {
+    if (typeof id === 'string') {
+      getMerchantDetail(id)
+        .then((response) => {
+          setInitiativeName(response?.initiativeName);
+          setIban(response?.iban);
+        })
+        .catch((error) =>
+          addError({
+            id: 'GET_MERCHANT_DETAIL',
+            blocking: false,
+            error,
+            techDescription: 'An error occurred getting merchant detail',
+            displayableTitle: t('errors.title'),
+            displayableDescription: t('errors.getDataDescription'),
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          })
+        );
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (typeof id === 'string') {
+      getMerchantInitiativeStatistics(id)
+        .then((response) => {
+          setAmount(response?.amount);
+          setRefunded(response?.refunded);
+        })
+        .catch((_error) => {});
+    }
+  }, [id]);
+
+  return (
+    <Card sx={{ display: 'grid', gridColumn: 'span 12' }}>
+      <CardContent
+        sx={{
+          p: 3,
+          display: 'grid',
+          width: '100%',
+          gridTemplateColumns: 'repeat(12, 1fr)',
+          alignItems: 'baseline',
+          rowGap: 1,
+        }}
+      >
+        <Box sx={{ display: 'grid', gridColumn: 'span 6', rowGap: 1 }}>
+          <Typography
+            sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 6', mb: 1 }}
+            variant="overline"
+            color="text.primary"
+          >
+            {t('pages.initiativeDiscounts.refundsStatusTitle')}
+          </Typography>
+          <Typography
+            sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 1' }}
+            variant="body2"
+            color="text.primary"
+          >
+            {t('pages.initiativeDiscounts.totalAmount')}
+          </Typography>
+          <Typography
+            sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 5' }}
+            variant="body2"
+          >
+            {formattedCurrency(amount, '0,00 €')}
+          </Typography>
+
+          <Typography
+            sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 1' }}
+            variant="body2"
+            color="text.primary"
+          >
+            {t('pages.initiativeDiscounts.totalRefunded')}
+          </Typography>
+          <Typography
+            sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 5' }}
+            variant="body2"
+          >
+            {formattedCurrency(refunded, '0,00 €')}
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'grid', gridColumn: 'span 6', rowGap: 1 }}>
+          <Typography
+            sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 6', mb: 1 }}
+            variant="overline"
+            color="text.primary"
+          >
+            {t('pages.initiativeDiscounts.refundsDataTitle')}
+          </Typography>
+          <Typography
+            sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 1' }}
+            variant="body2"
+            color="text.primary"
+          >
+            {t('pages.initiativeDiscounts.iban')}
+          </Typography>
+          <Typography
+            sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 5' }}
+            variant="body2"
+          >
+            {formatIban(iban)}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default InitiativeDiscountsSummary;

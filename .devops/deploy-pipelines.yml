@@ -37,6 +37,7 @@ variables:
     react_app_url_fe_assistance: '$(UAT_REACT_APP_URL_FE_ASSISTANCE_MERCHANTS)'
 
     react_app_url_api_merchants: '$(UAT_REACT_APP_URL_API_MERCHANTS)'
+    react_app_url_api_merchants_portal: '$(UAT_REACT_APP_URL_API_MERCHANTS_PORTAL)'
 
     react_app_url_storage: '$(UAT_REACT_APP_URL_STORAGE)'
 
@@ -69,6 +70,7 @@ variables:
     react_app_url_fe_assistance: '$(PROD_REACT_APP_URL_FE_ASSISTANCE_MERCHANTS)'
 
     react_app_url_api_merchants: '$(PROD_REACT_APP_URL_API_MERCHANTS)'
+    react_app_url_api_merchants_portal: '$(PROD_REACT_APP_URL_API_MERCHANTS_PORTAL)'
 
     react_app_url_storage: '$(PROD_REACT_APP_URL_STORAGE)'
 
@@ -103,6 +105,7 @@ variables:
     react_app_url_fe_assistance: '$(DEV_REACT_APP_URL_FE_ASSISTANCE_MERCHANTS)'
 
     react_app_url_api_merchants: '$(DEV_REACT_APP_URL_API_MERCHANTS)'
+    react_app_url_api_merchants_portal: '$(DEV_REACT_APP_URL_API_MERCHANTS_PORTAL)'
 
     react_app_url_storage: '$(DEV_REACT_APP_URL_STORAGE)'
 
@@ -204,7 +207,7 @@ stages:
               REACT_APP_URL_FE_LANDING: '$(react_app_url_fe_landing)'
               REACT_APP_URL_FE_ASSISTANCE: '$(react_app_url_fe_assistance)'
 
-              REACT_APP_URL_API_MERCHANTS: '$(react_app_url_api_merchants)'
+              REACT_APP_URL_API_MERCHANTS_PORTAL: '$(react_app_url_api_merchants_portal)'
               REACT_APP_URL_API_ROLE_PERMISSION: '$(react_app_url_api_merchants)/authorization'
               REACT_APP_URL_API_EMAIL_NOTIFICATION: '$(react_app_url_api_merchants)/email-notification'
 

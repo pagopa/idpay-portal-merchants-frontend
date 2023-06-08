@@ -14,24 +14,24 @@ const TOSWall = ({ acceptTOS, tosRoute, privacyRoute, firstAcceptance }: TOSWall
 
   const description = firstAcceptance ? (
     <Typography color="text.secondary">
-      {t('tos.termsDescription')}{' '}
+      {t('pages.tos.termsDescription')}{' '}
       <Link underline="hover" href={tosRoute}>
         {t('tos.linkTos')}
       </Link>{' '}
-      {t('tos.termsDescription2')}
+      {t('pages.tos.termsDescription2')}
       <Link underline="hover" href={privacyRoute}>
-        {t('tos.linkPrivacy')}
+        {t('pages.tos.linkPrivacy')}
       </Link>
     </Typography>
   ) : (
     <Typography color="text.secondary">
-      {t('tos.termsDescriptionChanged')}{' '}
+      {t('pages.tos.termsDescriptionChanged')}{' '}
       <Link underline="hover" href={tosRoute}>
-        {t('tos.linkTos')}
+        {t('pages.tos.linkTos')}
       </Link>{' '}
-      {t('tos.and')}{' '}
+      {t('pages.tos.and')}{' '}
       <Link underline="hover" href={privacyRoute}>
-        {t('tos.linkPrivacy')}
+        {t('pages.tos.linkPrivacy')}
       </Link>
     </Typography>
   );
@@ -40,7 +40,7 @@ const TOSWall = ({ acceptTOS, tosRoute, privacyRoute, firstAcceptance }: TOSWall
     <Box height="100%" width="100%" px={2} sx={{ backgroundColor: '#FAFAFA' }}>
       <TOSAgreement
         sx={{ textAlign: 'center' }}
-        productName={t('tos.title')}
+        productName={t('pages.tos.title')}
         description={description}
         onConfirm={() => acceptTOS()}
       >
