@@ -2,7 +2,18 @@
 /* eslint-disable no-prototype-builtins */
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { Alert, Backdrop, Box, Button, Fade, FormControl, Modal, TextField } from '@mui/material';
+import {
+  Alert,
+  Backdrop,
+  Box,
+  Button,
+  Divider,
+  Fade,
+  FormControl,
+  Modal,
+  TextField,
+  Typography,
+} from '@mui/material';
 import TitleBox from '@pagopa/selfcare-common-frontend/components/TitleBox';
 import { QRCodeSVG } from 'qrcode.react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
@@ -112,15 +123,12 @@ const AuthorizeTransactionModal = ({
           </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
             <Box sx={{ gridColumn: 'span 12' }}>
-              <TitleBox
-                title={t('pages.newDiscount.sendMagicLinkTitle')}
-                subTitle={t('pages.newDiscount.sendMagicLinkSubtitle')}
-                mbTitle={2}
-                mtTitle={0}
-                mbSubTitle={2}
-                variantTitle="subtitle1"
-                variantSubTitle="body2"
-              />
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                {t('pages.newDiscount.sendMagicLinkTitle')}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, fontSize: '1rem' }}>
+                {t('pages.newDiscount.sendMagicLinkSubtitle')}
+              </Typography>
             </Box>
             <FormControl sx={{ mr: 2, gridColumn: 'span 9' }}>
               <TextField disabled value={magicLink} size="small" id="magic-link" fullWidth />
@@ -137,18 +145,19 @@ const AuthorizeTransactionModal = ({
               </Button>
             </FormControl>
           </Box>
-
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', my: 2 }}>
+            <Box sx={{ gridColumn: 'span 12' }}>
+              <Divider />
+            </Box>
+          </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
             <Box sx={{ gridColumn: 'span 12' }}>
-              <TitleBox
-                title={t('pages.newDiscount.sendQrTitle')}
-                subTitle={t('pages.newDiscount.sendQrSubtitle')}
-                mbTitle={2}
-                mtTitle={4}
-                mbSubTitle={2}
-                variantTitle="subtitle1"
-                variantSubTitle="body2"
-              />
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                {t('pages.newDiscount.sendQrTitle')}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, fontSize: '1rem' }}>
+                {t('pages.newDiscount.sendQrSubtitle')}
+              </Typography>
               <Button
                 startIcon={<FileDownloadIcon />}
                 size="small"

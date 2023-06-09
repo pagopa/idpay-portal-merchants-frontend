@@ -5,6 +5,7 @@ import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOA
 
 interface InitiativesState {
   list?: InitiativeDTOArray;
+  selectedName?: string | undefined;
 }
 
 const initialState: InitiativesState = {};
@@ -17,11 +18,16 @@ export const initiativesSlice = createSlice({
     setInitiativesList: (state, action: PayloadAction<InitiativeDTOArray>) => {
       state.list = [...action.payload];
     },
+    setSelectedName: (state, action: PayloadAction<string | undefined>) => {
+      state.selectedName = action.payload;
+    },
   },
 });
 
-export const { setInitiativesList } = initiativesSlice.actions;
+export const { setInitiativesList, setSelectedName } = initiativesSlice.actions;
 export const initiativesReducer = initiativesSlice.reducer;
 
 export const intiativesListSelector = (state: RootState): InitiativeDTOArray | undefined =>
   state.initiatives.list;
+export const initiativeNameSelector = (state: RootState): string | undefined =>
+  state.initiatives.selectedName;
