@@ -28,6 +28,7 @@ import { useFormik } from 'formik';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { matchPath, useHistory } from 'react-router-dom';
+import { useAppDispatch } from '../../redux/hooks';
 import {
   MerchantTransactionDTO,
   StatusEnum as TransactionStatusEnum,
@@ -42,6 +43,7 @@ import {
 } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import EmptyList from '../components/EmptyList';
+import { setSelectedName } from '../../redux/slices/initiativesSlice';
 import AuthorizeTransactionModal from './AuthorizeTransactionModal';
 import CancelTransactionModal from './CancelTransactionModal';
 import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
@@ -217,6 +219,7 @@ const InitiativeDiscounts = () => {
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
   const addError = useErrorDispatcher();
   const history = useHistory();
+  const dispatch = useAppDispatch();
 
   const match = matchPath(location.pathname, {
     path: [ROUTES.DISCOUNTS],
@@ -378,7 +381,8 @@ const InitiativeDiscounts = () => {
             variant="contained"
             size="small"
             onClick={() => {
-              history.replace(`${BASE_ROUTE}/crea-sconto/${initiativeName}/${id}`);
+              dispatch(setSelectedName(initiativeName));
+              history.replace(`${BASE_ROUTE}/crea-sconto/${id}`);
             }}
             data-testid="goToWizard-btn-test"
           >
@@ -481,9 +485,7 @@ const InitiativeDiscounts = () => {
                 <TableBody sx={{ backgroundColor: 'white' }}>
                   {rows.map((r, i) => (
                     <TableRow key={i}>
-                      <TableCell>
-                        <Typography> {formatDate(r.updateDate)}</Typography>
-                      </TableCell>
+                      <TableCell>{formatDate(r.updateDate)}</TableCell>
                       <TableCell>
                         {r.status === TransactionStatusEnum.AUTHORIZED ? r.fiscalCode : ''}
                       </TableCell>

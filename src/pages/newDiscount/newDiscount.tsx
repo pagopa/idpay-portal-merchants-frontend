@@ -7,17 +7,19 @@ import ROUTES, { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
+import { useAppSelector } from '../../redux/hooks';
+import { initiativeNameSelector } from '../../redux/slices/initiativesSlice';
 import CreateForm from './CreateForm';
 import DiscountCreatedRecap from './DiscountCreatedRecap';
 
 interface MatchParams {
-  name: string;
   id: string;
 }
 
 const NewDiscount = () => {
   const [discountCreated, setDiscountCreated] = useState(false);
   const [discountResponse, setDiscountResponse] = useState<TransactionResponse | undefined>();
+  const initiativeName = useAppSelector(initiativeNameSelector);
   const { t } = useTranslation();
 
   const match = matchPath(location.pathname, {
@@ -25,7 +27,7 @@ const NewDiscount = () => {
     exact: true,
     strict: false,
   });
-  const { name, id } = (match?.params as MatchParams) || {};
+  const { id } = (match?.params as MatchParams) || {};
 
   return (
     <Box sx={{ ...genericContainerStyle, mt: 3, alignItems: 'start' }}>
@@ -34,7 +36,7 @@ const NewDiscount = () => {
         backLabel={t('commons.backBtn')}
         items={[
           t('pages.initiativesList.title'),
-          decodeURIComponent(name),
+          initiativeName,
           t('pages.initiativeDiscounts.createBtn'),
         ]}
       />

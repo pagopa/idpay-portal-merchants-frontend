@@ -4,7 +4,7 @@
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { Alert, Box, Button, FormControl, Paper, TextField, Typography } from '@mui/material';
-import { TitleBox, Toast } from '@pagopa/selfcare-common-frontend';
+import { Toast } from '@pagopa/selfcare-common-frontend';
 import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -90,15 +90,12 @@ const DiscountCreatedRecap = ({ data }: Props) => {
         </Alert>
       </Box>
       <Paper sx={{ gridColumn: 'span 12', p: 3 }}>
-        <TitleBox
-          title={t('pages.newDiscount.sendMagicLinkTitle')}
-          subTitle={t('pages.newDiscount.sendMagicLinkSubtitle')}
-          mbTitle={2}
-          mtTitle={0}
-          mbSubTitle={3}
-          variantTitle="h6"
-          variantSubTitle="body2"
-        />
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          {t('pages.newDiscount.sendMagicLinkTitle')}
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 3, fontSize: '1rem' }}>
+          {t('pages.newDiscount.sendMagicLinkSubtitle')}
+        </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
           <Box sx={{ gridColumn: 'span 12', mb: 1 }}>
             <Typography variant="subtitle1">{t('pages.newDiscount.magicLinkLabel')}</Typography>
@@ -125,15 +122,12 @@ const DiscountCreatedRecap = ({ data }: Props) => {
       <Paper sx={{ gridColumn: 'span 12', my: 5, p: 3 }}>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
           <Box sx={{ gridColumn: 'span 10' }}>
-            <TitleBox
-              title={t('pages.newDiscount.sendQrTitle')}
-              subTitle={t('pages.newDiscount.sendQrSubtitle')}
-              mbTitle={2}
-              mtTitle={0}
-              mbSubTitle={3}
-              variantTitle="h6"
-              variantSubTitle="body2"
-            />
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              {t('pages.newDiscount.sendQrTitle')}
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 3, fontSize: '1rem' }}>
+              {t('pages.newDiscount.sendQrSubtitle')}
+            </Typography>
             <Button
               startIcon={<FileDownloadIcon />}
               size="small"
