@@ -6,6 +6,7 @@ import { verifyFetchPartyDetailsMockExecution } from '../../services/__mocks__/p
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { testToken } from '../../utils/constants';
 import React, { Fragment } from 'react';
+import { PartiesState } from '../../redux/slices/partiesSlice';
 
 jest.mock('../../services/partyService');
 
@@ -48,7 +49,7 @@ const renderApp = async (
 
 test('Test default behavior when no parties', async () => {
   const { store } = await renderApp(true);
-  checkSelectedParty(store.getState());
+  checkSelectedParty(store.getState().parties);
 
   // test when selected party already in store
   await renderApp(true, store);
@@ -67,10 +68,13 @@ test('Test party not active', async () => {
 
   await waitFor(() => expect(store.getState().appState.errors.length).toBe(1));
   expect(store.getState().parties.selected).toBeUndefined();
+  
+  console.log('322323', store.getState().parties.selected);
 });
 
-const checkSelectedParty = (state: RootState) => {
-  const party = state.parties.selected;
+const checkSelectedParty = (state: PartiesState) => {
+  const party = state.selected;
+  console.log('party', party);
   verifyFetchPartyDetailsMockExecution(party!);
 };
 
