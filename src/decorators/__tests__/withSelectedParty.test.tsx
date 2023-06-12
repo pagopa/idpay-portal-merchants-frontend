@@ -10,7 +10,7 @@ import { PartiesState } from '../../redux/slices/partiesSlice';
 
 jest.mock('../../services/partyService');
 
-const expectedPartyId: string = '2f63a151-da4e-4e1e-acf9-adecc0c4d727';
+const expectedPartyId: string = '2b48bf96-fd74-477e-a70a-286b410f020a';
 
 let fetchPartyDetailsSpy: jest.SpyInstance;
 
@@ -68,13 +68,10 @@ test('Test party not active', async () => {
 
   await waitFor(() => expect(store.getState().appState.errors.length).toBe(1));
   expect(store.getState().parties.selected).toBeUndefined();
-  
-  console.log('322323', store.getState().parties.selected);
 });
 
 const checkSelectedParty = (state: PartiesState) => {
   const party = state.selected;
-  console.log('party', party);
   verifyFetchPartyDetailsMockExecution(party!);
 };
 
