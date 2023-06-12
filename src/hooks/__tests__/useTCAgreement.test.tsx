@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderWithHistoryAndStore } from '../../utils/__tests__/test-utils';
+import { renderWithContext } from '../../utils/__tests__/test-utils';
 import useTCAgreement from '../useTCAgreement';
 
 beforeEach(() => {
@@ -20,6 +20,6 @@ const HookWrapper = () => {
 
 describe('test suite for usTCAgreement hook', () => {
   test('test call of useTCAgreement hook', () => {
-    renderWithHistoryAndStore(<HookWrapper />);
+    renderWithContext(<HookWrapper />);
   });
 });
