@@ -87,7 +87,7 @@ const CancelTransactionModal = ({
               variant="outlined"
               sx={{ gridArea: 'backBtn', mr: 1, justifySelf: 'end' }}
               onClick={() => setOpenCancelTrxModal(false)}
-              data-testid="cancel-button-test"
+              data-testid="modal-cancel-back-button-test"
             >
               Torna indietro
             </Button>
@@ -98,7 +98,7 @@ const CancelTransactionModal = ({
                 handleCancelTransaction(trxId);
                 setOpenCancelTrxModal(false);
               }}
-              data-testid="cancel-button-test"
+              data-testid="modal-cancel-button-test"
             >
               {t('pages.initiativeDiscounts.cancelDiscount')}
             </Button>

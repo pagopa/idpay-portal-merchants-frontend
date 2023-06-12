@@ -22,7 +22,7 @@ test('test formatDate with undefined as param', () => {
 });
 
 test('test formatDate with a Date object as param', () => {
-  expect(formatDate(date)).toEqual('01/10/2022, 02:00');
+  expect(formatDate(date)).toEqual('01/10/2022 02:00');
 });
 
 test('test formatIban with a string of IBAN as param', () => {
