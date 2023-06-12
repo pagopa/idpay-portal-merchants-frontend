@@ -1,7 +1,8 @@
+import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
+import { mockedMerchantTransactionList } from '../../../api/__mocks__/MerchantsApiClient';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import AuthorizeTransactionModal from '../AuthorizeTransactionModal';
-import { mockedMerchantTransactionList } from '../../../api/__mocks__/MerchantsApiClient';
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -10,13 +11,22 @@ beforeEach(() => {
 
 describe('Test suite for AuthorizeTransactionModal component', () => {
   window.scrollTo = jest.fn();
-  test('Render component', () => {
+  test('Render component and and onClose with escape button', async () => {
     renderWithContext(
       <AuthorizeTransactionModal
-        openAuthorizeTrxModal={false}
+        openAuthorizeTrxModal={true}
         setOpenAuthorizeTrxModal={jest.fn()}
         data={mockedMerchantTransactionList[0]}
       />
     );
+
+    const modal = await screen.findByTestId('confirm-modal-authorize-trx');
+
+    fireEvent.keyDown(modal, {
+      key: 'Escape',
+      code: 'Escape',
+      keyCode: 27,
+      charCode: 27,
+    });
   });
 });

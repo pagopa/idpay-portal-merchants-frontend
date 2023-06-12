@@ -90,7 +90,10 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
       case TransactionStatusEnum.REJECTED:
         return (
           <>
-            <MenuItem onClick={() => setOpenAuthorizeTrxModal(true)}>
+            <MenuItem
+              data-testid="authorize-trx-button"
+              onClick={() => setOpenAuthorizeTrxModal(true)}
+            >
               {'Richiedi autorizzazione'}
             </MenuItem>
             <AuthorizeTransactionModal
@@ -113,7 +116,10 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
       case TransactionStatusEnum.REJECTED:
         return (
           <>
-            <MenuItem onClick={() => setOpenCancelTrxModal(true)}>
+            <MenuItem
+              data-testid="cancel-trx-button"
+              onClick={() => setOpenCancelTrxModal(true)}
+            >
               {t('pages.initiativeDiscounts.cancelDiscount')}
             </MenuItem>
             <CancelTransactionModal
