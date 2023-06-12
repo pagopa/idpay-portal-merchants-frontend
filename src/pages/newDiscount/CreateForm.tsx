@@ -43,6 +43,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
     },
     validateOnMount: true,
     validateOnChange: true,
+    enableReinitialize: true,
     validationSchema,
     onSubmit: (values) => {
       const roundedAmount = parseFloat(values.spendingAmount).toFixed(2);
@@ -119,6 +120,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
               variant="contained"
               disabled={!formik.isValid}
               onClick={() => formik.handleSubmit()}
+              data-testid="submit-new-discount-test"
             >
               {t('pages.initiativeDiscounts.createBtn')}
             </Button>
