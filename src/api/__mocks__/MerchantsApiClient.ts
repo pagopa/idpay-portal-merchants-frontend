@@ -15,7 +15,7 @@ import { InitiativeDTOArray } from '../generated/merchants/InitiativeDTOArray';
 const startDate = new Date();
 const endDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
 
-const mockedInitiativesList = [
+export const mockedInitiativesList = [
   {
     enabled: true,
     endDate,
@@ -38,7 +38,7 @@ const mockedInitiativesList = [
   },
 ];
 
-const mockedMerchantTransactionList = {
+export const mockedMerchantTransactionList = {
   content: [
     {
       trxCode: 'string',
@@ -79,13 +79,13 @@ const mockedMerchantTransactionList = {
   totalPages: 1,
 };
 
-const mockedMerchantInitiativeStatistics = {
+export const mockedMerchantInitiativeStatistics = {
   accrued: 100,
   amount: 250,
   refunded: 150,
 };
 
-const mockedMerchantDetail = {
+export const mockedMerchantDetail = {
   businessName: 'Aaronne Travel',
   certifiedEmail: 'mail@aaronnetravel.com',
   creationDate: startDate,
@@ -102,7 +102,7 @@ const mockedMerchantDetail = {
   vatNumber: '123456787',
 };
 
-const transactionResponseMocked = {
+export const transactionResponseMocked = {
   acquirerId: '12345',
   amountCents: 10000,
   amountCurrency: '€',
