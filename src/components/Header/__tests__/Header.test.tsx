@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderWithHistoryAndStore } from '../../../utils/__tests__/test-utils';
+import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import Header from '../Header';
 import { mockedUser } from '../../../decorators/__mocks__/withLogin';
 import { Party } from '../../../model/Party';
@@ -56,13 +56,13 @@ describe('test suite for Header', () => {
   ];
 
   test('render Header with no parties', () => {
-    renderWithHistoryAndStore(
+    renderWithContext(
       <Header parties={[]} loggedUser={mockedUser} withSecondHeader={false} onExit={jest.fn()} />
     );
   });
 
   test('render Header with parties', () => {
-    renderWithHistoryAndStore(
+    renderWithContext(
       <Header
         parties={mockedParties}
         loggedUser={mockedUser}

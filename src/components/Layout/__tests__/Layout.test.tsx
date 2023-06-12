@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderWithHistoryAndStore } from '../../../utils/__tests__/test-utils';
+import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import Layout from '../Layout';
 
 beforeEach(() => {
@@ -9,6 +9,6 @@ beforeEach(() => {
 
 describe('test suite for Layout', () => {
   test('test render Layout', () => {
-    renderWithHistoryAndStore(<Layout children={<div />} />);
+    renderWithContext(<Layout children={<div />} />);
   });
 });

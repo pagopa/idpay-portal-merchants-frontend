@@ -2,7 +2,7 @@
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import ExitModal from '../ExitModal';
-import { renderWithHistoryAndStore } from '../../../utils/__tests__/test-utils';
+import { renderWithContext } from '../../../utils/__tests__/test-utils';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: any) => key }),
@@ -16,7 +16,7 @@ describe('<ExitModal />', () => {
   });
 
   it('the modal should be in the document', async () => {
-    renderWithHistoryAndStore(
+    renderWithContext(
       <ExitModal
         title="Test title"
         subtitle="test subtitle"
