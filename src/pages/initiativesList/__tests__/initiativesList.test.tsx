@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import InitiativesList from '../initiativesList';
 import userEvent from '@testing-library/user-event';
@@ -19,14 +19,48 @@ beforeEach(() => {
 describe('Test suite for initiativeList page', () => {
   window.scrollTo = jest.fn();
   test('Render component', () => {
-    renderWithContext(<InitiativesList />);
+    const { store } = renderWithContext(<InitiativesList />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
   });
 
-  test('User searches an initiative by name', async () => {
-    renderWithContext(<InitiativesList />);
-
-    const user = userEvent.setup();
+  test('User searches an initiative by name that shows results', async () => {
+    const setStateMock = jest.fn();
+    const useStateMock: any = (useState: any) => [useState, setStateMock];
+    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
+    const { store } = renderWithContext(<InitiativesList />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
     const searchField = screen.getByTestId('search-initiatives') as HTMLInputElement;
-    await user.type(searchField, '10');
+    fireEvent.change(searchField, { target: { value: 'Iniziativa mock 1234' } });
+    expect(searchField.value).toBe('Iniziativa mock 1234');
   });
+
+  test("User searches an initiative by name that doesn't show results", async () => {
+    const setStateMock = jest.fn();
+    const useStateMock: any = (useState: any) => [useState, setStateMock];
+    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
+    const { store } = renderWithContext(<InitiativesList />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+    const searchField = screen.getByTestId('search-initiatives') as HTMLInputElement;
+    fireEvent.change(searchField, { target: { value: 'not present' } });
+    expect(searchField.value).toBe('not present');
+  });
+
+  test('User resets previous search', async () => {
+    const setStateMock = jest.fn();
+    const useStateMock: any = (useState: any) => [useState, setStateMock];
+    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
+    const { store } = renderWithContext(<InitiativesList />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+    const searchField = screen.getByTestId('search-initiatives') as HTMLInputElement;
+    fireEvent.change(searchField, { target: { value: '' } });
+    expect(searchField.value).toBe('');
+  });
+
+  // test('User sorts initiatives by name', async () => {
+  //   const { store } = renderWithContext(<InitiativesList />);
+  //   store.dispatch(setInitiativesList(mockedInitiativesList));
+  //   const sortByName = screen.getByText('pages.initiativesList.initiativeName');
+
+  //   fireEvent.click(sortByName);
+  // });
 });
