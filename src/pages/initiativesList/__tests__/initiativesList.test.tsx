@@ -3,7 +3,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import InitiativesList from '../initiativesList';
 import userEvent from '@testing-library/user-event';
-import { setInitiativesList } from '../../../redux/slices/initiativesSlice';
+import { setInitiativesList, setSelectedName } from '../../../redux/slices/initiativesSlice';
 import { mockedInitiativesList } from '../../../api/__mocks__/MerchantsApiClient';
 import { store } from '../../../redux/store';
 
@@ -75,6 +75,7 @@ describe('Test suite for initiativeList page', () => {
     const link = await screen.findByText('Iniziativa mock 1234');
     const oldLocationPathname = history.location.pathname;
     fireEvent.click(link);
+    store.dispatch(setSelectedName('Iniziativa mock 1234'));
     await waitFor(() => expect(oldLocationPathname !== history.location.pathname).toBeTruthy());
   });
 });

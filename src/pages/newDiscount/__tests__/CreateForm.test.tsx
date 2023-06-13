@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { SetStateAction } from 'react';
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
@@ -53,6 +53,19 @@ describe('Test suite for CreateForm component', () => {
   test('Form filling and submit OK', async () => {
     renderWithContext(
       <CreateForm id={'1234'} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
+    );
+    const user = userEvent.setup();
+    const spendingAmountField = screen.getByLabelText(
+      'pages.newDiscount.spendingAmountLabel'
+    ) as HTMLInputElement;
+    await user.type(spendingAmountField, '10');
+    await user.click(screen.getByTestId('submit-new-discount-test'));
+  });
+
+  test('Render component with id prop undefined', async () => {
+    renderWithContext(
+      // @ts-expect-error trying to render component without the required prop id
+      <CreateForm id={undefined} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
     );
     const user = userEvent.setup();
     const spendingAmountField = screen.getByLabelText(
