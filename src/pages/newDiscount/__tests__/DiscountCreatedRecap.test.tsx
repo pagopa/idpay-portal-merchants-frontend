@@ -11,6 +11,8 @@ beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
+global.URL.createObjectURL = jest.fn();
+
 describe('Test suite for DiscountCreatedRecap component', () => {
   window.scrollTo = jest.fn();
   test('Render component', async () => {
@@ -21,5 +23,7 @@ describe('Test suite for DiscountCreatedRecap component', () => {
     jest.spyOn(React, 'useState').mockImplementation(useStateMock);
     const user = userEvent.setup();
     await user.click(screen.getByTestId('copy-link-buttton-test'));
+    // test download
+    await user.click(screen.getByTestId('download-qr-code-button-test'));
   });
 });
