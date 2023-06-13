@@ -47,6 +47,8 @@ export const mockedMerchantTransactionList = {
       effectiveAmount: 1000,
       updateDate: startDate,
       status: TransactionStatusEnum.CREATED,
+      trxDate: new Date(),
+      trxExpirationMinutes: 4320,
     },
     {
       trxCode: 'string',
@@ -55,6 +57,8 @@ export const mockedMerchantTransactionList = {
       effectiveAmount: 1303,
       updateDate: startDate,
       status: TransactionStatusEnum.AUTHORIZED,
+      trxDate: new Date(),
+      trxExpirationMinutes: 4320,
     },
     {
       trxCode: 'string',
@@ -63,6 +67,8 @@ export const mockedMerchantTransactionList = {
       effectiveAmount: 2322,
       updateDate: startDate,
       status: TransactionStatusEnum.IDENTIFIED,
+      trxDate: new Date(),
+      trxExpirationMinutes: 4320,
     },
     {
       trxCode: 'string',
@@ -71,6 +77,8 @@ export const mockedMerchantTransactionList = {
       effectiveAmount: 5000,
       updateDate: startDate,
       status: TransactionStatusEnum.REJECTED,
+      trxDate: new Date(),
+      trxExpirationMinutes: 4320,
     },
   ],
   pageNo: 0,

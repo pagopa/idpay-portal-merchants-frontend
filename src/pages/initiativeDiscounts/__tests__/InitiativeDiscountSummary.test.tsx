@@ -13,16 +13,28 @@ beforeEach(() => {
 describe('Test suite for InitiativeDiscountSummary component', () => {
   window.scrollTo = jest.fn();
   test('Render component', () => {
-    renderWithContext(<InitiativeDiscountSummary id={'123456789'} setInitiativeName={jest.fn()} />);
+    renderWithContext(
+      <InitiativeDiscountSummary id={'initativeTestId321'} setInitiativeName={jest.fn()} />
+    );
+  });
+
+  test('render component with undefined id as prop ', () => {
+    renderWithContext(
+      // @ts-expect-error need to pass undefined to cover  condition if id is not a string
+      <InitiativeDiscountSummary id={undefined} setInitiativeName={jest.fn()} />
+    );
   });
 
   test('catch in case of error from api getMerchantDetail and getMerchantInitiativeStatistics', () => {
     MerchantsApiMocked.getMerchantDetail = async (): Promise<MerchantDetailDTO> =>
       Promise.reject('mocked error response for tests');
 
-    MerchantsApiMocked.getMerchantInitiativeStatistics = async (_initiativeId: string): Promise<MerchantStatisticsDTO> =>
-      Promise.reject('mocked error response for tests');
+    MerchantsApiMocked.getMerchantInitiativeStatistics = async (
+      _initiativeId: string
+    ): Promise<MerchantStatisticsDTO> => Promise.reject('mocked error response for tests');
 
-    renderWithContext(<InitiativeDiscountSummary id={'123456789'} setInitiativeName={jest.fn()} />);
+    renderWithContext(
+      <InitiativeDiscountSummary id={'initativeTestId321'} setInitiativeName={jest.fn()} />
+    );
   });
 });
