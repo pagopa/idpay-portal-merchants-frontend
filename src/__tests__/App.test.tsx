@@ -40,6 +40,7 @@ const renderApp = (
 ) => {
   const store = injectedStore ? injectedStore : createStore();
   const history = injectedHistory ? injectedHistory : createMemoryHistory();
+
   render(
     <ThemeProvider theme={theme}>
       <Router history={history}>

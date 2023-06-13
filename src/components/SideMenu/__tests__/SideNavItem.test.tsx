@@ -6,14 +6,16 @@ import { act } from 'react-dom/test-utils';
 import SidenavItem from '../SidenavItem';
 import { SvgIcon } from '@mui/material';
 
-describe('<SideMenu />', (injectedStore?: ReturnType<typeof createStore>) => {
+describe('Test suite for SideNavItem component', (injectedStore?: ReturnType<
+  typeof createStore
+>) => {
   const store = injectedStore ? injectedStore : createStore();
 
   it('renders without crashing', () => {
     window.scrollTo = jest.fn();
   });
 
-  test('testing rendering of SideMenu component', async () => {
+  test('Testing rendering of SideMenu component', async () => {
     await act(async () => {
       render(
         <Provider store={store}>

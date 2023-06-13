@@ -19,7 +19,10 @@ describe('Test suite for DiscountCreatedRecap component', () => {
     const setStateMock = jest.fn();
     const useStateMock: any = (useState: any) => [useState, setStateMock];
     jest.spyOn(React, 'useState').mockImplementation(useStateMock);
+    // const downloadQRCode = jest.fn();
     const user = userEvent.setup();
     await user.click(screen.getByTestId('copy-link-buttton-test'));
+    // await user.click(screen.getByTestId('download-qr-code-button-test'));
+    // expect(downloadQRCode).toBeCalled();
   });
 });
