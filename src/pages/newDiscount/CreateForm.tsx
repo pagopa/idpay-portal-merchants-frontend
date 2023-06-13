@@ -111,6 +111,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
             <Button
               variant="outlined"
               onClick={() => history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`)}
+              data-testid="back-to-initiative-discounts-test"
             >
               {t('commons.backBtn')}
             </Button>

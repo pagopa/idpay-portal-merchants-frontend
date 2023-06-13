@@ -1,5 +1,5 @@
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import CreateForm from '../CreateForm';
@@ -25,9 +25,12 @@ const mockedLocation = {
 beforeAll(() => {
   Object.defineProperty(window, 'location', { value: mockedLocation });
 });
+
 afterAll(() => {
   Object.defineProperty(window, 'location', { value: oldWindowLocation });
 });
+
+afterEach(cleanup);
 
 describe('Test suite for CreateForm component', () => {
   window.scrollTo = jest.fn();
@@ -35,6 +38,16 @@ describe('Test suite for CreateForm component', () => {
     renderWithContext(
       <CreateForm id={'1234'} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
     );
+  });
+
+  test('Navigate to InitiativeDiscounts page clicking the back button', async () => {
+    const { history } = renderWithContext(
+      <CreateForm id={'1234'} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
+    );
+    const backButton = screen.getByTestId('back-to-initiative-discounts-test') as HTMLButtonElement;
+    const oldLocationPathname = history.location.pathname;
+    fireEvent.click(backButton);
+    await waitFor(() => expect(oldLocationPathname !== history.location.pathname).toBeTruthy());
   });
 
   test('Form filling and submit OK', async () => {

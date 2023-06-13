@@ -119,6 +119,7 @@ export const transactionResponseMocked = {
   residualAmountCents: 1,
   splitPayment: false,
   vat: 'ppppp',
+  trxExpirationMinutes: 4320,
 };
 
 export const MerchantsApiMocked = {

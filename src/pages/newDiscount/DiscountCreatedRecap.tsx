@@ -113,6 +113,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
                 copyTextToClipboard(magicLink);
                 setOpenCopySuccesToast(true);
               }}
+              data-testid="copy-link-buttton-test"
             >
               {t('commons.copyLinkBtn')}
             </Button>
@@ -137,6 +138,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
                 downloadQRCode('qr-container', data?.trxCode);
                 setOpenDownloadSuccesToast(true);
               }}
+              data-testid="download-qr-code-button-test"
             >
               {t('commons.downloadQrBtn')}
             </Button>
