@@ -212,7 +212,7 @@ const InitiativesList = () => {
             onChange={(e) => {
               handleSearchInitiatives(e.target.value);
             }}
-            inputProps={{ 'data-testid': 'search-initiative-no-permission-test' }}
+            inputProps={{ 'data-testid': 'search-initiatives' }}
           />
         </Box>
       </Box>
