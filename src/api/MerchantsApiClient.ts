@@ -88,8 +88,8 @@ export const MerchantApi = {
     return extractResponse(result, 201, onRedirectToLogin);
   },
 
-  confirmPaymentQRCode: async (transactionId: string): Promise<TransactionResponse> => {
-    const result = await apiClient.confirmPaymentQRCode({ transactionId });
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
+  // confirmPaymentQRCode: async (transactionId: string): Promise<TransactionResponse> => {
+  //   const result = await apiClient.confirmPaymentQRCode({ transactionId });
+  //   return extractResponse(result, 200, onRedirectToLogin);
+  // },
 };
