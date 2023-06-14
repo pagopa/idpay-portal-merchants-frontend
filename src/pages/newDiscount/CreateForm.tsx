@@ -34,7 +34,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
       .typeError(t('validation.numeric'))
       .required(t('validation.required'))
       .positive(t('validation.positive'))
-      .min(0.01, t('validation.minOne')),
+      .min(0.01, t('validation.minValue', { x: 0.01 })),
   });
 
   const formik = useFormik({

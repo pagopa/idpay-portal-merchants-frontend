@@ -70,13 +70,13 @@ const DiscountCreatedRecap = ({ data }: Props) => {
     <>
       <Toast
         open={openCopySuccesToast}
-        title={'Link Copiato'}
+        title={t('pages.newDiscount.magicLinkCopied')}
         showToastCloseIcon={true}
         onCloseToast={() => setOpenCopySuccesToast(false)}
       />
       <Toast
         open={openDownloadSuccesToast}
-        title={'Codice QR scaricato'}
+        title={t('pages.newDiscount.qrCodeDownloaded')}
         showToastCloseIcon={true}
         onCloseToast={() => setOpenDownloadSuccesToast(false)}
       />

@@ -51,7 +51,7 @@ const Assistance = () => {
     assistanceSubject: Yup.string().required(t('validation.required')),
     assistanceMessage: Yup.string()
       .required(t('validation.required'))
-      .max(500, t('validation.maxFiveHundred')),
+      .max(500, t('validation.maxChars', { x: 500 })),
   });
 
   const formik = useFormik({
@@ -174,7 +174,7 @@ const Assistance = () => {
                   }
                   helperText={
                     (formik.touched.assistanceMessage && formik.errors.assistanceMessage) ||
-                    t('validation.maxFiveHundred')
+                    t('validation.maxChars', { x: 500 })
                   }
                   required={true}
                   InputLabelProps={{ required: false }}

@@ -165,10 +165,12 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
       case TransactionStatusEnum.AUTHORIZED:
         return (
           <>
-            <MenuItem onClick={() => handleConfirmPayment(trxId)}>Conferma pagamento</MenuItem>
+            <MenuItem onClick={() => handleConfirmPayment(trxId)}>
+              {t('pages.initiativeDiscounts.confirmPayment')}
+            </MenuItem>
             <Toast
               open={openPaymentConfirmedToast}
-              title={'Pagamento confermato'}
+              title={t('pages.initiativeDiscounts.paymentConfirmed')}
               showToastCloseIcon={true}
               onCloseToast={() => setOpenPaymentConfirmedToast(false)}
             />

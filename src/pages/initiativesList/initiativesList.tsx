@@ -285,7 +285,7 @@ const InitiativesList = () => {
                   textAlign: 'center',
                 }}
               >
-                <EmptyList message="Nessun risultato disponibile" />
+                <EmptyList message={t('pages.initiativesList.emptyList')} />
               </Box>
             </Box>
           )}

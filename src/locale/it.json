@@ -1,24 +1,30 @@
 {
   "commons": {
     "backBtn": "Indietro",
-    "closeBtn": "Chiudi",
     "cancelBtn": "Torna indietro",
+    "closeBtn": "Chiudi",
     "confirmBtn": "Conferma",
     "continueBtn": "Continua",
     "copyLinkBtn": "Copia link",
-    "downloadQrBtn": "Scarica codice QR",
-    "exitBtn": "Esci",
     "discountStatusEnum": {
       "authorized": "Autorizzato",
       "identified": "Da autorizzare"
     },
+    "downloadQrBtn": "Scarica codice QR",
+    "exitBtn": "Esci",
     "filterBtn": "Filtra",
     "initiativeStatusEnum": {
-      "published": "In corso",
-      "closed": "Terminata"
+      "closed": "Terminata",
+      "published": "In corso"
     },
     "removeFiltersBtn": "Rimuovi filtri",
     "title": "Portale Esercenti"
+  },
+  "errors": {
+    "cantGetTc": "Non siamo riusciti a recuperare le informazioni sull’accettazione dei termini e condizioni d’uso. Riprova.",
+    "getDataDescription": "Riprovare",
+    "invalidDataDescription": "Verifica che i dati inseriti siano corretti",
+    "title": "Si è verificato un errore"
   },
   "pages": {
     "assistance": {
@@ -54,6 +60,10 @@
       "authorizationRequestModalTitle": "Vuoi richiedere l’autorizzazione?",
       "beneficiary": "Beneficiario",
       "cancelDiscount": "Annulla buono sconto",
+      "cancelDiscountAuthorizedModalBody": "Il buono sconto è già stato autorizzato, se decidi di annullarlo l’importo verrà riaccreditato sull’iniziativa del cittadino e il rimborso da parte dell’Ente non verrà avviato.",
+      "cancelDiscountModalTitle": "Vuoi annullare il buono sconto?",
+      "cancelDiscountNotAuthorizedModalBody": "Il buono sconto non è ancora stato autorizzato, se decidi di annullarlo il link magico e il codice QR smetteranno di funzionare e non sarà più possibile per il cittadino procedere con l’autorizzazione.",
+      "confirmPayment": "Conferma pagamento",
       "createBtn": "Crea buono sconto",
       "dateAndHours": "Data e ora",
       "discountAuthorized": "Autorizzato",
@@ -61,6 +71,7 @@
       "emptyList": "Non ci sono buoni sconto in corso per questa iniziativa.",
       "filterByStatus": "Stato",
       "listTitle": "Buoni sconto emessi",
+      "paymentConfirmed": "Pagamento confermato",
       "refundsDataTitle": "Dati rimborso",
       "refundsStatusTitle": "Stato rimborsi",
       "requestAuthorization": "Richiedi autorizzazione",
@@ -72,6 +83,7 @@
       "iban": "IBAN"
     },
     "initiativesList": {
+      "emptyList": "Nessuna iniziativa disponibile",
       "initiativeStatus": "Stato",
       "organizationName": "Creata da",
       "searchByInitiativeName": "Cerca per nome dell'iniziativa",
@@ -86,7 +98,9 @@
       "createdTitle": "Buono sconto creato!",
       "expiringDiscountInfoAlertText": "Il buono sconto ha una durata di {{days}} giorni: è necessario autorizzare la spesa entro le {{hour}} del {{date}}.",
       "handleDiscountsBtn": "Gestisci buoni sconto",
+      "magicLinkCopied": "Link copiato",
       "magicLinkLabel": "Link magico",
+      "qrCodeDownloaded": "Codice QR scaricato",
       "sendAuthorizationRequestSubtitle": "Invia al tuo cliente una richiesta di autorizzazione della spesa del buono sconto.",
       "sendAuthorizationRequestTitle": "Invio richiesta di autorizzazione",
       "sendMagicLinkSubtitle": "Copia il link e invialo al tuo cliente con la modalità che preferisci.",
@@ -110,47 +124,11 @@
     }
   },
   "validation": {
-    "celNum": "Numero di telefono non valido",
-    "celNumValid": "Inserisci un numero di telefono",
-    "email": "Indirizzo e-mail non valido",
-    "emailValid": "Inserisci un indirizzo e-mail",
-    "formatTimeInvalid": "Ora non valida",
-    "indicateAssistanceSubject": "Inserisci l’argomento della tua richiesta",
-    "integer": "Inserisci un numero intero",
-    "invalidDate": "Data non valida",
-    "maxArgumentsChar": "Scrivi massimo 100 caratteri",
-    "maxDescriptionChar": "Scrivi massimo 350 caratteri",
-    "maxFiveHundred": "Scrivi massimo 500 caratteri",
-    "maxServiceNameChar": "Scrivi massimo 50 caratteri",
-    "maxTwoHundred": "Scrivi massimo 200 caratteri",
-    "maxValue": "Il valore deve essere inferiore o uguale a {{value}}",
-    "minOne": "Inserisci un valore maggiore o uguale a 1",
-    "notValidMccLis": "Alcuni valori non sono validi",
+    "maxChars": "Scrivi massimo {{x}} caratteri",
+    "minValue": "Inserisci un valore maggiore o uguale a {{x}}",
     "numeric": "Inserisci un numero",
-    "outBudgetPerPerson": "Il budget a persona deve essere inferiore al budget totale",
-    "outDateTo": "La data di fine deve essere successiva a quella di inizio",
-    "outFixedPremiumValue": "Il valore massimo non può essere maggiore del budget per persona",
-    "outJoinFrom": "La data di inizio adesione non può essere antecedente ad oggi",
-    "outJoinTo": "La data di fine adesione deve essere successiva a quella di inizio",
-    "outMaxSpendingLimit": "Il valore di spesa massimo deve essere maggiore del minimo",
-    "outPercentageRecognized": "La percentuale massima non può essere maggiore di 100",
-    "outSpendFrom": "La data di inizio periodo spesa deve essere successiva alla data di fine adesione",
-    "outSpendFromWithRanking": "Devono passare almeno 10 giorni tra la fine del periodo di adesione e l’inizio di quello di spesa",
-    "outSpendTo": "La data di fine deve essere successiva a quella di inizio",
-    "outTransactionNumberLimit": "Il numero massimo di transazioni deve essere maggiore del minimo",
-    "outTransactionTime": "L'orario di fine deve essere maggiore di quello d'inizio",
-    "outValue": "Il secondo valore deve essere maggiore del primo",
     "positive": "Inserisci un valore positivo",
     "required": "Campo obbligatorio",
-    "trxCountMinCap": "Il valore minimo deve essere maggiore o uguale a {{x}} €",
-    "uniqueFrequency": "Non puoi inserire due importi diversi per lo stesso limite",
-    "uniqueInterval": "Non puoi inserire due intervalli uguali per lo stesso giorno",
-    "web": "Indirizzo web non valido",
-    "webValid": "Inserisci un indirizzo web"
-  },
-  "errors": {
-    "invalidDataDescription": "Verifica che i dati inseriti siano corretti",
-    "getDataDescription": "Riprovare",
-    "title": "Si è verificato un errore"
+    "indicateAssistanceSubject": "Inserisci l’argomento della tua richiesta"
   }
 }
