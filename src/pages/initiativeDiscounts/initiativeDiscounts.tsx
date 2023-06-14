@@ -21,7 +21,7 @@ import {
 import { itIT } from '@mui/material/locale';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { ButtonNaked } from '@pagopa/mui-italia';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox, Toast } from '@pagopa/selfcare-common-frontend';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useFormik } from 'formik';
@@ -35,7 +35,7 @@ import {
 } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { formatDate, formattedCurrency } from '../../helpers';
 import ROUTES, { BASE_ROUTE } from '../../routes';
-import { getMerchantTransactions } from '../../services/merchantService';
+import { confirmPaymentQRCode, getMerchantTransactions } from '../../services/merchantService';
 import {
   genericContainerStyle,
   pagesFiltersFormContainerStyle,
@@ -63,8 +63,10 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openCancelTrxModal, setOpenCancelTrxModal] = useState<boolean>(false);
   const [openAuthorizeTrxModal, setOpenAuthorizeTrxModal] = useState<boolean>(false);
+  const [openPaymentConfirmedToast, setOpenPaymentConfirmedToast] = useState<boolean>(false);
   const open = Boolean(anchorEl);
   const { t } = useTranslation();
+  const addError = useErrorDispatcher();
 
   const handleClickActionsMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -81,6 +83,11 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
 
   type RenderAuthorizeTrxProps = {
     data: MerchantTransactionDTO;
+  };
+
+  type RenderConfirmPaymentProps = {
+    status: TransactionStatusEnum;
+    trxId: string;
   };
 
   const RenderAuthorizeTransaction = ({ data }: RenderAuthorizeTrxProps) => {
@@ -116,10 +123,7 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
       case TransactionStatusEnum.REJECTED:
         return (
           <>
-            <MenuItem
-              data-testid="cancel-trx-button"
-              onClick={() => setOpenCancelTrxModal(true)}
-            >
+            <MenuItem data-testid="cancel-trx-button" onClick={() => setOpenCancelTrxModal(true)}>
               {t('pages.initiativeDiscounts.cancelDiscount')}
             </MenuItem>
             <CancelTransactionModal
@@ -128,6 +132,45 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
               initiativeId={initiativeId}
               trxId={trxId}
               status={status}
+            />
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const handleConfirmPayment = (transactionId: string | undefined) => {
+    if (typeof transactionId === 'string') {
+      confirmPaymentQRCode(transactionId)
+        .then((_response) => setOpenPaymentConfirmedToast(true))
+        .catch((error) => {
+          addError({
+            id: 'CONFIRM_PAYMENT_QR_CODE_ERROR',
+            blocking: false,
+            error,
+            techDescription: 'An error occurred confirming payment qr code',
+            displayableTitle: t('errors.title'),
+            displayableDescription: t('errors.getDataDescription'),
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          });
+        });
+    }
+  };
+
+  const RenderConfirmPayment = ({ status, trxId }: RenderConfirmPaymentProps) => {
+    switch (status) {
+      case TransactionStatusEnum.AUTHORIZED:
+        return (
+          <>
+            <MenuItem onClick={() => handleConfirmPayment(trxId)}>Conferma pagamento</MenuItem>
+            <Toast
+              open={openPaymentConfirmedToast}
+              title={'Pagamento confermato'}
+              showToastCloseIcon={true}
+              onCloseToast={() => setOpenPaymentConfirmedToast(false)}
             />
           </>
         );
@@ -160,6 +203,7 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
       >
         <RenderAuthorizeTransaction data={data} />
         <RenderCancelTransaction initiativeId={initiativeId} trxId={trxId} status={status} />
+        <RenderConfirmPayment status={status} trxId={trxId} />
       </Menu>
     </TableCell>
   );

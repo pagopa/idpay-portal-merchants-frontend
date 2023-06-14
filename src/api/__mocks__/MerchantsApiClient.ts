@@ -158,4 +158,7 @@ export const MerchantsApiMocked = {
     _trxDate: Date,
     _mcc: string | undefined
   ): Promise<TransactionResponse> => new Promise((resolve) => resolve(transactionResponseMocked)),
+
+  confirmPaymentQRCode: async (_transactionId: string): Promise<TransactionResponse> =>
+    new Promise((resolve) => resolve(transactionResponseMocked)),
 };
