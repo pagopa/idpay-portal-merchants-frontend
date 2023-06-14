@@ -23,7 +23,7 @@ describe('Test suite for DiscountCreatedRecap component', () => {
     renderWithContext(<DiscountCreatedRecap data={transactionResponseMocked} />);
     const user = userEvent.setup();
     await user.click(screen.getByTestId('copy-link-buttton-test'));
-    await screen.findByText('Link Copiato');
+    await screen.findByText('pages.newDiscount.magicLinkCopied');
     fireEvent.click(screen.getByTestId('CloseIcon'));
   });
 
@@ -31,7 +31,7 @@ describe('Test suite for DiscountCreatedRecap component', () => {
     renderWithContext(<DiscountCreatedRecap data={transactionResponseMocked} />);
     const user = userEvent.setup();
     await user.click(screen.getByTestId('download-qr-code-button-test'));
-    const toast = await screen.findByText('Codice QR scaricato');
+    const toast = await screen.findByText('pages.newDiscount.qrCodeDownloaded');
     expect(toast).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('CloseIcon'));
   });
