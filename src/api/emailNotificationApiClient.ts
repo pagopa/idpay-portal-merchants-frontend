@@ -31,8 +31,8 @@ const onRedirectToLogin = () =>
       techDescription: 'token expired or not valid',
       toNotify: false,
       blocking: false,
-      displayableTitle: i18n.t('session.expired.title'),
-      displayableDescription: i18n.t('session.expired.message'),
+      displayableTitle: i18n.t('errors.sessionExpiredTitle'),
+      displayableDescription: i18n.t('errors.sessionExpiredMessage'),
     })
   );
 

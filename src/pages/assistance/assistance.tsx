@@ -37,8 +37,8 @@ const Assistance = () => {
           blocking: false,
           error,
           techDescription: 'An error occurred getting institutional user email',
-          displayableTitle: t('errors.title'),
-          displayableDescription: t('errors.getDataDescription'),
+          displayableTitle: t('errors.genericTitle'),
+          displayableDescription: t('errors.genericDescription'),
           toNotify: true,
           component: 'Toast',
           showCloseIcon: true,
@@ -78,8 +78,8 @@ const Assistance = () => {
             blocking: false,
             error,
             techDescription: 'An error occurred sending assistance email',
-            displayableTitle: t('errors.title'),
-            displayableDescription: t('errors.getDataDescription'),
+            displayableTitle: t('errors.genericTitle'),
+            displayableDescription: t('errors.genericDescription'),
             toNotify: true,
             component: 'Toast',
             showCloseIcon: true,
@@ -137,7 +137,7 @@ const Assistance = () => {
                   }
                   helperText={
                     (formik.touched.assistanceSubject && formik.errors.assistanceSubject) ||
-                    t('validation.indicateAssistanceSubject')
+                    t('validation.assistanceSubject')
                   }
                   size="small"
                   data-testid="assistanceSubject-test"

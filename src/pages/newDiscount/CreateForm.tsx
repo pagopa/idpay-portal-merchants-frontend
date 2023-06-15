@@ -31,9 +31,9 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
 
   const validationSchema = Yup.object().shape({
     spendingAmount: Yup.number()
-      .typeError(t('validation.numeric'))
-      .required(t('validation.required'))
-      .positive(t('validation.positive'))
+      .typeError(t('validation.number'))
+      .required(t('validation.requiredField'))
+      .positive(t('validation.positiveNumber'))
       .min(0.01, t('validation.minValue', { x: 0.01 })),
   });
 
@@ -62,8 +62,8 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
               blocking: false,
               error,
               techDescription: 'An error occurred creating initiative discount',
-              displayableTitle: t('errors.title'),
-              displayableDescription: t('errors.invalidDataDescription'),
+              displayableTitle: t('errors.genericTitle'),
+              displayableDescription: t('errors.validationDescription'),
               toNotify: true,
               component: 'Toast',
               showCloseIcon: true,

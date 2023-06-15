@@ -21,10 +21,13 @@
     "title": "Portale Esercenti"
   },
   "errors": {
-    "cantGetTc": "Non siamo riusciti a recuperare le informazioni sull’accettazione dei termini e condizioni d’uso. Riprova.",
-    "getDataDescription": "Riprovare",
-    "invalidDataDescription": "Verifica che i dati inseriti siano corretti",
-    "title": "Si è verificato un errore"
+    "genericDescription": "Riprovare",
+    "genericTitle": "Si è verificato un errore",
+    "sessionExpiredMessage": "Ti stiamo reindirizzando alla pagina di accesso",
+    "sessionExpiredTitle": "La tua sessione è scaduta",
+    "tcDescription": "Non siamo riusciti a recuperare le informazioni sull’accettazione dei termini e condizioni d’uso. Riprova.",
+    "tcSave": "Non siamo riusciti a salvare l'accettazione dei Termini e condizioni d’uso. Riprova",
+    "validationDescription": "Verifica che i dati inseriti siano corretti"
   },
   "pages": {
     "assistance": {
@@ -117,18 +120,12 @@
   "roles": {
     "admin": "Amministratore"
   },
-  "session": {
-    "expired": {
-      "message": "Ti stiamo reindirizzando alla pagina di accesso",
-      "title": "La tua sessione è scaduta"
-    }
-  },
   "validation": {
+    "assistanceSubject": "Inserisci l’argomento della tua richiesta",
     "maxChars": "Scrivi massimo {{x}} caratteri",
     "minValue": "Inserisci un valore maggiore o uguale a {{x}}",
-    "numeric": "Inserisci un numero",
-    "positive": "Inserisci un valore positivo",
-    "required": "Campo obbligatorio",
-    "indicateAssistanceSubject": "Inserisci l’argomento della tua richiesta"
+    "positiveNumber": "Inserisci un valore positivo",
+    "requiredField": "Campo obbligatorio",
+    "number": "Inserisci un numero"
   }
 }
