@@ -68,9 +68,9 @@ export const createTransaction = (
   return MerchantApi.createTransaction(amountCents, idTrxIssuer, initiativeId, trxDate, mcc);
 };
 
-export const confirmPaymentQRCode = (transactionId: string) => {
-  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
-    return MerchantsApiMocked.confirmPaymentQRCode(transactionId);
-  }
-  return MerchantApi.confirmPaymentQRCode(transactionId);
-};
+// export const confirmPaymentQRCode = (transactionId: string) => {
+//   if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
+//     return MerchantsApiMocked.confirmPaymentQRCode(transactionId);
+//   }
+//   return MerchantApi.confirmPaymentQRCode(transactionId);
+// };

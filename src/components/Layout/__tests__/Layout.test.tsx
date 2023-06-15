@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderWithHistoryAndStore } from '../../../utils/__tests__/test-utils';
+import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import Layout from '../Layout';
 
 beforeEach(() => {
@@ -7,8 +7,8 @@ beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
-describe('test suite for Layout', () => {
-  test('test render Layout', () => {
-    renderWithHistoryAndStore(<Layout children={<div />} />);
+describe('Test suite for Layout', () => {
+  test('Test render Layout', () => {
+    renderWithContext(<Layout children={<div />} />);
   });
 });

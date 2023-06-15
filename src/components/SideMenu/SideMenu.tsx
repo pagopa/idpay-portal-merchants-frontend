@@ -26,10 +26,10 @@ interface MatchParams {
 
 /** The side menu of the application */
 export default function SideMenu() {
+  const initiativesList = useAppSelector(intiativesListSelector);
   const { t } = useTranslation();
   const history = useHistory();
   const onExit = useUnloadEventOnExit();
-  const initiativesList = useAppSelector(intiativesListSelector);
   const [expanded, setExpanded] = useState<string | false>(false);
   const [pathname, setPathName] = useState(() => {
     /*

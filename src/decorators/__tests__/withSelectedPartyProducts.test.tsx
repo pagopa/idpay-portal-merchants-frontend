@@ -11,7 +11,7 @@ import React, { Fragment } from 'react';
 jest.mock('../../services/partyService');
 jest.mock('../../services/productService');
 
-const expectedPartyId: string = '2f63a151-da4e-4e1e-acf9-adecc0c4d727';
+const expectedPartyId: string = '2b48bf96-fd74-477e-a70a-286b410f020a';
 
 let fetchPartyDetailsSpy: jest.SpyInstance;
 let fetchPartyProductsSpy: jest.SpyInstance;

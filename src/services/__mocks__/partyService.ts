@@ -2,6 +2,20 @@ import { Party } from '../../model/Party';
 
 export const mockedParties: Array<Party> = [
   {
+    partyId: '2b48bf96-fd74-477e-a70a-286b410f020a',
+    externalId: '',
+    originId: '',
+    origin: '',
+    description: 'Esercente di test IdPay',
+    digitalAddress: '',
+    status: 'ACTIVE',
+    roles: [{ partyRole: 'MANAGER', roleKey: 'admin' }],
+    urlLogo: 'https://selcdcheckoutsa.z6.web.core.windows.net/institutions/onboarded/logo.png',
+    fiscalCode: '33444433488',
+    registeredOffice: '',
+    typology: '',
+  },
+  {
     roles: [
       {
         partyRole: 'SUB_DELEGATE',
@@ -233,11 +247,10 @@ export const verifyFetchPartiesMockExecution = (parties: Array<Party>) => {
 export const fetchParties = () => new Promise((resolve) => resolve(mockedParties));
 
 export const verifyFetchPartyDetailsMockExecution = (party: Party) => {
-  expect(party).toStrictEqual(
-    mockedParties.filter(
-      (p) => p.partyId === party.partyId && p.roles[0].roleKey === party.roles[0].roleKey
-    )[0]
-  );
+  const test = mockedParties.filter(
+    (p) => p.partyId === party.partyId && p.roles[0].roleKey === party.roles[0].roleKey
+  )[0];
+  expect(party).toStrictEqual(test);
 };
 
 export const fetchPartyDetails = (

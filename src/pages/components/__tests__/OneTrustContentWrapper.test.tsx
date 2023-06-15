@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderWithHistoryAndStore } from '../../../utils/__tests__/test-utils';
+import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import OneTrustContentWrapper from '../OneTrustContentWrapper';
 
 beforeEach(() => {
@@ -8,6 +8,6 @@ beforeEach(() => {
 
 describe('test suite for OneTrustContentWrapper', () => {
   test('render OneTrustContentWrapper', () => {
-    renderWithHistoryAndStore(<OneTrustContentWrapper idSelector={''} />);
+    renderWithContext(<OneTrustContentWrapper idSelector={''} />);
   });
 });

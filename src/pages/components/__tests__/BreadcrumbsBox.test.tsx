@@ -1,6 +1,6 @@
 import React from 'react';
 import ROUTES from '../../../routes';
-import { renderWithHistoryAndStore } from '../../../utils/__tests__/test-utils';
+import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import BreadcrumbsBox from '../BreadcrumbsBox';
 
 beforeEach(() => {
@@ -9,7 +9,7 @@ beforeEach(() => {
 
 describe('test suite for BreadcrumbsBox', () => {
   test('render BreadcrumbsBox', () => {
-    renderWithHistoryAndStore(
+    renderWithContext(
       <BreadcrumbsBox
         backUrl={ROUTES.HOME}
         backLabel="Indietro"

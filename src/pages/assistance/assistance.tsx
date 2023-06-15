@@ -37,8 +37,8 @@ const Assistance = () => {
           blocking: false,
           error,
           techDescription: 'An error occurred getting institutional user email',
-          displayableTitle: t('errors.title'),
-          displayableDescription: t('errors.getDataDescription'),
+          displayableTitle: t('errors.genericTitle'),
+          displayableDescription: t('errors.genericDescription'),
           toNotify: true,
           component: 'Toast',
           showCloseIcon: true,
@@ -51,7 +51,7 @@ const Assistance = () => {
     assistanceSubject: Yup.string().required(t('validation.required')),
     assistanceMessage: Yup.string()
       .required(t('validation.required'))
-      .max(500, t('validation.maxFiveHundred')),
+      .max(500, t('validation.maxChars', { x: 500 })),
   });
 
   const formik = useFormik({
@@ -78,8 +78,8 @@ const Assistance = () => {
             blocking: false,
             error,
             techDescription: 'An error occurred sending assistance email',
-            displayableTitle: t('errors.title'),
-            displayableDescription: t('errors.getDataDescription'),
+            displayableTitle: t('errors.genericTitle'),
+            displayableDescription: t('errors.genericDescription'),
             toNotify: true,
             component: 'Toast',
             showCloseIcon: true,
@@ -137,7 +137,7 @@ const Assistance = () => {
                   }
                   helperText={
                     (formik.touched.assistanceSubject && formik.errors.assistanceSubject) ||
-                    t('validation.indicateAssistanceSubject')
+                    t('validation.assistanceSubject')
                   }
                   size="small"
                   data-testid="assistanceSubject-test"
@@ -174,7 +174,7 @@ const Assistance = () => {
                   }
                   helperText={
                     (formik.touched.assistanceMessage && formik.errors.assistanceMessage) ||
-                    t('validation.maxFiveHundred')
+                    t('validation.maxChars', { x: 500 })
                   }
                   required={true}
                   InputLabelProps={{ required: false }}
