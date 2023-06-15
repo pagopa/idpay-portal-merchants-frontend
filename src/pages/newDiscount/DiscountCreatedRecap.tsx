@@ -36,7 +36,8 @@ const DiscountCreatedRecap = ({ data }: Props) => {
       typeof data.trxDate === 'object'
     ) {
       const expDays = data?.trxExpirationMinutes / 1440;
-      setExpirationDays(expDays);
+      const expDaysStr = expDays.toString();
+      setExpirationDays(parseInt(expDaysStr, 10));
 
       const trxDateStr = data.trxDate.toString();
       const expDate = new Date(trxDateStr);
