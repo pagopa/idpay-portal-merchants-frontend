@@ -36,5 +36,5 @@ export const createTransaction = (
 ): Promise<TransactionResponse> =>
   MerchantsApiMocked.createTransaction(amountCents, idTrxIssuer, initiativeId, trxDate, mcc);
 
-export const confirmPaymentQRCode = (transactionId: string) =>
-  MerchantsApiMocked.confirmPaymentQRCode(transactionId);
+// export const confirmPaymentQRCode = (transactionId: string) =>
+//   MerchantsApiMocked.confirmPaymentQRCode(transactionId);

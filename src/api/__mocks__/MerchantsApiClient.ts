@@ -15,7 +15,7 @@ import { InitiativeDTOArray } from '../generated/merchants/InitiativeDTOArray';
 const startDate = new Date();
 const endDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
 
-const mockedInitiativesList = [
+export const mockedInitiativesList = [
   {
     enabled: true,
     endDate,
@@ -38,7 +38,7 @@ const mockedInitiativesList = [
   },
 ];
 
-const mockedMerchantTransactionList = {
+export const mockedMerchantTransactionList = {
   content: [
     {
       trxCode: 'string',
@@ -47,6 +47,8 @@ const mockedMerchantTransactionList = {
       effectiveAmount: 1000,
       updateDate: startDate,
       status: TransactionStatusEnum.CREATED,
+      trxDate: new Date(),
+      trxExpirationMinutes: 4320,
     },
     {
       trxCode: 'string',
@@ -55,6 +57,8 @@ const mockedMerchantTransactionList = {
       effectiveAmount: 1303,
       updateDate: startDate,
       status: TransactionStatusEnum.AUTHORIZED,
+      trxDate: new Date(),
+      trxExpirationMinutes: 4320,
     },
     {
       trxCode: 'string',
@@ -63,6 +67,8 @@ const mockedMerchantTransactionList = {
       effectiveAmount: 2322,
       updateDate: startDate,
       status: TransactionStatusEnum.IDENTIFIED,
+      trxDate: new Date(),
+      trxExpirationMinutes: 4320,
     },
     {
       trxCode: 'string',
@@ -71,6 +77,8 @@ const mockedMerchantTransactionList = {
       effectiveAmount: 5000,
       updateDate: startDate,
       status: TransactionStatusEnum.REJECTED,
+      trxDate: new Date(),
+      trxExpirationMinutes: 4320,
     },
   ],
   pageNo: 0,
@@ -79,13 +87,13 @@ const mockedMerchantTransactionList = {
   totalPages: 1,
 };
 
-const mockedMerchantInitiativeStatistics = {
+export const mockedMerchantInitiativeStatistics = {
   accrued: 100,
   amount: 250,
   refunded: 150,
 };
 
-const mockedMerchantDetail = {
+export const mockedMerchantDetail = {
   businessName: 'Aaronne Travel',
   certifiedEmail: 'mail@aaronnetravel.com',
   creationDate: startDate,
@@ -102,7 +110,7 @@ const mockedMerchantDetail = {
   vatNumber: '123456787',
 };
 
-const transactionResponseMocked = {
+export const transactionResponseMocked = {
   acquirerId: '12345',
   amountCents: 10000,
   amountCurrency: '€',
@@ -119,6 +127,7 @@ const transactionResponseMocked = {
   residualAmountCents: 1,
   splitPayment: false,
   vat: 'ppppp',
+  trxExpirationMinutes: 4320,
 };
 
 export const MerchantsApiMocked = {
@@ -150,6 +159,6 @@ export const MerchantsApiMocked = {
     _mcc: string | undefined
   ): Promise<TransactionResponse> => new Promise((resolve) => resolve(transactionResponseMocked)),
 
-  confirmPaymentQRCode: async (_transactionId: string): Promise<TransactionResponse> =>
-    new Promise((resolve) => resolve(transactionResponseMocked)),
+  // confirmPaymentQRCode: async (_transactionId: string): Promise<TransactionResponse> =>
+  //   new Promise((resolve) => resolve(transactionResponseMocked)),
 };

@@ -1,6 +1,6 @@
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { renderWithHistoryAndStore } from '../../../utils/__tests__/test-utils';
+import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import TOSWall from '../TOSWall';
 
 jest.mock('react-i18next', () => ({
@@ -12,14 +12,17 @@ jest.mock('react-i18next', () => ({
 
 describe('tests for TOSWall', () => {
   test('test render of TOSWall component with not already accepted tos', async () => {
-    renderWithHistoryAndStore(
-      <TOSWall acceptTOS={jest.fn()} tosRoute={''} privacyRoute={''} firstAcceptance={false} />
+    const mockAcceptTos = jest.fn();
+    renderWithContext(
+      <TOSWall acceptTOS={mockAcceptTos} tosRoute={''} privacyRoute={''} firstAcceptance={true} />
     );
-    fireEvent.click(screen.getByText('Accedi'));
+    const acceptTosBtn = screen.getByText('Accedi');
+    fireEvent.click(acceptTosBtn);
+    expect(mockAcceptTos).toHaveBeenCalledTimes(1);
   });
 
   test('test render of TOSWall component with tos already accepted', async () => {
-    renderWithHistoryAndStore(
+    renderWithContext(
       <TOSWall acceptTOS={jest.fn()} tosRoute={''} privacyRoute={''} firstAcceptance={true} />
     );
   });

@@ -31,10 +31,10 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
 
   const validationSchema = Yup.object().shape({
     spendingAmount: Yup.number()
-      .typeError(t('validation.numeric'))
-      .required(t('validation.required'))
-      .positive(t('validation.positive'))
-      .min(0.01, t('validation.minOne')),
+      .typeError(t('validation.number'))
+      .required(t('validation.requiredField'))
+      .positive(t('validation.positiveNumber'))
+      .min(0.01, t('validation.minValue', { x: 0.01 })),
   });
 
   const formik = useFormik({
@@ -43,6 +43,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
     },
     validateOnMount: true,
     validateOnChange: true,
+    enableReinitialize: true,
     validationSchema,
     onSubmit: (values) => {
       const roundedAmount = parseFloat(values.spendingAmount).toFixed(2);
@@ -61,8 +62,8 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
               blocking: false,
               error,
               techDescription: 'An error occurred creating initiative discount',
-              displayableTitle: t('errors.title'),
-              displayableDescription: t('errors.invalidDataDescription'),
+              displayableTitle: t('errors.genericTitle'),
+              displayableDescription: t('errors.validationDescription'),
               toNotify: true,
               component: 'Toast',
               showCloseIcon: true,
@@ -110,6 +111,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
             <Button
               variant="outlined"
               onClick={() => history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`)}
+              data-testid="back-to-initiative-discounts-test"
             >
               {t('commons.backBtn')}
             </Button>
@@ -119,6 +121,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
               variant="contained"
               disabled={!formik.isValid}
               onClick={() => formik.handleSubmit()}
+              data-testid="submit-new-discount-test"
             >
               {t('pages.initiativeDiscounts.createBtn')}
             </Button>

@@ -33,8 +33,8 @@ const CancelTransactionModal = ({
           blocking: false,
           error,
           techDescription: 'An error occurred deleting a transaction',
-          displayableTitle: t('errors.title'),
-          displayableDescription: t('errors.getDataDescription'),
+          displayableTitle: t('errors.genericTitle'),
+          displayableDescription: t('errors.genericDescription'),
           toNotify: true,
           component: 'Toast',
           showCloseIcon: true,
@@ -68,11 +68,13 @@ const CancelTransactionModal = ({
             p: 4,
           }}
         >
-          <Typography variant="h6">Vuoi annullare il buono sconto?</Typography>
+          <Typography variant="h6">
+            {t('pages.initiativeDiscounts.cancelDiscountModalTitle')}
+          </Typography>
           <Typography variant="body1" sx={{ my: 2 }}>
             {status === TransactionStatusEnum.AUTHORIZED
-              ? 'Il buono sconto è già stato autorizzato, se decidi di annullarlo l’importo verrà riaccreditato sull’iniziativa del cittadino e il rimborso da parte dell’Ente non verrà avviato.'
-              : 'Il buono sconto non è ancora stato autorizzato, se decidi di annullarlo il link magico e il codice QR smetteranno di funzionare e non sarà più possibile per il cittadino procedere con l’autorizzazione.'}
+              ? t('pages.initiativeDiscounts.cancelDiscountAuthorizedModalBody')
+              : t('pages.initiativeDiscounts.cancelDiscountNotAuthorizedModalBody')}
           </Typography>
           <Box
             sx={{
@@ -87,9 +89,9 @@ const CancelTransactionModal = ({
               variant="outlined"
               sx={{ gridArea: 'backBtn', mr: 1, justifySelf: 'end' }}
               onClick={() => setOpenCancelTrxModal(false)}
-              data-testid="cancel-button-test"
+              data-testid="modal-cancel-back-button-test"
             >
-              Torna indietro
+              {t('commons.cancelBtn')}
             </Button>
             <Button
               variant="contained"
@@ -98,7 +100,7 @@ const CancelTransactionModal = ({
                 handleCancelTransaction(trxId);
                 setOpenCancelTrxModal(false);
               }}
-              data-testid="cancel-button-test"
+              data-testid="modal-cancel-button-test"
             >
               {t('pages.initiativeDiscounts.cancelDiscount')}
             </Button>

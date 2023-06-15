@@ -64,7 +64,7 @@ const saveUserPermissions = (dispatch: Dispatch<any>, addError: any, t: any) => 
         blocking: false,
         error,
         techDescription: 'An error occurred getting user permissions for current role',
-        displayableTitle: t('errors.title'),
+        displayableTitle: t('errors.genericTitle'),
         displayableDescription: t('errors.contactAdmin'),
         toNotify: true,
         component: 'Toast',
