@@ -13,10 +13,7 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  MerchantTransactionDTO,
-  StatusEnum as TransactionStatusEnum,
-} from '../../api/generated/merchants/MerchantTransactionDTO';
+import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { formatDate, formattedCurrency } from '../../helpers';
 import { getMerchantTransactionsProcessed } from '../../services/merchantService';
 import { pagesTableContainerStyle } from '../../styles';
@@ -106,8 +103,10 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
                   <TableRow>
                     <TableCell width="20%">{t('pages.initiativeDiscounts.dateAndHours')}</TableCell>
                     <TableCell width="40%">{t('pages.initiativeDiscounts.beneficiary')}</TableCell>
-                    <TableCell width="15%">{'Totale della spesa'}</TableCell>
-                    <TableCell width="15%">{'Importo autorizzato'}</TableCell>
+                    <TableCell width="15%">{t('pages.initiativeDiscounts.totalSpent')}</TableCell>
+                    <TableCell width="15%">
+                      {t('pages.initiativeDiscounts.authorizedAmount')}
+                    </TableCell>
                     <TableCell width="15%">
                       {t('pages.initiativeDiscounts.discountStatus')}
                     </TableCell>
@@ -117,9 +116,7 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
                   {rows.map((r, i) => (
                     <TableRow key={i}>
                       <TableCell>{formatDate(r.updateDate)}</TableCell>
-                      <TableCell>
-                        {r.status === TransactionStatusEnum.AUTHORIZED ? r.fiscalCode : ''}
-                      </TableCell>
+                      <TableCell>{r.fiscalCode}</TableCell>
                       <TableCell>{formattedCurrency(r.effectiveAmount)}</TableCell>
                       <TableCell>{formattedCurrency(r.rewardAmount)}</TableCell>
                       <TableCell>
