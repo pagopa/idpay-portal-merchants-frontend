@@ -61,6 +61,22 @@ export const MerchantApi = {
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
+  getMerchantTransactionsProcessed: async (
+    initiativeId: string,
+    page: number,
+    fiscalCode?: string,
+    status?: string
+  ): Promise<MerchantTransactionsListDTO> => {
+    const result = await apiClient.getMerchantTransactionsProcessed({
+      initiativeId,
+      page,
+      size: 10,
+      fiscalCode,
+      status,
+    });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
   getMerchantInitiativeStatistics: async (initiativeId: string): Promise<MerchantStatisticsDTO> => {
     const result = await apiClient.getMerchantInitiativeStatistics({ initiativeId });
     return extractResponse(result, 200, onRedirectToLogin);
@@ -78,12 +94,11 @@ export const MerchantApi = {
 
   createTransaction: async (
     amountCents: number,
-    idTrxIssuer: string,
+    idTrxAcquirer: string,
     initiativeId: string,
-    trxDate: Date,
     mcc: string | undefined
   ): Promise<TransactionResponse> => {
-    const body = { body: { amountCents, idTrxIssuer, initiativeId, trxDate, mcc } };
+    const body = { body: { amountCents, idTrxAcquirer, initiativeId, mcc } };
     const result = await apiClient.createTransaction(body);
     return extractResponse(result, 201, onRedirectToLogin);
   },

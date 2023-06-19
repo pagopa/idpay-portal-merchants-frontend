@@ -16,6 +16,14 @@ export const getMerchantTransactions = (
 ): Promise<MerchantTransactionsListDTO> =>
   MerchantsApiMocked.getMerchantTransactions(initiativeId, page, fiscalCode, status);
 
+export const getMerchantTransactionsProcessed = (
+  initiativeId: string,
+  page: number,
+  fiscalCode?: string,
+  status?: string
+): Promise<MerchantTransactionsListDTO> =>
+  MerchantsApiMocked.getMerchantTransactionsProcessed(initiativeId, page, fiscalCode, status);
+
 export const getMerchantInitiativeStatistics = (
   initiativeId: string
 ): Promise<MerchantStatisticsDTO> =>
@@ -29,12 +37,11 @@ export const deleteTransaction = (transactionId: string): Promise<void> =>
 
 export const createTransaction = (
   amountCents: number,
-  idTrxIssuer: string,
+  idTrxAcquirer: string,
   initiativeId: string,
-  trxDate: Date,
   mcc: string | undefined
 ): Promise<TransactionResponse> =>
-  MerchantsApiMocked.createTransaction(amountCents, idTrxIssuer, initiativeId, trxDate, mcc);
+  MerchantsApiMocked.createTransaction(amountCents, idTrxAcquirer, initiativeId, mcc);
 
 // export const confirmPaymentQRCode = (transactionId: string) =>
 //   MerchantsApiMocked.confirmPaymentQRCode(transactionId);

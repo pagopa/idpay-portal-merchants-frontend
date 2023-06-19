@@ -49,6 +49,8 @@ export const mockedMerchantTransactionList = {
       status: TransactionStatusEnum.CREATED,
       trxDate: new Date(),
       trxExpirationMinutes: 4320,
+      qrcodePngUrl: 'example.com/image',
+      qrcodeTxtUrl: 'example.com/image',
     },
     {
       trxCode: 'string',
@@ -59,6 +61,8 @@ export const mockedMerchantTransactionList = {
       status: TransactionStatusEnum.AUTHORIZED,
       trxDate: new Date(),
       trxExpirationMinutes: 4320,
+      qrcodePngUrl: 'example.com/image',
+      qrcodeTxtUrl: 'example.com/image',
     },
     {
       trxCode: 'string',
@@ -69,6 +73,8 @@ export const mockedMerchantTransactionList = {
       status: TransactionStatusEnum.IDENTIFIED,
       trxDate: new Date(),
       trxExpirationMinutes: 4320,
+      qrcodePngUrl: 'example.com/image',
+      qrcodeTxtUrl: 'example.com/image',
     },
     {
       trxCode: 'string',
@@ -79,6 +85,8 @@ export const mockedMerchantTransactionList = {
       status: TransactionStatusEnum.REJECTED,
       trxDate: new Date(),
       trxExpirationMinutes: 4320,
+      qrcodePngUrl: 'example.com/image',
+      qrcodeTxtUrl: 'example.com/image',
     },
   ],
   pageNo: 0,
@@ -128,6 +136,8 @@ export const transactionResponseMocked = {
   splitPayment: false,
   vat: 'ppppp',
   trxExpirationMinutes: 4320,
+  qrcodePngUrl: 'example.com/image',
+  qrcodeTxtUrl: 'example.com/image',
 };
 
 export const MerchantsApiMocked = {
@@ -135,6 +145,14 @@ export const MerchantsApiMocked = {
     new Promise((resolve) => resolve(mockedInitiativesList)),
 
   getMerchantTransactions: async (
+    _initiativeId: string,
+    _page: number,
+    _fiscalCode?: string,
+    _status?: string
+  ): Promise<MerchantTransactionsListDTO> =>
+    new Promise((resolve) => resolve(mockedMerchantTransactionList)),
+
+  getMerchantTransactionsProcessed: async (
     _initiativeId: string,
     _page: number,
     _fiscalCode?: string,
@@ -153,9 +171,8 @@ export const MerchantsApiMocked = {
 
   createTransaction: async (
     _amountCents: number,
-    _idTrxIssuer: string,
+    _idTrxAcquirer: string,
     _initiativeId: string,
-    _trxDate: Date,
     _mcc: string | undefined
   ): Promise<TransactionResponse> => new Promise((resolve) => resolve(transactionResponseMocked)),
 
