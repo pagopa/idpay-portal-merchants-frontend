@@ -157,19 +157,7 @@ describe('Test suite for initiativeDiscounts page', () => {
 
     const processedDiscounts = screen.getByTestId('merchant-transactions-2');
     fireEvent.click(processedDiscounts);
-    // expect().toBeInTheDocument();
-    // console.log('test', await screen.findByText('commons.discountStatusEnum.rejected'));
+
   });
-/*
-  test('should render initative empty component in case of  Error from getMerchantTransactions API response', async () => {
-    MerchantsApiMocked.getMerchantTransactions = async (): Promise<MerchantTransactionsListDTO> =>
-      Promise.reject('mocked error response for tests');
 
-    renderWithContext(<InitiativeDiscounts />);
-
-    const emptyDiscountList = await screen.findByText('pages.initiativeDiscounts.emptyList');
-
-    expect(emptyDiscountList).toBeInTheDocument();
-  });
-  */
 });

@@ -46,7 +46,7 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
         setPage(response.pageNo);
         setRowsPerPage(response.pageSize);
         setTotalElements(response.totalElements);
-        if (Array.isArray(response.content)) {
+        if (response.content.length > 0) {
           setRows([...response.content]);
         } else {
           setRows([]);
