@@ -283,8 +283,10 @@ const MerchantTransactions = ({ id }: Props) => {
                   <TableRow>
                     <TableCell width="20%">{t('pages.initiativeDiscounts.dateAndHours')}</TableCell>
                     <TableCell width="40%">{t('pages.initiativeDiscounts.beneficiary')}</TableCell>
-                    <TableCell width="15%">{'Totale della spesa'}</TableCell>
-                    <TableCell width="15%">{'Importo autorizzato'}</TableCell>
+                    <TableCell width="15%">{t('pages.initiativeDiscounts.totalSpent')}</TableCell>
+                    <TableCell width="15%">
+                      {t('pages.initiativeDiscounts.authorizedAmount')}
+                    </TableCell>
                     <TableCell width="15%">
                       {t('pages.initiativeDiscounts.discountStatus')}
                     </TableCell>

@@ -118,8 +118,16 @@ const InitiativeDiscounts = () => {
         <Box sx={{ display: 'grid', gridColumn: 'span 12', height: '100%' }}>
           <Box sx={{ width: '100%', borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="merchant transactions tabs">
-              <Tab label="Item One" {...a11yProps(0)} data-testid='merchant-transactions-1' />
-              <Tab label="Item Two" {...a11yProps(1)} data-testid='merchant-transactions-2' />
+              <Tab
+                label={t('pages.initiativeDiscounts.currentMerchantTransactions')}
+                {...a11yProps(0)}
+                data-testid="merchant-transactions-1"
+              />
+              <Tab
+                label={t('pages.initiativeDiscounts.processedMerchantTransactions')}
+                {...a11yProps(1)}
+                data-testid="merchant-transactions-2"
+              />
             </Tabs>
           </Box>
           <Box sx={{ width: '100%' }}>

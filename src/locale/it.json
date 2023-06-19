@@ -8,7 +8,10 @@
     "copyLinkBtn": "Copia link",
     "discountStatusEnum": {
       "authorized": "Autorizzato",
-      "identified": "Da autorizzare"
+      "cancelled": "Annullato",
+      "identified": "Da autorizzare",
+      "rejected": "Rifiutato",
+      "rewarded": "Contabilizzato"
     },
     "downloadQrBtn": "Scarica codice QR",
     "exitBtn": "Esci",
@@ -61,6 +64,7 @@
     "initiativeDiscounts": {
       "amount": "Importo",
       "authorizationRequestModalTitle": "Vuoi richiedere l’autorizzazione?",
+      "authorizedAmount": "Importo autorizzato",
       "beneficiary": "Beneficiario",
       "cancelDiscount": "Annulla buono sconto",
       "cancelDiscountAuthorizedModalBody": "Il buono sconto è già stato autorizzato, se decidi di annullarlo l’importo verrà riaccreditato sull’iniziativa del cittadino e il rimborso da parte dell’Ente non verrà avviato.",
@@ -68,6 +72,7 @@
       "cancelDiscountNotAuthorizedModalBody": "Il buono sconto non è ancora stato autorizzato, se decidi di annullarlo il link magico e il codice QR smetteranno di funzionare e non sarà più possibile per il cittadino procedere con l’autorizzazione.",
       "confirmPayment": "Conferma pagamento",
       "createBtn": "Crea buono sconto",
+      "currentMerchantTransactions": "Buoni sconto in corso",
       "dateAndHours": "Data e ora",
       "discountAuthorized": "Autorizzato",
       "discountStatus": "Stato",
@@ -75,6 +80,7 @@
       "filterByStatus": "Stato",
       "listTitle": "Buoni sconto emessi",
       "paymentConfirmed": "Pagamento confermato",
+      "processedMerchantTransactions": "Buoni sconto contabilizzati",
       "refundsDataTitle": "Dati rimborso",
       "refundsStatusTitle": "Stato rimborsi",
       "requestAuthorization": "Richiedi autorizzazione",
@@ -83,6 +89,7 @@
       "title": "Buoni sconto",
       "totalAmount": "Totale erogato",
       "totalRefunded": "Totale rimborsato",
+      "totalSpent": "Totale della spesa",
       "iban": "IBAN"
     },
     "initiativesList": {
