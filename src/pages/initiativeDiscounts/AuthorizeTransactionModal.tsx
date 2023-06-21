@@ -15,7 +15,6 @@ import {
   Typography,
 } from '@mui/material';
 import TitleBox from '@pagopa/selfcare-common-frontend/components/TitleBox';
-import { QRCodeSVG } from 'qrcode.react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
@@ -147,9 +146,6 @@ const AuthorizeTransactionModal = ({
               >
                 {t('commons.downloadQrBtn')}
               </Button>
-            </Box>
-            <Box sx={{ gridColumn: 'span 2', display: 'none' }}>
-              <QRCodeSVG id="qr-container" value={magicLink || ''} />
             </Box>
           </Box>
 
