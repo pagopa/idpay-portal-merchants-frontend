@@ -5,7 +5,7 @@ export const copyTextToClipboard = (magicLink: string | undefined) => {
     void navigator.clipboard.writeText(magicLink);
   }
 };
-
+/*
 export const downloadQRCode = (selector: string, trxCode: string | undefined) => {
   const content = document.getElementById(selector);
   if (content !== null) {
@@ -23,7 +23,7 @@ export const downloadQRCode = (selector: string, trxCode: string | undefined) =>
     document.body.removeChild(downloadLink);
   }
 };
-
+*/
 export const downloadQRCodeFromURL = (url: string) => {
   fetch(url)
     .then((response) => response.blob())
