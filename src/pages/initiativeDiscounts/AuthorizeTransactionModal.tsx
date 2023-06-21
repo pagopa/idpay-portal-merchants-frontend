@@ -19,7 +19,11 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
-import { copyTextToClipboard, downloadQRCode } from '../../helpers';
+import {
+  copyTextToClipboard,
+  downloadQRCodeFromURL,
+  mapDataForDiscoutTimeRecap,
+} from '../../helpers';
 
 type Props = {
   openAuthorizeTrxModal: boolean;
@@ -33,48 +37,23 @@ const AuthorizeTransactionModal = ({
   data,
 }: Props) => {
   const [magicLink, setMagicLink] = useState<string>();
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [expirationDays, setExpirationDays] = useState<number>();
   const [expirationDate, setExpirationDate] = useState<string>();
   const [expirationTime, setExpirationTime] = useState<string>();
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (
-      typeof data !== 'undefined' &&
-      data.hasOwnProperty('trxExpirationMinutes') &&
-      typeof data.trxExpirationMinutes === 'number' &&
-      data.hasOwnProperty('trxDate') &&
-      typeof data.trxDate === 'object'
-    ) {
-      const expDays = data?.trxExpirationMinutes / 1440;
-      const expDaysStr = expDays.toString();
-      setExpirationDays(parseInt(expDaysStr, 10));
-
-      const trxDateStr = data.trxDate.toString();
-      const expDate = new Date(trxDateStr);
-      const days = expDate.getDate();
-      expDate.setDate(days + expDays);
-
-      const expDateStrArr = expDate
-        .toLocaleString('it-IT', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          timeZone: 'Europe/Rome',
-          hour: 'numeric',
-          minute: 'numeric',
-        })
-        .split(', ');
-      setExpirationDate(expDateStrArr[0]);
-      setExpirationTime(expDateStrArr[1]);
-    }
-
-    if (
-      typeof data !== 'undefined' &&
-      data.hasOwnProperty('trxCode') &&
-      typeof data.trxCode === 'string'
-    ) {
-      setMagicLink(`https://www.idpay.it/authorizationlink/${data?.trxCode}`);
+    if (typeof data !== 'undefined') {
+      const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
+        data.trxExpirationMinutes,
+        data.trxDate
+      );
+      setExpirationDays(expirationDays);
+      setExpirationDate(expirationDate);
+      setExpirationTime(expirationTime);
+      setMagicLink(data?.qrcodeTxtUrl);
+      setQrCodeUrl(data?.qrcodePngUrl);
     }
   }, [data]);
 
@@ -164,7 +143,7 @@ const AuthorizeTransactionModal = ({
                 size="small"
                 variant="contained"
                 sx={{ height: '43px' }}
-                onClick={() => downloadQRCode('qr-container', data?.trxCode)}
+                onClick={() => downloadQRCodeFromURL(qrCodeUrl)}
               >
                 {t('commons.downloadQrBtn')}
               </Button>

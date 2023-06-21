@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-let */
 /* eslint-disable functional/immutable-data */
 export const copyTextToClipboard = (magicLink: string | undefined) => {
   if (typeof magicLink === 'string') {
@@ -21,6 +22,53 @@ export const downloadQRCode = (selector: string, trxCode: string | undefined) =>
     downloadLink.click();
     document.body.removeChild(downloadLink);
   }
+};
+
+export const downloadQRCodeFromURL = (url: string) => {
+  fetch(url)
+    .then((response) => response.blob())
+    .then((blob) => {
+      const link = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = link;
+      const fileName = 'qrcode.png';
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    })
+    .catch((error) => console.log(error));
+};
+
+export const mapDataForDiscoutTimeRecap = (
+  trxExpirationMinutes: number | undefined,
+  trxDate: Date | undefined
+) => {
+  let expirationDays;
+  let expirationDate;
+  let expirationTime;
+  if (typeof trxExpirationMinutes === 'number' && typeof trxDate === 'object') {
+    const expDays = trxExpirationMinutes / 1440;
+    const expDaysStr = expDays.toString();
+    expirationDays = parseInt(expDaysStr, 10);
+    const trxDateStr = trxDate.toString();
+    const expDate = new Date(trxDateStr);
+    const days = expDate.getDate();
+    expDate.setDate(days + expDays);
+    const expDateStrArr = expDate
+      .toLocaleString('it-IT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: 'Europe/Rome',
+        hour: 'numeric',
+        minute: 'numeric',
+      })
+      .split(', ');
+    expirationDate = expDateStrArr[0];
+    expirationTime = expDateStrArr[1];
+  }
+  return { expirationDays, expirationDate, expirationTime };
 };
 
 export const formattedCurrency = (number: number | undefined, symbol: string = '-') => {

@@ -362,6 +362,8 @@ components:
         - trxId
         - effectiveAmount
         - status
+        - qrcodePngUrl
+        - qrcodeTxtUrl
       properties:
         trxCode:
           type: string

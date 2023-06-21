@@ -5,12 +5,16 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { Alert, Box, Button, FormControl, Paper, TextField, Typography } from '@mui/material';
 import { Toast } from '@pagopa/selfcare-common-frontend';
-import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
-import { copyTextToClipboard, downloadQRCode } from '../../helpers';
+import {
+  copyTextToClipboard,
+  downloadQRCodeFromURL,
+  mapDataForDiscoutTimeRecap,
+} from '../../helpers';
 import { BASE_ROUTE } from '../../routes';
 
 interface Props {
@@ -24,46 +28,21 @@ const DiscountCreatedRecap = ({ data }: Props) => {
   const [expirationDate, setExpirationDate] = useState<string>();
   const [expirationTime, setExpirationTime] = useState<string>();
   const [magicLink, setMagicLink] = useState<string>();
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [openCopySuccesToast, setOpenCopySuccesToast] = useState<boolean>(false);
   const [openDownloadSuccesToast, setOpenDownloadSuccesToast] = useState<boolean>(false);
 
   useEffect(() => {
-    if (
-      typeof data !== 'undefined' &&
-      data.hasOwnProperty('trxExpirationMinutes') &&
-      typeof data.trxExpirationMinutes === 'number' &&
-      data.hasOwnProperty('trxDate') &&
-      typeof data.trxDate === 'object'
-    ) {
-      const expDays = data?.trxExpirationMinutes / 1440;
-      const expDaysStr = expDays.toString();
-      setExpirationDays(parseInt(expDaysStr, 10));
-
-      const trxDateStr = data.trxDate.toString();
-      const expDate = new Date(trxDateStr);
-      const days = expDate.getDate();
-      expDate.setDate(days + expDays);
-
-      const expDateStrArr = expDate
-        .toLocaleString('it-IT', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          timeZone: 'Europe/Rome',
-          hour: 'numeric',
-          minute: 'numeric',
-        })
-        .split(', ');
-      setExpirationDate(expDateStrArr[0]);
-      setExpirationTime(expDateStrArr[1]);
-    }
-
-    if (
-      typeof data !== 'undefined' &&
-      data.hasOwnProperty('trxCode') &&
-      typeof data.trxCode === 'string'
-    ) {
-      setMagicLink(`https://www.idpay.it/authorizationlink/${data?.trxCode}`);
+    if (typeof data !== 'undefined') {
+      const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
+        data.trxExpirationMinutes,
+        data.trxDate
+      );
+      setExpirationDays(expirationDays);
+      setExpirationDate(expirationDate);
+      setExpirationTime(expirationTime);
+      setMagicLink(data?.qrcodeTxtUrl);
+      setQrCodeUrl(data?.qrcodePngUrl);
     }
   }, [data]);
 
@@ -136,7 +115,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               variant="contained"
               sx={{ height: '43px' }}
               onClick={() => {
-                downloadQRCode('qr-container', data?.trxCode);
+                downloadQRCodeFromURL(qrCodeUrl);
                 setOpenDownloadSuccesToast(true);
               }}
               data-testid="download-qr-code-button-test"
@@ -145,7 +124,9 @@ const DiscountCreatedRecap = ({ data }: Props) => {
             </Button>
           </Box>
           <Box sx={{ gridColumn: 'span 2', justifySelf: 'end' }}>
-            <QRCodeSVG id="qr-container" value={magicLink || ''} />
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <img src={qrCodeUrl} width="100%" />
+            </Box>
           </Box>
         </Box>
       </Paper>
