@@ -1,9 +1,9 @@
 import { screen } from '@testing-library/react';
 import React from 'react';
 import { MerchantsApiMocked } from '../../../api/__mocks__/MerchantsApiClient';
-import { MerchantTransactionsListDTO } from '../../../api/generated/merchants/MerchantTransactionsListDTO';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import MerchantTransactionsProcessed from '../MerchantTransactionsProcessed';
+import { MerchantTransactionsProcessedListDTO } from '../../../api/generated/merchants/MerchantTransactionsProcessedListDTO';
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -17,7 +17,7 @@ describe('test suite for MerchantTransactionsProcessed', () => {
 
   test('should render initative empty component in case of  Error from getMerchantTransactions API response', async () => {
     MerchantsApiMocked.getMerchantTransactionsProcessed =
-      async (): Promise<MerchantTransactionsListDTO> =>
+      async (): Promise<MerchantTransactionsProcessedListDTO> =>
         Promise.reject('mocked error response for tests');
 
     renderWithContext(<MerchantTransactionsProcessed id={'testId2222'} />);
@@ -29,7 +29,7 @@ describe('test suite for MerchantTransactionsProcessed', () => {
 
   test('render of component MerchantTransactionsProcessed in case of empty content from Api getMerchantTransactionsProcessed', async () => {
     MerchantsApiMocked.getMerchantTransactionsProcessed =
-      async (): Promise<MerchantTransactionsListDTO> =>
+      async (): Promise<MerchantTransactionsProcessedListDTO> =>
         new Promise((resolve) =>
           resolve({
             content: [],

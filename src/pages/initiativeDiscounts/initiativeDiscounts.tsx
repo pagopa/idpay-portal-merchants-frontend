@@ -1,6 +1,6 @@
 import { Box, Button, Typography, Tabs, Tab } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { matchPath, useHistory } from 'react-router-dom';
 import { useAppDispatch } from '../../redux/hooks';
@@ -28,6 +28,10 @@ const InitiativeDiscounts = () => {
     strict: false,
   });
   const { id } = (match?.params as MatchParams) || {};
+
+  useEffect(() => {
+    setValue(0);
+  }, [id]);
 
   interface TabPanelProps {
     children?: React.ReactNode;

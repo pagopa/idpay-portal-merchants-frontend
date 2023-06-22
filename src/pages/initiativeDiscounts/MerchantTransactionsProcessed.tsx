@@ -13,12 +13,12 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { formatDate, formattedCurrency } from '../../helpers';
 import { getMerchantTransactionsProcessed } from '../../services/merchantService';
 import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
-import { TransactionTypeEnum, renderTrasactionStatus } from './helpers';
+import { MerchantTransactionProcessedDTO } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
+import { renderTrasactionProcessedStatus } from './helpers';
 
 interface Props {
   id: string;
@@ -27,7 +27,7 @@ interface Props {
 const MerchantTransactionsProcessed = ({ id }: Props) => {
   const { t } = useTranslation();
   const [page, setPage] = useState<number>(0);
-  const [rows, setRows] = useState<Array<MerchantTransactionDTO>>([]);
+  const [rows, setRows] = useState<Array<MerchantTransactionProcessedDTO>>([]);
   const [rowsPerPage, setRowsPerPage] = useState<number>(0);
   const [totalElements, setTotalElements] = useState<number>(0);
   const theme = createTheme(itIT);
@@ -117,11 +117,9 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
                     <TableRow key={i}>
                       <TableCell>{formatDate(r.updateDate)}</TableCell>
                       <TableCell>{r.fiscalCode}</TableCell>
-                      <TableCell>{formattedCurrency(r.effectiveAmount)}</TableCell>
-                      <TableCell>{formattedCurrency(r.rewardAmount)}</TableCell>
-                      <TableCell>
-                        {renderTrasactionStatus(r.status, TransactionTypeEnum.PROCESSED)}
-                      </TableCell>
+                      <TableCell>{formattedCurrency(r.effectiveAmount, '-', true)}</TableCell>
+                      <TableCell>{formattedCurrency(r.rewardAmount, '-', true)}</TableCell>
+                      <TableCell>{renderTrasactionProcessedStatus(r.status)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -145,7 +143,9 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
           </Box>
         </Box>
       ) : (
-        <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
+        <Box sx={{ mt: 2 }}>
+          <EmptyList message={t('pages.initiativeDiscounts.emptyProcessedList')} />
+        </Box>
       )}
     </Box>
   );

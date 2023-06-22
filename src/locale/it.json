@@ -77,6 +77,7 @@
       "discountAuthorized": "Autorizzato",
       "discountStatus": "Stato",
       "emptyList": "Non ci sono buoni sconto in corso per questa iniziativa.",
+      "emptyProcessedList": "Non ci sono buoni sconto contabilizzati per questa iniziativa.",
       "filterByStatus": "Stato",
       "listTitle": "Buoni sconto emessi",
       "paymentConfirmed": "Pagamento confermato",

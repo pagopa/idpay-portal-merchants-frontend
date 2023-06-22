@@ -1,16 +1,19 @@
 import { StatusEnum } from '../generated/merchants/InitiativeDTO';
 import { MerchantStatisticsDTO } from '../generated/merchants/MerchantStatisticsDTO';
 import { StatusEnum as TransactionStatusEnum } from '../generated/merchants/MerchantTransactionDTO';
+import { StatusEnum as TransactionProcessedStatusEnum } from '../generated/merchants/MerchantTransactionProcessedDTO';
 import {
   MerchantDetailDTO,
   StatusEnum as MerchantStatusEnum,
 } from '../generated/merchants/MerchantDetailDTO';
+
 import { MerchantTransactionsListDTO } from '../generated/merchants/MerchantTransactionsListDTO';
 import {
   StatusEnum as TransactionCreatedStatusEnum,
   TransactionResponse,
 } from '../generated/merchants/TransactionResponse';
 import { InitiativeDTOArray } from '../generated/merchants/InitiativeDTOArray';
+import { MerchantTransactionsProcessedListDTO } from '../generated/merchants/MerchantTransactionsProcessedListDTO';
 
 const startDate = new Date();
 const endDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
@@ -88,13 +91,22 @@ export const mockedMerchantTransactionList = {
       qrcodePngUrl: 'example.com/image',
       qrcodeTxtUrl: 'example.com/image',
     },
+  ],
+  pageNo: 0,
+  pageSize: 10,
+  totalElements: 4,
+  totalPages: 1,
+};
+
+export const mockedMerchantTransactionProcessedList = {
+  content: [
     {
       trxCode: 'string',
       trxId: '12345asdfgf',
       fiscalCode: 'string',
       effectiveAmount: 5000,
       updateDate: startDate,
-      status: TransactionStatusEnum.REWARDED,
+      status: TransactionProcessedStatusEnum.REWARDED,
       trxDate: new Date(),
       trxExpirationMinutes: 4320,
       qrcodePngUrl: 'example.com/image',
@@ -106,7 +118,7 @@ export const mockedMerchantTransactionList = {
       fiscalCode: 'string',
       effectiveAmount: 5000,
       updateDate: startDate,
-      status: TransactionStatusEnum.CANCELLED,
+      status: TransactionProcessedStatusEnum.CANCELLED,
       trxDate: new Date(),
       trxExpirationMinutes: 4320,
       qrcodePngUrl: 'example.com/image',
@@ -181,8 +193,8 @@ export const MerchantsApiMocked = {
     _page: number,
     _fiscalCode?: string,
     _status?: string
-  ): Promise<MerchantTransactionsListDTO> =>
-    new Promise((resolve) => resolve(mockedMerchantTransactionList)),
+  ): Promise<MerchantTransactionsProcessedListDTO> =>
+    new Promise((resolve) => resolve(mockedMerchantTransactionProcessedList)),
 
   getMerchantInitiativeStatistics: async (_initiativeId: string): Promise<MerchantStatisticsDTO> =>
     new Promise((resolve) => resolve(mockedMerchantInitiativeStatistics)),

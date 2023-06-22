@@ -10,6 +10,7 @@ import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsD
 import { MerchantDetailDTO } from './generated/merchants/MerchantDetailDTO';
 import { TransactionResponse } from './generated/merchants/TransactionResponse';
 import { InitiativeDTOArray } from './generated/merchants/InitiativeDTOArray';
+import { MerchantTransactionsProcessedListDTO } from './generated/merchants/MerchantTransactionsProcessedListDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -66,7 +67,7 @@ export const MerchantApi = {
     page: number,
     fiscalCode?: string,
     status?: string
-  ): Promise<MerchantTransactionsListDTO> => {
+  ): Promise<MerchantTransactionsProcessedListDTO> => {
     const result = await apiClient.getMerchantTransactionsProcessed({
       initiativeId,
       page,

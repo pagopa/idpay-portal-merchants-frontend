@@ -1,15 +1,16 @@
 import { Chip } from '@mui/material';
 import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
-import { StatusEnum as TransactionStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
+import { StatusEnum as TransactionCreatedStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
+import { StatusEnum as TransactionProcessedStatusEnum } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
 
 export enum TransactionTypeEnum {
   PROCESSED,
   NOT_PROCESSED,
 }
 
-export const renderTrasactionStatus = (status: string, type: TransactionTypeEnum) => {
+export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusEnum) => {
   switch (status) {
-    case TransactionStatusEnum.AUTHORIZED:
+    case TransactionCreatedStatusEnum.AUTHORIZED:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -17,8 +18,9 @@ export const renderTrasactionStatus = (status: string, type: TransactionTypeEnum
           color="info"
         />
       );
-    case TransactionStatusEnum.CREATED:
-    case TransactionStatusEnum.IDENTIFIED:
+    case TransactionCreatedStatusEnum.CREATED:
+    case TransactionCreatedStatusEnum.IDENTIFIED:
+    case TransactionCreatedStatusEnum.REJECTED:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -26,19 +28,12 @@ export const renderTrasactionStatus = (status: string, type: TransactionTypeEnum
           color="default"
         />
       );
-    case TransactionStatusEnum.REJECTED:
-      return (
-        <Chip
-          sx={{ fontSize: '14px' }}
-          label={
-            type === TransactionTypeEnum.NOT_PROCESSED
-              ? i18n.t('commons.discountStatusEnum.identified')
-              : i18n.t('commons.discountStatusEnum.rejected')
-          }
-          color={type === TransactionTypeEnum.NOT_PROCESSED ? 'default' : 'error'}
-        />
-      );
-    case TransactionStatusEnum.REWARDED:
+  }
+};
+
+export const renderTrasactionProcessedStatus = (status: TransactionProcessedStatusEnum) => {
+  switch (status) {
+    case TransactionProcessedStatusEnum.REWARDED:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -46,7 +41,7 @@ export const renderTrasactionStatus = (status: string, type: TransactionTypeEnum
           color="success"
         />
       );
-    case TransactionStatusEnum.CANCELLED:
+    case TransactionProcessedStatusEnum.CANCELLED:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -54,7 +49,5 @@ export const renderTrasactionStatus = (status: string, type: TransactionTypeEnum
           color="error"
         />
       );
-    default:
-      return null;
   }
 };

@@ -27,7 +27,7 @@ import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
 import AuthorizeTransactionModal from './AuthorizeTransactionModal';
 import CancelTransactionModal from './CancelTransactionModal';
-import { TransactionTypeEnum, renderTrasactionStatus } from './helpers';
+import { renderTransactionCreatedStatus } from './helpers';
 
 type ActionsMenuProps = {
   initiativeId: string;
@@ -112,8 +112,6 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
             />
           </>
         );
-      default:
-        return null;
     }
   };
 
@@ -262,8 +260,6 @@ const MerchantTransactions = ({ id }: Props) => {
       case TransactionStatusEnum.IDENTIFIED:
       case TransactionStatusEnum.REJECTED:
         return true;
-      default:
-        return false;
     }
   };
 
@@ -300,11 +296,9 @@ const MerchantTransactions = ({ id }: Props) => {
                       <TableCell>
                         {r.status === TransactionStatusEnum.AUTHORIZED ? r.fiscalCode : ''}
                       </TableCell>
-                      <TableCell>{formattedCurrency(r.effectiveAmount)}</TableCell>
-                      <TableCell>{formattedCurrency(r.rewardAmount)}</TableCell>
-                      <TableCell>
-                        {renderTrasactionStatus(r.status, TransactionTypeEnum.NOT_PROCESSED)}
-                      </TableCell>
+                      <TableCell>{formattedCurrency(r.effectiveAmount, '-', true)}</TableCell>
+                      <TableCell>{formattedCurrency(r.rewardAmount, '-', true)}</TableCell>
+                      <TableCell>{renderTransactionCreatedStatus(r.status)}</TableCell>
                       {showActionMenu(r.status) ? (
                         <ActionMenu initiativeId={id} status={r.status} trxId={r.trxId} data={r} />
                       ) : (
@@ -333,7 +327,9 @@ const MerchantTransactions = ({ id }: Props) => {
           </Box>
         </Box>
       ) : (
-        <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
+        <Box sx={{ mt: 2 }}>
+          <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
+        </Box>
       )}
     </Box>
   );

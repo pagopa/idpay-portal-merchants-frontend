@@ -3,6 +3,7 @@ import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOA
 import { MerchantDetailDTO } from '../../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../../api/generated/merchants/MerchantStatisticsDTO';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
+import { MerchantTransactionsProcessedListDTO } from '../../api/generated/merchants/MerchantTransactionsProcessedListDTO';
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
 
 export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> =>
@@ -21,7 +22,7 @@ export const getMerchantTransactionsProcessed = (
   page: number,
   fiscalCode?: string,
   status?: string
-): Promise<MerchantTransactionsListDTO> =>
+): Promise<MerchantTransactionsProcessedListDTO> =>
   MerchantsApiMocked.getMerchantTransactionsProcessed(initiativeId, page, fiscalCode, status);
 
 export const getMerchantInitiativeStatistics = (
