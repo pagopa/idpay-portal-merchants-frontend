@@ -3,6 +3,7 @@ import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOA
 import { MerchantDetailDTO } from '../../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../../api/generated/merchants/MerchantStatisticsDTO';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
+import { MerchantTransactionsProcessedListDTO } from '../../api/generated/merchants/MerchantTransactionsProcessedListDTO';
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
 
 export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> =>
@@ -15,6 +16,14 @@ export const getMerchantTransactions = (
   status?: string
 ): Promise<MerchantTransactionsListDTO> =>
   MerchantsApiMocked.getMerchantTransactions(initiativeId, page, fiscalCode, status);
+
+export const getMerchantTransactionsProcessed = (
+  initiativeId: string,
+  page: number,
+  fiscalCode?: string,
+  status?: string
+): Promise<MerchantTransactionsProcessedListDTO> =>
+  MerchantsApiMocked.getMerchantTransactionsProcessed(initiativeId, page, fiscalCode, status);
 
 export const getMerchantInitiativeStatistics = (
   initiativeId: string
@@ -29,12 +38,11 @@ export const deleteTransaction = (transactionId: string): Promise<void> =>
 
 export const createTransaction = (
   amountCents: number,
-  idTrxIssuer: string,
+  idTrxAcquirer: string,
   initiativeId: string,
-  trxDate: Date,
   mcc: string | undefined
 ): Promise<TransactionResponse> =>
-  MerchantsApiMocked.createTransaction(amountCents, idTrxIssuer, initiativeId, trxDate, mcc);
+  MerchantsApiMocked.createTransaction(amountCents, idTrxAcquirer, initiativeId, mcc);
 
 // export const confirmPaymentQRCode = (transactionId: string) =>
 //   MerchantsApiMocked.confirmPaymentQRCode(transactionId);

@@ -5,6 +5,7 @@ import { InitiativeDTOArray } from '../api/generated/merchants/InitiativeDTOArra
 import { MerchantDetailDTO } from '../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../api/generated/merchants/MerchantStatisticsDTO';
 import { MerchantTransactionsListDTO } from '../api/generated/merchants/MerchantTransactionsListDTO';
+import { MerchantTransactionsProcessedListDTO } from '../api/generated/merchants/MerchantTransactionsProcessedListDTO';
 import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
 
 export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> => {
@@ -24,6 +25,23 @@ export const getMerchantTransactions = (
     return MerchantsApiMocked.getMerchantTransactions(initiativeId, page, fiscalCode, status);
   }
   return MerchantApi.getMerchantTransactions(initiativeId, page, fiscalCode, status);
+};
+
+export const getMerchantTransactionsProcessed = (
+  initiativeId: string,
+  page: number,
+  fiscalCode?: string,
+  status?: string
+): Promise<MerchantTransactionsProcessedListDTO> => {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
+    return MerchantsApiMocked.getMerchantTransactionsProcessed(
+      initiativeId,
+      page,
+      fiscalCode,
+      status
+    );
+  }
+  return MerchantApi.getMerchantTransactionsProcessed(initiativeId, page, fiscalCode, status);
 };
 
 export const getMerchantInitiativeStatistics = (
@@ -51,21 +69,14 @@ export const deleteTransaction = (transactionId: string): Promise<void> => {
 
 export const createTransaction = (
   amountCents: number,
-  idTrxIssuer: string,
+  idTrxAcquirer: string,
   initiativeId: string,
-  trxDate: Date,
   mcc: string | undefined
 ): Promise<TransactionResponse> => {
   if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
-    return MerchantsApiMocked.createTransaction(
-      amountCents,
-      idTrxIssuer,
-      initiativeId,
-      trxDate,
-      mcc
-    );
+    return MerchantsApiMocked.createTransaction(amountCents, idTrxAcquirer, initiativeId, mcc);
   }
-  return MerchantApi.createTransaction(amountCents, idTrxIssuer, initiativeId, trxDate, mcc);
+  return MerchantApi.createTransaction(amountCents, idTrxAcquirer, initiativeId, mcc);
 };
 
 // export const confirmPaymentQRCode = (transactionId: string) => {

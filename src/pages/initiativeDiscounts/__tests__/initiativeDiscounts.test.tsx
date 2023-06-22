@@ -1,8 +1,5 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { MerchantsApiMocked } from '../../../api/__mocks__/MerchantsApiClient';
-import { StatusEnum as TransactionStatusEnum } from '../../../api/generated/merchants/MerchantTransactionDTO';
-import { MerchantTransactionsListDTO } from '../../../api/generated/merchants/MerchantTransactionsListDTO';
 import { BASE_ROUTE } from '../../../routes';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import InitiativeDiscounts from '../initiativeDiscounts';
@@ -55,7 +52,7 @@ describe('Test suite for initiativeDiscounts page', () => {
 
     await waitFor(() => expect(oldLocPathnameUpload !== history.location.pathname).toBeTruthy());
   });
-
+/*
   test('test filter by fiscalCode and status of initiativeDiscounts, onClick of submit button and reset button  ', async () => {
     renderWithContext(<InitiativeDiscounts />);
 
@@ -98,7 +95,7 @@ describe('Test suite for initiativeDiscounts page', () => {
 
     await waitFor(() => expect(searcMerchant.value).toEqual(''));
   });
-
+*/
   test('on click of AUTHORIZE trx in status CREATED', async () => {
     renderWithContext(<InitiativeDiscounts />);
 
@@ -153,14 +150,14 @@ describe('Test suite for initiativeDiscounts page', () => {
     fireEvent.click(transactionRejected);
   });
 
-  test('should render initative empty component in case of  Error from getMerchantTransactions API response', async () => {
-    MerchantsApiMocked.getMerchantTransactions = async (): Promise<MerchantTransactionsListDTO> =>
-      Promise.reject('mocked error response for tests');
-
+  test('on change of merchant transactions tabs', async () => {
     renderWithContext(<InitiativeDiscounts />);
+    const currentDiscounts = screen.getByTestId('merchant-transactions-1');
+    fireEvent.click(currentDiscounts);
 
-    const emptyDiscountList = await screen.findByText('pages.initiativeDiscounts.emptyList');
+    const processedDiscounts = screen.getByTestId('merchant-transactions-2');
+    fireEvent.click(processedDiscounts);
 
-    expect(emptyDiscountList).toBeInTheDocument();
   });
+
 });

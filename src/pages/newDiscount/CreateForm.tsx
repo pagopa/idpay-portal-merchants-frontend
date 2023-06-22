@@ -49,9 +49,9 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
       const roundedAmount = parseFloat(values.spendingAmount).toFixed(2);
       const amountCents = parseFloat(roundedAmount) * 100;
       const trxDate = new Date();
-      const idTrxIssuer = trxDate.getTime().toString();
+      const idTrxAcquirer = trxDate.getTime().toString();
       if (typeof id === 'string') {
-        createTransaction(amountCents, idTrxIssuer, id, trxDate, undefined)
+        createTransaction(amountCents, idTrxAcquirer, id, undefined)
           .then((response) => {
             setDiscountResponse({ ...response });
             setDiscountCreated(true);
