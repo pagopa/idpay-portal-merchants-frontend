@@ -76,7 +76,6 @@ export const formattedCurrency = (
   symbol: string = '-',
   cents: boolean = false
 ) => {
-  console.log(cents);
   if (number && cents === false) {
     return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(number);
   } else if (number && cents === true) {

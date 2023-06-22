@@ -22,7 +22,9 @@ describe('test suite for MerchantTransactionsProcessed', () => {
 
     renderWithContext(<MerchantTransactionsProcessed id={'testId2222'} />);
 
-    const emptyDiscountList = await screen.findByText('pages.initiativeDiscounts.emptyList');
+    const emptyDiscountList = await screen.findByText(
+      'pages.initiativeDiscounts.emptyProcessedList'
+    );
 
     expect(emptyDiscountList).toBeInTheDocument();
   });
@@ -41,7 +43,9 @@ describe('test suite for MerchantTransactionsProcessed', () => {
         );
     renderWithContext(<MerchantTransactionsProcessed id={'testId2222'} />);
 
-    const emptyDiscountList = await screen.findByText('pages.initiativeDiscounts.emptyList');
+    const emptyDiscountList = await screen.findByText(
+      'pages.initiativeDiscounts.emptyProcessedList'
+    );
 
     expect(emptyDiscountList).toBeInTheDocument();
   });
