@@ -78,9 +78,8 @@ describe('Test suite for CreateForm component', () => {
   test('Submit KO', async () => {
     MerchantsApiMocked.createTransaction = async (
       _amountCents: number,
-      _idTrxIssuer: string,
+      _idTrxAcquirer: string,
       _initiativeId: string,
-      _trxDate: Date,
       _mcc: string | undefined
     ): Promise<TransactionResponse> => Promise.reject('testing catch case');
 

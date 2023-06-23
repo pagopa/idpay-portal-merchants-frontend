@@ -1,17 +1,26 @@
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { transactionResponseMocked } from '../../../api/__mocks__/MerchantsApiClient';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import DiscountCreatedRecap from '../DiscountCreatedRecap';
-import { transactionResponseMocked } from '../../../api/__mocks__/MerchantsApiClient';
 
 import userEvent from '@testing-library/user-event';
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
+
+  // Mock the fetch response
+  const mockResponse = {
+    blob: () => Promise.resolve(new Blob()),
+  } as Response;
+
+  jest.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 });
 
 global.URL.createObjectURL = jest.fn();
+
+afterEach(() => cleanup);
 
 describe('Test suite for DiscountCreatedRecap component', () => {
   window.scrollTo = jest.fn();
