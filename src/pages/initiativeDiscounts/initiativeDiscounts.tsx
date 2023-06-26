@@ -1,13 +1,13 @@
-import { Box, Button, Typography, Tabs, Tab } from '@mui/material';
+import { Box, Button, Tab, Tabs, Typography } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { matchPath, useHistory } from 'react-router-dom';
-import { useAppDispatch } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { initiativeSelector, setSelectedName } from '../../redux/slices/initiativesSlice';
 import ROUTES, { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle, pagesTableContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
-import { setSelectedName } from '../../redux/slices/initiativesSlice';
 import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
 import MerchantTransactions from './MerchantTransactions';
 import MerchantTransactionsProcessed from './MerchantTransactionsProcessed';
@@ -22,6 +22,7 @@ const InitiativeDiscounts = () => {
   const [value, setValue] = useState(0);
   const history = useHistory();
   const dispatch = useAppDispatch();
+  const selcetedInitiative = useAppSelector(initiativeSelector);
   const match = matchPath(location.pathname, {
     path: [ROUTES.DISCOUNTS],
     exact: true,

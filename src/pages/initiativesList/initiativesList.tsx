@@ -20,8 +20,8 @@ import { grey } from '@mui/material/colors';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useAppSelector } from '../../redux/hooks';
-import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
 import EmptyList from '../components/EmptyList';
 import { StatusEnum } from '../../api/generated/merchants/InitiativeDTO';
 import { BASE_ROUTE } from '../../routes';
@@ -106,6 +106,7 @@ const InitiativesList = () => {
   const history = useHistory();
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (Array.isArray(initiativesListSel)) {
@@ -248,9 +249,17 @@ const InitiativesList = () => {
                               fontSize: '1em',
                               textAlign: 'left',
                             }}
-                            onClick={() =>
-                              history.replace(`${BASE_ROUTE}/sconti-iniziativa/${row.initiativeId}`)
-                            }
+                            onClick={() => {
+                              dispatch(
+                                setSelectedInitative({
+                                  spendingPeriod: row.spendingPeriod,
+                                  initiativeName: row.initiativeName,
+                                })
+                              );
+                              history.replace(
+                                `${BASE_ROUTE}/sconti-iniziativa/${row.initiativeId}`
+                              );
+                            }}
                             data-testid="initiative-btn-test"
                           >
                             {row.initiativeName}
