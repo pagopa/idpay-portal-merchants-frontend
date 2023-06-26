@@ -3,14 +3,15 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { matchPath, useHistory } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { initiativeSelector, setSelectedName } from '../../redux/slices/initiativesSlice';
+import { useAppSelector } from '../../redux/hooks';
+import { initiativeSelector } from '../../redux/slices/initiativesSlice';
 import ROUTES, { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle, pagesTableContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
 import MerchantTransactions from './MerchantTransactions';
 import MerchantTransactionsProcessed from './MerchantTransactionsProcessed';
+import { mapDatesFromPeriod, userCanCreateDiscount } from './helpers';
 
 interface MatchParams {
   id: string;
@@ -18,11 +19,11 @@ interface MatchParams {
 
 const InitiativeDiscounts = () => {
   const { t } = useTranslation();
-  const [initiativeName, setInitativeName] = useState<string | undefined>();
   const [value, setValue] = useState(0);
   const history = useHistory();
-  const dispatch = useAppDispatch();
-  const selcetedInitiative = useAppSelector(initiativeSelector);
+  const selectedInitiative = useAppSelector(initiativeSelector);
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
   const match = matchPath(location.pathname, {
     path: [ROUTES.DISCOUNTS],
     exact: true,
@@ -31,6 +32,9 @@ const InitiativeDiscounts = () => {
   const { id } = (match?.params as MatchParams) || {};
 
   useEffect(() => {
+    const dates = mapDatesFromPeriod(selectedInitiative?.spendingPeriod);
+    setStartDate(dates?.startDate);
+    setEndDate(dates?.endDate);
     setValue(0);
   }, [id]);
 
@@ -77,7 +81,7 @@ const InitiativeDiscounts = () => {
           backLabel={t('commons.backBtn')}
           items={[
             t('pages.initiativesList.title'),
-            initiativeName,
+            selectedInitiative?.initiativeName,
             t('pages.initiativeDiscounts.title'),
           ]}
         />
@@ -95,21 +99,22 @@ const InitiativeDiscounts = () => {
           />
         </Box>
         <Box sx={{ display: 'grid', gridColumn: 'span 2', mt: 2, justifyContent: 'right' }}>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => {
-              dispatch(setSelectedName(initiativeName));
-              history.replace(`${BASE_ROUTE}/crea-sconto/${id}`);
-            }}
-            data-testid="goToWizard-btn-test"
-          >
-            {t('pages.initiativeDiscounts.createBtn')}
-          </Button>
+          {userCanCreateDiscount(startDate, endDate) && (
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => {
+                history.replace(`${BASE_ROUTE}/crea-sconto/${id}`);
+              }}
+              data-testid="goToWizard-btn-test"
+            >
+              {t('pages.initiativeDiscounts.createBtn')}
+            </Button>
+          )}
         </Box>
       </Box>
 
-      <InitiativeDiscountsSummary id={id} setInitiativeName={setInitativeName} />
+      <InitiativeDiscountsSummary id={id} />
 
       <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 4, mb: 3 }}>
         <Typography variant="h6">{t('pages.initiativeDiscounts.listTitle')}</Typography>

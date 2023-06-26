@@ -5,8 +5,9 @@ import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOA
 
 interface InitiativesState {
   list?: InitiativeDTOArray;
-  selectedName?: string | undefined;
-  selectedInitative?: object | undefined;
+  selectedInitative?:
+    | { initiativeName?: string | undefined; spendingPeriod?: string | undefined }
+    | undefined;
 }
 
 const initialState: InitiativesState = {};
@@ -19,23 +20,28 @@ export const initiativesSlice = createSlice({
     setInitiativesList: (state, action: PayloadAction<InitiativeDTOArray>) => {
       state.list = [...action.payload];
     },
-    setSelectedName: (state, action: PayloadAction<string | undefined>) => {
-      state.selectedName = action.payload;
-    },
-    setSelectedInitative: (state, action: PayloadAction<object | undefined>) => {
-      state.selectedInitative = {...action.payload};
+    setSelectedInitative: (
+      state,
+      action: PayloadAction<
+        | {
+            initiativeName?: string | undefined;
+            spendingPeriod?: string | undefined;
+          }
+        | undefined
+      >
+    ) => {
+      state.selectedInitative = { ...action.payload };
     },
   },
 });
 
-export const { setInitiativesList, setSelectedName, setSelectedInitative } =
-  initiativesSlice.actions;
+export const { setInitiativesList, setSelectedInitative } = initiativesSlice.actions;
 export const initiativesReducer = initiativesSlice.reducer;
 
 export const intiativesListSelector = (state: RootState): InitiativeDTOArray | undefined =>
   state.initiatives.list;
-export const initiativeNameSelector = (state: RootState): string | undefined =>
-  state.initiatives.selectedName;
 
-export const initiativeSelector = (state: RootState): object | undefined =>
+export const initiativeSelector = (
+  state: RootState
+): { initiativeName?: string | undefined; spendingPeriod?: string | undefined } | undefined =>
   state.initiatives.selectedInitative;
