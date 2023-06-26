@@ -77,6 +77,9 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
     if (typeof id === 'string') {
       getTableData(id, page, undefined, undefined);
     }
+    return () => {
+      setRows([]);
+    };
   }, [id, page]);
 
   const handleChangePage = (
