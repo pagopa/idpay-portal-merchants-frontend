@@ -57,7 +57,7 @@ const InitiativeDiscounts = () => {
       >
         {value === index && (
           <Box sx={{ pt: 3 }}>
-            <Typography>{children}</Typography>
+            <Box>{children}</Box>
           </Box>
         )}
       </div>
@@ -140,10 +140,12 @@ const InitiativeDiscounts = () => {
               />
             </Tabs>
           </Box>
+
           <Box sx={{ width: '100%' }}>
             <TabPanel value={value} index={0}>
               <MerchantTransactions id={id} />
             </TabPanel>
+
             <TabPanel value={value} index={1}>
               <MerchantTransactionsProcessed id={id} />
             </TabPanel>
