@@ -56,8 +56,8 @@ export const renderTrasactionProcessedStatus = (status: TransactionProcessedStat
 export const mapDatesFromPeriod = (period: string | undefined) => {
   if (typeof period === 'string') {
     const dates = period.split(' - ');
-    const startDateStr = dates[0].split('/').reverse().join('-');
-    const endDateStr = dates[1].split('/').reverse().join('-');
+    const startDateStr = `${dates[0].split('/').reverse().join('-')} 00:00:00`;
+    const endDateStr = `${dates[1].split('/').reverse().join('-')} 23:59:59`;
     const startDate = new Date(startDateStr);
     const endDate = new Date(endDateStr);
     return { startDate, endDate };
