@@ -39,13 +39,18 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
   }, [id]);
 
   useEffect(() => {
+    setAmount(undefined);
+    setRefunded(undefined);
     if (typeof id === 'string') {
       getMerchantInitiativeStatistics(id)
         .then((response) => {
           setAmount(response?.amount);
           setRefunded(response?.refunded);
         })
-        .catch((_error) => {});
+        .catch((_error) => {
+          setAmount(undefined);
+          setRefunded(undefined);
+        });
     }
   }, [id]);
 
