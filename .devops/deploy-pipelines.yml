@@ -205,7 +205,7 @@ stages:
               REACT_APP_URL_FE_LOGIN: '$(react_app_url_fe_auth)/login'
               REACT_APP_URL_FE_LOGOUT: '$(react_app_url_fe_auth)/logout'
               REACT_APP_URL_FE_LANDING: '$(react_app_url_fe_landing)'
-              REACT_APP_URL_FE_ASSISTANCE: '$(react_app_url_fe_assistance)'
+              REACT_APP_URL_FE_ASSISTANCE_MERCHANTS: '$(react_app_url_fe_assistance)'
 
               REACT_APP_URL_API_MERCHANTS_PORTAL: '$(react_app_url_api_merchants_portal)'
               REACT_APP_URL_API_ROLE_PERMISSION: '$(react_app_url_api_merchants)/authorization'
