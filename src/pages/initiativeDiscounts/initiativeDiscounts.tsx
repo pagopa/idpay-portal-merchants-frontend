@@ -36,7 +36,7 @@ const InitiativeDiscounts = () => {
     setStartDate(dates?.startDate);
     setEndDate(dates?.endDate);
     setValue(0);
-  }, [id]);
+  }, [id, JSON.stringify(selectedInitiative)]);
 
   interface TabPanelProps {
     children?: React.ReactNode;
