@@ -1,3 +1,4 @@
+/* eslint-disable functional/immutable-data */
 import { Chip } from '@mui/material';
 import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
 import { StatusEnum as TransactionCreatedStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
@@ -50,4 +51,26 @@ export const renderTrasactionProcessedStatus = (status: TransactionProcessedStat
         />
       );
   }
+};
+
+export const mapDatesFromPeriod = (period: string | undefined) => {
+  if (typeof period === 'string') {
+    const dates = period.split(' - ');
+    const startDateStr = `${dates[0].split('/').reverse().join('-')} 00:00:00`;
+    const endDateStr = `${dates[1].split('/').reverse().join('-')} 23:59:59`;
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+    return { startDate, endDate };
+  }
+  return undefined;
+};
+
+export const userCanCreateDiscount = (startDate: Date | undefined, endDate: Date | undefined) => {
+  if (typeof startDate === 'object' && typeof endDate === 'object') {
+    const now = new Date().getTime();
+    const nowIsGreaterOrEqualThanStartDate = startDate.getTime() <= now;
+    const nowIsLowerOrEqualThanEndDate = now <= endDate.getTime();
+    return nowIsGreaterOrEqualThanStartDate && nowIsLowerOrEqualThanEndDate;
+  }
+  return true;
 };

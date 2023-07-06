@@ -3,6 +3,8 @@ import React from 'react';
 import { BASE_ROUTE } from '../../../routes';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import InitiativeDiscounts from '../initiativeDiscounts';
+import { setSelectedInitative } from '../../../redux/slices/initiativesSlice';
+import { store } from '../../../redux/store';
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -52,7 +54,7 @@ describe('Test suite for initiativeDiscounts page', () => {
 
     await waitFor(() => expect(oldLocPathnameUpload !== history.location.pathname).toBeTruthy());
   });
-/*
+  /*
   test('test filter by fiscalCode and status of initiativeDiscounts, onClick of submit button and reset button  ', async () => {
     renderWithContext(<InitiativeDiscounts />);
 
@@ -151,13 +153,20 @@ describe('Test suite for initiativeDiscounts page', () => {
   });
 
   test('on change of merchant transactions tabs', async () => {
-    renderWithContext(<InitiativeDiscounts />);
+    // dispatch the selected initative to cover mapDatesFromPeriod and userCanCreateDiscount  functions 
+    store.dispatch(
+      setSelectedInitative({
+        initiativeName: 'local tests initiative name',
+        spendingPeriod: '15/06/2023 - 31/07/2023',
+      })
+    );
+    renderWithContext(<InitiativeDiscounts />, store);
+
     const currentDiscounts = screen.getByTestId('merchant-transactions-1');
     fireEvent.click(currentDiscounts);
+    
 
     const processedDiscounts = screen.getByTestId('merchant-transactions-2');
     fireEvent.click(processedDiscounts);
-
   });
-
 });

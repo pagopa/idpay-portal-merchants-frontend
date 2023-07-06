@@ -16,8 +16,8 @@ import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
 import ROUTES, { BASE_ROUTE } from '../../routes';
-import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
-import { useAppSelector } from '../../redux/hooks';
+import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import SidenavItem from './SidenavItem';
 
 interface MatchParams {
@@ -31,6 +31,7 @@ export default function SideMenu() {
   const history = useHistory();
   const onExit = useUnloadEventOnExit();
   const [expanded, setExpanded] = useState<string | false>(false);
+  const dispatch = useAppDispatch();
   const [pathname, setPathName] = useState(() => {
     /*
     For some reason, push on history will not notify this component.
@@ -106,6 +107,15 @@ export default function SideMenu() {
                     title={t('pages.initiativeDiscounts.title')}
                     handleClick={() =>
                       onExit(() => {
+                        dispatch(
+                          setSelectedInitative({
+                            spendingPeriod:
+                              `${item.startDate?.toLocaleDateString(
+                                'fr-FR'
+                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
+                            initiativeName: item.initiativeName,
+                          })
+                        );
                         history.replace(`${BASE_ROUTE}/sconti-iniziativa/${item.initiativeId}`);
                       })
                     }

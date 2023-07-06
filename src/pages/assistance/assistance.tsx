@@ -48,9 +48,9 @@ const Assistance = () => {
   }, []);
 
   const validationSchema = Yup.object().shape({
-    assistanceSubject: Yup.string().required(t('validation.required')),
+    assistanceSubject: Yup.string().required(t('validation.requiredField')),
     assistanceMessage: Yup.string()
-      .required(t('validation.required'))
+      .required(t('validation.requiredField'))
       .max(500, t('validation.maxChars', { x: 500 })),
   });
 
@@ -113,18 +113,18 @@ const Assistance = () => {
               }}
             >
               <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
-                <Typography variant="h4">{t('pages.assistance.title')}</Typography>
+                <Typography variant="h4">{t('pages.assistanceRequest.title')}</Typography>
               </Box>
               <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
-                <Typography variant="body1">{t('pages.assistance.subtitle')}</Typography>
+                <Typography variant="body1">{t('pages.assistanceRequest.subtitle')}</Typography>
               </Box>
             </Box>
 
             <Paper sx={{ display: 'grid', gridColumn: 'span 12', gap: 3, my: 4, p: 3 }}>
               <FormControl>
                 <TextField
-                  label={t('pages.assistance.form.subject')}
-                  placeholder={t('pages.assistance.form.subject')}
+                  label={t('pages.assistanceRequest.subject')}
+                  placeholder={t('pages.assistanceRequest.subject')}
                   name="assistanceSubject"
                   aria-label="assistanceSubject"
                   role="input"
@@ -161,8 +161,8 @@ const Assistance = () => {
                   multiline
                   minRows={3}
                   maxRows={4}
-                  label={t('pages.assistance.form.message')}
-                  placeholder={t('pages.assistance.form.message')}
+                  label={t('pages.assistanceRequest.message')}
+                  placeholder={t('pages.assistanceRequest.message')}
                   name="assistanceMessage"
                   aria-label="assistanceMessage"
                   data-testid="assistanceMessage-test"
@@ -189,7 +189,7 @@ const Assistance = () => {
                   data-testid="sendAssistenceRequest-test"
                   disabled={!formik.dirty || !formik.isValid}
                 >
-                  {t('pages.assistance.form.sendBtn')}
+                  {t('commons.sendBtn')}
                 </Button>
               </Box>
             </Paper>
@@ -199,8 +199,8 @@ const Assistance = () => {
               {t('commons.backBtn')}
             </Button>
             <ExitModal
-              title={t('pages.assistance.exitModal.title')}
-              subtitle={t('pages.assistance.exitModal.body')}
+              title={t('pages.assistanceRequest.exitModalTitle')}
+              subtitle={t('pages.assistanceRequest.exitModalBody')}
               openExitModal={openExitModal}
               handleCloseExitModal={handleCloseExitModal}
             />
@@ -229,7 +229,7 @@ const Assistance = () => {
             <Typography variant="h4" sx={{ textAlign: 'center' }}>
               {
                 (
-                  <Trans i18nKey="pages.thankyouPage.title">
+                  <Trans i18nKey="pages.assistanceRequest.thankYouTitle">
                     Abbiamo ricevuto la tua <br /> richiesta
                   </Trans>
                 ) as unknown as string
@@ -238,7 +238,7 @@ const Assistance = () => {
           </Box>
           <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
             <Typography variant="body1" sx={{ textAlign: 'center' }}>
-              {t('pages.thankyouPage.description')}
+              {t('pages.assistanceRequest.thankYouDescription')}
             </Typography>
           </Box>
           <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
@@ -247,7 +247,7 @@ const Assistance = () => {
               onClick={() => history.replace(ROUTES.HOME)}
               data-testid="thankyouPageBackBtn-test"
             >
-              {t('pages.thankyouPage.buttonLabel')}
+              {t('commons.closeBtn')}
             </Button>
           </Box>
         </Box>

@@ -1,16 +1,15 @@
 import { Box, Card, CardContent, Typography } from '@mui/material';
 import { useErrorDispatcher } from '@pagopa/selfcare-common-frontend';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
 import { formatIban, formattedCurrency } from '../../helpers';
 
 type Props = {
   id: string;
-  setInitiativeName: Dispatch<SetStateAction<string | undefined>>;
 };
 
-const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
+const InitiativeDiscountsSummary = ({ id }: Props) => {
   const { t } = useTranslation();
   const [amount, setAmount] = useState<number | undefined>(undefined);
   const [refunded, setRefunded] = useState<number | undefined>(undefined);
@@ -21,7 +20,6 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
     if (typeof id === 'string') {
       getMerchantDetail(id)
         .then((response) => {
-          setInitiativeName(response?.initiativeName);
           setIban(response?.iban);
         })
         .catch((error) =>
@@ -41,13 +39,18 @@ const InitiativeDiscountsSummary = ({ id, setInitiativeName }: Props) => {
   }, [id]);
 
   useEffect(() => {
+    setAmount(undefined);
+    setRefunded(undefined);
     if (typeof id === 'string') {
       getMerchantInitiativeStatistics(id)
         .then((response) => {
           setAmount(response?.amount);
           setRefunded(response?.refunded);
         })
-        .catch((_error) => {});
+        .catch((_error) => {
+          setAmount(undefined);
+          setRefunded(undefined);
+        });
     }
   }, [id]);
 
