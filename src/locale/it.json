@@ -10,6 +10,7 @@
       "authorized": "Autorizzato",
       "cancelled": "Annullato",
       "identified": "Da autorizzare",
+      "invalidated": "Invalidato",
       "rejected": "Rifiutato",
       "rewarded": "Contabilizzato"
     },
