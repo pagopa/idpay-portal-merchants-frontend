@@ -110,7 +110,7 @@
       "sendAuthorizationRequestTitle": "Invio richiesta di autorizzazione",
       "sendMagicLinkSubtitle": "Copia il link e invialo al tuo cliente con la modalità che preferisci.",
       "sendMagicLinkTitle": "Invia un link magico",
-      "sendQrSubtitle": "Salva l’immagine e inviala al tuo cliente con la modalità che preferisci.",
+      "sendQrSubtitle": "Salva l’immagine e inviala al tuo cliente con la modalità che preferisci. In caso di problemi con la lettura del codice QR è possibile inserire manualmente sull’app IO il codice di 8 cifre.",
       "sendQrTitle": "Oppure invia un codice QR",
       "spendingAmountLabel": "Importo spesa",
       "spendingInfoSubtitle": "Inserisci l’importo totale della spesa, ci servirà per calcolare lo sconto applicabile.",
