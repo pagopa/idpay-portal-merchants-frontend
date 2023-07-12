@@ -18,6 +18,7 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
 
   useEffect(() => {
     if (typeof id === 'string') {
+      setIban(undefined);
       getMerchantDetail(id)
         .then((response) => {
           setIban(response?.iban);
