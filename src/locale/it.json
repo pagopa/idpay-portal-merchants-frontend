@@ -101,6 +101,7 @@
       "initiativeName": "Nome"
     },
     "newDiscount": {
+      "codeCopied": "Codice copiato",
       "createdSubtitle": "Invia il buono sconto al tuo cliente, gli servirà per autorizzare la spesa con l’app IO.",
       "createdTitle": "Buono sconto creato!",
       "expiringDiscountInfoAlertText": "Il buono sconto ha una durata di {{days}} giorni: è necessario autorizzare la spesa entro le {{hour}} del {{date}}.",

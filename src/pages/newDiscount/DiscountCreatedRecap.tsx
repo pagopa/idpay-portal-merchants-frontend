@@ -30,8 +30,9 @@ const DiscountCreatedRecap = ({ data }: Props) => {
   const [magicLink, setMagicLink] = useState<string>();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [authorizationId, setAuthorizationId] = useState<string>();
-  const [openCopySuccesToast, setOpenCopySuccesToast] = useState<boolean>(false);
-  const [openDownloadSuccesToast, setOpenDownloadSuccesToast] = useState<boolean>(false);
+  const [openCopyLinkSuccessToast, setOpenCopyLinkSuccessToast] = useState<boolean>(false);
+  const [openDownloadSuccessToast, setOpenDownloadSuccessToast] = useState<boolean>(false);
+  const [openCopyCodeSuccessToast, setOpenCopyCodeSuccessToast] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof data !== 'undefined') {
@@ -51,16 +52,22 @@ const DiscountCreatedRecap = ({ data }: Props) => {
   return (
     <>
       <Toast
-        open={openCopySuccesToast}
+        open={openCopyLinkSuccessToast}
         title={t('pages.newDiscount.magicLinkCopied')}
         showToastCloseIcon={true}
-        onCloseToast={() => setOpenCopySuccesToast(false)}
+        onCloseToast={() => setOpenCopyLinkSuccessToast(false)}
       />
       <Toast
-        open={openDownloadSuccesToast}
+        open={openDownloadSuccessToast}
         title={t('pages.newDiscount.qrCodeDownloaded')}
         showToastCloseIcon={true}
-        onCloseToast={() => setOpenDownloadSuccesToast(false)}
+        onCloseToast={() => setOpenDownloadSuccessToast(false)}
+      />
+      <Toast
+        open={openCopyCodeSuccessToast}
+        title={t('pages.newDiscount.codeCopied')}
+        showToastCloseIcon={true}
+        onCloseToast={() => setOpenCopyCodeSuccessToast(false)}
       />
       <Box sx={{ gridColumn: 'span 12', mt: 2, mb: 5 }}>
         <Alert color="info">
@@ -93,7 +100,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               sx={{ height: '43px' }}
               onClick={() => {
                 copyTextToClipboard(magicLink);
-                setOpenCopySuccesToast(true);
+                setOpenCopyLinkSuccessToast(true);
               }}
               data-testid="copy-link-buttton-test"
             >
@@ -122,7 +129,10 @@ const DiscountCreatedRecap = ({ data }: Props) => {
                   startIcon={<ContentCopyIcon />}
                   size="small"
                   variant="contained"
-                  onClick={() => copyTextToClipboard(authorizationId)}
+                  onClick={() => {
+                    copyTextToClipboard(authorizationId);
+                    setOpenCopyCodeSuccessToast(true);
+                  }}
                   sx={{ height: '43px' }}
                 >
                   {t('commons.copyCodeBtn')}
@@ -143,7 +153,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               sx={{ height: '43px' }}
               onClick={() => {
                 downloadQRCodeFromURL(qrCodeUrl);
-                setOpenDownloadSuccesToast(true);
+                setOpenDownloadSuccessToast(true);
               }}
               data-testid="download-qr-code-button-test"
             >
