@@ -21,12 +21,19 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       );
     case TransactionCreatedStatusEnum.CREATED:
     case TransactionCreatedStatusEnum.IDENTIFIED:
-    case TransactionCreatedStatusEnum.REJECTED:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
           label={i18n.t('commons.discountStatusEnum.identified')}
           color="default"
+        />
+      );
+    case TransactionCreatedStatusEnum.REJECTED:
+      return (
+        <Chip
+          sx={{ fontSize: '14px' }}
+          label={i18n.t('commons.discountStatusEnum.invalidated')}
+          color="error"
         />
       );
   }
