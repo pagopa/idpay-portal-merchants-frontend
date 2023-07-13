@@ -8,6 +8,7 @@ import {
   Backdrop,
   Box,
   Button,
+  Divider,
   Fade,
   FormControl,
   IconButton,
@@ -17,6 +18,7 @@ import {
 } from '@mui/material';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
 import {
   copyTextToClipboard,
@@ -40,6 +42,7 @@ const AuthorizeTransactionModal = ({
 }: Props) => {
   const [magicLink, setMagicLink] = useState<string>();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [authorizationId, setAuthorizationId] = useState<string>();
   const [expirationDays, setExpirationDays] = useState<number>();
   const [expirationDate, setExpirationDate] = useState<string>();
   const [expirationTime, setExpirationTime] = useState<string>();
@@ -56,6 +59,7 @@ const AuthorizeTransactionModal = ({
       setExpirationTime(expirationTime);
       setMagicLink(data?.qrcodeTxtUrl);
       setQrCodeUrl(data?.qrcodePngUrl);
+      setAuthorizationId(data?.trxCode);
     }
   }, [data]);
 
@@ -90,7 +94,7 @@ const AuthorizeTransactionModal = ({
               display: 'grid',
               gridTemplateColumns: 'repeat(12, 1fr)',
               justifyItems: 'end',
-              mb: 4,
+              mb: 2,
             }}
           >
             <Box sx={{ gridColumn: 'span 12' }}>
@@ -116,11 +120,9 @@ const AuthorizeTransactionModal = ({
             }}
           >
             <Box sx={{ gridColumn: 'span 12' }}>
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                {t('pages.initiativeDiscounts.detailTitle')}
-              </Typography>
+              <Typography variant="h6">{t('pages.initiativeDiscounts.detailTitle')}</Typography>
             </Box>
-            <Box sx={{ gridColumn: 'span 12', my: 2 }}>
+            <Box sx={{ gridColumn: 'span 12' }}>
               <Alert color="info">
                 {t('pages.newDiscount.expiringDiscountInfoAlertText', {
                   days: expirationDays,
@@ -129,55 +131,55 @@ const AuthorizeTransactionModal = ({
                 })}
               </Alert>
             </Box>
-            <Box sx={{ gridColumn: 'span 12', mt: 2, mb: 1 }}>
-              <Typography variant="body2">{t('pages.initiativeDiscounts.dateAndHours')}</Typography>
-            </Box>
             <Box sx={{ gridColumn: 'span 12' }}>
+              <Typography variant="body2">{t('pages.initiativeDiscounts.dateAndHours')}</Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {formatDate(data.trxDate)}
               </Typography>
             </Box>
-            <Box sx={{ gridColumn: 'span 12', mt: 2, mb: 1 }}>
-              <Typography variant="body2">{t('pages.initiativeDiscounts.totalSpent')}</Typography>
-            </Box>
             <Box sx={{ gridColumn: 'span 12' }}>
+              <Typography variant="body2">{t('pages.initiativeDiscounts.totalSpent')}</Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {formattedCurrency(data.effectiveAmount, '-', true)}
               </Typography>
             </Box>
-            <Box sx={{ gridColumn: 'span 12', mt: 2, mb: 1 }}>
-              <Typography variant="body2">
+            <Box sx={{ gridColumn: 'span 12' }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
                 {t('pages.initiativeDiscounts.discountStatus')}
               </Typography>
-            </Box>
-            <Box sx={{ gridColumn: 'span 12' }}>{renderTransactionCreatedStatus(data.status)}</Box>
-
-            <Box sx={{ gridColumn: 'span 12', mt: 3, mb: 2 }}>
-              <Typography variant="h6">{t('pages.newDiscount.magicLinkLabel')}</Typography>
+              <Box>{renderTransactionCreatedStatus(data.status)}</Box>
             </Box>
 
             <FormControl
               sx={{
-                mb: 1,
                 gridColumn: 'span 12',
                 width: '100%',
               }}
             >
+              <Typography variant="body2" sx={{ fontWeight: 600, my: 1 }}>
+                {t('pages.newDiscount.magicLinkLabel')}
+              </Typography>
               <TextField disabled value={magicLink} size="small" id="magic-link" />
-            </FormControl>
-            <FormControl sx={{ gridColumn: 'span 5' }}>
               <Button
                 startIcon={<ContentCopyIcon />}
                 size="small"
                 variant="contained"
                 onClick={() => copyTextToClipboard(magicLink)}
+                sx={{ width: '125px', mt: 1 }}
               >
                 {t('commons.copyLinkBtn')}
               </Button>
             </FormControl>
-
-            <Box sx={{ gridColumn: 'span 12', mt: 3, mb: 2 }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>
+            <Box
+              sx={{
+                width: '100%',
+                gridColumn: 'span 12',
+              }}
+            >
+              <Divider />
+            </Box>
+            <Box sx={{ gridColumn: 'span 12' }}>
+              <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>
                 {t('pages.newDiscount.qrCodeLabel')}
               </Typography>
               <Button
@@ -189,6 +191,35 @@ const AuthorizeTransactionModal = ({
                 {t('commons.downloadQrBtn')}
               </Button>
             </Box>
+            <Box
+              sx={{
+                width: '100%',
+                gridColumn: 'span 12',
+              }}
+            >
+              <Divider />
+            </Box>
+
+            <FormControl
+              sx={{
+                gridColumn: 'span 12',
+                width: '100%',
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                {t('pages.newDiscount.numericCodeLabel')}
+              </Typography>
+              <TextField disabled value={authorizationId} size="small" id="magic-link" />
+              <Button
+                startIcon={<ContentCopyIcon />}
+                size="small"
+                variant="contained"
+                onClick={() => copyTextToClipboard(authorizationId)}
+                sx={{ width: '150px', mt: 1 }}
+              >
+                {t('commons.copyCodeBtn')}
+              </Button>
+            </FormControl>
           </Box>
         </Box>
       </Fade>

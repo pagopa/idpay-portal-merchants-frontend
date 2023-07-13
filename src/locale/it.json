@@ -5,6 +5,7 @@
     "closeBtn": "Chiudi",
     "confirmBtn": "Conferma",
     "continueBtn": "Continua",
+    "copyCodeBtn": "Copia codice",
     "copyLinkBtn": "Copia link",
     "discountStatusEnum": {
       "authorized": "Autorizzato",
@@ -106,6 +107,7 @@
       "handleDiscountsBtn": "Gestisci buoni sconto",
       "magicLinkCopied": "Link copiato",
       "magicLinkLabel": "Link magico",
+      "numericCodeLabel": "Codice numerico",
       "qrCodeDownloaded": "Codice QR scaricato",
       "qrCodeLabel": "Codice QR",
       "sendAuthorizationRequestSubtitle": "Invia al tuo cliente una richiesta di autorizzazione della spesa del buono sconto.",
