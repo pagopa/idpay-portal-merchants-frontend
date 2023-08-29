@@ -16,7 +16,7 @@ const TOSWall = ({ acceptTOS, tosRoute, privacyRoute, firstAcceptance }: TOSWall
     <Typography color="text.secondary">
       {t('pages.tos.termsDescription')}{' '}
       <Link underline="hover" href={tosRoute}>
-        {t('tos.linkTos')}
+        {t('pages.tos.linkTos')}
       </Link>{' '}
       {t('pages.tos.termsDescription2')}
       <Link underline="hover" href={privacyRoute}>
