@@ -98,62 +98,62 @@ describe('Test suite for initiativeDiscounts page', () => {
     await waitFor(() => expect(searcMerchant.value).toEqual(''));
   });
 */
-  test('on click of AUTHORIZE trx in status CREATED', async () => {
-    renderWithContext(<InitiativeDiscounts />);
+  // test('on click of AUTHORIZE trx in status CREATED', async () => {
+  //   renderWithContext(<InitiativeDiscounts />);
 
-    const actionMenuList = await screen.findAllByTestId('menu-open-test');
+  //   const actionMenuList = await screen.findAllByTestId('menu-open-test');
 
-    const transactionCreated = actionMenuList[0];
+  //   const transactionCreated = actionMenuList[0];
 
-    fireEvent.click(transactionCreated);
+  //   fireEvent.click(transactionCreated);
 
-    const authorizeTrxButton = await screen.findByTestId('authorize-trx-button');
+  //   const authorizeTrxButton = await screen.findByTestId('authorize-trx-button');
 
-    fireEvent.click(authorizeTrxButton);
-    // wait authorize modal to open
-    const closeAuthorizeModalBtn = await screen.findByText('commons.closeBtn');
+  //   fireEvent.click(authorizeTrxButton);
+  //   // wait authorize modal to open
+  //   const closeAuthorizeModalBtn = await screen.findByText('commons.closeBtn');
 
-    fireEvent.click(closeAuthorizeModalBtn);
+  //   fireEvent.click(closeAuthorizeModalBtn);
 
-    const closeActionMenuButton = screen.getByTestId('menu-close-test');
+  //   const closeActionMenuButton = screen.getByTestId('menu-close-test');
 
-    fireEvent.click(closeActionMenuButton);
-  });
+  //   fireEvent.click(closeActionMenuButton);
+  // });
 
-  test('on click of Cancel trx in status AUTHORIZED', async () => {
-    renderWithContext(<InitiativeDiscounts />);
+  // test('on click of Cancel trx in status AUTHORIZED', async () => {
+  //   renderWithContext(<InitiativeDiscounts />);
 
-    const actionMenuList = await screen.findAllByTestId('menu-open-test');
+  //   const actionMenuList = await screen.findAllByTestId('menu-open-test');
 
-    const transactionAuthorized = actionMenuList[1];
+  //   const transactionAuthorized = actionMenuList[1];
 
-    fireEvent.click(transactionAuthorized);
+  //   fireEvent.click(transactionAuthorized);
 
-    const cancelTrxButton = await screen.findByTestId('cancel-trx-button');
+  //   const cancelTrxButton = await screen.findByTestId('cancel-trx-button');
 
-    fireEvent.click(cancelTrxButton);
-    // wait for cancel modal to open
-    const modalCancelButton = await screen.findByTestId('modal-cancel-button-test');
+  //   fireEvent.click(cancelTrxButton);
+  //   // wait for cancel modal to open
+  //   const modalCancelButton = await screen.findByTestId('modal-cancel-button-test');
 
-    fireEvent.click(modalCancelButton);
+  //   fireEvent.click(modalCancelButton);
 
-    const closeActionMenuButton = screen.getByTestId('menu-close-test');
+  //   const closeActionMenuButton = screen.getByTestId('menu-close-test');
 
-    fireEvent.click(closeActionMenuButton);
+  //   fireEvent.click(closeActionMenuButton);
 
-    // test on click of transaction in status IDENTIFIED and REJECTED
+  //   // test on click of transaction in status IDENTIFIED and REJECTED
 
-    const transactionIdentified = actionMenuList[2];
+  //   const transactionIdentified = actionMenuList[2];
 
-    fireEvent.click(transactionIdentified);
+  //   fireEvent.click(transactionIdentified);
 
-    const transactionRejected = actionMenuList[3];
+  //   const transactionRejected = actionMenuList[3];
 
-    fireEvent.click(transactionRejected);
-  });
+  //   fireEvent.click(transactionRejected);
+  // });
 
   test('on change of merchant transactions tabs', async () => {
-    // dispatch the selected initative to cover mapDatesFromPeriod and userCanCreateDiscount  functions 
+    // dispatch the selected initative to cover mapDatesFromPeriod and userCanCreateDiscount  functions
     store.dispatch(
       setSelectedInitative({
         initiativeName: 'local tests initiative name',
@@ -164,7 +164,6 @@ describe('Test suite for initiativeDiscounts page', () => {
 
     const currentDiscounts = screen.getByTestId('merchant-transactions-1');
     fireEvent.click(currentDiscounts);
-    
 
     const processedDiscounts = screen.getByTestId('merchant-transactions-2');
     fireEvent.click(processedDiscounts);

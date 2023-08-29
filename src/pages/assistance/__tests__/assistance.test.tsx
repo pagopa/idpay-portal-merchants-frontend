@@ -39,8 +39,8 @@ describe('<Assistance />', (injectedStore?: ReturnType<typeof createStore>) => {
       );
     });
 
-    const assSubject = screen.getByLabelText('pages.assistance.form.subject') as HTMLInputElement;
-    const assMessage = screen.getByLabelText('pages.assistance.form.message') as HTMLInputElement;
+    const assSubject = screen.getByLabelText('pages.assistanceRequest.subject') as HTMLInputElement;
+    const assMessage = screen.getByLabelText('pages.assistanceRequest.message') as HTMLInputElement;
     const sendBtn = screen.getByTestId('sendAssistenceRequest-test');
     const exitBtn = screen.getByTestId('open-exit-test') as HTMLButtonElement;
     //not found
