@@ -134,20 +134,20 @@ const AuthorizeTransactionModal = ({
             <Box sx={{ gridColumn: 'span 12' }}>
               <Typography variant="body2">{t('pages.initiativeDiscounts.dateAndHours')}</Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {formatDate(data.trxDate)}
+                {formatDate(data?.trxDate)}
               </Typography>
             </Box>
             <Box sx={{ gridColumn: 'span 12' }}>
               <Typography variant="body2">{t('pages.initiativeDiscounts.totalSpent')}</Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {formattedCurrency(data.effectiveAmount, '-', true)}
+                {formattedCurrency(data?.effectiveAmount, '-', true)}
               </Typography>
             </Box>
             <Box sx={{ gridColumn: 'span 12' }}>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 {t('pages.initiativeDiscounts.discountStatus')}
               </Typography>
-              <Box>{renderTransactionCreatedStatus(data.status)}</Box>
+              <Box>{renderTransactionCreatedStatus(data?.status)}</Box>
             </Box>
 
             <FormControl
