@@ -48,9 +48,20 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
           setAmount(response?.amount);
           setRefunded(response?.refunded);
         })
-        .catch((_error) => {
+        .catch((error) => {
           setAmount(undefined);
           setRefunded(undefined);
+          addError({
+            id: 'GET_MERCHANT_STATISTICS',
+            blocking: false,
+            error,
+            techDescription: 'An error occurred getting merchant statistics',
+            displayableTitle: t('errors.genericTitle'),
+            displayableDescription: t('errors.genericDescription'),
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          });
         });
     }
   }, [id]);
