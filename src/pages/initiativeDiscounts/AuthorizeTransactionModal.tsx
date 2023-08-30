@@ -49,18 +49,16 @@ const AuthorizeTransactionModal = ({
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (typeof data !== 'undefined') {
-      const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
-        data.trxExpirationMinutes,
-        data.trxDate
-      );
-      setExpirationDays(expirationDays);
-      setExpirationDate(expirationDate);
-      setExpirationTime(expirationTime);
-      setMagicLink(data?.qrcodeTxtUrl);
-      setQrCodeUrl(data?.qrcodePngUrl);
-      setAuthorizationId(data?.trxCode);
-    }
+    const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
+      data.trxExpirationMinutes,
+      data.trxDate
+    );
+    setExpirationDays(expirationDays);
+    setExpirationDate(expirationDate);
+    setExpirationTime(expirationTime);
+    setMagicLink(data?.qrcodeTxtUrl);
+    setQrCodeUrl(data?.qrcodePngUrl);
+    setAuthorizationId(data?.trxCode);
   }, [data]);
 
   return (

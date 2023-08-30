@@ -13,15 +13,13 @@ beforeEach(() => {
 describe('Test suite for InitiativeDiscountSummary component', () => {
   window.scrollTo = jest.fn();
   test('Render component', () => {
-    renderWithContext(
-      <InitiativeDiscountSummary id={'initativeTestId321'} setInitiativeName={jest.fn()} />
-    );
+    renderWithContext(<InitiativeDiscountSummary id={'initativeTestId321'} />);
   });
 
   test('render component with undefined id as prop ', () => {
     renderWithContext(
       // @ts-expect-error need to pass undefined to cover  condition if id is not a string
-      <InitiativeDiscountSummary id={undefined} setInitiativeName={jest.fn()} />
+      <InitiativeDiscountSummary id={undefined} />
     );
   });
 
@@ -33,8 +31,6 @@ describe('Test suite for InitiativeDiscountSummary component', () => {
       _initiativeId: string
     ): Promise<MerchantStatisticsDTO> => Promise.reject('mocked error response for tests');
 
-    renderWithContext(
-      <InitiativeDiscountSummary id={'initativeTestId321'} setInitiativeName={jest.fn()} />
-    );
+    renderWithContext(<InitiativeDiscountSummary id={'initativeTestId321'} />);
   });
 });

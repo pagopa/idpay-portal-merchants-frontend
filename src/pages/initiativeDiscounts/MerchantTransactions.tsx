@@ -75,7 +75,7 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
   // };
 
   const RenderAuthorizeTransaction = ({ data }: RenderAuthorizeTrxProps) => {
-    switch (status) {
+    switch (data.status) {
       case TransactionStatusEnum.IDENTIFIED:
       case TransactionStatusEnum.CREATED:
         return (
@@ -164,14 +164,14 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
   // };
 
   return (
-    <TableCell align="right">
+    <TableCell align="right" data-testid="tablecell-actions-menu">
       <IconButton
         id={`actions_button-${trxId}`}
         aria-controls={open ? `actions-menu_${trxId}` : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClickActionsMenu}
-        data-testid="menu-open-test"
+        data-testid="actions_button"
       >
         <MoreIcon color="primary" />
       </IconButton>
@@ -356,6 +356,7 @@ const MerchantTransactions = ({ id }: Props) => {
             component="button"
             sx={{ color: 'primary.main', fontWeight: 600, fontSize: '0.875rem' }}
             onClick={resetForm}
+            data-testid="reset-filters-test"
           >
             {t('commons.removeFiltersBtn')}
           </ButtonNaked>

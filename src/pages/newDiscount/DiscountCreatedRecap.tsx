@@ -134,6 +134,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
                     setOpenCopyCodeSuccessToast(true);
                   }}
                   sx={{ height: '43px' }}
+                  data-testid="copy-auhorization-id-buttton-test"
                 >
                   {t('commons.copyCodeBtn')}
                 </Button>

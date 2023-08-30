@@ -179,6 +179,7 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
             component="button"
             sx={{ color: 'primary.main', fontWeight: 600, fontSize: '0.875rem' }}
             onClick={resetForm}
+            data-testid="reset-filters-test"
           >
             {t('commons.removeFiltersBtn')}
           </ButtonNaked>

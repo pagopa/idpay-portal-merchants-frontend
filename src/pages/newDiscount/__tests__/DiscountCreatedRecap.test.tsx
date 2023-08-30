@@ -36,6 +36,14 @@ describe('Test suite for DiscountCreatedRecap component', () => {
     fireEvent.click(screen.getByTestId('CloseIcon'));
   });
 
+  test('User copies the authorization id', async () => {
+    renderWithContext(<DiscountCreatedRecap data={transactionResponseMocked} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId('copy-auhorization-id-buttton-test'));
+    await screen.findByText('pages.newDiscount.codeCopied');
+    fireEvent.click(screen.getByTestId('CloseIcon'));
+  });
+
   test('User downloads the QR code', async () => {
     renderWithContext(<DiscountCreatedRecap data={transactionResponseMocked} />);
     const user = userEvent.setup();
@@ -54,5 +62,9 @@ describe('Test suite for DiscountCreatedRecap component', () => {
     const oldLocationPathname = history.location.pathname;
     await user.click(link);
     await waitFor(() => expect(oldLocationPathname !== history.location.pathname).toBeTruthy());
+  });
+
+  test('Render component with undefined data', () => {
+    <DiscountCreatedRecap data={undefined} />;
   });
 });

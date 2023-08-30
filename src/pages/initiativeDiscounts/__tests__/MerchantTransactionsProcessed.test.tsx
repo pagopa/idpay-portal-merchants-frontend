@@ -4,6 +4,7 @@ import { MerchantsApiMocked } from '../../../api/__mocks__/MerchantsApiClient';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import MerchantTransactionsProcessed from '../MerchantTransactionsProcessed';
 import { MerchantTransactionsProcessedListDTO } from '../../../api/generated/merchants/MerchantTransactionsProcessedListDTO';
+import userEvent from '@testing-library/user-event';
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -13,6 +14,24 @@ beforeEach(() => {
 describe('test suite for MerchantTransactionsProcessed', () => {
   test('render of component MerchantTransactionsProcessed', () => {
     renderWithContext(<MerchantTransactionsProcessed id={'testId2222'} />);
+  });
+
+  test('Render component when user filters results', async () => {
+    renderWithContext(<MerchantTransactionsProcessed id={'testId2222'} />);
+    const user = userEvent.setup();
+    const filterByUser = screen.getByLabelText(
+      'pages.initiativeDiscounts.searchByFiscalCode'
+    ) as HTMLInputElement;
+
+    await user.type(filterByUser, 'test');
+
+    await user.click(screen.getByTestId('apply-filters-test'));
+  });
+
+  test('Render component when user resets filters', async () => {
+    renderWithContext(<MerchantTransactionsProcessed id={'testId2222'} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId('reset-filters-test'));
   });
 
   test('should render initative empty component in case of  Error from getMerchantTransactions API response', async () => {
