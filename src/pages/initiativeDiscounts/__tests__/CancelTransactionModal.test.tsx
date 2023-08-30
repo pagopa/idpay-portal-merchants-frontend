@@ -44,7 +44,21 @@ describe('Test suite for CancelTransactionModal component', () => {
     );
 
     const modalBackButton = await screen.findByTestId('modal-cancel-back-button-test');
-
     fireEvent.click(modalBackButton);
+  });
+
+  test('Render component and cancel transaction', () => {
+    renderWithContext(
+      <CancelTransactionModal
+        openCancelTrxModal={true}
+        setOpenCancelTrxModal={jest.fn()}
+        initiativeId={'1234'}
+        trxId={'123456789'}
+        status={TransactionStatusEnum.AUTHORIZED}
+      />
+    );
+
+    const btn = screen.getByTestId('modal-cancel-button-test');
+    fireEvent.click(btn);
   });
 });
