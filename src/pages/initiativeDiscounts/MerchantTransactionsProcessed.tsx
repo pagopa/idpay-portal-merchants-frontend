@@ -27,8 +27,8 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
   const [rows, setRows] = useState<Array<MerchantTransactionProcessedDTO>>([]);
   const [rowsPerPage, setRowsPerPage] = useState<number>(0);
   const [totalElements, setTotalElements] = useState<number>(0);
-  const [filterByUser, setFilterByUser] = useState<string | undefined>();
-  const [filterByStatus, setFilterByStatus] = useState<string | undefined>();
+  const [filterDataByUser, setFilterDataByUser] = useState<string | undefined>();
+  const [filterDataByStatus, setFilterDataByStatus] = useState<string | undefined>();
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
   const addError = useErrorDispatcher();
 
@@ -41,8 +41,8 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
       if (typeof id === 'string') {
         const fU = values.searchUser.length > 0 ? values.searchUser : undefined;
         const fS = values.filterStatus.length > 0 ? values.filterStatus : undefined;
-        setFilterByUser(fU);
-        setFilterByStatus(fS);
+        setFilterDataByUser(fU);
+        setFilterDataByStatus(fS);
         getTableData(id, 0, fU, fS);
       }
     },
@@ -73,10 +73,10 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
       })
       .catch((error) => {
         addError({
-          id: 'GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST_ERROR',
+          id: 'GET_INITIATIVE_MERCHANT_DISCOUNTS_PROCESSED_LIST_ERROR',
           blocking: false,
           error,
-          techDescription: 'An error occurred getting initiative merchant discounts list',
+          techDescription: 'An error occurred getting initiative merchant discounts processed list',
           displayableTitle: t('errors.genericTitle'),
           displayableDescription: t('errors.genericDescription'),
           toNotify: true,
@@ -87,15 +87,15 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
       .finally(() => setLoading(false));
   };
 
-  useMemoInitTableData(id, setPage, setFilterByUser, setFilterByStatus);
-  useTableDataFiltered(id, page, filterByUser, filterByStatus, getTableData, setRows);
+  useMemoInitTableData(id, setPage, setFilterDataByUser, setFilterDataByStatus);
+  useTableDataFiltered(id, page, filterDataByUser, filterDataByStatus, getTableData, setRows);
 
   return (
     <Box sx={{ width: '100%' }}>
       <FiltersForm
         formik={formik}
         resetForm={() =>
-          resetForm(id, formik, setFilterByUser, setFilterByStatus, setRows, getTableData)
+          resetForm(id, formik, setFilterDataByUser, setFilterDataByStatus, setRows, getTableData)
         }
         filterByStatusOptionsList={filterByStatusOptionsList}
       />
