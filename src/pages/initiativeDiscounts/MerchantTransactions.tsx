@@ -1,20 +1,14 @@
 import MoreIcon from '@mui/icons-material/MoreVert';
 import {
   Box,
-  // Button,
-  // FormControl,
   IconButton,
-  // InputLabel,
   Menu,
   MenuItem,
-  // Select,
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TablePagination,
   TableRow,
-  // TextField,
 } from '@mui/material';
 import { itIT } from '@mui/material/locale';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -22,7 +16,6 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-// import { ButtonNaked } from '@pagopa/mui-italia';
 import { useFormik } from 'formik';
 import {
   MerchantTransactionDTO,
@@ -30,15 +23,13 @@ import {
 } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { formatDate, formattedCurrency } from '../../helpers';
 import { getMerchantTransactions } from '../../services/merchantService';
-import {
-  // genericContainerStyle,
-  pagesTableContainerStyle,
-} from '../../styles';
+import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
 import AuthorizeTransactionModal from './AuthorizeTransactionModal';
 import CancelTransactionModal from './CancelTransactionModal';
-import { renderTransactionCreatedStatus } from './helpers';
+import { renderTransactionCreatedStatus, tableHeadData } from './helpers';
 import FiltersForm from './FiltersForm';
+import TableHeader from './TableHeader';
 
 type ActionsMenuProps = {
   initiativeId: string;
@@ -268,61 +259,6 @@ const MerchantTransactions = ({ id }: Props) => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      {/* <Box sx={{ ...genericContainerStyle, gap: 2, alignItems: 'baseline' }}>
-        <FormControl sx={{ gridColumn: 'span 4' }}>
-          <TextField
-            label={t('pages.initiativeDiscounts.searchByFiscalCode')}
-            placeholder={t('pages.initiativeDiscounts.searchByFiscalCode')}
-            name="searchUser"
-            aria-label="searchUser"
-            role="input"
-            InputLabelProps={{ required: false }}
-            value={formik.values.searchUser}
-            onChange={(e) => formik.handleChange(e)}
-            size="small"
-            data-testid="searchUser-test"
-          />
-        </FormControl>
-        <FormControl sx={{ gridColumn: 'span 2' }} size="small">
-          <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
-          <Select
-            id="filterStatus"
-            inputProps={{
-              'data-testid': 'filterStatus-select',
-            }}
-            name="filterStatus"
-            label={t('pages.initiativeDiscounts.filterByStatus')}
-            placeholder={t('pages.initiativeDiscounts.filterByStatus')}
-            onChange={(e) => formik.handleChange(e)}
-            value={formik.values.filterStatus}
-          >
-            <MenuItem value={'IDENTIFIED'}>{t('commons.discountStatusEnum.identified')}</MenuItem>
-            <MenuItem value={'AUTHORIZED'}>{t('commons.discountStatusEnum.authorized')}</MenuItem>
-            <MenuItem value={'REJECTED'}>{t('commons.discountStatusEnum.invalidated')}</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl sx={{ gridColumn: 'span 1' }}>
-          <Button
-            sx={{ height: '44.5px' }}
-            variant="outlined"
-            size="small"
-            onClick={() => formik.handleSubmit()}
-            data-testid="apply-filters-test"
-          >
-            {t('commons.filterBtn')}
-          </Button>
-        </FormControl>
-        <FormControl sx={{ gridColumn: 'span 1' }}>
-          <ButtonNaked
-            component="button"
-            sx={{ color: 'primary.main', fontWeight: 600, fontSize: '0.875rem' }}
-            onClick={resetForm}
-            data-testid="reset-filters-test"
-          >
-            {t('commons.removeFiltersBtn')}
-          </ButtonNaked>
-        </FormControl>
-      </Box> */}
       <FiltersForm
         formik={formik}
         resetForm={resetForm}
@@ -339,20 +275,7 @@ const MerchantTransactions = ({ id }: Props) => {
           <Box sx={{ display: 'grid', gridColumn: 'span 12', height: '100%' }}>
             <Box sx={{ width: '100%' }}>
               <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell width="20%">{t('pages.initiativeDiscounts.dateAndHours')}</TableCell>
-                    <TableCell width="40%">{t('pages.initiativeDiscounts.beneficiary')}</TableCell>
-                    <TableCell width="15%">{t('pages.initiativeDiscounts.totalSpent')}</TableCell>
-                    <TableCell width="15%">
-                      {t('pages.initiativeDiscounts.authorizedAmount')}
-                    </TableCell>
-                    <TableCell width="15%">
-                      {t('pages.initiativeDiscounts.discountStatus')}
-                    </TableCell>
-                    <TableCell width="5%"></TableCell>
-                  </TableRow>
-                </TableHead>
+                <TableHeader data={[...tableHeadData, { width: '5%', label: '' }]} />
                 <TableBody sx={{ backgroundColor: 'white' }}>
                   {rows.map((r, i) => (
                     <TableRow key={i}>

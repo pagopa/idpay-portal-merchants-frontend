@@ -1,36 +1,19 @@
-import {
-  Box,
-  // Button,
-  // FormControl,
-  // InputLabel,
-  // MenuItem,
-  // Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TablePagination,
-  TableRow,
-  // TextField,
-} from '@mui/material';
+import { Box, Table, TableBody, TableCell, TablePagination, TableRow } from '@mui/material';
 import { itIT } from '@mui/material/locale';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-// import { ButtonNaked } from '@pagopa/mui-italia';
 import { useFormik } from 'formik';
 import { formatDate, formattedCurrency } from '../../helpers';
 import { getMerchantTransactionsProcessed } from '../../services/merchantService';
-import {
-  // genericContainerStyle,
-  pagesTableContainerStyle,
-} from '../../styles';
+import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
 import { MerchantTransactionProcessedDTO } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
-import { renderTrasactionProcessedStatus } from './helpers';
+import { renderTrasactionProcessedStatus, tableHeadData } from './helpers';
 import FiltersForm from './FiltersForm';
+import TableHeader from './TableHeader';
 
 interface Props {
   id: string;
@@ -156,19 +139,7 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
           <Box sx={{ display: 'grid', gridColumn: 'span 12', height: '100%' }}>
             <Box sx={{ width: '100%' }}>
               <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell width="20%">{t('pages.initiativeDiscounts.dateAndHours')}</TableCell>
-                    <TableCell width="40%">{t('pages.initiativeDiscounts.beneficiary')}</TableCell>
-                    <TableCell width="15%">{t('pages.initiativeDiscounts.totalSpent')}</TableCell>
-                    <TableCell width="15%">
-                      {t('pages.initiativeDiscounts.authorizedAmount')}
-                    </TableCell>
-                    <TableCell width="15%">
-                      {t('pages.initiativeDiscounts.discountStatus')}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
+                <TableHeader data={tableHeadData} />
                 <TableBody sx={{ backgroundColor: 'white' }}>
                   {rows.map((r, i) => (
                     <TableRow key={i}>
