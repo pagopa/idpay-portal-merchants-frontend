@@ -7,11 +7,8 @@ import {
   Table,
   TableBody,
   TableCell,
-  TablePagination,
   TableRow,
 } from '@mui/material';
-import { itIT } from '@mui/material/locale';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useEffect, useMemo, useState } from 'react';
@@ -27,9 +24,14 @@ import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
 import AuthorizeTransactionModal from './AuthorizeTransactionModal';
 import CancelTransactionModal from './CancelTransactionModal';
-import { renderTransactionCreatedStatus, tableHeadData } from './helpers';
+import {
+  TransactionsComponentProps,
+  renderTransactionCreatedStatus,
+  tableHeadData,
+} from './helpers';
 import FiltersForm from './FiltersForm';
 import TableHeader from './TableHeader';
+import TablePaginator from './TablePaginator';
 
 type ActionsMenuProps = {
   initiativeId: string;
@@ -139,11 +141,7 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
   );
 };
 
-interface Props {
-  id: string;
-}
-
-const MerchantTransactions = ({ id }: Props) => {
+const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState<number>(0);
   const [rows, setRows] = useState<Array<MerchantTransactionDTO>>([]);
@@ -151,7 +149,6 @@ const MerchantTransactions = ({ id }: Props) => {
   const [totalElements, setTotalElements] = useState<number>(0);
   const [filterByUser, setFilterByUser] = useState<string | undefined>();
   const [filterByStatus, setFilterByStatus] = useState<string | undefined>();
-  const theme = createTheme(itIT);
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
   const addError = useErrorDispatcher();
 
@@ -238,14 +235,6 @@ const MerchantTransactions = ({ id }: Props) => {
     };
   }, [id, page]);
 
-  const handleChangePage = (
-    _event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
-  ) => {
-    window.scrollTo(0, 0);
-    setPage(newPage);
-  };
-
   const showActionMenu = (status: TransactionStatusEnum) => {
     switch (status) {
       case TransactionStatusEnum.AUTHORIZED:
@@ -295,21 +284,12 @@ const MerchantTransactions = ({ id }: Props) => {
                   ))}
                 </TableBody>
               </Table>
-              <ThemeProvider theme={theme}>
-                <TablePagination
-                  sx={{
-                    '.MuiTablePagination-displayedRows': {
-                      fontFamily: '"Titillium Web",sans-serif',
-                    },
-                  }}
-                  component="div"
-                  onPageChange={handleChangePage}
-                  page={page}
-                  count={totalElements}
-                  rowsPerPage={rowsPerPage}
-                  rowsPerPageOptions={[10]}
-                />
-              </ThemeProvider>
+              <TablePaginator
+                page={page}
+                setPage={setPage}
+                totalElements={totalElements}
+                rowsPerPage={rowsPerPage}
+              />
             </Box>
           </Box>
         </Box>
