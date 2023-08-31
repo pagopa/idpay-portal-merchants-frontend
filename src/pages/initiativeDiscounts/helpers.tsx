@@ -89,3 +89,7 @@ export const tableHeadData = [
   { width: '15%', label: 'pages.initiativeDiscounts.authorizedAmount' },
   { width: '15%', label: 'pages.initiativeDiscounts.discountStatus' },
 ];
+
+export interface TransactionsComponentProps {
+  id: string;
+}

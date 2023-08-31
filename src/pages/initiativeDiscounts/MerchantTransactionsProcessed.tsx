@@ -1,6 +1,4 @@
-import { Box, Table, TableBody, TableCell, TablePagination, TableRow } from '@mui/material';
-import { itIT } from '@mui/material/locale';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { Box, Table, TableBody, TableCell, TableRow } from '@mui/material';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useEffect, useMemo, useState } from 'react';
@@ -11,15 +9,16 @@ import { getMerchantTransactionsProcessed } from '../../services/merchantService
 import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
 import { MerchantTransactionProcessedDTO } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
-import { renderTrasactionProcessedStatus, tableHeadData } from './helpers';
+import {
+  TransactionsComponentProps,
+  renderTrasactionProcessedStatus,
+  tableHeadData,
+} from './helpers';
 import FiltersForm from './FiltersForm';
 import TableHeader from './TableHeader';
+import TablePaginator from './TablePaginator';
 
-interface Props {
-  id: string;
-}
-
-const MerchantTransactionsProcessed = ({ id }: Props) => {
+const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState<number>(0);
   const [rows, setRows] = useState<Array<MerchantTransactionProcessedDTO>>([]);
@@ -27,7 +26,6 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
   const [totalElements, setTotalElements] = useState<number>(0);
   const [filterByUser, setFilterByUser] = useState<string | undefined>();
   const [filterByStatus, setFilterByStatus] = useState<string | undefined>();
-  const theme = createTheme(itIT);
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
   const addError = useErrorDispatcher();
 
@@ -113,14 +111,6 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
     };
   }, [id, page]);
 
-  const handleChangePage = (
-    _event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
-  ) => {
-    window.scrollTo(0, 0);
-    setPage(newPage);
-  };
-
   return (
     <Box sx={{ width: '100%' }}>
       <FiltersForm
@@ -152,21 +142,12 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
                   ))}
                 </TableBody>
               </Table>
-              <ThemeProvider theme={theme}>
-                <TablePagination
-                  sx={{
-                    '.MuiTablePagination-displayedRows': {
-                      fontFamily: '"Titillium Web",sans-serif',
-                    },
-                  }}
-                  component="div"
-                  onPageChange={handleChangePage}
-                  page={page}
-                  count={totalElements}
-                  rowsPerPage={rowsPerPage}
-                  rowsPerPageOptions={[10]}
-                />
-              </ThemeProvider>
+              <TablePaginator
+                page={page}
+                setPage={setPage}
+                totalElements={totalElements}
+                rowsPerPage={rowsPerPage}
+              />
             </Box>
           </Box>
         </Box>
