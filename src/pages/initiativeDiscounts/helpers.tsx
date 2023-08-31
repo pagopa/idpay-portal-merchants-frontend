@@ -1,6 +1,8 @@
 /* eslint-disable functional/immutable-data */
 import { Chip } from '@mui/material';
 import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
+import { FormikProps } from 'formik';
+import { Dispatch, SetStateAction } from 'react';
 import { StatusEnum as TransactionCreatedStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { StatusEnum as TransactionProcessedStatusEnum } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
 
@@ -93,3 +95,26 @@ export const tableHeadData = [
 export interface TransactionsComponentProps {
   id: string;
 }
+
+export const resetForm = (
+  initiativeId: string,
+  formik: FormikProps<{ searchUser: string; filterStatus: string }>,
+  setFilterByUser: Dispatch<SetStateAction<string | undefined>>,
+  setFilterByStatus: Dispatch<SetStateAction<string | undefined>>,
+  setRows: Dispatch<SetStateAction<Array<any>>>,
+  getTableData: (
+    initiativeId: string,
+    page: number,
+    fiscalCode: string | undefined,
+    status: string | undefined
+  ) => void
+) => {
+  const initialValues = { searchUser: '', filterStatus: '' };
+  formik.resetForm({ values: initialValues });
+  setFilterByUser(undefined);
+  setFilterByStatus(undefined);
+  setRows([]);
+  if (typeof initiativeId === 'string') {
+    getTableData(initiativeId, 0, undefined, undefined);
+  }
+};

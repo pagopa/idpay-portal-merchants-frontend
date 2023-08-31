@@ -12,6 +12,7 @@ import { MerchantTransactionProcessedDTO } from '../../api/generated/merchants/M
 import {
   TransactionsComponentProps,
   renderTrasactionProcessedStatus,
+  resetForm,
   tableHeadData,
 } from './helpers';
 import FiltersForm from './FiltersForm';
@@ -84,17 +85,6 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
       .finally(() => setLoading(false));
   };
 
-  const resetForm = () => {
-    const initialValues = { searchUser: '', filterStatus: '' };
-    formik.resetForm({ values: initialValues });
-    setFilterByUser(undefined);
-    setFilterByStatus(undefined);
-    setRows([]);
-    if (typeof id === 'string') {
-      getTableData(id, 0, undefined, undefined);
-    }
-  };
-
   useMemo(() => {
     setPage(0);
     setFilterByUser(undefined);
@@ -115,10 +105,11 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
     <Box sx={{ width: '100%' }}>
       <FiltersForm
         formik={formik}
-        resetForm={resetForm}
+        resetForm={() =>
+          resetForm(id, formik, setFilterByUser, setFilterByStatus, setRows, getTableData)
+        }
         filterByStatusOptionsList={filterByStatusOptionsList}
       />
-
       {rows.length > 0 ? (
         <Box
           sx={{
