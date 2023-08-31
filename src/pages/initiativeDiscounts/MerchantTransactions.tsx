@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import {
@@ -33,6 +33,8 @@ import {
 import FiltersForm from './FiltersForm';
 import TableHeader from './TableHeader';
 import TablePaginator from './TablePaginator';
+import { useTableDataFiltered } from './useTableDataFiltered';
+import { useMemoInitTableData } from './useMemoInitTableData';
 
 type ActionsMenuProps = {
   initiativeId: string;
@@ -209,21 +211,8 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
       .finally(() => setLoading(false));
   };
 
-  useMemo(() => {
-    setPage(0);
-    setFilterByUser(undefined);
-    setFilterByStatus(undefined);
-  }, [id]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if (typeof id === 'string') {
-      getTableData(id, page, filterByUser, filterByStatus);
-    }
-    return () => {
-      setRows([]);
-    };
-  }, [id, page]);
+  useMemoInitTableData(id, setPage, setFilterByUser, setFilterByStatus);
+  useTableDataFiltered(id, page, filterByUser, filterByStatus, getTableData, setRows);
 
   const showActionMenu = (status: TransactionStatusEnum) => {
     switch (status) {

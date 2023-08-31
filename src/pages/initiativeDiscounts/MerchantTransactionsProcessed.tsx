@@ -1,7 +1,7 @@
 import { Box, Table, TableBody, TableCell, TableRow } from '@mui/material';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { formatDate, formattedCurrency } from '../../helpers';
@@ -18,6 +18,8 @@ import {
 import FiltersForm from './FiltersForm';
 import TableHeader from './TableHeader';
 import TablePaginator from './TablePaginator';
+import { useTableDataFiltered } from './useTableDataFiltered';
+import { useMemoInitTableData } from './useMemoInitTableData';
 
 const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
   const { t } = useTranslation();
@@ -85,21 +87,8 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
       .finally(() => setLoading(false));
   };
 
-  useMemo(() => {
-    setPage(0);
-    setFilterByUser(undefined);
-    setFilterByStatus(undefined);
-  }, [id]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if (typeof id === 'string') {
-      getTableData(id, page, filterByUser, filterByStatus);
-    }
-    return () => {
-      setRows([]);
-    };
-  }, [id, page]);
+  useMemoInitTableData(id, setPage, setFilterByUser, setFilterByStatus);
+  useTableDataFiltered(id, page, filterByUser, filterByStatus, getTableData, setRows);
 
   return (
     <Box sx={{ width: '100%' }}>
