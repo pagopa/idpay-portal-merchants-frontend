@@ -1,20 +1,20 @@
 import MoreIcon from '@mui/icons-material/MoreVert';
 import {
   Box,
-  Button,
-  FormControl,
+  // Button,
+  // FormControl,
   IconButton,
-  InputLabel,
+  // InputLabel,
   Menu,
   MenuItem,
-  Select,
+  // Select,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TablePagination,
   TableRow,
-  TextField,
+  // TextField,
 } from '@mui/material';
 import { itIT } from '@mui/material/locale';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -22,7 +22,7 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ButtonNaked } from '@pagopa/mui-italia';
+// import { ButtonNaked } from '@pagopa/mui-italia';
 import { useFormik } from 'formik';
 import {
   MerchantTransactionDTO,
@@ -30,11 +30,15 @@ import {
 } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { formatDate, formattedCurrency } from '../../helpers';
 import { getMerchantTransactions } from '../../services/merchantService';
-import { genericContainerStyle, pagesTableContainerStyle } from '../../styles';
+import {
+  // genericContainerStyle,
+  pagesTableContainerStyle,
+} from '../../styles';
 import EmptyList from '../components/EmptyList';
 import AuthorizeTransactionModal from './AuthorizeTransactionModal';
 import CancelTransactionModal from './CancelTransactionModal';
 import { renderTransactionCreatedStatus } from './helpers';
+import FiltersForm from './FiltersForm';
 
 type ActionsMenuProps = {
   initiativeId: string;
@@ -47,10 +51,8 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openCancelTrxModal, setOpenCancelTrxModal] = useState<boolean>(false);
   const [openAuthorizeTrxModal, setOpenAuthorizeTrxModal] = useState<boolean>(false);
-  // const [openPaymentConfirmedToast, setOpenPaymentConfirmedToast] = useState<boolean>(false);
   const open = Boolean(anchorEl);
   const { t } = useTranslation();
-  // const addError = useErrorDispatcher();
 
   const handleClickActionsMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -68,11 +70,6 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
   type RenderAuthorizeTrxProps = {
     data: MerchantTransactionDTO;
   };
-
-  // type RenderConfirmPaymentProps = {
-  //   status: TransactionStatusEnum;
-  //   trxId: string;
-  // };
 
   const RenderAuthorizeTransaction = ({ data }: RenderAuthorizeTrxProps) => {
     switch (data.status) {
@@ -122,47 +119,6 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
     }
   };
 
-  // const handleConfirmPayment = (transactionId: string | undefined) => {
-  //   if (typeof transactionId === 'string') {
-  //     confirmPaymentQRCode(transactionId)
-  //       .then((_response) => setOpenPaymentConfirmedToast(true))
-  //       .catch((error) => {
-  //         addError({
-  //           id: 'CONFIRM_PAYMENT_QR_CODE_ERROR',
-  //           blocking: false,
-  //           error,
-  //           techDescription: 'An error occurred confirming payment qr code',
-  //           displayableTitle: t('errors.genericTitle'),
-  //           displayableDescription: t('errors.genericDescription'),
-  //           toNotify: true,
-  //           component: 'Toast',
-  //           showCloseIcon: true,
-  //         });
-  //       });
-  //   }
-  // };
-
-  // const RenderConfirmPayment = ({ status, trxId }: RenderConfirmPaymentProps) => {
-  //   switch (status) {
-  //     case TransactionStatusEnum.AUTHORIZED:
-  //       return (
-  //         <>
-  //           <MenuItem onClick={() => handleConfirmPayment(trxId)}>
-  //             {t('pages.initiativeDiscounts.confirmPayment')}
-  //           </MenuItem>
-  //           <Toast
-  //             open={openPaymentConfirmedToast}
-  //             title={t('pages.initiativeDiscounts.paymentConfirmed')}
-  //             showToastCloseIcon={true}
-  //             onCloseToast={() => setOpenPaymentConfirmedToast(false)}
-  //           />
-  //         </>
-  //       );
-  //     default:
-  //       return null;
-  //   }
-  // };
-
   return (
     <TableCell align="right" data-testid="tablecell-actions-menu">
       <IconButton
@@ -187,7 +143,6 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
       >
         <RenderAuthorizeTransaction data={data} />
         <RenderCancelTransaction initiativeId={initiativeId} trxId={trxId} status={status} />
-        {/* <RenderConfirmPayment status={status} trxId={trxId} /> */}
       </Menu>
     </TableCell>
   );
@@ -224,6 +179,12 @@ const MerchantTransactions = ({ id }: Props) => {
       }
     },
   });
+
+  const filterByStatusOptionsList = [
+    { value: 'IDENTIFIED', label: t('commons.discountStatusEnum.identified') },
+    { value: 'AUTHORIZED', label: t('commons.discountStatusEnum.authorized') },
+    { value: 'REJECTED', label: t('commons.discountStatusEnum.invalidated') },
+  ];
 
   const getTableData = (
     initiativeId: string,
@@ -307,7 +268,7 @@ const MerchantTransactions = ({ id }: Props) => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Box sx={{ ...genericContainerStyle, gap: 2, alignItems: 'baseline' }}>
+      {/* <Box sx={{ ...genericContainerStyle, gap: 2, alignItems: 'baseline' }}>
         <FormControl sx={{ gridColumn: 'span 4' }}>
           <TextField
             label={t('pages.initiativeDiscounts.searchByFiscalCode')}
@@ -361,7 +322,12 @@ const MerchantTransactions = ({ id }: Props) => {
             {t('commons.removeFiltersBtn')}
           </ButtonNaked>
         </FormControl>
-      </Box>
+      </Box> */}
+      <FiltersForm
+        formik={formik}
+        resetForm={resetForm}
+        filterByStatusOptionsList={filterByStatusOptionsList}
+      />
 
       {rows.length > 0 ? (
         <Box
