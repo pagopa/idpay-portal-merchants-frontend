@@ -81,3 +81,11 @@ export const userCanCreateDiscount = (startDate: Date | undefined, endDate: Date
   }
   return true;
 };
+
+export const tableHeadData = [
+  { width: '20%', label: 'pages.initiativeDiscounts.dateAndHours' },
+  { width: '30%', label: 'pages.initiativeDiscounts.beneficiary' },
+  { width: '15%', label: 'pages.initiativeDiscounts.totalSpent' },
+  { width: '15%', label: 'pages.initiativeDiscounts.authorizedAmount' },
+  { width: '15%', label: 'pages.initiativeDiscounts.discountStatus' },
+];
