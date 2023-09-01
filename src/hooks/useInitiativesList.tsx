@@ -5,6 +5,7 @@ import { match } from 'react-router-dom';
 import { getMerchantInitiativeList } from '../services/merchantService';
 import { useAppDispatch } from '../redux/hooks';
 import { setInitiativesList } from '../redux/slices/initiativesSlice';
+import { StatusEnum } from '../api/generated/merchants/InitiativeDTO';
 
 export const useInitiativesList = (match: match | null) => {
   const addError = useErrorDispatcher();
@@ -15,7 +16,10 @@ export const useInitiativesList = (match: match | null) => {
     if (match !== null) {
       getMerchantInitiativeList()
         .then((response) => {
-          dispatch(setInitiativesList(response));
+          const resFiltered = response.filter(
+            (r) => r.status === StatusEnum.PUBLISHED || r.status === StatusEnum.CLOSED
+          );
+          dispatch(setInitiativesList(resFiltered));
         })
         .catch((error) => {
           addError({
