@@ -5,11 +5,13 @@
     "closeBtn": "Chiudi",
     "confirmBtn": "Conferma",
     "continueBtn": "Continua",
+    "copyCodeBtn": "Copia codice",
     "copyLinkBtn": "Copia link",
     "discountStatusEnum": {
       "authorized": "Autorizzato",
       "cancelled": "Annullato",
       "identified": "Da autorizzare",
+      "invalidated": "Invalidato",
       "rejected": "Rifiutato",
       "rewarded": "Contabilizzato"
     },
@@ -21,6 +23,7 @@
       "published": "In corso"
     },
     "removeFiltersBtn": "Rimuovi filtri",
+    "sendBtn": "Invia",
     "title": "Portale Esercenti"
   },
   "errors": {
@@ -33,23 +36,15 @@
     "validationDescription": "Verifica che i dati inseriti siano corretti"
   },
   "pages": {
-    "assistance": {
-      "exitModal": {
-        "title": "Vuoi uscire?",
-        "body": "Il team di Assistenza non riceverà la tua richiesta."
-      },
-      "form": {
-        "message": "Descrivi il tuo problema",
-        "sendBtn": "Invia",
-        "subject": "Oggetto"
-      },
+    "assistanceRequest": {
+      "exitModalBody": "Il team di Assistenza non riceverà la tua richiesta.",
+      "exitModalTitle": "Vuoi uscire?",
+      "message": "Descrivi il tuo problema",
+      "subject": "Oggetto",
       "subtitle": "Compila e invia il modulo. Ti risponderemo al più presto.",
+      "thankYouDescription": "Ti risponderemo al più presto all’indirizzo e-mail che hai indicato.",
+      "thankYouTitle": "Abbiamo ricevuto la tua richiesta!",
       "title": "Come possiamo aiutarti?"
-    },
-    "thankyouPage": {
-      "buttonLabel": "Chiudi",
-      "description": "Ti risponderemo al più presto all’indirizzo e-mail che hai indicato.",
-      "title": "Abbiamo ricevuto la tua richiesta!"
     },
     "tos": {
       "and": "e l’",
@@ -74,10 +69,11 @@
       "createBtn": "Crea buono sconto",
       "currentMerchantTransactions": "Buoni sconto in corso",
       "dateAndHours": "Data e ora",
+      "detailTitle": "Dettaglio buono sconto",
       "discountAuthorized": "Autorizzato",
       "discountStatus": "Stato",
       "emptyList": "Non ci sono buoni sconto in corso per questa iniziativa.",
-      "emptyProcessedList": "Non ci sono buoni sconto contabilizzati per questa iniziativa.",
+      "emptyProcessedList": "Non ci sono buoni sconto contabilizzati per questa iniziativa",
       "filterByStatus": "Stato",
       "listTitle": "Buoni sconto emessi",
       "paymentConfirmed": "Pagamento confermato",
@@ -105,18 +101,21 @@
       "initiativeName": "Nome"
     },
     "newDiscount": {
+      "codeCopied": "Codice copiato",
       "createdSubtitle": "Invia il buono sconto al tuo cliente, gli servirà per autorizzare la spesa con l’app IO.",
       "createdTitle": "Buono sconto creato!",
       "expiringDiscountInfoAlertText": "Il buono sconto ha una durata di {{days}} giorni: è necessario autorizzare la spesa entro le {{hour}} del {{date}}.",
       "handleDiscountsBtn": "Gestisci buoni sconto",
       "magicLinkCopied": "Link copiato",
       "magicLinkLabel": "Link magico",
+      "numericCodeLabel": "Codice numerico",
       "qrCodeDownloaded": "Codice QR scaricato",
+      "qrCodeLabel": "Codice QR",
       "sendAuthorizationRequestSubtitle": "Invia al tuo cliente una richiesta di autorizzazione della spesa del buono sconto.",
       "sendAuthorizationRequestTitle": "Invio richiesta di autorizzazione",
       "sendMagicLinkSubtitle": "Copia il link e invialo al tuo cliente con la modalità che preferisci.",
       "sendMagicLinkTitle": "Invia un link magico",
-      "sendQrSubtitle": "Salva l’immagine e inviala al tuo cliente con la modalità che preferisci.",
+      "sendQrSubtitle": "Salva l’immagine e inviala al tuo cliente con la modalità che preferisci. In caso di problemi con la lettura del codice QR è possibile inserire manualmente sull’app IO il codice di 8 cifre.",
       "sendQrTitle": "Oppure invia un codice QR",
       "spendingAmountLabel": "Importo spesa",
       "spendingInfoSubtitle": "Inserisci l’importo totale della spesa, ci servirà per calcolare lo sconto applicabile.",

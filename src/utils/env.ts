@@ -15,7 +15,7 @@ export const ENV = {
     LOGIN: env.get('REACT_APP_URL_FE_LOGIN').required().asString(),
     LOGOUT: env.get('REACT_APP_URL_FE_LOGOUT').required().asString(),
     LANDING: env.get('REACT_APP_URL_FE_LANDING').required().asString(),
-    ASSISTANCE: env.get('REACT_APP_URL_FE_ASSISTANCE').required().asString(),
+    ASSISTANCE_MERCHANT: env.get('REACT_APP_URL_FE_ASSISTANCE_MERCHANTS').required().asString(),
   },
 
   URL_API: {
@@ -52,12 +52,15 @@ export const ENV = {
       .get('REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS')
       .required()
       .asString(),
-    PRIVACY_POLICY_ID: env.get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID').required().asString(),
-    PRIVACY_POLICY_JSON_URL: env
-      .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL')
+    PRIVACY_POLICY_ID: env
+      .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID_MERCHANTS')
       .required()
       .asString(),
-    TOS_ID: env.get('REACT_APP_ONE_TRUST_TOS_ID').required().asString(),
-    TOS_JSON_URL: env.get('REACT_APP_ONE_TRUST_TOS_JSON_URL').required().asString(),
+    PRIVACY_POLICY_JSON_URL: env
+      .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL_MERCHANTS')
+      .required()
+      .asString(),
+    TOS_ID: env.get('REACT_APP_ONE_TRUST_TOS_ID_MERCHANTS').required().asString(),
+    TOS_JSON_URL: env.get('REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS').required().asString(),
   },
 };

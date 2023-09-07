@@ -1,38 +1,57 @@
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TablePagination,
-  TableRow,
-} from '@mui/material';
-import { itIT } from '@mui/material/locale';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { Box, Table, TableBody, TableCell, TableRow } from '@mui/material';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useFormik } from 'formik';
 import { formatDate, formattedCurrency } from '../../helpers';
 import { getMerchantTransactionsProcessed } from '../../services/merchantService';
 import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
 import { MerchantTransactionProcessedDTO } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
-import { renderTrasactionProcessedStatus } from './helpers';
+import {
+  TransactionsComponentProps,
+  renderTrasactionProcessedStatus,
+  resetForm,
+  tableHeadData,
+} from './helpers';
+import FiltersForm from './FiltersForm';
+import TableHeader from './TableHeader';
+import TablePaginator from './TablePaginator';
+import { useTableDataFiltered } from './useTableDataFiltered';
+import { useMemoInitTableData } from './useMemoInitTableData';
 
-interface Props {
-  id: string;
-}
-
-const MerchantTransactionsProcessed = ({ id }: Props) => {
+const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState<number>(0);
   const [rows, setRows] = useState<Array<MerchantTransactionProcessedDTO>>([]);
   const [rowsPerPage, setRowsPerPage] = useState<number>(0);
   const [totalElements, setTotalElements] = useState<number>(0);
-  const theme = createTheme(itIT);
+  const [filterDataByUser, setFilterDataByUser] = useState<string | undefined>();
+  const [filterDataByStatus, setFilterDataByStatus] = useState<string | undefined>();
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
   const addError = useErrorDispatcher();
+
+  const formik = useFormik({
+    initialValues: {
+      searchUser: '',
+      filterStatus: '',
+    },
+    onSubmit: (values) => {
+      if (typeof id === 'string') {
+        const fU = values.searchUser.length > 0 ? values.searchUser : undefined;
+        const fS = values.filterStatus.length > 0 ? values.filterStatus : undefined;
+        setFilterDataByUser(fU);
+        setFilterDataByStatus(fS);
+        getTableData(id, 0, fU, fS);
+      }
+    },
+  });
+
+  const filterByStatusOptionsList = [
+    { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded') },
+    { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
+  ];
 
   const getTableData = (
     initiativeId: string,
@@ -54,10 +73,10 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
       })
       .catch((error) => {
         addError({
-          id: 'GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST_ERROR',
+          id: 'GET_INITIATIVE_MERCHANT_DISCOUNTS_PROCESSED_LIST_ERROR',
           blocking: false,
           error,
-          techDescription: 'An error occurred getting initiative merchant discounts list',
+          techDescription: 'An error occurred getting initiative merchant discounts processed list',
           displayableTitle: t('errors.genericTitle'),
           displayableDescription: t('errors.genericDescription'),
           toNotify: true,
@@ -68,27 +87,18 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
       .finally(() => setLoading(false));
   };
 
-  useMemo(() => {
-    setPage(0);
-  }, [id]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if (typeof id === 'string') {
-      getTableData(id, page, undefined, undefined);
-    }
-  }, [id, page]);
-
-  const handleChangePage = (
-    _event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
-  ) => {
-    window.scrollTo(0, 0);
-    setPage(newPage);
-  };
+  useMemoInitTableData(id, setPage, setFilterDataByUser, setFilterDataByStatus);
+  useTableDataFiltered(id, page, filterDataByUser, filterDataByStatus, getTableData, setRows);
 
   return (
     <Box sx={{ width: '100%' }}>
+      <FiltersForm
+        formik={formik}
+        resetForm={() =>
+          resetForm(id, formik, setFilterDataByUser, setFilterDataByStatus, setRows, getTableData)
+        }
+        filterByStatusOptionsList={filterByStatusOptionsList}
+      />
       {rows.length > 0 ? (
         <Box
           sx={{
@@ -99,19 +109,7 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
           <Box sx={{ display: 'grid', gridColumn: 'span 12', height: '100%' }}>
             <Box sx={{ width: '100%' }}>
               <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell width="20%">{t('pages.initiativeDiscounts.dateAndHours')}</TableCell>
-                    <TableCell width="40%">{t('pages.initiativeDiscounts.beneficiary')}</TableCell>
-                    <TableCell width="15%">{t('pages.initiativeDiscounts.totalSpent')}</TableCell>
-                    <TableCell width="15%">
-                      {t('pages.initiativeDiscounts.authorizedAmount')}
-                    </TableCell>
-                    <TableCell width="15%">
-                      {t('pages.initiativeDiscounts.discountStatus')}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
+                <TableHeader data={tableHeadData} />
                 <TableBody sx={{ backgroundColor: 'white' }}>
                   {rows.map((r, i) => (
                     <TableRow key={i}>
@@ -124,21 +122,12 @@ const MerchantTransactionsProcessed = ({ id }: Props) => {
                   ))}
                 </TableBody>
               </Table>
-              <ThemeProvider theme={theme}>
-                <TablePagination
-                  sx={{
-                    '.MuiTablePagination-displayedRows': {
-                      fontFamily: '"Titillium Web",sans-serif',
-                    },
-                  }}
-                  component="div"
-                  onPageChange={handleChangePage}
-                  page={page}
-                  count={totalElements}
-                  rowsPerPage={rowsPerPage}
-                  rowsPerPageOptions={[10]}
-                />
-              </ThemeProvider>
+              <TablePaginator
+                page={page}
+                setPage={setPage}
+                totalElements={totalElements}
+                rowsPerPage={rowsPerPage}
+              />
             </Box>
           </Box>
         </Box>

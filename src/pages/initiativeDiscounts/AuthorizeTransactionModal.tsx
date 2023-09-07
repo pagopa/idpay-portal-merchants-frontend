@@ -2,6 +2,7 @@
 /* eslint-disable no-prototype-builtins */
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Alert,
   Backdrop,
@@ -10,19 +11,23 @@ import {
   Divider,
   Fade,
   FormControl,
+  IconButton,
   Modal,
   TextField,
   Typography,
 } from '@mui/material';
-import TitleBox from '@pagopa/selfcare-common-frontend/components/TitleBox';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
 import {
   copyTextToClipboard,
   downloadQRCodeFromURL,
+  formatDate,
+  formattedCurrency,
   mapDataForDiscoutTimeRecap,
 } from '../../helpers';
+import { renderTransactionCreatedStatus } from './helpers';
 
 type Props = {
   openAuthorizeTrxModal: boolean;
@@ -37,23 +42,23 @@ const AuthorizeTransactionModal = ({
 }: Props) => {
   const [magicLink, setMagicLink] = useState<string>();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [authorizationId, setAuthorizationId] = useState<string>();
   const [expirationDays, setExpirationDays] = useState<number>();
   const [expirationDate, setExpirationDate] = useState<string>();
   const [expirationTime, setExpirationTime] = useState<string>();
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (typeof data !== 'undefined') {
-      const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
-        data.trxExpirationMinutes,
-        data.trxDate
-      );
-      setExpirationDays(expirationDays);
-      setExpirationDate(expirationDate);
-      setExpirationTime(expirationTime);
-      setMagicLink(data?.qrcodeTxtUrl);
-      setQrCodeUrl(data?.qrcodePngUrl);
-    }
+    const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
+      data.trxExpirationMinutes,
+      data.trxDate
+    );
+    setExpirationDays(expirationDays);
+    setExpirationDate(expirationDate);
+    setExpirationTime(expirationTime);
+    setMagicLink(data?.qrcodeTxtUrl);
+    setQrCodeUrl(data?.qrcodePngUrl);
+    setAuthorizationId(data?.trxCode);
   }, [data]);
 
   return (
@@ -72,93 +77,147 @@ const AuthorizeTransactionModal = ({
         <Box
           sx={{
             position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 600,
+            top: '0',
+            right: '0',
+            transform: 'translate(0, 0)',
+            width: '375px',
+            height: '100%',
             bgcolor: 'background.paper',
-            borderRadius: '4px',
             boxShadow: 24,
-            p: 4,
+            p: 3,
           }}
         >
-          <TitleBox
-            title={t('pages.initiativeDiscounts.authorizationRequestModalTitle')}
-            subTitle={t('pages.newDiscount.createdSubtitle')}
-            mbTitle={2}
-            mtTitle={0}
-            mbSubTitle={0}
-            variantTitle="h6"
-            variantSubTitle="body2"
-          />
-          <Box sx={{ gridColumn: 'span 12', my: 2 }}>
-            <Alert color="info">
-              {t('pages.newDiscount.expiringDiscountInfoAlertText', {
-                days: expirationDays,
-                hour: expirationTime,
-                date: expirationDate,
-              })}
-            </Alert>
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(12, 1fr)',
+              justifyItems: 'end',
+              mb: 2,
+            }}
+          >
             <Box sx={{ gridColumn: 'span 12' }}>
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                {t('pages.newDiscount.sendMagicLinkTitle')}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, fontSize: '1rem' }}>
-                {t('pages.newDiscount.sendMagicLinkSubtitle')}
+              <IconButton
+                color="default"
+                aria-label="close authorize transaction modal"
+                component="span"
+                onClick={() => {
+                  setOpenAuthorizeTrxModal(false);
+                }}
+              >
+                <CloseIcon data-testid="close-authorize-transaction-modal-test" />
+              </IconButton>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(12, 1fr)',
+              justifyItems: 'start',
+              height: 'calc(100% - 100px)',
+              overflow: 'auto',
+            }}
+          >
+            <Box sx={{ gridColumn: 'span 12' }}>
+              <Typography variant="h6">{t('pages.initiativeDiscounts.detailTitle')}</Typography>
+            </Box>
+            <Box sx={{ gridColumn: 'span 12' }}>
+              <Alert color="info">
+                {t('pages.newDiscount.expiringDiscountInfoAlertText', {
+                  days: expirationDays,
+                  hour: expirationTime,
+                  date: expirationDate,
+                })}
+              </Alert>
+            </Box>
+            <Box sx={{ gridColumn: 'span 12' }}>
+              <Typography variant="body2">{t('pages.initiativeDiscounts.dateAndHours')}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {formatDate(data?.trxDate)}
               </Typography>
             </Box>
-            <FormControl sx={{ mr: 2, gridColumn: 'span 9' }}>
-              <TextField disabled value={magicLink} size="small" id="magic-link" fullWidth />
-            </FormControl>
-            <FormControl sx={{ gridColumn: 'span 3' }}>
+            <Box sx={{ gridColumn: 'span 12' }}>
+              <Typography variant="body2">{t('pages.initiativeDiscounts.totalSpent')}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {formattedCurrency(data?.effectiveAmount, '-', true)}
+              </Typography>
+            </Box>
+            <Box sx={{ gridColumn: 'span 12' }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                {t('pages.initiativeDiscounts.discountStatus')}
+              </Typography>
+              <Box>{renderTransactionCreatedStatus(data?.status)}</Box>
+            </Box>
+
+            <FormControl
+              sx={{
+                gridColumn: 'span 12',
+                width: '100%',
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 600, my: 1 }}>
+                {t('pages.newDiscount.magicLinkLabel')}
+              </Typography>
+              <TextField disabled value={magicLink} size="small" id="magic-link" />
               <Button
                 startIcon={<ContentCopyIcon />}
                 size="small"
                 variant="contained"
-                sx={{ height: '43px' }}
                 onClick={() => copyTextToClipboard(magicLink)}
+                sx={{ width: '125px', mt: 1 }}
               >
                 {t('commons.copyLinkBtn')}
               </Button>
             </FormControl>
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', my: 2 }}>
-            <Box sx={{ gridColumn: 'span 12' }}>
+            <Box
+              sx={{
+                width: '100%',
+                gridColumn: 'span 12',
+              }}
+            >
               <Divider />
             </Box>
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
             <Box sx={{ gridColumn: 'span 12' }}>
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                {t('pages.newDiscount.sendQrTitle')}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, fontSize: '1rem' }}>
-                {t('pages.newDiscount.sendQrSubtitle')}
+              <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>
+                {t('pages.newDiscount.qrCodeLabel')}
               </Typography>
               <Button
                 startIcon={<FileDownloadIcon />}
                 size="small"
                 variant="contained"
-                sx={{ height: '43px' }}
                 onClick={() => downloadQRCodeFromURL(qrCodeUrl)}
               >
                 {t('commons.downloadQrBtn')}
               </Button>
             </Box>
-          </Box>
-
-          <Box sx={{ display: 'grid', gridColumn: 'span 2', justifyContent: 'end', mt: 5 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => {
-                setOpenAuthorizeTrxModal(false);
+            <Box
+              sx={{
+                width: '100%',
+                gridColumn: 'span 12',
               }}
             >
-              {t('commons.closeBtn')}
-            </Button>
+              <Divider />
+            </Box>
+
+            <FormControl
+              sx={{
+                gridColumn: 'span 12',
+                width: '100%',
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                {t('pages.newDiscount.numericCodeLabel')}
+              </Typography>
+              <TextField disabled value={authorizationId} size="small" id="magic-link" />
+              <Button
+                startIcon={<ContentCopyIcon />}
+                size="small"
+                variant="contained"
+                onClick={() => copyTextToClipboard(authorizationId)}
+                sx={{ width: '150px', mt: 1 }}
+              >
+                {t('commons.copyCodeBtn')}
+              </Button>
+            </FormControl>
           </Box>
         </Box>
       </Fade>

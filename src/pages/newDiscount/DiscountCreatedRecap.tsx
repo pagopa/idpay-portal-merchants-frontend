@@ -29,8 +29,10 @@ const DiscountCreatedRecap = ({ data }: Props) => {
   const [expirationTime, setExpirationTime] = useState<string>();
   const [magicLink, setMagicLink] = useState<string>();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  const [openCopySuccesToast, setOpenCopySuccesToast] = useState<boolean>(false);
-  const [openDownloadSuccesToast, setOpenDownloadSuccesToast] = useState<boolean>(false);
+  const [authorizationId, setAuthorizationId] = useState<string>();
+  const [openCopyLinkSuccessToast, setOpenCopyLinkSuccessToast] = useState<boolean>(false);
+  const [openDownloadSuccessToast, setOpenDownloadSuccessToast] = useState<boolean>(false);
+  const [openCopyCodeSuccessToast, setOpenCopyCodeSuccessToast] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof data !== 'undefined') {
@@ -43,22 +45,29 @@ const DiscountCreatedRecap = ({ data }: Props) => {
       setExpirationTime(expirationTime);
       setMagicLink(data?.qrcodeTxtUrl);
       setQrCodeUrl(data?.qrcodePngUrl);
+      setAuthorizationId(data?.trxCode);
     }
   }, [data]);
 
   return (
     <>
       <Toast
-        open={openCopySuccesToast}
+        open={openCopyLinkSuccessToast}
         title={t('pages.newDiscount.magicLinkCopied')}
         showToastCloseIcon={true}
-        onCloseToast={() => setOpenCopySuccesToast(false)}
+        onCloseToast={() => setOpenCopyLinkSuccessToast(false)}
       />
       <Toast
-        open={openDownloadSuccesToast}
+        open={openDownloadSuccessToast}
         title={t('pages.newDiscount.qrCodeDownloaded')}
         showToastCloseIcon={true}
-        onCloseToast={() => setOpenDownloadSuccesToast(false)}
+        onCloseToast={() => setOpenDownloadSuccessToast(false)}
+      />
+      <Toast
+        open={openCopyCodeSuccessToast}
+        title={t('pages.newDiscount.codeCopied')}
+        showToastCloseIcon={true}
+        onCloseToast={() => setOpenCopyCodeSuccessToast(false)}
       />
       <Box sx={{ gridColumn: 'span 12', mt: 2, mb: 5 }}>
         <Alert color="info">
@@ -91,7 +100,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               sx={{ height: '43px' }}
               onClick={() => {
                 copyTextToClipboard(magicLink);
-                setOpenCopySuccesToast(true);
+                setOpenCopyLinkSuccessToast(true);
               }}
               data-testid="copy-link-buttton-test"
             >
@@ -101,14 +110,43 @@ const DiscountCreatedRecap = ({ data }: Props) => {
         </Box>
       </Paper>
       <Paper sx={{ gridColumn: 'span 12', my: 5, p: 3 }}>
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
-          <Box sx={{ gridColumn: 'span 10' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', columnGap: 2 }}>
+          <Box sx={{ gridColumn: 'span 12' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               {t('pages.newDiscount.sendQrTitle')}
             </Typography>
+          </Box>
+          <Box sx={{ gridColumn: 'span 9' }}>
             <Typography variant="body2" sx={{ mb: 3, fontSize: '1rem' }}>
               {t('pages.newDiscount.sendQrSubtitle')}
             </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', columnGap: 2 }}>
+              <FormControl sx={{ gridColumn: 'span 5' }}>
+                <TextField disabled value={authorizationId} size="small" id="magic-link" />
+              </FormControl>
+              <FormControl sx={{ gridColumn: 'span 3' }}>
+                <Button
+                  startIcon={<ContentCopyIcon />}
+                  size="small"
+                  variant="contained"
+                  onClick={() => {
+                    copyTextToClipboard(authorizationId);
+                    setOpenCopyCodeSuccessToast(true);
+                  }}
+                  sx={{ height: '43px' }}
+                  data-testid="copy-auhorization-id-buttton-test"
+                >
+                  {t('commons.copyCodeBtn')}
+                </Button>
+              </FormControl>
+            </Box>
+          </Box>
+          <Box sx={{ gridColumn: 'span 3', justifySelf: 'end', mt: -2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <img src={qrCodeUrl} width="100%" />
+            </Box>
+          </Box>
+          <Box sx={{ gridColumn: 'span 12' }}>
             <Button
               startIcon={<FileDownloadIcon />}
               size="small"
@@ -116,17 +154,12 @@ const DiscountCreatedRecap = ({ data }: Props) => {
               sx={{ height: '43px' }}
               onClick={() => {
                 downloadQRCodeFromURL(qrCodeUrl);
-                setOpenDownloadSuccesToast(true);
+                setOpenDownloadSuccessToast(true);
               }}
               data-testid="download-qr-code-button-test"
             >
               {t('commons.downloadQrBtn')}
             </Button>
-          </Box>
-          <Box sx={{ gridColumn: 'span 2', justifySelf: 'end' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-              <img src={qrCodeUrl} width="100%" />
-            </Box>
           </Box>
         </Box>
       </Paper>

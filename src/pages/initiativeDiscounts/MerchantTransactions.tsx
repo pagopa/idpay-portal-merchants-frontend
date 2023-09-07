@@ -7,16 +7,13 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TablePagination,
   TableRow,
 } from '@mui/material';
-import { itIT } from '@mui/material/locale';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useFormik } from 'formik';
 import {
   MerchantTransactionDTO,
   StatusEnum as TransactionStatusEnum,
@@ -27,7 +24,17 @@ import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
 import AuthorizeTransactionModal from './AuthorizeTransactionModal';
 import CancelTransactionModal from './CancelTransactionModal';
-import { renderTransactionCreatedStatus } from './helpers';
+import {
+  TransactionsComponentProps,
+  renderTransactionCreatedStatus,
+  resetForm,
+  tableHeadData,
+} from './helpers';
+import FiltersForm from './FiltersForm';
+import TableHeader from './TableHeader';
+import TablePaginator from './TablePaginator';
+import { useTableDataFiltered } from './useTableDataFiltered';
+import { useMemoInitTableData } from './useMemoInitTableData';
 
 type ActionsMenuProps = {
   initiativeId: string;
@@ -40,10 +47,8 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openCancelTrxModal, setOpenCancelTrxModal] = useState<boolean>(false);
   const [openAuthorizeTrxModal, setOpenAuthorizeTrxModal] = useState<boolean>(false);
-  // const [openPaymentConfirmedToast, setOpenPaymentConfirmedToast] = useState<boolean>(false);
   const open = Boolean(anchorEl);
   const { t } = useTranslation();
-  // const addError = useErrorDispatcher();
 
   const handleClickActionsMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -62,23 +67,17 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
     data: MerchantTransactionDTO;
   };
 
-  // type RenderConfirmPaymentProps = {
-  //   status: TransactionStatusEnum;
-  //   trxId: string;
-  // };
-
   const RenderAuthorizeTransaction = ({ data }: RenderAuthorizeTrxProps) => {
-    switch (status) {
+    switch (data.status) {
       case TransactionStatusEnum.IDENTIFIED:
       case TransactionStatusEnum.CREATED:
-      case TransactionStatusEnum.REJECTED:
         return (
           <>
             <MenuItem
               data-testid="authorize-trx-button"
               onClick={() => setOpenAuthorizeTrxModal(true)}
             >
-              {t('pages.initiativeDiscounts.requestAuthorization')}
+              {t('pages.initiativeDiscounts.detailTitle')}
             </MenuItem>
             <AuthorizeTransactionModal
               openAuthorizeTrxModal={openAuthorizeTrxModal}
@@ -87,6 +86,7 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
             />
           </>
         );
+      case TransactionStatusEnum.REJECTED:
       default:
         return null;
     }
@@ -115,56 +115,15 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
     }
   };
 
-  // const handleConfirmPayment = (transactionId: string | undefined) => {
-  //   if (typeof transactionId === 'string') {
-  //     confirmPaymentQRCode(transactionId)
-  //       .then((_response) => setOpenPaymentConfirmedToast(true))
-  //       .catch((error) => {
-  //         addError({
-  //           id: 'CONFIRM_PAYMENT_QR_CODE_ERROR',
-  //           blocking: false,
-  //           error,
-  //           techDescription: 'An error occurred confirming payment qr code',
-  //           displayableTitle: t('errors.genericTitle'),
-  //           displayableDescription: t('errors.genericDescription'),
-  //           toNotify: true,
-  //           component: 'Toast',
-  //           showCloseIcon: true,
-  //         });
-  //       });
-  //   }
-  // };
-
-  // const RenderConfirmPayment = ({ status, trxId }: RenderConfirmPaymentProps) => {
-  //   switch (status) {
-  //     case TransactionStatusEnum.AUTHORIZED:
-  //       return (
-  //         <>
-  //           <MenuItem onClick={() => handleConfirmPayment(trxId)}>
-  //             {t('pages.initiativeDiscounts.confirmPayment')}
-  //           </MenuItem>
-  //           <Toast
-  //             open={openPaymentConfirmedToast}
-  //             title={t('pages.initiativeDiscounts.paymentConfirmed')}
-  //             showToastCloseIcon={true}
-  //             onCloseToast={() => setOpenPaymentConfirmedToast(false)}
-  //           />
-  //         </>
-  //       );
-  //     default:
-  //       return null;
-  //   }
-  // };
-
   return (
-    <TableCell align="right">
+    <TableCell align="right" data-testid="tablecell-actions-menu">
       <IconButton
         id={`actions_button-${trxId}`}
         aria-controls={open ? `actions-menu_${trxId}` : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClickActionsMenu}
-        data-testid="menu-open-test"
+        data-testid="actions_button"
       >
         <MoreIcon color="primary" />
       </IconButton>
@@ -180,25 +139,43 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
       >
         <RenderAuthorizeTransaction data={data} />
         <RenderCancelTransaction initiativeId={initiativeId} trxId={trxId} status={status} />
-        {/* <RenderConfirmPayment status={status} trxId={trxId} /> */}
       </Menu>
     </TableCell>
   );
 };
 
-interface Props {
-  id: string;
-}
-
-const MerchantTransactions = ({ id }: Props) => {
+const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState<number>(0);
   const [rows, setRows] = useState<Array<MerchantTransactionDTO>>([]);
   const [rowsPerPage, setRowsPerPage] = useState<number>(0);
   const [totalElements, setTotalElements] = useState<number>(0);
-  const theme = createTheme(itIT);
+  const [filterByUser, setFilterByUser] = useState<string | undefined>();
+  const [filterByStatus, setFilterByStatus] = useState<string | undefined>();
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
   const addError = useErrorDispatcher();
+
+  const formik = useFormik({
+    initialValues: {
+      searchUser: '',
+      filterStatus: '',
+    },
+    onSubmit: (values) => {
+      if (typeof id === 'string') {
+        const fU = values.searchUser.length > 0 ? values.searchUser : undefined;
+        const fS = values.filterStatus.length > 0 ? values.filterStatus : undefined;
+        setFilterByUser(fU);
+        setFilterByStatus(fS);
+        getTableData(id, 0, fU, fS);
+      }
+    },
+  });
+
+  const filterByStatusOptionsList = [
+    { value: 'IDENTIFIED', label: t('commons.discountStatusEnum.identified') },
+    { value: 'AUTHORIZED', label: t('commons.discountStatusEnum.authorized') },
+    { value: 'REJECTED', label: t('commons.discountStatusEnum.invalidated') },
+  ];
 
   const getTableData = (
     initiativeId: string,
@@ -234,37 +211,30 @@ const MerchantTransactions = ({ id }: Props) => {
       .finally(() => setLoading(false));
   };
 
-  useMemo(() => {
-    setPage(0);
-  }, [id]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if (typeof id === 'string') {
-      getTableData(id, page, undefined, undefined);
-    }
-  }, [id, page]);
-
-  const handleChangePage = (
-    _event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
-  ) => {
-    window.scrollTo(0, 0);
-    setPage(newPage);
-  };
+  useMemoInitTableData(id, setPage, setFilterByUser, setFilterByStatus);
+  useTableDataFiltered(id, page, filterByUser, filterByStatus, getTableData, setRows);
 
   const showActionMenu = (status: TransactionStatusEnum) => {
     switch (status) {
       case TransactionStatusEnum.AUTHORIZED:
       case TransactionStatusEnum.CREATED:
       case TransactionStatusEnum.IDENTIFIED:
-      case TransactionStatusEnum.REJECTED:
         return true;
+      case TransactionStatusEnum.REJECTED:
+        return false;
     }
   };
 
   return (
     <Box sx={{ width: '100%' }}>
+      <FiltersForm
+        formik={formik}
+        resetForm={() =>
+          resetForm(id, formik, setFilterByUser, setFilterByStatus, setRows, getTableData)
+        }
+        filterByStatusOptionsList={filterByStatusOptionsList}
+      />
+
       {rows.length > 0 ? (
         <Box
           sx={{
@@ -275,20 +245,7 @@ const MerchantTransactions = ({ id }: Props) => {
           <Box sx={{ display: 'grid', gridColumn: 'span 12', height: '100%' }}>
             <Box sx={{ width: '100%' }}>
               <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell width="20%">{t('pages.initiativeDiscounts.dateAndHours')}</TableCell>
-                    <TableCell width="40%">{t('pages.initiativeDiscounts.beneficiary')}</TableCell>
-                    <TableCell width="15%">{t('pages.initiativeDiscounts.totalSpent')}</TableCell>
-                    <TableCell width="15%">
-                      {t('pages.initiativeDiscounts.authorizedAmount')}
-                    </TableCell>
-                    <TableCell width="15%">
-                      {t('pages.initiativeDiscounts.discountStatus')}
-                    </TableCell>
-                    <TableCell width="5%"></TableCell>
-                  </TableRow>
-                </TableHead>
+                <TableHeader data={[...tableHeadData, { width: '5%', label: '' }]} />
                 <TableBody sx={{ backgroundColor: 'white' }}>
                   {rows.map((r, i) => (
                     <TableRow key={i}>
@@ -308,21 +265,12 @@ const MerchantTransactions = ({ id }: Props) => {
                   ))}
                 </TableBody>
               </Table>
-              <ThemeProvider theme={theme}>
-                <TablePagination
-                  sx={{
-                    '.MuiTablePagination-displayedRows': {
-                      fontFamily: '"Titillium Web",sans-serif',
-                    },
-                  }}
-                  component="div"
-                  onPageChange={handleChangePage}
-                  page={page}
-                  count={totalElements}
-                  rowsPerPage={rowsPerPage}
-                  rowsPerPageOptions={[10]}
-                />
-              </ThemeProvider>
+              <TablePaginator
+                page={page}
+                setPage={setPage}
+                totalElements={totalElements}
+                rowsPerPage={rowsPerPage}
+              />
             </Box>
           </Box>
         </Box>

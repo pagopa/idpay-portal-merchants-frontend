@@ -8,7 +8,7 @@ import { genericContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
 import { useAppSelector } from '../../redux/hooks';
-import { initiativeNameSelector } from '../../redux/slices/initiativesSlice';
+import { initiativeSelector } from '../../redux/slices/initiativesSlice';
 import CreateForm from './CreateForm';
 import DiscountCreatedRecap from './DiscountCreatedRecap';
 
@@ -19,7 +19,7 @@ interface MatchParams {
 const NewDiscount = () => {
   const [discountCreated, setDiscountCreated] = useState(false);
   const [discountResponse, setDiscountResponse] = useState<TransactionResponse | undefined>();
-  const initiativeName = useAppSelector(initiativeNameSelector);
+  const selectedInitiative = useAppSelector(initiativeSelector);
   const { t } = useTranslation();
 
   const match = matchPath(location.pathname, {
@@ -36,7 +36,7 @@ const NewDiscount = () => {
         backLabel={t('commons.backBtn')}
         items={[
           t('pages.initiativesList.title'),
-          initiativeName,
+          selectedInitiative?.initiativeName,
           t('pages.initiativeDiscounts.createBtn'),
         ]}
       />
