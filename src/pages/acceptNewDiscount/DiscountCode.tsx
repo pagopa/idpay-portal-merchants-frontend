@@ -113,7 +113,7 @@ const DiscountCode = ({ id, amount, setAmountGiven, code, setCode }: Props) => {
                 setAmountGiven(false);
                 setCode(formik.values.discountCode);
               }}
-              data-testid="back-to-initiative-discounts-test"
+              data-testid="back-to-total-amount-test"
             >
               {t('commons.backBtn')}
             </Button>

@@ -17,7 +17,6 @@ interface MatchParams {
 
 const AcceptNewDiscount = () => {
   const { t } = useTranslation();
-
   const match = matchPath(location.pathname, {
     path: [ROUTES.ACCEPT_NEW_DISCOUNT],
     exact: true,
