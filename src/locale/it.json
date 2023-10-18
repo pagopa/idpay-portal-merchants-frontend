@@ -27,6 +27,7 @@
     "title": "Portale Esercenti"
   },
   "errors": {
+    "contactAdmin": "Contatta l'assistenza",
     "genericDescription": "Riprovare",
     "genericTitle": "Si è verificato un errore",
     "sessionExpiredMessage": "Ti stiamo reindirizzando alla pagina di accesso",
@@ -54,7 +55,7 @@
       "termsDescription": "Accedendo, accetti i",
       "termsDescription2": "del servizio e confermi di aver letto l’",
       "termsDescriptionChanged": "Recentemente abbiamo cambiato i",
-      "title": "Portale Bonus"
+      "title": "Portale Esercenti"
     },
     "initiativeDiscounts": {
       "amount": "Importo",
@@ -129,6 +130,7 @@
   },
   "validation": {
     "assistanceSubject": "Inserisci l’argomento della tua richiesta",
+    "exactChars": "Deve essere esattamente di {{x}} caratteri",
     "maxChars": "Scrivi massimo {{x}} caratteri",
     "minValue": "Inserisci un valore maggiore o uguale a {{x}}",
     "positiveNumber": "Inserisci un valore positivo",

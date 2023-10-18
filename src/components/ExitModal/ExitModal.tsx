@@ -2,20 +2,20 @@ import { Modal, Backdrop, Fade, Box, Typography, Button } from '@mui/material';
 import { MouseEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import ROUTES from '../../routes';
 
 type Props = {
   title: string;
   subtitle: string;
   openExitModal: boolean;
   handleCloseExitModal: MouseEventHandler;
+  backRoute: string;
 };
 
-const ExitModal = ({ title, subtitle, openExitModal, handleCloseExitModal }: Props) => {
+const ExitModal = ({ title, subtitle, openExitModal, handleCloseExitModal, backRoute }: Props) => {
   const history = useHistory();
   const { t } = useTranslation();
   const closeWithoutSaving = (e: any) => {
-    history.replace(ROUTES.HOME);
+    history.replace(backRoute);
     handleCloseExitModal(e);
   };
 
