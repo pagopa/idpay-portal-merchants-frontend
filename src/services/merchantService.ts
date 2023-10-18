@@ -81,13 +81,6 @@ export const createTransaction = (
   return MerchantApi.createTransaction(amountCents, idTrxAcquirer, initiativeId, mcc);
 };
 
-// export const confirmPaymentQRCode = (transactionId: string) => {
-//   if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
-//     return MerchantsApiMocked.confirmPaymentQRCode(transactionId);
-//   }
-//   return MerchantApi.confirmPaymentQRCode(transactionId);
-// };
-
 export const authPaymentBarCode = (
   trxCode: string,
   amountCents: number

@@ -38,7 +38,7 @@ const TotalAmount = ({ id, amount, setAmount, setAmountGiven }: Props) => {
     initialValues: {
       spendingAmount: amount,
     },
-    validateOnMount: true,
+    validateOnMount: false,
     validateOnChange: true,
     enableReinitialize: true,
     validationSchema,
@@ -65,6 +65,8 @@ const TotalAmount = ({ id, amount, setAmount, setAmountGiven }: Props) => {
               label={t('pages.newDiscount.spendingAmountLabel')}
               value={formik.values.spendingAmount}
               onChange={(e) => formik.handleChange(e)}
+              error={Boolean(formik.errors.spendingAmount)}
+              helperText={formik.errors.spendingAmount}
               size="small"
               inputProps={{
                 step: 0.01,

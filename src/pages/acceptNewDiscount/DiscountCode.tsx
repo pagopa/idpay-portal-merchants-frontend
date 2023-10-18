@@ -3,6 +3,10 @@ import { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useHistory } from 'react-router-dom';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import { authPaymentBarCode } from '../../services/merchantService';
+import { BASE_ROUTE } from '../../routes';
 
 interface Props {
   id: string;
@@ -14,6 +18,39 @@ interface Props {
 
 const DiscountCode = ({ id, amount, setAmountGiven, code, setCode }: Props) => {
   const { t } = useTranslation();
+  const history = useHistory();
+  const addError = useErrorDispatcher();
+
+  const sendAuthorizationPaymentBarCode = (
+    amount: number | undefined,
+    discountCode: string | undefined
+  ) => {
+    if (typeof amount === 'number' && typeof discountCode === 'string') {
+      const amountCents = amount * 100;
+      authPaymentBarCode(discountCode, amountCents)
+        .then((response) => {
+          if (response !== null) {
+            history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`);
+          } else {
+            throw new Error();
+          }
+        })
+        .catch((error) => {
+          formik.setFieldError('discountCode', 'Codice non valido');
+          addError({
+            id: 'AUTHORIZE_PAYMENT_BAR_CODE_ERROR',
+            blocking: false,
+            error,
+            techDescription: 'An error occurred authorizing payment bar code',
+            displayableTitle: t('errors.genericTitle'),
+            displayableDescription: t('errors.validationDescription'),
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          });
+        });
+    }
+  };
 
   const validationSchema = Yup.object().shape({
     discountCode: Yup.string()
@@ -35,9 +72,7 @@ const DiscountCode = ({ id, amount, setAmountGiven, code, setCode }: Props) => {
     enableReinitialize: true,
     validationSchema,
     onSubmit: (values) => {
-      // TODO SUBMIT FORM
-      console.log(id);
-      console.log(values);
+      sendAuthorizationPaymentBarCode(values.amount, values.discountCode);
     },
   });
 

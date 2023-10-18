@@ -105,16 +105,11 @@ export const MerchantApi = {
     return extractResponse(result, 201, onRedirectToLogin);
   },
 
-  // confirmPaymentQRCode: async (transactionId: string): Promise<TransactionResponse> => {
-  //   const result = await apiClient.confirmPaymentQRCode({ transactionId });
-  //   return extractResponse(result, 200, onRedirectToLogin);
-  // },
-
   authPaymentBarCode: async (
     trxCode: string,
     amountCents: number
   ): Promise<AuthPaymentResponseDTO> => {
     const result = await apiClient.authPaymentBarCode({ trxCode, body: { amountCents } });
-    return extractResponse(result, 202, onRedirectToLogin);
+    return extractResponse(result, 200, onRedirectToLogin);
   },
 };
