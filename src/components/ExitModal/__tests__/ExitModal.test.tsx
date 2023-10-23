@@ -3,6 +3,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import ExitModal from '../ExitModal';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
+import ROUTES from '../../../routes';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: any) => key }),
@@ -22,6 +23,7 @@ describe('<ExitModal />', () => {
         subtitle="test subtitle"
         openExitModal={true}
         handleCloseExitModal={handleCloseExitModal}
+        backRoute={ROUTES.HOME}
       />
     );
 

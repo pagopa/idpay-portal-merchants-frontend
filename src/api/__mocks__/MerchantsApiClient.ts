@@ -3,6 +3,10 @@ import { MerchantStatisticsDTO } from '../generated/merchants/MerchantStatistics
 import { StatusEnum as TransactionStatusEnum } from '../generated/merchants/MerchantTransactionDTO';
 import { StatusEnum as TransactionProcessedStatusEnum } from '../generated/merchants/MerchantTransactionProcessedDTO';
 import {
+  AuthPaymentResponseDTO,
+  StatusEnum as AuthPaymentStatusEnum,
+} from '../generated/merchants/AuthPaymentResponseDTO';
+import {
   MerchantDetailDTO,
   StatusEnum as MerchantStatusEnum,
 } from '../generated/merchants/MerchantDetailDTO';
@@ -176,6 +180,14 @@ export const transactionResponseMocked = {
   qrcodeTxtUrl: 'example.com/image',
 };
 
+export const authPaymentBarCodeResponseMocked = {
+  amountCents: 100,
+  id: '12345',
+  initiativeId: '234567',
+  status: AuthPaymentStatusEnum.CREATED,
+  trxCode: 'qwertyui',
+};
+
 export const MerchantsApiMocked = {
   getMerchantInitiativeList: async (): Promise<InitiativeDTOArray> =>
     new Promise((resolve) => resolve(mockedInitiativesList)),
@@ -212,6 +224,10 @@ export const MerchantsApiMocked = {
     _mcc: string | undefined
   ): Promise<TransactionResponse> => new Promise((resolve) => resolve(transactionResponseMocked)),
 
-  // confirmPaymentQRCode: async (_transactionId: string): Promise<TransactionResponse> =>
-  //   new Promise((resolve) => resolve(transactionResponseMocked)),
+  authPaymentBarCode: async (
+    _trxCode: string,
+    _amountCents: number,
+    _idTrxAcquirer: string
+  ): Promise<AuthPaymentResponseDTO> =>
+    new Promise((resolve) => resolve(authPaymentBarCodeResponseMocked)),
 };
