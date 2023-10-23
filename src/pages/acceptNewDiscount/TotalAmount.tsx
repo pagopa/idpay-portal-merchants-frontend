@@ -1,33 +1,28 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  InputAdornment,
-  Paper,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, FormControl, InputAdornment, Paper, TextField, Typography } from '@mui/material';
 import EuroSymbolIcon from '@mui/icons-material/EuroSymbol';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useHistory } from 'react-router-dom';
 import { Dispatch, SetStateAction } from 'react';
+import { useHistory } from 'react-router-dom';
 import { BASE_ROUTE } from '../../routes';
+import WizardNavigation from './WizardNavigation';
 
 interface Props {
   id: string;
   amount: number | undefined;
   setAmount: Dispatch<SetStateAction<number | undefined>>;
-  setAmountGiven: Dispatch<SetStateAction<boolean>>;
+  steps: number;
+  activeStep: number;
+  setActiveStep: Dispatch<SetStateAction<number>>;
 }
 
-const TotalAmount = ({ id, amount, setAmount, setAmountGiven }: Props) => {
+const TotalAmount = ({ id, amount, setAmount, setActiveStep }: Props) => {
   const { t } = useTranslation();
   const history = useHistory();
 
   const validationSchema = Yup.object().shape({
-    spendingAmount: Yup.number()
+    amount: Yup.number()
       .typeError(t('validation.number'))
       .required(t('validation.requiredField'))
       .positive(t('validation.positiveNumber'))
@@ -36,17 +31,39 @@ const TotalAmount = ({ id, amount, setAmount, setAmountGiven }: Props) => {
 
   const formik = useFormik({
     initialValues: {
-      spendingAmount: amount,
+      amount,
     },
-    validateOnMount: false,
+    initialErrors: {
+      amount: '',
+    },
+    validateOnMount: true,
     validateOnChange: true,
     enableReinitialize: true,
     validationSchema,
     onSubmit: (values) => {
-      setAmount(values.spendingAmount);
-      setAmountGiven(true);
+      setAmount(values.amount);
     },
   });
+
+  const handleFieldChange = (e: { target: { value: string } }) => {
+    formik.handleChange(e);
+    const roundedAmount = parseFloat(e.target.value).toFixed(2);
+    const amount = parseFloat(roundedAmount);
+    setAmount(amount);
+  };
+
+  const handleNext = () => {
+    // if (activeStep < steps) {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    formik.handleSubmit();
+    // }
+  };
+
+  const handleBack = () => {
+    // if (activeStep === 0) {
+    history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`);
+    // }
+  };
 
   return (
     <>
@@ -58,15 +75,13 @@ const TotalAmount = ({ id, amount, setAmount, setAmountGiven }: Props) => {
           {t('pages.newDiscount.spendingInfoSubtitle')}
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)' }}>
-          <FormControl sx={{ gridColumn: 'span 3' }}>
+          <FormControl sx={{ gridColumn: 'span 4' }}>
             <TextField
-              id={`spendingAmount`}
-              name={`spendingAmount`}
+              id={`amount`}
+              name={`amount`}
               label={t('pages.newDiscount.spendingAmountLabel')}
-              value={formik.values.spendingAmount}
-              onChange={(e) => formik.handleChange(e)}
-              error={Boolean(formik.errors.spendingAmount)}
-              helperText={formik.errors.spendingAmount}
+              value={formik.values.amount}
+              onChange={(e) => handleFieldChange(e)}
               size="small"
               inputProps={{
                 step: 0.01,
@@ -84,29 +99,11 @@ const TotalAmount = ({ id, amount, setAmount, setAmountGiven }: Props) => {
           </FormControl>
         </Box>
       </Paper>
-      <Box sx={{ gridColumn: 'span 12', mt: 5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Box>
-            <Button
-              variant="outlined"
-              onClick={() => history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`)}
-              data-testid="back-to-initiative-discounts-test"
-            >
-              {t('commons.backBtn')}
-            </Button>
-          </Box>
-          <Box>
-            <Button
-              variant="contained"
-              disabled={!formik.isValid}
-              onClick={() => formik.handleSubmit()}
-              data-testid="submit-new-discount-test"
-            >
-              {t('commons.confirmBtn')}
-            </Button>
-          </Box>
-        </Box>
-      </Box>
+      <WizardNavigation
+        handleBack={handleBack}
+        handleNext={handleNext}
+        disabledNext={!formik.isValid}
+      />
     </>
   );
 };

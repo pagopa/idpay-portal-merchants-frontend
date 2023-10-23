@@ -226,7 +226,8 @@ export const MerchantsApiMocked = {
 
   authPaymentBarCode: async (
     _trxCode: string,
-    _amountCents: number
+    _amountCents: number,
+    _idTrxAcquirer: string
   ): Promise<AuthPaymentResponseDTO> =>
     new Promise((resolve) => resolve(authPaymentBarCodeResponseMocked)),
 };

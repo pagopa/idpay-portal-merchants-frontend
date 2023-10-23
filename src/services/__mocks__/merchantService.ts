@@ -1,5 +1,4 @@
 import { MerchantsApiMocked } from '../../api/__mocks__/MerchantsApiClient';
-import { AuthPaymentResponseDTO } from '../../api/generated/merchants/AuthPaymentResponseDTO';
 import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOArray';
 import { MerchantDetailDTO } from '../../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../../api/generated/merchants/MerchantStatisticsDTO';
@@ -47,5 +46,6 @@ export const createTransaction = (
 
 export const authPaymentBarCode = (
   trxCode: string,
-  amountCents: number
-): Promise<AuthPaymentResponseDTO> => MerchantsApiMocked.authPaymentBarCode(trxCode, amountCents);
+  amountCents: number,
+  idTrxAcquirer: string
+): Promise<any> => MerchantsApiMocked.authPaymentBarCode(trxCode, amountCents, idTrxAcquirer);

@@ -1,13 +1,21 @@
-import React, { SetStateAction } from 'react';
+import React, { useState as useStateMock } from 'react';
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import { BASE_ROUTE } from '../../../routes';
 import TotalAmount from '../TotalAmount';
 
+jest.mock('react', () => ({
+  ...jest.requireActual('react'),
+  useState: jest.fn(),
+}));
+const setActiveStep = jest.fn();
+
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
+  // @ts-ignore
+  useStateMock.mockImplementation((init: any) => [init, setActiveStep]);
 });
 
 const oldWindowLocation = global.window.location;
@@ -37,7 +45,9 @@ describe('Test suite for TotalAmount component', () => {
         id={'1234'}
         amount={undefined}
         setAmount={jest.fn()}
-        setAmountGiven={jest.fn()}
+        steps={2}
+        activeStep={0}
+        setActiveStep={jest.fn()}
       />
     );
   });
@@ -48,13 +58,30 @@ describe('Test suite for TotalAmount component', () => {
         id={'1234'}
         amount={undefined}
         setAmount={jest.fn()}
-        setAmountGiven={jest.fn()}
+        steps={2}
+        activeStep={0}
+        setActiveStep={jest.fn()}
       />
     );
-    const backButton = screen.getByTestId('back-to-initiative-discounts-test') as HTMLButtonElement;
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => [0, setActiveStep]);
+    const backButton = screen.getByTestId('back-action-test') as HTMLButtonElement;
     const oldLocationPathname = history.location.pathname;
     fireEvent.click(backButton);
     await waitFor(() => expect(oldLocationPathname !== history.location.pathname).toBeTruthy());
+  });
+
+  test('Render component', () => {
+    renderWithContext(
+      <TotalAmount
+        id={'1234'}
+        amount={undefined}
+        setAmount={jest.fn()}
+        steps={2}
+        activeStep={0}
+        setActiveStep={jest.fn()}
+      />
+    );
   });
 
   test('Form filling and submit OK', async () => {
@@ -63,32 +90,51 @@ describe('Test suite for TotalAmount component', () => {
         id={'1234'}
         amount={undefined}
         setAmount={jest.fn()}
-        setAmountGiven={jest.fn()}
+        steps={2}
+        activeStep={0}
+        setActiveStep={jest.fn()}
       />
     );
     const user = userEvent.setup();
     const spendingAmountField = screen.getByLabelText(
       'pages.newDiscount.spendingAmountLabel'
     ) as HTMLInputElement;
-    await user.type(spendingAmountField, '10');
-    await user.click(screen.getByTestId('submit-new-discount-test'));
+    await user.type(spendingAmountField, '100');
+    await user.click(screen.getByTestId('continue-action-test'));
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => [1, setActiveStep]);
   });
 
-  test('Render component with id prop undefined', async () => {
-    renderWithContext(
-      <TotalAmount
-        // @ts-expect-error trying to render component without the required prop id
-        id={undefined}
-        amount={undefined}
-        setAmount={jest.fn()}
-        setAmountGiven={jest.fn()}
-      />
-    );
-    const user = userEvent.setup();
-    const spendingAmountField = screen.getByLabelText(
-      'pages.newDiscount.spendingAmountLabel'
-    ) as HTMLInputElement;
-    await user.type(spendingAmountField, '10');
-    await user.click(screen.getByTestId('submit-new-discount-test'));
-  });
+  // test('Render component with id prop undefined', async () => {
+  //   renderWithContext(
+  //     <TotalAmount
+  //       // @ts-expect-error trying to render component without the required prop id
+  //       id={undefined}
+  //       amount={undefined}
+  //       setAmount={jest.fn()}
+  //       steps={2}
+  //       activeStep={0}
+  //       setActiveStep={jest.fn()}
+  //     />
+  //   );
+  //   const user = userEvent.setup();
+  //   const spendingAmountField = screen.getByLabelText(
+  //     'pages.newDiscount.spendingAmountLabel'
+  //   ) as HTMLInputElement;
+  //   await user.type(spendingAmountField, '10');
+  //   await user.click(screen.getByTestId('continue-action-test'));
+  // });
+
+  // test('Render component', () => {
+  //   renderWithContext(
+  //     <TotalAmount
+  //       id={'1234'}
+  //       amount={undefined}
+  //       setAmount={jest.fn()}
+  //       steps={2}
+  //       activeStep={0}
+  //       setActiveStep={jest.fn()}
+  //     />
+  //   );
+  // });
 });

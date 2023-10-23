@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Step, StepLabel, Stepper } from '@mui/material';
 import { matchPath } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -24,9 +24,44 @@ const AcceptNewDiscount = () => {
   });
   const { id } = (match?.params as MatchParams) || {};
   const selectedInitiative = useAppSelector(initiativeSelector);
+  const [activeStep, setActiveStep] = useState(0);
   const [amount, setAmount] = useState<number | undefined>();
   const [code, setCode] = useState<string | undefined>();
-  const [amountGiven, setAmountGiven] = useState(false);
+
+  const steps = [
+    t('pages.acceptNewDiscount.spendingDataStepperTitle'),
+    t('pages.acceptNewDiscount.discountDataStepperTitle'),
+  ];
+
+  const renderActiveStepBox = (activeStep: number) => {
+    switch (activeStep) {
+      case 0:
+        return (
+          <TotalAmount
+            id={id}
+            amount={amount}
+            setAmount={setAmount}
+            steps={steps.length}
+            activeStep={activeStep}
+            setActiveStep={setActiveStep}
+          />
+        );
+      case 1:
+        return (
+          <DiscountCode
+            id={id}
+            amount={amount}
+            code={code}
+            setCode={setCode}
+            steps={steps.length}
+            activeStep={activeStep}
+            setActiveStep={setActiveStep}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <Box
@@ -42,12 +77,12 @@ const AcceptNewDiscount = () => {
         items={[
           t('pages.initiativesList.title'),
           selectedInitiative?.initiativeName,
-          t('pages.initiativeDiscounts.createBtn'),
+          t('pages.initiativeDiscounts.acceptBtn'),
         ]}
       />
       <Box sx={{ gridColumn: 'span 12' }}>
         <TitleBox
-          title={'Accetta un buono sconto'}
+          title={t('pages.acceptNewDiscount.title')}
           subTitle={''}
           mbTitle={2}
           mtTitle={2}
@@ -56,22 +91,33 @@ const AcceptNewDiscount = () => {
           variantSubTitle="body1"
         />
       </Box>
-      {!amountGiven ? (
-        <TotalAmount
-          id={id}
-          amount={amount}
-          setAmount={setAmount}
-          setAmountGiven={setAmountGiven}
-        />
-      ) : (
-        <DiscountCode
-          id={id}
-          amount={amount}
-          setAmountGiven={setAmountGiven}
-          code={code}
-          setCode={setCode}
-        />
-      )}
+      <Box
+        sx={{
+          display: 'grid',
+          gridColumn: 'span 12',
+          gridTemplateColumns: 'repeat(12, 1fr)',
+          gap: 2,
+          gridTemplateRows: 'auto',
+          gridTemplateAreas: `". . . stepper stepper stepper stepper stepper stepper . . ."`,
+          justifyContent: 'space-between',
+        }}
+      >
+        <Box
+          sx={{
+            gridArea: 'stepper',
+            my: 2,
+          }}
+        >
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label, index) => (
+              <Step key={index} sx={{ px: 0 }}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Box>
+      </Box>
+      {renderActiveStepBox(activeStep)}
     </Box>
   );
 };

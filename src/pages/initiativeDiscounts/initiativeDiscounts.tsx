@@ -113,7 +113,7 @@ const InitiativeDiscounts = () => {
                 data-testid="goToAuthorizationWizard-btn-test"
                 sx={{ mr: 2 }}
               >
-                {'Accetta buono sconto'}
+                {t('pages.initiativeDiscounts.acceptBtn')}
               </Button>
             )}
             {userCanCreateDiscount(startDate, endDate) && (

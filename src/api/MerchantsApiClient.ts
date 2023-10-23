@@ -11,7 +11,6 @@ import { MerchantDetailDTO } from './generated/merchants/MerchantDetailDTO';
 import { TransactionResponse } from './generated/merchants/TransactionResponse';
 import { InitiativeDTOArray } from './generated/merchants/InitiativeDTOArray';
 import { MerchantTransactionsProcessedListDTO } from './generated/merchants/MerchantTransactionsProcessedListDTO';
-import { AuthPaymentResponseDTO } from './generated/merchants/AuthPaymentResponseDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -107,9 +106,10 @@ export const MerchantApi = {
 
   authPaymentBarCode: async (
     trxCode: string,
-    amountCents: number
-  ): Promise<AuthPaymentResponseDTO> => {
-    const result = await apiClient.authPaymentBarCode({ trxCode, body: { amountCents } });
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
+    amountCents: number,
+    idTrxAcquirer: string
+  ): Promise<any> =>
+    // const result = await apiClient.authPaymentBarCode({ trxCode, body: { amountCents } });
+    // return extractResponse(result, 200, onRedirectToLogin);
+    await apiClient.authPaymentBarCode({ trxCode, body: { amountCents, idTrxAcquirer } }),
 };

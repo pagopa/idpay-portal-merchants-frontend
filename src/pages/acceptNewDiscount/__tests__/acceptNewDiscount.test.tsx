@@ -6,38 +6,50 @@ jest.mock('react', () => ({
   ...jest.requireActual('react'),
   useState: jest.fn(),
 }));
+const setActiveStep = jest.fn();
 const setAmount = jest.fn();
 const setCode = jest.fn();
-const setAmountGiven = jest.fn();
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   // @ts-ignore
-  // Accepts a function that will be used as an implementation of the mock for one call to the mocked function.
-  // Can be chained so that multiple function calls produce different results.
+  useStateMock.mockImplementation((init: any) => [init, setActiveStep]);
+  // @ts-ignore
   useStateMock.mockImplementation((init: any) => [init, setAmount]);
   // @ts-ignore
   useStateMock.mockImplementation((init: any) => [init, setCode]);
-  // @ts-ignore
-  useStateMock.mockImplementation((init: any) => [init, setAmountGiven]);
 });
 
 describe('Test suite for AcceptnewDiscount page', () => {
   window.scrollTo = jest.fn();
-  //   test('Render component', () => {
-  //     renderWithContext(<AcceptNewDiscount />);
-  //   });
-
-  test('Render component with first step', () => {
+  test('Render component with step 0 active', () => {
     // @ts-ignore
-    useStateMock.mockImplementationOnce(() => [false, setAmountGiven]);
+    useStateMock.mockImplementationOnce(() => [0, setActiveStep]);
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => [undefined, setAmount]);
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => [undefined, setCode]);
     renderWithContext(<AcceptNewDiscount />);
   });
 
-  test('Render component with second step', () => {
+  test('Render component with step 1 active', () => {
     // @ts-ignore
-    useStateMock.mockImplementationOnce(() => [true, setAmountGiven]);
+    useStateMock.mockImplementationOnce(() => [1, setActiveStep]);
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => [100, setAmount]);
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => [undefined, setCode]);
+    renderWithContext(<AcceptNewDiscount />);
+  });
+
+  test('Render component with unexpected step 2 active', () => {
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => [2, setActiveStep]);
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => [100, setAmount]);
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => ['qwertyui', setCode]);
     renderWithContext(<AcceptNewDiscount />);
   });
 });

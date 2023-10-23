@@ -37,6 +37,31 @@
     "validationDescription": "Verifica che i dati inseriti siano corretti"
   },
   "pages": {
+    "acceptNewDiscount": {
+      "discountCodeLabel": "Codice sconto",
+      "discountDataStepperTitle": "Inserisci il codice sconto",
+      "discountInfoSubtitle": "Inserisci il codice sconto generato dal cliente sull'app IO",
+      "discountInfoTitle": "Qual è il codice sconto?",
+      "errors": {
+        "paymentAlreadyAuthorized": "Transazione già autorizzata",
+        "paymentAmountNotValid": "Importo non valido",
+        "paymentBudgetExhausted": "Budget esaurito",
+        "paymentGenericError": "Si è verificato un errore",
+        "paymentGenericRejected": "Transazione rifiutata",
+        "paymentInitiativeInvalidDate": "Periodo di fruizione non valido",
+        "paymentInitiativeNotFound": "Non è possibile trovare l'iniziativa",
+        "paymentMerchantOrAcquirerNotAllowed": "Esercente non autorizzato",
+        "paymentMerchantNotFound": "L'esercente non è stato trovato",
+        "paymentNotFoundExpired": "Transazione non trovata oppure scaduta",
+        "paymentStatusNotValid": "Stato della transazione non valido",
+        "paymentUserNotOnboarded": "L'utente non ha aderito all'iniziativa",
+        "paymentUserNotValid": "Utente non valido",
+        "paymentUserSuspended": "L'utente è stato sospeso sull'iniziativa",
+        "paymentUserUnsubscribed": "L'utente ha effettuato il recesso dall'iniziativa"
+      },
+      "title": "Accetta un buono sconto",
+      "spendingDataStepperTitle": "Inserisci i dati della spesa"
+    },
     "assistanceRequest": {
       "exitModalBody": "Il team di Assistenza non riceverà la tua richiesta.",
       "exitModalTitle": "Vuoi uscire?",
@@ -58,6 +83,7 @@
       "title": "Portale Esercenti"
     },
     "initiativeDiscounts": {
+      "acceptBtn": "Accetta buono sconto",
       "amount": "Importo",
       "authorizationRequestModalTitle": "Vuoi richiedere l’autorizzazione?",
       "authorizedAmount": "Importo autorizzato",
@@ -119,8 +145,8 @@
       "sendQrSubtitle": "Salva l’immagine e inviala al tuo cliente con la modalità che preferisci. In caso di problemi con la lettura del codice QR è possibile inserire manualmente sull’app IO il codice di 8 cifre.",
       "sendQrTitle": "Oppure invia un codice QR",
       "spendingAmountLabel": "Importo spesa",
-      "spendingInfoSubtitle": "Inserisci l’importo totale della spesa, ci servirà per calcolare lo sconto applicabile.",
-      "spendingInfoTitle": "Informazioni sulla spesa",
+      "spendingInfoSubtitle": "Inserisci l’importo totale della spesa, ci servirà per calcolare lo sconto massimo applicabile.",
+      "spendingInfoTitle": "Qual è l'Importo totale della spesa?",
       "subtitle": "Compila i campi e genera buoni sconto da inviare ai tuoi clienti per usufruire dell’iniziativa.",
       "title": "Crea un nuovo buono sconto"
     }
