@@ -115,7 +115,7 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
       authPaymentBarCode(discountCode, amountCents, idTrxAcquirer)
         .then((response) => {
           // eslint-disable-next-line no-prototype-builtins
-          if (response.hasOwnProperty('right')) {
+          if (response.hasOwnProperty('right') && response.right.status !== 200) {
             const errorText = mapErrorCode(response.right.value.code);
             formik.setFieldError('discountCode', errorText);
           } else {
