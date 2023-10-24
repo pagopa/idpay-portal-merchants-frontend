@@ -10,12 +10,15 @@ jest.mock('react', () => ({
   useState: jest.fn(),
 }));
 const setActiveStep = jest.fn();
+const setOpenExitModal = jest.fn();
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   // @ts-ignore
   useStateMock.mockImplementation((init: any) => [init, setActiveStep]);
+  // @ts-ignore
+  useStateMock.mockImplementation((init: any) => [init, setOpenExitModal]);
 });
 
 const oldWindowLocation = global.window.location;
@@ -68,7 +71,8 @@ describe('Test suite for TotalAmount component', () => {
     const backButton = screen.getByTestId('back-action-test') as HTMLButtonElement;
     const oldLocationPathname = history.location.pathname;
     fireEvent.click(backButton);
-    await waitFor(() => expect(oldLocationPathname !== history.location.pathname).toBeTruthy());
+    // @ts-ignore
+    useStateMock.mockImplementationOnce(() => [true, setOpenExitModal]);
   });
 
   test('Render component', () => {

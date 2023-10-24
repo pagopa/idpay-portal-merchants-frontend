@@ -38,6 +38,7 @@
   },
   "pages": {
     "acceptNewDiscount": {
+      "discountAccepted": "Buono sconto accettato",
       "discountCodeLabel": "Codice sconto",
       "discountDataStepperTitle": "Inserisci il codice sconto",
       "discountInfoSubtitle": "Inserisci il codice sconto generato dal cliente sull'app IO",
@@ -59,6 +60,8 @@
         "paymentUserSuspended": "L'utente è stato sospeso sull'iniziativa",
         "paymentUserUnsubscribed": "L'utente ha effettuato il recesso dall'iniziativa"
       },
+      "exitModalTitle": "Vuoi uscire?",
+      "exitModalBody": "Tutte le informazioni che hai inserito andranno perse. Se vuoi accettare il buono sconto in un secondo momento, dovrai chiedere al tuo cliente di generare un nuovo codice.",
       "title": "Accetta un buono sconto",
       "spendingDataStepperTitle": "Inserisci i dati della spesa"
     },

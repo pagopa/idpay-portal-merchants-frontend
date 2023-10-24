@@ -3,9 +3,9 @@ import EuroSymbolIcon from '@mui/icons-material/EuroSymbol';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Dispatch, SetStateAction } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Dispatch, Fragment, SetStateAction, useState } from 'react';
 import { BASE_ROUTE } from '../../routes';
+import ExitModal from '../../components/ExitModal/ExitModal';
 import WizardNavigation from './WizardNavigation';
 
 interface Props {
@@ -19,7 +19,7 @@ interface Props {
 
 const TotalAmount = ({ id, amount, setAmount, setActiveStep }: Props) => {
   const { t } = useTranslation();
-  const history = useHistory();
+  const [openExitModal, setOpenExitModal] = useState(false);
 
   const validationSchema = Yup.object().shape({
     amount: Yup.number()
@@ -42,6 +42,7 @@ const TotalAmount = ({ id, amount, setAmount, setActiveStep }: Props) => {
     validationSchema,
     onSubmit: (values) => {
       setAmount(values.amount);
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
     },
   });
 
@@ -53,20 +54,15 @@ const TotalAmount = ({ id, amount, setAmount, setActiveStep }: Props) => {
   };
 
   const handleNext = () => {
-    // if (activeStep < steps) {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
     formik.handleSubmit();
-    // }
   };
 
   const handleBack = () => {
-    // if (activeStep === 0) {
-    history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`);
-    // }
+    setOpenExitModal(true);
   };
 
   return (
-    <>
+    <Fragment>
       <Paper sx={{ gridColumn: 'span 12', p: 3 }}>
         <Typography variant="h6" sx={{ mb: 3 }}>
           {t('pages.newDiscount.spendingInfoTitle')}
@@ -98,13 +94,20 @@ const TotalAmount = ({ id, amount, setAmount, setActiveStep }: Props) => {
             />
           </FormControl>
         </Box>
+        <ExitModal
+          title={t('pages.acceptNewDiscount.exitModalTitle')}
+          subtitle={t('pages.acceptNewDiscount.exitModalBody')}
+          openExitModal={openExitModal}
+          handleCloseExitModal={() => setOpenExitModal(false)}
+          backRoute={`${BASE_ROUTE}/sconti-iniziativa/${id}`}
+        />
       </Paper>
       <WizardNavigation
         handleBack={handleBack}
         handleNext={handleNext}
         disabledNext={!formik.isValid}
       />
-    </>
+    </Fragment>
   );
 };
 
