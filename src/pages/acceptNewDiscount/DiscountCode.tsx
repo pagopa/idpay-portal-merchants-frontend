@@ -1,10 +1,11 @@
 import { Box, FormControl, Paper, TextField, Typography } from '@mui/material';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useHistory } from 'react-router-dom';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import { Toast } from '@pagopa/selfcare-common-frontend';
 import { authPaymentBarCode } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import WizardNavigation from './WizardNavigation';
@@ -23,6 +24,7 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
   const { t } = useTranslation();
   const history = useHistory();
   const addError = useErrorDispatcher();
+  const [openDataSentToast, setOpenDataSentToast] = useState(false);
 
   const validationSchema = Yup.object().shape({
     discountCode: Yup.string()
@@ -117,7 +119,10 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
             const errorText = mapErrorCode(response.right.value.code);
             formik.setFieldError('discountCode', errorText);
           } else {
-            history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`);
+            setOpenDataSentToast(true);
+            setTimeout(() => {
+              history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`);
+            }, 3000);
           }
         })
         .catch((error) => {
@@ -168,6 +173,14 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
         handleNext={handleNext}
         disabledNext={!formik.isValid}
       />
+      {openDataSentToast && (
+        <Toast
+          open={openDataSentToast}
+          title={t('pages.acceptNewDiscount.discountAccepted')}
+          showToastCloseIcon={false}
+          onCloseToast={() => setOpenDataSentToast(false)}
+        />
+      )}
     </>
   );
 };
