@@ -5,7 +5,6 @@ import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import { BASE_ROUTE } from '../../../routes';
 import DiscountCode from '../DiscountCode';
 import { MerchantsApiMocked } from '../../../api/__mocks__/MerchantsApiClient';
-import { AuthPaymentResponseDTO } from '../../../api/generated/merchants/AuthPaymentResponseDTO';
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -87,7 +86,8 @@ describe('Test suite for DiscountCode component', () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
-    ): Promise<any> => Promise.resolve({ right: { value: { code: 'PAYMENT_NOT_FOUND_EXPIRED' } } });
+    ): Promise<any> =>
+      Promise.resolve({ right: { status: 404, value: { code: 'PAYMENT_NOT_FOUND_EXPIRED' } } });
 
     renderWithContext(
       <DiscountCode
@@ -112,7 +112,8 @@ describe('Test suite for DiscountCode component', () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
-    ): Promise<any> => Promise.resolve({ right: { value: { code: 'PAYMENT_USER_NOT_VALID' } } });
+    ): Promise<any> =>
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_USER_NOT_VALID' } } });
 
     renderWithContext(
       <DiscountCode
@@ -137,7 +138,8 @@ describe('Test suite for DiscountCode component', () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
-    ): Promise<any> => Promise.resolve({ right: { value: { code: 'PAYMENT_STATUS_NOT_VALID' } } });
+    ): Promise<any> =>
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_STATUS_NOT_VALID' } } });
 
     renderWithContext(
       <DiscountCode
@@ -163,7 +165,7 @@ describe('Test suite for DiscountCode component', () => {
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { value: { code: 'PAYMENT_ALREADY_AUTHORIZED' } } });
+      Promise.resolve({ right: { status: 403, value: { code: 'PAYMENT_ALREADY_AUTHORIZED' } } });
 
     renderWithContext(
       <DiscountCode
@@ -188,7 +190,8 @@ describe('Test suite for DiscountCode component', () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
-    ): Promise<any> => Promise.resolve({ right: { value: { code: 'PAYMENT_BUDGET_EXHAUSTED' } } });
+    ): Promise<any> =>
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_BUDGET_EXHAUSTED' } } });
 
     renderWithContext(
       <DiscountCode
@@ -213,7 +216,8 @@ describe('Test suite for DiscountCode component', () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
-    ): Promise<any> => Promise.resolve({ right: { value: { code: 'PAYMENT_GENERIC_REJECTED' } } });
+    ): Promise<any> =>
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_GENERIC_REJECTED' } } });
 
     renderWithContext(
       <DiscountCode
@@ -238,7 +242,8 @@ describe('Test suite for DiscountCode component', () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
-    ): Promise<any> => Promise.resolve({ right: { value: { code: 'PAYMENT_USER_SUSPENDED' } } });
+    ): Promise<any> =>
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_USER_SUSPENDED' } } });
 
     renderWithContext(
       <DiscountCode
@@ -264,7 +269,7 @@ describe('Test suite for DiscountCode component', () => {
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { value: { code: 'PAYMENT_MERCHANT_NOT_FOUND' } } });
+      Promise.resolve({ right: { status: 404, value: { code: 'PAYMENT_MERCHANT_NOT_FOUND' } } });
 
     renderWithContext(
       <DiscountCode
@@ -289,7 +294,8 @@ describe('Test suite for DiscountCode component', () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
-    ): Promise<any> => Promise.resolve({ right: { value: { code: 'PAYMENT_AMOUNT_NOT_VALID' } } });
+    ): Promise<any> =>
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_AMOUNT_NOT_VALID' } } });
 
     renderWithContext(
       <DiscountCode
@@ -314,7 +320,8 @@ describe('Test suite for DiscountCode component', () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
-    ): Promise<any> => Promise.resolve({ right: { value: { code: 'PAYMENT_USER_UNSUBSCRIBED' } } });
+    ): Promise<any> =>
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_USER_UNSUBSCRIBED' } } });
 
     renderWithContext(
       <DiscountCode
@@ -340,7 +347,7 @@ describe('Test suite for DiscountCode component', () => {
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { value: { code: 'PAYMENT_USER_NOT_ONBOARDED' } } });
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_USER_NOT_ONBOARDED' } } });
 
     renderWithContext(
       <DiscountCode
@@ -366,7 +373,9 @@ describe('Test suite for DiscountCode component', () => {
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { value: { code: 'PAYMENT_MERCHANT_OR_ACQUIRER_NOT_ALLOWED' } } });
+      Promise.resolve({
+        right: { status: 400, value: { code: 'PAYMENT_MERCHANT_OR_ACQUIRER_NOT_ALLOWED' } },
+      });
 
     renderWithContext(
       <DiscountCode
@@ -392,7 +401,9 @@ describe('Test suite for DiscountCode component', () => {
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { value: { code: 'PAYMENT_INITIATIVE_INVALID_DATE' } } });
+      Promise.resolve({
+        right: { status: 400, value: { code: 'PAYMENT_INITIATIVE_INVALID_DATE' } },
+      });
 
     renderWithContext(
       <DiscountCode
@@ -418,7 +429,7 @@ describe('Test suite for DiscountCode component', () => {
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { value: { code: 'PAYMENT_INITIATIVE_NOT_FOUND' } } });
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_INITIATIVE_NOT_FOUND' } } });
 
     renderWithContext(
       <DiscountCode
@@ -444,7 +455,7 @@ describe('Test suite for DiscountCode component', () => {
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { value: { code: 'PAYMENT_TRANSACTION_EXPIRED' } } });
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_TRANSACTION_EXPIRED' } } });
 
     renderWithContext(
       <DiscountCode
