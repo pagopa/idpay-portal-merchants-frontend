@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { Box, FormControl, Paper, TextField, Typography } from '@mui/material';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,11 +63,12 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
 
   const mapErrorCode = (errorCode: string) => {
     switch (errorCode) {
-      case 'PAYMENT_NOT_FOUND_EXPIRED':
+      case 'PAYMENT_NOT_FOUND_OR_EXPIRED':
         return t('pages.acceptNewDiscount.errors.paymentNotFoundExpired');
-      case 'PAYMENT_USER_NOT_VALID':
+      case 'PAYMENT_USER_NOT_ASSOCIATED':
+      case 'PAYMENT_ALREADY_ASSIGNED':
         return t('pages.acceptNewDiscount.errors.paymentUserNotValid');
-      case 'PAYMENT_STATUS_NOT_VALID':
+      case 'PAYMENT_NOT_ALLOWED_FOR_TRX_STATUS':
         return t('pages.acceptNewDiscount.errors.paymentStatusNotValid');
       case 'PAYMENT_ALREADY_AUTHORIZED':
         return t('pages.acceptNewDiscount.errors.paymentAlreadyAuthorized');
@@ -76,7 +78,7 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
         return t('pages.acceptNewDiscount.errors.paymentGenericRejected');
       case 'PAYMENT_USER_SUSPENDED':
         return t('pages.acceptNewDiscount.errors.paymentUserSuspended');
-      case 'PAYMENT_MERCHANT_NOT_FOUND':
+      case 'PAYMENT_MERCHANT_NOT_ONBOARDED':
         return t('pages.acceptNewDiscount.errors.paymentMerchantNotFound');
       case 'PAYMENT_AMOUNT_NOT_VALID':
         return t('pages.acceptNewDiscount.errors.paymentAmountNotValid');
@@ -84,7 +86,7 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
         return t('pages.acceptNewDiscount.errors.paymentUserUnsubscribed');
       case 'PAYMENT_USER_NOT_ONBOARDED':
         return t('pages.acceptNewDiscount.errors.paymentUserNotOnboarded');
-      case 'PAYMENT_MERCHANT_OR_ACQUIRER_NOT_ALLOWED':
+      case 'PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT':
         return t('pages.acceptNewDiscount.errors.paymentMerchantOrAcquirerNotAllowed');
       case 'PAYMENT_INITIATIVE_INVALID_DATE':
         return t('pages.acceptNewDiscount.errors.paymentInitiativeInvalidDate');
@@ -94,6 +96,8 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
       case 'PAYMENT_TRANSACTION_EXPIRED':
       case 'PAYMENT_TOO_MANY_REQUESTS':
       case 'PAYMENT_GENERIC_ERROR':
+      case 'PAYMENT_DELETE_NOT_ALLOWED_FOR_TRX_STATUS':
+      case 'PAYMENT_UNRELATE_NOT_ALLOWED_FOR_TRX_STATUS':
       default:
         return t('pages.acceptNewDiscount.errors.paymentGenericError');
     }
