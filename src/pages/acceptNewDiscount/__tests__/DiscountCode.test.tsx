@@ -82,12 +82,12 @@ describe('Test suite for DiscountCode component', () => {
     await user.click(screen.getByTestId('continue-action-test'));
   });
 
-  test('Form filling and submit KO with error code PAYMENT_NOT_FOUND_EXPIRED', async () => {
+  test('Form filling and submit KO with error code PAYMENT_NOT_FOUND_OR_EXPIRED', async () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { status: 404, value: { code: 'PAYMENT_NOT_FOUND_EXPIRED' } } });
+      Promise.resolve({ right: { status: 404, value: { code: 'PAYMENT_NOT_FOUND_OR_EXPIRED' } } });
 
     renderWithContext(
       <DiscountCode
@@ -108,12 +108,12 @@ describe('Test suite for DiscountCode component', () => {
     await user.click(screen.getByTestId('continue-action-test'));
   });
 
-  test('Form filling and submit KO with error code PAYMENT_USER_NOT_VALID', async () => {
+  test('Form filling and submit KO with error code PAYMENT_USER_NOT_ASSOCIATED', async () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_USER_NOT_VALID' } } });
+      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_USER_NOT_ASSOCIATED' } } });
 
     renderWithContext(
       <DiscountCode
@@ -134,12 +134,14 @@ describe('Test suite for DiscountCode component', () => {
     await user.click(screen.getByTestId('continue-action-test'));
   });
 
-  test('Form filling and submit KO with error code PAYMENT_STATUS_NOT_VALID', async () => {
+  test('Form filling and submit KO with error code PAYMENT_NOT_ALLOWED_FOR_TRX_STATUS', async () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { status: 400, value: { code: 'PAYMENT_STATUS_NOT_VALID' } } });
+      Promise.resolve({
+        right: { status: 400, value: { code: 'PAYMENT_NOT_ALLOWED_FOR_TRX_STATUS' } },
+      });
 
     renderWithContext(
       <DiscountCode
@@ -264,12 +266,14 @@ describe('Test suite for DiscountCode component', () => {
     await user.click(screen.getByTestId('continue-action-test'));
   });
 
-  test('Form filling and submit KO with error code PAYMENT_MERCHANT_NOT_FOUND', async () => {
+  test('Form filling and submit KO with error code PAYMENT_MERCHANT_NOT_ONBOARDED', async () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
-      Promise.resolve({ right: { status: 404, value: { code: 'PAYMENT_MERCHANT_NOT_FOUND' } } });
+      Promise.resolve({
+        right: { status: 404, value: { code: 'PAYMENT_MERCHANT_NOT_ONBOARDED' } },
+      });
 
     renderWithContext(
       <DiscountCode
@@ -368,13 +372,13 @@ describe('Test suite for DiscountCode component', () => {
     await user.click(screen.getByTestId('continue-action-test'));
   });
 
-  test('Form filling and submit KO with error code PAYMENT_MERCHANT_OR_ACQUIRER_NOT_ALLOWED', async () => {
+  test('Form filling and submit KO with error code PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT', async () => {
     MerchantsApiMocked.authPaymentBarCode = async (
       _trxCode: string,
       _amountCents: number
     ): Promise<any> =>
       Promise.resolve({
-        right: { status: 400, value: { code: 'PAYMENT_MERCHANT_OR_ACQUIRER_NOT_ALLOWED' } },
+        right: { status: 400, value: { code: 'PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT' } },
       });
 
     renderWithContext(
