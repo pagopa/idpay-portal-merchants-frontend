@@ -1,6 +1,5 @@
 import { MerchantApi } from '../api/MerchantsApiClient';
 import { MerchantsApiMocked } from '../api/__mocks__/MerchantsApiClient';
-
 import { InitiativeDTOArray } from '../api/generated/merchants/InitiativeDTOArray';
 import { MerchantDetailDTO } from '../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../api/generated/merchants/MerchantStatisticsDTO';
@@ -79,9 +78,13 @@ export const createTransaction = (
   return MerchantApi.createTransaction(amountCents, idTrxAcquirer, initiativeId, mcc);
 };
 
-// export const confirmPaymentQRCode = (transactionId: string) => {
-//   if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
-//     return MerchantsApiMocked.confirmPaymentQRCode(transactionId);
-//   }
-//   return MerchantApi.confirmPaymentQRCode(transactionId);
-// };
+export const authPaymentBarCode = (
+  trxCode: string,
+  amountCents: number,
+  idTrxAcquirer: string
+): Promise<any> => {
+  if (process.env.REACT_APP_API_MOCK_MERCHANTS_PORTAL === 'true') {
+    return MerchantsApiMocked.authPaymentBarCode(trxCode, amountCents, idTrxAcquirer);
+  }
+  return MerchantApi.authPaymentBarCode(trxCode, amountCents, idTrxAcquirer);
+};
