@@ -24,20 +24,22 @@ export const downloadQRCode = (selector: string, trxCode: string | undefined) =>
   }
 };
 */
-export const downloadQRCodeFromURL = (url: string) => {
-  fetch(url)
-    .then((response) => response.blob())
-    .then((blob) => {
-      const link = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = link;
-      const fileName = 'qrcode.png';
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    })
-    .catch((error) => console.log(error));
+export const downloadQRCodeFromURL = (url: string | undefined) => {
+  if (typeof url === 'string') {
+    fetch(url)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const link = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = link;
+        const fileName = 'qrcode.png';
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      })
+      .catch((error) => console.log(error));
+  }
 };
 
 export const mapDataForDiscoutTimeRecap = (
