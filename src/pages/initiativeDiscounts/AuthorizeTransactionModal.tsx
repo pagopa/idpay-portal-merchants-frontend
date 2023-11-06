@@ -40,8 +40,8 @@ const AuthorizeTransactionModal = ({
   setOpenAuthorizeTrxModal,
   data,
 }: Props) => {
-  const [magicLink, setMagicLink] = useState<string>();
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [magicLink, setMagicLink] = useState<string | undefined>();
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | undefined>('');
   const [authorizationId, setAuthorizationId] = useState<string>();
   const [expirationDays, setExpirationDays] = useState<number>();
   const [expirationDate, setExpirationDate] = useState<string>();
