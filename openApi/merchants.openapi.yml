@@ -413,27 +413,33 @@ components:
         - trxId
         - effectiveAmount
         - status
-        - qrcodePngUrl
-        - qrcodeTxtUrl
       properties:
         trxCode:
           type: string
+          description: 'ENG: Transaction code - IT: Il codice della transazione'
         trxId:
           type: string
+          description: "ENG: Transaction ID - IT: L'ID della transazione"
         fiscalCode:
           type: string
+          description: 'ENG: Citizen fiscal code - IT: Codice fiscale del cittadino'
         effectiveAmount:
           type: number
+          description: 'ENG: Transaction amount - IT: Quantitativo della transazione'
         rewardAmount:
           type: number
+          description: 'ENG: Reward amount - IT: Premio generato'
         trxDate:
           type: string
           format: date-time
+          description: 'ENG: The date of the transaction - IT: La data della transazione'
         trxExpirationMinutes:
           type: number
+          description: 'ENG: Expiration time of the transaction, in minutes - IT: Scadenza della transazione, in minuti'
         updateDate:
           type: string
           format: date-time
+          description: 'ENG: The date of the transaction update - IT: La data di aggiornamento della transazione'
         status:
           type: string
           enum:
@@ -441,10 +447,16 @@ components:
             - IDENTIFIED
             - AUTHORIZED
             - REJECTED
+          description: 'ENG: Status of the transaction - IT: Stato della transazione'
+        channel:
+          type: string
+          description: 'ENG: Channel from which the transaction takes place - IT: Canale da cui avviene la transazione'
         qrcodePngUrl:
           type: string
+          description: "ENG: Url to the QR code image - IT: Url all'immagine del QR code"
         qrcodeTxtUrl:
           type: string
+          description: 'ENG: Url of the QR code link - IT: Url del QR code'
     MerchantTransactionsProcessedListDTO:
       type: object
       required:
@@ -461,15 +473,19 @@ components:
         pageNo:
           type: integer
           format: int32
+          description: 'ENG: The number of the page - IT: Il numero della pagina'
         pageSize:
           type: integer
           format: int32
+          description: 'ENG: The element size for page - IT: Il numero di elementi per pagina'
         totalElements:
           type: integer
           format: int32
+          description: 'ENG: The total number of the elements - IT: Il numero totale degli elementi'
         totalPages:
           type: integer
           format: int32
+          description: 'ENG: The total number of the pages - IT: Il numero totale delle pagine'
     MerchantTransactionProcessedDTO:
       type: object
       required:
@@ -479,23 +495,34 @@ components:
       properties:
         trxId:
           type: string
+          description: "ENG: Transaction ID - IT: L'ID della transazione"
         fiscalCode:
           type: string
+          description: 'ENG: Citizen fiscal code - IT: Codice fiscale del cittadino'
         effectiveAmount:
           type: number
+          description: 'ENG: Transaction amount - IT: Quantitativo della transazione'
         rewardAmount:
           type: number
+          description: 'ENG: Reward amount - IT: Premio generato'
         trxDate:
           type: string
           format: date-time
+          description: 'ENG: The date of the transaction - IT: La data della transazione'
         updateDate:
           type: string
           format: date-time
+          description: 'ENG: The date of the transaction update - IT: La data di aggiornamento della transazione'
         status:
           type: string
           enum:
             - REWARDED
             - CANCELLED
+          description: 'ENG: Status of the transaction - IT: Stato della transazione'
+        channel:
+          type: string
+          description: 'ENG: Channel from which the transaction takes place - IT: Canale da
+            cui avviene la transazione'
     MerchantDetailDTO:
       type: object
       properties:
@@ -702,7 +729,7 @@ components:
             - PAYMENT_AMOUNT_NOT_VALID
             - PAYMENT_MERCHANT_NOT_ONBOARDED
           description: >-
-            "ENG: Error code: 
+            "ENG: Error code:
             PAYMENT_NOT_FOUND_OR_EXPIRED: transaction not found or expired
             PAYMENT_TRANSACTION_EXPIRED: transaction expired
             PAYMENT_INITIATIVE_NOT_FOUND: initiative not found
@@ -724,7 +751,7 @@ components:
             PAYMENT_UNRELATE_NOT_ALLOWED_FOR_TRX_STATUS: unrelate transaction not allowed due to status
             PAYMENT_AMOUNT_NOT_VALID: amount of transaction not valid
             PAYMENT_MERCHANT_NOT_ONBOARDED: the merchant is not onboarded
-            IT: Codice di errore 
+            IT: Codice di errore
             PAYMENT_NOT_FOUND_OR_EXPIRED: transazione non trovata oppure scaduta
             PAYMENT_TRANSACTION_EXPIRED: transazione scaduta
             PAYMENT_INITIATIVE_NOT_FOUND: iniziativa non trovata
@@ -732,7 +759,7 @@ components:
             PAYMENT_INITIATIVE_NOT_DISCOUNT: iniziativa non è di tipo a sconto
             PAYMENT_ALREADY_AUTHORIZED: transazione già autorizzata
             PAYMENT_BUDGET_EXHAUSTED: budget esaurito
-            PAYMENT_GENERIC_REJECTED: errore generico, transazione rigettata 
+            PAYMENT_GENERIC_REJECTED: errore generico, transazione rigettata
             PAYMENT_TOO_MANY_REQUESTS: troppe richieste, riprovare
             PAYMENT_GENERIC_ERROR: errore generico (errore nella connessione ad un microservizio)
             PAYMENT_USER_SUSPENDED: l'utente è stato sospeso dall'iniziativa
