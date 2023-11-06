@@ -47,7 +47,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
     validationSchema,
     onSubmit: (values) => {
       const roundedAmount = parseFloat(values.spendingAmount).toFixed(2);
-      const amountCents = parseFloat(roundedAmount) * 100;
+      const amountCents = Math.ceil(parseFloat(roundedAmount) * 100);
       const trxDate = new Date();
       const idTrxAcquirer = trxDate.getTime().toString();
       if (typeof id === 'string') {
