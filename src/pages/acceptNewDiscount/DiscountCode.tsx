@@ -98,6 +98,7 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
       case 'PAYMENT_GENERIC_ERROR':
       case 'PAYMENT_DELETE_NOT_ALLOWED_FOR_TRX_STATUS':
       case 'PAYMENT_UNRELATE_NOT_ALLOWED_FOR_TRX_STATUS':
+      case 'PAYMENT_INVALID_REQUEST':
       default:
         return t('pages.acceptNewDiscount.errors.paymentGenericError');
     }
