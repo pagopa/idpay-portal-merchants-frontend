@@ -37,7 +37,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
   useEffect(() => {
     if (typeof data !== 'undefined') {
       const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
-        data.trxExpirationMinutes,
+        data.trxExpirationSeconds,
         data.trxDate
       );
       setExpirationDays(expirationDays);
