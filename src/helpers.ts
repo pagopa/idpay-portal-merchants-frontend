@@ -50,14 +50,8 @@ export const mapDataForDiscoutTimeRecap = (
   let expirationDate;
   let expirationTime;
   if (typeof trxExpirationSeconds === 'number' && typeof trxDate === 'object') {
-    const expDays = trxExpirationSeconds / 86400;
-    const expDaysStr = expDays.toString();
-    expirationDays = parseInt(expDaysStr, 10);
-    const trxDateStr = trxDate.toString();
-    const expDate = new Date(trxDateStr);
-    const days = expDate.getDate();
-    expDate.setDate(days + expDays);
-    const expDateStrArr = expDate
+    trxDate.setSeconds(trxDate.getSeconds() + trxExpirationSeconds);
+    const expDateStrArr = trxDate
       .toLocaleString('it-IT', {
         day: '2-digit',
         month: '2-digit',
