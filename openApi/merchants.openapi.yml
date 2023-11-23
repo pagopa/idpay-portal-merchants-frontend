@@ -10,7 +10,7 @@ paths:
     get:
       tags:
         - merchant-initiatives
-      summary: "ENG: Returns the list of initiatives of a specific merchant - IT: Ritorna la lista delle iniziative di uno specifico merchant"
+      summary: 'ENG: Returns the list of initiatives of a specific merchant - IT: Ritorna la lista delle iniziative di uno specifico merchant'
       description: Returns the list of initiatives of a specific merchant
       operationId: getMerchantInitiativeList
       responses:
@@ -117,8 +117,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_INVALID_REQUEST"
-                message: "Something went wrong handling the request"
+                code: 'PAYMENT_INVALID_REQUEST'
+                message: 'Something went wrong handling the request'
         '401':
           description: Authentication failed
         '403':
@@ -128,8 +128,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_INITIATIVE_INVALID_DATE"
-                message: "Cannot create transaction out of valid period. Initiative startDate: %s endDate: %s"
+                code: 'PAYMENT_INITIATIVE_INVALID_DATE'
+                message: 'Cannot create transaction out of valid period. Initiative startDate: %s endDate: %s'
         '404':
           description: The requested resource was not found
           content:
@@ -137,8 +137,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_INITIATIVE_NOT_FOUND"
-                message: "Cannot find initiative with id [%s]"
+                code: 'PAYMENT_INITIATIVE_NOT_FOUND'
+                message: 'Cannot find initiative with id [%s]'
         '429':
           description: Too many requests
           content:
@@ -146,8 +146,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_TOO_MANY_REQUESTS"
-                message: "Too many requests"
+                code: 'PAYMENT_TOO_MANY_REQUESTS'
+                message: 'Too many requests'
         '500':
           description: Generic error
           content:
@@ -155,8 +155,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_GENERIC_ERROR"
-                message: "Application error"
+                code: 'PAYMENT_GENERIC_ERROR'
+                message: 'Application error'
   /transactions/{transactionId}:
     delete:
       tags:
@@ -180,8 +180,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_INVALID_REQUEST"
-                message: "Something went wrong handling the request"
+                code: 'PAYMENT_INVALID_REQUEST'
+                message: 'Something went wrong handling the request'
         '401':
           description: Authentication failed
         '403':
@@ -191,8 +191,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT"
-                message: "The merchant with id [%s] associated to the transaction is not equal to the merchant with id [%s]"
+                code: 'PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT'
+                message: 'The merchant with id [%s] associated to the transaction is not equal to the merchant with id [%s]'
         '404':
           description: The requested resource was not found
           content:
@@ -200,8 +200,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_NOT_FOUND_OR_EXPIRED"
-                message: "Cannot find transaction with transactionId [%s]"
+                code: 'PAYMENT_NOT_FOUND_OR_EXPIRED'
+                message: 'Cannot find transaction with transactionId [%s]'
         '429':
           description: Too many requests
           content:
@@ -209,8 +209,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_TOO_MANY_REQUESTS"
-                message: "Too many requests"
+                code: 'PAYMENT_TOO_MANY_REQUESTS'
+                message: 'Too many requests'
         '500':
           description: Generic error
           content:
@@ -218,14 +218,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_GENERIC_ERROR"
-                message: "Application error"
+                code: 'PAYMENT_GENERIC_ERROR'
+                message: 'Application error'
   /initiatives/{initiativeId}/transactions:
     get:
       tags:
         - merchant-transactions
-      summary: "ENG: Returns the list of in progress transactions associated to a merchant - IT: Ritorna la lista delle transazioni in corso associate ad un esercente"
-      description: "ENG: Returns the list of in progress transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni in corso associate ad un esercente"
+      summary: 'ENG: Returns the list of in progress transactions associated to a merchant - IT: Ritorna la lista delle transazioni in corso associate ad un esercente'
+      description: 'ENG: Returns the list of in progress transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni in corso associate ad un esercente'
       operationId: getMerchantTransactions
       parameters:
         - name: initiativeId
@@ -272,8 +272,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_INVALID_REQUEST"
-                message: "Something went wrong handling the request"
+                code: 'PAYMENT_INVALID_REQUEST'
+                message: 'Something went wrong handling the request'
         '401':
           description: Autentication failed
         '429':
@@ -283,8 +283,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_TOO_MANY_REQUESTS"
-                message: "Too many requests"
+                code: 'PAYMENT_TOO_MANY_REQUESTS'
+                message: 'Too many requests'
         '500':
           description: Generic error
           content:
@@ -292,14 +292,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_GENERIC_ERROR"
-                message: "Application error"
+                code: 'PAYMENT_GENERIC_ERROR'
+                message: 'Application error'
   /initiatives/{initiativeId}/transactions/processed:
     get:
       tags:
         - merchant-transactions
-      summary: "ENG: Returns the list of processed transactions associated to a merchant - IT: Ritorna la lista delle transazioni processate associate ad un esercente"
-      description: "ENG: Returns the list of processed transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni processate associate ad un esercente"
+      summary: 'ENG: Returns the list of processed transactions associated to a merchant - IT: Ritorna la lista delle transazioni processate associate ad un esercente'
+      description: 'ENG: Returns the list of processed transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni processate associate ad un esercente'
       operationId: getMerchantTransactionsProcessed
       parameters:
         - name: initiativeId
@@ -356,7 +356,7 @@ paths:
       parameters:
         - name: trxCode
           in: path
-          description: 'ENG: The transaction''s code - IT: Codice della transazione'
+          description: "ENG: The transaction's code - IT: Codice della transazione"
           required: true
           schema:
             type: string
@@ -380,8 +380,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_AMOUNT_NOT_VALID"
-                message: "Cannot authorize transaction with invalid amount [%s]"
+                code: 'PAYMENT_AMOUNT_NOT_VALID'
+                message: 'Cannot authorize transaction with invalid amount [%s]'
         '401':
           description: Authentication failed
         '403':
@@ -391,8 +391,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_ALREADY_AUTHORIZED"
-                message: "Transaction with trxCode [trxCode] is already authorized"
+                code: 'PAYMENT_ALREADY_AUTHORIZED'
+                message: 'Transaction with trxCode [trxCode] is already authorized'
         '404':
           description: The requested resource was not found
           content:
@@ -400,8 +400,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_NOT_FOUND_EXPIRED"
-                message: "Cannot find transaction with trxCode [trxCode]"
+                code: 'PAYMENT_NOT_FOUND_EXPIRED'
+                message: 'Cannot find transaction with trxCode [trxCode]'
         '429':
           description: Too many requests
           content:
@@ -409,8 +409,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_TOO_MANY_REQUESTS"
-                message: "Too many request on the ms reward calculator"
+                code: 'PAYMENT_TOO_MANY_REQUESTS'
+                message: 'Too many request on the ms reward calculator'
         '500':
           description: Generic error
           content:
@@ -418,8 +418,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: "PAYMENT_GENERIC_ERROR"
-                message: "A generic error occured"
+                code: 'PAYMENT_GENERIC_ERROR'
+                message: 'A generic error occured'
   /initiatives/{initiativeId}:
     get:
       tags:
@@ -536,35 +536,35 @@ components:
         - trxCode
         - trxId
         - effectiveAmount
-        - trxExpirationMinutes
+        - trxExpirationSeconds
         - status
       properties:
         trxCode:
           type: string
-          description: "ENG: Transaction code - IT: Il codice della transazione"
+          description: 'ENG: Transaction code - IT: Il codice della transazione'
         trxId:
           type: string
           description: "ENG: Transaction ID - IT: L'ID della transazione"
         fiscalCode:
           type: string
-          description: "ENG: Citizen fiscal code - IT: Codice fiscale del cittadino"
+          description: 'ENG: Citizen fiscal code - IT: Codice fiscale del cittadino'
         effectiveAmount:
           type: number
-          description: "ENG: Transaction amount - IT: Quantitativo della transazione"
+          description: 'ENG: Transaction amount - IT: Quantitativo della transazione'
         rewardAmount:
           type: number
-          description: "ENG: Reward amount - IT: Premio generato"
+          description: 'ENG: Reward amount - IT: Premio generato'
         trxDate:
           type: string
           format: date-time
-          description: "ENG: The date of the transaction - IT: La data della transazione"
-        trxExpirationMinutes:
+          description: 'ENG: The date of the transaction - IT: La data della transazione'
+        trxExpirationSeconds:
           type: number
-          description: "ENG: Expiration time of the transaction, in minutes - IT: Scadenza della transazione, in minuti"
+          description: 'ENG: Expiration time of the transaction, in seconds - IT: Scadenza della transazione, in secondi'
         updateDate:
           type: string
           format: date-time
-          description: "ENG: The date of the transaction update - IT: La data di aggiornamento della transazione"
+          description: 'ENG: The date of the transaction update - IT: La data di aggiornamento della transazione'
         status:
           type: string
           enum:
@@ -572,16 +572,16 @@ components:
             - IDENTIFIED
             - AUTHORIZED
             - REJECTED
-          description: "ENG: Status of the transaction - IT: Stato della transazione"
+          description: 'ENG: Status of the transaction - IT: Stato della transazione'
         channel:
           type: string
-          description: "ENG: Channel from which the transaction takes place - IT: Canale da cui avviene la transazione"
+          description: 'ENG: Channel from which the transaction takes place - IT: Canale da cui avviene la transazione'
         qrcodePngUrl:
           type: string
           description: "ENG: Url to the QR code image - IT: Url all'immagine del QR code"
         qrcodeTxtUrl:
           type: string
-          description: "ENG: Url of the QR code link - IT: Url del QR code"
+          description: 'ENG: Url of the QR code link - IT: Url del QR code'
     MerchantTransactionsProcessedListDTO:
       type: object
       required:
@@ -598,19 +598,19 @@ components:
         pageNo:
           type: integer
           format: int32
-          description: "ENG: The number of the page - IT: Il numero della pagina"
+          description: 'ENG: The number of the page - IT: Il numero della pagina'
         pageSize:
           type: integer
           format: int32
-          description: "ENG: The element size for page - IT: Il numero di elementi per pagina"
+          description: 'ENG: The element size for page - IT: Il numero di elementi per pagina'
         totalElements:
           type: integer
           format: int32
-          description: "ENG: The total number of the elements - IT: Il numero totale degli elementi"
+          description: 'ENG: The total number of the elements - IT: Il numero totale degli elementi'
         totalPages:
           type: integer
           format: int32
-          description: "ENG: The total number of the pages - IT: Il numero totale delle pagine"
+          description: 'ENG: The total number of the pages - IT: Il numero totale delle pagine'
     MerchantTransactionProcessedDTO:
       type: object
       required:
@@ -623,31 +623,31 @@ components:
           description: "ENG: Transaction ID - IT: L'ID della transazione"
         fiscalCode:
           type: string
-          description: "ENG: Citizen fiscal code - IT: Codice fiscale del cittadino"
+          description: 'ENG: Citizen fiscal code - IT: Codice fiscale del cittadino'
         effectiveAmount:
           type: number
-          description: "ENG: Transaction amount - IT: Quantitativo della transazione"
+          description: 'ENG: Transaction amount - IT: Quantitativo della transazione'
         rewardAmount:
           type: number
-          description: "ENG: Reward amount - IT: Premio generato"
+          description: 'ENG: Reward amount - IT: Premio generato'
         trxDate:
           type: string
           format: date-time
-          description: "ENG: The date of the transaction - IT: La data della transazione"
+          description: 'ENG: The date of the transaction - IT: La data della transazione'
         updateDate:
           type: string
           format: date-time
-          description: "ENG: The date of the transaction update - IT: La data di aggiornamento della transazione"
+          description: 'ENG: The date of the transaction update - IT: La data di aggiornamento della transazione'
         status:
           type: string
           enum:
             - REWARDED
             - CANCELLED
-          description: "ENG: Status of the transaction - IT: Stato della transazione"
+          description: 'ENG: Status of the transaction - IT: Stato della transazione'
         channel:
           type: string
-          description: "ENG: Channel from which the transaction takes place - IT: Canale da
-              cui avviene la transazione"
+          description: 'ENG: Channel from which the transaction takes place - IT: Canale da
+            cui avviene la transazione'
     MerchantDetailDTO:
       type: object
       properties:
@@ -665,13 +665,13 @@ components:
           description: "ENG: The address of the legal office <br> IT: L'indirizzo della sede legale"
         legalOfficeMunicipality:
           type: string
-          description: "ENG: The municipality of the legal office <br> IT: Il comune della sede legale"
+          description: 'ENG: The municipality of the legal office <br> IT: Il comune della sede legale'
         legalOfficeProvince:
           type: string
-          description: "ENG: The province of the legal office <br> IT: La provincia della sede legale"
+          description: 'ENG: The province of the legal office <br> IT: La provincia della sede legale'
         legalOfficeZipCode:
           type: string
-          description: "ENG: The zipcode of the legal office <br> IT: Il CAP della sede legale"
+          description: 'ENG: The zipcode of the legal office <br> IT: Il CAP della sede legale'
         certifiedEmail:
           type: string
           description: "ENG: The certified email address of the merchant <br> IT: L'indirizzo email PEC dell' esercente"
@@ -722,7 +722,7 @@ components:
         - merchantId
         - idTrxAcquirer
         - trxDate
-        - trxExpirationMinutes
+        - trxExpirationSeconds
         - amountCents
         - amountCurrency
         - acquirerId
@@ -743,7 +743,7 @@ components:
         trxDate:
           type: string
           format: date-time
-        trxExpirationMinutes:
+        trxExpirationSeconds:
           type: number
         amountCents:
           type: integer
@@ -796,13 +796,13 @@ components:
           description: 'ENG: Transaction date - IT: Data della transazione'
         initiativeId:
           type: string
-          description: 'ENG: Id of the initiative - IT: Identificativo dell''iniziativa'
+          description: "ENG: Id of the initiative - IT: Identificativo dell'iniziativa"
         initiativeName:
           type: string
           description: 'ENG: Name of the initiative - IT: Nome della iniziativa'
         businessName:
           type: string
-          description: 'ENG: Business name - IT: Nome dell''esercente'
+          description: "ENG: Business name - IT: Nome dell'esercente"
         status:
           type: string
           enum:
@@ -917,7 +917,7 @@ components:
         amountCents:
           type: integer
           format: int64
-          description: "ENG: Amount of transaction - IT: Importo della transazione"
+          description: 'ENG: Amount of transaction - IT: Importo della transazione'
         idTrxAcquirer:
           type: string
           description: "ENG: Transaction acquirer ID- IT: Identificativo della transazione rispetto all'acquirer"

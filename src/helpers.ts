@@ -43,14 +43,14 @@ export const downloadQRCodeFromURL = (url: string | undefined) => {
 };
 
 export const mapDataForDiscoutTimeRecap = (
-  trxExpirationMinutes: number | undefined,
+  trxExpirationSeconds: number | undefined,
   trxDate: Date | undefined
 ) => {
   let expirationDays;
   let expirationDate;
   let expirationTime;
-  if (typeof trxExpirationMinutes === 'number' && typeof trxDate === 'object') {
-    const expDays = trxExpirationMinutes / 1440;
+  if (typeof trxExpirationSeconds === 'number' && typeof trxDate === 'object') {
+    const expDays = trxExpirationSeconds / 86400;
     const expDaysStr = expDays.toString();
     expirationDays = parseInt(expDaysStr, 10);
     const trxDateStr = trxDate.toString();
