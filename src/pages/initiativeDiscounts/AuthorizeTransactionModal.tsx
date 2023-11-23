@@ -50,7 +50,7 @@ const AuthorizeTransactionModal = ({
 
   useEffect(() => {
     const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
-      data.trxExpirationMinutes,
+      data.trxExpirationSeconds,
       data.trxDate
     );
     setExpirationDays(expirationDays);

@@ -69,6 +69,7 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
       case 'PAYMENT_ALREADY_ASSIGNED':
         return t('pages.acceptNewDiscount.errors.paymentUserNotValid');
       case 'PAYMENT_NOT_ALLOWED_FOR_TRX_STATUS':
+      case 'PAYMENT_STATUS_NOT_VALID':
         return t('pages.acceptNewDiscount.errors.paymentStatusNotValid');
       case 'PAYMENT_ALREADY_AUTHORIZED':
         return t('pages.acceptNewDiscount.errors.paymentAlreadyAuthorized');
