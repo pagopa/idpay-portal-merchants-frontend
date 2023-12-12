@@ -3,6 +3,10 @@ import { MerchantStatisticsDTO } from '../generated/merchants/MerchantStatistics
 import { StatusEnum as TransactionStatusEnum } from '../generated/merchants/MerchantTransactionDTO';
 import { StatusEnum as TransactionProcessedStatusEnum } from '../generated/merchants/MerchantTransactionProcessedDTO';
 import {
+  AuthPaymentResponseDTO,
+  StatusEnum as AuthPaymentStatusEnum,
+} from '../generated/merchants/AuthPaymentResponseDTO';
+import {
   MerchantDetailDTO,
   StatusEnum as MerchantStatusEnum,
 } from '../generated/merchants/MerchantDetailDTO';
@@ -51,7 +55,7 @@ export const mockedMerchantTransactionList = {
       updateDate: startDate,
       status: TransactionStatusEnum.CREATED,
       trxDate: new Date(),
-      trxExpirationMinutes: 4320,
+      trxExpirationSeconds: 300,
       qrcodePngUrl: 'example.com/image',
       qrcodeTxtUrl: 'example.com/image',
     },
@@ -63,7 +67,7 @@ export const mockedMerchantTransactionList = {
       updateDate: startDate,
       status: TransactionStatusEnum.AUTHORIZED,
       trxDate: new Date(),
-      trxExpirationMinutes: 4320,
+      trxExpirationSeconds: 300,
       qrcodePngUrl: 'example.com/image',
       qrcodeTxtUrl: 'example.com/image',
     },
@@ -75,7 +79,7 @@ export const mockedMerchantTransactionList = {
       updateDate: startDate,
       status: TransactionStatusEnum.IDENTIFIED,
       trxDate: new Date(),
-      trxExpirationMinutes: 4320,
+      trxExpirationSeconds: 300,
       qrcodePngUrl: 'example.com/image',
       qrcodeTxtUrl: 'example.com/image',
     },
@@ -87,7 +91,7 @@ export const mockedMerchantTransactionList = {
       updateDate: startDate,
       status: TransactionStatusEnum.REJECTED,
       trxDate: new Date(),
-      trxExpirationMinutes: 4320,
+      trxExpirationSeconds: 300,
       qrcodePngUrl: 'example.com/image',
       qrcodeTxtUrl: 'example.com/image',
     },
@@ -108,7 +112,7 @@ export const mockedMerchantTransactionProcessedList = {
       updateDate: startDate,
       status: TransactionProcessedStatusEnum.REWARDED,
       trxDate: new Date(),
-      trxExpirationMinutes: 4320,
+      trxExpirationMinutes: 300,
       qrcodePngUrl: 'example.com/image',
       qrcodeTxtUrl: 'example.com/image',
     },
@@ -120,7 +124,7 @@ export const mockedMerchantTransactionProcessedList = {
       updateDate: startDate,
       status: TransactionProcessedStatusEnum.CANCELLED,
       trxDate: new Date(),
-      trxExpirationMinutes: 4320,
+      trxExpirationMinutes: 300,
       qrcodePngUrl: 'example.com/image',
       qrcodeTxtUrl: 'example.com/image',
     },
@@ -171,9 +175,17 @@ export const transactionResponseMocked = {
   residualAmountCents: 1,
   splitPayment: false,
   vat: 'ppppp',
-  trxExpirationMinutes: 4320,
+  trxExpirationSeconds: 4320,
   qrcodePngUrl: 'example.com/image',
   qrcodeTxtUrl: 'example.com/image',
+};
+
+export const authPaymentBarCodeResponseMocked = {
+  amountCents: 100,
+  id: '12345',
+  initiativeId: '234567',
+  status: AuthPaymentStatusEnum.CREATED,
+  trxCode: 'qwertyui',
 };
 
 export const MerchantsApiMocked = {
@@ -212,6 +224,10 @@ export const MerchantsApiMocked = {
     _mcc: string | undefined
   ): Promise<TransactionResponse> => new Promise((resolve) => resolve(transactionResponseMocked)),
 
-  // confirmPaymentQRCode: async (_transactionId: string): Promise<TransactionResponse> =>
-  //   new Promise((resolve) => resolve(transactionResponseMocked)),
+  authPaymentBarCode: async (
+    _trxCode: string,
+    _amountCents: number,
+    _idTrxAcquirer: string
+  ): Promise<AuthPaymentResponseDTO> =>
+    new Promise((resolve) => resolve(authPaymentBarCodeResponseMocked)),
 };

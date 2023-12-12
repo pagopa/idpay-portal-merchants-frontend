@@ -3,6 +3,8 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { matchPath, useHistory } from 'react-router-dom';
+import QrCodeIcon from '@mui/icons-material/QrCode';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import { useAppSelector } from '../../redux/hooks';
 import { initiativeSelector } from '../../redux/slices/initiativesSlice';
 import ROUTES, { BASE_ROUTE } from '../../routes';
@@ -87,7 +89,7 @@ const InitiativeDiscounts = () => {
         />
       </Box>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
-        <Box sx={{ display: 'grid', gridColumn: 'span 10', mt: 2 }}>
+        <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
           <TitleBox
             title={t('pages.initiativeDiscounts.title')}
             subTitle={t('pages.initiativeDiscounts.subtitle')}
@@ -98,24 +100,39 @@ const InitiativeDiscounts = () => {
             variantSubTitle="body1"
           />
         </Box>
-        <Box sx={{ display: 'grid', gridColumn: 'span 2', mt: 2, justifyContent: 'right' }}>
-          {userCanCreateDiscount(startDate, endDate) && (
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() => {
-                history.replace(`${BASE_ROUTE}/crea-sconto/${id}`);
-              }}
-              data-testid="goToWizard-btn-test"
-            >
-              {t('pages.initiativeDiscounts.createBtn')}
-            </Button>
-          )}
+        <Box sx={{ display: 'grid', gridColumn: 'span 4', mt: 3, justifyContent: 'right' }}>
+          <Box sx={{ display: 'flex' }}>
+            {userCanCreateDiscount(startDate, endDate) && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<ConfirmationNumberIcon />}
+                onClick={() => {
+                  history.replace(`${BASE_ROUTE}/accetta-sconto/${id}`);
+                }}
+                data-testid="goToAuthorizationWizard-btn-test"
+                sx={{ mr: 2 }}
+              >
+                {t('pages.initiativeDiscounts.acceptBtn')}
+              </Button>
+            )}
+            {userCanCreateDiscount(startDate, endDate) && (
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<QrCodeIcon />}
+                onClick={() => {
+                  history.replace(`${BASE_ROUTE}/crea-sconto/${id}`);
+                }}
+                data-testid="goToWizard-btn-test"
+              >
+                {t('pages.initiativeDiscounts.createBtn')}
+              </Button>
+            )}
+          </Box>
         </Box>
       </Box>
-
       <InitiativeDiscountsSummary id={id} />
-
       <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 4, mb: 3 }}>
         <Typography variant="h6">{t('pages.initiativeDiscounts.listTitle')}</Typography>
       </Box>
@@ -140,12 +157,10 @@ const InitiativeDiscounts = () => {
               />
             </Tabs>
           </Box>
-
           <Box sx={{ width: '100%' }}>
             <TabPanel value={value} index={0}>
               <MerchantTransactions id={id} />
             </TabPanel>
-
             <TabPanel value={value} index={1}>
               <MerchantTransactionsProcessed id={id} />
             </TabPanel>

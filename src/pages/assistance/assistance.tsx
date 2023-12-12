@@ -203,6 +203,7 @@ const Assistance = () => {
               subtitle={t('pages.assistanceRequest.exitModalBody')}
               openExitModal={openExitModal}
               handleCloseExitModal={handleCloseExitModal}
+              backRoute={ROUTES.HOME}
             />
           </Box>
         </Box>

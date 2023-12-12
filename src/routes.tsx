@@ -10,6 +10,7 @@ const ROUTES = {
   PRIVACY_POLICY: `${BASE_ROUTE}/privacy-policy`,
   DISCOUNTS: `${BASE_ROUTE}/sconti-iniziativa/:id`,
   NEW_DISCOUNT: `${BASE_ROUTE}/crea-sconto/:id`,
+  ACCEPT_NEW_DISCOUNT: `${BASE_ROUTE}/accetta-sconto/:id`,
 };
 
 export default ROUTES;

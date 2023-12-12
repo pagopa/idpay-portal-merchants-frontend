@@ -24,38 +24,37 @@ export const downloadQRCode = (selector: string, trxCode: string | undefined) =>
   }
 };
 */
-export const downloadQRCodeFromURL = (url: string) => {
-  fetch(url)
-    .then((response) => response.blob())
-    .then((blob) => {
-      const link = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = link;
-      const fileName = 'qrcode.png';
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    })
-    .catch((error) => console.log(error));
+export const downloadQRCodeFromURL = (url: string | undefined) => {
+  if (typeof url === 'string') {
+    fetch(url)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const link = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = link;
+        const fileName = 'qrcode.png';
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      })
+      .catch((error) => console.log(error));
+  }
 };
 
 export const mapDataForDiscoutTimeRecap = (
-  trxExpirationMinutes: number | undefined,
+  trxExpirationSeconds: number | undefined,
   trxDate: Date | undefined
 ) => {
   let expirationDays;
   let expirationDate;
   let expirationTime;
-  if (typeof trxExpirationMinutes === 'number' && typeof trxDate === 'object') {
-    const expDays = trxExpirationMinutes / 1440;
-    const expDaysStr = expDays.toString();
-    expirationDays = parseInt(expDaysStr, 10);
-    const trxDateStr = trxDate.toString();
-    const expDate = new Date(trxDateStr);
-    const days = expDate.getDate();
-    expDate.setDate(days + expDays);
-    const expDateStrArr = expDate
+  if (typeof trxExpirationSeconds === 'number' && typeof trxDate === 'object') {
+    const initialTimestamp = trxDate.getTime();
+    trxDate.setSeconds(trxDate.getSeconds() + trxExpirationSeconds);
+    const finalTimestamp = trxDate.getTime();
+    expirationDays = Math.trunc((finalTimestamp - initialTimestamp) / (1000 * 60 * 60 * 24));
+    const expDateStrArr = trxDate
       .toLocaleString('it-IT', {
         day: '2-digit',
         month: '2-digit',
