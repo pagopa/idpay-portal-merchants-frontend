@@ -18,16 +18,7 @@ export const fetchParties = (): Promise<Array<Party>> => {
 export const fetchPartyDetails = (
   partyId: string,
   parties?: Array<Party>
-): Promise<Party | null> => {
-  /* istanbul ignore if */
-  if (process.env.REACT_APP_API_MOCK_PARTIES === 'true') {
-    return new Promise((resolve) =>
-      resolve(mockedParties.find((p) => p.partyId === partyId) ?? null)
-    );
-  }
-
-  return retrieveParty(partyId, parties);
-};
+): Promise<Party | null> => retrieveParty(partyId, parties);
 
 // check inside parties as first
 const retrieveParty = (

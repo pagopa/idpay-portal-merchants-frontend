@@ -4,6 +4,9 @@ import { Provider } from 'react-redux';
 import Assistance from '../assistance';
 import { createStore } from '../../../redux/store';
 
+import * as emailNotificationService from '../../../services/emailNotificationService';
+import { mockedInstitutionInfo } from '../../../services/__mocks__/emailNotificationService';
+
 jest.mock('react-router-dom', () => Function());
 
 jest.mock('react-router-dom', () => ({
@@ -16,6 +19,16 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@pagopa/selfcare-common-frontend', () => ({
   useLoading: jest.fn(),
 }));
+
+jest.mock('../../../services/emailNotificationService');
+
+beforeEach(()=> {
+  jest.spyOn(emailNotificationService, 'getInstitutionProductUserInfo').mockResolvedValue(mockedInstitutionInfo);
+})
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 jest.mock('react-i18next', () => ({
