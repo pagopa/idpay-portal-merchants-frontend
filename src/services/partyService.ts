@@ -1,19 +1,13 @@
 import { /* institutionResource2Party, */ Party } from '../model/Party';
-import { mockedParties } from './__mocks__/partyService';
+// import { mockedParties } from './__mocks__/partyService';
 
-export const fetchParties = (): Promise<Array<Party>> => {
-  /* istanbul ignore if */
-  if (process.env.REACT_APP_API_MOCK_PARTIES === 'true') {
-    return new Promise((resolve) => resolve(mockedParties));
-  } else {
+export const fetchParties = (): Promise<Array<Party>> => new Promise((resolve) => resolve([]));
     // TODO Implementation of call to selfcare to populate switch change entities
-    return new Promise((resolve) => resolve([]));
-
     // return PortalApi.getInstitutions().then((institutionResources) =>
     //   institutionResources ? institutionResources.map(institutionResource2Party) : []
-    // );
-  }
-};
+  //   // );
+  // }
+
 
 export const fetchPartyDetails = (
   partyId: string,
