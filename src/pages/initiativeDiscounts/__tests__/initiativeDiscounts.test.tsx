@@ -6,6 +6,8 @@ import InitiativeDiscounts from '../initiativeDiscounts';
 import { setSelectedInitative } from '../../../redux/slices/initiativesSlice';
 import { store } from '../../../redux/store';
 
+jest.mock('../../../services/merchantService');
+
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
