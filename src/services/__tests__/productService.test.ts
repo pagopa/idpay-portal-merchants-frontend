@@ -4,11 +4,20 @@
 // import { productResource2Product } from '../../model/Product';
 
 // jest.mock('../../api/PortalApiClient');
+import { fetchProducts } from '../../services/productService';
 
 beforeEach(() => {
   // jest.spyOn(PortalApi, 'getProducts');
   // jest.spyOn(PortalApi, 'getProductRoles');
 });
+
+describe('fetchProducts Service', () => {
+  it('should return an empty array', async () => {
+    const result = await fetchProducts('examplePartyId');
+    expect(result).toEqual([]);
+  });
+});
+
 
 test('Test fetchProducts', async () => {
   // const products = await fetchProducts('1');
