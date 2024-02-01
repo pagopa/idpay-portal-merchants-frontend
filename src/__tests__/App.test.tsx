@@ -18,6 +18,7 @@ jest.mock('react-router-dom', () => ({
 
 const mockSignOutFn = jest.fn();
 
+jest.mock('../services/rolePermissionService');
 jest.mock('../decorators/withLogin');
 jest.mock('../decorators/withSelectedPartyProducts');
 

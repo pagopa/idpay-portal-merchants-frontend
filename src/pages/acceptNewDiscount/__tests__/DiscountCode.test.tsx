@@ -6,6 +6,8 @@ import { BASE_ROUTE } from '../../../routes';
 import DiscountCode from '../DiscountCode';
 import { MerchantsApiMocked } from '../../../api/__mocks__/MerchantsApiClient';
 
+jest.mock('../../../services/merchantService');
+
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
