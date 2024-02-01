@@ -1,33 +1,11 @@
 import { /* institutionResource2Party, */ Party } from '../model/Party';
-import { mockedParties } from './__mocks__/partyService';
 
-export const fetchParties = (): Promise<Array<Party>> => {
-  /* istanbul ignore if */
-  if (process.env.REACT_APP_API_MOCK_PARTIES === 'true') {
-    return new Promise((resolve) => resolve(mockedParties));
-  } else {
-    // TODO Implementation of call to selfcare to populate switch change entities
-    return new Promise((resolve) => resolve([]));
-
-    // return PortalApi.getInstitutions().then((institutionResources) =>
-    //   institutionResources ? institutionResources.map(institutionResource2Party) : []
-    // );
-  }
-};
+export const fetchParties = (): Promise<Array<Party>> => new Promise((resolve) => resolve([]));
 
 export const fetchPartyDetails = (
   partyId: string,
   parties?: Array<Party>
-): Promise<Party | null> => {
-  /* istanbul ignore if */
-  if (process.env.REACT_APP_API_MOCK_PARTIES === 'true') {
-    return new Promise((resolve) =>
-      resolve(mockedParties.find((p) => p.partyId === partyId) ?? null)
-    );
-  }
-
-  return retrieveParty(partyId, parties);
-};
+): Promise<Party | null> => retrieveParty(partyId, parties);
 
 // check inside parties as first
 const retrieveParty = (
