@@ -73,6 +73,18 @@ export const mockedMerchantTransactionList = {
     },
     {
       trxCode: 'string',
+      trxId: 'asdfggf5678',
+      fiscalCode: 'string',
+      effectiveAmount: 1250,
+      updateDate: startDate,
+      status: TransactionStatusEnum.AUTHORIZATION_REQUESTED,
+      trxDate: new Date(),
+      trxExpirationSeconds: 300,
+      qrcodePngUrl: 'example.com/image',
+      qrcodeTxtUrl: 'example.com/image',
+    },
+    {
+      trxCode: 'string',
       trxId: 'zxcvbnmzxcv',
       fiscalCode: 'string',
       effectiveAmount: 2322,
@@ -98,7 +110,7 @@ export const mockedMerchantTransactionList = {
   ],
   pageNo: 0,
   pageSize: 10,
-  totalElements: 4,
+  totalElements: 5,
   totalPages: 1,
 };
 
