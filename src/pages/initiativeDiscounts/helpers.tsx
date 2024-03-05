@@ -67,6 +67,8 @@ export const renderTrasactionProcessedStatus = (status: TransactionProcessedStat
           color="error"
         />
       );
+    default:
+      return null;
   }
 };
 
