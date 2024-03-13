@@ -9,6 +9,7 @@
     "copyLinkBtn": "Copia link",
     "discountStatusEnum": {
       "authorized": "Autorizzato",
+      "authorizationRequested": "Autorizzazione in corso",
       "cancelled": "Annullato",
       "identified": "Da autorizzare",
       "invalidated": "Invalidato",

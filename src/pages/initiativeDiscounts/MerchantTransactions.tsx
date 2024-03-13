@@ -95,6 +95,7 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
   const RenderCancelTransaction = ({ initiativeId, status, trxId }: RenderCancelTrxProps) => {
     switch (status) {
       case TransactionStatusEnum.AUTHORIZED:
+      case TransactionStatusEnum.AUTHORIZATION_REQUESTED:
       case TransactionStatusEnum.IDENTIFIED:
       case TransactionStatusEnum.CREATED:
       case TransactionStatusEnum.REJECTED:
@@ -220,6 +221,7 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
       case TransactionStatusEnum.CREATED:
       case TransactionStatusEnum.IDENTIFIED:
         return true;
+      case TransactionStatusEnum.AUTHORIZATION_REQUESTED:
       case TransactionStatusEnum.REJECTED:
         return false;
     }
@@ -251,7 +253,10 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
                     <TableRow key={i}>
                       <TableCell>{formatDate(r.updateDate)}</TableCell>
                       <TableCell>
-                        {r.status === TransactionStatusEnum.AUTHORIZED ? r.fiscalCode : ''}
+                        {r.status === TransactionStatusEnum.AUTHORIZED ||
+                        TransactionStatusEnum.AUTHORIZATION_REQUESTED
+                          ? r.fiscalCode
+                          : ''}
                       </TableCell>
                       <TableCell>{formattedCurrency(r.effectiveAmount, '-', true)}</TableCell>
                       <TableCell>{formattedCurrency(r.rewardAmount, '-', true)}</TableCell>
