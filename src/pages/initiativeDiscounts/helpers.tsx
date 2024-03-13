@@ -21,6 +21,14 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
           color="info"
         />
       );
+    case TransactionCreatedStatusEnum.AUTHORIZATION_REQUESTED:
+      return (
+        <Chip
+          sx={{ fontSize: '14px' }}
+          label={i18n.t('commons.discountStatusEnum.authorizationRequested')}
+          color="default"
+        />
+      );
     case TransactionCreatedStatusEnum.CREATED:
     case TransactionCreatedStatusEnum.IDENTIFIED:
       return (
