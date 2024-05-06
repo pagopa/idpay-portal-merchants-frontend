@@ -258,8 +258,8 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
                           ? r.fiscalCode
                           : ''}
                       </TableCell>
-                      <TableCell>{formattedCurrency(r.effectiveAmount, '-', true)}</TableCell>
-                      <TableCell>{formattedCurrency(r.rewardAmount, '-', true)}</TableCell>
+                      <TableCell>{formattedCurrency(r.effectiveAmountCents, '-', true)}</TableCell>
+                      <TableCell>{formattedCurrency(r.rewardAmountCents, '-', true)}</TableCell>
                       <TableCell>{renderTransactionCreatedStatus(r.status)}</TableCell>
                       {showActionMenu(r.status) ? (
                         <ActionMenu initiativeId={id} status={r.status} trxId={r.trxId} data={r} />

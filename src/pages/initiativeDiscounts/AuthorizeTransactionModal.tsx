@@ -138,7 +138,7 @@ const AuthorizeTransactionModal = ({
             <Box sx={{ gridColumn: 'span 12' }}>
               <Typography variant="body2">{t('pages.initiativeDiscounts.totalSpent')}</Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {formattedCurrency(data?.effectiveAmount, '-', true)}
+                {formattedCurrency(data?.effectiveAmountCents, '-', true)}
               </Typography>
             </Box>
             <Box sx={{ gridColumn: 'span 12' }}>
