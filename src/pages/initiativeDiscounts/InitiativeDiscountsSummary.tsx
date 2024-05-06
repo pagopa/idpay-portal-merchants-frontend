@@ -45,8 +45,8 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
     if (typeof id === 'string') {
       getMerchantInitiativeStatistics(id)
         .then((response) => {
-          setAmount(response?.amount);
-          setRefunded(response?.refunded);
+          setAmount(response?.amountCents);
+          setRefunded(response?.refundedCents);
         })
         .catch((error) => {
           setAmount(undefined);
@@ -109,7 +109,7 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
             sx={{ fontWeight: 700, display: 'grid', gridArea: 'value1', justifyContent: 'end' }}
             variant="body2"
           >
-            {formattedCurrency(amount, '0,00 €')}
+            {formattedCurrency(amount, '0,00 €', true)}
           </Typography>
 
           <Typography
@@ -123,7 +123,7 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
             sx={{ fontWeight: 700, display: 'grid', gridArea: 'value2', justifyContent: 'end' }}
             variant="body2"
           >
-            {formattedCurrency(refunded, '0,00 €')}
+            {formattedCurrency(refunded, '0,00 €', true)}
           </Typography>
         </Box>
 
