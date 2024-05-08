@@ -115,8 +115,8 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
                     <TableRow key={i}>
                       <TableCell>{formatDate(r.updateDate)}</TableCell>
                       <TableCell>{r.fiscalCode}</TableCell>
-                      <TableCell>{formattedCurrency(r.effectiveAmount, '-', true)}</TableCell>
-                      <TableCell>{formattedCurrency(r.rewardAmount, '-', true)}</TableCell>
+                      <TableCell>{formattedCurrency(r.effectiveAmountCents, '-', true)}</TableCell>
+                      <TableCell>{formattedCurrency(r.rewardAmountCents, '-', true)}</TableCell>
                       <TableCell>{renderTrasactionProcessedStatus(r.status)}</TableCell>
                     </TableRow>
                   ))}
