@@ -3,7 +3,7 @@ info:
   title: IDPAY-WelfarePortalUserPermissions_v1
   version: '1.0'
 servers:
-  - url: https://api-io.dev.cstar.pagopa.it/idpay/authorization
+  - url: https://api-io.dev.cstar.pagopa.it/idpay-itn/authorization
 paths:
   /permissions:
     get:

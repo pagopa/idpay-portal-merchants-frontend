@@ -4,7 +4,7 @@ info:
   description: IDPAY Welfare Portal Merchant
   version: '1.0.1'
 servers:
-  - url: https://api-io.dev.cstar.pagopa.it/idpay/merchant/portal
+  - url: https://api-io.dev.cstar.pagopa.it/idpay-itn/merchant/portal
 paths:
   /initiatives:
     get:
