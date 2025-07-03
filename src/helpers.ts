@@ -94,7 +94,7 @@ export const formatIban = (iban: string | undefined) => {
       10
     )} ${iban.slice(10, 15)} ${iban.slice(15, 32)}`;
   }
-  return '';
+  return '-';
 };
 
 export const formatDate = (date: Date | undefined) => {

@@ -120,6 +120,21 @@
       "totalSpent": "Totale della spesa",
       "iban": "IBAN"
     },
+    "initiativeOverview" : {
+      "subtitle": "Tieni sotto controllo le tue attività da qui.",
+      "title": "Panoramica",
+      "information" : "Informazioni",
+      "stores" : "Punti vendita",
+      "iban": "IBAN",
+      "refundsDataTitle": "Dati rimborso",
+      "refundsStatusTitle": "Stato rimborsi",
+      "totalAmount": "Totale erogato",
+      "totalRefunded": "Totale rimborsato",
+      "missingIban" : "E' necessario inserire un IBAN valido per ottenere i rimborsi."
+    },
+    "initiativeStores" : {
+      "title": "Punti vendita"
+    },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
       "initiativeStatus": "Stato",
