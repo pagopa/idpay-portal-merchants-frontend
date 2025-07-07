@@ -8,7 +8,7 @@ import { initiativeSelector } from '../../redux/slices/initiativesSlice';
 import ROUTES from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import InitiativeOverviewSummary from './initiativeOverviewSummary';
-// import { mapDatesFromPeriod } from './helpers';
+import InitiativeOverviewStores from './initiativeOverviewStores';
 
 interface MatchParams {
   id: string;
@@ -16,13 +16,9 @@ interface MatchParams {
 
 const InitiativeOverview = () => {
   const { t } = useTranslation();
-  // const [value, setValue] = useState(0);
-  // const history = useHistory();
   const selectedInitiative = useAppSelector(initiativeSelector);
-  // const [startDate, setStartDate] = useState<Date>();
-  // const [endDate, setEndDate] = useState<Date>();
   const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS],
+    path: [ROUTES.OVERVIEW],
     exact: true,
     strict: false,
   });
@@ -34,38 +30,6 @@ const InitiativeOverview = () => {
     // setEndDate(dates?.endDate);
     // setValue(0);
   }, [id, JSON.stringify(selectedInitiative)]);
-
-  // interface TabPanelProps {
-  //   children?: React.ReactNode;
-  //   index: number;
-  //   value: number;
-  // }
-
-  // const TabPanel = (props: TabPanelProps) => {
-  //   const { children, value, index, ...other } = props;
-  //
-  //   return (
-  //     <div
-  //       role="tabpanel"
-  //       hidden={value !== index}
-  //       id={`tabpanel-${index}`}
-  //       aria-labelledby={`tab-${index}`}
-  //       {...other}
-  //     >
-  //       {value === index && (
-  //         <Box sx={{ pt: 3 }}>
-  //           <Box>{children}</Box>
-  //         </Box>
-  //       )}
-  //     </div>
-  //   );
-  // };
-
-  // const a11yProps = (index: number) => ({
-  //   id: `tab-${index}`,
-  //   'aria-controls': `tabpanel-${index}`,
-  // });
-
 
   return (
     <Box sx={{ width: '100%', padding: 2 }}>
@@ -82,18 +46,24 @@ const InitiativeOverview = () => {
           />
         </Box>
       </Box>
-      <Alert closeText="Inserisci IBAN" variant="outlined" severity="warning" sx={{ bgcolor: 'background.paper' }}
+      <Alert
+        variant="outlined"
+        severity="warning"
+        sx={{ bgcolor: 'background.paper' }}
+        action={
+          <Button size="small" variant="text">{t('pages.initiativeOverview.insertIban')}</Button>
+        }
       >
         {t('pages.initiativeOverview.missingIban')}
-        <Button size="small" variant="text">Inserisci IBAN</Button>
       </Alert>
       <Box sx={{ display: 'flex', gridColumn: 'span 6', gap: 2, mt: 2 }}>
-        <InitiativeOverviewSummary id={id} />
-        <InitiativeOverviewSummary id={id} />
+        <Box flex="1">
+          <InitiativeOverviewSummary id={id} />
+        </Box>
+        <Box flex="1">
+          <InitiativeOverviewStores />
+        </Box>
       </Box>
-
-
-
     </Box>
   );
 };

@@ -125,12 +125,16 @@
       "title": "Panoramica",
       "information" : "Informazioni",
       "stores" : "Punti vendita",
+      "storesSubtitle" : "Censisci i tuoi punti vendita direttamente sul portale.",
+      "addStores" : "Censisci i tuoi punti vendita",
       "iban": "IBAN",
+      "holder": "Intestatario",
       "refundsDataTitle": "Dati rimborso",
       "refundsStatusTitle": "Stato rimborsi",
       "totalAmount": "Totale erogato",
       "totalRefunded": "Totale rimborsato",
-      "missingIban" : "E' necessario inserire un IBAN valido per ottenere i rimborsi."
+      "missingIban" : "E' necessario inserire un IBAN valido per ottenere i rimborsi.",
+      "insertIban": "Inserisci IBAN"
     },
     "initiativeStores" : {
       "title": "Punti vendita"

@@ -14,14 +14,17 @@ const InitiativeOverviewSummary = ({ id }: Props) => {
   const [amount, setAmount] = useState<number | undefined>(undefined);
   const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
+  const [holder, setHolder] = useState<string | undefined>();
   const addError = useErrorDispatcher();
 
   useEffect(() => {
     if (typeof id === 'string') {
       setIban(undefined);
+      setHolder(undefined);
       getMerchantDetail(id)
         .then((response) => {
           setIban(response?.iban);
+          setHolder(undefined);
         })
         .catch((error) =>
           addError({
@@ -116,7 +119,7 @@ const InitiativeOverviewSummary = ({ id }: Props) => {
             {t('pages.initiativeOverview.totalAmount')}
           </Typography>
           <Typography
-            sx={{ fontWeight: 700, display: 'grid', gridArea: 'value1', justifyContent: 'end' }}
+            sx={{ fontWeight: 700, display: 'grid', gridArea: 'value1', justifyContent: 'start' }}
             variant="body2"
           >
             {formattedCurrency(amount, '0,00 €', true)}
@@ -130,7 +133,7 @@ const InitiativeOverviewSummary = ({ id }: Props) => {
             {t('pages.initiativeOverview.totalRefunded')}
           </Typography>
           <Typography
-            sx={{ fontWeight: 700, display: 'grid', gridArea: 'value2', justifyContent: 'end'}}
+            sx={{ fontWeight: 700, display: 'grid', gridArea: 'value2', justifyContent: 'start'}}
             variant="body2"
           >
             {formattedCurrency(refunded, '0,00 €', true)}
@@ -146,14 +149,27 @@ const InitiativeOverviewSummary = ({ id }: Props) => {
             {t('pages.initiativeOverview.refundsDataTitle')}
           </Typography>
           <Typography
-            sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 2' }}
+            sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 3' }}
+            variant="body2"
+            color="text.primary"
+          >
+            {t('pages.initiativeOverview.holder')}
+          </Typography>
+          <Typography
+            sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 3' ,justifyContent: 'start'}}
+            variant="body2"
+          >
+            {holder ?? "-"}
+          </Typography>
+          <Typography
+            sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 3' }}
             variant="body2"
             color="text.primary"
           >
             {t('pages.initiativeOverview.iban')}
           </Typography>
           <Typography
-            sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 4' }}
+            sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 3', justifyContent: 'start' }}
             variant="body2"
           >
             {formatIban(iban)}
