@@ -9,7 +9,7 @@ const InitiativeOverviewStores = () => {
   const { t } = useTranslation();
 
   return (
-    <Card sx={{ width:'100%', display: 'grid', gridColumn: 'span 12' }}>
+    <Card sx={{borderRadius: 0 , width:'100%', display: 'grid', gridColumn: 'span 12' }}>
       <CardContent
         sx={{
           p: 3,
@@ -26,7 +26,7 @@ const InitiativeOverviewStores = () => {
             subTitle={t('pages.initiativeOverview.storesSubtitle')}
             mbTitle={2}
             mtTitle={2}
-            mbSubTitle={1}
+            mbSubTitle={3}
             variantTitle="h5"
             variantSubTitle="caption"
           />
@@ -42,7 +42,7 @@ const InitiativeOverviewStores = () => {
             <Button
               variant="contained"
               startIcon={<StoreIcon/>}
-              size="medium"
+              size="large"
               fullWidth={false}
             >
               {t('pages.initiativeOverview.storesSubtitle')}

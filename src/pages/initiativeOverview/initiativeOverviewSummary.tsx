@@ -18,7 +18,6 @@ const InitiativeOverviewSummary = ({ id }: Props) => {
   const addError = useErrorDispatcher();
 
   useEffect(() => {
-    if (typeof id === 'string') {
       setIban(undefined);
       setHolder(undefined);
       getMerchantDetail(id)
@@ -39,13 +38,11 @@ const InitiativeOverviewSummary = ({ id }: Props) => {
             showCloseIcon: true,
           })
         );
-    }
   }, [id]);
 
   useEffect(() => {
     setAmount(undefined);
     setRefunded(undefined);
-    if (typeof id === 'string') {
       getMerchantInitiativeStatistics(id)
         .then((response) => {
           setAmount(response?.amountCents);
@@ -66,11 +63,11 @@ const InitiativeOverviewSummary = ({ id }: Props) => {
             showCloseIcon: true,
           });
         });
-    }
+
   }, [id]);
 
   return (
-    <Card sx={{ width:'100%', display: 'grid', gridColumn: 'span 12' }}>
+    <Card sx={{ borderRadius: 0 , width:'100%', display: 'grid', gridColumn: 'span 12' }}>
       <CardContent
         sx={{
           p: 3,
@@ -113,28 +110,28 @@ const InitiativeOverviewSummary = ({ id }: Props) => {
 
           <Typography
             sx={{ fontWeight: 400, display: 'grid', gridArea: 'label1' }}
-            variant="body2"
+            variant="body1"
             color="text.primary"
           >
             {t('pages.initiativeOverview.totalAmount')}
           </Typography>
           <Typography
             sx={{ fontWeight: 700, display: 'grid', gridArea: 'value1', justifyContent: 'start' }}
-            variant="body2"
+            variant="body1"
           >
             {formattedCurrency(amount, '0,00 €', true)}
           </Typography>
 
           <Typography
             sx={{ fontWeight: 400, display: 'grid', gridArea: 'label2' }}
-            variant="body2"
+            variant="body1"
             color="text.primary"
           >
             {t('pages.initiativeOverview.totalRefunded')}
           </Typography>
           <Typography
             sx={{ fontWeight: 700, display: 'grid', gridArea: 'value2', justifyContent: 'start'}}
-            variant="body2"
+            variant="body1"
           >
             {formattedCurrency(refunded, '0,00 €', true)}
           </Typography>
@@ -150,20 +147,20 @@ const InitiativeOverviewSummary = ({ id }: Props) => {
           </Typography>
           <Typography
             sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 3' }}
-            variant="body2"
+            variant="body1"
             color="text.primary"
           >
             {t('pages.initiativeOverview.holder')}
           </Typography>
           <Typography
             sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 3' ,justifyContent: 'start'}}
-            variant="body2"
+            variant="body1"
           >
             {holder ?? "-"}
           </Typography>
           <Typography
             sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 3' }}
-            variant="body2"
+            variant="body1"
             color="text.primary"
           >
             {t('pages.initiativeOverview.iban')}

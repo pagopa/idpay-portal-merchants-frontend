@@ -1,10 +1,7 @@
 import { Box,Alert, Button } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { matchPath } from 'react-router-dom';
-import { useAppSelector } from '../../redux/hooks';
-import { initiativeSelector } from '../../redux/slices/initiativesSlice';
 import ROUTES from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import InitiativeOverviewSummary from './initiativeOverviewSummary';
@@ -16,7 +13,6 @@ interface MatchParams {
 
 const InitiativeOverview = () => {
   const { t } = useTranslation();
-  const selectedInitiative = useAppSelector(initiativeSelector);
   const match = matchPath(location.pathname, {
     path: [ROUTES.OVERVIEW],
     exact: true,
@@ -24,12 +20,6 @@ const InitiativeOverview = () => {
   });
   const { id } = (match?.params as MatchParams) || {};
 
-  useEffect(() => {
-    // const dates = mapDatesFromPeriod(selectedInitiative?.spendingPeriod);
-    // setStartDate(dates?.startDate);
-    // setEndDate(dates?.endDate);
-    // setValue(0);
-  }, [id, JSON.stringify(selectedInitiative)]);
 
   return (
     <Box sx={{ width: '100%', padding: 2 }}>
@@ -51,7 +41,7 @@ const InitiativeOverview = () => {
         severity="warning"
         sx={{ bgcolor: 'background.paper' }}
         action={
-          <Button size="small" variant="text">{t('pages.initiativeOverview.insertIban')}</Button>
+          <Button size="medium" variant="text">{t('pages.initiativeOverview.insertIban')}</Button>
         }
       >
         {t('pages.initiativeOverview.missingIban')}
