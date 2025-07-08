@@ -1,5 +1,5 @@
 import { Modal, Box } from "@mui/material";
-import React, {FC, useEffect} from "react";
+import React, {FC} from "react";
 
 interface ModalComponentProps {
     open: boolean;
@@ -9,17 +9,15 @@ interface ModalComponentProps {
 }
 
 const ModalComponent: FC<ModalComponentProps> = ({ open, onClose, children, style }) => {
-    useEffect(() => {
-
-    },[]);
 
     const handleClose = () => {
         onClose();
     };
+    
 
     return (
       <Modal open={open} onClose={handleClose}>
-        <Box sx={style ? style : {
+        <Box sx={style ?? {
           position: 'absolute',
           top: '50%',
           left: '50%',

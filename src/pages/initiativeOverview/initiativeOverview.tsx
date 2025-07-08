@@ -56,6 +56,13 @@ const InitiativeOverview = () => {
     setHolder('');
   };
 
+  const handleSaveIban = () => {
+    setIbanModalIsOpen(false);
+    setIban('');
+    setHolder('');
+    console.log('test');
+  };
+
   return (
     <Box sx={{ width: '100%', padding: 2 }}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
@@ -125,7 +132,7 @@ const InitiativeOverview = () => {
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, marginTop: '40px' }}>
           <Button variant="outlined" onClick={handleCloseModal}>{t('commons.cancel')}</Button>
-          <Button variant="contained" onClick={handleCloseModal}>{t('commons.saveBtn')}</Button>
+          <Button variant="contained" onClick={handleSaveIban}>{t('commons.saveBtn')}</Button>
         </Box>
       </ModalComponent>
     </Box>
