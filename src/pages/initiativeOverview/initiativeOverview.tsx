@@ -1,9 +1,9 @@
-import { Box, Alert, Button, Typography } from '@mui/material';
-import { TitleBox} from '@pagopa/selfcare-common-frontend';
+import { Box, Alert, Button, Typography, TextField } from '@mui/material';
+import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { matchPath } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
-import { useEffect, useState } from 'react';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import ROUTES from '../../routes';
 import { genericContainerStyle } from '../../styles';
@@ -11,12 +11,15 @@ import InitiativeOverviewCard from '../components/initiativeOverviewCard';
 import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
 import { formatIban, formattedCurrency } from '../../helpers';
 
+import ModalComponent from '../../components/modal/ModalComponent';
+import style from './initiativeOverview.module.css';
 
 interface MatchParams {
   id: string;
 }
 
 const InitiativeOverview = () => {
+  const [ibanModalIsOpen, setIbanModalIsOpen] = useState(false);
   const { t } = useTranslation();
   const match = matchPath(location.pathname, {
     path: [ROUTES.OVERVIEW],
@@ -76,7 +79,29 @@ const InitiativeOverview = () => {
         });
       });
   }, [id]);
-  
+
+  const handleIbanChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target.value;
+    const alphanumericInput = input.replace(/[^a-zA-Z0-9]/g, '');
+    setIban(alphanumericInput);
+  };
+
+  const handleHolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setHolder(event.target.value);
+  };
+
+  const handleCloseModal = () => {
+    setIbanModalIsOpen(false);
+    setIban('');
+    setHolder('');
+  };
+
+  const handleSaveIban = () => {
+    setIbanModalIsOpen(false);
+    setIban('');
+    setHolder('');
+    console.log('test');
+  };
 
   return (
     <Box sx={{ width: '100%', padding: 2 }}>
@@ -219,6 +244,45 @@ const InitiativeOverview = () => {
           </InitiativeOverviewCard>
         </Box>
       </Box>
+
+      <ModalComponent open={ibanModalIsOpen} onClose={handleCloseModal}>
+        <Typography variant="h6">{t('pages.initiativeOverview.insertIban')}</Typography>
+        <Typography variant="body1" sx={{ my: 2 }}>
+          {t('pages.initiativeOverview.insertIbanDescription')}
+        </Typography>
+        <Box>
+          <Typography variant="subtitle1" sx={{ my: 2 }}>
+            {t('pages.initiativeOverview.insertIbanHolder')}
+          </Typography>
+
+          <TextField
+            label={t('pages.initiativeOverview.insertIbanHolder')}
+            variant="outlined"
+            value={holder}
+            onChange={handleHolderChange}
+            fullWidth
+          />
+        </Box>
+        <Box>
+          <Typography variant="subtitle1" sx={{ my: 2 }}>
+            {t('pages.initiativeOverview.insertIban')}
+          </Typography>
+          <TextField
+            className={style['iban-input-text']}
+            label={t('pages.initiativeOverview.insertIban')}
+            variant="outlined"
+            value={iban}
+            onChange={handleIbanChange}
+            fullWidth
+            helperText={`${iban?.length}/27`}
+            inputProps={{ maxLength: 27 }}
+          />
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, marginTop: '40px' }}>
+          <Button variant="outlined" onClick={handleCloseModal}>{t('commons.cancel')}</Button>
+          <Button variant="contained" onClick={handleSaveIban}>{t('commons.saveBtn')}</Button>
+        </Box>
+      </ModalComponent>
     </Box>
   );
 };

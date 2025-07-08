@@ -5,6 +5,8 @@
     "closeBtn": "Chiudi",
     "confirmBtn": "Conferma",
     "continueBtn": "Continua",
+    "saveBtn": "Salva",
+    "cancel": "Annulla",
     "copyCodeBtn": "Copia codice",
     "copyLinkBtn": "Copia link",
     "discountStatusEnum": {
@@ -134,7 +136,9 @@
       "totalAmount": "Totale erogato",
       "totalRefunded": "Totale rimborsato",
       "missingIban" : "E' necessario inserire un IBAN valido per ottenere i rimborsi.",
-      "insertIban": "Inserisci IBAN"
+      "insertIban": "Inserisci IBAN",
+      "insertIbanDescription": "L’IBAN indicato sarà utilizzato per l’accredito degli importi maturati tramite l’uso del buono. Assicurati che i dati siano corretti e intestati all’azienda.",
+      "insertIbanHolder": "Inserisci intestatario"
     },
     "initiativeStores" : {
       "title": "Punti vendita"
