@@ -138,7 +138,8 @@
       "missingIban" : "E' necessario inserire un IBAN valido per ottenere i rimborsi.",
       "insertIban": "Inserisci IBAN",
       "insertIbanDescription": "L’IBAN indicato sarà utilizzato per l’accredito degli importi maturati tramite l’uso del buono. Assicurati che i dati siano corretti e intestati all’azienda.",
-      "insertIbanHolder": "Inserisci intestatario"
+      "insertIbanHolder": "Inserisci intestatario",
+      "modify": "Modifica"
     },
     "initiativeStores" : {
       "title": "Punti vendita"

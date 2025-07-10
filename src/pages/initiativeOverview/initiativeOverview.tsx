@@ -31,6 +31,8 @@ const InitiativeOverview = () => {
   const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
   const [holder, setHolder] = useState<string | undefined>();
+  const [ibanForm, setIbanForm] = useState<string | undefined>();
+  const [holderForm, setHolderForm] = useState<string | undefined>();
   const addError = useErrorDispatcher();
 
   useEffect(() => {
@@ -83,24 +85,34 @@ const InitiativeOverview = () => {
   const handleIbanChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.target.value;
     const alphanumericInput = input.replace(/[^a-zA-Z0-9]/g, '');
-    setIban(alphanumericInput);
+    setIbanForm(alphanumericInput);
   };
 
   const handleHolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setHolder(event.target.value);
+    setHolderForm(event.target.value);
   };
 
   const handleCloseModal = () => {
     setIbanModalIsOpen(false);
-    setIban('');
-    setHolder('');
   };
 
+
   const handleSaveIban = () => {
+
+    // TODO: aggiungere chiamata api per salvataggio iban e intestatario
     setIbanModalIsOpen(false);
-    setIban('');
-    setHolder('');
-    console.log('test');
+  };
+
+  const handleOpenModal = (type: 'modify' | 'add') => {
+    if(type === 'add'){
+      setIbanForm('');
+      setHolderForm('');
+    }else{
+      setIbanForm(iban);
+      setHolderForm(holder);
+    }
+
+    setIbanModalIsOpen(true);
   };
 
   return (
@@ -121,106 +133,139 @@ const InitiativeOverview = () => {
       {
         iban ? (
           <Alert
-        variant="outlined"
-        severity="warning"
-        sx={{ bgcolor: 'background.paper' }}
-        action={
-          <Button size="medium" variant="text" onClick={() => setIbanModalIsOpen(true)}>{t('pages.initiativeOverview.insertIban')}</Button>
-        }
-      >
-        {t('pages.initiativeOverview.missingIban')}
-      </Alert>
+            variant="outlined"
+            severity="warning"
+            sx={{ bgcolor: 'background.paper' }}
+            action={
+              <Button size="medium" variant="text" onClick={() => handleOpenModal('add')}>{t('pages.initiativeOverview.insertIban')}</Button>
+            }
+          >
+            {t('pages.initiativeOverview.missingIban')}
+          </Alert>
         ) : ''
       }
       <Box sx={{ display: 'flex', gridColumn: 'span 6', gap: 2, mt: 2 }}>
         <Box flex="1">
-           <InitiativeOverviewCard title={t('pages.initiativeOverview.information')}>
-             <Box
-               sx={{
-                 display: 'grid',
-                 gridColumn: 'span 12',
-                 gridTemplateColumns: 'repeat(8, 1fr)',
-                 gridTemplateRows: '3',
-                 gridTemplateAreas: `"title title title title title title title title title title title title"  
-              "label1 label1 label1 value1 value1 . . . . . . ." 
-              "label2 label2 label2 value2 value2 . . . . . . ."`,
-                 rowGap: 3,
-                 mb: 5
-               }}
-             >
-               <Typography
-                 sx={{ fontWeight: 700, display: 'grid', gridArea: 'title', mb: 1 }}
-                 variant="overline"
-                 color="text.primary"
-               >
-                 {t('pages.initiativeOverview.refundsStatusTitle')}
-               </Typography>
+          <InitiativeOverviewCard title={t('pages.initiativeOverview.information')}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridColumn: 'span 12',
+                gridTemplateColumns: 'repeat(12, 1fr)',
+                gridTemplateRows: 'auto auto auto auto auto auto',
+                gridTemplateAreas: `
+                  "title title title title title title title title title title title title"
+                  "label1 label1 label1 value1 value1 . . . . . . ."
+                  "label2 label2 label2 value2 value2 . . . . . . ."
+                  "datatitle datatitle datatitle datatitle datatitle datatitle . . . modify modify modify"
+                  "datalabel1 datalabel1 datalabel1 datavalue1 datavalue1 datavalue1 . . . . . ."
+                  "datalabel2 datalabel2 datalabel2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2"
+                `,
+                rowGap: 3,
+                mb: 5,
+                position: 'relative'
+              }}
+            >
+              <Typography
+                sx={{ fontWeight: 700, display: 'grid', gridArea: 'title', mb: 1 }}
+                variant="overline"
+                color="text.primary"
+              >
+                {t('pages.initiativeOverview.refundsStatusTitle')}
+              </Typography>
 
-               <Typography
-                 sx={{ fontWeight: 400, display: 'grid', gridArea: 'label1' }}
-                 variant="body1"
-                 color="text.primary"
-               >
-                 {t('pages.initiativeOverview.totalAmount')}
-               </Typography>
-               <Typography
-                 sx={{ fontWeight: 700, display: 'grid', gridArea: 'value1', justifyContent: 'start' }}
-                 variant="body1"
-               >
-                 {formattedCurrency(amount, '0,00 €', true)}
-               </Typography>
+              <Typography
+                sx={{ fontWeight: 400, display: 'grid', gridArea: 'label1' }}
+                variant="body1"
+                color="text.primary"
+              >
+                {t('pages.initiativeOverview.totalAmount')}
+              </Typography>
 
-               <Typography
-                 sx={{ fontWeight: 400, display: 'grid', gridArea: 'label2' }}
-                 variant="body1"
-                 color="text.primary"
-               >
-                 {t('pages.initiativeOverview.totalRefunded')}
-               </Typography>
-               <Typography
-                 sx={{ fontWeight: 700, display: 'grid', gridArea: 'value2', justifyContent: 'start'}}
-                 variant="body1"
-               >
-                 {formattedCurrency(refunded, '0,00 €', true)}
-               </Typography>
-             </Box>
+              <Typography
+                sx={{ fontWeight: 700, display: 'grid', gridArea: 'value1', justifyContent: 'start' }}
+                variant="body1"
+              >
+                {formattedCurrency(amount, '0,00 €', true)}
+              </Typography>
 
-             <Box sx={{ display: 'grid', gridColumn: 'span 12', rowGap: 3 , mb: 5}}>
-               <Typography
-                 sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 6', mb: 1 }}
-                 variant="overline"
-                 color="text.primary"
-               >
-                 {t('pages.initiativeOverview.refundsDataTitle')}
-               </Typography>
-               <Typography
-                 sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 3' }}
-                 variant="body1"
-                 color="text.primary"
-               >
-                 {t('pages.initiativeOverview.holder')}
-               </Typography>
-               <Typography
-                 sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 3' ,justifyContent: 'start'}}
-                 variant="body1"
-               >
-                 {holder ?? "-"}
-               </Typography>
-               <Typography
-                 sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 3' }}
-                 variant="body1"
-                 color="text.primary"
-               >
-                 {t('pages.initiativeOverview.iban')}
-               </Typography>
-               <Typography
-                 sx={{ fontWeight: 700, display: 'grid', gridColumn: 'span 3', justifyContent: 'start' }}
-                 variant="body2"
-               >
-                 {formatIban(iban)}
-               </Typography>
-             </Box>
-           </InitiativeOverviewCard>
+              <Typography
+                sx={{ fontWeight: 400, display: 'grid', gridArea: 'label2' }}
+                variant="body1"
+                color="text.primary"
+              >
+                {t('pages.initiativeOverview.totalRefunded')}
+              </Typography>
+
+              <Typography
+                sx={{ fontWeight: 700, display: 'grid', gridArea: 'value2', justifyContent: 'start' }}
+                variant="body1"
+              >
+                {formattedCurrency(refunded, '0,00 €', true)}
+              </Typography>
+
+              <Typography
+                sx={{ fontWeight: 700, display: 'grid', gridArea: 'datatitle', mb: 1, alignSelf: 'center' }}
+                variant="overline"
+                color="text.primary"
+              >
+                {t('pages.initiativeOverview.refundsDataTitle')}
+              </Typography>
+
+              <Button
+                sx={{
+                  gridArea: 'modify',
+                  justifySelf: 'end',
+                  alignSelf: 'center', 
+                  textTransform: 'none',
+                  minWidth: 'auto'
+                }}
+                variant="text"
+                size="medium"
+                onClick={() => handleOpenModal('modify')}
+              >
+                {t('pages.initiativeOverview.modify')}
+              </Button>
+
+              <Typography
+                sx={{ fontWeight: 400, display: 'grid', gridArea: 'datalabel1' }}
+                variant="body1"
+                color="text.primary"
+              >
+                {t('pages.initiativeOverview.holder')}
+              </Typography>
+
+              <Typography
+                sx={{ fontWeight: 700, display: 'grid', gridArea: 'datavalue1', justifyContent: 'start' }}
+                variant="body1"
+              >
+                {holder ?? "-"}
+              </Typography>
+
+              <Typography
+                sx={{ fontWeight: 400, display: 'grid', gridArea: 'datalabel2' }}
+                variant="body1"
+                color="text.primary"
+              >
+                {t('pages.initiativeOverview.iban')}
+              </Typography>
+
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  display: 'grid',
+                  gridArea: 'datavalue2',
+                  justifyContent: 'start',
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis' 
+                }}
+                variant="body2"
+              >
+                {formatIban(iban)}
+              </Typography>
+            </Box>
+          </InitiativeOverviewCard>
         </Box>
         <Box flex="1">
           <InitiativeOverviewCard
@@ -262,7 +307,7 @@ const InitiativeOverview = () => {
           <TextField
             label={t('pages.initiativeOverview.insertIbanHolder')}
             variant="outlined"
-            value={holder}
+            value={holderForm}
             onChange={handleHolderChange}
             fullWidth
           />
@@ -275,10 +320,10 @@ const InitiativeOverview = () => {
             className={style['iban-input-text']}
             label={t('pages.initiativeOverview.insertIban')}
             variant="outlined"
-            value={iban}
+            value={ibanForm}
             onChange={handleIbanChange}
             fullWidth
-            helperText={`${iban?.length}/27`}
+            helperText={`${ibanForm?.length}/27`}
             inputProps={{ maxLength: 27 }}
           />
         </Box>
