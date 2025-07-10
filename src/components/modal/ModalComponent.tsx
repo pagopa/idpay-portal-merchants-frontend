@@ -6,9 +6,10 @@ interface ModalComponentProps {
     onClose: () => void;
     children: React.ReactNode;
     style?: React.CSSProperties;
+    className?: string;
 }
 
-const ModalComponent: FC<ModalComponentProps> = ({ open, onClose, children, style }) => {
+const ModalComponent: FC<ModalComponentProps> = ({ open, onClose, children, style, className }) => {
 
     const handleClose = () => {
         onClose();
@@ -16,7 +17,7 @@ const ModalComponent: FC<ModalComponentProps> = ({ open, onClose, children, styl
     
 
     return (
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={open} onClose={handleClose} className={className}>
         <Box sx={style ?? {
           position: 'absolute',
           top: '50%',
@@ -26,7 +27,7 @@ const ModalComponent: FC<ModalComponentProps> = ({ open, onClose, children, styl
           bgcolor: 'background.paper',
           boxShadow: 24,
           p: 4
-        }}>{children}</Box>
+        }} data-testid="iban-modal-content">{children}</Box>
       </Modal>
     );
   };

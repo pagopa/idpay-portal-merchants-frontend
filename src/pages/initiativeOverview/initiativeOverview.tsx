@@ -118,16 +118,20 @@ const InitiativeOverview = () => {
           />
         </Box>
       </Box>
-      <Alert
+      {
+        iban ? (
+          <Alert
         variant="outlined"
         severity="warning"
         sx={{ bgcolor: 'background.paper' }}
         action={
-          <Button size="medium" variant="text">{t('pages.initiativeOverview.insertIban')}</Button>
+          <Button size="medium" variant="text" onClick={() => setIbanModalIsOpen(true)}>{t('pages.initiativeOverview.insertIban')}</Button>
         }
       >
         {t('pages.initiativeOverview.missingIban')}
       </Alert>
+        ) : ''
+      }
       <Box sx={{ display: 'flex', gridColumn: 'span 6', gap: 2, mt: 2 }}>
         <Box flex="1">
            <InitiativeOverviewCard title={t('pages.initiativeOverview.information')}>
@@ -245,7 +249,7 @@ const InitiativeOverview = () => {
         </Box>
       </Box>
 
-      <ModalComponent open={ibanModalIsOpen} onClose={handleCloseModal}>
+      <ModalComponent open={ibanModalIsOpen} onClose={handleCloseModal} className='iban-modal'>
         <Typography variant="h6">{t('pages.initiativeOverview.insertIban')}</Typography>
         <Typography variant="body1" sx={{ my: 2 }}>
           {t('pages.initiativeOverview.insertIbanDescription')}
