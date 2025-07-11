@@ -33,15 +33,12 @@ const InitiativeOverview = () => {
   const [amount, setAmount] = useState<number | undefined>(undefined);
   const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
-  const [holder, setHolder] = useState<string | undefined>();
   const [ibanForm, setIbanForm] = useState<string | undefined>();
-  const [holderForm, setHolderForm] = useState<string | undefined>();
   const addError = useErrorDispatcher();
 
   useEffect(() => {
-    handleShowAlert();
+    handleShowAlert(); // TODO: da rimuovere una volta che verrà montato il servizio per l' aggiornamento dell' IBAN
     setIban(undefined);
-    setHolder(undefined);
     getMerchantDetail(id)
       .then((response) => {
         setIban(response?.iban);
@@ -92,9 +89,6 @@ const InitiativeOverview = () => {
     setIbanForm(alphanumericInput);
   };
 
-  const handleHolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setHolderForm(event.target.value);
-  };
 
   const handleCloseModal = () => {
     setIbanModalIsOpen(false);
@@ -103,17 +97,15 @@ const InitiativeOverview = () => {
 
   const handleSaveIban = () => {
 
-    // TODO: aggiungere chiamata api per salvataggio iban e intestatario
+    // TODO: aggiungere chiamata api per salvataggio iban
     setIbanModalIsOpen(false);
   };
 
   const handleOpenModal = (type: 'modify' | 'add') => {
     if (type === 'add') {
       setIbanForm('');
-      setHolderForm('');
     } else {
       setIbanForm(iban);
-      setHolderForm(holder);
     }
 
     setIbanModalIsOpen(true);
@@ -169,7 +161,6 @@ const InitiativeOverview = () => {
                   "label1 label1 label1 value1 value1 . . . . . . ."
                   "label2 label2 label2 value2 value2 . . . . . . ."
                   "datatitle datatitle datatitle datatitle datatitle datatitle . . . modify modify modify"
-                  "datalabel1 datalabel1 datalabel1 datavalue1 datavalue1 datavalue1 . . . . . ."
                   "datalabel2 datalabel2 datalabel2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2"
                 `,
                 rowGap: 3,
@@ -237,21 +228,6 @@ const InitiativeOverview = () => {
               >
                 {t('pages.initiativeOverview.modify')}
               </Button>
-
-              <Typography
-                sx={{ fontWeight: 400, display: 'grid', gridArea: 'datalabel1' }}
-                variant="body1"
-                color="text.primary"
-              >
-                {t('pages.initiativeOverview.holder')}
-              </Typography>
-
-              <Typography
-                sx={{ fontWeight: 700, display: 'grid', gridArea: 'datavalue1', justifyContent: 'start' }}
-                variant="body1"
-              >
-                {holder ?? "-"}
-              </Typography>
 
               <Typography
                 sx={{ fontWeight: 400, display: 'grid', gridArea: 'datalabel2' }}
@@ -334,19 +310,6 @@ const InitiativeOverview = () => {
         <Typography variant="body1" sx={{ my: 2 }}>
           {t('pages.initiativeOverview.insertIbanDescription')}
         </Typography>
-        <Box>
-          <Typography variant="subtitle1" sx={{ my: 2 }}>
-            {t('pages.initiativeOverview.insertIbanHolder')}
-          </Typography>
-
-          <TextField
-            label={t('pages.initiativeOverview.insertIbanHolder')}
-            variant="outlined"
-            value={holderForm}
-            onChange={handleHolderChange}
-            fullWidth
-          />
-        </Box>
         <Box>
           <Typography variant="subtitle1" sx={{ my: 2 }}>
             {t('pages.initiativeOverview.insertIban')}
