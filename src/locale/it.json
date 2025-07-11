@@ -139,7 +139,8 @@
       "insertIban": "Inserisci IBAN",
       "insertIbanDescription": "L’IBAN indicato sarà utilizzato per l’accredito degli importi maturati tramite l’uso del buono. Assicurati che i dati siano corretti e intestati all’azienda.",
       "insertIbanHolder": "Inserisci intestatario",
-      "modify": "Modifica"
+      "modify": "Modifica",
+      "successIban": "IBAN inserito con successo"
     },
     "initiativeStores" : {
       "title": "Punti vendita"

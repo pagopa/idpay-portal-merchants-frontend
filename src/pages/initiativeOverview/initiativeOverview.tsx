@@ -1,15 +1,17 @@
-import { Box, Alert, Button, Typography, TextField } from '@mui/material';
+import { Box, Alert, Button, Typography, TextField, Slide } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { matchPath } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import ROUTES from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
 import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
 import { formatIban, formattedCurrency } from '../../helpers';
+
 
 import ModalComponent from '../../components/modal/ModalComponent';
 import style from './initiativeOverview.module.css';
@@ -20,6 +22,7 @@ interface MatchParams {
 
 const InitiativeOverview = () => {
   const [ibanModalIsOpen, setIbanModalIsOpen] = useState(false);
+  const [showAlertIbanSuccess, setShowAlertIbanSuccess] = useState(false);
   const { t } = useTranslation();
   const match = matchPath(location.pathname, {
     path: [ROUTES.OVERVIEW],
@@ -36,6 +39,7 @@ const InitiativeOverview = () => {
   const addError = useErrorDispatcher();
 
   useEffect(() => {
+    handleShowAlert();
     setIban(undefined);
     setHolder(undefined);
     getMerchantDetail(id)
@@ -104,16 +108,23 @@ const InitiativeOverview = () => {
   };
 
   const handleOpenModal = (type: 'modify' | 'add') => {
-    if(type === 'add'){
+    if (type === 'add') {
       setIbanForm('');
       setHolderForm('');
-    }else{
+    } else {
       setIbanForm(iban);
       setHolderForm(holder);
     }
 
     setIbanModalIsOpen(true);
   };
+
+  const handleShowAlert = () => {
+    setShowAlertIbanSuccess(true);
+    // Auto-hide after 5 seconds
+    setTimeout(() => setShowAlertIbanSuccess(false), 5000);
+  };
+
 
   return (
     <Box sx={{ width: '100%', padding: 2 }}>
@@ -216,7 +227,7 @@ const InitiativeOverview = () => {
                 sx={{
                   gridArea: 'modify',
                   justifySelf: 'end',
-                  alignSelf: 'center', 
+                  alignSelf: 'center',
                   textTransform: 'none',
                   minWidth: 'auto'
                 }}
@@ -256,9 +267,9 @@ const InitiativeOverview = () => {
                   display: 'grid',
                   gridArea: 'datavalue2',
                   justifyContent: 'start',
-                  whiteSpace: 'nowrap', 
+                  whiteSpace: 'nowrap',
                   overflow: 'hidden',
-                  textOverflow: 'ellipsis' 
+                  textOverflow: 'ellipsis'
                 }}
                 variant="body2"
               >
@@ -293,6 +304,30 @@ const InitiativeOverview = () => {
           </InitiativeOverviewCard>
         </Box>
       </Box>
+
+      <Slide direction="left" in={showAlertIbanSuccess} mountOnEnter unmountOnExit>
+        <Alert
+          severity="success"
+          icon={<CheckCircleOutlineIcon />}
+          sx={{
+            position: 'fixed',
+            bottom: 20,
+            right: 20,
+            backgroundColor: 'white',
+            width: 'auto',
+            maxWidth: '400px',
+            minWidth: '300px',
+            zIndex: 1300,
+            boxShadow: 3,
+            borderRadius: 1,
+            '& .MuiAlert-icon': {
+              color: '#6CC66A'
+            }
+          }}
+        >
+          {t('pages.initiativeOverview.successIban')}
+        </Alert>
+      </Slide>
 
       <ModalComponent open={ibanModalIsOpen} onClose={handleCloseModal} className='iban-modal'>
         <Typography variant="h6">{t('pages.initiativeOverview.insertIban')}</Typography>
