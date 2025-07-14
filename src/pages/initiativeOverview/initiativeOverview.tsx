@@ -33,6 +33,7 @@ const InitiativeOverview = () => {
   const [amount, setAmount] = useState<number | undefined>(undefined);
   const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
+  const [ibanHolder, setIbanHolder] = useState<string | undefined>();
   const [ibanForm, setIbanForm] = useState<string | undefined>();
   const [ibanHolderForm, setIbanHolderForm] = useState<string | undefined>();
   const addError = useErrorDispatcher();
@@ -43,6 +44,7 @@ const InitiativeOverview = () => {
     getMerchantDetail(id)
       .then((response) => {
         setIban(response?.iban);
+        setIbanHolder('-');  // TODO: da aggiornare con il dato corretto quando sara presente il servizio
       })
       .catch((error) =>
         addError({
@@ -163,6 +165,7 @@ const InitiativeOverview = () => {
                   "label1 label1 label1 value1 value1 . . . . . . ."
                   "label2 label2 label2 value2 value2 . . . . . . ."
                   "datatitle datatitle datatitle datatitle datatitle datatitle . . . modify modify modify"
+                  "datalabel1 datalabel1 datalabel1 datavalue1 datavalue1 datavalue1 . . . . . . "
                   "datalabel2 datalabel2 datalabel2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2 datavalue2"
                 `,
                 rowGap: 3,
@@ -214,6 +217,21 @@ const InitiativeOverview = () => {
                 color="text.primary"
               >
                 {t('pages.initiativeOverview.refundsDataTitle')}
+              </Typography>
+
+              <Typography
+                sx={{ fontWeight: 400, display: 'grid', gridArea: 'datalabel1' }}
+                variant="body1"
+                color="text.primary"
+              >
+                {t('pages.initiativeOverview.holder')}
+              </Typography>
+
+              <Typography
+                sx={{ fontWeight: 700, display: 'grid', gridArea: 'datavalue1', justifyContent: 'start' }}
+                variant="body1"
+              >
+                {ibanHolder ?? "-"}
               </Typography>
 
               <Typography
@@ -298,7 +316,7 @@ const InitiativeOverview = () => {
           {t('pages.initiativeOverview.insertIbanDescription')}
         </Typography>
         <Box>
-        <Typography variant="subtitle1" sx={{ my: 2 }}>
+          <Typography variant="subtitle1" sx={{ my: 2 }}>
             {t('pages.initiativeOverview.insertIbanHolder')}
           </Typography>
           <TextField
