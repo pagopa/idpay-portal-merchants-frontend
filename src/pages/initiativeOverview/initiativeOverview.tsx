@@ -34,6 +34,7 @@ const InitiativeOverview = () => {
   const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
   const [ibanForm, setIbanForm] = useState<string | undefined>();
+  const [ibanHolderForm, setIbanHolderForm] = useState<string | undefined>();
   const addError = useErrorDispatcher();
 
   useEffect(() => {
@@ -89,6 +90,11 @@ const InitiativeOverview = () => {
     setIbanForm(alphanumericInput);
   };
 
+  const handleIbanHolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target.value;
+    setIbanHolderForm(input);
+  };
+
 
   const handleCloseModal = () => {
     setIbanModalIsOpen(false);
@@ -101,13 +107,9 @@ const InitiativeOverview = () => {
     setIbanModalIsOpen(false);
   };
 
-  const handleOpenModal = (type: 'modify' | 'add') => {
-    if (type === 'add') {
-      setIbanForm('');
-    } else {
-      setIbanForm(iban);
-    }
-
+  const handleOpenModal = () => {
+    setIbanForm('');
+    setIbanHolderForm('');
     setIbanModalIsOpen(true);
   };
 
@@ -140,7 +142,7 @@ const InitiativeOverview = () => {
             severity="warning"
             sx={{ bgcolor: 'background.paper' }}
             action={
-              <Button size="medium" variant="text" onClick={() => handleOpenModal('add')}>{t('pages.initiativeOverview.insertIban')}</Button>
+              <Button size="medium" variant="text" onClick={() => handleOpenModal()}>{t('pages.initiativeOverview.insertIban')}</Button>
             }
           >
             {t('pages.initiativeOverview.missingIban')}
@@ -213,21 +215,6 @@ const InitiativeOverview = () => {
               >
                 {t('pages.initiativeOverview.refundsDataTitle')}
               </Typography>
-
-              <Button
-                sx={{
-                  gridArea: 'modify',
-                  justifySelf: 'end',
-                  alignSelf: 'center',
-                  textTransform: 'none',
-                  minWidth: 'auto'
-                }}
-                variant="text"
-                size="medium"
-                onClick={() => handleOpenModal('modify')}
-              >
-                {t('pages.initiativeOverview.modify')}
-              </Button>
 
               <Typography
                 sx={{ fontWeight: 400, display: 'grid', gridArea: 'datalabel2' }}
@@ -311,6 +298,16 @@ const InitiativeOverview = () => {
           {t('pages.initiativeOverview.insertIbanDescription')}
         </Typography>
         <Box>
+        <Typography variant="subtitle1" sx={{ my: 2 }}>
+            {t('pages.initiativeOverview.insertIbanHolder')}
+          </Typography>
+          <TextField
+            label={t('pages.initiativeOverview.insertIbanHolder')}
+            variant="outlined"
+            value={ibanHolderForm}
+            onChange={handleIbanHolderChange}
+            fullWidth
+          />
           <Typography variant="subtitle1" sx={{ my: 2 }}>
             {t('pages.initiativeOverview.insertIban')}
           </Typography>
