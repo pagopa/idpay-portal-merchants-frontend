@@ -135,7 +135,7 @@
       "refundsStatusTitle": "Stato rimborsi",
       "totalAmount": "Totale erogato",
       "totalRefunded": "Totale rimborsato",
-      "missingIban" : "E' necessario inserire un IBAN valido per ottenere i rimborsi.",
+      "missingIban" : "E' necessario inserire dai dati validi per ottenere i rimborsi.",
       "insertIban": "Inserisci IBAN",
       "insertIbanDescription": "L’IBAN indicato sarà utilizzato per l’accredito degli importi maturati tramite l’uso del buono. Assicurati che i dati siano corretti e intestati all’azienda.",
       "insertIbanHolder": "Inserisci intestatario",

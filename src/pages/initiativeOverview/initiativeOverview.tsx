@@ -1,6 +1,6 @@
 import { Box, Alert, Button, Typography, TextField, Slide } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { matchPath } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
@@ -138,13 +138,13 @@ const InitiativeOverview = () => {
         </Box>
       </Box>
       {
-        iban ? (
+        !iban ? (
           <Alert
             variant="outlined"
             severity="warning"
             sx={{ bgcolor: 'background.paper' }}
             action={
-              <Button size="medium" variant="text" onClick={() => handleOpenModal()}>{t('pages.initiativeOverview.insertIban')}</Button>
+              <Button size="medium" variant="text" onClick={() => handleOpenModal()}  data-testid="insert-iban-button">{t('pages.initiativeOverview.insertIban')}</Button>
             }
           >
             {t('pages.initiativeOverview.missingIban')}
@@ -277,7 +277,7 @@ const InitiativeOverview = () => {
                   startIcon={<StoreIcon />}
                   size="large"
                   fullWidth={false}
-                >
+                  data-testid="add-stores-button">
                   {t('pages.initiativeOverview.storesSubtitle')}
                 </Button>
               </Box>

@@ -23,13 +23,13 @@ const InitiativeOverviewCard = ({
       sx={{
         ...inititiveOverviewCardStyle,
       }}
-    >
+      data-testid="card">
       <CardContent
         sx={{
           ...inititiveOverviewCardContentStyle,
         }}
-      >
-          <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 2 }}>
+        data-testid="card-content">
+          <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 2 }} data-testid="box">
             <TitleBox
               title={title}
               subTitle={subtitle}
