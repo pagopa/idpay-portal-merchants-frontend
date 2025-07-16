@@ -17,7 +17,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
-import ROUTES, { BASE_ROUTE } from '../../routes';
+import ROUTES from '../../routes';
 import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import SidenavItem from './SidenavItem';
@@ -45,7 +45,7 @@ export default function SideMenu() {
   });
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS],
+    path: [ROUTES.DISCOUNTS,ROUTES.OVERVIEW],
     exact: true,
     strict: false,
   });
@@ -118,20 +118,20 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        history.replace(`${BASE_ROUTE}/panoramica/${item.initiativeId}`);
+                        history.replace(`${ROUTES.SIDE_MENU_OVERVIEW}/${item.initiativeId}`);
                       })}
-                    isSelected={pathname === `${BASE_ROUTE}/panoramica/${item.initiativeId}`}
+                    isSelected={pathname === `${ROUTES.SIDE_MENU_OVERVIEW}/${item.initiativeId}`}
                     icon={DashboardIcon}
                     level={2}
-                    data-testid="initiativeDiscountsTitle-click-test"
+                    data-testid="initiativeOverviewTitle-click-test"
                   />
                   <SidenavItem
                     title={t('pages.initiativeStores.title')}
                     handleClick={() =>{}}
-                    isSelected={pathname === `${BASE_ROUTE}/punti-vendita/${item.initiativeId}`}
+                    isSelected={pathname === `${ROUTES.SIDE_MENU_STORES}/${item.initiativeId}`}
                     icon={StoreIcon}
                     level={2}
-                    data-testid="initiativeDiscountsTitle-click-test"
+                    data-testid="initiativeStoresTitle-click-test"
                   />
                   <SidenavItem
                     title={t('pages.initiativeDiscounts.title')}
@@ -146,10 +146,10 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        history.replace(`${BASE_ROUTE}/sconti-iniziativa/${item.initiativeId}`);
+                        history.replace(`${ROUTES.SIDE_MENU_DISCOUNTS}/${item.initiativeId}`);
                       })
                     }
-                    isSelected={pathname === `${BASE_ROUTE}/sconti-iniziativa/${item.initiativeId}`}
+                    isSelected={pathname === `${ROUTES.SIDE_MENU_DISCOUNTS}/${item.initiativeId}`}
                     icon={ConfirmationNumberIcon}
                     level={2}
                     data-testid="initiativeDiscountsTitle-click-test"

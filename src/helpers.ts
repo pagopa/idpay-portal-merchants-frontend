@@ -1,5 +1,7 @@
 /* eslint-disable functional/no-let */
 /* eslint-disable functional/immutable-data */
+import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
+
 export const copyTextToClipboard = (magicLink: string | undefined) => {
   if (typeof magicLink === 'string') {
     void navigator.clipboard.writeText(magicLink);
@@ -72,7 +74,7 @@ export const mapDataForDiscoutTimeRecap = (
 
 export const formattedCurrency = (
   number: number | undefined,
-  symbol: string = '-',
+  symbol: string = MISSING_EURO_PLACEHOLDER,
   cents: boolean = false
 ) => {
   if (number && cents === false) {
@@ -94,7 +96,7 @@ export const formatIban = (iban: string | undefined) => {
       10
     )} ${iban.slice(10, 15)} ${iban.slice(15, 32)}`;
   }
-  return '-';
+  return MISSING_DATA_PLACEHOLDER;
 };
 
 export const formatDate = (date: Date | undefined) => {

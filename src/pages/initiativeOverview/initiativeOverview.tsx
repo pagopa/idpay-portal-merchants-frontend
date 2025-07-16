@@ -14,6 +14,7 @@ import { formatIban, formattedCurrency } from '../../helpers';
 
 
 import ModalComponent from '../../components/modal/ModalComponent';
+import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../../utils/constants';
 import style from './initiativeOverview.module.css';
 
 interface MatchParams {
@@ -188,7 +189,7 @@ const InitiativeOverview = () => {
                 sx={{ fontWeight: 700, display: 'grid', gridArea: 'value1', justifyContent: 'start' }}
                 variant="body1"
               >
-                {formattedCurrency(amount, '0,00 €', true)}
+                {formattedCurrency(amount, MISSING_EURO_PLACEHOLDER, true)}
               </Typography>
 
               <Typography
@@ -203,7 +204,7 @@ const InitiativeOverview = () => {
                 sx={{ fontWeight: 700, display: 'grid', gridArea: 'value2', justifyContent: 'start' }}
                 variant="body1"
               >
-                {formattedCurrency(refunded, '0,00 €', true)}
+                {formattedCurrency(refunded, MISSING_EURO_PLACEHOLDER, true)}
               </Typography>
 
               <Typography
@@ -226,7 +227,7 @@ const InitiativeOverview = () => {
                 sx={{ fontWeight: 700, display: 'grid', gridArea: 'datavalue1', justifyContent: 'start' }}
                 variant="body1"
               >
-                {ibanHolder ?? "-"}
+                {ibanHolder ?? MISSING_DATA_PLACEHOLDER}
               </Typography>
 
               <Typography
