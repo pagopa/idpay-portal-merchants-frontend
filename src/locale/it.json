@@ -5,6 +5,8 @@
     "closeBtn": "Chiudi",
     "confirmBtn": "Conferma",
     "continueBtn": "Continua",
+    "saveBtn": "Salva",
+    "cancel": "Annulla",
     "copyCodeBtn": "Copia codice",
     "copyLinkBtn": "Copia link",
     "discountStatusEnum": {
@@ -119,6 +121,29 @@
       "totalRefunded": "Totale rimborsato",
       "totalSpent": "Totale della spesa",
       "iban": "IBAN"
+    },
+    "initiativeOverview" : {
+      "subtitle": "Tieni sotto controllo le tue attività da qui.",
+      "title": "Panoramica",
+      "information" : "Informazioni",
+      "stores" : "Punti vendita",
+      "storesSubtitle" : "Censisci i tuoi punti vendita direttamente sul portale.",
+      "addStores" : "Censisci i tuoi punti vendita",
+      "iban": "IBAN",
+      "holder": "Intestatario",
+      "refundsDataTitle": "Dati rimborso",
+      "refundsStatusTitle": "Stato rimborsi",
+      "totalAmount": "Totale erogato",
+      "totalRefunded": "Totale rimborsato",
+      "missingIban" : "E' necessario inserire dai dati validi per ottenere i rimborsi.",
+      "insertIban": "Inserisci IBAN",
+      "insertIbanDescription": "L’IBAN indicato sarà utilizzato per l’accredito degli importi maturati tramite l’uso del buono. Assicurati che i dati siano corretti e intestati all’azienda.",
+      "insertIbanHolder": "Inserisci intestatario",
+      "modify": "Modifica",
+      "successIban": "IBAN inserito con successo"
+    },
+    "initiativeStores" : {
+      "title": "Punti vendita"
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",

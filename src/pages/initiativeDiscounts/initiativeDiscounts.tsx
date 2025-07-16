@@ -34,6 +34,7 @@ const InitiativeDiscounts = () => {
   const { id } = (match?.params as MatchParams) || {};
 
   useEffect(() => {
+    console.log(`${ROUTES.OVERVIEW}/${id}`);
     const dates = mapDatesFromPeriod(selectedInitiative?.spendingPeriod);
     setStartDate(dates?.startDate);
     setEndDate(dates?.endDate);
