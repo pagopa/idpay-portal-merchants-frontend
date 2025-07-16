@@ -22,7 +22,7 @@ interface MatchParams {
 
 const InitiativeOverview = () => {
   const [ibanModalIsOpen, setIbanModalIsOpen] = useState(false);
-  const [showAlertIbanSuccess, setShowAlertIbanSuccess] = useState(false);
+  const [showAlertIbanSuccess] = useState(false);
   const { t } = useTranslation();
   const match = matchPath(location.pathname, {
     path: [ROUTES.OVERVIEW],
@@ -39,12 +39,12 @@ const InitiativeOverview = () => {
   const addError = useErrorDispatcher();
 
   useEffect(() => {
-    handleShowAlert(); // TODO: da rimuovere una volta che verrà montato il servizio per l' aggiornamento dell' IBAN
     setIban(undefined);
+    setIbanHolder(undefined);
     getMerchantDetail(id)
       .then((response) => {
         setIban(response?.iban);
-        setIbanHolder('-');  // TODO: da aggiornare con il dato corretto quando sara presente il servizio
+        setIbanHolder(response?.ibanHolder);
       })
       .catch((error) =>
         addError({
@@ -115,11 +115,6 @@ const InitiativeOverview = () => {
     setIbanModalIsOpen(true);
   };
 
-  const handleShowAlert = () => {
-    setShowAlertIbanSuccess(true);
-    // Auto-hide after 5 seconds
-    setTimeout(() => setShowAlertIbanSuccess(false), 5000);
-  };
 
 
   return (
