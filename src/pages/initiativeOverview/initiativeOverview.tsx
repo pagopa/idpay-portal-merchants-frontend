@@ -2,11 +2,11 @@ import { Box, Alert, Button, Typography, TextField, Slide } from '@mui/material'
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { matchPath } from 'react-router-dom';
+import { matchPath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
-import ROUTES from '../../routes';
+import ROUTES, { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
 import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
@@ -23,6 +23,7 @@ interface MatchParams {
 
 const InitiativeOverview = () => {
   const [ibanModalIsOpen, setIbanModalIsOpen] = useState(false);
+  const history = useHistory();
   const [showAlertIbanSuccess] = useState(false);
   const { t } = useTranslation();
   const match = matchPath(location.pathname, {
@@ -271,6 +272,7 @@ const InitiativeOverview = () => {
                 <Button
                   variant="contained"
                   startIcon={<StoreIcon />}
+                  onClick={() => {history.replace(`${BASE_ROUTE}/punti-vendita/censisci/${id}`);}}
                   size="large"
                   fullWidth={false}
                   data-testid="add-stores-button">

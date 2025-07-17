@@ -128,7 +128,7 @@
       "information" : "Informazioni",
       "stores" : "Punti vendita",
       "storesSubtitle" : "Censisci i tuoi punti vendita direttamente sul portale.",
-      "addStores" : "Censisci i tuoi punti vendita",
+      "uploadStores" : "Censisci i tuoi punti vendita",
       "iban": "IBAN",
       "holder": "Intestatario",
       "refundsDataTitle": "Dati rimborso",
@@ -143,7 +143,17 @@
       "successIban": "IBAN inserito con successo"
     },
     "initiativeStores" : {
-      "title": "Punti vendita"
+      "title": "Punti vendita",
+      "addStore": "Inserisci i punti vendita",
+      "uploadStores" : "Censisci i tuoi punti vendita",
+      "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online. Puoi aggiungerli singolarmente o caricarli in blocco con un file CSV.\n            Le credenziali per accedere al portale operativo vengono generate automaticamente e inviate via email ai referenti indicati.",
+      "manualLink": "Dubbi? Vai al manuale",
+      "uploadCSV": "Carica CSV",
+      "dragCSV": "Trascina qui il file CSV con la lista dei punti vendita ",
+      "selectFromPc": "selezionalo dal tuo computer",
+      "downloadExampleFile": "Scarica il file di esempio",
+      "enterManually": "Inserisci manualmente",
+      "prepareList": "Non sai come preparare la lista? "
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",

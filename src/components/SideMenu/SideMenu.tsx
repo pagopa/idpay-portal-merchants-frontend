@@ -17,7 +17,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
-import ROUTES from '../../routes';
+import ROUTES, { BASE_ROUTE } from '../../routes';
 import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import SidenavItem from './SidenavItem';
@@ -127,8 +127,20 @@ export default function SideMenu() {
                   />
                   <SidenavItem
                     title={t('pages.initiativeStores.title')}
-                    handleClick={() =>{}}
-                    isSelected={pathname === `${ROUTES.SIDE_MENU_STORES}/${item.initiativeId}`}
+                    handleClick={() =>
+                      onExit(() => {
+                        dispatch(
+                          setSelectedInitative({
+                            spendingPeriod:
+                              `${item.startDate?.toLocaleDateString(
+                                'fr-FR'
+                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
+                            initiativeName: item.initiativeName,
+                          })
+                        );
+                        history.replace(`${BASE_ROUTE}/punti-vendita/censisci/${item.initiativeId}`);
+                      })}
+                    isSelected={pathname === `${BASE_ROUTE}/punti-vendita/censisci/${item.initiativeId}`}
                     icon={StoreIcon}
                     level={2}
                     data-testid="initiativeStoresTitle-click-test"
