@@ -1,16 +1,162 @@
 openapi: 3.0.1
 info:
-  title: IDPAY Welfare Portal Merchant API
-  description: IDPAY Welfare Portal Merchant
+  title: IDPAY ITN Welfare Portal Merchant API
+  description: IDPAY ITN Welfare Portal Merchant
   version: '1.0.1'
 servers:
-  - url: https://api-io.dev.cstar.pagopa.it/idpay/merchant/portal
+  - url: https://api-io.dev.cstar.pagopa.it/idpay-itn/merchant/portal
 paths:
+  /{merchantId}/point-of-sales:
+    put:
+      tags:
+        - point-of-sales
+      summary: Save a list of points of sale
+      description: "Save or update a list of points of sale fo the specified merchant"
+      operationId: putPointOfSales
+      parameters:
+        - name: merchantId
+          in: path
+          description: The merchant ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: List of points of sale to save or update
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PointOfSaleDTO'
+      responses:
+        '204':
+          description: No Content - Successfully saved or updated
+        '400':
+          description: Bad request - Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointOfSaleErrorDTO'
+              example:
+                code: "POINT_OF_SALE_INVALID_REQUEST"
+                message: "Something went wrong handling the request"
+        '401':
+          description: Unauthorized - Authentication failed
+        '429':
+          description: Too many Request - Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointOfSaleErrorDTO'
+              example:
+                code: "POINT_OF_SALE_TOO_MANY_REQUESTS"
+                message: "Too many requests"
+        '500':
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointOfSaleErrorDTO'
+              example:
+                code: "POINT_OF_SALE_GENERIC_ERROR"
+                message: "An internal error occured"
+    get:
+      tags:
+        - point-of-sales
+      summary: Retrieve a list of points of sale
+      description: "Returns a paginated list of points of sale for the specified merchant, with optional filters."
+      operationId: getPointOfSales
+      parameters:
+        - name: merchantId
+          in: path
+          description: The merchant ID
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Filter by point of sale type
+          required: false
+          schema:
+            type: string
+            enum: [PHYSICAL, ONLINE]
+        - name: city
+          in: query
+          description: Filter by city
+          required: false
+          schema:
+            type: string
+        - name: address
+          in: query
+          description: Filter by full address
+          required: false
+          schema:
+            type: string
+        - name: contactName
+          in: query
+          description: Filter by contact person's name
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with a paginated list of points of sale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPointOfSaleDTO'
+        '400':
+          description: Bad request - Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointOfSaleErrorDTO'
+              example:
+                code: POINT_OF_SALE_INVALID_REQUEST
+                message: Something went wrong handling request
+        '401':
+          description: Unauthorized - Authentication Failed
+        '429':
+          description: Too many Request - Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointOfSaleErrorDTO'
+              example:
+                code: POINT_OF_SALE_TOO_MANY_REQUESTS
+                message: Too many requests
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointOfSaleErrorDTO'
+              example:
+                code: POINT_OF_SALE_GENERIC_ERROR
+                message: An error occurred during file reading
   /initiatives:
     get:
       tags:
         - merchant-initiatives
-      summary: 'ENG: Returns the list of initiatives of a specific merchant - IT: Ritorna la lista delle iniziative di uno specifico merchant'
+      summary: "ENG: Returns the list of initiatives of a specific merchant - IT: Ritorna la lista delle iniziative di uno specifico merchant"
       description: Returns the list of initiatives of a specific merchant
       operationId: getMerchantInitiativeList
       responses:
@@ -79,8 +225,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/StatisticsErrorDTO'
               example:
-                code: 'STATISTICS_INVALID_REQUEST'
-                message: 'Something went wrong handling request'
+                code: "STATISTICS_INVALID_REQUEST"
+                message: "Something went wrong handling request"
         '401':
           description: Authentication failed
         '404':
@@ -90,8 +236,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/StatisticsErrorDTO'
               example:
-                code: 'STATISTICS_NOT_FOUND'
-                message: 'Stats not found'
+                code: "STATISTICS_NOT_FOUND"
+                message: "Stats not found"
         '429':
           description: Too many Request
           content:
@@ -99,8 +245,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/StatisticsErrorDTO'
               example:
-                code: 'STATISTICS_MANAGER_TOO_MANY_REQUESTS'
-                message: 'Too many requests'
+                code: "STATISTICS_MANAGER_TOO_MANY_REQUESTS"
+                message: "Too many requests"
         '500':
           description: Server ERROR
           content:
@@ -108,8 +254,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/StatisticsErrorDTO'
               example:
-                code: 'STATISTICS_MANAGER_GENERIC_ERROR'
-                message: 'Application error'
+                code: "STATISTICS_MANAGER_GENERIC_ERROR"
+                message: "Application error"
   /transactions:
     post:
       tags:
@@ -136,8 +282,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_INVALID_REQUEST'
-                message: 'Something went wrong handling the request'
+                code: "PAYMENT_INVALID_REQUEST"
+                message: "Something went wrong handling the request"
         '401':
           description: Authentication failed
         '403':
@@ -147,8 +293,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_INITIATIVE_INVALID_DATE'
-                message: 'Cannot create transaction out of valid period. Initiative startDate: %s endDate: %s'
+                code: "PAYMENT_INITIATIVE_INVALID_DATE"
+                message: "Cannot create transaction out of valid period. Initiative startDate: %s endDate: %s"
         '404':
           description: The requested resource was not found
           content:
@@ -156,8 +302,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_INITIATIVE_NOT_FOUND'
-                message: 'Cannot find initiative with id [%s]'
+                code: "PAYMENT_INITIATIVE_NOT_FOUND"
+                message: "Cannot find initiative with id [%s]"
         '429':
           description: Too many requests
           content:
@@ -165,8 +311,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_TOO_MANY_REQUESTS'
-                message: 'Too many requests'
+                code: "PAYMENT_TOO_MANY_REQUESTS"
+                message: "Too many requests"
         '500':
           description: Generic error
           content:
@@ -174,8 +320,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_GENERIC_ERROR'
-                message: 'Application error'
+                code: "PAYMENT_GENERIC_ERROR"
+                message: "Application error"
   /transactions/{transactionId}:
     delete:
       tags:
@@ -199,8 +345,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_INVALID_REQUEST'
-                message: 'Something went wrong handling the request'
+                code: "PAYMENT_INVALID_REQUEST"
+                message: "Something went wrong handling the request"
         '401':
           description: Authentication failed
         '403':
@@ -210,8 +356,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT'
-                message: 'The merchant with id [%s] associated to the transaction is not equal to the merchant with id [%s]'
+                code: "PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT"
+                message: "The merchant with id [%s] associated to the transaction is not equal to the merchant with id [%s]"
         '404':
           description: The requested resource was not found
           content:
@@ -219,8 +365,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_NOT_FOUND_OR_EXPIRED'
-                message: 'Cannot find transaction with transactionId [%s]'
+                code: "PAYMENT_NOT_FOUND_OR_EXPIRED"
+                message: "Cannot find transaction with transactionId [%s]"
         '429':
           description: Too many requests
           content:
@@ -228,8 +374,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_TOO_MANY_REQUESTS'
-                message: 'Too many requests'
+                code: "PAYMENT_TOO_MANY_REQUESTS"
+                message: "Too many requests"
         '500':
           description: Generic error
           content:
@@ -237,14 +383,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_GENERIC_ERROR'
-                message: 'Application error'
+                code: "PAYMENT_GENERIC_ERROR"
+                message: "Application error"
   /initiatives/{initiativeId}/transactions:
     get:
       tags:
         - merchant-transactions
-      summary: 'ENG: Returns the list of in progress transactions associated to a merchant - IT: Ritorna la lista delle transazioni in corso associate ad un esercente'
-      description: 'ENG: Returns the list of in progress transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni in corso associate ad un esercente'
+      summary: "ENG: Returns the list of in progress transactions associated to a merchant - IT: Ritorna la lista delle transazioni in corso associate ad un esercente"
+      description: "ENG: Returns the list of in progress transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni in corso associate ad un esercente"
       operationId: getMerchantTransactions
       parameters:
         - name: initiativeId
@@ -291,8 +437,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_INVALID_REQUEST'
-                message: 'Something went wrong handling the request'
+                code: "PAYMENT_INVALID_REQUEST"
+                message: "Something went wrong handling the request"
         '401':
           description: Autentication failed
         '429':
@@ -302,8 +448,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_TOO_MANY_REQUESTS'
-                message: 'Too many requests'
+                code: "PAYMENT_TOO_MANY_REQUESTS"
+                message: "Too many requests"
         '500':
           description: Generic error
           content:
@@ -311,14 +457,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_GENERIC_ERROR'
-                message: 'Application error'
+                code: "PAYMENT_GENERIC_ERROR"
+                message: "Application error"
   /initiatives/{initiativeId}/transactions/processed:
     get:
       tags:
         - merchant-transactions
-      summary: 'ENG: Returns the list of processed transactions associated to a merchant - IT: Ritorna la lista delle transazioni processate associate ad un esercente'
-      description: 'ENG: Returns the list of processed transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni processate associate ad un esercente'
+      summary: "ENG: Returns the list of processed transactions associated to a merchant - IT: Ritorna la lista delle transazioni processate associate ad un esercente"
+      description: "ENG: Returns the list of processed transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni processate associate ad un esercente"
       operationId: getMerchantTransactionsProcessed
       parameters:
         - name: initiativeId
@@ -375,7 +521,7 @@ paths:
       parameters:
         - name: trxCode
           in: path
-          description: "ENG: The transaction's code - IT: Codice della transazione"
+          description: 'ENG: The transaction''s code - IT: Codice della transazione'
           required: true
           schema:
             type: string
@@ -399,8 +545,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_AMOUNT_NOT_VALID'
-                message: 'Cannot authorize transaction with invalid amount [%s]'
+                code: "PAYMENT_AMOUNT_NOT_VALID"
+                message: "Cannot authorize transaction with invalid amount [%s]"
         '401':
           description: Authentication failed
         '403':
@@ -410,8 +556,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_ALREADY_AUTHORIZED'
-                message: 'Transaction with trxCode [trxCode] is already authorized'
+                code: "PAYMENT_ALREADY_AUTHORIZED"
+                message: "Transaction with trxCode [trxCode] is already authorized"
         '404':
           description: The requested resource was not found
           content:
@@ -419,8 +565,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_NOT_FOUND_EXPIRED'
-                message: 'Cannot find transaction with trxCode [trxCode]'
+                code: "PAYMENT_NOT_FOUND_EXPIRED"
+                message: "Cannot find transaction with trxCode [trxCode]"
         '429':
           description: Too many requests
           content:
@@ -428,8 +574,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_TOO_MANY_REQUESTS'
-                message: 'Too many request on the ms reward calculator'
+                code: "PAYMENT_TOO_MANY_REQUESTS"
+                message: "Too many request on the ms reward calculator"
         '500':
           description: Generic error
           content:
@@ -437,8 +583,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransactionErrorDTO'
               example:
-                code: 'PAYMENT_GENERIC_ERROR'
-                message: 'A generic error occured'
+                code: "PAYMENT_GENERIC_ERROR"
+                message: "A generic error occured"
   /initiatives/{initiativeId}:
     get:
       tags:
@@ -498,6 +644,71 @@ paths:
               example:
                 code: MERCHANT_GENERIC_ERROR
                 message: An error occurred during file reading
+    patch:
+      tags:
+        - merchant-detail
+      summary: Update merchant IBAN
+      description: "ENG: Update the IBAN of a merchant for a specific initiative <br> IT: Aggiornamento dell'IBAN di un esercente per una specifica iniziativa"
+      operationId: updateMerchantIban
+      parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The IBAN to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MerchantIbanPatchDTO'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantDetailDTO'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantErrorDTO'
+              example:
+                code: MERCHANT_INVALID_REQUEST
+                message: Something went wrong handling request
+        '401':
+          description: Authentication failed
+        '404':
+          description: The requested ID was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantErrorDTO'
+              example:
+                code: MERCHANT_NOT_ONBOARDED
+                message: The current merchant is not onboarded on initiative
+        '429':
+          description: Too many Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantErrorDTO'
+              example:
+                code: MERCHANT_TOO_MANY_REQUESTS
+                message: Too many requests
+        '500':
+          description: Server ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantErrorDTO'
+              example:
+                code: MERCHANT_GENERIC_ERROR
+                message: An error occurred during the update
 components:
   schemas:
     InitiativeDTO:
@@ -580,34 +791,34 @@ components:
       properties:
         trxCode:
           type: string
-          description: 'ENG: Transaction code - IT: Il codice della transazione'
+          description: "ENG: Transaction code - IT: Il codice della transazione"
         trxId:
           type: string
           description: "ENG: Transaction ID - IT: L'ID della transazione"
         fiscalCode:
           type: string
-          description: 'ENG: Citizen fiscal code - IT: Codice fiscale del cittadino'
+          description: "ENG: Citizen fiscal code - IT: Codice fiscale del cittadino"
         effectiveAmountCents:
           type: integer
           format: int64
-          description: 'ENG: Transaction amount - IT: Quantitativo della transazione'
+          description: "ENG: Transaction amount - IT: Quantitativo della transazione"
           example: 100
         rewardAmountCents:
           type: integer
           format: int64
-          description: 'ENG: Reward amount - IT: Premio generato'
+          description: "ENG: Reward amount - IT: Premio generato"
           example: 100
         trxDate:
           type: string
           format: date-time
-          description: 'ENG: The date of the transaction - IT: La data della transazione'
+          description: "ENG: The date of the transaction - IT: La data della transazione"
         trxExpirationSeconds:
           type: number
-          description: 'ENG: Expiration time of the transaction, in seconds - IT: Scadenza della transazione, in secondi'
+          description: "ENG: Expiration time of the transaction, in seconds - IT: Scadenza della transazione, in secondi"
         updateDate:
           type: string
           format: date-time
-          description: 'ENG: The date of the transaction update - IT: La data di aggiornamento della transazione'
+          description: "ENG: The date of the transaction update - IT: La data di aggiornamento della transazione"
         status:
           type: string
           enum:
@@ -616,23 +827,23 @@ components:
             - AUTHORIZATION_REQUESTED
             - AUTHORIZED
             - REJECTED
-          description: 'ENG: Status of the transaction - IT: Stato della transazione'
+          description: "ENG: Status of the transaction - IT: Stato della transazione"
         splitPayment:
           type: boolean
-          description: 'ENG: TRUE, if the authorized sum is less than the requested sum or FALSE, if the authorized sum is equal to the requested sum - IT: TRUE, se la somma autorizzata è inferiore alla somma richiesta o FALSE, se la somma autorizzata è uguale alla somma richiesta.'
+          description: "ENG: TRUE, if the authorized sum is less than the requested sum or FALSE, if the authorized sum is equal to the requested sum - IT: TRUE, se la somma autorizzata è inferiore alla somma richiesta o FALSE, se la somma autorizzata è uguale alla somma richiesta."
         residualAmountCents:
           type: integer
           format: int64
-          description: 'ENG: Remaining amount to be paid if the authorized sum is less than the requested sum - IT: Importo restante da pagare nel caso in cui la somma autorizzata sia inferiore alla somma richiesta.'
+          description: "ENG: Remaining amount to be paid if the authorized sum is less than the requested sum - IT: Importo restante da pagare nel caso in cui la somma autorizzata sia inferiore alla somma richiesta."
         channel:
           type: string
-          description: 'ENG: Channel from which the transaction takes place - IT: Canale da cui avviene la transazione'
+          description: "ENG: Channel from which the transaction takes place - IT: Canale da cui avviene la transazione"
         qrcodePngUrl:
           type: string
           description: "ENG: Url to the QR code image - IT: Url all'immagine del QR code"
         qrcodeTxtUrl:
           type: string
-          description: 'ENG: Url of the QR code link - IT: Url del QR code'
+          description: "ENG: Url of the QR code link - IT: Url del QR code"
     MerchantTransactionsProcessedListDTO:
       type: object
       required:
@@ -649,19 +860,19 @@ components:
         pageNo:
           type: integer
           format: int32
-          description: 'ENG: The number of the page - IT: Il numero della pagina'
+          description: "ENG: The number of the page - IT: Il numero della pagina"
         pageSize:
           type: integer
           format: int32
-          description: 'ENG: The element size for page - IT: Il numero di elementi per pagina'
+          description: "ENG: The element size for page - IT: Il numero di elementi per pagina"
         totalElements:
           type: integer
           format: int32
-          description: 'ENG: The total number of the elements - IT: Il numero totale degli elementi'
+          description: "ENG: The total number of the elements - IT: Il numero totale degli elementi"
         totalPages:
           type: integer
           format: int32
-          description: 'ENG: The total number of the pages - IT: Il numero totale delle pagine'
+          description: "ENG: The total number of the pages - IT: Il numero totale delle pagine"
     MerchantTransactionProcessedDTO:
       type: object
       required:
@@ -674,35 +885,35 @@ components:
           description: "ENG: Transaction ID - IT: L'ID della transazione"
         fiscalCode:
           type: string
-          description: 'ENG: Citizen fiscal code - IT: Codice fiscale del cittadino'
+          description: "ENG: Citizen fiscal code - IT: Codice fiscale del cittadino"
         effectiveAmountCents:
           type: integer
           format: int64
-          description: 'ENG: Transaction amount - IT: Quantitativo della transazione'
+          description: "ENG: Transaction amount - IT: Quantitativo della transazione"
           example: 100
         rewardAmountCents:
           type: integer
           format: int64
-          description: 'ENG: Reward amount - IT: Premio generato'
+          description: "ENG: Reward amount - IT: Premio generato"
           example: 100
         trxDate:
           type: string
           format: date-time
-          description: 'ENG: The date of the transaction - IT: La data della transazione'
+          description: "ENG: The date of the transaction - IT: La data della transazione"
         updateDate:
           type: string
           format: date-time
-          description: 'ENG: The date of the transaction update - IT: La data di aggiornamento della transazione'
+          description: "ENG: The date of the transaction update - IT: La data di aggiornamento della transazione"
         status:
           type: string
           enum:
             - REWARDED
             - CANCELLED
-          description: 'ENG: Status of the transaction - IT: Stato della transazione'
+          description: "ENG: Status of the transaction - IT: Stato della transazione"
         channel:
           type: string
-          description: 'ENG: Channel from which the transaction takes place - IT: Canale da
-            cui avviene la transazione'
+          description: "ENG: Channel from which the transaction takes place - IT: Canale da
+              cui avviene la transazione"
     MerchantDetailDTO:
       type: object
       properties:
@@ -720,13 +931,13 @@ components:
           description: "ENG: The address of the legal office <br> IT: L'indirizzo della sede legale"
         legalOfficeMunicipality:
           type: string
-          description: 'ENG: The municipality of the legal office <br> IT: Il comune della sede legale'
+          description: "ENG: The municipality of the legal office <br> IT: Il comune della sede legale"
         legalOfficeProvince:
           type: string
-          description: 'ENG: The province of the legal office <br> IT: La provincia della sede legale'
+          description: "ENG: The province of the legal office <br> IT: La provincia della sede legale"
         legalOfficeZipCode:
           type: string
-          description: 'ENG: The zipcode of the legal office <br> IT: Il CAP della sede legale'
+          description: "ENG: The zipcode of the legal office <br> IT: Il CAP della sede legale"
         certifiedEmail:
           type: string
           description: "ENG: The certified email address of the merchant <br> IT: L'indirizzo email PEC dell' esercente"
@@ -744,6 +955,9 @@ components:
         iban:
           type: string
           description: "ENG: The iban of the merchant <br> IT: L'iban dell'esercente"
+        ibanHolder:
+          type: string
+          description: "ENG: The holder of the IBAN <br> IT: L'intestatario dell'IBAN"
         creationDate:
           type: string
           format: date-time
@@ -851,13 +1065,13 @@ components:
           description: 'ENG: Transaction date - IT: Data della transazione'
         initiativeId:
           type: string
-          description: "ENG: Id of the initiative - IT: Identificativo dell'iniziativa"
+          description: 'ENG: Id of the initiative - IT: Identificativo dell''iniziativa'
         initiativeName:
           type: string
           description: 'ENG: Name of the initiative - IT: Nome della iniziativa'
         businessName:
           type: string
-          description: "ENG: Business name - IT: Nome dell'esercente"
+          description: 'ENG: Business name - IT: Nome dell''esercente'
         status:
           type: string
           enum:
@@ -885,11 +1099,11 @@ components:
           description: 'ENG: Residual budget - IT: Budget residuo'
         splitPayment:
           type: boolean
-          description: 'ENG: TRUE, if the authorized sum is less than the requested sum or FALSE, if the authorized sum is equal to the requested sum - IT: TRUE, se la somma autorizzata è inferiore alla somma richiesta o FALSE, se la somma autorizzata è uguale alla somma richiesta.'
+          description: "ENG: TRUE, if the authorized sum is less than the requested sum or FALSE, if the authorized sum is equal to the requested sum - IT: TRUE, se la somma autorizzata è inferiore alla somma richiesta o FALSE, se la somma autorizzata è uguale alla somma richiesta."
         residualAmountCents:
           type: integer
           format: int64
-          description: 'ENG: Remaining amount to be paid if the authorized sum is less than the requested sum - IT: Importo restante da pagare nel caso in cui la somma autorizzata sia inferiore alla somma richiesta.'
+          description: "ENG: Remaining amount to be paid if the authorized sum is less than the requested sum - IT: Importo restante da pagare nel caso in cui la somma autorizzata sia inferiore alla somma richiesta."
     TransactionErrorDTO:
       type: object
       required:
@@ -905,6 +1119,7 @@ components:
             - PAYMENT_INITIATIVE_INVALID_DATE
             - PAYMENT_INITIATIVE_NOT_DISCOUNT
             - PAYMENT_ALREADY_AUTHORIZED
+            - PAYMENT_ALREADY_CANCELLED
             - PAYMENT_BUDGET_EXHAUSTED
             - PAYMENT_GENERIC_REJECTED
             - PAYMENT_TOO_MANY_REQUESTS
@@ -931,6 +1146,7 @@ components:
             PAYMENT_INITIATIVE_INVALID_DATE: initiative invalid date<br>
             PAYMENT_INITIATIVE_NOT_DISCOUNT: initiative is not of discount type<br>
             PAYMENT_ALREADY_AUTHORIZED: transaction already authorized<br>
+            PAYMENT_ALREADY_CANCELLED: transaction already cancelled<br>
             PAYMENT_BUDGET_EXHAUSTED: budget exhausted<br>
             PAYMENT_GENERIC_REJECTED: generic rejected error (transaction rejected)<br>
             PAYMENT_TOO_MANY_REQUESTS: too many request, retry<br>
@@ -956,6 +1172,7 @@ components:
             PAYMENT_INITIATIVE_INVALID_DATE: iniziativa con data invalida<br>
             PAYMENT_INITIATIVE_NOT_DISCOUNT: iniziativa non è di tipo a sconto<br>
             PAYMENT_ALREADY_AUTHORIZED: transazione già autorizzata<br>
+            PAYMENT_ALREADY_CANCELLED: transazione già cancellata<br>
             PAYMENT_BUDGET_EXHAUSTED: budget esaurito<br>
             PAYMENT_GENERIC_REJECTED: errore generico, transazione rigettata<br>
             PAYMENT_TOO_MANY_REQUESTS: troppe richieste, riprovare<br>
@@ -986,7 +1203,7 @@ components:
         amountCents:
           type: integer
           format: int64
-          description: 'ENG: Amount of transaction - IT: Importo della transazione'
+          description: "ENG: Amount of transaction - IT: Importo della transazione"
         idTrxAcquirer:
           type: string
           description: "ENG: Transaction acquirer ID- IT: Identificativo della transazione rispetto all'acquirer"
@@ -1014,7 +1231,7 @@ components:
              STATISTICS_GENERIC_ERROR: Errore generico"
         message:
           type: string
-          description: 'ENG: Error message - IT: Messaggio di errore'
+          description: "ENG: Error message - IT: Messaggio di errore"
     MerchantErrorDTO:
       type: object
       required:
@@ -1045,6 +1262,129 @@ components:
         message:
           type: string
           description: 'ENG: Error message- IT: Messaggio di errore'
+    PointOfSaleDTO:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - PHYSICAL
+            - ONLINE
+          description: "ENG: The type of the point of sale <br> IT: Il tipo del punto vendita"
+        franchiseName:
+          type: string
+          description: "ENG: The name of the point of sale <br> IT: Il nome del punto vendita"
+        region:
+          type: string
+          description: "ENG: The region of the point of sale <br> IT: La regione del punto vendita"
+        province:
+          type: string
+          description: "ENG: The province of the point of sale <br> IT: La provincia del punto vendita"
+        city:
+          type: string
+          description: "ENG: The city of the point of sale <br> IT: La città del punto vendita"
+        zipCode:
+          type: string
+          description: "ENG: The zip code of the point of sale <br> IT: Il CAP del punto vendita"
+        address:
+          type: string
+          description: "ENG: The address of the point of sale <br> IT: L'indirizzo completo del punto vendita"
+        streetNumber:
+          type: string
+          description: "ENG: The street number of the point of sale <br> IT: Il numero civico del punto vendita"
+        webSite:
+          type: string
+          description: "ENG: The website of the point of sale <br> IT: Il sito web del punto vendita"
+        contactEmail:
+          type: string
+          description: "ENG: The email of the contact person <br> IT: L'email del referente"
+        contactName:
+          type: string
+          description: "ENG: The name of the contact person <br> IT: Il nome del referente"
+        contactSurname:
+          type: string
+          description: "ENG: The surname of the contact person <br> IT: Il cognome del referente"
+        channels:
+          type: array
+          description: Communication channels associated with the point of sale
+          items:
+            $ref: '#/components/schemas/ChannelDTO'
+    ChannelDTO:
+      type: object
+      properties:
+        type:
+          enum:
+            - WEB
+            - EMAIL
+            - MOBILE
+            - LANDING
+          type: string
+          description: Type of communication channel
+        contact:
+          type: string
+          description: Contact information for the channel
+    ListPointOfSaleDTO:
+      type: object
+      properties:
+        pointsOfSale:
+          type: array
+          items:
+            $ref: '#/components/schemas/PointOfSaleDTO'
+        pageNumber:
+          type: integer
+          format: int32
+          description: "ENG: The number of the page <br> IT: Il numero della pagina"
+        pageSize:
+          type: integer
+          format: int32
+          description: "ENG: The element size for page <br> IT: Il numero di elementi per pagina"
+        totalElements:
+          type: integer
+          format: int32
+          description: "ENG: The total number of the elements <br> IT: Il numero totale degli elementi"
+        totalPages:
+          type: integer
+          format: int32
+          description: "ENG: The total number of the pages <br> IT: Il numero totale delle pagine"
+    PointOfSaleErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - POINT_OF_SALES_NOT_FOUND
+            - MERCHANT_NOT_ONBOARDED
+            - POINT_OF_SALES_TOO_MANY_REQUESTS
+            - POINT_OF_SALES_INVALID_REQUEST
+            - POINT_OF_SALES_GENERIC_ERROR
+          description: >-
+            "ENG: Error code:<br>
+            POINT_OF_SALES_NOT_FOUND: The sale was not found,<br>
+            MERCHANT_NOT_ONBOARDED: The merchant is not associated to the initiative,<br>
+            POINT_OF_SALES_TOO_MANY_REQUESTS: Too many requests,<br>
+            POINT_OF_SALES_INVALID_REQUEST: Something went wrong handling the request,<br>
+            POINT_OF_SALES_GENERIC_ERROR: Application error,<br>
+            - IT: Codice di errore:<br>
+            POINT_OF_SALES_NOT_FOUND: Lo store non è stato trovato,<br>
+            MERCHANT_NOT_ONBOARDED: L'esercente non è associato all'iniziativa,<br>
+            POINT_OF_SALES_TOO_MANY_REQUESTS: Troppe richieste,<br>
+            POINT_OF_SALES_INVALID_REQUEST: Qualcosa è andato storto durante l'invio della richiesta,<br>
+            POINT_OF_SALES_GENERIC_ERROR: Errore applicativo"
+        message:
+          type: string
+          description: 'ENG: Error message- IT: Messaggio di errore'
+    MerchantIbanPatchDTO:
+      type: object
+      properties:
+        iban:
+          type: string
+          description: "ENG: The IBAN of the merchant <br> IT: L'IBAN dell'esercente"
+        ibanHolder:
+          type: string
+          description: "ENG: The holder of the IBAN <br> IT: L'intestatario dell'IBAN"
   securitySchemes:
     Bearer:
       type: apiKey

@@ -23,7 +23,7 @@ const Layout = ({ children }: Props) => {
   const [showAssistanceInfo, setShowAssistanceInfo] = useState(true);
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.HOME, ROUTES.DISCOUNTS],
+    path: [ROUTES.HOME, ROUTES.DISCOUNTS, ROUTES.OVERVIEW],
     exact: true,
     strict: false,
   });
