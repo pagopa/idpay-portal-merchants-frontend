@@ -15,7 +15,9 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
 import ROUTES from '../../routes';
 import { genericContainerStyle } from '../../styles';
-
+import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
+import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
+import { updateMerchantPointOfSales } from '../../services/merchantService';
 
 interface MatchParams {
   id: string;
@@ -23,6 +25,7 @@ interface MatchParams {
 
 const InitiativeStoresUpload: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<'csv' | 'manual'>('csv');
+  const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([]);
   const { t } = useTranslation();
 
 
@@ -36,6 +39,44 @@ const InitiativeStoresUpload: React.FC = () => {
   useEffect(() => {
     console.log(id);
   }, []);
+
+  const onFormChange = (salesPoints: Array<PointOfSaleDTO>) => {
+    setSalesPoints(salesPoints);
+  };
+
+  const handleConfirm = async () => {
+    if(uploadMethod === 'manual') {
+      const merchantId = JSON.parse(localStorage.getItem('user') || '{}').uid;
+      // const filteredSalesPoints = filterSalesPointsByType(salesPoints);
+      await updateMerchantPointOfSales(merchantId, salesPoints);
+    }
+  };
+
+  // const filterSalesPointsByType = (salesPoints: Array<PointOfSaleDTO>) => salesPoints.map(salesPoint => {
+  //     if (salesPoint.type === 'ONLINE') {
+  //       return {
+  //         type: 'ONLINE',
+  //         franchiseName: salesPoint.franchiseName,
+  //         website: salesPoint.webSite,
+  //         contactEmail: salesPoint.contactEmail,
+  //         contactName: salesPoint.contactName,
+  //         contactSurname: salesPoint.contactSurname};
+  //     } else {
+  //       return {
+  //         type: 'PHYSICAL',
+  //         franchiseName: salesPoint.franchiseName,
+  //         address: salesPoint.address,
+  //         city: salesPoint.city,
+  //         zipCode: salesPoint.zipCode,
+  //         region: salesPoint.region,
+  //         province: salesPoint.province,
+  //         contactEmail: salesPoint.contactEmail,
+  //         contactName: salesPoint.contactName,
+  //         contactSurname: salesPoint.contactSurname,
+  //         channels: salesPoint.channels 
+  //       };
+  //     }
+  //   });   
 
   return (
     <Box sx={{ p: 4, maxWidth: 800, margin: '0 auto' }}>
@@ -101,6 +142,12 @@ const InitiativeStoresUpload: React.FC = () => {
           </Paper>
         )}
 
+        {
+          uploadMethod === 'manual' && (
+            <PointsOfSaleForm onFormChange={onFormChange}/>
+          )
+        }
+
         <Typography variant="body2" color="text.secondary">
           {t('pages.initiativeStores.prepareList')}
           <Link href="#" underline="hover">
@@ -111,7 +158,7 @@ const InitiativeStoresUpload: React.FC = () => {
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
         <Button variant="outlined">{t('commons.backBtn')}</Button>
-        <Button variant="contained" disabled>
+        <Button variant="contained" disabled={salesPoints.length === 0} onClick={handleConfirm}>
           {t('commons.confirmBtn')}
         </Button>
       </Box>
