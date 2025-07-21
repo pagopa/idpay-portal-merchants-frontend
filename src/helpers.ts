@@ -112,3 +112,17 @@ export const formatDate = (date: Date | undefined) => {
   }
   return '';
 };
+
+export const isValidEmail = (email: string) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
+export const isValidUrl = (url: string) => {
+  try {
+    new URL(url); // Tenta di creare un oggetto URL
+    return true;  // Se non lancia errori, l'URL è valido
+  } catch (e) {
+    return false; // Se si verifica un errore, l'URL non è valido
+  }
+};

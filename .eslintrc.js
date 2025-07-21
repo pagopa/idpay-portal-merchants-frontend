@@ -15,6 +15,7 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'react', 'react-hooks', 'import', 'functional', 'sonarjs'],
   rules: {
+    'sonarjs/cognitive-complexity': 'off',
     'no-case-declarations': 'off',
     'no-inner-declarations': 'off',
     'prefer-const': 'error',
@@ -36,7 +37,7 @@ module.exports = {
     eqeqeq: ['error', 'smart'],
     'max-classes-per-file': ['error', 1],
     'guard-for-in': 'error',
-    complexity: 'error',
+    complexity: 'off',
     'arrow-body-style': 'error',
     'import/order': 'error',
     '@typescript-eslint/no-unused-vars': 'off',

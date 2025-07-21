@@ -9,6 +9,7 @@ const ROUTES = {
   OVERVIEW: `${BASE_ROUTE}/panoramica/:id`,
   SIDE_MENU_OVERVIEW: `${BASE_ROUTE}/panoramica`,
   STORES: `${BASE_ROUTE}/punti-vendita/:id`,
+  STORES_UPLOAD: `${BASE_ROUTE}/punti-vendita/censisci/:id`,
   SIDE_MENU_STORES: `${BASE_ROUTE}/punti-vendita`,
   TOS: `${BASE_ROUTE}/terms-of-service`,
   PRIVACY_POLICY: `${BASE_ROUTE}/privacy-policy`,

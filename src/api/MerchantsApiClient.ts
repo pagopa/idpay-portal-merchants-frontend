@@ -11,6 +11,7 @@ import { MerchantDetailDTO } from './generated/merchants/MerchantDetailDTO';
 import { TransactionResponse } from './generated/merchants/TransactionResponse';
 import { InitiativeDTOArray } from './generated/merchants/InitiativeDTOArray';
 import { MerchantTransactionsProcessedListDTO } from './generated/merchants/MerchantTransactionsProcessedListDTO';
+import { PointOfSaleDTO } from './generated/merchants/PointOfSaleDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -112,4 +113,9 @@ export const MerchantApi = {
     // const result = await apiClient.authPaymentBarCode({ trxCode, body: { amountCents } });
     // return extractResponse(result, 200, onRedirectToLogin);
     await apiClient.authPaymentBarCode({ trxCode, body: { amountCents, idTrxAcquirer } }),
+
+  updateMerchantPointOfSales: async (merchantId: string, pointOfSales: Array<PointOfSaleDTO>): Promise<void> => {
+    const result = await apiClient.putPointOfSales({ merchantId, body: pointOfSales });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
 };
