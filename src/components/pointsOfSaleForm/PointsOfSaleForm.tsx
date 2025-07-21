@@ -485,7 +485,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     variant="text"
                     onClick={() => { 
                       const url = getChannelValue(salesPoint, ChannelTypeEnum.LANDING);
-                      if(url){
+                      if(url && isValidUrl(url)){
                         window.open(url, '_blank', 'noopener,noreferrer');
                       }
                     }}
