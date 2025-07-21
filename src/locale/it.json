@@ -123,12 +123,12 @@
       "iban": "IBAN"
     },
     "initiativeOverview" : {
-      "subtitle": "Tieni sotto controllo le tue attività da qui.",
+      "subtitle": "Tieni sotto controllo tutte le tue attività da qui.",
       "title": "Panoramica",
       "information" : "Informazioni",
       "stores" : "Punti vendita",
-      "storesSubtitle" : "Censisci i tuoi punti vendita direttamente sul portale.",
       "uploadStores" : "Censisci i tuoi punti vendita",
+      "storesSubtitle" : "Inserisci i tuoi punti vendita direttamente sul portale.",
       "iban": "IBAN",
       "holder": "Intestatario",
       "refundsDataTitle": "Dati rimborso",
