@@ -7,12 +7,13 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
-  Link,
+  Link, Alert, Slide,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { matchPath } from 'react-router-dom';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ROUTES from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
@@ -36,6 +37,7 @@ interface MatchParams {
 
 const InitiativeStoresUpload: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<'csv' | 'manual'>('csv');
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([]);
   const [errors, setErrors] = useState<FormErrors>({});
   const { t } = useTranslation();
@@ -63,7 +65,9 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const handleConfirm = async () => {
     if (uploadMethod === 'manual') {
-      await updateMerchantPointOfSales('bb7b4183-2a38-3243-8cdd-218fec0c5258', salesPoints);
+      await updateMerchantPointOfSales('bb7b4183-2a38-3243-8cdd-218fec0c5258', salesPoints).then(() => {
+           setShowSuccessAlert(true);
+      });
     }
   };
 
@@ -181,14 +185,39 @@ const InitiativeStoresUpload: React.FC = () => {
             <PointsOfSaleForm onFormChange={onFormChange} onErrorChange={onErrorChange}/>
           )
         }
+        {uploadMethod === 'csv' && (
+          <Typography variant="body1" color="text.primary">
+            {t('pages.initiativeStores.prepareList')}
+            <Link fontWeight={'bold'} href="#" underline="hover">
+              {t('pages.initiativeStores.downloadExampleFile')}
+            </Link>
+          </Typography>
+        )}
 
-        <Typography variant="body1" color="text.primary">
-          {t('pages.initiativeStores.prepareList')}
-          <Link fontWeight={'bold'} href="#" underline="hover">
-            {t('pages.initiativeStores.downloadExampleFile')}
-          </Link>
-        </Typography>
       </Paper>
+      <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
+        <Alert
+          severity="success"
+          icon={<CheckCircleOutlineIcon />}
+          sx={{
+            position: 'fixed',
+            bottom: 20,
+            right: 20,
+            backgroundColor: 'white',
+            width: 'auto',
+            maxWidth: '400px',
+            minWidth: '300px',
+            zIndex: 1300,
+            boxShadow: 3,
+            borderRadius: 1,
+            '& .MuiAlert-icon': {
+              color: '#6CC66A'
+            }
+          }}
+        >
+          {t('Punti vendita salvati con successo!')}
+        </Alert>
+      </Slide>
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
         <Button data-testid="back-stores-button" variant="outlined">{t('commons.backBtn')}</Button>
