@@ -42,11 +42,11 @@ const InitiativeOverview = () => {
 
   useEffect(() => {
     setIban(undefined);
-    setIbanHolder(undefined);
+    setIbanHolder("Mario Rossi");
     getMerchantDetail(id)
       .then((response) => {
         setIban(response?.iban);
-        setIbanHolder(response?.ibanHolder);
+        // setIbanHolder(response?.ibanHolder);
       })
       .catch((error) =>
         addError({

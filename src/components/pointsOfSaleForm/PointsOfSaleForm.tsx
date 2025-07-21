@@ -11,6 +11,7 @@ import {
   Grid,
   Button,
 } from '@mui/material';
+import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
@@ -20,6 +21,7 @@ import { TypeEnum as ChannelTypeEnum } from '../../api/generated/merchants/Chann
 import { isValidEmail, isValidUrl } from '../../helpers';
 
 import style from './pointsOfSaleForm.module.css';
+
 
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
@@ -233,39 +235,42 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
     const getFieldError = (salesPointIndex: number, fieldName: string): string => errors[salesPointIndex]?.[fieldName] || '';
 
   const addAnotherSalesPoint = () => {
-    setSalesPoints([
-      ...salesPoints,
-      {
-        type: TypeEnum.PHYSICAL,
-        franchiseName: '',
-        address: '',
-        city: '',
-        zipCode: '',
-        region: '',
-        province: '',
-        contactEmail: '',
-        contactName: '',
-        contactSurname: '',
-        channels: [
-          {
-            type: ChannelTypeEnum.LANDING,
-            contact: '',
-          },
-          {
-            type: ChannelTypeEnum.WEB,
-            contact: '',
-          },
-          {
-            type: ChannelTypeEnum.EMAIL,
-            contact: '',
-          },
-          {
-            type: ChannelTypeEnum.MOBILE,
-            contact: '',
-          },
-        ],
-      },
-    ]);
+    if(salesPoints.length < 5 ){
+      setSalesPoints([
+        ...salesPoints,
+        {
+          type: TypeEnum.PHYSICAL,
+          franchiseName: '',
+          address: '',
+          city: '',
+          zipCode: '',
+          region: '',
+          province: '',
+          contactEmail: '',
+          contactName: '',
+          contactSurname: '',
+          channels: [
+            {
+              type: ChannelTypeEnum.LANDING,
+              contact: '',
+            },
+            {
+              type: ChannelTypeEnum.WEB,
+              contact: '',
+            },
+            {
+              type: ChannelTypeEnum.EMAIL,
+              contact: '',
+            },
+            {
+              type: ChannelTypeEnum.MOBILE,
+              contact: '',
+            },
+          ],
+        },
+      ]);
+    }
+
   };
 
   const getChannelValue = (salesPoint: PointOfSaleDTO, channelType: ChannelTypeEnum): string => {
@@ -274,7 +279,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', bgcolor: 'background.paper', borderRadius: 2, boxShadow: 3 }}>
+    <Box sx={{ width: '100%', mx: 'auto', bgcolor: 'background.paper', borderRadius: 2, boxShadow: 3 }}>
       {salesPoints.map((salesPoint, index) => (
         <Box className={style['points-of-sale-wrapper']} key={index} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="h6" gutterBottom>
@@ -476,14 +481,19 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     onChange={(e) => handleChannelChange(index, ChannelTypeEnum.LANDING, e.target.value)}
 
                   />
-                  {/* <Button
+                  <Button
                     variant="text"
-                    onClick={() => { }}
-                    // endIcon={<OpenInNewIcon fontSize="small" />} // Changed to OpenInNewIcon for external link
+                    onClick={() => { 
+                      const url = getChannelValue(salesPoint, ChannelTypeEnum.LANDING);
+                      if(url){
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                    endIcon={<ArrowOutward fontSize="small" />}
                     sx={{ whiteSpace: 'nowrap' }}
                   >
                     Verifica URL
-                  </Button> */}
+                  </Button>
                 </FormControl>
                 <TextField
                   fullWidth
