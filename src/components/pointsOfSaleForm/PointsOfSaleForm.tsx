@@ -16,14 +16,26 @@ import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { TypeEnum as ChannelTypeEnum } from '../../api/generated/merchants/ChannelDTO';
 
+// utils
+import { isValidEmail, isValidUrl } from '../../helpers';
+
 import style from './pointsOfSaleForm.module.css';
 
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
+  onErrorChange: (errors: FormErrors) => void;
+}
+
+interface FormErrors {
+  [salesPointIndex: number]: FieldErrors;
+}
+
+interface FieldErrors {
+  [fieldName: string]: string;
 }
 
 
-const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
+const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChange }) => {
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
     {
       type: TypeEnum.PHYSICAL,
@@ -58,13 +70,108 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
     },
   ]);
 
+  const [errors, setErrors] = useState<FormErrors>({});
+
   useEffect(() => {
     onFormChange(salesPoints);
+    onErrorChange(errors);
   }, [salesPoints]);
 
-  // Handler per le proprietà dirette di PointOfSaleDTO
   const handleFieldChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
+    if(name !== 'type'){
+      switch (name) {
+        case 'contactEmail':
+          if (!isValidEmail(value)) {
+            updateError(index, 'contactEmail', 'Email non valida');
+          } else {
+            clearError(index, 'contactEmail');
+          }
+          break;
+        case 'contactName':
+          if (value.length === 0) {
+            updateError(index, 'contactName', 'Nome non valido');
+          } else {
+            clearError(index, 'contactName');
+          }
+          break;
+        case 'contactSurname':
+          if (value.length === 0) {
+            updateError(index, 'contactSurname', 'Cognome non valido');
+          } else {
+            clearError(index, 'contactSurname');
+          }
+          break;
+        case 'franchiseName':
+          if (value.length === 0) {
+            updateError(index, 'franchiseName', 'Nome insegna non valido');
+          } else {
+            clearError(index, 'franchiseName');
+          }
+          break;
+        case 'city':
+          if (value.length === 0) {
+            updateError(index, 'city', 'Città non valida');
+          } else {
+            clearError(index, 'city');
+          }
+          break;
+        case 'zipCode':
+          if (value.length === 0) {
+            updateError(index, 'zipCode', 'CAP non valido');
+          } else {
+            clearError(index, 'zipCode');
+          }
+          break;
+        case 'region':
+          if (value.length === 0) {
+            updateError(index, 'region', 'Regione non valida');
+          } else {
+            clearError(index, 'region');
+          }
+          break;
+        case 'province':
+          if (value.length === 0) {
+            updateError(index, 'province', 'Provincia non valida');
+          } else {
+            clearError(index, 'province');
+          }
+          break;
+        case 'webSite':
+          if (value.length === 0 || !isValidUrl(value)) {
+            updateError(index, 'webSite', 'Sito web non valido');
+          } else {
+            clearError(index, 'webSite');
+          }
+          break;
+        case 'address':
+          if (value.length === 0) {
+            updateError(index, 'address', 'Indirizzo non valido');
+          } else {
+            clearError(index, 'address');
+          }
+          break;
+        default:
+          break;
+      }
+    }else{
+     setErrors({});
+    //   prevSalesPoints.map((salesPoint, i) => {
+    //     if (i !== index) {
+    //       return salesPoint;
+    //     }
+  
+    //     // Se il campo è 'type', usa l'asserzione di tipo
+    //     if (name === 'type') {
+    //       return { ...salesPoint, type: value as TypeEnum };
+    //     }
+  
+    //     // Per tutti gli altri campi, la logica originale va bene
+    //     return { [name]: value };
+    //   })
+    // );
+    }
+
     setSalesPoints(prevSalesPoints =>
       prevSalesPoints.map((salesPoint, i) =>
         i === index
@@ -72,7 +179,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
           : salesPoint
       )
     );
+
   };
+
 
   const handleChannelChange = (salesPointIndex: number, channelType: ChannelTypeEnum, value: string) => {
     setSalesPoints(prevSalesPoints =>
@@ -90,6 +199,38 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
       )
     );
   };
+
+    const updateError = (salesPointIndex: number, fieldName: string, errorMessage: string) => {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [salesPointIndex]: {
+          ...prevErrors[salesPointIndex],
+          [fieldName]: errorMessage
+        }
+      }));
+    };
+  
+    const clearError = (salesPointIndex: number, fieldName: string) => {
+      setErrors(prevErrors => {
+        if (!prevErrors[salesPointIndex]?.[fieldName]) {
+          return prevErrors;
+        }
+    
+        const { [fieldName]: _, ...restErrors } = prevErrors[salesPointIndex];
+    
+        if (Object.keys(restErrors).length === 0) {
+          const { [salesPointIndex]: __, ...finalErrors } = prevErrors;
+          return finalErrors;
+        } else {
+          return {
+            ...prevErrors,
+            [salesPointIndex]: restErrors,
+          };
+        }
+      });
+    };
+
+    const getFieldError = (salesPointIndex: number, fieldName: string): string => errors[salesPointIndex]?.[fieldName] || '';
 
   const addAnotherSalesPoint = () => {
     setSalesPoints([
@@ -169,21 +310,27 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
             onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
             margin="normal"
             sx={{ mb: 3 }}
+            error={!!getFieldError(index, 'franchiseName')}
+            helperText={getFieldError(index, 'franchiseName')}
+            required
           />
 
           {
             salesPoint.type === 'ONLINE' && (
               <>
-              <Typography variant="subtitle1" gutterBottom>Indirizzo web</Typography>
-              <TextField
-                fullWidth
-                label="Indirizzo completo"
-                name="website"
-                value={salesPoint.webSite}
-                onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
-                margin="normal"
-                sx={{ mb: 3 }}
-              />
+                <Typography variant="subtitle1" gutterBottom>Indirizzo web</Typography>
+                <TextField
+                  fullWidth
+                  label="Indirizzo completo"
+                  name="webSite"
+                  value={salesPoint.webSite}
+                  onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                  margin="normal"
+                  sx={{ mb: 3 }}
+                  error={!!getFieldError(index, 'webSite')}
+                  helperText={getFieldError(index, 'webSite')}
+                  required
+                />
               </>
             )
           }
@@ -202,6 +349,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
                     onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                     margin="normal"
                     sx={{ mb: 2 }}
+                    error={!!getFieldError(index, 'address')}
+                    helperText={getFieldError(index, 'address')}
+                    required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}></Grid>
@@ -213,6 +363,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
                     value={salesPoint.city}
                     onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                     margin="normal"
+                    error={!!getFieldError(index, 'city')}
+                    helperText={getFieldError(index, 'city')}
+                    required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
@@ -223,6 +376,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
                     value={salesPoint.zipCode}
                     onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                     margin="normal"
+                    error={!!getFieldError(index, 'zipCode')}
+                    helperText={getFieldError(index, 'zipCode')}
+                    required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
@@ -233,6 +389,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
                     value={salesPoint.region}
                     onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                     margin="normal"
+                    error={!!getFieldError(index, 'region')}
+                    helperText={getFieldError(index, 'region')}
+                    required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
@@ -243,6 +402,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
                     value={salesPoint.province}
                     onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                     margin="normal"
+                    error={!!getFieldError(index, 'province')}
+                    helperText={getFieldError(index, 'province')}
+                    required
                   />
                 </Grid>
               </Grid>
@@ -264,6 +426,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
                   value={salesPoint.contactEmail}
                   onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                   margin="normal"
+                  error={!!getFieldError(index, 'contactEmail')}
+                  helperText={getFieldError(index, 'contactEmail')}
+                  required
                 />
               </Grid>
             </Grid>
@@ -276,6 +441,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
                   value={salesPoint.contactName}
                   onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                   margin="normal"
+                  error={!!getFieldError(index, 'contactName')}
+                  helperText={getFieldError(index, 'contactName')}
+                  required
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -286,6 +454,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
                   value={salesPoint.contactSurname}
                   onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                   margin="normal"
+                  error={!!getFieldError(index, 'contactSurname')}
+                  helperText={getFieldError(index, 'contactSurname')}
+                  required
                 />
               </Grid>
             </Grid>
@@ -303,15 +474,16 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange }) => {
                     name="landingGoogle"
                     value={getChannelValue(salesPoint, ChannelTypeEnum.LANDING)}
                     onChange={(e) => handleChannelChange(index, ChannelTypeEnum.LANDING, e.target.value)}
+
                   />
-                  <Button
+                  {/* <Button
                     variant="text"
                     onClick={() => { }}
                     // endIcon={<OpenInNewIcon fontSize="small" />} // Changed to OpenInNewIcon for external link
                     sx={{ whiteSpace: 'nowrap' }}
                   >
                     Verifica URL
-                  </Button>
+                  </Button> */}
                 </FormControl>
                 <TextField
                   fullWidth
