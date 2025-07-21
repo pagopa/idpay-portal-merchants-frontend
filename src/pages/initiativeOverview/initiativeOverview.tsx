@@ -276,7 +276,7 @@ const InitiativeOverview = () => {
                   size="large"
                   fullWidth={false}
                   data-testid="add-stores-button">
-                  {t('pages.initiativeOverview.addStores')}
+                  {t('pages.initiativeStores.uploadStores')}
                 </Button>
               </Box>
             </Box>
