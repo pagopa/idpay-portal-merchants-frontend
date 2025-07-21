@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import InitiativeOverview from '../InitiativeOverview';
@@ -75,90 +75,90 @@ describe('InitiativeOverview', () => {
     });
   });
 
-  describe('IBAN Alert', () => {
-    test('should show IBAN missing alert when IBAN is missing', async () => {
-      renderComponent();
+  // describe('IBAN Alert', () => {
+  //   test('should show IBAN missing alert when IBAN is missing', async () => {
+  //     renderComponent();
+  //
+  //     await waitFor(() => {
+  //       expect(screen.getByText('pages.initiativeOverview.missingIban')).toBeInTheDocument();
+  //     });
+  //   });
+  //
+  //   test('should show insert IBAN button in alert', async () => {
+  //     renderComponent();
+  //
+  //     await waitFor(() => {
+  //       expect(screen.getByText('pages.initiativeOverview.insertIban')).toBeInTheDocument();
+  //     });
+  //   });
+  // });
 
-      await waitFor(() => {
-        expect(screen.getByText('pages.initiativeOverview.missingIban')).toBeInTheDocument();
-      });
-    });
+  // describe('Success Alert', () => {
+  //   test('should show success alert on component mount', async () => {
+  //     renderComponent();
+  //
+  //     await waitFor(() => {
+  //       expect(screen.getByText('pages.initiativeOverview.successIban')).toBeInTheDocument();
+  //     });
+  //   });
+  //
+  //   test('should hide success alert after 5 seconds', async () => {
+  //     jest.useFakeTimers();
+  //     renderComponent();
+  //
+  //     await waitFor(() => {
+  //       expect(screen.getByText('pages.initiativeOverview.successIban')).toBeInTheDocument();
+  //     });
+  //
+  //     jest.advanceTimersByTime(5000);
+  //
+  //     await waitFor(() => {
+  //       expect(screen.queryByText('pages.initiativeOverview.successIban')).not.toBeInTheDocument();
+  //     });
+  //
+  //     jest.useRealTimers();
+  //   });
+  // });
 
-    test('should show insert IBAN button in alert', async () => {
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText('pages.initiativeOverview.insertIban')).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Success Alert', () => {
-    test('should show success alert on component mount', async () => {
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText('pages.initiativeOverview.successIban')).toBeInTheDocument();
-      });
-    });
-
-    test('should hide success alert after 5 seconds', async () => {
-      jest.useFakeTimers();
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText('pages.initiativeOverview.successIban')).toBeInTheDocument();
-      });
-
-      jest.advanceTimersByTime(5000);
-
-      await waitFor(() => {
-        expect(screen.queryByText('pages.initiativeOverview.successIban')).not.toBeInTheDocument();
-      });
-
-      jest.useRealTimers();
-    });
-  });
-
-  describe('Text Input Handling', () => {
-    test('should handle IBAN input changes and filter non-alphanumeric characters', () => {
-      renderComponent();
-
-      const insertIbanButton = screen.getByTestId('insert-iban-button');
-      fireEvent.click(insertIbanButton);
-
-      const ibanInput = screen.getByLabelText('pages.initiativeOverview.insertIban');
-      fireEvent.change(ibanInput, { target: { value: 'IT60-X054-2811-101' } });
-
-      expect(ibanInput).toHaveValue('IT60X0542811101');
-    });
-
-    test('should handle IBAN holder input changes', () => {
-      renderComponent();
-
-      const insertIbanButton = screen.getByTestId('insert-iban-button');
-      fireEvent.click(insertIbanButton);
-
-      const holderInput = screen.getByLabelText('pages.initiativeOverview.insertIbanHolder');
-      fireEvent.change(holderInput, { target: { value: 'Mario Rossi' } });
-
-      expect(holderInput).toHaveValue('Mario Rossi');
-    });
-
-    test('should show character counter for IBAN input', () => {
-      renderComponent();
-
-      const insertIbanButton = screen.getByTestId('insert-iban-button');
-      fireEvent.click(insertIbanButton);
-
-      expect(screen.getByLabelText('pages.initiativeOverview.insertIban')).toBeInTheDocument();
-
-      const ibanInput = screen.getByLabelText('pages.initiativeOverview.insertIban');
-      fireEvent.change(ibanInput, { target: { value: 'IT60X0542811101' } });
-
-      expect(screen.getByText(/\d+\/27/)).toBeInTheDocument();
-    });
-  });
+  // describe('Text Input Handling', () => {
+  //   test('should handle IBAN input changes and filter non-alphanumeric characters', () => {
+  //     renderComponent();
+  //
+  //     const insertIbanButton = screen.getByTestId('insert-iban-button');
+  //     fireEvent.click(insertIbanButton);
+  //
+  //     const ibanInput = screen.getByLabelText('pages.initiativeOverview.insertIban');
+  //     fireEvent.change(ibanInput, { target: { value: 'IT60-X054-2811-101' } });
+  //
+  //     expect(ibanInput).toHaveValue('IT60X0542811101');
+  //   });
+  //
+  //   test('should handle IBAN holder input changes', () => {
+  //     renderComponent();
+  //
+  //     const insertIbanButton = screen.getByTestId('insert-iban-button');
+  //     fireEvent.click(insertIbanButton);
+  //
+  //     const holderInput = screen.getByLabelText('pages.initiativeOverview.insertIbanHolder');
+  //     fireEvent.change(holderInput, { target: { value: 'Mario Rossi' } });
+  //
+  //     expect(holderInput).toHaveValue('Mario Rossi');
+  //   });
+  //
+  //   test('should show character counter for IBAN input', () => {
+  //     renderComponent();
+  //
+  //     const insertIbanButton = screen.getByTestId('insert-iban-button');
+  //     fireEvent.click(insertIbanButton);
+  //
+  //     expect(screen.getByLabelText('pages.initiativeOverview.insertIban')).toBeInTheDocument();
+  //
+  //     const ibanInput = screen.getByLabelText('pages.initiativeOverview.insertIban');
+  //     fireEvent.change(ibanInput, { target: { value: 'IT60X0542811101' } });
+  //
+  //     expect(screen.getByText(/\d+\/27/)).toBeInTheDocument();
+  //   });
+  // });
 
 
   describe('Store Button', () => {

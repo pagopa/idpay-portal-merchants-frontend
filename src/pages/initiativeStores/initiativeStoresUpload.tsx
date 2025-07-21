@@ -26,7 +26,8 @@ interface FormErrors {
 
 interface FieldErrors {
   [fieldName: string]: string;
-}
+}import BreadcrumbsBox from '../components/BreadcrumbsBox';
+
 
 interface MatchParams {
   id: string;
@@ -92,13 +93,10 @@ const InitiativeStoresUpload: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 4, maxWidth: 920, margin: '0 auto' }}>
-
+    <Box sx={{ p: 4, width: '100%', margin: '0 auto' }}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
         <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
-          <Link href="#" underline="none" sx={{ display: 'inline-block', mb: 2 }}>
-            &lt; {t('commons.backBtn')}
-          </Link>
+          <BreadcrumbsBox backUrl={`${ROUTES.SIDE_MENU_OVERVIEW}/${id}`} backLabel={t('commons.backBtn')} items={[]} />
           <TitleBox
             title={t('pages.initiativeStores.uploadStores')}
             mbTitle={2}
@@ -108,7 +106,7 @@ const InitiativeStoresUpload: React.FC = () => {
         </Box>
       </Box>
 
-      <Paper elevation={1} sx={{ p: 3, mt: 2 }}>
+      <Paper elevation={1} sx={{ borderRadius: 0, p: 3, mt: 2 }}>
         <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
           <TitleBox
             title={t('pages.initiativeStores.addStore')}
@@ -119,7 +117,12 @@ const InitiativeStoresUpload: React.FC = () => {
             variantTitle="h6"
             variantSubTitle="body2"
           />
-          <Link href="#" underline="hover" sx={{ display: 'block', my: 1 }}>
+          <Link
+            fontWeight={'bold'}
+            href="#"
+            underline="hover"
+            sx={{ display: 'block', my: 1, mb: 2 }}
+          >
             {t('pages.initiativeStores.manualLink')}
           </Link>
         </Box>
@@ -130,8 +133,16 @@ const InitiativeStoresUpload: React.FC = () => {
           onChange={(e) => setUploadMethod(e.target.value as 'csv' | 'manual')}
           sx={{ mb: 2 }}
         >
-          <FormControlLabel value="csv" control={<Radio />} label={t('pages.initiativeStores.uploadCSV')} />
-          <FormControlLabel value="manual" control={<Radio />} label={t('pages.initiativeStores.enterManually')} />
+          <FormControlLabel
+            value="csv"
+            control={<Radio />}
+            label={t('pages.initiativeStores.uploadCSV')}
+          />
+          <FormControlLabel
+            value="manual"
+            control={<Radio />}
+            label={t('pages.initiativeStores.enterManually')}
+          />
         </RadioGroup>
 
         {uploadMethod === 'csv' && (
@@ -141,17 +152,27 @@ const InitiativeStoresUpload: React.FC = () => {
               border: '2px dashed #2196f3',
               p: 4,
               textAlign: 'center',
-              mb: 2,
-              backgroundColor: '#f9f9f9',
+              mb: 4,
+              backgroundColor: '#0073E614',
             }}
           >
-            <CloudUploadIcon fontSize="large" color="primary" />
-            <Typography variant="body1" mt={2}>
-              {t('pages.initiativeStores.dragCSV')}
-              <Link href="#" underline="hover">
-                {t('pages.initiativeStores.selectFromPc')}
-              </Link>
-            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                mt: 2,
+              }}
+            >
+              <CloudUploadIcon fontSize="large" color="primary" />
+              <Typography variant="body1">
+                {t('pages.initiativeStores.dragCSV')}
+                <Link fontWeight={'bold'} href="#" underline="hover" sx={{ ml: 1 }}>
+                  {t('pages.initiativeStores.selectFromPc')}
+                </Link>
+              </Typography>
+            </Box>
           </Paper>
         )}
 
@@ -161,17 +182,17 @@ const InitiativeStoresUpload: React.FC = () => {
           )
         }
 
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body1" color="text.primary">
           {t('pages.initiativeStores.prepareList')}
-          <Link href="#" underline="hover">
-            {t('pages.initiativeStores.downExampleFile')}
+          <Link fontWeight={'bold'} href="#" underline="hover">
+            {t('pages.initiativeStores.downloadExampleFile')}
           </Link>
         </Typography>
       </Paper>
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-        <Button variant="outlined">{t('commons.backBtn')}</Button>
-        <Button variant="contained" disabled={!isFormValid()} onClick={handleConfirm}>
+        <Button data-testid="back-stores-button" variant="outlined">{t('commons.backBtn')}</Button>
+        <Button data-testid="confirm-stores-button" variant="contained" disabled={!isFormValid()} onClick={handleConfirm}>
           {t('commons.confirmBtn')}
         </Button>
       </Box>

@@ -12,7 +12,6 @@ import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/hooks/use
 import { useTranslation } from 'react-i18next';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListAltIcon from '@mui/icons-material/ListAlt';
-import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import StoreIcon from '@mui/icons-material/Store';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useEffect, useState } from 'react';
@@ -144,27 +143,6 @@ export default function SideMenu() {
                     icon={StoreIcon}
                     level={2}
                     data-testid="initiativeStoresTitle-click-test"
-                  />
-                  <SidenavItem
-                    title={t('pages.initiativeDiscounts.title')}
-                    handleClick={() =>
-                      onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
-                        history.replace(`${ROUTES.SIDE_MENU_DISCOUNTS}/${item.initiativeId}`);
-                      })
-                    }
-                    isSelected={pathname === `${ROUTES.SIDE_MENU_DISCOUNTS}/${item.initiativeId}`}
-                    icon={ConfirmationNumberIcon}
-                    level={2}
-                    data-testid="initiativeDiscountsTitle-click-test"
                   />
                 </List>
               </AccordionDetails>
