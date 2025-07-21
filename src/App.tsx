@@ -21,6 +21,7 @@ import InitiativeDiscounts from './pages/initiativeDiscounts/initiativeDiscounts
 import NewDiscount from './pages/newDiscount/newDiscount';
 import AcceptNewDiscount from './pages/acceptNewDiscount/acceptNewDiscount';
 import InitiativeOverview from './pages/initiativeOverview/initiativeOverview';
+import InitiativeStoresUpload from './pages/initiativeStores/initiativeStoresUpload';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -70,6 +71,9 @@ const SecuredRoutes = withLogin(
           </Route>
           <Route path={routes.OVERVIEW} exact={true}>
             <InitiativeOverview />
+          </Route>
+          <Route path={routes.STORES_UPLOAD} exact={true}>
+            <InitiativeStoresUpload />
           </Route>
           <Route path={routes.NEW_DISCOUNT} exact={true}>
             <NewDiscount />

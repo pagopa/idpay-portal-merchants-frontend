@@ -85,7 +85,7 @@ const Layout = ({ children }: Props) => {
             gridColumn="span 12"
             maxWidth={
               location.pathname !== routes.PRIVACY_POLICY && location.pathname !== routes.TOS
-                ? 920
+                ? '75%'
                 : '100%'
             }
             justifySelf="center"

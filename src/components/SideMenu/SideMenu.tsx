@@ -12,12 +12,11 @@ import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/hooks/use
 import { useTranslation } from 'react-i18next';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListAltIcon from '@mui/icons-material/ListAlt';
-import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import StoreIcon from '@mui/icons-material/Store';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
-import ROUTES from '../../routes';
+import ROUTES, { BASE_ROUTE } from '../../routes';
 import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import SidenavItem from './SidenavItem';
@@ -127,14 +126,6 @@ export default function SideMenu() {
                   />
                   <SidenavItem
                     title={t('pages.initiativeStores.title')}
-                    handleClick={() =>{}}
-                    isSelected={pathname === `${ROUTES.SIDE_MENU_STORES}/${item.initiativeId}`}
-                    icon={StoreIcon}
-                    level={2}
-                    data-testid="initiativeStoresTitle-click-test"
-                  />
-                  <SidenavItem
-                    title={t('pages.initiativeDiscounts.title')}
                     handleClick={() =>
                       onExit(() => {
                         dispatch(
@@ -146,13 +137,12 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        history.replace(`${ROUTES.SIDE_MENU_DISCOUNTS}/${item.initiativeId}`);
-                      })
-                    }
-                    isSelected={pathname === `${ROUTES.SIDE_MENU_DISCOUNTS}/${item.initiativeId}`}
-                    icon={ConfirmationNumberIcon}
+                        history.replace(`${BASE_ROUTE}/punti-vendita/censisci/${item.initiativeId}`);
+                      })}
+                    isSelected={pathname === `${BASE_ROUTE}/punti-vendita/censisci/${item.initiativeId}`}
+                    icon={StoreIcon}
                     level={2}
-                    data-testid="initiativeDiscountsTitle-click-test"
+                    data-testid="initiativeStoresTitle-click-test"
                   />
                 </List>
               </AccordionDetails>

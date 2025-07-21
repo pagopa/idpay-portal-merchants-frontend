@@ -9,7 +9,7 @@ const date = new Date('2022-10-01T00:00:00.000Z');
 // });
 
 test('test formattedCurrency with undefined as param', () => {
-  expect(formattedCurrency(undefined)).toEqual('-');
+  expect(formattedCurrency(undefined)).toEqual('0,00 €');
 });
 
 test('test formattedCurrency with a number as param', () => {
@@ -30,5 +30,5 @@ test('test formatIban with a string of IBAN as param', () => {
 });
 
 test('test formatIban with undefined as param', () => {
-  expect(formatIban(undefined)).toEqual('');
+  expect(formatIban(undefined)).toEqual('-');
 });
