@@ -135,7 +135,7 @@ const InitiativeOverview = () => {
         </Box>
       </Box>
       {
-        !iban ? (
+        !iban && ibanModalIsOpen ? (
           <Alert
             variant="outlined"
             severity="warning"
