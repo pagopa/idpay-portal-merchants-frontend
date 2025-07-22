@@ -78,7 +78,7 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const handleConfirm = async () => {
     if (uploadMethod === 'manual') {
-      await updateMerchantPointOfSales('bb7b4183-2a38-3243-8cdd-218fec0c5258', salesPoints).then(() => {
+      await updateMerchantPointOfSales(id, salesPoints).then(() => {
            setShowSuccessAlert(true);
       });
     }
