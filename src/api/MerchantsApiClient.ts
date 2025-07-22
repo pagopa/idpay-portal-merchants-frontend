@@ -116,6 +116,6 @@ export const MerchantApi = {
 
   updateMerchantPointOfSales: async (merchantId: string, pointOfSales: Array<PointOfSaleDTO>): Promise<void> => {
     const result = await apiClient.putPointOfSales({ merchantId, body: pointOfSales });
-    return extractResponse(result, 200, onRedirectToLogin);
+    return extractResponse(result, 204, onRedirectToLogin);
   },
 };

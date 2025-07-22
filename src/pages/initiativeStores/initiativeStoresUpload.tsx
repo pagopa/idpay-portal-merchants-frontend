@@ -59,6 +59,19 @@ const InitiativeStoresUpload: React.FC = () => {
     console.log(salesPoints);
   }, [salesPoints]);
 
+  useEffect(() => {
+    // eslint-disable-next-line functional/no-let
+    let timer : any = {};
+    if (showSuccessAlert) {
+      timer = setTimeout(() => {
+        setShowSuccessAlert(false);
+      }, 5000);
+    }
+    return() => {
+      clearTimeout(timer);
+    };
+  }, [showSuccessAlert]);
+
   const onFormChange = (salesPoints: Array<PointOfSaleDTO>) => {
     setSalesPoints(salesPoints);
   };
@@ -201,7 +214,7 @@ const InitiativeStoresUpload: React.FC = () => {
           icon={<CheckCircleOutlineIcon />}
           sx={{
             position: 'fixed',
-            bottom: 20,
+            bottom: 40,
             right: 20,
             backgroundColor: 'white',
             width: 'auto',
