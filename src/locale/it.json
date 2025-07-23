@@ -201,5 +201,9 @@
     "positiveNumber": "Inserisci un valore positivo",
     "requiredField": "Campo obbligatorio",
     "number": "Inserisci un numero"
+  },
+  "initiativeStoresUpload": {
+    "uploadError": "Errore durante il caricamento dei punti vendita",
+    "uploadSuccess": "Punti vendita caricati con successo"
   }
 }

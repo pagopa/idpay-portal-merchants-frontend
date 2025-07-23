@@ -26,6 +26,7 @@ import style from './pointsOfSaleForm.module.css';
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
   onErrorChange: (errors: FormErrors) => void;
+  pointsOfSaleLoaded: boolean;
 }
 
 interface FormErrors {
@@ -37,7 +38,7 @@ interface FieldErrors {
 }
 
 
-const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChange }) => {
+const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChange, pointsOfSaleLoaded }) => {
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
     {
       type: TypeEnum.PHYSICAL,
@@ -78,6 +79,44 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
     onFormChange(salesPoints);
     onErrorChange(errors);
   }, [salesPoints]);
+
+  useEffect(() => {
+    if(pointsOfSaleLoaded){
+      setSalesPoints([
+        {
+          type: TypeEnum.PHYSICAL,
+          franchiseName: '',
+          address: '',
+          city: '',
+          zipCode: '',
+          region: '',
+          province: '',
+          webSite: '',
+          contactEmail: '',
+          contactName: '',
+          contactSurname: '',
+          channels: [
+            {
+              type: ChannelTypeEnum.LANDING,
+              contact: '',
+            },
+            {
+              type: ChannelTypeEnum.WEB,
+              contact: '',
+            },
+            {
+              type: ChannelTypeEnum.EMAIL,
+              contact: '',
+            },
+            {
+              type: ChannelTypeEnum.MOBILE,
+              contact: '',
+            },
+          ],
+        },
+      ]);
+    }
+  },[pointsOfSaleLoaded]);
 
   const handleFieldChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
