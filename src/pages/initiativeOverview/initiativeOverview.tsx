@@ -120,9 +120,9 @@ const InitiativeOverview = () => {
 
 
   return (
-    <Box sx={{ width: '100%', padding: 2 }}>
+    <Box sx={{ width: '100%'}}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
-        <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
+        <Box sx={{ display: 'grid', gridColumn: 'span 8'}}>
           <TitleBox
             title={t('pages.initiativeOverview.title')}
             subTitle={t('pages.initiativeOverview.subtitle')}

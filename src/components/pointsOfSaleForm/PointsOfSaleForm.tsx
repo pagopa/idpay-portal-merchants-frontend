@@ -320,7 +320,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
   return (
     <Box sx={{ width: '100%', mx: 'auto', bgcolor: 'background.paper', borderRadius: 2, boxShadow: 3 }}>
       {salesPoints.map((salesPoint, index) => (
-        <Box className={style['points-of-sale-wrapper']} key={index} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Box className={style['points-of-sale-wrapper']} key={`${salesPoint.franchiseName}-${index}`} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="h6" gutterBottom>
             Punto vendita {index + 1}
             <Typography component="span" variant="body2" sx={{ float: 'right' }}>
@@ -379,7 +379,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             )
           }
 
-          {/* Indirizzo (conditionally rendered for 'fisico' type) */}
           {salesPoint.type === 'PHYSICAL' && (
             <Box sx={{ mb: 3 }}>
               <Grid container spacing={2}>

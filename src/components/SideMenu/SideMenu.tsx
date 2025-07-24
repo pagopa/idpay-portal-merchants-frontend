@@ -117,9 +117,9 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        history.replace(`${ROUTES.SIDE_MENU_OVERVIEW}/${item.initiativeId}`);
+                        history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`);
                       })}
-                    isSelected={pathname === `${ROUTES.SIDE_MENU_OVERVIEW}/${item.initiativeId}`}
+                    isSelected={pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`}
                     icon={DashboardIcon}
                     level={2}
                     data-testid="initiativeOverviewTitle-click-test"
@@ -137,9 +137,9 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        history.replace(`${BASE_ROUTE}/punti-vendita/censisci/${item.initiativeId}`);
+                        history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
                       })}
-                    isSelected={pathname === `${BASE_ROUTE}/punti-vendita/censisci/${item.initiativeId}`}
+                    isSelected={pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`}
                     icon={StoreIcon}
                     level={2}
                     data-testid="initiativeStoresTitle-click-test"

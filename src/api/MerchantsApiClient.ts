@@ -4,6 +4,7 @@ import { buildFetchApi, extractResponse } from '@pagopa/selfcare-common-frontend
 import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
+import { GetPointOfSalesFilters } from '../types/types';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
 import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
 import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsDTO';
@@ -118,4 +119,11 @@ export const MerchantApi = {
     const result = await apiClient.putPointOfSales({ merchantId, body: pointOfSales });
     return extractResponse(result, 204, onRedirectToLogin);
   },
+
+  getMerchantPointOfSales: async (merchantId: string,
+    filters: GetPointOfSalesFilters): Promise<Array<PointOfSaleDTO>> => {
+    const result = await apiClient.getPointOfSales({ merchantId, ...filters });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
 };

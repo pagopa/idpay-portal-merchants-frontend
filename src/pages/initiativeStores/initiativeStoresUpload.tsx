@@ -89,7 +89,7 @@ const InitiativeStoresUpload: React.FC = () => {
         return;
       }
       try{
-        await updateMerchantPointOfSales("", salesPoints);
+        await updateMerchantPointOfSales(merchantId, salesPoints);
         setPointsOfSaleLoaded(true);
         setShowSuccessAlert(true);
       } catch (error: any) {
@@ -128,7 +128,7 @@ const InitiativeStoresUpload: React.FC = () => {
     <Box sx={{ p: 4, width: '100%', margin: '0 auto' }}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
         <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
-          <BreadcrumbsBox backUrl={`${ROUTES.SIDE_MENU_OVERVIEW}/${id}`} backLabel={t('commons.backBtn')} items={[]} />
+          <BreadcrumbsBox backUrl={`${id}/${ROUTES.SIDE_MENU_OVERVIEW}`} backLabel={t('commons.backBtn')} items={[]} />
           <TitleBox
             title={t('pages.initiativeStores.uploadStores')}
             mbTitle={2}
