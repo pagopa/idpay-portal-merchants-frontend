@@ -48,10 +48,10 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
     },
   });
 
-  const filterByStatusOptionsList = [
-    { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded') },
-    { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
-  ];
+  // const filterByStatusOptionsList = [
+  //   { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded') },
+  //   { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
+  // ];
 
   const getTableData = (
     initiativeId: string,
@@ -97,7 +97,6 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
         resetForm={() =>
           resetForm(id, formik, setFilterDataByUser, setFilterDataByStatus, setRows, getTableData)
         }
-        filterByStatusOptionsList={filterByStatusOptionsList}
       />
       {rows.length > 0 ? (
         <Box

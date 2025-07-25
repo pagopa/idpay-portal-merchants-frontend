@@ -150,7 +150,10 @@ const InitiativeOverview = () => {
       }
       <Box sx={{ display: 'flex', gridColumn: 'span 6', gap: 2, mt: 2 }}>
         <Box flex="1">
-          <InitiativeOverviewCard title={t('pages.initiativeOverview.information')}>
+          <InitiativeOverviewCard
+            title={t('pages.initiativeOverview.information')}
+            titleVariant={'h5'}
+          >
             <Box
               sx={{
                 display: 'grid',
@@ -260,6 +263,7 @@ const InitiativeOverview = () => {
           <InitiativeOverviewCard
             title={t('pages.initiativeOverview.stores')}
             subtitle={t('pages.initiativeOverview.storesSubtitle')}
+            titleVariant={'h5'}
           >
             <Box
               sx={{

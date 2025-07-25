@@ -1,53 +1,21 @@
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Box, Button, FormControl} from '@mui/material';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import { useTranslation } from 'react-i18next';
 import { FormikProps } from 'formik';
+import React from 'react';
 import { genericContainerStyle } from '../../styles';
 
 interface Props {
+  children?: Array<React.ReactNode>;
   formik: FormikProps<{ searchUser: string; filterStatus: string }>;
-  resetForm: () => void;
-  filterByStatusOptionsList: Array<{ value: string; label: string }>;
+  resetForm?: () => void;
 }
 
-const FiltersForm = ({ formik, resetForm, filterByStatusOptionsList }: Props) => {
+const FiltersForm = ({children, formik, resetForm}: Props) => {
   const { t } = useTranslation();
   return (
     <Box sx={{ ...genericContainerStyle, gap: 2, alignItems: 'baseline' }}>
-      <FormControl sx={{ gridColumn: 'span 4' }}>
-        <TextField
-          label={t('pages.initiativeDiscounts.searchByFiscalCode')}
-          placeholder={t('pages.initiativeDiscounts.searchByFiscalCode')}
-          name="searchUser"
-          aria-label="searchUser"
-          role="input"
-          InputLabelProps={{ required: false }}
-          value={formik.values.searchUser}
-          onChange={(e) => formik.handleChange(e)}
-          size="small"
-          data-testid="searchUser-test"
-        />
-      </FormControl>
-      <FormControl sx={{ gridColumn: 'span 2' }} size="small">
-        <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
-        <Select
-          id="filterStatus"
-          inputProps={{
-            'data-testid': 'filterStatus-select',
-          }}
-          name="filterStatus"
-          label={t('pages.initiativeDiscounts.filterByStatus')}
-          placeholder={t('pages.initiativeDiscounts.filterByStatus')}
-          onChange={(e) => formik.handleChange(e)}
-          value={formik.values.filterStatus}
-        >
-          {filterByStatusOptionsList.map((item) => (
-            <MenuItem key={item.value} value={item.value}>
-              {item.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {React.Children.map(children, (child) => (<>{child}</>))}
       <FormControl sx={{ gridColumn: 'span 1' }}>
         <Button
           sx={{ height: '44.5px' }}

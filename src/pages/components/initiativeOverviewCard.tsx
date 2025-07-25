@@ -8,7 +8,7 @@ interface InitiativeOverviewCardProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
-  titleVariant?: 'h4' | 'h5' | 'h6';
+  titleVariant?: 'h4' | 'h5' | 'h6' ;
   subtitleVariant?: 'body1' | 'body2' | 'caption';
 }
 
@@ -16,7 +16,7 @@ const InitiativeOverviewCard = ({
        children,
        title,
        subtitle,
-       titleVariant = 'h5',
+       titleVariant,
        subtitleVariant = 'caption',
        }: InitiativeOverviewCardProps) => (
     <Card
