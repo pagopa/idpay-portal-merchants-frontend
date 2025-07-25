@@ -155,7 +155,13 @@
       "selectFromPc": "selezionalo dal tuo computer",
       "downloadExampleFile": "Scarica il file di esempio",
       "enterManually": "Inserisci manualmente",
-      "prepareList": "Non sai come preparare la lista? "
+      "prepareList": "Non sai come preparare la lista? ",
+      "referent": "Referente",
+      "address": "Indirizzo",
+      "city": "Città",
+      "pointOfSaleType": "Tipologia punto vendita",
+      "online": "Online",
+      "physical": "Fisico"
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",

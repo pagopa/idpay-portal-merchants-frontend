@@ -6,6 +6,7 @@ import { matchPath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import {theme} from "@pagopa/mui-italia/dist/theme/theme.js";
 import ROUTES, { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
@@ -41,6 +42,7 @@ const InitiativeOverview = () => {
   const addError = useErrorDispatcher();
 
   useEffect(() => {
+    console.log("THEME", theme.typography.fontWeightRegular);
     setIban(undefined);
     setIbanHolder("Mario Rossi");
     getMerchantDetail(id)
