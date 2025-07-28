@@ -1,18 +1,109 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Box, Button, Stack, Grid, FormControl, InputLabel, Select, MenuItem, TextField} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import StoreIcon from '@mui/icons-material/Store';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+// import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+// import { TypeEnum, PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 
+// service
+// import { getMerchantPointOfSales } from '../../services/merchantService';
+// import { parseJwt } from '../../utils/jwt-utils';
+const columns: Array<GridColDef> = [
+  {
+    field: 'franchiseName',
+    headerName: 'Franchise Name',
+    width: 150,
+    editable: true,
+  },
+  {
+    field: 'type',
+    headerName: 'Type',
+    width: 150,
+    editable: true,
+  },
+  {
+    field: 'address',
+    headerName: 'Address',
+    width: 150,
+    editable: true,
+  },
+  {
+    field: 'city',
+    headerName: 'City',
+    width: 150,
+    editable: true,
+  },
+  {
+    field: 'referent',
+    headerName: 'Referent',
+    width: 150,
+    editable: true,
+  },
+  {
+    field: 'contactEmail',
+    headerName: 'Email',
+    width: 150,
+    editable: true,
+  },
 
+];
+
+const rows = [
+  { id: 1, franchiseName: 'Snow', type: 'Jon', address: 'Jon', city: 'Jon', referent: 'Jon', contactEmail: 'Jon' },
+  { id: 2, franchiseName: 'Lannister', type: 'Cersei', address: 'Cersei', city: 'Cersei', referent: 'Cersei', contactEmail: 'Cersei' },
+  { id: 3, franchiseName: 'Lannister', type: 'Jaime', address: 'Jaime', city: 'Jaime', referent: 'Jaime', contactEmail: 'Jaime' },
+  { id: 4, franchiseName: 'Stark', type: 'Arya', address: 'Arya', city: 'Arya', referent: 'Arya', contactEmail: 'Arya' },
+  { id: 5, franchiseName: 'Targaryen', type: 'Daenerys', address: 'Daenerys', city: 'Daenerys', referent: 'Daenerys', contactEmail: 'Daenerys' },
+  { id: 6, franchiseName: 'Melisandre', type: 'Daenerys', address: 'Daenerys', city: 'Daenerys', referent: 'Daenerys', contactEmail: 'Daenerys' },
+  { id: 7, franchiseName: 'Clifford', type: 'Ferrara', address: 'Ferrara', city: 'Ferrara', referent: 'Ferrara', contactEmail: 'Ferrara' },
+  { id: 8, franchiseName: 'Frances', type: 'Rossini', address: 'Rossini', city: 'Rossini', referent: 'Rossini', contactEmail: 'Rossini' },
+  { id: 9, franchiseName: 'Roxie', type: 'Harvey', address: 'Harvey', city: 'Harvey', referent: 'Harvey', contactEmail: 'Harvey' }, 
+];
 
 const InitiativeStores: React.FC = () => {
-
-
+  
   const { t } = useTranslation();
-  useEffect(() => {
-    console.log('initiativeStores');
-  }, []);
+  // const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
+  // const [showErrorAlert, setShowErrorAlert] = useState(false);
+  // const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  // const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
+
+  // useEffect(() => {
+  //     try {
+  //       await fetchStores();
+  //     } catch (error) {
+  //       console.error('Error fetching stores:', error);
+  //       setShowErrorAlert(true);
+  //     }
+  // }, []);
+
+  // const fetchStores = async () => {
+  //   const userJwt = parseJwt(storageTokenOps.read());
+  //   const merchantId = userJwt?.merchant_id;
+  //   if (!merchantId) {
+  //     setShowErrorAlert(true);
+  //     return;
+  //   }
+  //   try{
+  //     const stores = await getMerchantPointOfSales(merchantId, {
+  //       type: TypeEnum.PHYSICAL,
+  //       city: '',
+  //       address: '',
+  //       contactName: '',
+  //       sort: 'asc',
+  //       page: 0,
+  //       size: 10,
+  //     });
+  //     setStores(stores);
+  //     setPointsOfSaleLoaded(true);
+  //     setShowSuccessAlert(true);
+  //   } catch (error: any) {
+  //     console.log(error);
+  //     setShowErrorAlert(true);
+  //   }
+  // };
 
   
 
@@ -114,6 +205,25 @@ const InitiativeStores: React.FC = () => {
           </Button>
         </Grid>
       </Grid>
+
+      <Box sx={{ height: 400, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={5}
+        rowsPerPageOptions={[5]}
+        disableSelectionOnClick
+        experimentalFeatures={{ newEditingApi: true }}
+        sx={{
+          '& .MuiDataGrid-row': {
+            backgroundColor: '#FFFFFF',
+            '&:hover': {
+              backgroundColor: '#FFFFFF',
+            },
+          },
+        }}
+      />
+    </Box>
 
 
 
