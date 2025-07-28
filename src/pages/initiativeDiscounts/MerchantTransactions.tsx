@@ -21,7 +21,7 @@ import EmptyList from '../components/EmptyList';
 import DataTable from '../../components/dataTable/DataTable';
 import {
   TransactionsComponentProps,
-  resetForm,
+  
 } from './helpers';
 import FiltersForm from './FiltersForm';
 import { useTableDataFiltered } from './useTableDataFiltered';
@@ -165,9 +165,9 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
     <Box width={'100%'}>
       <FiltersForm
         formik={formik}
-        resetForm={() =>
-          resetForm(id, formik, setFilterByUser, setFilterByStatus, setRows, getTableData)
-        }
+        // resetForm={() =>
+        //   resetForm(id, formik, setFilterByUser, setFilterByStatus, setRows, getTableData)
+        // }
       >
         <FormControl sx={{ gridColumn: 'span 4' }}>
           <TextField

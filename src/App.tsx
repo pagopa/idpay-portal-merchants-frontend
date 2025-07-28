@@ -23,7 +23,7 @@ import AcceptNewDiscount from './pages/acceptNewDiscount/acceptNewDiscount';
 import InitiativeOverview from './pages/initiativeOverview/initiativeOverview';
 import InitiativeStoresUpload from './pages/initiativeStores/initiativeStoresUpload';
 import InitiativeStores from './pages/initiativeStores/InitiativeStores';
-import InitiativeStoreDetail from './pages/initiativeStores/initiativeStoreDetail';
+// import InitiativeStoreDetail from './pages/initiativeStores/initiativeStoreDetail';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {

@@ -278,7 +278,7 @@ const InitiativeOverview = () => {
                 <Button
                   variant="contained"
                   startIcon={<StoreIcon />}
-                  onClick={() => {history.replace(`${BASE_ROUTE}/punti-vendita/censisci/${id}`);}}
+                  onClick={() => {history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`);}}
                   size="large"
                   fullWidth={false}
                   data-testid="add-stores-button">

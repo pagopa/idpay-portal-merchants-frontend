@@ -161,7 +161,10 @@
       "city": "Città",
       "pointOfSaleType": "Tipologia punto vendita",
       "online": "Online",
-      "physical": "Fisico"
+      "physical": "Fisico",
+      "franchiseName": "Insegna",
+      "type": "Tipo",
+      "email": "E-mail"
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",

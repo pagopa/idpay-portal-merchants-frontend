@@ -6,7 +6,7 @@ import { MerchantTransactionsListDTO } from '../api/generated/merchants/Merchant
 import { MerchantTransactionsProcessedListDTO } from '../api/generated/merchants/MerchantTransactionsProcessedListDTO';
 import { PointOfSaleDTO } from '../api/generated/merchants/PointOfSaleDTO';
 import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
-import { GetPointOfSalesFilters } from '../types/types';
+import { GetPointOfSalesFilters, GetPointOfSalesResponse } from '../types/types';
 
 export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> => MerchantApi.getMerchantInitiativeList();
 
@@ -47,5 +47,5 @@ export const authPaymentBarCode = (
 
 export const updateMerchantPointOfSales = (merchantId: string, pointOfSales: Array<PointOfSaleDTO>): Promise<void> => MerchantApi.updateMerchantPointOfSales(merchantId, pointOfSales);
 
-export const getMerchantPointOfSales = (merchantId: string, filters: GetPointOfSalesFilters): Promise<Array<PointOfSaleDTO>> => MerchantApi.getMerchantPointOfSales(merchantId, filters);
+export const getMerchantPointOfSales = (merchantId: string, filters: GetPointOfSalesFilters): Promise<GetPointOfSalesResponse> => MerchantApi.getMerchantPointOfSales(merchantId, filters);
   

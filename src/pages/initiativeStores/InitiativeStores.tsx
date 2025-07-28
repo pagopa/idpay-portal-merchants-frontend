@@ -1,149 +1,196 @@
-import React from 'react';
-import { Box, Button, Stack, Grid, FormControl, InputLabel, Select, MenuItem, TextField} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, Stack, Grid, FormControl, InputLabel, Select, MenuItem, TextField, Alert, Slide } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import StoreIcon from '@mui/icons-material/Store';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-// import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-// import { TypeEnum, PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
+import { GridColDef } from '@mui/x-data-grid';
+import { useFormik } from 'formik';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import {useHistory, useParams } from 'react-router-dom';
+import DataTable from '../../components/dataTable/DataTable';
+import FiltersForm from '../initiativeDiscounts/FiltersForm';
+import { GetPointOfSalesFilters } from '../../types/types';
+import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
+import { parseJwt } from '../../utils/jwt-utils';
+import { getMerchantPointOfSales } from '../../services/merchantService';
+import { BASE_ROUTE } from '../../routes';
 
-// service
-// import { getMerchantPointOfSales } from '../../services/merchantService';
-// import { parseJwt } from '../../utils/jwt-utils';
-const columns: Array<GridColDef> = [
-  {
-    field: 'franchiseName',
-    headerName: 'Franchise Name',
-    width: 150,
-    editable: true,
-  },
-  {
-    field: 'type',
-    headerName: 'Type',
-    width: 150,
-    editable: true,
-  },
-  {
-    field: 'address',
-    headerName: 'Address',
-    width: 150,
-    editable: true,
-  },
-  {
-    field: 'city',
-    headerName: 'City',
-    width: 150,
-    editable: true,
-  },
-  {
-    field: 'referent',
-    headerName: 'Referent',
-    width: 150,
-    editable: true,
-  },
-  {
-    field: 'contactEmail',
-    headerName: 'Email',
-    width: 150,
-    editable: true,
-  },
 
-];
+const initialValues: GetPointOfSalesFilters = {
+  type: TypeEnum.PHYSICAL,
+  city: '',
+  address: '',
+  contactName: '',
+  page: 0,
+  size: 10,
+  sort: 'asc'
+};
+interface RouteParams {
+  id: string;
+}
 
-const rows = [
-  { id: 1, franchiseName: 'Snow', type: 'Jon', address: 'Jon', city: 'Jon', referent: 'Jon', contactEmail: 'Jon' },
-  { id: 2, franchiseName: 'Lannister', type: 'Cersei', address: 'Cersei', city: 'Cersei', referent: 'Cersei', contactEmail: 'Cersei' },
-  { id: 3, franchiseName: 'Lannister', type: 'Jaime', address: 'Jaime', city: 'Jaime', referent: 'Jaime', contactEmail: 'Jaime' },
-  { id: 4, franchiseName: 'Stark', type: 'Arya', address: 'Arya', city: 'Arya', referent: 'Arya', contactEmail: 'Arya' },
-  { id: 5, franchiseName: 'Targaryen', type: 'Daenerys', address: 'Daenerys', city: 'Daenerys', referent: 'Daenerys', contactEmail: 'Daenerys' },
-  { id: 6, franchiseName: 'Melisandre', type: 'Daenerys', address: 'Daenerys', city: 'Daenerys', referent: 'Daenerys', contactEmail: 'Daenerys' },
-  { id: 7, franchiseName: 'Clifford', type: 'Ferrara', address: 'Ferrara', city: 'Ferrara', referent: 'Ferrara', contactEmail: 'Ferrara' },
-  { id: 8, franchiseName: 'Frances', type: 'Rossini', address: 'Rossini', city: 'Rossini', referent: 'Rossini', contactEmail: 'Rossini' },
-  { id: 9, franchiseName: 'Roxie', type: 'Harvey', address: 'Harvey', city: 'Harvey', referent: 'Harvey', contactEmail: 'Harvey' }, 
-];
 
 const InitiativeStores: React.FC = () => {
-  
+
+  const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
   const { t } = useTranslation();
-  // const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
-  // const [showErrorAlert, setShowErrorAlert] = useState(false);
-  // const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  // const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
+  const history = useHistory();
+  const { id } = useParams<RouteParams>();
 
-  // useEffect(() => {
-  //     try {
-  //       await fetchStores();
-  //     } catch (error) {
-  //       console.error('Error fetching stores:', error);
-  //       setShowErrorAlert(true);
-  //     }
-  // }, []);
+  useEffect(() => {
+    fetchStores(initialValues).catch(error => {
+      console.error('Error fetching stores:', error);
+      setShowErrorAlert(true);
+    });
+  }, []);
 
-  // const fetchStores = async () => {
-  //   const userJwt = parseJwt(storageTokenOps.read());
-  //   const merchantId = userJwt?.merchant_id;
-  //   if (!merchantId) {
-  //     setShowErrorAlert(true);
-  //     return;
-  //   }
-  //   try{
-  //     const stores = await getMerchantPointOfSales(merchantId, {
-  //       type: TypeEnum.PHYSICAL,
-  //       city: '',
-  //       address: '',
-  //       contactName: '',
-  //       sort: 'asc',
-  //       page: 0,
-  //       size: 10,
-  //     });
-  //     setStores(stores);
-  //     setPointsOfSaleLoaded(true);
-  //     setShowSuccessAlert(true);
-  //   } catch (error: any) {
-  //     console.log(error);
-  //     setShowErrorAlert(true);
-  //   }
-  // };
-
+  const columns: Array<GridColDef> = [
+    {
+      field: 'franchiseName',
+      headerName: t('pages.initiativeStores.franchiseName'),
+      flex: 1,
+      editable: false,
+      disableColumnMenu: true,
+    },
+    {
+      field: 'type',
+      headerName: t('pages.initiativeStores.type'),
+      flex: 1,
+      editable: false,
+      disableColumnMenu: true,
+    },
+    {
+      field: 'address',
+      headerName: t('pages.initiativeStores.address'),
+      flex: 1,
+      editable: false,
+      disableColumnMenu: true,
+    },
+    {
+      field: 'city',
+      headerName: t('pages.initiativeStores.city'),
+      flex: 1,
+      editable: false,
+      disableColumnMenu: true,
+    },
+    {
+      field: 'referent',
+      headerName: t('pages.initiativeStores.referent'),
+      flex: 1,
+      editable: false,
+      disableColumnMenu: true,
+    },
+    {
+      field: 'contactEmail',
+      headerName: t('pages.initiativeStores.email'),
+      flex: 1,
+      editable: false,
+      disableColumnMenu: true,
+    },
   
+  ];
+
+  const fetchStores = async (filters: GetPointOfSalesFilters) => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
+    if (!merchantId) {
+      setShowErrorAlert(true);
+      return;
+    }
+    try {
+      const response = await getMerchantPointOfSales(merchantId, {
+        type: filters.type,
+        city: filters.city,
+        address: filters.address,
+        contactName: filters.contactName,
+        sort: filters.sort,
+        page: filters.page,
+        size: 10,
+      });
+      setStores(response.content);
+    } catch (error: any) {
+      console.log(error);
+      setShowErrorAlert(true);
+    }
+  };
+
+  const formik = useFormik<GetPointOfSalesFilters>({
+    initialValues,
+    onSubmit: (values) => {
+      console.log('Eseguo ricerca con filtri:', values);
+    }
+  });
+
+  const handleFiltersApplied = (values: GetPointOfSalesFilters) => {
+    console.log('Callback dopo applicazione filtri:', values);
+    fetchStores(values).catch(error => {
+      console.error('Error fetching stores:', error);
+      setShowErrorAlert(true);
+    });
+
+  };
+
+  const handleFiltersReset = () => {
+    console.log('Callback dopo reset filtri');
+    fetchStores(initialValues).catch(error => {
+      console.error('Error fetching stores:', error);
+      setShowErrorAlert(true);
+    });
+  };
+
+  const goToAddStorePage = () => {
+    history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`);
+  };
+
+  const goToStoreDetail = (store: PointOfSaleDTO) => {
+    // history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
+    console.log(store);
+  };
 
 
   return (
-    <Box sx={{my: 2}}>
-    <Stack
-      direction={{ xs: 'column', md: 'row' }}
-      spacing={{ xs: 2, md: 3 }}
-      justifyContent="space-between"
-      alignItems={{ xs: 'flex-start', md: 'center' }}
-    >
-      <TitleBox
-        title={t('pages.initiativeStores.title')}
-        subTitle={t('pages.initiativeStores.subtitle')}
-        mbTitle={2}
-        variantTitle="h4"
-        variantSubTitle="body1"
-      />
-      <Button
-        variant="contained"
-        size="small"
-        onClick={() => { console.log("Aggiungi Negozio Clicked"); }}
-        startIcon={<StoreIcon />}
-        sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '200px' } }}
+    <Box sx={{ my: 2 }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={{ xs: 2, md: 3 }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', md: 'center' }}
       >
-        {t('pages.initiativeStores.addStoreList')}
-      </Button>
-    </Stack>
-    <Grid sx={{my: 4}} container spacing={2} alignItems="center"> 
-
-        <Grid item xs={12} sm={6} md={3} lg={3}> 
+        <TitleBox
+          title={t('pages.initiativeStores.title')}
+          subTitle={t('pages.initiativeStores.subtitle')}
+          mbTitle={2}
+          variantTitle="h4"
+          variantSubTitle="body1"
+        />
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => goToAddStorePage()}
+          startIcon={<StoreIcon />}
+          sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '200px' } }}
+        >
+          {t('pages.initiativeStores.addStoreList')}
+        </Button>
+      </Stack>
+      <FiltersForm
+        onFiltersApplied={handleFiltersApplied}
+        onFiltersReset={handleFiltersReset}
+        formik={formik}
+      >
+        <Grid item xs={12} sm={6} md={3} lg={3}>
           <FormControl fullWidth size="small">
             <InputLabel id="pos-type-label">{t('pages.initiativeStores.pointOfSaleType')}</InputLabel>
             <Select
               labelId="pos-type-label"
               id="pos-type-select"
-              // value={posType}
               label={t('pages.initiativeStores.pointOfSaleType')}
-              // onChange={(e) => setPosType(e.target.value)}
+              name="type"
+              value={formik.values.type}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
             >
               <MenuItem value=""><em>Nessuna</em></MenuItem>
               <MenuItem value="PHYSICAL">{t('pages.initiativeStores.physical')}</MenuItem>
@@ -158,8 +205,10 @@ const InitiativeStores: React.FC = () => {
             fullWidth
             size="small"
             label={t('pages.initiativeStores.city')}
-            // value={city}
-            // onChange={(e) => setCity(e.target.value)}
+            name="city"
+            value={formik.values.city}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
         </Grid>
 
@@ -168,9 +217,11 @@ const InitiativeStores: React.FC = () => {
           <TextField
             fullWidth
             size="small"
+            name="address"
             label={t('pages.initiativeStores.address')}
-            // value={address}
-            // onChange={(e) => setAddress(e.target.value)}
+            value={formik.values.address}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
         </Grid>
 
@@ -180,54 +231,47 @@ const InitiativeStores: React.FC = () => {
             fullWidth
             size="small"
             label={t('pages.initiativeStores.referent')}
-            // value={contactName}
-            // onChange={(e) => setContactName(e.target.value)}
+            name="contactName"
+            value={formik.values.contactName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3} lg={1}>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => { console.log("Filtra Clicked"); }}
-            sx={{ flexShrink: 0 }}
-          >
-            {t('commons.filterBtn')}
-          </Button>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3} lg={2}>
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => { console.log("Rimuovi filtri Clicked"); }}
-            sx={{ flexShrink: 0 }}
-          >
-            {t('commons.removeFiltersBtn')}
-          </Button>
-        </Grid>
-      </Grid>
 
-      <Box sx={{ height: 400, width: '100%' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        pageSize={5}
-        rowsPerPageOptions={[5]}
-        disableSelectionOnClick
-        experimentalFeatures={{ newEditingApi: true }}
-        sx={{
-          '& .MuiDataGrid-row': {
-            backgroundColor: '#FFFFFF',
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-            },
-          },
-        }}
-      />
+      </FiltersForm>
+
+      <Box sx={{ height: 500, width: '100%' }}>
+
+        <DataTable rows={stores} columns={columns} pageSize={10} rowsPerPage={10} handleRowAction={goToStoreDetail} />
+      </Box>
+
+      <Slide direction="left" in={showErrorAlert} mountOnEnter unmountOnExit>
+        <Alert
+          severity="error"
+          icon={<ErrorOutlineIcon />}
+          sx={{
+            position: 'fixed',
+            bottom: 40,
+            right: 20,
+            backgroundColor: 'white',
+            width: 'auto',
+            maxWidth: '400px',
+            minWidth: '300px',
+            zIndex: 1300,
+            boxShadow: 3,
+            borderRadius: 1,
+            '& .MuiAlert-icon': {
+              color: 'red'
+            }
+          }}
+        >
+          {t('initiativeStoresUpload.uploadError')}
+        </Alert>
+      </Slide>
+
+
+
     </Box>
-
-
-
-  </Box>
   );
 };
 

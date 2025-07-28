@@ -1,6 +1,6 @@
 import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
-import { IconButton } from '@mui/material';
+import { IconButton, Box } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 export interface DataTableProps {
@@ -21,21 +21,46 @@ const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction} : DataTab
 
   useEffect(() => {
     if (columns && columns.length > 0){
+      const processedColumns = columns.map((col: any) => ({
+          ...col,
+          renderCell: renderEmptyCell 
+        }));
+
       setFinalColumns(
-        [...columns,{field : 'actions',headerName: '', sortable: false, filterable: false,
-          renderCell : (params: any) => {
-            <IconButton
-              onClick={() => onRowAction(params.row)}
-              size="small"
-              sx={{ opacity: 0.6,
-                '&:hover': { opacity: 1 } }}
-            >
-              {<ArrowForwardIosIcon/>}
-            </IconButton>;}
-        }]
+        [
+          ...processedColumns,
+          {
+            field : 'actions',
+            headerName: '',
+            sortable: false,
+            filterable: false,
+            disableColumnMenu: true,
+            flex: 1,
+            renderCell : (params: any) => (
+              <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+                <IconButton
+                  onClick={() => onRowAction(params.row)}
+                  size="small"
+                  sx={{ opacity: 0.6,
+                    '&:hover': { opacity: 1 }
+                  }}
+                >
+                  <ArrowForwardIosIcon/>
+                </IconButton>
+              </Box>
+            )
+          }
+        ]
       );
     }
-  }, [columns]);
+  }, [columns]); 
+
+  const renderEmptyCell = (params: any) => {
+    if (params.value === null || params.value === undefined || params.value === '') {
+      return '-';
+    }
+    return params.value;
+  };
   return (
     <DataGrid
       rows={rows}
@@ -44,12 +69,20 @@ const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction} : DataTab
       rowsPerPageOptions={[rowsPerPage]}
       disableSelectionOnClick
       sx={{
+        border: 'none',
         '& .MuiDataGrid-row': {
           backgroundColor: '#FFFFFF',
           '&:hover': {
             backgroundColor: '#FFFFFF',
           },
         },
+        '& .MuiDataGrid-columnSeparator': {
+          display: 'none'
+        },
+        '& .MuiDataGrid-footerContainer': {
+          border: 'none'
+        },    
+    
       }}
     />
 
