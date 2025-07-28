@@ -3,7 +3,7 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { matchPath } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import ROUTES, { BASE_ROUTE } from '../../routes';
+import ROUTES from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
@@ -32,7 +32,6 @@ const NewDiscount = () => {
   return (
     <Box sx={{ ...genericContainerStyle, mt: 3, alignItems: 'start' }}>
       <BreadcrumbsBox
-        backUrl={`${BASE_ROUTE}/sconti-iniziativa/${id}`}
         backLabel={t('commons.backBtn')}
         items={[
           t('pages.initiativesList.title'),

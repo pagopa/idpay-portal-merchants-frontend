@@ -164,7 +164,9 @@
       "physical": "Fisico",
       "franchiseName": "Insegna",
       "type": "Tipo",
-      "email": "E-mail"
+      "email": "E-mail",
+      "noStores": "Non ci sono punti vendita,",
+      "addStoreNoResults": "aggiungili per iniziare"
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",

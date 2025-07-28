@@ -35,7 +35,6 @@ const FiltersForm = <T extends Record<string, any>>({
   const enhancedChildren = React.Children.map(children, (child) => {
     if (isValidElement(child) && child.props.name) {
       const fieldName = child.props.name;
-      const hasError = formik.touched[fieldName] && Boolean(formik.errors[fieldName]);
       
       return cloneElement(child, {
         ...child.props,
@@ -52,7 +51,6 @@ const FiltersForm = <T extends Record<string, any>>({
             child.props.onBlur(event);
           }
         },
-        error: hasError
       });
     }
     return child;

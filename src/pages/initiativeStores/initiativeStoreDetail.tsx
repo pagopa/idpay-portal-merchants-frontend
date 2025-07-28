@@ -120,7 +120,7 @@ const InitiativeStoreDetail = () => {
   return (
     <Box>
         <Box display={'grid'} gridColumn={'span 8'} mt={2}>
-          <BreadcrumbsBox backUrl={`${ROUTES.SIDE_MENU_OVERVIEW}/${id}`} backLabel={t('commons.backBtn')} items={[]} />
+          <BreadcrumbsBox backLabel={t('commons.backBtn')} items={[]} />
           <TitleBox
             title={"Nome punto vendita"}
             mbTitle={2}

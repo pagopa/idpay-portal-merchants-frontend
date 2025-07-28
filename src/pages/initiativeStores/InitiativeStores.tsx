@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Stack, Grid, FormControl, InputLabel, Select, MenuItem, TextField, Alert, Slide } from '@mui/material';
+import { Box, Button, Stack, Grid, FormControl, InputLabel, Select, MenuItem, TextField, Alert, Slide, Paper, Typography, Link } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import StoreIcon from '@mui/icons-material/Store';
@@ -35,6 +36,7 @@ const InitiativeStores: React.FC = () => {
 
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [storesLoading, setStoresLoading] = useState(false);
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
@@ -93,6 +95,7 @@ const InitiativeStores: React.FC = () => {
   ];
 
   const fetchStores = async (filters: GetPointOfSalesFilters) => {
+    setStoresLoading(true);
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     if (!merchantId) {
@@ -110,8 +113,10 @@ const InitiativeStores: React.FC = () => {
         size: 10,
       });
       setStores(response.content);
+      setStoresLoading(false);
     } catch (error: any) {
       console.log(error);
+      setStoresLoading(false);
       setShowErrorAlert(true);
     }
   };
@@ -145,8 +150,7 @@ const InitiativeStores: React.FC = () => {
   };
 
   const goToStoreDetail = (store: PointOfSaleDTO) => {
-    // history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
-    console.log(store);
+    history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
   };
 
 
@@ -165,7 +169,9 @@ const InitiativeStores: React.FC = () => {
           variantTitle="h4"
           variantSubTitle="body1"
         />
-        <Button
+       {
+        stores.length > 0 && !storesLoading && (
+          <Button
           variant="contained"
           size="small"
           onClick={() => goToAddStorePage()}
@@ -174,11 +180,23 @@ const InitiativeStores: React.FC = () => {
         >
           {t('pages.initiativeStores.addStoreList')}
         </Button>
+        )
+       }
       </Stack>
-      <FiltersForm
-        onFiltersApplied={handleFiltersApplied}
-        onFiltersReset={handleFiltersReset}
-        formik={formik}
+      {
+        storesLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+                  {
+        stores.length > 0 ? (
+        <>
+          <FiltersForm
+            onFiltersApplied={handleFiltersApplied}
+            onFiltersReset={handleFiltersReset}
+            formik={formik}
       >
         <Grid item xs={12} sm={6} md={3} lg={3}>
           <FormControl fullWidth size="small">
@@ -244,6 +262,15 @@ const InitiativeStores: React.FC = () => {
 
         <DataTable rows={stores} columns={columns} pageSize={10} rowsPerPage={10} handleRowAction={goToStoreDetail} />
       </Box>
+        </> ) : <Paper sx={{my: 4, p: 3, textAlign: 'center', display: 'flex',alignItems: 'center', justifyContent: 'center'}}>
+        <Typography variant="body2">{t('pages.initiativeStores.noStores')}</Typography>
+        <Link onClick={() => goToAddStorePage()} className='cursor-pointer' variant="body2" sx={{fontWeight: '600'}}>{t('pages.initiativeStores.addStoreNoResults')}</Link>
+        </Paper>
+      }
+          </>
+        )
+      }
+
 
       <Slide direction="left" in={showErrorAlert} mountOnEnter unmountOnExit>
         <Alert
