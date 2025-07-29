@@ -2,11 +2,11 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { matchPath, useHistory } from 'react-router-dom';
+import { generatePath, matchPath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { theme } from '@pagopa/mui-italia';
-import ROUTES, { BASE_ROUTE } from '../../routes';
+import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
 import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
 import { formatIban, formattedCurrency } from '../../helpers';
@@ -183,7 +183,8 @@ const InitiativeOverview = () => {
                   <Button
                     variant="contained"
                     startIcon={<StoreIcon />}
-                    onClick={() => { history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`); }}
+                    onClick={() => { history.push(generatePath(ROUTES.STORES_UPLOAD, { id })); }}
+                    // onClick={() => { history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`); }}
                     size="large"
                     fullWidth={false}
                     data-testid="add-stores-button">
