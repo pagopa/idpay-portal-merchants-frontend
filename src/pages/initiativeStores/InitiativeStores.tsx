@@ -35,21 +35,13 @@ interface RouteParams {
 const InitiativeStores: React.FC = () => {
 
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
+  const [storesPagination, setStoresPagination] = useState<any>({});
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [storesLoading, setStoresLoading] = useState(false);
   const [sortModel, setSortModel] = useState<any>([]);
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
-
-  useEffect(() => {
-    fetchStores(initialValues).catch(error => {
-      console.error('Error fetching stores:', error);
-      setShowErrorAlert(true);
-    });
-  }, []);
-
-
 
   const columns: Array<GridColDef> = [
     {
@@ -106,6 +98,14 @@ const InitiativeStores: React.FC = () => {
   
   ];
 
+  useEffect(() => {
+    fetchStores(initialValues).catch(error => {
+      console.error('Error fetching stores:', error);
+      setShowErrorAlert(true);
+    });
+  }, []);
+
+
   const fetchStores = async (filters: GetPointOfSalesFilters) => {
     setStoresLoading(true);
     const userJwt = parseJwt(storageTokenOps.read());
@@ -124,7 +124,9 @@ const InitiativeStores: React.FC = () => {
         page: filters.page,
         size: 10,
       });
-      setStores(response.content);
+      const { content, ...paginationData } = response;
+      setStores(content);
+      setStoresPagination(paginationData);
       setStoresLoading(false);
     } catch (error: any) {
       console.log(error);
@@ -182,6 +184,17 @@ const InitiativeStores: React.FC = () => {
     } else {
       console.log('Ordinamento rimosso.');
     }
+  };
+
+  const handlePaginationPageChange = (page: number) => {
+    setStoresPagination(page);
+    fetchStores({
+      ...formik.values,
+      page
+    }).catch(error => {
+      console.error('Error fetching stores:', error);
+      setShowErrorAlert(true);
+    });
   };
 
 
@@ -291,7 +304,17 @@ const InitiativeStores: React.FC = () => {
 
       <Box sx={{ height: 500, width: '100%' }}>
 
-        <DataTable rows={stores} columns={columns} pageSize={10} rowsPerPage={10} handleRowAction={goToStoreDetail} onSortModelChange={handleSortModelChange} sortModel={sortModel}/>
+        <DataTable 
+          rows={stores} 
+          columns={columns} 
+          pageSize={10} 
+          rowsPerPage={10} 
+          handleRowAction={goToStoreDetail} 
+          onSortModelChange={handleSortModelChange} 
+          sortModel={sortModel} 
+          paginationModel={storesPagination}
+          onPaginationPageChange={handlePaginationPageChange}
+        />
       </Box>
         </> ) : <Paper sx={{my: 4, p: 3, textAlign: 'center', display: 'flex',alignItems: 'center', justifyContent: 'center'}}>
         <Typography variant="body2">{t('pages.initiativeStores.noStores')}</Typography>
