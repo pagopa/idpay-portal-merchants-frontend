@@ -23,7 +23,7 @@ const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction} : DataTab
     if (columns && columns.length > 0){
       const processedColumns = columns.map((col: any) => ({
           ...col,
-          renderCell: renderEmptyCell 
+          renderCell: col.renderCell ? col.renderCell : renderEmptyCell 
         }));
 
       setFinalColumns(
@@ -41,11 +41,8 @@ const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction} : DataTab
                 <IconButton
                   onClick={() => onRowAction(params.row)}
                   size="small"
-                  sx={{ opacity: 0.6,
-                    '&:hover': { opacity: 1 }
-                  }}
                 >
-                  <ArrowForwardIosIcon/>
+                  <ArrowForwardIosIcon color='primary' fontSize='small' />
                 </IconButton>
               </Box>
             )
@@ -68,6 +65,9 @@ const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction} : DataTab
       pageSize={pageSize}
       rowsPerPageOptions={[rowsPerPage]}
       disableSelectionOnClick
+      localeText={{
+        noRowsLabel: 'Nessun punto vendita da visualizzare.',
+      }}
       sx={{
         border: 'none',
         '& .MuiDataGrid-row': {

@@ -12,14 +12,14 @@ import {useHistory, useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
 import { GetPointOfSalesFilters } from '../../types/types';
-import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
+import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { parseJwt } from '../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 
 
 const initialValues: GetPointOfSalesFilters = {
-  type: TypeEnum.PHYSICAL,
+  type: undefined,
   city: '',
   address: '',
   contactName: '',
@@ -48,6 +48,8 @@ const InitiativeStores: React.FC = () => {
     });
   }, []);
 
+
+
   const columns: Array<GridColDef> = [
     {
       field: 'franchiseName',
@@ -62,6 +64,15 @@ const InitiativeStores: React.FC = () => {
       flex: 1,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => {
+        if(params.value === 'PHYSICAL') {
+          return 'Fisico';
+        } else if(params.value === 'ONLINE') {
+          return 'Online';
+        } else {
+          return '-';
+        }
+      },
     },
     {
       field: 'address',
@@ -153,6 +164,8 @@ const InitiativeStores: React.FC = () => {
     history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
   };
 
+  const filtersSetted = () => formik.values.type || formik.values.city !== '' || formik.values.address !== '' || formik.values.contactName !== '';
+
 
   return (
     <Box sx={{ my: 2 }}>
@@ -191,7 +204,7 @@ const InitiativeStores: React.FC = () => {
         ) : (
           <>
                   {
-        stores.length > 0 ? (
+        stores.length > 0 || ( stores.length === 0 && filtersSetted()) ? (
         <>
           <FiltersForm
             onFiltersApplied={handleFiltersApplied}
