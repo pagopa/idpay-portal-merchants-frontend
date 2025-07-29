@@ -44,7 +44,7 @@ export default function SideMenu() {
   });
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS,ROUTES.OVERVIEW],
+    path: [ROUTES.DISCOUNTS,ROUTES.OVERVIEW,ROUTES.STORES],
     exact: true,
     strict: false,
   });
@@ -99,6 +99,22 @@ export default function SideMenu() {
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls={`panel-${item.initiativeId}-content`}
                 id={`panel-${item.initiativeId}-header`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onExit(() => {
+                    dispatch(
+                      setSelectedInitative({
+                        spendingPeriod:
+                          `${item.startDate?.toLocaleDateString(
+                            'fr-FR'
+                          )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
+                        initiativeName: item.initiativeName,
+                      })
+                    );
+                    history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`);
+                    setExpanded(`panel-${item.initiativeId}`);
+                  });
+                }}
               >
                 <ListItemText sx={{ wordBreak: 'break-word' }} primary={item.initiativeName} />
               </AccordionSummary>
@@ -137,6 +153,7 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
+                        console.log(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
                         history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
                       })}
                     isSelected={pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`}

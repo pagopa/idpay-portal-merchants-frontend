@@ -1,5 +1,5 @@
 import { DataGrid } from '@mui/x-data-grid';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { IconButton, Box } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
@@ -11,16 +11,14 @@ export interface DataTableProps {
   handleRowAction: (row:any) => void;
   onSortModelChange?: (model: any) => void;
   sortModel?: any;
+  onPaginationPageChange?: (page: number) => void;
+  paginationModel?: any;
 }
 
 
-const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction,onSortModelChange,sortModel} : DataTableProps ) => {
+const DataTable = ({rows,columns,rowsPerPage,handleRowAction,onSortModelChange,sortModel,onPaginationPageChange,paginationModel} : DataTableProps ) => {
   const [finalColumns, setFinalColumns] = useState(Array<any>);
-
-  function onRowAction(row: any) {
-    handleRowAction(row);
-  }
-
+  
   useEffect(() => {
     if (columns && columns.length > 0){
       const processedColumns = columns.map((col: any) => ({
@@ -41,7 +39,7 @@ const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction,onSortMode
             renderCell : (params: any) => (
               <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
                 <IconButton
-                  onClick={() => onRowAction(params.row)}
+                  onClick={() => memoizedHandleRowAction(params.row)}
                   size="small"
                 >
                   <ArrowForwardIosIcon color='primary' fontSize='small' />
@@ -54,25 +52,37 @@ const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction,onSortMode
     }
   }, [columns]); 
 
+  const memoizedHandleRowAction = useCallback((row: any) => {
+    handleRowAction(row);
+  }, [handleRowAction]);
+
   const renderEmptyCell = (params: any) => {
     if (params.value === null || params.value === undefined || params.value === '') {
       return '-';
     }
     return params.value;
   };
+
+  const handlePageChange = (page: number) => {
+    onPaginationPageChange?.(page);
+  };
   return (
     <DataGrid
       rows={rows}
       columns={finalColumns}
-      pageSize={pageSize}
       rowsPerPageOptions={[rowsPerPage]}
       disableSelectionOnClick
       autoHeight
       sortingMode='server'
+      paginationMode='server'
       onSortModelChange={(model) => {
         onSortModelChange?.(model);
       }}
       sortModel={sortModel}
+      onPageChange={handlePageChange}
+      page={paginationModel?.pageNo}
+      pageSize={paginationModel?.pageSize}
+      rowCount={paginationModel?.totalElements}
       localeText={{
         noRowsLabel: 'Nessun punto vendita da visualizzare.',
       }}

@@ -15,12 +15,17 @@ import { useTranslation } from 'react-i18next';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { parseJwt } from '../../utils/jwt-utils';
 import { genericContainerStyle } from '../../styles';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
 import { isValidUrl, isValidEmail } from '../../helpers';
+import ROUTES from '../../routes';
+import BreadcrumbsBox from '../components/BreadcrumbsBox';
+import { BASE_ROUTE } from '../../routes';
 
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
@@ -28,9 +33,12 @@ interface FormErrors {
 
 interface FieldErrors {
   [fieldName: string]: string;
-}import BreadcrumbsBox from '../components/BreadcrumbsBox';
+}
 
 
+interface RouteParams {
+  id: string;
+}
 
 const InitiativeStoresUpload: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<'csv' | 'manual'>('csv');
@@ -40,6 +48,8 @@ const InitiativeStoresUpload: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
   const { t } = useTranslation();
+  const { id } = useParams<RouteParams>();
+  const history = useHistory();
 
   useEffect(() => {
     console.log(errors);
@@ -63,7 +73,11 @@ const InitiativeStoresUpload: React.FC = () => {
     if(pointsOfSaleLoaded){
       setPointsOfSaleLoaded(false);
     }
-    setSalesPoints(salesPoints);
+    const salesPointsWithoutId = salesPoints.map((salesPoint) => {
+      const { id, ...rest } = salesPoint;
+      return rest;
+    });
+    setSalesPoints(salesPointsWithoutId);
   };
 
   const handleConfirm = async () => {
@@ -78,6 +92,7 @@ const InitiativeStoresUpload: React.FC = () => {
         await updateMerchantPointOfSales(merchantId, salesPoints);
         setPointsOfSaleLoaded(true);
         setShowSuccessAlert(true);
+        history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
       } catch (error: any) {
         console.log(error);
         setShowErrorAlert(true);
