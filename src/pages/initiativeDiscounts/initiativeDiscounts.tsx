@@ -34,7 +34,6 @@ const InitiativeDiscounts = () => {
   const { id } = (match?.params as MatchParams) || {};
 
   useEffect(() => {
-    console.log(`${ROUTES.OVERVIEW}/${id}`);
     const dates = mapDatesFromPeriod(selectedInitiative?.spendingPeriod);
     setStartDate(dates?.startDate);
     setEndDate(dates?.endDate);
@@ -80,7 +79,6 @@ const InitiativeDiscounts = () => {
     <Box sx={{ width: '100%', padding: 2 }}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
         <BreadcrumbsBox
-          backUrl={`${BASE_ROUTE}`}
           backLabel={t('commons.backBtn')}
           items={[
             t('pages.initiativesList.title'),

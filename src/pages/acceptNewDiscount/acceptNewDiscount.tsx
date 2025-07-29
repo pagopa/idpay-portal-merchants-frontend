@@ -3,7 +3,7 @@ import { matchPath } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useState } from 'react';
-import ROUTES, { BASE_ROUTE } from '../../routes';
+import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { useAppSelector } from '../../redux/hooks';
 import { initiativeSelector } from '../../redux/slices/initiativesSlice';
@@ -72,7 +72,6 @@ const AcceptNewDiscount = () => {
       }}
     >
       <BreadcrumbsBox
-        backUrl={`${BASE_ROUTE}/sconti-iniziativa/${id}`}
         backLabel={t('commons.backBtn')}
         items={[
           t('pages.initiativesList.title'),

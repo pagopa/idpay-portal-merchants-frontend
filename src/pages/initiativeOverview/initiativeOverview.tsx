@@ -6,6 +6,7 @@ import { matchPath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import {theme} from "@pagopa/mui-italia/dist/theme/theme.js";
 import ROUTES, { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
@@ -41,6 +42,7 @@ const InitiativeOverview = () => {
   const addError = useErrorDispatcher();
 
   useEffect(() => {
+    console.log("THEME", theme.typography.fontWeightRegular);
     setIban(undefined);
     setIbanHolder("Mario Rossi");
     getMerchantDetail(id)
@@ -120,9 +122,9 @@ const InitiativeOverview = () => {
 
 
   return (
-    <Box sx={{ width: '100%', padding: 2 }}>
+    <Box sx={{ width: '100%'}}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
-        <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
+        <Box sx={{ display: 'grid', gridColumn: 'span 8'}}>
           <TitleBox
             title={t('pages.initiativeOverview.title')}
             subTitle={t('pages.initiativeOverview.subtitle')}
@@ -150,7 +152,10 @@ const InitiativeOverview = () => {
       }
       <Box sx={{ display: 'flex', gridColumn: 'span 6', gap: 2, mt: 2 }}>
         <Box flex="1">
-          <InitiativeOverviewCard title={t('pages.initiativeOverview.information')}>
+          <InitiativeOverviewCard
+            title={t('pages.initiativeOverview.information')}
+            titleVariant={'h5'}
+          >
             <Box
               sx={{
                 display: 'grid',
@@ -260,6 +265,7 @@ const InitiativeOverview = () => {
           <InitiativeOverviewCard
             title={t('pages.initiativeOverview.stores')}
             subtitle={t('pages.initiativeOverview.storesSubtitle')}
+            titleVariant={'h5'}
           >
             <Box
               sx={{
@@ -272,7 +278,7 @@ const InitiativeOverview = () => {
                 <Button
                   variant="contained"
                   startIcon={<StoreIcon />}
-                  onClick={() => {history.replace(`${BASE_ROUTE}/punti-vendita/censisci/${id}`);}}
+                  onClick={() => {history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`);}}
                   size="large"
                   fullWidth={false}
                   data-testid="add-stores-button">

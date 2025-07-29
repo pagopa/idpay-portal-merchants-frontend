@@ -10,14 +10,12 @@ import {
   Link, Alert, Slide,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { matchPath } from 'react-router-dom';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { parseJwt } from '../../utils/jwt-utils';
-import ROUTES from '../../routes';
 import { genericContainerStyle } from '../../styles';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
@@ -33,10 +31,6 @@ interface FieldErrors {
 }import BreadcrumbsBox from '../components/BreadcrumbsBox';
 
 
-interface MatchParams {
-  id: string;
-}
-
 
 const InitiativeStoresUpload: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<'csv' | 'manual'>('csv');
@@ -50,14 +44,6 @@ const InitiativeStoresUpload: React.FC = () => {
   useEffect(() => {
     console.log(errors);
   }, [errors]);
-
-
-  const match = matchPath(location.pathname, {
-    path: [ROUTES.STORES_UPLOAD],
-    exact: true,
-    strict: false,
-  });
-  const { id } = (match?.params as MatchParams) || {};
 
   useEffect(() => {
     // eslint-disable-next-line functional/no-let
@@ -89,7 +75,7 @@ const InitiativeStoresUpload: React.FC = () => {
         return;
       }
       try{
-        await updateMerchantPointOfSales("", salesPoints);
+        await updateMerchantPointOfSales(merchantId, salesPoints);
         setPointsOfSaleLoaded(true);
         setShowSuccessAlert(true);
       } catch (error: any) {
@@ -128,7 +114,7 @@ const InitiativeStoresUpload: React.FC = () => {
     <Box sx={{ p: 4, width: '100%', margin: '0 auto' }}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
         <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
-          <BreadcrumbsBox backUrl={`${ROUTES.SIDE_MENU_OVERVIEW}/${id}`} backLabel={t('commons.backBtn')} items={[]} />
+          <BreadcrumbsBox backLabel={t('commons.backBtn')} items={[]} />
           <TitleBox
             title={t('pages.initiativeStores.uploadStores')}
             mbTitle={2}
