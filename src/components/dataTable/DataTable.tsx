@@ -9,10 +9,12 @@ export interface DataTableProps {
   pageSize: number;
   rowsPerPage: number;
   handleRowAction: (row:any) => void;
+  onSortModelChange?: (model: any) => void;
+  sortModel?: any;
 }
 
 
-const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction} : DataTableProps ) => {
+const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction,onSortModelChange,sortModel} : DataTableProps ) => {
   const [finalColumns, setFinalColumns] = useState(Array<any>);
 
   function onRowAction(row: any) {
@@ -65,6 +67,12 @@ const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction} : DataTab
       pageSize={pageSize}
       rowsPerPageOptions={[rowsPerPage]}
       disableSelectionOnClick
+      autoHeight
+      sortingMode='server'
+      onSortModelChange={(model) => {
+        onSortModelChange?.(model);
+      }}
+      sortModel={sortModel}
       localeText={{
         noRowsLabel: 'Nessun punto vendita da visualizzare.',
       }}
@@ -81,7 +89,7 @@ const DataTable = ({rows,columns,pageSize,rowsPerPage,handleRowAction} : DataTab
         },
         '& .MuiDataGrid-footerContainer': {
           border: 'none'
-        },    
+        }  
     
       }}
     />

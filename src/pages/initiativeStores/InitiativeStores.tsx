@@ -4,7 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import StoreIcon from '@mui/icons-material/Store';
-import { GridColDef } from '@mui/x-data-grid';
+import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
@@ -37,6 +37,7 @@ const InitiativeStores: React.FC = () => {
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [storesLoading, setStoresLoading] = useState(false);
+  const [sortModel, setSortModel] = useState<any>([]);
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
@@ -54,14 +55,14 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'franchiseName',
       headerName: t('pages.initiativeStores.franchiseName'),
-      flex: 1,
+      width: 250,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'type',
       headerName: t('pages.initiativeStores.type'),
-      flex: 1,
+      width: 100,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => {
@@ -77,28 +78,28 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'address',
       headerName: t('pages.initiativeStores.address'),
-      flex: 1,
+      width: 200,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'city',
       headerName: t('pages.initiativeStores.city'),
-      flex: 1,
+      width: 200,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'referent',
       headerName: t('pages.initiativeStores.referent'),
-      flex: 1,
+      width: 200,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'contactEmail',
       headerName: t('pages.initiativeStores.email'),
-      flex: 1,
+      width: 300,
       editable: false,
       disableColumnMenu: true,
     },
@@ -164,7 +165,24 @@ const InitiativeStores: React.FC = () => {
     history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
   };
 
-  const filtersSetted = () => formik.values.type || formik.values.city !== '' || formik.values.address !== '' || formik.values.contactName !== '';
+  const filtersSetted = () => formik.values.type !== undefined || formik.values.city !== '' || formik.values.address !== '' || formik.values.contactName !== '';
+
+  const handleSortModelChange = async (newSortModel: GridSortModel) => {
+    if (newSortModel.length > 0) {
+      const { field, sort } = newSortModel[0]; 
+      setSortModel(newSortModel);
+      await fetchStores({
+        ...formik.values,
+        sort: `${field},${sort}`, 
+      }).catch(error => {
+        console.error('Error fetching stores:', error);
+        setShowErrorAlert(true);
+      });
+      
+    } else {
+      console.log('Ordinamento rimosso.');
+    }
+  };
 
 
   return (
@@ -273,7 +291,7 @@ const InitiativeStores: React.FC = () => {
 
       <Box sx={{ height: 500, width: '100%' }}>
 
-        <DataTable rows={stores} columns={columns} pageSize={10} rowsPerPage={10} handleRowAction={goToStoreDetail} />
+        <DataTable rows={stores} columns={columns} pageSize={10} rowsPerPage={10} handleRowAction={goToStoreDetail} onSortModelChange={handleSortModelChange} sortModel={sortModel}/>
       </Box>
         </> ) : <Paper sx={{my: 4, p: 3, textAlign: 'center', display: 'flex',alignItems: 'center', justifyContent: 'center'}}>
         <Typography variant="body2">{t('pages.initiativeStores.noStores')}</Typography>
