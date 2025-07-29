@@ -157,6 +157,7 @@ export default function SideMenu() {
                         history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
                       })}
                     isSelected={pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`}
+                    isSelected={pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`}
                     icon={StoreIcon}
                     level={2}
                     data-testid="initiativeStoresTitle-click-test"
