@@ -1,48 +1,53 @@
 import { Box, Card, CardContent } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { ReactNode } from 'react';
-import { inititiveOverviewCardStyle,inititiveOverviewCardContentStyle } from '../../styles';
 
 
 interface InitiativeOverviewCardProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
-  titleVariant?: 'h4' | 'h5' | 'h6' ;
+  titleVariant?: 'h4' | 'h5' | 'h6';
   subtitleVariant?: 'body1' | 'body2' | 'caption';
 }
 
 const InitiativeOverviewCard = ({
-       children,
-       title,
-       subtitle,
-       titleVariant,
-       subtitleVariant = 'caption',
-       }: InitiativeOverviewCardProps) => (
-    <Card
+  children,
+  title,
+  subtitle,
+  titleVariant,
+  subtitleVariant = 'caption',
+}: InitiativeOverviewCardProps) => (
+  <Card
+    sx={{
+      borderRadius: 0,
+      width: '100%',
+      display: 'grid',
+      gridColumn: 'span 12'
+    }}
+    data-testid="card">
+    <CardContent
       sx={{
-        ...inititiveOverviewCardStyle,
+        display: 'grid',
+        width: '100%',
+        gridTemplateColumns: 'repeat(12, 1fr)',
+        alignItems: 'baseline',
+        rowGap: 1
       }}
-      data-testid="card">
-      <CardContent
-        sx={{
-          ...inititiveOverviewCardContentStyle,
-        }}
-        data-testid="card-content">
-          <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 2 }} data-testid="box">
-            <TitleBox
-              title={title}
-              subTitle={subtitle}
-              mbTitle={2}
-              mtTitle={2}
-              mbSubTitle={subtitle ? 3 : 5}
-              variantTitle={titleVariant}
-              variantSubTitle={subtitleVariant}
-            />
-          </Box>
-        {children}
-      </CardContent>
-    </Card>
-  );
+      data-testid="card-content">
+      <Box sx={{ display: 'grid', gridColumn: 'span 12'}} data-testid="box">
+        <TitleBox
+          title={title}
+          subTitle={subtitle}
+          mbTitle={2}
+          mbSubTitle={subtitle ? 3 : 5}
+          variantTitle={titleVariant}
+          variantSubTitle={subtitleVariant}
+        />
+      </Box>
+      {children}
+    </CardContent>
+  </Card>
+);
 
 export default InitiativeOverviewCard;
