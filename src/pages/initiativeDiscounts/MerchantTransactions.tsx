@@ -1,6 +1,6 @@
 
 import {
-  Box, FormControl, InputLabel, MenuItem, Select,
+  Box, FormControl, Grid, InputLabel, MenuItem, Select,
  TextField,
 } from '@mui/material';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
@@ -67,36 +67,42 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
       headerName: 'Franchise Name',
       width: 150,
       editable: true,
+      disableColumnMenu: true,
     },
     {
       field: 'type',
       headerName: 'Type',
       width: 150,
       editable: true,
+      disableColumnMenu: true,
     },
     {
       field: 'address',
       headerName: 'Address',
       width: 150,
       editable: true,
+      disableColumnMenu: true,
     },
     {
       field: 'city',
       headerName: 'City',
       width: 150,
       editable: true,
+      disableColumnMenu: true,
     },
     {
       field: 'referent',
       headerName: 'Referent',
       width: 150,
       editable: true,
+      disableColumnMenu: true,
     },
     {
       field: 'contactEmail',
       headerName: 'Email',
       width: 150,
       editable: true,
+      disableColumnMenu: true,
     },
 
   ];
@@ -161,29 +167,40 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
   //   }
   // };
 
+  const handleFiltersApplied = () => {
+    console.log('Callback dopo applicazione filtri');
+  };
+
+  const handleFiltersReset = () => {
+    console.log('Callback dopo reset filtri');
+  };
+
   return (
     <Box width={'100%'}>
       <FiltersForm
         formik={formik}
-        // resetForm={() =>
-        //   resetForm(id, formik, setFilterByUser, setFilterByStatus, setRows, getTableData)
-        // }
+        onFiltersApplied={handleFiltersApplied}
+        onFiltersReset={handleFiltersReset}
       >
-        <FormControl sx={{ gridColumn: 'span 4' }}>
-          <TextField
-            label={t('pages.initiativeDiscounts.searchByFiscalCode')}
-            placeholder={t('pages.initiativeDiscounts.searchByFiscalCode')}
-            name="searchUser"
-            aria-label="searchUser"
-            role="input"
-            InputLabelProps={{ required: false }}
-            value={formik.values.searchUser}
-            onChange={(e) => formik.handleChange(e)}
-            size="small"
-            data-testid="searchUser-test"
-          />
-        </FormControl>
-        <FormControl sx={{ gridColumn: 'span 3' }} size="small">
+        <Grid item xs={12} sm={6} md={3} lg={3}>
+          <FormControl fullWidth size="small">
+            <TextField
+              label={t('pages.initiativeDiscounts.searchByFiscalCode')}
+              placeholder={t('pages.initiativeDiscounts.searchByFiscalCode')}
+              name="searchUser"
+              aria-label="searchUser"
+              role="input"
+              InputLabelProps={{ required: false }}
+              value={formik.values.searchUser}
+              onChange={(e) => formik.handleChange(e)}
+              size="small"
+              data-testid="searchUser-test"
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3} lg={3}>
+        <FormControl size="small" fullWidth>
           <InputLabel>{'Categoria'}</InputLabel>
           <Select
             id="filterCategory"
@@ -203,7 +220,9 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
             ))}
           </Select>
         </FormControl>
-        <FormControl sx={{ gridColumn: 'span 2' }} size="small">
+        </Grid>
+        <Grid item xs={12} sm={6} md={3} lg={3}>
+        <FormControl size="small" fullWidth>
           <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
           <Select
             id="filterStatus"
@@ -223,6 +242,8 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
             ))}
           </Select>
         </FormControl>
+        </Grid>
+
      </FiltersForm >
       {rows2.length > 0 ? (
         <Box

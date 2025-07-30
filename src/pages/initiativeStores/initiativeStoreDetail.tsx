@@ -76,7 +76,7 @@ const InitiativeStoreDetail = () => {
   // const history = useHistory();
   const { t } = useTranslation();
   const match = matchPath(location.pathname, {
-    path: [ROUTES.STORES],
+    path: [ROUTES.STORES, ROUTES.STORES_DETAIL],
     exact: true,
     strict: false,
   });
@@ -119,7 +119,7 @@ const InitiativeStoreDetail = () => {
 
   return (
     <Box>
-        <Box display={'grid'} gridColumn={'span 8'} mt={2}>
+        <Box mt={2}>
           <BreadcrumbsBox backLabel={t('commons.backBtn')} items={[]} />
           <TitleBox
             title={"Nome punto vendita"}
@@ -179,7 +179,7 @@ const InitiativeStoreDetail = () => {
           </Paper>
         </Box>
       </Box>
-      <Box display={'grid'} gridColumn={'span 8'} mt={2}>
+      <Box mt={2}>
         <TitleBox
           title={"Storico transazioni"}
           mbTitle={2}

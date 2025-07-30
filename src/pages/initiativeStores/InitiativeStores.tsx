@@ -234,7 +234,7 @@ const InitiativeStores: React.FC = () => {
           </Box>
         ) : (
           <>
-                  {
+        {
         stores.length > 0 || ( stores.length === 0 && filtersSetted()) ? (
         <>
           <FiltersForm
