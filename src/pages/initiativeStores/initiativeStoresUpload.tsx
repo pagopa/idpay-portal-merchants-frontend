@@ -10,16 +10,22 @@ import {
   Link, Alert, Slide,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { matchPath } from 'react-router-dom';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ROUTES from '../../routes';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
+import { parseJwt } from '../../utils/jwt-utils';
 import { genericContainerStyle } from '../../styles';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
 import { isValidUrl, isValidEmail } from '../../helpers';
+import ROUTES from '../../routes';
+import BreadcrumbsBox from '../components/BreadcrumbsBox';
+import { BASE_ROUTE } from '../../routes';
 
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
@@ -27,37 +33,41 @@ interface FormErrors {
 
 interface FieldErrors {
   [fieldName: string]: string;
-}import BreadcrumbsBox from '../components/BreadcrumbsBox';
-
-
-interface MatchParams {
-  id: string;
 }
 
+
+interface RouteParams {
+  id: string;
+}
 
 const InitiativeStoresUpload: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<'csv' | 'manual'>('csv');
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([]);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
   const { t } = useTranslation();
+  const { id } = useParams<RouteParams>();
+  const history = useHistory();
 
   useEffect(() => {
     console.log(errors);
   }, [errors]);
 
-
-  const match = matchPath(location.pathname, {
-    path: [ROUTES.STORES_UPLOAD],
-    exact: true,
-    strict: false,
-  });
-  const { id } = (match?.params as MatchParams) || {};
-
   useEffect(() => {
-    console.log(id);
-    console.log(salesPoints);
-  }, [salesPoints]);
+    // eslint-disable-next-line functional/no-let
+    let timer: any = {};
+    if (showSuccessAlert || showErrorAlert) {
+      timer = setTimeout(() => {
+        setShowSuccessAlert(false);
+        setShowErrorAlert(false);
+      }, 5000);
+    }
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [showSuccessAlert, showErrorAlert]);
 
   useEffect(() => {
     // eslint-disable-next-line functional/no-let
@@ -73,14 +83,33 @@ const InitiativeStoresUpload: React.FC = () => {
   }, [showSuccessAlert]);
 
   const onFormChange = (salesPoints: Array<PointOfSaleDTO>) => {
-    setSalesPoints(salesPoints);
+    if(pointsOfSaleLoaded){
+      setPointsOfSaleLoaded(false);
+    }
+    const salesPointsWithoutId = salesPoints.map((salesPoint) => {
+      const { id, ...rest } = salesPoint;
+      return rest;
+    });
+    setSalesPoints(salesPointsWithoutId);
   };
 
   const handleConfirm = async () => {
     if (uploadMethod === 'manual') {
-      await updateMerchantPointOfSales('bb7b4183-2a38-3243-8cdd-218fec0c5258', salesPoints).then(() => {
-           setShowSuccessAlert(true);
-      });
+      const userJwt = parseJwt(storageTokenOps.read());
+      const merchantId = userJwt?.merchant_id;
+      if (!merchantId) {
+        setShowErrorAlert(true);
+        return;
+      }
+      try{
+        await updateMerchantPointOfSales(merchantId, salesPoints);
+        setPointsOfSaleLoaded(true);
+        setShowSuccessAlert(true);
+        history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
+      } catch (error: any) {
+        console.log(error);
+        setShowErrorAlert(true);
+      }
     }
   };
 
@@ -91,7 +120,7 @@ const InitiativeStoresUpload: React.FC = () => {
         (!!salesPoint.contactEmail && isValidEmail(salesPoint.contactEmail)) &&
         !!salesPoint.contactName &&
         !!salesPoint.contactSurname;
-    }else if(salesPoint.type === TypeEnum.PHYSICAL){
+    } else if (salesPoint.type === TypeEnum.PHYSICAL) {
       return !!salesPoint.franchiseName &&
         !!salesPoint.address &&
         !!salesPoint.city &&
@@ -102,7 +131,7 @@ const InitiativeStoresUpload: React.FC = () => {
         !!salesPoint.contactName &&
         !!salesPoint.contactSurname;
     }
-    return true;
+    return false;
   });
 
   const onErrorChange = (errors: FormErrors) => {
@@ -113,7 +142,7 @@ const InitiativeStoresUpload: React.FC = () => {
     <Box sx={{ p: 4, width: '100%', margin: '0 auto' }}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
         <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
-          <BreadcrumbsBox backUrl={`${ROUTES.SIDE_MENU_OVERVIEW}/${id}`} backLabel={t('commons.backBtn')} items={[]} />
+          <BreadcrumbsBox backLabel={t('commons.backBtn')} items={[]} />
           <TitleBox
             title={t('pages.initiativeStores.uploadStores')}
             mbTitle={2}
@@ -195,7 +224,7 @@ const InitiativeStoresUpload: React.FC = () => {
 
         {
           uploadMethod === 'manual' && (
-            <PointsOfSaleForm onFormChange={onFormChange} onErrorChange={onErrorChange}/>
+            <PointsOfSaleForm onFormChange={onFormChange} onErrorChange={onErrorChange} pointsOfSaleLoaded={pointsOfSaleLoaded}/>
           )
         }
         {uploadMethod === 'csv' && (
@@ -228,7 +257,30 @@ const InitiativeStoresUpload: React.FC = () => {
             }
           }}
         >
-          {t('Punti vendita salvati con successo!')}
+          {t('initiativeStoresUpload.uploadSuccess')}
+        </Alert>
+      </Slide>
+      <Slide direction="left" in={showErrorAlert} mountOnEnter unmountOnExit>
+        <Alert
+          severity="error"
+          icon={<ErrorOutlineIcon />}
+          sx={{
+            position: 'fixed',
+            bottom: 40,
+            right: 20,
+            backgroundColor: 'white',
+            width: 'auto',
+            maxWidth: '400px',
+            minWidth: '300px',
+            zIndex: 1300,
+            boxShadow: 3,
+            borderRadius: 1,
+            '& .MuiAlert-icon': {
+              color: 'red'
+            }
+          }}
+        >
+          {t('initiativeStoresUpload.uploadError')}
         </Alert>
       </Slide>
 

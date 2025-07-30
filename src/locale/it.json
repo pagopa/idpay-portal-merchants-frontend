@@ -144,7 +144,9 @@
     },
     "initiativeStores" : {
       "title": "Punti vendita",
+      "subtitle": "Consulta i tuoi punti vendita",
       "addStore": "Inserisci i punti vendita",
+      "addStoreList": "Aggiungi punti vendita",
       "uploadStores" : "Censisci i tuoi punti vendita",
       "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online. Puoi aggiungerli singolarmente o caricarli in blocco con un file CSV.  \nLe credenziali per accedere al portale operativo vengono generate automaticamente e inviate via email ai referenti indicati.",
       "manualLink": "Dubbi? Vai al manuale",
@@ -153,7 +155,18 @@
       "selectFromPc": "selezionalo dal tuo computer",
       "downloadExampleFile": "Scarica il file di esempio",
       "enterManually": "Inserisci manualmente",
-      "prepareList": "Non sai come preparare la lista? "
+      "prepareList": "Non sai come preparare la lista? ",
+      "referent": "Referente",
+      "address": "Indirizzo",
+      "city": "Città",
+      "pointOfSaleType": "Tipologia punto vendita",
+      "online": "Online",
+      "physical": "Fisico",
+      "franchiseName": "Insegna",
+      "type": "Tipo",
+      "email": "E-mail",
+      "noStores": "Non ci sono punti vendita,",
+      "addStoreNoResults": "aggiungili per iniziare"
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
@@ -201,5 +214,9 @@
     "positiveNumber": "Inserisci un valore positivo",
     "requiredField": "Campo obbligatorio",
     "number": "Inserisci un numero"
+  },
+  "initiativeStoresUpload": {
+    "uploadError": "Errore durante il caricamento dei punti vendita",
+    "uploadSuccess": "Punti vendita caricati con successo"
   }
 }

@@ -126,3 +126,5 @@ export const isValidUrl = (url: string) => {
     return false; // Se si verifica un errore, l'URL non è valido
   }
 };
+
+export const generateUniqueId = () => Date.now().toString() + Math.random().toString(36).substring(2, 9);

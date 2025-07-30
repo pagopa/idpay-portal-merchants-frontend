@@ -15,10 +15,9 @@ import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
-import { TypeEnum as ChannelTypeEnum } from '../../api/generated/merchants/ChannelDTO';
 
 // utils
-import { isValidEmail, isValidUrl } from '../../helpers';
+import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 
 import style from './pointsOfSaleForm.module.css';
 
@@ -26,6 +25,7 @@ import style from './pointsOfSaleForm.module.css';
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
   onErrorChange: (errors: FormErrors) => void;
+  pointsOfSaleLoaded: boolean;
 }
 
 interface FormErrors {
@@ -37,11 +37,12 @@ interface FieldErrors {
 }
 
 
-const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChange }) => {
+const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChange, pointsOfSaleLoaded }) => {
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
     {
       type: TypeEnum.PHYSICAL,
       franchiseName: '',
+      id: generateUniqueId(),
       address: '',
       city: '',
       zipCode: '',
@@ -51,24 +52,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
       contactEmail: '',
       contactName: '',
       contactSurname: '',
-      channels: [
-        {
-          type: ChannelTypeEnum.LANDING,
-          contact: '',
-        },
-        {
-          type: ChannelTypeEnum.WEB,
-          contact: '',
-        },
-        {
-          type: ChannelTypeEnum.EMAIL,
-          contact: '',
-        },
-        {
-          type: ChannelTypeEnum.MOBILE,
-          contact: '',
-        },
-      ],
+      channelEmail: '',
+      channelPhone: '',
+      channelGeolink: '',
+      channelWebsite: '',
     },
   ]);
 
@@ -78,6 +65,30 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
     onFormChange(salesPoints);
     onErrorChange(errors);
   }, [salesPoints]);
+
+  useEffect(() => {
+    if(pointsOfSaleLoaded){
+      setSalesPoints([
+        {
+          type: TypeEnum.PHYSICAL,
+          franchiseName: '',
+          address: '',
+          city: '',
+          zipCode: '',
+          region: '',
+          province: '',
+          webSite: '',
+          contactEmail: '',
+          contactName: '',
+          contactSurname: '',
+          channelEmail: '',
+          channelPhone: '',
+          channelGeolink: '',
+          channelWebsite: '',
+        },
+      ]);
+    }
+  },[pointsOfSaleLoaded]);
 
   const handleFieldChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -185,22 +196,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
   };
 
 
-  const handleChannelChange = (salesPointIndex: number, channelType: ChannelTypeEnum, value: string) => {
-    setSalesPoints(prevSalesPoints =>
-      prevSalesPoints.map((salesPoint, i) =>
-        i === salesPointIndex
-          ? {
-            ...salesPoint,
-            channels: salesPoint.channels?.map(channel =>
-              channel.type === channelType
-                ? { ...channel, contact: value }
-                : channel
-            ) || []
-          }
-          : salesPoint
-      )
-    );
-  };
 
     const updateError = (salesPointIndex: number, fieldName: string, errorMessage: string) => {
       setErrors(prevErrors => ({
@@ -240,6 +235,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
         ...salesPoints,
         {
           type: TypeEnum.PHYSICAL,
+          id: generateUniqueId(),
           franchiseName: '',
           address: '',
           city: '',
@@ -249,39 +245,21 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           contactEmail: '',
           contactName: '',
           contactSurname: '',
-          channels: [
-            {
-              type: ChannelTypeEnum.LANDING,
-              contact: '',
-            },
-            {
-              type: ChannelTypeEnum.WEB,
-              contact: '',
-            },
-            {
-              type: ChannelTypeEnum.EMAIL,
-              contact: '',
-            },
-            {
-              type: ChannelTypeEnum.MOBILE,
-              contact: '',
-            },
-          ],
+          channelEmail: '',
+          channelGeolink: '',
+          channelPhone: '',
+          channelWebsite: '',
         },
       ]);
     }
 
   };
 
-  const getChannelValue = (salesPoint: PointOfSaleDTO, channelType: ChannelTypeEnum): string => {
-    const channel = salesPoint.channels?.find(ch => ch.type === channelType);
-    return channel?.contact || '';
-  };
 
   return (
     <Box sx={{ width: '100%', mx: 'auto', bgcolor: 'background.paper', borderRadius: 2, boxShadow: 3 }}>
       {salesPoints.map((salesPoint, index) => (
-        <Box className={style['points-of-sale-wrapper']} key={index} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Box className={style['points-of-sale-wrapper']} key={`${salesPoint.id}`} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="h6" gutterBottom>
             Punto vendita {index + 1}
             <Typography component="span" variant="body2" sx={{ float: 'right' }}>
@@ -340,7 +318,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             )
           }
 
-          {/* Indirizzo (conditionally rendered for 'fisico' type) */}
           {salesPoint.type === 'PHYSICAL' && (
             <Box sx={{ mb: 3 }}>
               <Grid container spacing={2}>
@@ -477,14 +454,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     sx={{ flexGrow: 1, mr: 1 }}
                     label="Scheda Google MYBusiness"
                     name="landingGoogle"
-                    value={getChannelValue(salesPoint, ChannelTypeEnum.LANDING)}
-                    onChange={(e) => handleChannelChange(index, ChannelTypeEnum.LANDING, e.target.value)}
+                    value={salesPoint.channelGeolink}
+                    onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
 
                   />
                   <Button
                     variant="text"
                     onClick={() => { 
-                      const url = getChannelValue(salesPoint, ChannelTypeEnum.LANDING);
+                      const url = salesPoint.channelGeolink;
                       if(url && isValidUrl(url)){
                         window.open(url, '_blank', 'noopener,noreferrer');
                       }
@@ -499,24 +476,24 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                   fullWidth
                   label="Numero di telefono"
                   name="phoneNumber"
-                  value={getChannelValue(salesPoint, ChannelTypeEnum.MOBILE)}
-                  onChange={(e) => handleChannelChange(index, ChannelTypeEnum.MOBILE, e.target.value)}
+                  value={salesPoint.channelPhone}
+                  onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                   margin="normal"
                 />
                 <TextField
                   fullWidth
                   label="Email"
                   name="email"
-                  value={getChannelValue(salesPoint, ChannelTypeEnum.EMAIL)}
-                  onChange={(e) => handleChannelChange(index, ChannelTypeEnum.EMAIL, e.target.value)}
+                  value={salesPoint.channelEmail}
+                  onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                   margin="normal"
                 />
                 <TextField
                   fullWidth
                   label="Sito web"
                   name="website"
-                  value={getChannelValue(salesPoint, ChannelTypeEnum.WEB)}
-                  onChange={(e) => handleChannelChange(index, ChannelTypeEnum.WEB, e.target.value)}
+                  value={salesPoint.channelWebsite}
+                  onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                   margin="normal"
                 />
               </Box>
