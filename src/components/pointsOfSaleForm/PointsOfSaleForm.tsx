@@ -13,13 +13,13 @@ import {
 } from '@mui/material';
 import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
+import { ButtonNaked } from '@pagopa/mui-italia';
 import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 
 // utils
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 
-import style from './pointsOfSaleForm.module.css';
 
 
 interface PointsOfSaleFormProps {
@@ -67,7 +67,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
   }, [salesPoints]);
 
   useEffect(() => {
-    if(pointsOfSaleLoaded){
+    if (pointsOfSaleLoaded) {
       setSalesPoints([
         {
           type: TypeEnum.PHYSICAL,
@@ -88,11 +88,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
         },
       ]);
     }
-  },[pointsOfSaleLoaded]);
+  }, [pointsOfSaleLoaded]);
 
   const handleFieldChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    if(name !== 'type'){
+    if (name !== 'type') {
       switch (name) {
         case 'contactEmail':
           if (!isValidEmail(value)) {
@@ -167,22 +167,22 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
         default:
           break;
       }
-    }else{
-     setErrors({});
-    //   prevSalesPoints.map((salesPoint, i) => {
-    //     if (i !== index) {
-    //       return salesPoint;
-    //     }
-  
-    //     // Se il campo è 'type', usa l'asserzione di tipo
-    //     if (name === 'type') {
-    //       return { ...salesPoint, type: value as TypeEnum };
-    //     }
-  
-    //     // Per tutti gli altri campi, la logica originale va bene
-    //     return { [name]: value };
-    //   })
-    // );
+    } else {
+      setErrors({});
+      //   prevSalesPoints.map((salesPoint, i) => {
+      //     if (i !== index) {
+      //       return salesPoint;
+      //     }
+
+      //     // Se il campo è 'type', usa l'asserzione di tipo
+      //     if (name === 'type') {
+      //       return { ...salesPoint, type: value as TypeEnum };
+      //     }
+
+      //     // Per tutti gli altri campi, la logica originale va bene
+      //     return { [name]: value };
+      //   })
+      // );
     }
 
     setSalesPoints(prevSalesPoints =>
@@ -197,40 +197,40 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
 
 
 
-    const updateError = (salesPointIndex: number, fieldName: string, errorMessage: string) => {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        [salesPointIndex]: {
-          ...prevErrors[salesPointIndex],
-          [fieldName]: errorMessage
-        }
-      }));
-    };
-  
-    const clearError = (salesPointIndex: number, fieldName: string) => {
-      setErrors(prevErrors => {
-        if (!prevErrors[salesPointIndex]?.[fieldName]) {
-          return prevErrors;
-        }
-    
-        const { [fieldName]: _, ...restErrors } = prevErrors[salesPointIndex];
-    
-        if (Object.keys(restErrors).length === 0) {
-          const { [salesPointIndex]: __, ...finalErrors } = prevErrors;
-          return finalErrors;
-        } else {
-          return {
-            ...prevErrors,
-            [salesPointIndex]: restErrors,
-          };
-        }
-      });
-    };
+  const updateError = (salesPointIndex: number, fieldName: string, errorMessage: string) => {
+    setErrors(prevErrors => ({
+      ...prevErrors,
+      [salesPointIndex]: {
+        ...prevErrors[salesPointIndex],
+        [fieldName]: errorMessage
+      }
+    }));
+  };
 
-    const getFieldError = (salesPointIndex: number, fieldName: string): string => errors[salesPointIndex]?.[fieldName] || '';
+  const clearError = (salesPointIndex: number, fieldName: string) => {
+    setErrors(prevErrors => {
+      if (!prevErrors[salesPointIndex]?.[fieldName]) {
+        return prevErrors;
+      }
+
+      const { [fieldName]: _, ...restErrors } = prevErrors[salesPointIndex];
+
+      if (Object.keys(restErrors).length === 0) {
+        const { [salesPointIndex]: __, ...finalErrors } = prevErrors;
+        return finalErrors;
+      } else {
+        return {
+          ...prevErrors,
+          [salesPointIndex]: restErrors,
+        };
+      }
+    });
+  };
+
+  const getFieldError = (salesPointIndex: number, fieldName: string): string => errors[salesPointIndex]?.[fieldName] || '';
 
   const addAnotherSalesPoint = () => {
-    if(salesPoints.length < 5 ){
+    if (salesPoints.length < 5) {
       setSalesPoints([
         ...salesPoints,
         {
@@ -259,7 +259,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
   return (
     <Box sx={{ width: '100%', mx: 'auto', bgcolor: 'background.paper', borderRadius: 2, boxShadow: 3 }}>
       {salesPoints.map((salesPoint, index) => (
-        <Box className={style['points-of-sale-wrapper']} key={`${salesPoint.id}`} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Box key={`${salesPoint.id}`} sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="h6" gutterBottom>
             Punto vendita {index + 1}
             <Typography component="span" variant="body2" sx={{ float: 'right' }}>
@@ -286,13 +286,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           <Typography variant="subtitle1" gutterBottom>Nome insegna</Typography>
           {/* Nome insegna */}
           <TextField
+            size="small"
             fullWidth
             label="Nome insegna"
             name="franchiseName"
             value={salesPoint.franchiseName}
             onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
             margin="normal"
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
             error={!!getFieldError(index, 'franchiseName')}
             helperText={getFieldError(index, 'franchiseName')}
             required
@@ -303,13 +304,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
               <>
                 <Typography variant="subtitle1" gutterBottom>Indirizzo web</Typography>
                 <TextField
+                  size="small"
                   fullWidth
                   label="Indirizzo completo"
                   name="webSite"
                   value={salesPoint.webSite}
                   onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                   margin="normal"
-                  sx={{ mb: 3 }}
+                  sx={{ mb: 2 }}
                   error={!!getFieldError(index, 'webSite')}
                   helperText={getFieldError(index, 'webSite')}
                   required
@@ -320,25 +322,27 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
 
           {salesPoint.type === 'PHYSICAL' && (
             <Box sx={{ mb: 3 }}>
-              <Grid container spacing={2}>
+              <Grid container spacing={1}>
                 <Grid item xs={12} sm={6} md={10}>
                   <Typography variant="subtitle1" gutterBottom>Indirizzo</Typography>
                   <TextField
+                    size="small"
                     fullWidth
                     label="Indirizzo completo"
                     name="address"
                     value={salesPoint.address}
                     onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                     margin="normal"
-                    sx={{ mb: 2 }}
+
                     error={!!getFieldError(index, 'address')}
                     helperText={getFieldError(index, 'address')}
                     required
                   />
                 </Grid>
-                <Grid item xs={12} sm={6} md={2}></Grid>
+                <Grid item xs={12} sm={6} md={2} />
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
+                    size="small"
                     fullWidth
                     label="Città"
                     name="city"
@@ -352,6 +356,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
                   <TextField
+                    size="small"
                     fullWidth
                     label="CAP"
                     name="zipCode"
@@ -365,6 +370,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
+                    size="small"
                     fullWidth
                     label="Regione"
                     name="region"
@@ -378,6 +384,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
                   <TextField
+                    size="small"
                     fullWidth
                     label="Provincia"
                     name="province"
@@ -402,6 +409,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  size="small"
                   fullWidth
                   label="E-mail"
                   name="contactEmail"
@@ -414,9 +422,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                 />
               </Grid>
             </Grid>
-            <Grid container spacing={2}>
+            <Grid container spacing={1}>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  size="small"
                   fullWidth
                   label="Nome"
                   name="contactName"
@@ -430,6 +439,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  size="small"
                   fullWidth
                   label="Cognome"
                   name="contactSurname"
@@ -450,19 +460,36 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
               <Box>
                 <Typography variant="subtitle1" gutterBottom>Contatti punto vendita</Typography>
                 <FormControl fullWidth margin="normal" sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                  <TextField
-                    sx={{ flexGrow: 1, mr: 1 }}
-                    label="Scheda Google MYBusiness"
-                    name="landingGoogle"
-                    value={salesPoint.channelGeolink}
-                    onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                  <Box mr={2} flex={1}>
+                    <TextField
+                      size="small"
+                      label="Scheda Google MYBusiness"
+                      name="landingGoogle"
+                      value={salesPoint.channelGeolink}
+                      onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
 
-                  />
-                  <Button
+                    />
+                  </Box>
+                  <Box mx={2}>
+                    <ButtonNaked
+                      color="primary"
+                      endIcon={<ArrowOutward fontSize="small" />}
+                      onFocusVisible={() => {
+                        const url = salesPoint.channelGeolink;
+                        if (url && isValidUrl(url)) {
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                        }
+                      }}
+                      size="medium"
+                    >
+                      Verifica URL
+                    </ButtonNaked>
+                  </Box>
+                  {/* <Button
                     variant="text"
-                    onClick={() => { 
+                    onClick={() => {
                       const url = salesPoint.channelGeolink;
-                      if(url && isValidUrl(url)){
+                      if (url && isValidUrl(url)) {
                         window.open(url, '_blank', 'noopener,noreferrer');
                       }
                     }}
@@ -470,9 +497,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     sx={{ whiteSpace: 'nowrap' }}
                   >
                     Verifica URL
-                  </Button>
+                  </Button> */}
                 </FormControl>
                 <TextField
+                  size="small"
                   fullWidth
                   label="Numero di telefono"
                   name="phoneNumber"
@@ -481,6 +509,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                   margin="normal"
                 />
                 <TextField
+                  size="small"
                   fullWidth
                   label="Email"
                   name="email"
@@ -489,6 +518,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                   margin="normal"
                 />
                 <TextField
+                  size="small"
                   fullWidth
                   label="Sito web"
                   name="website"
