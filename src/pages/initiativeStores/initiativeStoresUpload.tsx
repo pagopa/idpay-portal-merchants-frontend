@@ -69,6 +69,19 @@ const InitiativeStoresUpload: React.FC = () => {
     };
   }, [showSuccessAlert, showErrorAlert]);
 
+  useEffect(() => {
+    // eslint-disable-next-line functional/no-let
+    let timer : any = {};
+    if (showSuccessAlert) {
+      timer = setTimeout(() => {
+        setShowSuccessAlert(false);
+      }, 5000);
+    }
+    return() => {
+      clearTimeout(timer);
+    };
+  }, [showSuccessAlert]);
+
   const onFormChange = (salesPoints: Array<PointOfSaleDTO>) => {
     if(pointsOfSaleLoaded){
       setPointsOfSaleLoaded(false);
