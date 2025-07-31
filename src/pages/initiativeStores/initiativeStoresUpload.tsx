@@ -14,7 +14,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { useParams } from 'react-router-dom';
+import { generatePath, useParams } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import { parseJwt } from '../../utils/jwt-utils';
@@ -24,7 +24,6 @@ import { updateMerchantPointOfSales } from '../../services/merchantService';
 import { isValidUrl, isValidEmail } from '../../helpers';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
-import { BASE_ROUTE } from '../../routes';
 import { POS_UPDATE } from '../../utils/constants';
 
 interface FormErrors {
@@ -76,11 +75,19 @@ const InitiativeStoresUpload: React.FC = () => {
         await updateMerchantPointOfSales(merchantId, salesPoints);
         setPointsOfSaleLoaded(true);
         setShowSuccessAlert(true);
-        history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
+        // history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
+        history.push(generatePath(ROUTES.STORES, { id }));
       } catch (error: any) {
         setShowErrorAlert(true);
       }
     }
+    if (uploadMethod === POS_UPDATE.Csv) {
+      history.push(generatePath(ROUTES.STORES, { id }));
+    }
+  };
+
+  const handleBack = () => {
+    history.push(generatePath(ROUTES.OVERVIEW, { id }));
   };
 
   const isFormValid = (): boolean => salesPoints.every(salesPoint => {
@@ -156,12 +163,12 @@ const InitiativeStoresUpload: React.FC = () => {
                   sx={{ mb: 2 }}
                 >
                   <FormControlLabel
-                    value="csv"
+                    value= {POS_UPDATE.Csv}
                     control={<Radio />}
                     label={t('pages.initiativeStores.uploadCSV')}
                   />
                   <FormControlLabel
-                    value="manual"
+                    value={POS_UPDATE.Manual}
                     control={<Radio />}
                     label={t('pages.initiativeStores.enterManually')}
                   />
@@ -213,7 +220,7 @@ const InitiativeStoresUpload: React.FC = () => {
 
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-        <Button data-testid="back-stores-button" variant="outlined">{t('commons.backBtn')}</Button>
+        <Button data-testid="back-stores-button" variant="outlined" onClick={handleBack}>{t('commons.backBtn')}</Button>
         <Button data-testid="confirm-stores-button" variant="contained" disabled={!isFormValid()} onClick={handleConfirm}>
           {t('commons.confirmBtn')}
         </Button>
