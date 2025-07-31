@@ -19,7 +19,7 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, }) => (
     <Typography
       fontWeight={theme.typography.fontWeightRegular}
       minWidth={'30%'}
-      variant="body1"
+      variant="body2"
       color="text.primary"
     >
       {label}:
@@ -27,8 +27,8 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, }) => (
 
     <Typography
       flex={1}
-      fontWeight={theme.typography.fontWeightBold}
-      variant="body1"
+      fontWeight={theme.typography.fontWeightMedium}
+      variant="body2"
       color="text.primary"
     >
       {value}

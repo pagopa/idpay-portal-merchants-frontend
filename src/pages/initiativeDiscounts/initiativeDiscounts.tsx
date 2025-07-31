@@ -11,7 +11,7 @@ import ROUTES, { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle, pagesTableContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
-import MerchantTransactions from './MerchantTransactions';
+// import MerchantTransactions from './MerchantTransactions';
 import MerchantTransactionsProcessed from './MerchantTransactionsProcessed';
 import { mapDatesFromPeriod, userCanCreateDiscount } from './helpers';
 
@@ -157,9 +157,9 @@ const InitiativeDiscounts = () => {
             </Tabs>
           </Box>
           <Box sx={{ width: '100%' }}>
-            <TabPanel value={value} index={0}>
+            {/* <TabPanel value={value} index={0}>
               <MerchantTransactions id={id} />
-            </TabPanel>
+            </TabPanel> */}
             <TabPanel value={value} index={1}>
               <MerchantTransactionsProcessed id={id} />
             </TabPanel>

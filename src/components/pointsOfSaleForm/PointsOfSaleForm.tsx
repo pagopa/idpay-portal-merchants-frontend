@@ -195,8 +195,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
 
   };
 
-
-
     const updateError = (salesPointIndex: number, fieldName: string, errorMessage: string) => {
       setErrors(prevErrors => ({
         ...prevErrors,

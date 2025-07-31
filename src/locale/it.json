@@ -162,11 +162,21 @@
       "pointOfSaleType": "Tipologia punto vendita",
       "online": "Online",
       "physical": "Fisico",
+      "contactName": "Nome",
+      "contactSurname": "Cognome",
+      "contactEmail": "E-mail",
       "franchiseName": "Insegna",
+      "region": "Regione",
+      "province": "Provincia",
+      "zipCode": "CAP",
       "type": "Tipo",
       "email": "E-mail",
       "noStores": "Non ci sono punti vendita,",
-      "addStoreNoResults": "aggiungili per iniziare"
+      "addStoreNoResults": "aggiungili per iniziare",
+      "id": "Id",
+      "phone": "Telefono",
+      "geoLink": "Landing google",
+      "website": "Sito web"
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
