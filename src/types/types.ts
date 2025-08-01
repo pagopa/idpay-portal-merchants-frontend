@@ -18,4 +18,12 @@ export interface GetPointOfSalesResponse {
     totalElements: number;
     totalPages: number;
 }
+
+export interface GetPointOfSaleTransactionsFilters {
+    page?: number;
+    size?: number;
+    sort?: string;
+    fiscalCode?: string;
+    status?: string;
+}
     

@@ -1,58 +1,82 @@
 
 import {
-  Box, FormControl, InputLabel, MenuItem, Select,
- TextField,
+  Box, FormControl, Grid, InputLabel, MenuItem, Select,
+  TextField, Chip
 } from '@mui/material';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
-import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
-import { GridColDef } from '@mui/x-data-grid';
+import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import {
   MerchantTransactionDTO,
-  // StatusEnum as TransactionStatusEnum,
 } from '../../api/generated/merchants/MerchantTransactionDTO';
-// import { formatDate, formattedCurrency } from '../../helpers';
-import { getMerchantTransactions } from '../../services/merchantService';
-import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
-// import ActionMenu from '../../components/actionMenu/actionMenu';
 import DataTable from '../../components/dataTable/DataTable';
-import {
-  TransactionsComponentProps,
-  
-} from './helpers';
+import { PAGINATION_SIZE } from '../../utils/constants';
 import FiltersForm from './FiltersForm';
-import { useTableDataFiltered } from './useTableDataFiltered';
-import { useMemoInitTableData } from './useMemoInitTableData';
+
+
+const StatusChip = ({ status }: any) => {
+  /* eslint-disable functional/no-let */
+  let color = '';
+  let label = '';
+  switch (status) {
+    case 'CREATED':
+      color = 'default';
+      label = 'Rimborso richiesto';
+      break;
+    case 'AUTHORIZATION_REQUESTED':
+      color = 'default';
+      label = 'Da autorizzare';
+      break;
+    case 'REJECTED':
+      color = 'error';
+      label = 'Annullato';
+      break;
+    case 'REWARDED':
+      color = 'success';
+      label = 'Stornato';
+      break;
+    default:
+      color = 'default';
+      label = 'Default';
+  }
+  return <Chip label={label} color={color as any} size="small" />;
+};
 
 
 
-const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
+
+interface MerchantTransactionsProps {
+  transactions: Array<MerchantTransactionDTO>;
+  handleFiltersApplied: (filters: any) => void;
+  handleFiltersReset: () => void;
+  handleSortChange?: (sortModel: GridSortModel) => void;
+  sortModel?: GridSortModel;
+  handlePaginationPageChange?: (page: number) => void;
+  paginationModel?: any;
+}
+
+
+
+const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFiltersReset, handleSortChange, sortModel, handlePaginationPageChange, paginationModel }: MerchantTransactionsProps) => {
   const { t } = useTranslation();
-  const [page, setPage] = useState<number>(0);
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const [rows, setRows] = useState<Array<MerchantTransactionDTO>>([]);
-  // const [rowsPerPage, setRowsPerPage] = useState<number>(0);
-  // const [totalElements, setTotalElements] = useState<number>(0);
-  const [filterByUser, setFilterByUser] = useState<string | undefined>();
-  const [filterByStatus, setFilterByStatus] = useState<string | undefined>();
-  const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
-  const addError = useErrorDispatcher();
 
-  const formik = useFormik({
+  useEffect(() => {
+    setRows([...transactions]);
+  }, [transactions]);
+
+  const formik = useFormik<any>({
     initialValues: {
-      searchUser: '',
-      filterStatus: '',
+      fiscalCode: '',
+      status: '',
+      page: 0
     },
     onSubmit: (values) => {
-        const fU = values.searchUser.length > 0 ? values.searchUser : undefined;
-        const fS = values.filterStatus.length > 0 ? values.filterStatus : undefined;
-        setFilterByUser(fU);
-        setFilterByStatus(fS);
-        getTableData(id, 0, fU, fS);
+      console.log(values);
     },
   });
 
@@ -63,181 +87,153 @@ const MerchantTransactions = ({ id }: TransactionsComponentProps) => {
   ];
   const columns: Array<GridColDef> = [
     {
-      field: 'franchiseName',
-      headerName: 'Franchise Name',
-      width: 150,
-      editable: true,
+      field: 'updateDate',
+      headerName: 'Data e ora',
+      width: 200,
+      editable: false,
+      disableColumnMenu: true,
     },
     {
-      field: 'type',
-      headerName: 'Type',
-      width: 150,
-      editable: true,
+      field: 'fiscalCode',
+      headerName: 'Beneficiario',
+      width: 200,
+      editable: false,
+      disableColumnMenu: true,
     },
     {
-      field: 'address',
-      headerName: 'Address',
-      width: 150,
-      editable: true,
+      field: 'effectiveAmountCents',
+      headerName: 'Totale della spesa',
+      width: 200,
+      editable: false,
+      disableColumnMenu: true,
+      sortable: false
     },
     {
-      field: 'city',
-      headerName: 'City',
-      width: 150,
-      editable: true,
+      field: 'rewardAmountCents',
+      headerName: 'Importo autorizzato',
+      width: 200,
+      editable: false,
+      disableColumnMenu: true,
+      sortable: false
     },
     {
-      field: 'referent',
-      headerName: 'Referent',
-      width: 150,
-      editable: true,
+      field: 'status',
+      headerName: 'Stato',
+      width: 200,
+      editable: false,
+      disableColumnMenu: true,
+      sortable: false,
+      renderCell: (params: any) => (
+        <StatusChip status={params.value} />
+      ),
     },
-    {
-      field: 'contactEmail',
-      headerName: 'Email',
-      width: 150,
-      editable: true,
-    },
-
-  ];
-  const rows2 = [
-    { id: 1, franchiseName: 'Snow', type: 'Jon', address: 'Jon', city: 'Jon', referent: 'Jon', contactEmail: 'Jon' },
-    { id: 2, franchiseName: 'Lannister', type: 'Cersei', address: 'Cersei', city: 'Cersei', referent: 'Cersei', contactEmail: 'Cersei' },
-    { id: 3, franchiseName: 'Lannister', type: 'Jaime', address: 'Jaime', city: 'Jaime', referent: 'Jaime', contactEmail: 'Jaime' },
-    { id: 4, franchiseName: 'Stark', type: 'Arya', address: 'Arya', city: 'Arya', referent: 'Arya', contactEmail: 'Arya' },
-    { id: 5, franchiseName: 'Targaryen', type: 'Daenerys', address: 'Daenerys', city: 'Daenerys', referent: 'Daenerys', contactEmail: 'Daenerys' },
-    { id: 6, franchiseName: 'Melisandre', type: 'Daenerys', address: 'Daenerys', city: 'Daenerys', referent: 'Daenerys', contactEmail: 'Daenerys' },
-    { id: 7, franchiseName: 'Clifford', type: 'Ferrara', address: 'Ferrara', city: 'Ferrara', referent: 'Ferrara', contactEmail: 'Ferrara' },
-    { id: 8, franchiseName: 'Frances', type: 'Rossini', address: 'Rossini', city: 'Rossini', referent: 'Rossini', contactEmail: 'Rossini' },
-    { id: 9, franchiseName: 'Roxie', type: 'Harvey', address: 'Harvey', city: 'Harvey', referent: 'Harvey', contactEmail: 'Harvey' },
   ];
 
-  const getTableData = (
-    initiativeId: string,
-    page: number,
-    fiscalCode: string | undefined,
-    status: string | undefined
-  ) => {
-    setLoading(true);
-    getMerchantTransactions(initiativeId, page, fiscalCode, status)
-      .then((response) => {
-        setPage(response.pageNo);
-        // setRowsPerPage(response.pageSize);
-        // setTotalElements(response.totalElements);
-        if (response.content.length > 0) {
-          setRows([...response.content]);
-        } else {
-          setRows([]);
-        }
-      })
-      .catch((error) => {
-        addError({
-          id: 'GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST_ERROR',
-          blocking: false,
-          error,
-          techDescription: 'An error occurred getting initiative merchant discounts list',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
-      })
-      .finally(() => setLoading(false));
+  const handleOnFiltersApplied = (filters: any) => {
+    console.log('Callback dopo applicazione filtri', filters);
+    if (handleFiltersApplied) { handleFiltersApplied(filters); }
   };
 
-  useMemoInitTableData(id, setPage, setFilterByUser, setFilterByStatus);
-  useTableDataFiltered(id, page, filterByUser, filterByStatus, getTableData, setRows);
+  const handleOnFiltersReset = () => {
+    console.log('Callback dopo reset filtri');
+    if (handleFiltersReset) { handleFiltersReset(); }
+  };
 
-  // const showActionMenu = (status: TransactionStatusEnum) => {
-  //   switch (status) {
-  //     case TransactionStatusEnum.AUTHORIZED:
-  //     case TransactionStatusEnum.CREATED:
-  //     case TransactionStatusEnum.IDENTIFIED:
-  //       return true;
-  //     case TransactionStatusEnum.AUTHORIZATION_REQUESTED:
-  //     case TransactionStatusEnum.REJECTED:
-  //       return false;
-  //   }
-  // };
+  const handleSortModelChange = async (newSortModel: GridSortModel) => {
+    if (handleSortChange) { handleSortChange(newSortModel); }
+  };
+
+  const onPaginationChange = (page: number) => {
+    if (handlePaginationPageChange) { handlePaginationPageChange(page); }
+  };
 
   return (
     <Box width={'100%'}>
       <FiltersForm
         formik={formik}
-        // resetForm={() =>
-        //   resetForm(id, formik, setFilterByUser, setFilterByStatus, setRows, getTableData)
-        // }
+        onFiltersApplied={handleOnFiltersApplied}
+        onFiltersReset={handleOnFiltersReset}
       >
-        <FormControl sx={{ gridColumn: 'span 4' }}>
-          <TextField
-            label={t('pages.initiativeDiscounts.searchByFiscalCode')}
-            placeholder={t('pages.initiativeDiscounts.searchByFiscalCode')}
-            name="searchUser"
-            aria-label="searchUser"
-            role="input"
-            InputLabelProps={{ required: false }}
-            value={formik.values.searchUser}
-            onChange={(e) => formik.handleChange(e)}
-            size="small"
-            data-testid="searchUser-test"
+        <Grid item xs={12} sm={6} md={3} lg={3}>
+          <FormControl fullWidth size="small">
+            <TextField
+              label={t('pages.initiativeDiscounts.searchByFiscalCode')}
+              placeholder={t('pages.initiativeDiscounts.searchByFiscalCode')}
+              name="fiscalCode"
+              aria-label="searchUser"
+              role="input"
+              InputLabelProps={{ required: false }}
+              value={formik.values.fiscalCode}
+              onChange={(e) => formik.handleChange(e)}
+              size="small"
+              data-testid="searchUser-test"
+            />
+          </FormControl>
+        </Grid>
+
+        {/* <Grid item xs={12} sm={6} md={3} lg={3}>
+          <FormControl size="small" fullWidth>
+            <InputLabel>{'Categoria'}</InputLabel>
+            <Select
+              id="filterCategory"
+              inputProps={{
+                'data-testid': 'filterCategory-select',
+              }}
+              name="filterCategory"
+              label={'Categoria'}
+              placeholder={'Seleziona una categoria'}
+              onChange={(e) => formik.handleChange(e)}
+              value={formik.values.status}
+            >
+              {filterByStatusOptionsList.map((category) => (
+                <MenuItem key={category.value} value={category.value}>
+                  {category.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid> */}
+        <Grid item xs={12} sm={6} md={3} lg={3}>
+          <FormControl size="small" fullWidth>
+            <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
+            <Select
+              id="status"
+              inputProps={{
+                'data-testid': 'filterStatus-select',
+              }}
+              name="status"
+              label={t('pages.initiativeDiscounts.filterByStatus')}
+              placeholder={t('pages.initiativeDiscounts.filterByStatus')}
+              onChange={formik.handleChange}
+              value={formik.values.status}
+            >
+              {filterByStatusOptionsList.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+      </FiltersForm >
+      {rows.length > 0 ? (
+
+        <Box sx={{ width: '100%', height: 500, mb: 2 }}>
+          <DataTable
+            rows={rows}
+            columns={columns}
+            pageSize={PAGINATION_SIZE}
+            rowsPerPage={PAGINATION_SIZE}
+            handleRowAction={(row: any) => {
+              console.log(row);
+              // TODO Aggiungere redirect al dettaglio transazione
+            }}
+            onSortModelChange={handleSortModelChange}
+            sortModel={sortModel}
+            paginationModel={paginationModel}
+            onPaginationPageChange={onPaginationChange}
           />
-        </FormControl>
-        <FormControl sx={{ gridColumn: 'span 3' }} size="small">
-          <InputLabel>{'Categoria'}</InputLabel>
-          <Select
-            id="filterCategory"
-            inputProps={{
-              'data-testid': 'filterCategory-select',
-            }}
-            name="filterCategory"
-            label={'Categoria'}
-            placeholder={'Seleziona una categoria'}
-            onChange={(e) => formik.handleChange(e)}
-            value={formik.values.filterStatus}
-          >
-            {filterByStatusOptionsList.map((category) => (
-              <MenuItem key={category.value} value={category.value}>
-                {category.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ gridColumn: 'span 2' }} size="small">
-          <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
-          <Select
-            id="filterStatus"
-            inputProps={{
-              'data-testid': 'filterStatus-select',
-            }}
-            name="filterStatus"
-            label={t('pages.initiativeDiscounts.filterByStatus')}
-            placeholder={t('pages.initiativeDiscounts.filterByStatus')}
-            onChange={(e) => formik.handleChange(e)}
-            value={formik.values.filterStatus}
-          >
-            {filterByStatusOptionsList.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-     </FiltersForm >
-      {rows2.length > 0 ? (
-        <Box
-          sx={{
-            ...pagesTableContainerStyle,
-            mt: 3,
-          }}
-        >
-          <Box sx={{ display: 'grid', gridColumn: 'span 12', height: '100%' }}>
-            <Box sx={{ width: '100%' ,height: 500 }}>
-              <DataTable rows={rows2} columns={columns} pageSize={5} rowsPerPage={5} handleRowAction={(row: any) => {
-                console.log(row);
-              }} />
-            </Box>
-          </Box>
         </Box>
       ) : (
         <Box sx={{ mt: 2 }}>

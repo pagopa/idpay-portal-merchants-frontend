@@ -17,6 +17,7 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage'
 import { generatePath, useParams } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
@@ -49,6 +50,7 @@ const InitiativeStoresUpload: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams<RouteParams>();
   const history = useHistory();
+  const addError = useErrorDispatcher();
 
 
 
@@ -68,16 +70,39 @@ const InitiativeStoresUpload: React.FC = () => {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
       if (!merchantId) {
-        setShowErrorAlert(true);
+        addError({
+          id: 'UPLOAD_STORES',
+          blocking: false,
+          error: new Error('Merchant ID not found'),
+          techDescription: 'Merchant ID not found',
+          displayableTitle: t('errors.genericTitle'),
+          displayableDescription: t('errors.genericDescription'),
+          toNotify: true,
+          component: 'Toast',
+          showCloseIcon: true,
+        });
         return;
       }
       try {
         await updateMerchantPointOfSales(merchantId, salesPoints);
         setPointsOfSaleLoaded(true);
         setShowSuccessAlert(true);
-        // history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
         history.push(generatePath(ROUTES.STORES, { id }));
       } catch (error: any) {
+        addError({
+          id: 'UPLOAD_STORES',
+          blocking: false,
+          error,
+          techDescription: 'An error occurred uploading stores',
+          displayableTitle: t('errors.genericTitle'),
+          displayableDescription: t('errors.genericDescription'),
+          toNotify: true,
+          component: 'Toast',
+          showCloseIcon: true,
+        });
+        // history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
+        history.push(generatePath(ROUTES.STORES, { id }));
+  
         setShowErrorAlert(true);
       }
     }
