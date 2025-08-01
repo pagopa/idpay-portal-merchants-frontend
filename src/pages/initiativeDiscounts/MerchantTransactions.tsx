@@ -6,7 +6,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
-import { GridColDef } from '@mui/x-data-grid';
+import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import {
   MerchantTransactionDTO,
 } from '../../api/generated/merchants/MerchantTransactionDTO';
@@ -15,7 +15,7 @@ import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from './FiltersForm';
 
 
-const StatusChip = ({status}: any) => {
+const StatusChip = ({ status }: any) => {
   /* eslint-disable functional/no-let */
   let color = '';
   let label = '';
@@ -49,26 +49,31 @@ const StatusChip = ({status}: any) => {
 interface MerchantTransactionsProps {
   id: string;
   transactions: Array<MerchantTransactionDTO>;
+  handleFiltersApplied: (filters: any) => void;
+  handleFiltersReset: () => void;
+  handleSortChange?: (sortModel: GridSortModel) => void;
+  sortModel?: GridSortModel;
+  handlePaginationPageChange?: (page: number) => void;
+  paginationModel?: any;
 }
 
 
 
-const MerchantTransactions = ({transactions }: MerchantTransactionsProps) => {
+const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFiltersReset, handleSortChange, sortModel, handlePaginationPageChange, paginationModel }: MerchantTransactionsProps) => {
   const { t } = useTranslation();
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const [rows, setRows] = useState<Array<MerchantTransactionDTO>>([]);
 
   useEffect(() => {
-    if (transactions.length > 0) {
-      console.log(transactions);
-      setRows([...transactions]);
-    }
+    setRows([...transactions]);
   }, [transactions]);
 
-  const formik = useFormik({
+  const formik = useFormik<any>({
     initialValues: {
-      
+      fiscalCode: '',
+      status: '',
+      page: 0
     },
     onSubmit: (values) => {
       console.log(values);
@@ -152,31 +157,41 @@ const MerchantTransactions = ({transactions }: MerchantTransactionsProps) => {
   //   }
   // ];
 
-  const handleFiltersApplied = () => {
-    console.log('Callback dopo applicazione filtri');
+  const handleOnFiltersApplied = (filters: any) => {
+    console.log('Callback dopo applicazione filtri', filters);
+    if (handleFiltersApplied) { handleFiltersApplied(filters); }
   };
 
-  const handleFiltersReset = () => {
+  const handleOnFiltersReset = () => {
     console.log('Callback dopo reset filtri');
+    if (handleFiltersReset) { handleFiltersReset(); }
+  };
+
+  const handleSortModelChange = async (newSortModel: GridSortModel) => {
+    if (handleSortChange) { handleSortChange(newSortModel); }
+  };
+
+  const onPaginationChange = (page: number) => {
+    if (handlePaginationPageChange) { handlePaginationPageChange(page); }
   };
 
   return (
     <Box width={'100%'}>
       <FiltersForm
         formik={formik}
-        onFiltersApplied={handleFiltersApplied}
-        onFiltersReset={handleFiltersReset}
+        onFiltersApplied={handleOnFiltersApplied}
+        onFiltersReset={handleOnFiltersReset}
       >
         <Grid item xs={12} sm={6} md={3} lg={3}>
           <FormControl fullWidth size="small">
             <TextField
               label={t('pages.initiativeDiscounts.searchByFiscalCode')}
               placeholder={t('pages.initiativeDiscounts.searchByFiscalCode')}
-              name="searchUser"
+              name="fiscalCode"
               aria-label="searchUser"
               role="input"
               InputLabelProps={{ required: false }}
-              // value={formik.values.searchUser}
+              value={formik.values.fiscalCode}
               onChange={(e) => formik.handleChange(e)}
               size="small"
               data-testid="searchUser-test"
@@ -184,7 +199,7 @@ const MerchantTransactions = ({transactions }: MerchantTransactionsProps) => {
           </FormControl>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3} lg={3}>
+        {/* <Grid item xs={12} sm={6} md={3} lg={3}>
           <FormControl size="small" fullWidth>
             <InputLabel>{'Categoria'}</InputLabel>
             <Select
@@ -196,7 +211,7 @@ const MerchantTransactions = ({transactions }: MerchantTransactionsProps) => {
               label={'Categoria'}
               placeholder={'Seleziona una categoria'}
               onChange={(e) => formik.handleChange(e)}
-              // value={formik.values.filterStatus}
+              value={formik.values.status}
             >
               {filterByStatusOptionsList.map((category) => (
                 <MenuItem key={category.value} value={category.value}>
@@ -205,20 +220,20 @@ const MerchantTransactions = ({transactions }: MerchantTransactionsProps) => {
               ))}
             </Select>
           </FormControl>
-        </Grid>
+        </Grid> */}
         <Grid item xs={12} sm={6} md={3} lg={3}>
           <FormControl size="small" fullWidth>
             <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
             <Select
-              id="filterStatus"
+              id="status"
               inputProps={{
                 'data-testid': 'filterStatus-select',
               }}
-              name="filterStatus"
+              name="status"
               label={t('pages.initiativeDiscounts.filterByStatus')}
               placeholder={t('pages.initiativeDiscounts.filterByStatus')}
-              onChange={(e) => formik.handleChange(e)}
-              // value={formik.values.filterStatus}
+              onChange={formik.handleChange}
+              value={formik.values.status}
             >
               {filterByStatusOptionsList.map((item) => (
                 <MenuItem key={item.value} value={item.value}>
@@ -240,11 +255,11 @@ const MerchantTransactions = ({transactions }: MerchantTransactionsProps) => {
             rowsPerPage={10}
             handleRowAction={(row: any) => {
               console.log(row);
-            }} 
-            // onSortModelChange={handleSortModelChange} 
-            // sortModel={sortModel} 
-            // paginationModel={storesPagination}
-            // onPaginationPageChange={handlePaginationPageChange}
+            }}
+            sortModel={sortModel}
+            onSortModelChange={handleSortModelChange}
+            paginationModel={paginationModel}
+            onPaginationPageChange={onPaginationChange}
           />
         </Box>
       ) : (

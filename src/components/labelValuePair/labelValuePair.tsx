@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { FC } from 'react';
 import {theme} from "@pagopa/mui-italia/dist/theme/theme.js";
+import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 
 interface LabelValuePairProps {
   label: string;
@@ -31,7 +32,7 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, }) => (
       variant="body2"
       color="text.primary"
     >
-      {value}
+      {value ? value : MISSING_DATA_PLACEHOLDER}
     </Typography>
   </Box>
 );

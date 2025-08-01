@@ -2,6 +2,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState, useCallback } from 'react';
 import { IconButton, Box } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import {MISSING_DATA_PLACEHOLDER} from '../../utils/constants';
 
 export interface DataTableProps {
   rows: any;
@@ -62,7 +63,7 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
 
   const renderEmptyCell = (params: any) => {
     if (params.value === null || params.value === undefined || params.value === '') {
-      return '-';
+      return MISSING_DATA_PLACEHOLDER;
     }
     return params.value;
   };

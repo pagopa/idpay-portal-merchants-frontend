@@ -5,6 +5,7 @@
     "closeBtn": "Chiudi",
     "confirmBtn": "Conferma",
     "continueBtn": "Continua",
+    "modify": "Modifica",
     "saveBtn": "Salva",
     "cancel": "Annulla",
     "copyCodeBtn": "Copia codice",
@@ -176,7 +177,9 @@
       "id": "Id",
       "phone": "Telefono",
       "geoLink": "Landing google",
-      "website": "Sito web"
+      "website": "Sito web",
+      "modalDescription": "Qui puoi modificare  idati del referente di questo punto vendita.<Se modifica l' indirizzo email gli verrà inviata una email di conferma, e verranno invalidate le credenziali inviate alla precedente email>.",
+      "referentChangeSuccess": "Dati modificati con successo"
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
