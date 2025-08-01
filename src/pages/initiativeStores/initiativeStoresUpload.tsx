@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -7,25 +7,24 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
-  Link, Alert, Slide,
+  Link,
+  Grid,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { useParams } from 'react-router-dom';
+import { generatePath, useParams } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
+import { theme } from '@pagopa/mui-italia';
 import { parseJwt } from '../../utils/jwt-utils';
-import { genericContainerStyle } from '../../styles';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
 import { isValidUrl, isValidEmail } from '../../helpers';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
-import { BASE_ROUTE } from '../../routes';
+import { POS_UPDATE } from '../../utils/constants';
 
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
@@ -41,36 +40,20 @@ interface RouteParams {
 }
 
 const InitiativeStoresUpload: React.FC = () => {
-  const [uploadMethod, setUploadMethod] = useState<'csv' | 'manual'>('csv');
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(POS_UPDATE.Csv);
+  const [_showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [_showErrorAlert, setShowErrorAlert] = useState(false);
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([]);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [_errors, setErrors] = useState<FormErrors>({});
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
   const { t } = useTranslation();
   const { id } = useParams<RouteParams>();
   const history = useHistory();
 
-  useEffect(() => {
-    console.log(errors);
-  }, [errors]);
 
-  useEffect(() => {
-    // eslint-disable-next-line functional/no-let
-    let timer: any = {};
-    if (showSuccessAlert || showErrorAlert) {
-      timer = setTimeout(() => {
-        setShowSuccessAlert(false);
-        setShowErrorAlert(false);
-      }, 5000);
-    }
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [showSuccessAlert, showErrorAlert]);
 
   const onFormChange = (salesPoints: Array<PointOfSaleDTO>) => {
-    if(pointsOfSaleLoaded){
+    if (pointsOfSaleLoaded) {
       setPointsOfSaleLoaded(false);
     }
     const salesPointsWithoutId = salesPoints.map((salesPoint) => {
@@ -81,23 +64,30 @@ const InitiativeStoresUpload: React.FC = () => {
   };
 
   const handleConfirm = async () => {
-    if (uploadMethod === 'manual') {
+    if (uploadMethod === POS_UPDATE.Manual) {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
       if (!merchantId) {
         setShowErrorAlert(true);
         return;
       }
-      try{
+      try {
         await updateMerchantPointOfSales(merchantId, salesPoints);
         setPointsOfSaleLoaded(true);
         setShowSuccessAlert(true);
-        history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
+        // history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
+        history.push(generatePath(ROUTES.STORES, { id }));
       } catch (error: any) {
-        console.log(error);
         setShowErrorAlert(true);
       }
     }
+    if (uploadMethod === POS_UPDATE.Csv) {
+      history.push(generatePath(ROUTES.STORES, { id }));
+    }
+  };
+
+  const handleBack = () => {
+    history.push(generatePath(ROUTES.OVERVIEW, { id }));
   };
 
   const isFormValid = (): boolean => salesPoints.every(salesPoint => {
@@ -125,10 +115,12 @@ const InitiativeStoresUpload: React.FC = () => {
     setErrors(errors);
   };
 
+
+
   return (
-    <Box sx={{ p: 4, width: '100%', margin: '0 auto' }}>
-      <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
-        <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
+    <Box sx={{ width: '100%' }}>
+      <Box>
+        <Box mt={2} sx={{ display: 'grid', gridColumn: 'span 8' }}>
           <BreadcrumbsBox backLabel={t('commons.backBtn')} items={[]} />
           <TitleBox
             title={t('pages.initiativeStores.uploadStores')}
@@ -139,140 +131,96 @@ const InitiativeStoresUpload: React.FC = () => {
         </Box>
       </Box>
 
-      <Paper elevation={1} sx={{ borderRadius: 0, p: 3, mt: 2 }}>
-        <Box sx={{ display: 'grid', gridColumn: 'span 8', mt: 2 }}>
-          <TitleBox
-            title={t('pages.initiativeStores.addStore')}
-            subTitle={t('pages.initiativeStores.addStoresSubtitle')}
-            mbTitle={3}
-            mtTitle={2}
-            mbSubTitle={2}
-            variantTitle="h6"
-            variantSubTitle="body2"
-          />
-          <Link
-            fontWeight={'bold'}
-            href="#"
-            underline="hover"
-            sx={{ display: 'block', my: 1, mb: 2 }}
-          >
-            {t('pages.initiativeStores.manualLink')}
-          </Link>
+      <Paper elevation={1} square={true} sx={{ mt: 2 }}>
+        <Box px={4} pt={2} pb={4}>
+          <Grid container>
+            <Grid item xs={12}>
+              <TitleBox
+                title={t('pages.initiativeStores.addStore')}
+                subTitle={t('pages.initiativeStores.addStoresSubtitle')}
+                mbTitle={3}
+                mtTitle={2}
+                mbSubTitle={2}
+                variantTitle="h6"
+                variantSubTitle="body2"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Link
+                fontWeight={theme.typography.fontWeightBold}
+                href="#"
+                underline="hover"
+              >
+                {t('pages.initiativeStores.manualLink')}
+              </Link>
+            </Grid>
+            <Grid item xs={12}>
+              <Box my={2}>
+                <RadioGroup
+                  row
+                  value={uploadMethod}
+                  onChange={(e) => setUploadMethod(e.target.value as POS_UPDATE.Csv | POS_UPDATE.Manual)}
+                  sx={{ mb: 2 }}
+                >
+                  <FormControlLabel
+                    value= {POS_UPDATE.Csv}
+                    control={<Radio />}
+                    label={t('pages.initiativeStores.uploadCSV')}
+                  />
+                  <FormControlLabel
+                    value={POS_UPDATE.Manual}
+                    control={<Radio />}
+                    label={t('pages.initiativeStores.enterManually')}
+                  />
+                </RadioGroup>
+              </Box>
+            </Grid>
+
+            {uploadMethod === POS_UPDATE.Csv &&
+              <Grid item xs={12}>
+                <Box p={2} mb={4} display="flex" alignItems={"center"} justifyContent={"center"}
+                  sx={{
+                    borderWidth: '1px', borderStyle: "dashed", borderColor: theme.palette.primary.main, borderRadius: "10px",
+                    backgroundColor: theme.palette.primaryAction.selected
+                  }}>
+                  <Box mr={1}>
+                    <CloudUploadIcon fontSize="large" color="primary" />
+                  </Box>
+                  <Box>
+                    <Typography variant="body1">
+                      {t('pages.initiativeStores.dragCSV')}
+                      <Link href="#" underline="hover" color={theme.palette.primary.main}>
+                        {t('pages.initiativeStores.selectFromPc')}
+                      </Link>
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+            }
+
+            {
+              uploadMethod === POS_UPDATE.Manual &&
+              <Grid item xs={12}>
+                <PointsOfSaleForm onFormChange={onFormChange} onErrorChange={onErrorChange} pointsOfSaleLoaded={pointsOfSaleLoaded} />
+              </Grid>
+            }
+            {uploadMethod === POS_UPDATE.Csv &&
+              <Grid item xs={12}>
+                <Typography variant="body1" color="text.primary">
+                  {t('pages.initiativeStores.prepareList')}
+                  <Link fontWeight={theme.typography.fontWeightMedium} href="#" underline="hover">
+                    {t('pages.initiativeStores.downloadExampleFile')}
+                  </Link>
+                </Typography>
+              </Grid>
+            }
+          </Grid>
         </Box>
-
-        <RadioGroup
-          row
-          value={uploadMethod}
-          onChange={(e) => setUploadMethod(e.target.value as 'csv' | 'manual')}
-          sx={{ mb: 2 }}
-        >
-          <FormControlLabel
-            value="csv"
-            control={<Radio />}
-            label={t('pages.initiativeStores.uploadCSV')}
-          />
-          <FormControlLabel
-            value="manual"
-            control={<Radio />}
-            label={t('pages.initiativeStores.enterManually')}
-          />
-        </RadioGroup>
-
-        {uploadMethod === 'csv' && (
-          <Paper
-            variant="outlined"
-            sx={{
-              border: '2px dashed #2196f3',
-              p: 4,
-              textAlign: 'center',
-              mb: 4,
-              backgroundColor: '#0073E614',
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1,
-                mt: 2,
-              }}
-            >
-              <CloudUploadIcon fontSize="large" color="primary" />
-              <Typography variant="body1">
-                {t('pages.initiativeStores.dragCSV')}
-                <Link fontWeight={'bold'} href="#" underline="hover" sx={{ ml: 1 }}>
-                  {t('pages.initiativeStores.selectFromPc')}
-                </Link>
-              </Typography>
-            </Box>
-          </Paper>
-        )}
-
-        {
-          uploadMethod === 'manual' && (
-            <PointsOfSaleForm onFormChange={onFormChange} onErrorChange={onErrorChange} pointsOfSaleLoaded={pointsOfSaleLoaded}/>
-          )
-        }
-        {uploadMethod === 'csv' && (
-          <Typography variant="body1" color="text.primary">
-            {t('pages.initiativeStores.prepareList')}
-            <Link fontWeight={'bold'} href="#" underline="hover">
-              {t('pages.initiativeStores.downloadExampleFile')}
-            </Link>
-          </Typography>
-        )}
-
       </Paper>
-      <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
-        <Alert
-          severity="success"
-          icon={<CheckCircleOutlineIcon />}
-          sx={{
-            position: 'fixed',
-            bottom: 40,
-            right: 20,
-            backgroundColor: 'white',
-            width: 'auto',
-            maxWidth: '400px',
-            minWidth: '300px',
-            zIndex: 1300,
-            boxShadow: 3,
-            borderRadius: 1,
-            '& .MuiAlert-icon': {
-              color: '#6CC66A'
-            }
-          }}
-        >
-          {t('initiativeStoresUpload.uploadSuccess')}
-        </Alert>
-      </Slide>
-      <Slide direction="left" in={showErrorAlert} mountOnEnter unmountOnExit>
-        <Alert
-          severity="error"
-          icon={<ErrorOutlineIcon />}
-          sx={{
-            position: 'fixed',
-            bottom: 40,
-            right: 20,
-            backgroundColor: 'white',
-            width: 'auto',
-            maxWidth: '400px',
-            minWidth: '300px',
-            zIndex: 1300,
-            boxShadow: 3,
-            borderRadius: 1,
-            '& .MuiAlert-icon': {
-              color: 'red'
-            }
-          }}
-        >
-          {t('initiativeStoresUpload.uploadError')}
-        </Alert>
-      </Slide>
+
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-        <Button data-testid="back-stores-button" variant="outlined">{t('commons.backBtn')}</Button>
+        <Button data-testid="back-stores-button" variant="outlined" onClick={handleBack}>{t('commons.backBtn')}</Button>
         <Button data-testid="confirm-stores-button" variant="contained" disabled={!isFormValid()} onClick={handleConfirm}>
           {t('commons.confirmBtn')}
         </Button>

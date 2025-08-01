@@ -61,6 +61,10 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
     handleRowAction(row);
   }, [handleRowAction]);
 
+  const memoizedHandleRowAction = useCallback((row: any) => {
+    handleRowAction(row);
+  }, [handleRowAction]);
+
   const renderEmptyCell = (params: any) => {
     if (params.value === null || params.value === undefined || params.value === '') {
       return MISSING_DATA_PLACEHOLDER;
