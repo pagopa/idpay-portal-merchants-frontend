@@ -35,7 +35,6 @@ const InitiativeStores: React.FC = () => {
 
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesPagination, setStoresPagination] = useState<any>({});
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [storesLoading, setStoresLoading] = useState(false);
   const [sortModel, setSortModel] = useState<any>([]);
   const { t } = useTranslation();
@@ -102,7 +101,6 @@ const InitiativeStores: React.FC = () => {
   useEffect(() => {
     fetchStores(initialValues).catch(error => {
       console.error('Error fetching stores:', error);
-      setShowErrorAlert(true);
     });
   }, []);
 
@@ -198,7 +196,6 @@ const InitiativeStores: React.FC = () => {
       page
     }).catch(error => {
       console.error('Error fetching stores:', error);
-      setShowErrorAlert(true);
     });
   };
 
