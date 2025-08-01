@@ -15,20 +15,12 @@ export interface DataTableProps {
   sortModel?: GridSortModel;
   onPaginationPageChange?: (page: number) => void;
   paginationModel?: any;
-  customId?: string;
 }
 
 
 const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel, sortModel }: DataTableProps) => {
   const [finalColumns, setFinalColumns] = useState(Array<any>);
 
-  console.log("ROWS", rows);
-  console.log("COLUMNS", columns);
-
-  useEffect(() => {
-    console.log("Sort model", sortModel);
-    
-  }, [sortModel]);
 
   useEffect(() => {
     if (columns && columns.length > 0) {
@@ -81,8 +73,7 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
   };
 
   const handleSortModelChange = useCallback((model: GridSortModel) => {
-    console.log("Sort model changed:", model);
-    onSortModelChange?.(model); // Chiama la callback del parent
+    onSortModelChange?.(model);
   }, [onSortModelChange]);
 
   return (
