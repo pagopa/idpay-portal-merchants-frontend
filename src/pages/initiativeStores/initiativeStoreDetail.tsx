@@ -16,9 +16,10 @@ import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import LabelValuePair from '../../components/labelValuePair/labelValuePair';
 import MerchantTransactions from '../initiativeDiscounts/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
-import { PointOfSaleDetailDTO } from '../../api/generated/merchants/PointOfSaleDetailDTO';
+// import { PointOfSaleDetailDTO } from '../../api/generated/merchants/PointOfSaleDetailDTO';
 import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
 import ModalComponent from '../../components/modal/ModalComponent';
+
 
 
 
@@ -26,101 +27,9 @@ interface RouteParams {
   id: string;
   store_id: string;
 }
-// interface StoreField {
-//   id: string;
-//   label: string;
-//   value: string;
-// }
-
-// const storeFields: Array<StoreField> = [
-//   {
-//     id: 'id',
-//     label: 'ID',
-//     value: MISSING_DATA_PLACEHOLDER
-//   },
-//   {
-//     id: 'address',
-//     label: 'Indirizzo',
-//     value: MISSING_DATA_PLACEHOLDER
-//   },
-//   {
-//     id: 'phone',
-//     label: 'Telefono',
-//     value: MISSING_DATA_PLACEHOLDER
-//   },
-//   {
-//     id: 'email',
-//     label: 'Email',
-//     value: MISSING_DATA_PLACEHOLDER
-//   },
-//   {
-//     id: 'google_landing',
-//     label: 'Landing Google',
-//     value: MISSING_DATA_PLACEHOLDER
-//   },
-//   {
-//     id: 'website',
-//     label: 'Sito web',
-//     value: MISSING_DATA_PLACEHOLDER
-//   }
-// ];
-
-// const referentFields: Array<StoreField> = [
-//   {
-//     id: 'nome',
-//     label: 'Nome',
-//     value: MISSING_DATA_PLACEHOLDER
-//   },
-//   {
-//     id: 'cognome',
-//     label: 'Cognome',
-//     value: MISSING_DATA_PLACEHOLDER
-//   },
-//   {
-//     id: 'email',
-//     label: 'email',
-//     value: MISSING_DATA_PLACEHOLDER
-//   }
-// ];
-
-// const mockResponse = {
-
-//   pointOfSale: {
-
-//     id: "6888ea7fc3286af3d5afa7f7",
-
-//     type: "PHYSICAL",
-
-//     franchiseName: "Orn - Abbott",
-
-//     region: "Molise",
-
-//     province: "Provincia Generica",
-
-//     city: "East Ludiestad",
-
-//     zipCode: "85077",
-
-//     address: "Viale Europa, 14",
-
-//     contactEmail: "Steve_Daniel@hotmail.com",
-
-//     contactName: "Tyrese",
-
-//     contactSurname: "Langosh"
-
-//   },
-
-//   merchantDetail: {
-//     vatNumber: "12345678908",
-//     iban: "IT96I0300203280465229336812"
-//   }
-// }
-;
 
 const InitiativeStoreDetail = () => {
-  // const history = useHistory();
-  const [storeDetail, setStoreDetail] = useState<PointOfSaleDetailDTO | null>(null);
+  const [storeDetail, setStoreDetail] = useState<any>(null);
   const [transactionsFilters, setTransactionsFilters] = useState<any>({});
   const [storeTransactions, setStoreTransactions] = useState<Array<MerchantTransactionDTO>>([]);
   // const [storeTransactionsLoading, setStoreTransactionsLoading] = useState(false);
@@ -130,7 +39,6 @@ const InitiativeStoreDetail = () => {
   const [contactSurnameModal, setContactSurnameModal] = useState('');
   const [contactEmailModal, setContactEmailModal] = useState('');
   const [contactEmailConfirmModal, setContactEmailConfirmModal] = useState('');
-  const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
   const { t } = useTranslation();
@@ -148,10 +56,6 @@ const InitiativeStoreDetail = () => {
 
   }, [id]);
 
-  useEffect(() => {
-    console.log("TRANSACTIONS", storeTransactions);
-  }, [storeTransactions]);
-
   const fetchStoreDetail = async () => {
     try {
       const userJwt = parseJwt(storageTokenOps.read());
@@ -159,7 +63,6 @@ const InitiativeStoreDetail = () => {
       const pointOfSaleId = store_id;
       const response = await getMerchantPointOfSalesById(merchantId, pointOfSaleId);
       if (response) {
-        console.log("response", response);
         setStoreDetail(response);
       }
 
@@ -205,23 +108,23 @@ const InitiativeStoreDetail = () => {
         toNotify: true,
         component: 'Toast',
         showCloseIcon: true,
-      });
+      });  
     }
   };
 
   const getKeyValue = (obj: any) => [
-    { label: t('pages.initiativeStores.id'), value: obj?.pointOfSale?.id },
-    { label: t('pages.initiativeStores.address'), value: obj?.pointOfSale?.address },
-    { label: t('pages.initiativeStores.phone'), value: obj?.pointOfSale?.channelPhone },
-    { label: t('pages.initiativeStores.contactEmail'), value: obj?.pointOfSale?.channelEmail },
-    { label: t('pages.initiativeStores.geoLink'), value: obj?.pointOfSale?.channelGeolink },
-    { label: t('pages.initiativeStores.website'), value: obj?.pointOfSale?.type === 'PHYSICAL' ? obj?.pointOfSale?.channelWebsite : obj?.pointOfSale?.website },
+    { label: t('pages.initiativeStores.id'), value: obj?.id },
+    { label: t('pages.initiativeStores.address'), value: obj?.address },
+    { label: t('pages.initiativeStores.phone'), value: obj?.channelPhone },
+    { label: t('pages.initiativeStores.contactEmail'), value: obj?.channelEmail },
+    { label: t('pages.initiativeStores.geoLink'), value: obj?.channelGeolink },
+    { label: t('pages.initiativeStores.website'), value: obj?.type === 'PHYSICAL' ? obj?.channelWebsite : obj?.website },
   ];
 
   const getKeyValueReferent = (obj: any) => [
-    { label: t('pages.initiativeStores.contactName'), value: obj?.pointOfSale?.contactName },
-    { label: t('pages.initiativeStores.contactSurname'), value: obj?.pointOfSale?.contactSurname },
-    { label: t('pages.initiativeStores.contactEmail'), value: obj?.pointOfSale?.contactEmail },
+    { label: t('pages.initiativeStores.contactName'), value: obj?.contactName },
+    { label: t('pages.initiativeStores.contactSurname'), value: obj?.contactSurname },
+    { label: t('pages.initiativeStores.contactEmail'), value: obj?.contactEmail },
   ];
 
   const handleFiltersApplied = (filters: any) => {
@@ -252,7 +155,6 @@ const InitiativeStoreDetail = () => {
     } else {
       console.log('Ordinamento rimosso.');
     }
-    setSortModel(newSortModel);
   };
 
   const handleUpdateReferent = async () => {
@@ -294,12 +196,12 @@ const InitiativeStoreDetail = () => {
         <BreadcrumbsBox
           backLabel={t('commons.backBtn')}
           items={[
-            t('pages.initiativeOverview.title'),
-            storeDetail?.pointOfSale?.franchiseName
+            t('pages.initiativeStores.title'),
+            storeDetail?.franchiseName
           ]}
         />
         <TitleBox
-          title={storeDetail?.pointOfSale?.franchiseName ? storeDetail?.pointOfSale?.franchiseName : ''}
+          title={storeDetail?.franchiseName ? storeDetail?.franchiseName : ''}
           mtTitle={2}
           variantTitle="h4"
         />
@@ -321,7 +223,7 @@ const InitiativeStoreDetail = () => {
               <Box display={'flex'} flexDirection={'column'}>
                 {storeDetail && getKeyValue(storeDetail).map((field: any) => (
                   <LabelValuePair
-                    key={field?.id}
+                    key={`${field?.label}-${field?.value}`}
                     label={field?.label}
                     value={field?.value}
                   />
@@ -373,12 +275,10 @@ const InitiativeStoreDetail = () => {
           {'Storico transazioni'}
         </Typography>
         <MerchantTransactions
-          id={id}
           transactions={storeTransactions}
           handleFiltersApplied={handleFiltersApplied}
           handleFiltersReset={handleFiltersReset}
           handleSortChange={handleSortModelChange}
-          sortModel={sortModel}
           handlePaginationPageChange={handlePaginationPageChange}
           paginationModel={paginationModel}
         />
