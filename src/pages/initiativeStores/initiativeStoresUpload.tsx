@@ -27,7 +27,6 @@ import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { POS_UPDATE } from '../../utils/constants';
 
-
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
 }
@@ -44,6 +43,7 @@ interface RouteParams {
 const InitiativeStoresUpload: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(POS_UPDATE.Csv);
   const [_showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [_showErrorAlert, setShowErrorAlert] = useState(false);
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([]);
   const [_errors, setErrors] = useState<FormErrors>({});
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
@@ -100,6 +100,10 @@ const InitiativeStoresUpload: React.FC = () => {
           component: 'Toast',
           showCloseIcon: true,
         });
+        // history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
+        history.push(generatePath(ROUTES.STORES, { id }));
+  
+        setShowErrorAlert(true);
       }
     }
     if (uploadMethod === POS_UPDATE.Csv) {
