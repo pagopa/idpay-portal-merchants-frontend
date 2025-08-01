@@ -8,6 +8,7 @@ import {
   FormControl,
   TextField,
   Grid,
+  Button,
 } from '@mui/material';
 import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
@@ -100,13 +101,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             clearError(index, 'contactEmail');
           }
           break;
-        case 'confirmContactEmail':
-          if (!isValidEmail(value)) {
-            updateError(index, 'confirmContactEmail', 'Email non valida');
-          } else {
-            clearError(index, 'confirmContactEmail');
-          }
-          break;
+        // case 'confirmContactEmail':
+        //   if (!isValidEmail(value)) {
+        //     updateError(index, 'confirmContactEmail', 'Email non valida');
+        //   } else {
+        //     clearError(index, 'confirmContactEmail');
+        //   }
+        //   break;
         case 'contactName':
           if (value.length === 0) {
             updateError(index, 'contactName', 'Nome non valido');
@@ -270,7 +271,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                 Punto vendita {index + 1}
               </Typography>
             </Grid>
-            <Grid xs={1}>
+            <Grid item xs={1}>
               <Typography variant="body2" sx={{ float: 'right' }}>
                 {index + 1}/{salesPoints.length}
               </Typography>
@@ -440,7 +441,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     </Box>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Box pl={1}>
+                    {/* <Box pl={1}>
                       <TextField
                         disabled
                         size="small"
@@ -454,7 +455,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         helperText={getFieldError(index, 'confirmContactEmail')}
                         required
                       />
-                    </Box>
+                    </Box> */}
                   </Grid>
 
                   <Grid item xs={12} sm={6}>
@@ -510,7 +511,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           name="landingGoogle"
                           value={salesPoint.channelGeolink}
                           onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
-
                         />
                       </Box>
                     </Grid>
@@ -573,15 +573,26 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
 
       ))}
 
-      <ButtonNaked
+      {/* <ButtonNaked
         color="primary"
         startIcon={<AddIcon/>}
-        onFocusVisible={addAnotherSalesPoint}
+        onFocusVisible={()=>{addAnotherSalesPoint();}}
         size="medium"
         sx={{ p: 1 }}
       >
         Aggiungi un altro punto vendita
-      </ButtonNaked>
+      </ButtonNaked> */}
+      <Button
+        startIcon={<AddIcon />}
+        onClick={addAnotherSalesPoint}
+        color="primary"
+        size="medium"
+        sx={{ p: 1 }}
+      >
+        Aggiungi un altro punto vendita
+      </Button>
+
+
     </Box>
   );
 };
