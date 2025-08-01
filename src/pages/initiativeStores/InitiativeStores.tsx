@@ -16,6 +16,7 @@ import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { parseJwt } from '../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
+import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -36,7 +37,6 @@ const InitiativeStores: React.FC = () => {
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesPagination, setStoresPagination] = useState<any>({});
   const [storesLoading, setStoresLoading] = useState(false);
-  const [sortModel, setSortModel] = useState<any>([]);
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
@@ -87,6 +87,7 @@ const InitiativeStores: React.FC = () => {
       width: 200,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER}`,
     },
     {
       field: 'contactEmail',
@@ -176,7 +177,6 @@ const InitiativeStores: React.FC = () => {
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     if (newSortModel.length > 0) {
       const { field, sort } = newSortModel[0]; 
-      setSortModel(newSortModel);
       await fetchStores({
         ...formik.values,
         sort: `${field},${sort}`, 
@@ -313,7 +313,6 @@ const InitiativeStores: React.FC = () => {
           rowsPerPage={10} 
           handleRowAction={goToStoreDetail} 
           onSortModelChange={handleSortModelChange} 
-          sortModel={sortModel} 
           paginationModel={storesPagination}
           onPaginationPageChange={handlePaginationPageChange}
         />

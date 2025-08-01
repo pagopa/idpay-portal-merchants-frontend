@@ -124,15 +124,15 @@ const InitiativeStoreDetail = () => {
   const [transactionsFilters, setTransactionsFilters] = useState<any>({});
   const [storeTransactions, setStoreTransactions] = useState<Array<MerchantTransactionDTO>>([]);
   // const [storeTransactionsLoading, setStoreTransactionsLoading] = useState(false);
-  const [sortModel, setSortModel] = useState<any>([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paginationModel, setPaginationModel] = useState<any>({});
   const [contactNameModal, setContactNameModal] = useState('');
   const [contactSurnameModal, setContactSurnameModal] = useState('');
   const [contactEmailModal, setContactEmailModal] = useState('');
   const [contactEmailConfirmModal, setContactEmailConfirmModal] = useState('');
+  const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  
+
   const { t } = useTranslation();
   const { id, store_id } = useParams<RouteParams>();
   const addError = useErrorDispatcher();
@@ -241,17 +241,18 @@ const InitiativeStoreDetail = () => {
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     if (newSortModel.length > 0) {
       const { field, sort } = newSortModel[0];
-      setSortModel(newSortModel);
       await fetchStoreTransactions({
         ...transactionsFilters,
         sort: `${field !== 'fiscalCode' ? field : 'userId'},${sort}`,
-      }).catch(error => {
-        console.error('Error fetching stores:', error);
-      });
+      })
+        .catch(error => {
+          console.error('Error fetching stores:', error);
+        });
 
     } else {
       console.log('Ordinamento rimosso.');
     }
+    setSortModel(newSortModel);
   };
 
   const handleUpdateReferent = async () => {
@@ -263,7 +264,7 @@ const InitiativeStoreDetail = () => {
       contactSurname: contactSurnameModal,
       contactEmail: contactEmailModal,
     }];
-    try{
+    try {
       await updateMerchantPointOfSales(merchantId, obj);
       setModalIsOpen(false);
       setShowSuccessAlert(true);
