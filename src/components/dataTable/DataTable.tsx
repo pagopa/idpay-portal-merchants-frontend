@@ -18,8 +18,9 @@ export interface DataTableProps {
 }
 
 
-const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel, sortModel }: DataTableProps) => {
+const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel }: DataTableProps) => {
   const [finalColumns, setFinalColumns] = useState(Array<any>);
+  const [sortModelState, setSortModelState] = useState<any>([]);
 
 
   useEffect(() => {
@@ -72,8 +73,24 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
     onPaginationPageChange?.(page);
   };
 
-  const handleSortModelChange = useCallback((model: GridSortModel) => {
-    onSortModelChange?.(model);
+  const handleSortModelChange = useCallback((model: any) => {
+    console.log("MODEL", model);
+    if(model.length > 0){
+      setSortModelState(model);
+      onSortModelChange?.(model);
+    }else{
+      setSortModelState((prevState: any) => {
+        const newSortModel = prevState?.[0].sort === 'asc'
+          ? [{field: prevState?.[0].field, sort: 'desc'}]
+          : [{field: prevState?.[0].field, sort: 'asc'}];
+        
+        onSortModelChange?.(newSortModel);
+        console.log("NEW MODEL", newSortModel);
+        
+        return newSortModel;
+      });
+    }
+    
   }, [onSortModelChange]);
 
   return (
@@ -89,7 +106,7 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
             sortingMode='server'
             paginationMode='server'
             onSortModelChange={handleSortModelChange}
-            sortModel={sortModel}
+            sortModel={sortModelState}
             onPageChange={handlePageChange}
             page={paginationModel?.pageNo}
             pageSize={paginationModel?.pageSize}

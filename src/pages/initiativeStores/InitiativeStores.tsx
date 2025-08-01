@@ -106,14 +106,16 @@ const InitiativeStores: React.FC = () => {
   }, []);
 
 
-  const fetchStores = async (filters: GetPointOfSalesFilters) => {
-    setStoresLoading(true);
+  const fetchStores = async (filters: GetPointOfSalesFilters, fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     if (!merchantId) {
       return;
     }
     try {
+      if(!fromSort) {
+        setStoresLoading(true);
+      }
       const response = await getMerchantPointOfSales(merchantId, {
         type: filters.type,
         city: filters.city,
@@ -126,9 +128,13 @@ const InitiativeStores: React.FC = () => {
       const { content, ...paginationData } = response;
       setStores(content);
       setStoresPagination(paginationData);
-      setStoresLoading(false);
+      if(!fromSort) {
+        setStoresLoading(false);
+      }
     } catch (error: any) {
-      setStoresLoading(false);
+      if(!fromSort) {
+        setStoresLoading(false);
+      }
       addError({
         id: 'GET_MERCHANT_POINT_OF_SALES',
         blocking: false,
@@ -180,7 +186,7 @@ const InitiativeStores: React.FC = () => {
       await fetchStores({
         ...formik.values,
         sort: `${field},${sort}`, 
-      }).catch(error => {
+      }, true).catch(error => {
         console.error('Error fetching stores:', error);
       });
       
