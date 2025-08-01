@@ -12,6 +12,7 @@ import {
 } from '../../api/generated/merchants/MerchantTransactionDTO';
 import EmptyList from '../components/EmptyList';
 import DataTable from '../../components/dataTable/DataTable';
+import { PAGINATION_SIZE } from '../../utils/constants';
 import FiltersForm from './FiltersForm';
 
 
@@ -47,7 +48,6 @@ const StatusChip = ({ status }: any) => {
 
 
 interface MerchantTransactionsProps {
-  id: string;
   transactions: Array<MerchantTransactionDTO>;
   handleFiltersApplied: (filters: any) => void;
   handleFiltersReset: () => void;
@@ -223,8 +223,8 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
           <DataTable
             rows={rows}
             columns={columns}
-            pageSize={10}
-            rowsPerPage={10}
+            pageSize={PAGINATION_SIZE}
+            rowsPerPage={PAGINATION_SIZE}
             handleRowAction={(row: any) => {
               console.log(row);
               // TODO Aggiungere redirect al dettaglio transazione
