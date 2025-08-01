@@ -24,7 +24,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
 import EmptyList from '../components/EmptyList';
 import { StatusEnum } from '../../api/generated/merchants/InitiativeDTO';
-import { BASE_ROUTE } from '../../routes';
+import ROUTES, { BASE_ROUTE } from '../../routes';
 import { Data, EnhancedTableProps, HeadCell, Order, getComparator, stableSort } from './helpers';
 
 function EnhancedTableHead(props: EnhancedTableProps) {
@@ -256,8 +256,8 @@ const InitiativesList = () => {
                                   initiativeName: row.initiativeName,
                                 })
                               );
-                              history.replace(
-                                `${BASE_ROUTE}/sconti-iniziativa/${row.initiativeId}`
+                              history.push(
+                                `${BASE_ROUTE}/${row.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
                               );
                             }}
                             data-testid="initiative-btn-test"

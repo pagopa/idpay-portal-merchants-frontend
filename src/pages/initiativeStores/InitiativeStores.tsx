@@ -17,6 +17,7 @@ import { parseJwt } from '../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { PAGINATION_SIZE } from '../../utils/constants';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -24,7 +25,7 @@ const initialValues: GetPointOfSalesFilters = {
   address: '',
   contactName: '',
   page: 0,
-  size: 10,
+  size: PAGINATION_SIZE,
   sort: 'asc'
 };
 interface RouteParams {
@@ -123,7 +124,7 @@ const InitiativeStores: React.FC = () => {
         contactName: filters.contactName,
         sort: filters.sort,
         page: filters.page,
-        size: 10,
+        size: PAGINATION_SIZE,
       });
       const { content, ...paginationData } = response;
       setStores(content);
@@ -315,8 +316,8 @@ const InitiativeStores: React.FC = () => {
         <DataTable 
           rows={stores} 
           columns={columns} 
-          pageSize={10} 
-          rowsPerPage={10} 
+          pageSize={PAGINATION_SIZE} 
+          rowsPerPage={PAGINATION_SIZE} 
           handleRowAction={goToStoreDetail} 
           onSortModelChange={handleSortModelChange} 
           paginationModel={storesPagination}

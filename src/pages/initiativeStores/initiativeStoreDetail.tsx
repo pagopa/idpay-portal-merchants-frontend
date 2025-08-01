@@ -22,6 +22,7 @@ import ModalComponent from '../../components/modal/ModalComponent';
 
 
 
+
 interface RouteParams {
   id: string;
   store_id: string;
@@ -222,7 +223,7 @@ const InitiativeStoreDetail = () => {
               <Box display={'flex'} flexDirection={'column'}>
                 {storeDetail && getKeyValue(storeDetail).map((field: any) => (
                   <LabelValuePair
-                    key={field?.id}
+                    key={`${field?.label}-${field?.value}`}
                     label={field?.label}
                     value={field?.value}
                   />
@@ -274,7 +275,6 @@ const InitiativeStoreDetail = () => {
           {'Storico transazioni'}
         </Typography>
         <MerchantTransactions
-          id={id}
           transactions={storeTransactions}
           handleFiltersApplied={handleFiltersApplied}
           handleFiltersReset={handleFiltersReset}
