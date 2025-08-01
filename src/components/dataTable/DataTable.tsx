@@ -2,6 +2,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState, useCallback } from 'react';
 import { IconButton, Box } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { GridSortModel } from '@mui/x-data-grid';
 import {MISSING_DATA_PLACEHOLDER} from '../../utils/constants';
 
 export interface DataTableProps {
@@ -11,18 +12,15 @@ export interface DataTableProps {
   rowsPerPage: number;
   handleRowAction: (row: any) => void; 
   onSortModelChange?: (model: any) => void;
-  sortModel?: any;
+  sortModel?: GridSortModel;
   onPaginationPageChange?: (page: number) => void;
   paginationModel?: any;
-  customId?: string;
 }
 
 
-const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, sortModel, onPaginationPageChange, paginationModel }: DataTableProps) => {
+const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel, sortModel }: DataTableProps) => {
   const [finalColumns, setFinalColumns] = useState(Array<any>);
 
-  console.log("ROWS", rows);
-  console.log("COLUMNS", columns);
 
   useEffect(() => {
     if (columns && columns.length > 0) {
@@ -73,6 +71,11 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
   };
+
+  const handleSortModelChange = useCallback((model: GridSortModel) => {
+    onSortModelChange?.(model);
+  }, [onSortModelChange]);
+
   return (
     <>
       {
@@ -85,9 +88,7 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
             autoHeight
             sortingMode='server'
             paginationMode='server'
-            onSortModelChange={(model) => {
-              onSortModelChange?.(model);
-            }}
+            onSortModelChange={handleSortModelChange}
             sortModel={sortModel}
             onPageChange={handlePageChange}
             page={paginationModel?.pageNo}
@@ -95,6 +96,11 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
             rowCount={paginationModel?.totalElements}
             localeText={{
               noRowsLabel: 'Nessun punto vendita da visualizzare.',
+              MuiTablePagination: {
+                labelDisplayedRows(paginationInfo) {
+                  return `${paginationInfo.from}-${paginationInfo.to} di ${paginationInfo.count}`;
+                },
+              }
             }}
             sx={{
               border: 'none',

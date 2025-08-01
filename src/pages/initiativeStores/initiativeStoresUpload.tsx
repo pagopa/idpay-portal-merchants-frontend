@@ -17,6 +17,7 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage'
 import { generatePath, useParams } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
@@ -25,6 +26,7 @@ import { isValidUrl, isValidEmail } from '../../helpers';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { POS_UPDATE } from '../../utils/constants';
+
 
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
@@ -42,13 +44,13 @@ interface RouteParams {
 const InitiativeStoresUpload: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(POS_UPDATE.Csv);
   const [_showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [_showErrorAlert, setShowErrorAlert] = useState(false);
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([]);
   const [_errors, setErrors] = useState<FormErrors>({});
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
   const { t } = useTranslation();
   const { id } = useParams<RouteParams>();
   const history = useHistory();
+  const addError = useErrorDispatcher();
 
 
 
@@ -68,17 +70,36 @@ const InitiativeStoresUpload: React.FC = () => {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
       if (!merchantId) {
-        setShowErrorAlert(true);
+        addError({
+          id: 'UPLOAD_STORES',
+          blocking: false,
+          error: new Error('Merchant ID not found'),
+          techDescription: 'Merchant ID not found',
+          displayableTitle: t('errors.genericTitle'),
+          displayableDescription: t('errors.genericDescription'),
+          toNotify: true,
+          component: 'Toast',
+          showCloseIcon: true,
+        });
         return;
       }
       try {
         await updateMerchantPointOfSales(merchantId, salesPoints);
         setPointsOfSaleLoaded(true);
         setShowSuccessAlert(true);
-        // history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
         history.push(generatePath(ROUTES.STORES, { id }));
       } catch (error: any) {
-        setShowErrorAlert(true);
+        addError({
+          id: 'UPLOAD_STORES',
+          blocking: false,
+          error,
+          techDescription: 'An error occurred uploading stores',
+          displayableTitle: t('errors.genericTitle'),
+          displayableDescription: t('errors.genericDescription'),
+          toNotify: true,
+          component: 'Toast',
+          showCloseIcon: true,
+        });
       }
     }
     if (uploadMethod === POS_UPDATE.Csv) {

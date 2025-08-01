@@ -127,35 +127,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
         <StatusChip status={params.value} />
       ),
     },
-
   ];
-
-  // const rows2 = [
-  //   {
-  //     trxCode: "3lezemi7",
-  //     trxId: "287b1eed-8032-46f9-8b8a-bd27a0192b0a_1749541238286",
-  //     fiscalCode: "BRTVNL63E26X000U",
-  //     effectiveAmountCents: 200,
-  //     rewardAmountCents: 0,
-  //     trxDate: "2025-07-20T09:40:38.286",
-  //     trxExpirationSeconds: 300,
-  //     updateDate: "2025-07-20T09:40:56.027",
-  //     status: "CANCELLED",
-  //     channel: "IDPAYCODE"
-  //   },
-  //   {
-  //     trxCode: "4lezemi1",
-  //     trxId: "956b1eed-8032-46f9-8b8a-bd27a0192b0a_1749541238286",
-  //     fiscalCode: "BLBGRC27A05X000D",
-  //     effectiveAmountCents: 400,
-  //     rewardAmountCents: 0,
-  //     trxDate: "2025-07-12T09:40:38.286",
-  //     trxExpirationSeconds: 300,
-  //     updateDate: "2025-07-12T09:40:56.027",
-  //     status: "IDENTIFIED",
-  //     channel: "IDPAYCODE"
-  //   }
-  // ];
 
   const handleOnFiltersApplied = (filters: any) => {
     console.log('Callback dopo applicazione filtri', filters);
@@ -247,7 +219,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       </FiltersForm >
       {rows.length > 0 ? (
 
-        <Box sx={{ width: '100%', height: 500 }}>
+        <Box sx={{ width: '100%', height: 500, mb: 2 }}>
           <DataTable
             rows={rows}
             columns={columns}
@@ -255,9 +227,10 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
             rowsPerPage={10}
             handleRowAction={(row: any) => {
               console.log(row);
+              // TODO Aggiungere redirect al dettaglio transazione
             }}
-            sortModel={sortModel}
             onSortModelChange={handleSortModelChange}
+            sortModel={sortModel}
             paginationModel={paginationModel}
             onPaginationPageChange={onPaginationChange}
           />
