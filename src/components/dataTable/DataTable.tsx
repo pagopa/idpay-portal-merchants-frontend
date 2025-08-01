@@ -10,7 +10,7 @@ export interface DataTableProps {
   columns: any;
   pageSize: number;
   rowsPerPage: number;
-  handleRowAction: (row: any) => void; 
+  handleRowAction: (row: any) => void;
   onSortModelChange?: (model: any) => void;
   sortModel?: GridSortModel;
   onPaginationPageChange?: (page: number) => void;
@@ -24,8 +24,7 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
 
 
   useEffect(() => {
-    console.log("QUII", columns);
-    if (columns && columns.length > 0) {
+    if (columns && columns.length > 0){
       const processedColumns = columns.map((col: any) => ({
         ...col,
         renderCell: col.renderCell ? col.renderCell : renderEmptyCell
@@ -79,14 +78,14 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
         const newSortModel = prevState?.[0].sort === 'asc'
           ? [{field: prevState?.[0].field, sort: 'desc'}]
           : [{field: prevState?.[0].field, sort: 'asc'}];
-        
+
         onSortModelChange?.(newSortModel);
         console.log("NEW MODEL", newSortModel);
-        
+
         return newSortModel;
       });
     }
-    
+
   }, [onSortModelChange]);
 
   return (
@@ -128,17 +127,17 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
               },
               '& .MuiDataGrid-footerContainer': {
                 border: 'none'
-              }, 
+              },
                '& .MuiDataGrid-cell:focus': {
                 outline: 'none'
-              }, 
+              },
                '& .MuiDataGrid-columnHeader:focus': {
                 outline: 'none'
               },
                '& .MuiDataGrid-cell:focus-within': {
                 outline: 'none'
               }
-              
+
 
             }}
           />
