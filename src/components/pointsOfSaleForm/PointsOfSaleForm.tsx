@@ -7,8 +7,7 @@ import {
   FormControlLabel,
   FormControl,
   TextField,
-  Grid,
-  Button,
+  Grid
 } from '@mui/material';
 import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
@@ -176,20 +175,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
       }
     } else {
       setErrors({});
-      //   prevSalesPoints.map((salesPoint, i) => {
-      //     if (i !== index) {
-      //       return salesPoint;
-      //     }
-
-      //     // Se il campo è 'type', usa l'asserzione di tipo
-      //     if (name === 'type') {
-      //       return { ...salesPoint, type: value as TypeEnum };
-      //     }
-
-      //     // Per tutti gli altri campi, la logica originale va bene
-      //     return { [name]: value };
-      //   })
-      // );
     }
 
     setSalesPoints(prevSalesPoints =>
@@ -508,7 +493,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           fullWidth
                           size="small"
                           label="Scheda Google MYBusiness"
-                          name="landingGoogle"
+                          name="channelGeolink"
                           value={salesPoint.channelGeolink}
                           onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         />
@@ -536,7 +521,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         size="small"
                         fullWidth
                         label="Numero di telefono"
-                        name="phoneNumber"
+                        name="channelPhone"
                         value={salesPoint.channelPhone}
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="dense"
@@ -547,7 +532,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         size="small"
                         fullWidth
                         label="Email"
-                        name="email"
+                        name="channelEmail"
                         value={salesPoint.channelEmail}
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="dense"
@@ -558,7 +543,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         size="small"
                         fullWidth
                         label="Sito web"
-                        name="website"
+                        name="channelWebsite"
                         value={salesPoint.channelWebsite}
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="dense"
@@ -573,26 +558,20 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
 
       ))}
 
-      {/* <ButtonNaked
-        color="primary"
-        startIcon={<AddIcon/>}
-        onFocusVisible={()=>{addAnotherSalesPoint();}}
-        size="medium"
-        sx={{ p: 1 }}
-      >
-        Aggiungi un altro punto vendita
-      </ButtonNaked> */}
-      <Button
-        startIcon={<AddIcon />}
-        onClick={addAnotherSalesPoint}
-        color="primary"
-        size="medium"
-        sx={{ p: 1 }}
-      >
-        Aggiungi un altro punto vendita
-      </Button>
-
-
+      {
+        salesPoints.length < 5 && (
+          <ButtonNaked
+            color="primary"
+            startIcon={<AddIcon/>}
+            onFocusVisible={()=>{addAnotherSalesPoint();}}
+            onClick={()=>{addAnotherSalesPoint();}}
+            size="medium"
+            sx={{ p: 1, whiteSpace: 'nowrap' }}
+          >
+            Aggiungi un altro punto vendita
+          </ButtonNaked>
+        )
+      }
     </Box>
   );
 };
