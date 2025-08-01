@@ -201,8 +201,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
 
   };
 
-
-
   const updateError = (salesPointIndex: number, fieldName: string, errorMessage: string) => {
     setErrors(prevErrors => ({
       ...prevErrors,
@@ -265,7 +263,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
   return (
     <Box sx={{ bgcolor: 'background.paper', boxShadow: 3 }}>
       {salesPoints.map((salesPoint, index) => (
-
         <Box p={2} key={`${salesPoint.id}`} sx={{ mb: 2, border: 1, borderColor: 'divider', borderRadius: 2 }}>
           <Grid container>
             <Grid item xs={11}>
