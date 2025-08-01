@@ -19,12 +19,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import { grey } from '@mui/material/colors';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { generatePath, useHistory } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
 import EmptyList from '../components/EmptyList';
 import { StatusEnum } from '../../api/generated/merchants/InitiativeDTO';
-import ROUTES, { BASE_ROUTE } from '../../routes';
+import ROUTES from '../../routes';
 import { Data, EnhancedTableProps, HeadCell, Order, getComparator, stableSort } from './helpers';
 
 function EnhancedTableHead(props: EnhancedTableProps) {
@@ -257,7 +257,7 @@ const InitiativesList = () => {
                                 })
                               );
                               history.push(
-                                `${BASE_ROUTE}/${row.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
+                                generatePath(ROUTES.OVERVIEW, { id: row.initiativeId })
                               );
                             }}
                             data-testid="initiative-btn-test"
@@ -270,37 +270,37 @@ const InitiativesList = () => {
                         <TableCell>{row.serviceId}</TableCell>
                         <TableCell>{renderInitiativeStatus(row.status as StatusEnum)}</TableCell>
                       </TableRow>
-                    );
+              );
                   }
                 )}
-              </TableBody>
+            </TableBody>
             </Table>
-          ) : (
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(12, 1fr)',
-                justifyContent: 'center',
-                width: '100%',
-                backgroundColor: 'white',
-                p: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'inline',
-                  gridColumn: 'span 12',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                }}
-              >
-                <EmptyList message={t('pages.initiativesList.emptyList')} />
-              </Box>
-            </Box>
+        ) : (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(12, 1fr)',
+            justifyContent: 'center',
+            width: '100%',
+            backgroundColor: 'white',
+            p: 2,
+          }}
+        >
+          <Box
+            sx={{
+              display: 'inline',
+              gridColumn: 'span 12',
+              justifyContent: 'center',
+              textAlign: 'center',
+            }}
+          >
+            <EmptyList message={t('pages.initiativesList.emptyList')} />
+          </Box>
+        </Box>
           )}
-        </TableContainer>
-      </Paper>
-    </Box>
+      </TableContainer>
+    </Paper>
+    </Box >
   );
 };
 export default InitiativesList;
