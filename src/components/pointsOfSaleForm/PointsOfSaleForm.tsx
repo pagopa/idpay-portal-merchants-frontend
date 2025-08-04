@@ -59,6 +59,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
   ]);
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
 
   useEffect(() => {
     onFormChange(salesPoints);
@@ -94,19 +95,30 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
     if (name !== 'type') {
       switch (name) {
         case 'contactEmail':
+          if (contactEmailConfirm[index] && value !== contactEmailConfirm[index]) {
+            updateError(index, 'confirmContactEmail', 'Le email non coincidono');
+          } else {
+            clearError(index, 'confirmContactEmail');
+          }
           if (!isValidEmail(value)) {
             updateError(index, 'contactEmail', 'Email non valida');
           } else {
             clearError(index, 'contactEmail');
           }
           break;
-        // case 'confirmContactEmail':
-        //   if (!isValidEmail(value)) {
-        //     updateError(index, 'confirmContactEmail', 'Email non valida');
-        //   } else {
-        //     clearError(index, 'confirmContactEmail');
-        //   }
-        //   break;
+        case 'confirmContactEmail':
+          setContactEmailConfirm((prev) => ({
+            ...prev,
+            [index]: value,
+          }));
+          if (!isValidEmail(value)) {
+            updateError(index, 'confirmContactEmail', 'Email non valida');
+            }else if (salesPoints[index].contactEmail && value !== contactEmailConfirm[index]) {
+            updateError(index, 'confirmContactEmail', 'Le email non coincidono');
+          } else {
+            clearError(index, 'confirmContactEmail');
+          }
+          break;
         case 'contactName':
           if (value.length === 0) {
             updateError(index, 'contactName', 'Nome non valido');
@@ -426,21 +438,20 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     </Box>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    {/* <Box pl={1}>
+                    <Box pl={1}>
                       <TextField
-                        disabled
                         size="small"
                         fullWidth
                         label="Conferma e-mail"
                         name="confirmContactEmail"
-                        value={salesPoint.contactEmail}
+                        value={contactEmailConfirm[index] || ''}
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="normal"
                         error={!!getFieldError(index, 'confirmContactEmail')}
                         helperText={getFieldError(index, 'confirmContactEmail')}
                         required
                       />
-                    </Box> */}
+                    </Box>
                   </Grid>
 
                   <Grid item xs={12} sm={6}>

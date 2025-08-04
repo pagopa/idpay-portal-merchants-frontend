@@ -19,6 +19,7 @@ import { parseJwt } from '../../utils/jwt-utils';
 // import { PointOfSaleDetailDTO } from '../../api/generated/merchants/PointOfSaleDetailDTO';
 import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
 import ModalComponent from '../../components/modal/ModalComponent';
+import { isValidEmail } from '../../helpers';
 
 
 
@@ -35,12 +36,15 @@ const InitiativeStoreDetail = () => {
   // const [storeTransactionsLoading, setStoreTransactionsLoading] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paginationModel, setPaginationModel] = useState<any>({});
-  const [contactNameModal, setContactNameModal] = useState('');
-  const [contactSurnameModal, setContactSurnameModal] = useState('');
-  const [contactEmailModal, setContactEmailModal] = useState('');
-  const [contactEmailConfirmModal, setContactEmailConfirmModal] = useState('');
+  const [contactNameModal, setContactNameModal] = useState<string>('');
+  const [contactSurnameModal, setContactSurnameModal] = useState<string>('');
+  const [contactEmailModal, setContactEmailModal] = useState<string>('');
+  const [contactEmailConfirmModal, setContactEmailConfirmModal] = useState<string>('');
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-
+  const [fieldErrors, setFieldErrors] = useState<{
+    contactEmailModal?: string;
+    contactEmailConfirmModal?: string;
+  }>({});
   const { t } = useTranslation();
   const { id, store_id } = useParams<RouteParams>();
   const addError = useErrorDispatcher();
@@ -54,7 +58,15 @@ const InitiativeStoreDetail = () => {
       console.log("error", error);
     });
 
-  }, [id]);
+  }, [id,store_id]);
+  useEffect(() => {
+    if (storeDetail) {
+      setContactNameModal(storeDetail.contactName || '');
+      setContactSurnameModal(storeDetail.contactSurname || '');
+      setContactEmailModal(storeDetail.contactEmail || '');
+      setContactEmailConfirmModal(storeDetail.contactEmail || '');
+    }
+  }, [storeDetail]);
 
   const fetchStoreDetail = async () => {
     try {
@@ -140,6 +152,31 @@ const InitiativeStoreDetail = () => {
       console.error('Error fetching stores:', error);
     });
   };
+  const handleBlur = (
+    field: 'contactEmailModal' | 'contactEmailConfirmModal',
+    value: string
+  ) => {
+    let errorMsg = '';
+
+    if (!value?.trim()) {
+      errorMsg = 'Il campo è obbligatorio';
+    } else if (field === 'contactEmailModal' || field === 'contactEmailConfirmModal') {
+      if (!isValidEmail(value)) {
+        errorMsg = 'Inserisci un indirizzo email valido';
+      } else if (
+        contactEmailModal?.trim() &&
+        contactEmailConfirmModal?.trim() &&
+        contactEmailModal?.trim() !== contactEmailConfirmModal?.trim()
+      ) {
+        errorMsg = 'Le email non coincidono';
+      }
+    }
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [field]: errorMsg,
+    }));
+  };
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     if (newSortModel.length > 0) {
@@ -167,7 +204,19 @@ const InitiativeStoreDetail = () => {
       contactEmail: contactEmailModal,
     }];
     try {
-      await updateMerchantPointOfSales(merchantId, obj);
+      await updateMerchantPointOfSales(merchantId, obj).catch((error) => {
+        addError({
+          id: 'UPDATE_STORES',
+          blocking: false,
+          error,
+          techDescription: 'An error occurred updating stores',
+          displayableTitle: t('errors.genericTitle'),
+          displayableDescription: t('errors.genericDescription'),
+          toNotify: true,
+          component: 'Toast',
+          showCloseIcon: true,
+        });
+      });
       setModalIsOpen(false);
       setShowSuccessAlert(true);
       fetchStoreDetail().catch((error) => {
@@ -226,6 +275,7 @@ const InitiativeStoreDetail = () => {
                     key={`${field?.label}-${field?.value}`}
                     label={field?.label}
                     value={field?.value}
+                    isLink={field?.value.includes('https://')}
                   />
                 ))}
               </Box>
@@ -234,35 +284,39 @@ const InitiativeStoreDetail = () => {
         </Grid>
         <Grid item xs={12} md={12} lg={6}>
           <Paper sx={{ height: '100%' }}>
-            <Box p={2} display={'flex'} justifyContent={'space-between'}>
+            <Box p={2} >
               <Box>
-                <Typography
-                  fontWeight={theme.typography.fontWeightBold}
-                  mb={2}
-                >
-                  {'REFERENTE'}
-                </Typography>
-
+                <Grid container>
+                  <Grid item xs={6}>
+                    <Typography
+                      fontWeight={theme.typography.fontWeightBold}
+                      mb={2}
+                    >
+                      {'REFERENTE'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <ButtonNaked
+                      onClick={() => setModalIsOpen(true)}
+                      size="medium"
+                      sx={{ display: 'flex', justifyContent: 'start', alignItems: 'start' }}
+                      startIcon={<Edit />}
+                      color="primary"
+                    >
+                      Modifica
+                    </ButtonNaked>
+                  </Grid>
+                </Grid>
                 <Box display={'flex'} flexDirection={'column'}>
-                  {storeDetail && getKeyValueReferent(storeDetail).map((field: any) => {
-                    console.log("field", field);
-                    return <LabelValuePair
-                      key={field?.id}
-                      label={field?.label}
-                      value={field?.value}
-                    />;
-                  })}
+                  {storeDetail && getKeyValueReferent(storeDetail).map((referent: any) => (
+                    <LabelValuePair
+                      key={`${referent?.label}-${referent?.value}`}
+                      label={referent?.label}
+                      value={referent?.value}
+                      isLink={false}
+                    />))}
                 </Box>
               </Box>
-              <ButtonNaked
-                onClick={() => setModalIsOpen(true)}
-                size="medium"
-                sx={{ display: 'flex', justifyContent: 'start', alignItems: 'start' }}
-                startIcon={<Edit />}
-                color="primary"
-              >
-                Modifica
-              </ButtonNaked>
             </Box>
           </Paper>
         </Grid>
@@ -314,28 +368,40 @@ const InitiativeStoreDetail = () => {
             <Typography variant="subtitle1" gutterBottom>Indirizzo e-mail</Typography>
             <TextField
               fullWidth
+              required={true}
               size='small'
               label={t('pages.initiativeStores.contactEmail')}
               value={contactEmailModal}
-              onChange={(e) => setContactEmailModal(e.target.value)}
+              onBlur={() => handleBlur('contactEmailModal', contactEmailModal)}
+              onChange={(e) => {
+                setContactEmailModal(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, contactEmailModal: '' }));
+              }}
+              error={Boolean(fieldErrors.contactEmailModal)}
+              helperText={fieldErrors.contactEmailModal}
             />
           </Grid>
           <Grid item xs={12} md={12}>
             <Typography variant="subtitle1" gutterBottom>Conferma indirizzo e-mail</Typography>
             <TextField
               fullWidth
+              required={true}
               size='small'
               label={t('pages.initiativeStores.contactEmail')}
               value={contactEmailConfirmModal}
-              onChange={(e) => setContactEmailConfirmModal(e.target.value)}
-              error={contactEmailModal !== contactEmailConfirmModal}
-              helperText={contactEmailModal !== contactEmailConfirmModal ? 'Le email non coincidono' : ''}
+              onBlur={() => handleBlur('contactEmailConfirmModal', contactEmailConfirmModal)}
+              onChange={(e) => {
+                setContactEmailConfirmModal(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, contactEmailConfirmModal: '' }));
+              }}
+              error={Boolean(fieldErrors.contactEmailConfirmModal)}
+              helperText={fieldErrors.contactEmailConfirmModal}
             />
           </Grid>
         </Grid>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, marginTop: '40px' }}>
           <Button variant="outlined" onClick={() => setModalIsOpen(false)}>{t('commons.cancel')}</Button>
-          <Button variant="contained" onClick={handleUpdateReferent}>{t('commons.modify')}</Button>
+          <Button disabled={Object.values(fieldErrors).some((msg) => msg)} variant="contained" onClick={handleUpdateReferent}>{t('commons.modify')}</Button>
         </Box>
       </ModalComponent>
       <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
