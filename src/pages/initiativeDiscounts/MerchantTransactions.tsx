@@ -7,12 +7,10 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
-import {
-  MerchantTransactionDTO,
-} from '../../api/generated/merchants/MerchantTransactionDTO';
 import EmptyList from '../components/EmptyList';
 import DataTable from '../../components/dataTable/DataTable';
 import { PAGINATION_SIZE } from '../../utils/constants';
+import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
 import FiltersForm from './FiltersForm';
 
 
@@ -26,20 +24,21 @@ const StatusChip = ({ status }: any) => {
       label = 'Rimborso richiesto';
       break;
     case 'AUTHORIZATION_REQUESTED':
-      color = 'default';
+      color = 'warning';
       label = 'Da autorizzare';
       break;
     case 'REJECTED':
       color = 'error';
       label = 'Annullato';
       break;
-    case 'REWARDED':
-      color = 'success';
+    case 'IDENTIFIED':
+      color = 'warning';
       label = 'Stornato';
       break;
-    default:
-      color = 'default';
-      label = 'Default';
+    case 'AUTHORIZED':
+      color = 'success';
+      label = 'Autorizzato';
+      break;
   }
   return <Chip label={label} color={color as any} size="small" />;
 };
@@ -48,7 +47,7 @@ const StatusChip = ({ status }: any) => {
 
 
 interface MerchantTransactionsProps {
-  transactions: Array<MerchantTransactionDTO>;
+  transactions: Array<PointOfSaleTransactionDTO>;
   handleFiltersApplied: (filters: any) => void;
   handleFiltersReset: () => void;
   handleSortChange?: (sortModel: GridSortModel) => void;
@@ -63,7 +62,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   const { t } = useTranslation();
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  const [rows, setRows] = useState<Array<MerchantTransactionDTO>>([]);
+  const [rows, setRows] = useState<Array<PointOfSaleTransactionDTO>>([]);
 
   useEffect(() => {
     setRows([...transactions]);

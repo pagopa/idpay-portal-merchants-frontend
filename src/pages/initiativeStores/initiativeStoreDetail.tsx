@@ -17,9 +17,9 @@ import LabelValuePair from '../../components/labelValuePair/labelValuePair';
 import MerchantTransactions from '../initiativeDiscounts/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
 // import { PointOfSaleDetailDTO } from '../../api/generated/merchants/PointOfSaleDetailDTO';
-import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail } from '../../helpers';
+import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
 
 
 
@@ -32,7 +32,7 @@ interface RouteParams {
 const InitiativeStoreDetail = () => {
   const [storeDetail, setStoreDetail] = useState<any>(null);
   const [transactionsFilters, setTransactionsFilters] = useState<any>({});
-  const [storeTransactions, setStoreTransactions] = useState<Array<MerchantTransactionDTO>>([]);
+  const [storeTransactions, setStoreTransactions] = useState<Array<PointOfSaleTransactionDTO>>([]);
   // const [storeTransactionsLoading, setStoreTransactionsLoading] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paginationModel, setPaginationModel] = useState<any>({});
@@ -126,11 +126,15 @@ const InitiativeStoreDetail = () => {
 
   const getKeyValue = (obj: any) => [
     { label: t('pages.initiativeStores.id'), value: obj?.id },
-    { label: t('pages.initiativeStores.address'), value: obj?.address },
-    { label: t('pages.initiativeStores.phone'), value: obj?.channelPhone },
-    { label: t('pages.initiativeStores.contactEmail'), value: obj?.channelEmail },
-    { label: t('pages.initiativeStores.geoLink'), value: obj?.channelGeolink },
-    { label: t('pages.initiativeStores.website'), value: obj?.type === 'PHYSICAL' ? obj?.channelWebsite : obj?.website },
+    ...(obj?.type === 'PHYSICAL'
+      ? [
+        { label: t('pages.initiativeStores.address'), value: obj?.address },
+        { label: t('pages.initiativeStores.phone'), value: obj?.channelPhone },
+        { label: t('pages.initiativeStores.contactEmail'), value: obj?.channelEmail },
+        { label: t('pages.initiativeStores.geoLink'), value: obj?.channelGeolink },
+      ]
+      : []),
+    { label: t('pages.initiativeStores.website'), value: obj?.type === 'PHYSICAL' ? obj?.channelWebsite : obj?.webSite },
   ];
 
   const getKeyValueReferent = (obj: any) => [
@@ -218,7 +222,7 @@ const InitiativeStoreDetail = () => {
         });
       });
       setModalIsOpen(false);
-      setShowSuccessAlert(true);
+      setShowSuccessAlert(!addError);
       fetchStoreDetail().catch((error) => {
         console.log("error", error);
       });
@@ -261,7 +265,7 @@ const InitiativeStoreDetail = () => {
         mb={3}
       >
         <Grid item xs={12} md={12} lg={6}>
-          <Paper>
+          <Paper sx={{ height: '100%' }}>
             <Box p={2}>
               <Typography
                 fontWeight={theme.typography.fontWeightBold}
@@ -275,7 +279,7 @@ const InitiativeStoreDetail = () => {
                     key={`${field?.label}-${field?.value}`}
                     label={field?.label}
                     value={field?.value}
-                    isLink={field?.value.includes('https://')}
+                    isLink={field?.value?.includes('https://')}
                   />
                 ))}
               </Box>
