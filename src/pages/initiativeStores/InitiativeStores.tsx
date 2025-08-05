@@ -16,8 +16,7 @@ import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { parseJwt } from '../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
-import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
-import { PAGINATION_SIZE } from '../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER,PAGINATION_SIZE } from '../../utils/constants';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -83,7 +82,7 @@ const InitiativeStores: React.FC = () => {
       disableColumnMenu: true,
     },
     {
-      field: 'referent',
+      field: 'contact',
       headerName: t('pages.initiativeStores.referent'),
       width: 200,
       editable: false,

@@ -7,16 +7,14 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import { theme } from '@pagopa/mui-italia/dist/theme/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { format } from 'date-fns';
-import { CheckCircleOutline } from '@mui/icons-material';
+import { CheckCircleOutline , Edit} from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';
 import { ButtonNaked } from '@pagopa/mui-italia';
-import { Edit } from '@mui/icons-material';
 import { getMerchantPointOfSalesById, getMerchantPointOfSaleTransactions, updateMerchantPointOfSales } from '../../services/merchantService';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import LabelValuePair from '../../components/labelValuePair/labelValuePair';
 import MerchantTransactions from '../initiativeDiscounts/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
-// import { PointOfSaleDetailDTO } from '../../api/generated/merchants/PointOfSaleDetailDTO';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail } from '../../helpers';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
@@ -33,7 +31,6 @@ const InitiativeStoreDetail = () => {
   const [storeDetail, setStoreDetail] = useState<any>(null);
   const [transactionsFilters, setTransactionsFilters] = useState<any>({});
   const [storeTransactions, setStoreTransactions] = useState<Array<PointOfSaleTransactionDTO>>([]);
-  // const [storeTransactionsLoading, setStoreTransactionsLoading] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paginationModel, setPaginationModel] = useState<any>({});
   const [contactNameModal, setContactNameModal] = useState<string>('');
@@ -72,8 +69,7 @@ const InitiativeStoreDetail = () => {
     try {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
-      const pointOfSaleId = store_id;
-      const response = await getMerchantPointOfSalesById(merchantId, pointOfSaleId);
+      const response = await getMerchantPointOfSalesById(merchantId, store_id);
       if (response) {
         setStoreDetail(response);
       }
@@ -95,7 +91,6 @@ const InitiativeStoreDetail = () => {
 
   const fetchStoreTransactions = async (filters?: any) => {
     try {
-      // setStoreTransactionsLoading(true);
       const response = await getMerchantPointOfSaleTransactions(id, store_id, { size: 10, ...filters });
       const { content, ...paginationData } = response;
       setPaginationModel(paginationData);
@@ -106,10 +101,8 @@ const InitiativeStoreDetail = () => {
           updateDate: format(transaction.updateDate, 'dd/MM/yyyy HH:mm')
         }));
         setStoreTransactions([...responseWIthFormattedDate]);
-        // setStoreTransactionsLoading(false);
       }
     } catch (error: any) {
-      // setStoreTransactionsLoading(false);
       addError({
         id: 'GET_MERCHANT_TRANSACTIONS',
         blocking: false,
@@ -299,7 +292,11 @@ const InitiativeStoreDetail = () => {
                       {'REFERENTE'}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                     item xs={6}
+                     display={'flex'}
+                     alignItems={'baseline'}
+                     justifyContent={'flex-end'}>
                     <ButtonNaked
                       onClick={() => setModalIsOpen(true)}
                       size="medium"

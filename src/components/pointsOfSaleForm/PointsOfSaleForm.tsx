@@ -13,8 +13,7 @@ import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked, theme } from '@pagopa/mui-italia';
 import { useTranslation } from 'react-i18next';
-import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
-import { TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
+import { PointOfSaleDTO,TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 
@@ -113,7 +112,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           }));
           if (!isValidEmail(value)) {
             updateError(index, 'confirmContactEmail', 'Email non valida');
-            }else if (salesPoints[index].contactEmail && value !== contactEmailConfirm[index]) {
+          } else if (salesPoints[index]?.contactEmail && value.trim() !== salesPoints[index]?.contactEmail?.trim()) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
           } else {
             clearError(index, 'confirmContactEmail');
