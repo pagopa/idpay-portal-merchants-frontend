@@ -1,46 +1,68 @@
 
 import {
   Box, FormControl, Grid, InputLabel, MenuItem, Select,
-  TextField, Chip
+  TextField, Chip,
+  styled,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
+import { theme } from '@pagopa/mui-italia';
 import EmptyList from '../components/EmptyList';
 import DataTable from '../../components/dataTable/DataTable';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
 import FiltersForm from './FiltersForm';
 
+// const StyleChip = styled(Chip)`
+//   color: #20b2aa;
+
+//   :hover {
+//     color: #2e8b57;
+//   }
+// `;
+
+
 
 const StatusChip = ({ status }: any) => {
-  /* eslint-disable functional/no-let */
+
+
   let color = '';
   let label = '';
   switch (status) {
     case 'CREATED':
-      color = 'default';
+      color = theme.palette.primary.extraLight as string;
       label = 'Rimborso richiesto';
       break;
     case 'AUTHORIZATION_REQUESTED':
-      color = 'warning';
+      color = theme.palette.warning.extraLight as string;
       label = 'Da autorizzare';
       break;
     case 'REJECTED':
-      color = 'error';
+      color = theme.palette.error.extraLight as string;
       label = 'Annullato';
       break;
     case 'IDENTIFIED':
-      color = 'warning';
+      color = theme.palette.warning.extraLight as string;
       label = 'Stornato';
       break;
     case 'AUTHORIZED':
-      color = 'success';
+      color = theme.palette.success.extraLight as string;
       label = 'Autorizzato';
       break;
+    default:
+      color = theme.palette.primary.extraLight as string;
+      label = '';
+      break;
+
   }
-  return <Chip label={label} color={color as any} size="small" />;
+  const CustomChip = styled(Chip)({
+    [`&.MuiChip-filled`]: {
+      backgroundColor: color
+    }
+  });
+  return <CustomChip label={label} size="small" />;
 };
 
 
@@ -60,8 +82,6 @@ interface MerchantTransactionsProps {
 
 const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFiltersReset, handleSortChange, sortModel, handlePaginationPageChange, paginationModel }: MerchantTransactionsProps) => {
   const { t } = useTranslation();
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   const [rows, setRows] = useState<Array<PointOfSaleTransactionDTO>>([]);
 
   useEffect(() => {
