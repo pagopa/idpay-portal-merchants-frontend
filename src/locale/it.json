@@ -182,6 +182,11 @@
       "modalDescription": "Qui puoi modificare  idati del referente di questo punto vendita.<Se modifica l' indirizzo email gli verrà inviata una email di conferma, e verranno invalidate le credenziali inviate alla precedente email>.",
       "referentChangeSuccess": "Dati modificati con successo"
     },
+    "initiativeStoreDetail": {
+      "transactionHistory": "Storico transazioni",
+      "contactEmail": "Indirizzo e-mail",
+      "confirmContactEmail": "Conferma indirizzo e-mail"
+    },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
       "initiativeStatus": "Stato",

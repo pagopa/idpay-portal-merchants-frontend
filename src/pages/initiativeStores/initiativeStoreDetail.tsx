@@ -68,7 +68,6 @@ const InitiativeStoreDetail = () => {
       setContactEmailModal(storeDetail.contactEmail || '');
       setContactEmailConfirmModal(storeDetail.contactEmail || '');
     }
-    console.log("QUIII", storeDetail);
   }, [storeDetail]);
 
   const fetchStoreDetail = async () => {
@@ -320,12 +319,9 @@ const InitiativeStoreDetail = () => {
 
         </Grid>
       </Grid>
-      <Box mt={4}>
-        <Typography
-          fontWeight={theme.typography.fontWeightBold}
-          variant="h6"
-        >
-          {'Storico transazioni'}
+      <Box mt={5}>
+        <Typography fontWeight={theme.typography.fontWeightBold} variant="h6">
+          {t('pages.initiativeStoreDetail.transactionHistory')}
         </Typography>
         <MerchantTransactions
           transactions={storeTransactions}
@@ -344,7 +340,7 @@ const InitiativeStoreDetail = () => {
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" gutterBottom>Nome</Typography>
+            <Typography variant="subtitle1" gutterBottom>{t('pages.initiativeStores.contactName')}</Typography>
             <TextField
               fullWidth
               size='small'
@@ -354,7 +350,7 @@ const InitiativeStoreDetail = () => {
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" gutterBottom>Cognome</Typography>
+            <Typography variant="subtitle1" gutterBottom>{t('pages.initiativeStores.contactSurname')}</Typography>
             <TextField
               fullWidth
               size='small'
@@ -364,7 +360,7 @@ const InitiativeStoreDetail = () => {
             />
           </Grid>
           <Grid item xs={12} md={12} >
-            <Typography variant="subtitle1" gutterBottom>Indirizzo e-mail</Typography>
+            <Typography variant="subtitle1" gutterBottom>{t('pages.initiativeStoreDetail.contactEmail')}</Typography>
             <TextField
               fullWidth
               required={true}
@@ -381,7 +377,7 @@ const InitiativeStoreDetail = () => {
             />
           </Grid>
           <Grid item xs={12} md={12}>
-            <Typography variant="subtitle1" gutterBottom>Conferma indirizzo e-mail</Typography>
+            <Typography variant="subtitle1" gutterBottom>{t('pages.initiativeStoreDetail.confirmContactEmail')}</Typography>
             <TextField
               fullWidth
               required={true}
