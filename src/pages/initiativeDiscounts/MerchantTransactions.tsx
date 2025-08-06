@@ -11,7 +11,7 @@ import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia';
 import EmptyList from '../components/EmptyList';
 import DataTable from '../../components/dataTable/DataTable';
-import { PAGINATION_SIZE } from '../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
 import FiltersForm from './FiltersForm';
 
@@ -28,41 +28,34 @@ import FiltersForm from './FiltersForm';
 const StatusChip = ({ status }: any) => {
 
 
-  let color = '';
-  let label = '';
+  let chipItem = { color: '', label: '' };
+  // let label = '';
   switch (status) {
     case 'CREATED':
-      color = theme.palette.primary.extraLight as string;
-      label = 'Rimborso richiesto';
+      chipItem = { color: theme.palette.primary.light as string, label: 'Rimborso richiesto' };
       break;
     case 'AUTHORIZATION_REQUESTED':
-      color = theme.palette.warning.extraLight as string;
-      label = 'Da autorizzare';
+      chipItem= {color : theme.palette.warning.extraLight as string, label : 'Da autorizzare'};
       break;
-    case 'REJECTED':
-      color = theme.palette.error.extraLight as string;
-      label = 'Annullato';
+      case 'REJECTED':
+      chipItem = { color: theme.palette.error.extraLight as string, label: 'Annullato' };
       break;
     case 'IDENTIFIED':
-      color = theme.palette.warning.extraLight as string;
-      label = 'Stornato';
+      chipItem = { color: theme.palette.warning.extraLight as string, label: 'Stornato' };
       break;
     case 'AUTHORIZED':
-      color = theme.palette.success.extraLight as string;
-      label = 'Autorizzato';
+      chipItem = { color: theme.palette.success.extraLight as string, label: 'Autorizzato' };
       break;
     default:
-      color = theme.palette.primary.extraLight as string;
-      label = '';
+      chipItem = { color: theme.palette.action.disabled as string, label: MISSING_DATA_PLACEHOLDER};
       break;
-
   }
   const CustomChip = styled(Chip)({
     [`&.MuiChip-filled`]: {
-      backgroundColor: color
+      backgroundColor: chipItem?.color
     }
   });
-  return <CustomChip label={label} size="small" />;
+  return <CustomChip label={chipItem?.label} size="small" />;
 };
 
 
