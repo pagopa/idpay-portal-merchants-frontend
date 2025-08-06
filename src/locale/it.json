@@ -167,6 +167,8 @@
       "contactName": "Nome",
       "contactSurname": "Cognome",
       "contactEmail": "E-mail",
+      "contactEmailModal": "Indirizzo e-mail",
+      "contactEmailModalConfirm": "Conferma indirizzo e-mail",
       "franchiseName": "Insegna",
       "region": "Regione",
       "province": "Provincia",

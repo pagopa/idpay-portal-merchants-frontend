@@ -7,16 +7,14 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import { theme } from '@pagopa/mui-italia/dist/theme/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { format } from 'date-fns';
-import { CheckCircleOutline } from '@mui/icons-material';
+import { CheckCircleOutline, Edit } from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';
 import { ButtonNaked } from '@pagopa/mui-italia';
-import { Edit } from '@mui/icons-material';
 import { getMerchantPointOfSalesById, getMerchantPointOfSaleTransactions, updateMerchantPointOfSales } from '../../services/merchantService';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import LabelValuePair from '../../components/labelValuePair/labelValuePair';
 import MerchantTransactions from '../initiativeDiscounts/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
-// import { PointOfSaleDetailDTO } from '../../api/generated/merchants/PointOfSaleDetailDTO';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail } from '../../helpers';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
@@ -33,7 +31,6 @@ const InitiativeStoreDetail = () => {
   const [storeDetail, setStoreDetail] = useState<any>(null);
   const [transactionsFilters, setTransactionsFilters] = useState<any>({});
   const [storeTransactions, setStoreTransactions] = useState<Array<PointOfSaleTransactionDTO>>([]);
-  // const [storeTransactionsLoading, setStoreTransactionsLoading] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paginationModel, setPaginationModel] = useState<any>({});
   const [contactNameModal, setContactNameModal] = useState<string>('');
@@ -60,6 +57,21 @@ const InitiativeStoreDetail = () => {
 
   }, [id,store_id]);
   useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+
+    if (showSuccessAlert) {
+      timer = setTimeout(() => {
+        setShowSuccessAlert(false);
+      }, 4000);
+    }
+
+
+      if (timer) {
+        clearTimeout(timer);
+      }
+
+  }, [showSuccessAlert]);
+  useEffect(() => {
     if (storeDetail) {
       setContactNameModal(storeDetail.contactName || '');
       setContactSurnameModal(storeDetail.contactSurname || '');
@@ -68,12 +80,12 @@ const InitiativeStoreDetail = () => {
     }
   }, [storeDetail]);
 
+
   const fetchStoreDetail = async () => {
     try {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
-      const pointOfSaleId = store_id;
-      const response = await getMerchantPointOfSalesById(merchantId, pointOfSaleId);
+      const response = await getMerchantPointOfSalesById(merchantId, store_id);
       if (response) {
         setStoreDetail(response);
       }
@@ -95,7 +107,6 @@ const InitiativeStoreDetail = () => {
 
   const fetchStoreTransactions = async (filters?: any) => {
     try {
-      // setStoreTransactionsLoading(true);
       const response = await getMerchantPointOfSaleTransactions(id, store_id, { size: 10, ...filters });
       const { content, ...paginationData } = response;
       setPaginationModel(paginationData);
@@ -106,10 +117,8 @@ const InitiativeStoreDetail = () => {
           updateDate: format(transaction.updateDate, 'dd/MM/yyyy HH:mm')
         }));
         setStoreTransactions([...responseWIthFormattedDate]);
-        // setStoreTransactionsLoading(false);
       }
     } catch (error: any) {
-      // setStoreTransactionsLoading(false);
       addError({
         id: 'GET_MERCHANT_TRANSACTIONS',
         blocking: false,
@@ -160,25 +169,27 @@ const InitiativeStoreDetail = () => {
     field: 'contactEmailModal' | 'contactEmailConfirmModal',
     value: string
   ) => {
+    const email = field === 'contactEmailModal' ? value : contactEmailModal;
+    const emailConfirm = field === 'contactEmailConfirmModal' ? value : contactEmailConfirmModal;
     let errorMsg = '';
-
-    if (!value?.trim()) {
+    let confirmErrorMsg = '';
+    if (!value.trim()) {
       errorMsg = 'Il campo è obbligatorio';
-    } else if (field === 'contactEmailModal' || field === 'contactEmailConfirmModal') {
-      if (!isValidEmail(value)) {
-        errorMsg = 'Inserisci un indirizzo email valido';
-      } else if (
-        contactEmailModal?.trim() &&
-        contactEmailConfirmModal?.trim() &&
-        contactEmailModal?.trim() !== contactEmailConfirmModal?.trim()
-      ) {
-        errorMsg = 'Le email non coincidono';
-      }
+    } else if (!isValidEmail(value)) {
+      errorMsg = 'Inserisci un indirizzo email valido';
     }
-
+    if (
+      email.trim() &&
+      emailConfirm.trim() &&
+      email !== emailConfirm
+    ) {
+      errorMsg = field === 'contactEmailModal' ? 'Le email non coincidono' : '';
+      confirmErrorMsg = 'Le email non coincidono';
+    }
     setFieldErrors((prev) => ({
       ...prev,
-      [field]: errorMsg,
+      contactEmailModal: field === 'contactEmailModal' ? errorMsg : confirmErrorMsg ?? '',
+      contactEmailConfirmModal: field === 'contactEmailConfirmModal' ? errorMsg : confirmErrorMsg ?? '',
     }));
   };
 
@@ -202,32 +213,30 @@ const InitiativeStoreDetail = () => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     const obj = [{
-      ...storeDetail?.pointOfSale,
+      ...storeDetail,
       contactName: contactNameModal,
       contactSurname: contactSurnameModal,
       contactEmail: contactEmailModal,
     }];
     try {
-      await updateMerchantPointOfSales(merchantId, obj).catch((error) => {
-        addError({
-          id: 'UPDATE_STORES',
-          blocking: false,
-          error,
-          techDescription: 'An error occurred updating stores',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
-      });
+      await updateMerchantPointOfSales(merchantId, obj);
       setModalIsOpen(false);
-      setShowSuccessAlert(!addError);
+      setShowSuccessAlert(true);
       fetchStoreDetail().catch((error) => {
         console.log("error", error);
       });
     } catch (error: any) {
-      console.log(error);
+      addError({
+        id: 'UPDATE_STORES',
+        blocking: false,
+        error,
+        techDescription: 'An error occurred updating stores',
+        displayableTitle: t('errors.genericTitle'),
+        displayableDescription: t('errors.genericDescription'),
+        toNotify: true,
+        component: 'Toast',
+        showCloseIcon: true,
+      });
     }
   };
 
@@ -248,10 +257,7 @@ const InitiativeStoreDetail = () => {
       <Box mt={2}>
         <BreadcrumbsBox
           backLabel={t('commons.backBtn')}
-          items={[
-            t('pages.initiativeStores.title'),
-            storeDetail?.franchiseName
-          ]}
+          items={[t('pages.initiativeStores.title'), storeDetail?.franchiseName]}
         />
         <TitleBox
           title={storeDetail?.franchiseName ? storeDetail?.franchiseName : ''}
@@ -259,66 +265,67 @@ const InitiativeStoreDetail = () => {
           variantTitle="h4"
         />
       </Box>
-      <Grid
-        container
-        spacing={3}
-        mb={3}
-      >
+      <Grid container spacing={3} mb={3}>
         <Grid item xs={12} md={12} lg={6}>
           <Paper sx={{ height: '100%' }}>
             <Box p={2}>
-              <Typography
-                fontWeight={theme.typography.fontWeightBold}
-                mb={2}
-              >
-                DATI PUNTO VENDITA
+              <Typography fontWeight={theme.typography.fontWeightBold} mb={2}>
+                {'DATI PUNTO VENDITA'}
               </Typography>
               <Box display={'flex'} flexDirection={'column'}>
-                {storeDetail && getKeyValue(storeDetail).map((field: any) => (
-                  <LabelValuePair
-                    key={`${field?.label}-${field?.value}`}
-                    label={field?.label}
-                    value={field?.value}
-                    isLink={field?.value?.includes('https://')}
-                  />
-                ))}
+                {storeDetail &&
+                  getKeyValue(storeDetail).map((field: any) => (
+                    <LabelValuePair
+                      key={`${field?.label}-${field?.value}`}
+                      label={field?.label}
+                      value={field?.value}
+                      isLink={field?.value?.includes('https://')}
+                    />
+                  ))}
               </Box>
             </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={12} lg={6}>
           <Paper sx={{ height: '100%' }}>
-            <Box p={2} >
+            <Box p={2}>
               <Box>
                 <Grid container>
                   <Grid item xs={6}>
-                    <Typography
-                      fontWeight={theme.typography.fontWeightBold}
-                      mb={2}
-                    >
+                    <Typography fontWeight={theme.typography.fontWeightBold} mb={2}>
                       {'REFERENTE'}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                    item
+                    xs={6}
+                    display={'flex'}
+                    alignItems={'baseline'}
+                    justifyContent={'flex-end'}
+                  >
                     <ButtonNaked
                       onClick={() => setModalIsOpen(true)}
                       size="medium"
-                      sx={{ display: 'flex', justifyContent: 'start', alignItems: 'start' }}
+                      justifyContent={'start'}
+                      display={'flex'}
+                      alignItems={'start'}
                       startIcon={<Edit />}
                       color="primary"
                     >
-                      Modifica
+                      {'Modifica'}
                     </ButtonNaked>
                   </Grid>
                 </Grid>
                 <Box display={'flex'} flexDirection={'column'}>
-                  {storeDetail && getKeyValueReferent(storeDetail).map((referent: any) => (
-                    <LabelValuePair
-                      key={`${referent?.label}-${referent?.value}`}
-                      label={referent?.label}
-                      value={referent?.value}
-                      isLink={false}
-                    />))}
+                  {storeDetail &&
+                    getKeyValueReferent(storeDetail).map((referent: any) => (
+                      <LabelValuePair
+                        key={`${referent?.label}-${referent?.value}`}
+                        label={referent?.label}
+                        value={referent?.value}
+                        isLink={false}
+                      />
+                    ))}
                 </Box>
               </Box>
             </Box>
@@ -326,10 +333,7 @@ const InitiativeStoreDetail = () => {
         </Grid>
       </Grid>
       <Box mt={4}>
-        <Typography
-          fontWeight={theme.typography.fontWeightBold}
-          variant="h6"
-        >
+        <Typography fontWeight={theme.typography.fontWeightBold} variant="h6">
           {'Storico transazioni'}
         </Typography>
         <MerchantTransactions
@@ -342,38 +346,48 @@ const InitiativeStoreDetail = () => {
         />
       </Box>
 
-      <ModalComponent open={modalIsOpen} onClose={() => setModalIsOpen(false)} className='iban-modal'>
+      <ModalComponent
+        open={modalIsOpen}
+        onClose={() => setModalIsOpen(false)}
+        className="iban-modal"
+      >
         <Typography variant="h6">{t('commons.modify')}</Typography>
-        <Typography variant="body1" sx={{ my: 2 }}>
+        <Typography variant="body1" my={2}>
           {t('pages.initiativeStores.modalDescription')}
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" gutterBottom>Nome</Typography>
+            <Typography variant="subtitle1" gutterBottom>
+              Nome
+            </Typography>
             <TextField
               fullWidth
-              size='small'
+              size="small"
               label={t('pages.initiativeStores.contactName')}
               value={contactNameModal}
               onChange={(e) => setContactNameModal(e.target.value)}
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" gutterBottom>Cognome</Typography>
+            <Typography variant="subtitle1" gutterBottom>
+              {'Cognome'}
+            </Typography>
             <TextField
               fullWidth
-              size='small'
+              size="small"
               label={t('pages.initiativeStores.contactSurname')}
               value={contactSurnameModal}
               onChange={(e) => setContactSurnameModal(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12} md={12} >
-            <Typography variant="subtitle1" gutterBottom>Indirizzo e-mail</Typography>
+          <Grid item xs={12} md={12}>
+            <Typography variant="subtitle1" gutterBottom>
+              {t('pages.initiativeStores.contactEmailModal')}
+            </Typography>
             <TextField
               fullWidth
               required={true}
-              size='small'
+              size="small"
               label={t('pages.initiativeStores.contactEmail')}
               value={contactEmailModal}
               onBlur={() => handleBlur('contactEmailModal', contactEmailModal)}
@@ -386,11 +400,13 @@ const InitiativeStoreDetail = () => {
             />
           </Grid>
           <Grid item xs={12} md={12}>
-            <Typography variant="subtitle1" gutterBottom>Conferma indirizzo e-mail</Typography>
+            <Typography variant="subtitle1" gutterBottom>
+              {t('pages.initiativeStores.contactEmailModalConfirm')}
+            </Typography>
             <TextField
               fullWidth
               required={true}
-              size='small'
+              size="small"
               label={t('pages.initiativeStores.contactEmail')}
               value={contactEmailConfirmModal}
               onBlur={() => handleBlur('contactEmailConfirmModal', contactEmailConfirmModal)}
@@ -404,8 +420,16 @@ const InitiativeStoreDetail = () => {
           </Grid>
         </Grid>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, marginTop: '40px' }}>
-          <Button variant="outlined" onClick={() => setModalIsOpen(false)}>{t('commons.cancel')}</Button>
-          <Button disabled={Object.values(fieldErrors).some((msg) => msg)} variant="contained" onClick={handleUpdateReferent}>{t('commons.modify')}</Button>
+          <Button variant="outlined" onClick={() => setModalIsOpen(false)}>
+            {t('commons.cancel')}
+          </Button>
+          <Button
+            disabled={Object.values(fieldErrors).some((msg) => msg)}
+            variant="contained"
+            onClick={handleUpdateReferent}
+          >
+            {t('commons.modify')}
+          </Button>
         </Box>
       </ModalComponent>
       <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
@@ -424,8 +448,8 @@ const InitiativeStoreDetail = () => {
             boxShadow: 3,
             borderRadius: 1,
             '& .MuiAlert-icon': {
-              color: '#6CC66A'
-            }
+              color: '#6CC66A',
+            },
           }}
         >
           {t('pages.initiativeStores.referentChangeSuccess')}
