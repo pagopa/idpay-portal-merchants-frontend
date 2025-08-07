@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import InitiativeOverviewCard from '../InitiativeOverviewCard';
+import InitiativeOverviewCard from '../initiativeOverviewCard';
 
 
 jest.mock('@pagopa/selfcare-common-frontend', () => ({
