@@ -44,7 +44,7 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
             renderCell: (params: any) => (
               <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
                 <IconButton
-                  onClick={() => memoizedHandleRowAction(params.row)}
+                  onClick={() => handleRowAction(params.row)}
                   size="small"
                 >
                   <ArrowForwardIosIcon color='primary' fontSize='small' />
@@ -57,9 +57,9 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
     }
   }, [columns]);
 
-  const memoizedHandleRowAction = useCallback((row: any) => {
-    handleRowAction(row);
-  }, [handleRowAction]);
+  // const memoizedHandleRowAction = useCallback((row: any) => {
+  //   handleRowAction(row);
+  // }, [handleRowAction]);
 
 
 
@@ -135,6 +135,12 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
                 border: 'none'
               }, 
                '& .MuiDataGrid-cell:focus': {
+                outline: 'none'
+              }, 
+               '& .MuiDataGrid-columnHeader:focus': {
+                outline: 'none'
+              },
+               '& .MuiDataGrid-cell:focus-within': {
                 outline: 'none'
               }
               
