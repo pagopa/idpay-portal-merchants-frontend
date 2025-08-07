@@ -9,27 +9,15 @@ import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia';
-import EmptyList from '../components/EmptyList';
 import DataTable from '../../components/dataTable/DataTable';
 import { MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
 import FiltersForm from './FiltersForm';
-
-// const StyleChip = styled(Chip)`
-//   color: #20b2aa;
-
-//   :hover {
-//     color: #2e8b57;
-//   }
-// `;
-
+import EmptyStateGrid from './EmptyStateGrid';
 
 
 const StatusChip = ({ status }: any) => {
-
-
   let chipItem = { color: '', label: '' };
-  // let label = '';
   switch (status) {
     case 'CREATED':
       chipItem = { color: theme.palette.primary.light as string, label: 'Rimborso richiesto' };
@@ -101,40 +89,40 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     {
       field: 'updateDate',
       headerName: 'Data e ora',
-      width: 200,
+      flex:1,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'fiscalCode',
       headerName: 'Beneficiario',
-      width: 200,
+      flex:1,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'effectiveAmountCents',
       headerName: 'Totale della spesa',
-      width: 200,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
-      sortable: false
+      // sortable: false
     },
     {
       field: 'rewardAmountCents',
       headerName: 'Importo autorizzato',
-      width: 200,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
-      sortable: false
+      // sortable: false
     },
     {
       field: 'status',
       headerName: 'Stato',
-      width: 200,
+      flex:1,
       editable: false,
       disableColumnMenu: true,
-      sortable: false,
+      // sortable: false,
       renderCell: (params: any) => (
         <StatusChip status={params.value} />
       ),
@@ -229,9 +217,9 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
         </Grid>
 
       </FiltersForm >
-      {rows.length > 0 ? (
+      {rows.length > 0 ? 
 
-        <Box sx={{ width: '100%', height: 500, mb: 2 }}>
+        <Box mb={2} sx={{ width: '100%' }}>
           <DataTable
             rows={rows}
             columns={columns}
@@ -247,11 +235,9 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
             onPaginationPageChange={onPaginationChange}
           />
         </Box>
-      ) : (
-        <Box sx={{ mt: 2 }}>
-          <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
-        </Box>
-      )}
+       : 
+        <EmptyStateGrid message={'pages.initiativeDiscounts.emptyList'} />
+      }
     </Box>
   );
 };
