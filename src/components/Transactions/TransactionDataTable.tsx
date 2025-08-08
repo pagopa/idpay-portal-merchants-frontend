@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { IconButton, Box } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { GridSortModel } from '@mui/x-data-grid';
+import { theme } from '@pagopa/mui-italia';
 import {MISSING_DATA_PLACEHOLDER} from '../../utils/constants';
 
 export interface DataTableProps {
@@ -117,9 +118,9 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onS
             sx={{
               border: 'none',
               '& .MuiDataGrid-row': {
-                backgroundColor: '#FFFFFF',
+                backgroundColor: theme.palette.background.paper,
                 '&:hover': {
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: theme.palette.background.paper,
                 },
               },
               '& .MuiDataGrid-columnSeparator': {
