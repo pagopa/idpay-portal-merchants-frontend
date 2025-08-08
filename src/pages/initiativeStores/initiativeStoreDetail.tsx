@@ -129,7 +129,7 @@ const InitiativeStoreDetail = () => {
         toNotify: true,
         component: 'Toast',
         showCloseIcon: true,
-      });  
+      });
     }
   };
 

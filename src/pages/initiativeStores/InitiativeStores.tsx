@@ -182,7 +182,7 @@ const InitiativeStores: React.FC = () => {
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     if (newSortModel.length > 0) {
-      const { field, sort } = newSortModel[0]; 
+      const { field, sort } = newSortModel[0];
       await fetchStores({
         ...formik.values,
         sort: `${field},${sort}`, 
@@ -315,10 +315,10 @@ const InitiativeStores: React.FC = () => {
         <DataTable 
           rows={stores} 
           columns={columns} 
-          pageSize={PAGINATION_SIZE} 
-          rowsPerPage={PAGINATION_SIZE} 
+          pageSize={PAGINATION_SIZE}
+          rowsPerPage={PAGINATION_SIZE}
           handleRowAction={goToStoreDetail} 
-          onSortModelChange={handleSortModelChange} 
+          onSortModelChange={handleSortModelChange}
           paginationModel={storesPagination}
           onPaginationPageChange={handlePaginationPageChange}
         />
