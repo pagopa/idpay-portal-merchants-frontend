@@ -37,6 +37,7 @@ const InitiativeStores: React.FC = () => {
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesPagination, setStoresPagination] = useState<any>({});
   const [storesLoading, setStoresLoading] = useState(false);
+  const [currentSort, setCurrentSort] = useState<string>('asc');
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
@@ -157,7 +158,12 @@ const InitiativeStores: React.FC = () => {
   });
 
   const handleFiltersApplied = (values: GetPointOfSalesFilters) => {
-    fetchStores(values).catch(error => {
+    const filtersWithSort = {
+      ...values,
+      sort: currentSort,
+      page: 0
+    };
+    fetchStores(filtersWithSort).catch(error => {
       console.error('Error fetching stores:', error);
     });
 
@@ -183,6 +189,7 @@ const InitiativeStores: React.FC = () => {
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     if (newSortModel.length > 0) {
       const { field, sort } = newSortModel[0];
+      setCurrentSort(`${field},${sort}`);
       await fetchStores({
         ...formik.values,
         sort: `${field},${sort}`, 
@@ -192,6 +199,7 @@ const InitiativeStores: React.FC = () => {
       
     } else {
       console.log('Ordinamento rimosso.');
+      setCurrentSort('asc');
     }
   };
 
@@ -199,7 +207,8 @@ const InitiativeStores: React.FC = () => {
     setStoresPagination(page);
     fetchStores({
       ...formik.values,
-      page
+      page,
+      sort: currentSort
     }).catch(error => {
       console.error('Error fetching stores:', error);
     });
