@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper, Typography, TextField, Alert, Slide } from '@mui/material';
+import { Box, Button, Grid, Typography, TextField, Alert, Slide } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,18 +6,20 @@ import { useParams } from 'react-router-dom';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { theme } from '@pagopa/mui-italia/dist/theme/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { format } from 'date-fns';
 import { CheckCircleOutline, Edit } from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import { getMerchantPointOfSalesById, getMerchantPointOfSaleTransactions, updateMerchantPointOfSales } from '../../services/merchantService';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import LabelValuePair from '../../components/labelValuePair/labelValuePair';
-import MerchantTransactions from '../initiativeDiscounts/MerchantTransactions';
+import MerchantTransactions from '../../components/Transactions/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail } from '../../helpers';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
+import { formatDate } from '../../utils/formatUtils';
+import { POS_TYPE } from '../../utils/constants';
+import InitiativeDetailCard from './InitiativeDetailCard';
 
 
 
@@ -55,7 +57,8 @@ const InitiativeStoreDetail = () => {
       console.log("error", error);
     });
 
-  }, [id,store_id]);
+  }, [id, store_id]);
+
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
 
@@ -113,8 +116,8 @@ const InitiativeStoreDetail = () => {
       if (content) {
         const responseWIthFormattedDate = content.map((transaction: any) => ({
           ...transaction,
-          trxDate: format(transaction.trxDate, 'dd/MM/yyyy HH:mm'),
-          updateDate: format(transaction.updateDate, 'dd/MM/yyyy HH:mm')
+          trxDate: formatDate(transaction.trxDate),
+          updateDate: formatDate(transaction.updateDate)
         }));
         setStoreTransactions([...responseWIthFormattedDate]);
       }
@@ -135,7 +138,7 @@ const InitiativeStoreDetail = () => {
 
   const getKeyValue = (obj: any) => [
     { label: t('pages.initiativeStores.id'), value: obj?.id },
-    ...(obj?.type === 'PHYSICAL'
+    ...(obj?.type === POS_TYPE.Physical
       ? [
         { label: t('pages.initiativeStores.address'), value: obj?.address },
         { label: t('pages.initiativeStores.phone'), value: obj?.channelPhone },
@@ -143,7 +146,7 @@ const InitiativeStoreDetail = () => {
         { label: t('pages.initiativeStores.geoLink'), value: obj?.channelGeolink },
       ]
       : []),
-    { label: t('pages.initiativeStores.website'), value: obj?.type === 'PHYSICAL' ? obj?.channelWebsite : obj?.webSite },
+    { label: t('pages.initiativeStores.website'), value: obj?.type === POS_TYPE.Physical ? obj?.channelWebsite : obj?.webSite },
   ];
 
   const getKeyValueReferent = (obj: any) => [
@@ -269,76 +272,67 @@ const InitiativeStoreDetail = () => {
           variantTitle="h4"
         />
       </Box>
-      <Grid container spacing={3} mb={3}>
+      <Grid container spacing={6} mb={3}>
         <Grid item xs={12} md={12} lg={6}>
-          <Paper sx={{ height: '100%' }}>
-            <Box p={2}>
-              <Typography fontWeight={theme.typography.fontWeightBold} mb={2}>
-                {'DATI PUNTO VENDITA'}
-              </Typography>
-              <Box display={'flex'} flexDirection={'column'}>
-                {storeDetail &&
-                  getKeyValue(storeDetail).map((field: any) => (
-                    <LabelValuePair
-                      key={`${field?.label}-${field?.value}`}
-                      label={field?.label}
-                      value={field?.value}
-                      isLink={field?.value?.includes('https://')}
-                    />
-                  ))}
-              </Box>
+          <InitiativeDetailCard titleBox={"DATI PUNTO VENDITA"}>
+            <Box >
+              <Grid container spacing={1}>
+                {storeDetail && getKeyValue(storeDetail).map((field: any) =>
+                  <LabelValuePair
+                    key={`${field?.label}-${field?.value}`}
+                    label={field?.label}
+                    value={field?.value}
+                    isLink={field?.value?.includes('https://')}
+                  />
+                )}
+              </Grid>
             </Box>
-          </Paper>
+          </InitiativeDetailCard>
         </Grid>
         <Grid item xs={12} md={12} lg={6}>
-          <Paper sx={{ height: '100%' }}>
-            <Box p={2}>
-              <Box>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <Typography fontWeight={theme.typography.fontWeightBold} mb={2}>
-                      {'REFERENTE'}
-                    </Typography>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={6}
-                    display={'flex'}
-                    alignItems={'baseline'}
-                    justifyContent={'flex-end'}
-                  >
-                    <ButtonNaked
-                      onClick={() => setModalIsOpen(true)}
-                      size="medium"
-                      justifyContent={'start'}
-                      display={'flex'}
-                      alignItems={'start'}
-                      startIcon={<Edit />}
-                      color="primary"
-                    >
-                      {'Modifica'}
-                    </ButtonNaked>
-                  </Grid>
-                </Grid>
-                <Box display={'flex'} flexDirection={'column'}>
-                  {storeDetail &&
-                    getKeyValueReferent(storeDetail).map((referent: any) => (
-                      <LabelValuePair
-                        key={`${referent?.label}-${referent?.value}`}
-                        label={referent?.label}
-                        value={referent?.value}
-                        isLink={false}
-                      />
-                    ))}
+
+          <Box py={3} px={4} sx={{ backgroundColor: theme.palette.background.paper, height: "100%" }}>
+            <Grid container>
+              <Grid item xs={9}>
+                <Box mb={2}>
+                  <Typography variant="body1" fontWeight={theme.typography.fontWeightBold}>
+                    {'REFERENTE'}
+                  </Typography>
                 </Box>
-              </Box>
+              </Grid>
+              <Grid item xs={3}>
+                <Box display="flex" flexDirection="row" justifyContent="flex-end" >
+                  <ButtonNaked
+                    onClick={() => setModalIsOpen(true)}
+                    size="medium"
+                    // sx={{ display: 'flex', justifyContent: 'end', alignItems: 'start' }}
+                    startIcon={<Edit />}
+                    color="primary"
+                  >
+                    Modifica
+                  </ButtonNaked>
+                </Box>
+              </Grid>
+            </Grid>
+            <Box >
+              <Grid container spacing={1}>
+                {storeDetail && getKeyValueReferent(storeDetail).map((referent: any) => (
+                  <LabelValuePair
+                    key={`${referent?.label}-${referent?.value}`}
+                    label={referent?.label}
+                    value={referent?.value}
+                    isLink={false}
+                  />))}
+              </Grid>
             </Box>
-          </Paper>
+
+          </Box>
+
         </Grid>
       </Grid>
-      <Box mt={4}>
+      <Box mt={5}>
         <Typography fontWeight={theme.typography.fontWeightBold} variant="h6">
-          {'Storico transazioni'}
+          {t('pages.initiativeStoreDetail.transactionHistory')}
         </Typography>
         <MerchantTransactions
           transactions={storeTransactions}
@@ -361,9 +355,7 @@ const InitiativeStoreDetail = () => {
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" gutterBottom>
-              Nome
-            </Typography>
+            <Typography variant="subtitle1" gutterBottom>{t('pages.initiativeStores.contactName')}</Typography>
             <TextField
               fullWidth
               size="small"
@@ -373,9 +365,7 @@ const InitiativeStoreDetail = () => {
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" gutterBottom>
-              {'Cognome'}
-            </Typography>
+            <Typography variant="subtitle1" gutterBottom>{t('pages.initiativeStores.contactSurname')}</Typography>
             <TextField
               fullWidth
               size="small"
@@ -405,8 +395,8 @@ const InitiativeStoreDetail = () => {
           </Grid>
           <Grid item xs={12} md={12}>
             <Typography variant="subtitle1" gutterBottom>
-              {t('pages.initiativeStores.contactEmailModalConfirm')}
-            </Typography>
+              {t('pages.initiativeStoreDetail.confirmContactEmail')}
+              </Typography>
             <TextField
               fullWidth
               required={true}

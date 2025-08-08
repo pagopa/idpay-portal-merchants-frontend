@@ -18,3 +18,6 @@ export const enum POS_TYPE {Online = 'ONLINE', Physical='PHYSICAL'};
 
 export const PAGINATION_SIZE = 10;
 
+export const MANDATORY_FIELD = "Il campo è obbligatorio";
+
+export const enum TYPE_TEXT {Text = 'text', Currency='manual'};

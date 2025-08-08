@@ -1,47 +1,22 @@
 
-import {
-  Box, FormControl, Grid, InputLabel, MenuItem, Select,
-  TextField, Chip
-} from '@mui/material';
+import { Box, FormControl, Grid, InputLabel, MenuItem, Select, TextField, } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
-import EmptyList from '../components/EmptyList';
-import DataTable from '../../components/dataTable/DataTable';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
-import FiltersForm from './FiltersForm';
+import EmptyList from '../../pages/components/EmptyList';
 
+import DetailDrawer from '../Drawer/DetailDrawer';
+import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
+import CustomChip from '../Chip/CustomChip';
+import TransactionDataTable from './TransactionDataTable';
+import TransactionDetail from './TransactionDetail';
+import getStatus from './useStatus';
+import getDetailFieldList from './useDetailList';
+import CurrencyColumn from './CurrencyColumn';
 
-const StatusChip = ({ status }: any) => {
-  /* eslint-disable functional/no-let */
-  let color = '';
-  let label = '';
-  switch (status) {
-    case 'CREATED':
-      color = 'default';
-      label = 'Rimborso richiesto';
-      break;
-    case 'AUTHORIZATION_REQUESTED':
-      color = 'warning';
-      label = 'Da autorizzare';
-      break;
-    case 'REJECTED':
-      color = 'error';
-      label = 'Annullato';
-      break;
-    case 'IDENTIFIED':
-      color = 'warning';
-      label = 'Stornato';
-      break;
-    case 'AUTHORIZED':
-      color = 'success';
-      label = 'Autorizzato';
-      break;
-  }
-  return <Chip label={label} color={color as any} size="small" />;
-};
 
 
 
@@ -60,9 +35,10 @@ interface MerchantTransactionsProps {
 
 const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFiltersReset, handleSortChange, sortModel, handlePaginationPageChange, paginationModel }: MerchantTransactionsProps) => {
   const { t } = useTranslation();
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   const [rows, setRows] = useState<Array<PointOfSaleTransactionDTO>>([]);
+  const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionDTO>>([]);
+  const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
+  const listItemDetail = getDetailFieldList();
 
   useEffect(() => {
     setRows([...transactions]);
@@ -84,44 +60,54 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     { value: 'AUTHORIZED', label: t('commons.discountStatusEnum.authorized') },
     { value: 'REJECTED', label: t('commons.discountStatusEnum.invalidated') },
   ];
+
+  const StatusChip = ({ status }: any) => {
+    const chipItem = getStatus(status);
+    return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
+  };
+
   const columns: Array<GridColDef> = [
     {
       field: 'updateDate',
       headerName: 'Data e ora',
-      width: 200,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'fiscalCode',
       headerName: 'Beneficiario',
-      width: 200,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'effectiveAmountCents',
       headerName: 'Totale della spesa',
-      width: 200,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
-      sortable: false
+      renderCell: (params: any) => (
+        <CurrencyColumn value={params.value} />
+      ),
     },
     {
       field: 'rewardAmountCents',
       headerName: 'Importo autorizzato',
-      width: 200,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
-      sortable: false
+      renderCell: (params: any) => (
+        <CurrencyColumn value={params.value} />
+      ),
     },
     {
       field: 'status',
       headerName: 'Stato',
-      width: 200,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
-      sortable: false,
+      // sortable: false,
       renderCell: (params: any) => (
         <StatusChip status={params.value} />
       ),
@@ -144,6 +130,15 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
 
   const onPaginationChange = (page: number) => {
     if (handlePaginationPageChange) { handlePaginationPageChange(page); }
+  };
+
+  const handleListButtonClick = (row: any) => {
+    setRowDetail(row);
+    setDrawerOpened(true);
+  };
+
+  const handleToggleDrawer = (newOpen: boolean) => {
+    setDrawerOpened(newOpen);
   };
 
   return (
@@ -216,29 +211,31 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
         </Grid>
 
       </FiltersForm >
-      {rows.length > 0 ? (
+      {rows.length > 0 ?
 
-        <Box sx={{ width: '100%', height: 500, mb: 2 }}>
-          <DataTable
+        <Box mb={2} sx={{ width: '100%' }}>
+          <TransactionDataTable
             rows={rows}
             columns={columns}
             pageSize={PAGINATION_SIZE}
             rowsPerPage={PAGINATION_SIZE}
-            handleRowAction={(row: any) => {
-              console.log(row);
-              // TODO Aggiungere redirect al dettaglio transazione
-            }}
+            handleRowAction={(row: any) => handleListButtonClick(row)}
             onSortModelChange={handleSortModelChange}
             sortModel={sortModel}
             paginationModel={paginationModel}
             onPaginationPageChange={onPaginationChange}
           />
         </Box>
-      ) : (
-        <Box sx={{ mt: 2 }}>
-          <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
-        </Box>
-      )}
+        :
+        <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
+      }
+      <DetailDrawer
+        data-testid="detail-drawer"
+        open={drawerOpened}
+        toggleDrawer={handleToggleDrawer}
+      >
+        <TransactionDetail title={"Dettaglio Transazione"} itemValues={rowDetail} listItem={listItemDetail} />
+      </DetailDrawer>
     </Box>
   );
 };
