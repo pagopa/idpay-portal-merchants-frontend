@@ -13,7 +13,7 @@ import { Edit } from '@mui/icons-material';
 import { getMerchantPointOfSalesById, getMerchantPointOfSaleTransactions, updateMerchantPointOfSales } from '../../services/merchantService';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import LabelValuePair from '../../components/labelValuePair/labelValuePair';
-import MerchantTransactions from '../initiativeDiscounts/MerchantTransactions';
+import MerchantTransactions from '../../components/Transactions/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail } from '../../helpers';

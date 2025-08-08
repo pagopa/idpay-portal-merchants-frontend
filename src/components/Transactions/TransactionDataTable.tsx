@@ -18,13 +18,12 @@ export interface DataTableProps {
 }
 
 
-const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel }: DataTableProps) => {
+const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel }: DataTableProps) => {
   const [finalColumns, setFinalColumns] = useState(Array<any>);
   const [sortModelState, setSortModelState] = useState<any>([]);
 
 
   useEffect(() => {
-    console.log("QUII", columns);
     if (columns && columns.length > 0) {
       const processedColumns = columns.map((col: any) => ({
         ...col,
@@ -149,4 +148,4 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
   );
 };
 
-export default DataTable;
+export default TransactionDataTable;

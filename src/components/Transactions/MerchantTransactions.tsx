@@ -1,49 +1,25 @@
 
-import {
-  Box, FormControl, Grid, InputLabel, MenuItem, Select,
-  TextField, Chip,
-  styled,
-} from '@mui/material';
+import {  Box, FormControl, Grid, InputLabel, MenuItem, Select,TextField, } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
-import { theme } from '@pagopa/mui-italia';
-import DataTable from '../../components/dataTable/DataTable';
-import { MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
+import { PAGINATION_SIZE } from '../../utils/constants';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
-import FiltersForm from './FiltersForm';
-import EmptyStateGrid from './EmptyStateGrid';
+import EmptyList from '../../pages/components/EmptyList';
+import { currencyFormatter } from '../../utils/formatUtils';
+
+import DetailDrawer from '../Drawer/DetailDrawer';
+import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
+import CustomChip from '../Chip/CustomChip';
+import TransactionDataTable from './TransactionDataTable';
+import TransactionDetail from './TransactionDetail';
+import getStatus from './useStatus';
 
 
 const StatusChip = ({ status }: any) => {
-  let chipItem = { color: '', label: '' };
-  switch (status) {
-    case 'CREATED':
-      chipItem = { color: theme.palette.primary.light as string, label: 'Rimborso richiesto' };
-      break;
-    case 'AUTHORIZATION_REQUESTED':
-      chipItem= {color : theme.palette.warning.extraLight as string, label : 'Da autorizzare'};
-      break;
-      case 'REJECTED':
-      chipItem = { color: theme.palette.error.extraLight as string, label: 'Annullato' };
-      break;
-    case 'IDENTIFIED':
-      chipItem = { color: theme.palette.warning.extraLight as string, label: 'Stornato' };
-      break;
-    case 'AUTHORIZED':
-      chipItem = { color: theme.palette.success.extraLight as string, label: 'Autorizzato' };
-      break;
-    default:
-      chipItem = { color: theme.palette.action.disabled as string, label: MISSING_DATA_PLACEHOLDER};
-      break;
-  }
-  const CustomChip = styled(Chip)({
-    [`&.MuiChip-filled`]: {
-      backgroundColor: chipItem?.color
-    }
-  });
-  return <CustomChip label={chipItem?.label} size="small" />;
+  const chipItem=getStatus(status);
+  return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
 };
 
 
@@ -64,6 +40,8 @@ interface MerchantTransactionsProps {
 const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFiltersReset, handleSortChange, sortModel, handlePaginationPageChange, paginationModel }: MerchantTransactionsProps) => {
   const { t } = useTranslation();
   const [rows, setRows] = useState<Array<PointOfSaleTransactionDTO>>([]);
+  const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionDTO>>([]);
+  const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
 
   useEffect(() => {
     setRows([...transactions]);
@@ -89,14 +67,14 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     {
       field: 'updateDate',
       headerName: 'Data e ora',
-      flex:1,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'fiscalCode',
       headerName: 'Beneficiario',
-      flex:1,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
     },
@@ -114,12 +92,13 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
+      valueFormatter: (params: any) => currencyFormatter(params.value),
       // sortable: false
     },
     {
       field: 'status',
       headerName: 'Stato',
-      flex:1,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
       // sortable: false,
@@ -145,6 +124,17 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
 
   const onPaginationChange = (page: number) => {
     if (handlePaginationPageChange) { handlePaginationPageChange(page); }
+  };
+
+  const handleListButtonClick = (row: any) => {
+    // setDrawerData(row);
+    console.log("row", row);
+    setRowDetail(row);
+    setDrawerOpened(true);
+  };
+
+  const handleToggleDrawer = (newOpen: boolean) => {
+    setDrawerOpened(newOpen);
   };
 
   return (
@@ -217,27 +207,41 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
         </Grid>
 
       </FiltersForm >
-      {rows.length > 0 ? 
+      {rows.length > 0 ?
 
         <Box mb={2} sx={{ width: '100%' }}>
-          <DataTable
+          <TransactionDataTable
             rows={rows}
             columns={columns}
             pageSize={PAGINATION_SIZE}
             rowsPerPage={PAGINATION_SIZE}
-            handleRowAction={(row: any) => {
-              console.log(row);
-              // TODO Aggiungere redirect al dettaglio transazione
-            }}
+            handleRowAction={(row: any) => handleListButtonClick(row)}
             onSortModelChange={handleSortModelChange}
             sortModel={sortModel}
             paginationModel={paginationModel}
             onPaginationPageChange={onPaginationChange}
           />
         </Box>
-       : 
-        <EmptyStateGrid message={'pages.initiativeDiscounts.emptyList'} />
+        :
+        <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
       }
+      <DetailDrawer
+        data-testid="detail-drawer"
+        open={drawerOpened}
+        toggleDrawer={handleToggleDrawer}
+      >
+        <TransactionDetail item={rowDetail} />
+          {/* <StatusChip status={rowDetail?.status} /> */}
+       
+        {/* <ProductDetail
+          data-testid="product-detail"
+          data={drawerData}
+          isInvitaliaUser={isInvitaliaUser}
+          open={true}
+          onUpdateTable={updaDataTable}
+          onClose={() => handleToggleDrawer(false)}
+        /> */}
+      </DetailDrawer>
     </Box>
   );
 };
