@@ -1,31 +1,35 @@
 
 import { Box, Grid, Typography } from '@mui/material';
 import { ReactNode } from 'react';
-import { formatValues } from '../../utils/formatUtils';
-import { formattedCurrency } from '../../helpers';
+import { currencyFormatter, formatValues } from '../../utils/formatUtils';
 import CustomChip from '../Chip/CustomChip';
+import { TYPE_TEXT } from '../../utils/constants';
 import getStatus from './useStatus';
 
 type Props = {
-  item: any;
+  itemValues: any;
+  listItem: Array<any>;
   children?: ReactNode;
 };
-// type Props = {
-//   open: boolean;
-//   data: ProductDTO;
-//   isInvitaliaUser: boolean;
-//   onUpdateTable?: () => void;
-//   onClose?: () => void;
-// };
 
-export default function TransactionDetail({ item }: Props) {
-  // const { t } = useTranslation();
-  // const detailItem = [
-  //   { label: "test", value: "prova", id: "trxDate" }
-  // ];
+
+export default function TransactionDetail({ itemValues, listItem }: Props) {
+
   const getStatusChip = () => {
-    const chipItem = getStatus(item.status);
+    const chipItem = getStatus(itemValues.status);
     return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
+  };
+
+  function getValueText(driver: string, type: TYPE_TEXT) {
+    const index = Object.keys(itemValues).indexOf(driver);
+    const val = Object.values(itemValues)[index] as string;
+    if (type === TYPE_TEXT.Text) {
+      return formatValues(val);
+    } else if (type === TYPE_TEXT.Currency) {
+      return currencyFormatter(Number(val)).toString();
+    } else {
+      return "error on type";
+    }
   };
 
   return (
@@ -36,82 +40,22 @@ export default function TransactionDetail({ item }: Props) {
             Dettaglio Transazione
           </Typography>
         </Grid>
-        {/* {detailItem.map((item, index) =>{
-        console.log("item", item);
-        return(
-        <Grid item xs={12} key={index}>
-          <Box mt={2}>
-            <Typography variant="body1">
-             {item?.label}
-            </Typography>
-              <Typography variant="body1" fontWeight="fontWeightMedium">
-             {item?.value}
-            </Typography>
-          </Box>
-          
-        </Grid>);} 
-)} */}
-        <Grid item xs={12}>
-          <Box mt={2}>
-            <Typography variant="body1">
-              Data e ora
-            </Typography>
-            <Typography variant="body1" fontWeight="fontWeightMedium">
-              {formatValues(item?.trxDate)}
-            </Typography>
-          </Box>
-        </Grid>
-        {/* <Grid item xs={12}>
-          <Box mt={2}>
-            <Typography variant="body1">
-              Categoria
-            </Typography>
-            <Typography variant="body1" fontWeight="fontWeightMedium">
-               {formatValues(item?.)}
-            </Typography>
-          </Box>
-        </Grid> */}
-        {/* <Grid item xs={12}>
-          <Box mt={2}>
-            <Typography variant="body1">
-              Modello
-            </Typography>
-            <Typography variant="body1" fontWeight="fontWeightMedium">
-              {formatValues(item?.)}
-            </Typography>
-          </Box>
-        </Grid> */}
+        {listItem.map((item, index) => {
+          console.log("item", item);
+          return (
+            <Grid item xs={12} key={index}>
+              <Box mt={2}>
+                <Typography variant="body1">
+                  {item?.label}
+                </Typography>
+                <Typography variant="body1" fontWeight="fontWeightMedium">
+                  {getValueText(item?.id, item?.type)}
+                </Typography>
+              </Box>
+            </Grid>);
+        }
+        )}
 
-        <Grid item xs={12}>
-          <Box mt={2}>
-            <Typography variant="body1">
-              Codice Fiscale
-            </Typography>
-            <Typography variant="body1" fontWeight="fontWeightMedium">
-              {formatValues(item?.fiscalCode)}
-            </Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={12}>
-          <Box mt={2}>
-            <Typography variant="body1">
-              Totale della spesa
-            </Typography>
-            <Typography variant="body1" fontWeight="fontWeightMedium">
-              {formatValues(formattedCurrency(item?.trxExpirationSeconds))}
-            </Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={12}>
-          <Box mt={2}>
-            <Typography variant="body1">
-              Importo autorizzato
-            </Typography>
-            <Typography variant="body1" fontWeight="fontWeightMedium">
-              {formatValues(formattedCurrency(item?.rewardAmountCents))}
-            </Typography>
-          </Box>
-        </Grid>
         <Grid item xs={12}>
           <Box mt={2}>
             <Typography variant="body1">

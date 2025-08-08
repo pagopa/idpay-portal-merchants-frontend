@@ -70,7 +70,6 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onS
   };
 
   const handleSortModelChange = useCallback((model: any) => {
-    console.log("MODEL", model);
     if(model.length > 0){
       setSortModelState(model);
       onSortModelChange?.(model);
@@ -80,9 +79,7 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onS
           ? [{field: prevState?.[0].field, sort: 'desc'}]
           : [{field: prevState?.[0].field, sort: 'asc'}];
         
-        onSortModelChange?.(newSortModel);
-        console.log("NEW MODEL", newSortModel);
-        
+        onSortModelChange?.(newSortModel);        
         return newSortModel;
       });
     }

@@ -15,6 +15,7 @@ import CustomChip from '../Chip/CustomChip';
 import TransactionDataTable from './TransactionDataTable';
 import TransactionDetail from './TransactionDetail';
 import getStatus from './useStatus';
+import getDetailFieldList from './useDetailList';
 
 
 const StatusChip = ({ status }: any) => {
@@ -42,6 +43,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   const [rows, setRows] = useState<Array<PointOfSaleTransactionDTO>>([]);
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
+  const listItemDetail=getDetailFieldList();
 
   useEffect(() => {
     setRows([...transactions]);
@@ -84,7 +86,6 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
-      // sortable: false
     },
     {
       field: 'rewardAmountCents',
@@ -93,7 +94,6 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       editable: false,
       disableColumnMenu: true,
       valueFormatter: (params: any) => currencyFormatter(params.value),
-      // sortable: false
     },
     {
       field: 'status',
@@ -230,17 +230,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
         open={drawerOpened}
         toggleDrawer={handleToggleDrawer}
       >
-        <TransactionDetail item={rowDetail} />
-          {/* <StatusChip status={rowDetail?.status} /> */}
-       
-        {/* <ProductDetail
-          data-testid="product-detail"
-          data={drawerData}
-          isInvitaliaUser={isInvitaliaUser}
-          open={true}
-          onUpdateTable={updaDataTable}
-          onClose={() => handleToggleDrawer(false)}
-        /> */}
+        <TransactionDetail itemValues={rowDetail} listItem={listItemDetail}/>
       </DetailDrawer>
     </Box>
   );
