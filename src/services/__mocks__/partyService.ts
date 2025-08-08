@@ -246,7 +246,7 @@ export const fetchParties = () => new Promise((resolve) => resolve(mockedParties
 
 export const verifyFetchPartyDetailsMockExecution = (party: Party) => {
   const test = mockedParties.filter(
-    (p) => p.partyId === party.partyId && p.roles[0].roleKey === party.roles[0].roleKey
+    (p) => p.partyId === party?.partyId && p.roles[0].roleKey === party?.roles[0].roleKey
   )[0];
   expect(party).toStrictEqual(test);
 };

@@ -7,7 +7,7 @@ import {
   FormControlLabel,
   FormControl,
   TextField,
-  Grid
+  Grid, Button,
 } from '@mui/material';
 import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
@@ -566,23 +566,15 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             }
           </Grid>
         </Box>
-
       ))}
 
-      {
-        salesPoints.length < 5 && (
-          <ButtonNaked
-            color="primary"
-            startIcon={<AddIcon/>}
-            onFocusVisible={()=>{addAnotherSalesPoint();}}
-            onClick={()=>{addAnotherSalesPoint();}}
-            size="medium"
-            sx={{ p: 1, whiteSpace: 'nowrap' }}
-          >
-            Aggiungi un altro punto vendita
-          </ButtonNaked>
-        )
-      }
+      <Button
+        startIcon={<AddIcon />}
+        onClick={addAnotherSalesPoint}
+        sx={{ p: 1 }}
+      >
+        Aggiungi un altro punto vendita
+      </Button>
     </Box>
   );
 };
