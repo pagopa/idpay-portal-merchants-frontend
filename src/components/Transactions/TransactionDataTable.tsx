@@ -136,6 +136,9 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onS
               },
                '& .MuiDataGrid-cell:focus-within': {
                 outline: 'none'
+              },  
+              '& .MuiDataGrid-columnHeader:focus-within': {
+                outline: 'none'
               }
               
 
