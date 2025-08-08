@@ -123,7 +123,7 @@
       "totalSpent": "Totale della spesa",
       "iban": "IBAN"
     },
-    "initiativeOverview": {
+    "initiativeOverview" : {
       "subtitle": "Tieni sotto controllo tutte le tue attività da qui.",
       "title": "Panoramica",
       "information": "Informazioni",
