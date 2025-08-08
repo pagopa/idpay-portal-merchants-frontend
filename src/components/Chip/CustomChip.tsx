@@ -7,8 +7,6 @@ export interface Props {
   variantChip?:"filled" | "outlined";
 }
 
-
-
 export default function CustomChip({label, colorChip, sizeChip, variantChip}: Props) {
   
     const StyledChip = styled(Chip)({

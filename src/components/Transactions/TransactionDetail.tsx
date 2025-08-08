@@ -7,13 +7,14 @@ import { TYPE_TEXT } from '../../utils/constants';
 import getStatus from './useStatus';
 
 type Props = {
+  title?:string;
   itemValues: any;
   listItem: Array<any>;
   children?: ReactNode;
 };
 
 
-export default function TransactionDetail({ itemValues, listItem }: Props) {
+export default function TransactionDetail({ title, itemValues, listItem }: Props) {
 
   const getStatusChip = () => {
     const chipItem = getStatus(itemValues.status);
@@ -37,7 +38,7 @@ export default function TransactionDetail({ itemValues, listItem }: Props) {
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Typography variant="h5">
-            Dettaglio Transazione
+            {title}
           </Typography>
         </Grid>
         {listItem.map((item, index) => {

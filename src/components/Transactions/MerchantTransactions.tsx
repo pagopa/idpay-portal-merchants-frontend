@@ -1,5 +1,5 @@
 
-import {  Box, FormControl, Grid, InputLabel, MenuItem, Select,TextField, } from '@mui/material';
+import { Box, FormControl, Grid, InputLabel, MenuItem, Select, TextField, } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
@@ -7,7 +7,6 @@ import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
 import EmptyList from '../../pages/components/EmptyList';
-import { currencyFormatter } from '../../utils/formatUtils';
 
 import DetailDrawer from '../Drawer/DetailDrawer';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
@@ -16,12 +15,8 @@ import TransactionDataTable from './TransactionDataTable';
 import TransactionDetail from './TransactionDetail';
 import getStatus from './useStatus';
 import getDetailFieldList from './useDetailList';
+import CurrencyColumn from './CurrencyColumn';
 
-
-const StatusChip = ({ status }: any) => {
-  const chipItem=getStatus(status);
-  return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
-};
 
 
 
@@ -43,7 +38,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   const [rows, setRows] = useState<Array<PointOfSaleTransactionDTO>>([]);
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
-  const listItemDetail=getDetailFieldList();
+  const listItemDetail = getDetailFieldList();
 
   useEffect(() => {
     setRows([...transactions]);
@@ -65,6 +60,12 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     { value: 'AUTHORIZED', label: t('commons.discountStatusEnum.authorized') },
     { value: 'REJECTED', label: t('commons.discountStatusEnum.invalidated') },
   ];
+
+  const StatusChip = ({ status }: any) => {
+    const chipItem = getStatus(status);
+    return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
+  };
+
   const columns: Array<GridColDef> = [
     {
       field: 'updateDate',
@@ -86,6 +87,9 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => (
+        <CurrencyColumn value={params.value} />
+      ),
     },
     {
       field: 'rewardAmountCents',
@@ -93,7 +97,9 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
-      valueFormatter: (params: any) => currencyFormatter(params.value),
+      renderCell: (params: any) => (
+        <CurrencyColumn value={params.value} />
+      ),
     },
     {
       field: 'status',
@@ -127,8 +133,6 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   };
 
   const handleListButtonClick = (row: any) => {
-    // setDrawerData(row);
-    console.log("row", row);
     setRowDetail(row);
     setDrawerOpened(true);
   };
@@ -230,7 +234,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
         open={drawerOpened}
         toggleDrawer={handleToggleDrawer}
       >
-        <TransactionDetail itemValues={rowDetail} listItem={listItemDetail}/>
+        <TransactionDetail title={"Dettaglio Transazione"} itemValues={rowDetail} listItem={listItemDetail} />
       </DetailDrawer>
     </Box>
   );
