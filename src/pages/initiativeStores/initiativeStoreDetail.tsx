@@ -237,7 +237,11 @@ const InitiativeStoreDetail = () => {
         component: 'Toast',
         showCloseIcon: true,
       });
+      setModalIsOpen(false);
     }
+    setTimeout(() => {
+      setShowSuccessAlert(false);
+    }, 4000);
   };
 
   const handlePaginationPageChange = (page: number) => {
