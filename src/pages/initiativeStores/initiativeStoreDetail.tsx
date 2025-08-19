@@ -47,6 +47,7 @@ const InitiativeStoreDetail = () => {
   const { t } = useTranslation();
   const { id, store_id } = useParams<RouteParams>();
   const addError = useErrorDispatcher();
+  const [sortModel, setSortModel] = useState<GridSortModel>([]);
 
 
   useEffect(() => {
@@ -197,6 +198,7 @@ const InitiativeStoreDetail = () => {
   };
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
+    setSortModel(newSortModel);
     if (newSortModel.length > 0) {
       const { field, sort } = newSortModel[0];
       await fetchStoreTransactions({
@@ -248,12 +250,20 @@ const InitiativeStoreDetail = () => {
   };
 
   const handlePaginationPageChange = (page: number) => {
-    setPaginationModel({
+    setPaginationModel((prev: any) => ({
+      ...prev,
       page,
-    });
+    }));
+
+    const sortParam =
+      sortModel.length > 0
+        ? `${sortModel[0].field !== 'fiscalCode' ? sortModel[0].field : 'userId'},${sortModel[0].sort}`
+        : undefined;
+
     fetchStoreTransactions({
       ...transactionsFilters,
       page,
+      ...(sortParam && { sort: sortParam }),
     }).catch(error => {
       console.error('Error fetching stores:', error);
     });
