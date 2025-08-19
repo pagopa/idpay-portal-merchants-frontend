@@ -102,7 +102,7 @@ const InitiativeStoresUpload: React.FC = () => {
         });
         // history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
         history.push(generatePath(ROUTES.STORES, { id }));
-  
+
         setShowErrorAlert(true);
       }
     }
