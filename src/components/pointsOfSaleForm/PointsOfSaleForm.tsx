@@ -59,6 +59,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
   ]);
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
 
   useEffect(() => {
     onFormChange(salesPoints);
