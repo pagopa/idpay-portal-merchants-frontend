@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Stack, Grid, FormControl, InputLabel, Select, MenuItem, TextField, Alert, Slide, Paper, Typography, Link } from '@mui/material';
+import { Box, Button, Stack, Grid, FormControl, InputLabel, Select, MenuItem, TextField, Paper, Typography, Link } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -7,8 +7,8 @@ import StoreIcon from '@mui/icons-material/Store';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import {useHistory, useParams } from 'react-router-dom';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
 import { GetPointOfSalesFilters } from '../../types/types';
@@ -16,7 +16,7 @@ import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { parseJwt } from '../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
-
+import { MISSING_DATA_PLACEHOLDER,PAGINATION_SIZE} from '../../utils/constants';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -24,7 +24,7 @@ const initialValues: GetPointOfSalesFilters = {
   address: '',
   contactName: '',
   page: 0,
-  size: 10,
+  size: PAGINATION_SIZE,
   sort: 'asc'
 };
 interface RouteParams {
@@ -36,13 +36,13 @@ const InitiativeStores: React.FC = () => {
 
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesPagination, setStoresPagination] = useState<any>({});
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [storesLoading, setStoresLoading] = useState(false);
-  const [sortModel, setSortModel] = useState<any>([]);
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
 
+
+  const addError = useErrorDispatcher();
   const columns: Array<GridColDef> = [
     {
       field: 'franchiseName',
@@ -87,6 +87,7 @@ const InitiativeStores: React.FC = () => {
       width: 200,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER}`,
     },
     {
       field: 'contactEmail',
@@ -101,20 +102,20 @@ const InitiativeStores: React.FC = () => {
   useEffect(() => {
     fetchStores(initialValues).catch(error => {
       console.error('Error fetching stores:', error);
-      setShowErrorAlert(true);
     });
   }, []);
 
 
-  const fetchStores = async (filters: GetPointOfSalesFilters) => {
-    setStoresLoading(true);
+  const fetchStores = async (filters: GetPointOfSalesFilters, fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     if (!merchantId) {
-      setShowErrorAlert(true);
       return;
     }
     try {
+      if(!fromSort) {
+        setStoresLoading(true);
+      }
       const response = await getMerchantPointOfSales(merchantId, {
         type: filters.type,
         city: filters.city,
@@ -122,16 +123,29 @@ const InitiativeStores: React.FC = () => {
         contactName: filters.contactName,
         sort: filters.sort,
         page: filters.page,
-        size: 10,
+        size: PAGINATION_SIZE,
       });
       const { content, ...paginationData } = response;
       setStores(content);
       setStoresPagination(paginationData);
-      setStoresLoading(false);
+      if(!fromSort) {
+        setStoresLoading(false);
+      }
     } catch (error: any) {
-      console.log(error);
-      setStoresLoading(false);
-      setShowErrorAlert(true);
+      if(!fromSort) {
+        setStoresLoading(false);
+      }
+      addError({
+        id: 'GET_MERCHANT_POINT_OF_SALES',
+        blocking: false,
+        error,
+        techDescription: 'An error occurred getting merchant point of sales',
+        displayableTitle: t('errors.genericTitle'),
+        displayableDescription: t('errors.genericDescription'),
+        toNotify: true,
+        component: 'Toast',
+        showCloseIcon: true,
+      });
     }
   };
 
@@ -143,10 +157,8 @@ const InitiativeStores: React.FC = () => {
   });
 
   const handleFiltersApplied = (values: GetPointOfSalesFilters) => {
-    console.log('Callback dopo applicazione filtri:', values);
     fetchStores(values).catch(error => {
       console.error('Error fetching stores:', error);
-      setShowErrorAlert(true);
     });
 
   };
@@ -155,7 +167,6 @@ const InitiativeStores: React.FC = () => {
     console.log('Callback dopo reset filtri');
     fetchStores(initialValues).catch(error => {
       console.error('Error fetching stores:', error);
-      setShowErrorAlert(true);
     });
   };
 
@@ -171,14 +182,12 @@ const InitiativeStores: React.FC = () => {
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     if (newSortModel.length > 0) {
-      const { field, sort } = newSortModel[0]; 
-      setSortModel(newSortModel);
+      const { field, sort } = newSortModel[0];
       await fetchStores({
         ...formik.values,
         sort: `${field},${sort}`, 
-      }).catch(error => {
+      }, true).catch(error => {
         console.error('Error fetching stores:', error);
-        setShowErrorAlert(true);
       });
       
     } else {
@@ -193,7 +202,6 @@ const InitiativeStores: React.FC = () => {
       page
     }).catch(error => {
       console.error('Error fetching stores:', error);
-      setShowErrorAlert(true);
     });
   };
 
@@ -234,7 +242,7 @@ const InitiativeStores: React.FC = () => {
           </Box>
         ) : (
           <>
-                  {
+        {
         stores.length > 0 || ( stores.length === 0 && filtersSetted()) ? (
         <>
           <FiltersForm
@@ -307,11 +315,10 @@ const InitiativeStores: React.FC = () => {
         <DataTable 
           rows={stores} 
           columns={columns} 
-          pageSize={10} 
-          rowsPerPage={10} 
+          pageSize={PAGINATION_SIZE}
+          rowsPerPage={PAGINATION_SIZE}
           handleRowAction={goToStoreDetail} 
-          onSortModelChange={handleSortModelChange} 
-          sortModel={sortModel} 
+          onSortModelChange={handleSortModelChange}
           paginationModel={storesPagination}
           onPaginationPageChange={handlePaginationPageChange}
         />
@@ -324,33 +331,6 @@ const InitiativeStores: React.FC = () => {
           </>
         )
       }
-
-
-      <Slide direction="left" in={showErrorAlert} mountOnEnter unmountOnExit>
-        <Alert
-          severity="error"
-          icon={<ErrorOutlineIcon />}
-          sx={{
-            position: 'fixed',
-            bottom: 40,
-            right: 20,
-            backgroundColor: 'white',
-            width: 'auto',
-            maxWidth: '400px',
-            minWidth: '300px',
-            zIndex: 1300,
-            boxShadow: 3,
-            borderRadius: 1,
-            '& .MuiAlert-icon': {
-              color: 'red'
-            }
-          }}
-        >
-          {t('initiativeStoresUpload.uploadError')}
-        </Alert>
-      </Slide>
-
-
 
     </Box>
   );

@@ -51,7 +51,7 @@ export type PartyJwtConfig = {
 
 export const retrieveSelectedPartyIdConfig = (): PartyJwtConfig | null => {
   const organization = parseJwt(storageTokenOps.read()) as JWTUser;
-  if (organization.org_id && organization.org_party_role && organization.org_role) {
+  if (organization?.org_id && organization?.org_party_role && organization?.org_role) {
     return {
       partyId: organization.org_id,
       partyName: organization.org_name,

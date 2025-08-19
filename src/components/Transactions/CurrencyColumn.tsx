@@ -1,0 +1,15 @@
+import { Typography } from "@mui/material";
+import { currencyFormatter } from "../../utils/formatUtils";
+
+export interface Props {
+  value:string|number;
+  type?:"body1"|"body2";
+}
+
+export default function CurrencyColumn({ value, type="body1" }: Props) {
+    return (
+        <Typography variant={type} >
+            {currencyFormatter(Number(value)).toString()}
+        </Typography>
+    );
+}

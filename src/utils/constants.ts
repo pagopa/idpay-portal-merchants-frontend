@@ -16,3 +16,8 @@ export const MISSING_EURO_PLACEHOLDER = '0,00 €';
 export const enum POS_UPDATE {Csv = 'csv', Manual='manual'};
 export const enum POS_TYPE {Online = 'ONLINE', Physical='PHYSICAL'};
 
+export const PAGINATION_SIZE = 10;
+
+export const MANDATORY_FIELD = "Il campo è obbligatorio";
+
+export const enum TYPE_TEXT {Text = 'text', Currency='manual'};

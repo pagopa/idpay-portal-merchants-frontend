@@ -17,7 +17,7 @@ import routes from './routes';
 import useTCAgreement from './hooks/useTCAgreement';
 import InitiativesList from './pages/initiativesList/initiativesList';
 import Assistance from './pages/assistance/assistance';
-import InitiativeDiscounts from './pages/initiativeDiscounts/initiativeDiscounts';
+// import InitiativeDiscounts from './pages/initiativeDiscounts/initiativeDiscounts';
 import NewDiscount from './pages/newDiscount/newDiscount';
 import AcceptNewDiscount from './pages/acceptNewDiscount/acceptNewDiscount';
 import InitiativeOverview from './pages/initiativeOverview/initiativeOverview';
@@ -68,9 +68,9 @@ const SecuredRoutes = withLogin(
           <Route path={routes.PRIVACY_POLICY} exact={true}>
             <PrivacyPolicy />
           </Route>
-          <Route path={routes.DISCOUNTS} exact={true}>
+          {/* <Route path={routes.DISCOUNTS} exact={true}>
             <InitiativeDiscounts />
-          </Route>
+          </Route> */}
           <Route path={routes.OVERVIEW} exact={true}>
             <InitiativeOverview />
           </Route>

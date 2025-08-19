@@ -21,7 +21,7 @@ variables:
   # global variables
   react_app_pagopa_help_email: '$(REACT_APP_ASSISTANCE_EMAIL)'
 
-  ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/release-uat'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix')) }}:
+  ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/uat'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix')) }}:
     environment: 'UAT'
     azure_subscription: $(UAT_AZURE_SUBSCRIPTION)
     cdn_endpoint: '$(UAT_CDN_ENDPOINT)'
@@ -88,7 +88,6 @@ variables:
     react_app_one_trust_tos_json_url: $(PROD_REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS)
 
   # every branch different from past will be considered as DEV
-  #  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/release-dev') }}:
   ${{ else }}:
     environment: 'DEV'
     azure_subscription: $(DEV_AZURE_SUBSCRIPTION)
@@ -127,8 +126,9 @@ variables:
 trigger:
   branches:
     include:
+      - develop
+      - uat
       - main
-      - release-*
 
 pr: none
 

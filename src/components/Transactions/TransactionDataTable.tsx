@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { IconButton, Box } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { GridSortModel } from '@mui/x-data-grid';
+import { theme } from '@pagopa/mui-italia';
 import {MISSING_DATA_PLACEHOLDER} from '../../utils/constants';
 
 export interface DataTableProps {
@@ -18,13 +19,12 @@ export interface DataTableProps {
 }
 
 
-const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel }: DataTableProps) => {
+const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel }: DataTableProps) => {
   const [finalColumns, setFinalColumns] = useState(Array<any>);
   const [sortModelState, setSortModelState] = useState<any>([]);
 
 
   useEffect(() => {
-    console.log("QUII", columns);
     if (columns && columns.length > 0) {
       const processedColumns = columns.map((col: any) => ({
         ...col,
@@ -70,7 +70,6 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
   };
 
   const handleSortModelChange = useCallback((model: any) => {
-    console.log("MODEL", model);
     if(model.length > 0){
       setSortModelState(model);
       onSortModelChange?.(model);
@@ -80,9 +79,7 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
           ? [{field: prevState?.[0].field, sort: 'desc'}]
           : [{field: prevState?.[0].field, sort: 'asc'}];
         
-        onSortModelChange?.(newSortModel);
-        console.log("NEW MODEL", newSortModel);
-        
+        onSortModelChange?.(newSortModel);        
         return newSortModel;
       });
     }
@@ -118,9 +115,9 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
             sx={{
               border: 'none',
               '& .MuiDataGrid-row': {
-                backgroundColor: '#FFFFFF',
+                backgroundColor: theme.palette.background.paper,
                 '&:hover': {
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: theme.palette.background.paper,
                 },
               },
               '& .MuiDataGrid-columnSeparator': {
@@ -137,6 +134,9 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
               },
                '& .MuiDataGrid-cell:focus-within': {
                 outline: 'none'
+              },  
+              '& .MuiDataGrid-columnHeader:focus-within': {
+                outline: 'none'
               }
               
 
@@ -149,4 +149,4 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
   );
 };
 
-export default DataTable;
+export default TransactionDataTable;
