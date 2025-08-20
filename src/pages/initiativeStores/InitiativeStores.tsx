@@ -189,14 +189,15 @@ const InitiativeStores: React.FC = () => {
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     if (newSortModel.length > 0) {
       const { field, sort } = newSortModel[0];
-      setCurrentSort(`${field},${sort}`);
+      const sortKey = field === 'referent' ? `contactName,${sort}` : `${field},${sort}`;
+      setCurrentSort(sortKey);
       await fetchStores({
         ...formik.values,
-        sort: `${field},${sort}`, 
+        sort: sortKey,
       }, true).catch(error => {
         console.error('Error fetching stores:', error);
       });
-      
+
     } else {
       console.log('Ordinamento rimosso.');
       setCurrentSort('asc');
