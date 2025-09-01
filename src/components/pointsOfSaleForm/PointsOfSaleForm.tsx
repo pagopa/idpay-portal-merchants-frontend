@@ -113,7 +113,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           }));
           if (!isValidEmail(value)) {
             updateError(index, 'confirmContactEmail', 'Email non valida');
-            }else if (salesPoints[index].contactEmail && value !== contactEmailConfirm[index]) {
+            }else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
           } else {
             clearError(index, 'confirmContactEmail');
