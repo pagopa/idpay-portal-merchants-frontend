@@ -160,6 +160,7 @@
       "prepareList": "Non sai come preparare la lista? ",
       "referent": "Referente",
       "address": "Indirizzo",
+      "addressURL": "URL",
       "city": "Città",
       "pointOfSaleType": "Tipologia punto vendita",
       "online": "Online",
@@ -202,7 +203,9 @@
     },
     "pointOfSales": {
       "type": "Tipologia di punto vendita",
-      "typeDescription": "I punti vendita fisici richiedono l'indirizzo completo. Per quelli online è sufficiente l'URL del sito."
+      "typeDescription": "I punti vendita fisici richiedono l'indirizzo completo. Per quelli online è sufficiente l'URL del sito.",
+      "noOptionsText": "Nessun risultato",
+      "loadingText": "Caricamento..."
     },
     "newDiscount": {
       "codeCopied": "Codice copiato",

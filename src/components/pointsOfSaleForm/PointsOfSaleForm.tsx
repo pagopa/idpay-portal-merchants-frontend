@@ -17,6 +17,9 @@ import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
+import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
+import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
+import { PlaceItem } from '../../services/autocompleteService';
 
 
 
@@ -37,6 +40,7 @@ interface FieldErrors {
 
 const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChange, pointsOfSaleLoaded }) => {
   const { t } = useTranslation();
+  const { options, loading, error, search } = usePlacesAutocomplete();
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
     {
       type: TypeEnum.PHYSICAL,
@@ -57,7 +61,43 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
       channelWebsite: '',
     },
   ]);
-
+  const handleAddressSelect = (index: number, selected: PlaceItem | null, value: string) => {
+    if (selected) {
+      setSalesPoints((prev) =>
+        prev.map((sp, i) =>
+          i === index
+            ? {
+              ...sp,
+              address: selected.Address.Label,
+              city: selected.Address.Locality ?? '',
+              zipCode: selected.Address.PostalCode ?? '',
+              region: selected.Address.Region?.Name ?? '',
+              province: selected.Address.SubRegion?.Name ?? '',
+            }
+            : sp
+        )
+      );
+    } else {
+      setSalesPoints((prev) =>
+        prev.map((sp, i) => (i === index ? { ...sp, address: value } : sp))
+      );
+    }
+  };
+  // const handleAddressInputChange = (index: number, inputValue: string) => {
+  //   setSalesPoints(prevSalesPoints =>
+  //     prevSalesPoints.map((salesPoint, i) =>
+  //       i === index
+  //         ? { ...salesPoint, address: inputValue }
+  //         : salesPoint
+  //     )
+  //   );
+  //
+  //   if (inputValue.length === 0) {
+  //     updateError(index, 'address', 'Indirizzo non valido');
+  //   } else {
+  //     clearError(index, 'address');
+  //   }
+  // };
   const [errors, setErrors] = useState<FormErrors>({});
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
 
@@ -339,22 +379,32 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={6} md={10}>
                       <Typography variant="h6" gutterBottom>Indirizzo</Typography>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        label="Indirizzo completo"
-                        name="address"
-                        value={salesPoint.address}
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
-                        margin="normal"
-                        error={!!getFieldError(index, 'address')}
-                        helperText={getFieldError(index, 'address')}
-                        required
-                      />
+                      <Box sx={{ mt: 2 }}>
+                        <AutocompleteComponent
+                          options={options}
+                          onChangeDebounce={(value) => search(value)}
+                          inputError={!!errors[index]?.address}
+                          onChange={(value) => {
+                            const selected = options.find(
+                              (opt) => opt.Address.Label === value
+                            );
+                            handleAddressSelect(index, selected ?? null, value);
+                          }}
+                        />
+                        {loading && (
+                          <Typography variant="body2">Caricamento...</Typography>
+                        )}
+                        {error && (
+                          <Typography variant="body2" color="error">
+                            {error}
+                          </Typography>
+                        )}
+                      </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
                       <TextField
                         size="small"
+                        aria-readonly={true}
                         fullWidth
                         label="Città"
                         name="city"
@@ -369,6 +419,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     <Grid item xs={12} sm={6} md={2}>
                       <TextField
                         size="small"
+                        aria-readonly={true}
                         fullWidth
                         label="CAP"
                         name="zipCode"
@@ -383,6 +434,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     <Grid item xs={12} sm={6} md={4}>
                       <TextField
                         size="small"
+                        aria-readonly={true}
                         fullWidth
                         label="Regione"
                         name="region"
@@ -397,6 +449,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     <Grid item xs={12} sm={6} md={2}>
                       <TextField
                         size="small"
+                        aria-readonly={true}
                         fullWidth
                         label="Provincia"
                         name="province"
