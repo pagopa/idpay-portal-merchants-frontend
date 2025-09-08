@@ -30,29 +30,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - QueryText
-                - AdditionalFeatures
-              properties:
-                QueryText:
-                  type: string
-                  maxLength: 256
-                  pattern: ".+"
-                  description: >
-                    ENG: The input address for autocomplete
-                    IT: L'indirizzo di input per l'autocomplete
-                AdditionalFeatures:
-                  type: array
-                  description: >
-                    ENG: Must always be ["Core"] to receive detailed responses
-                    IT: Deve essere sempre ["Core"] per ottenere risposte dettagliate
-                  items:
-                    type: string
-                    enum: ["Core"]
-                  minItems: 1
-                  maxItems: 1
-                  default: ["Core"]
+              $ref: '#/components/schemas/AddressAutocompleteRequestDTO'
       responses:
         '200':
           $ref: '#/components/responses/POST_autocomplete_200_Response'
@@ -106,6 +84,84 @@ components:
         maximum: 86400
 
   schemas:
+    AddressAutocompleteRequestDTO:
+      type: object
+      required:
+        - QueryText
+        - AdditionalFeatures
+      properties:
+        QueryText:
+          type: string
+          maxLength: 256
+          pattern: ".+"
+          description: >
+            ENG: The input address for autocomplete
+            IT: L'indirizzo di input per l'autocomplete
+        AdditionalFeatures:
+          type: array
+          description: >
+            ENG: Must always be ["Core"] to receive detailed responses
+            IT: Deve essere sempre ["Core"] per ottenere risposte dettagliate
+          items:
+            type: string
+            enum: [ "Core" ]
+          minItems: 1
+          maxItems: 1
+          default: [ "Core" ]
+    AddressAutocompleteResponseDTO:
+      type: object
+      properties:
+        ResultItems:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: '#/components/schemas/AddressAutocompleteResultItemDTO'
+    AddressAutocompleteResultItemDTO:
+      type: object
+      properties:
+        PlaceId:
+          type: string
+          maxLength: 64
+          pattern: ".*"
+        Address:
+          $ref: '#/components/schemas/AddressDTO'
+    AddressDTO:
+      type: object
+      properties:
+        Region:
+          $ref: '#/components/schemas/RegionDTO'
+        SubRegion:
+          $ref: '#/components/schemas/SubRegionDTO'
+        Locality:
+          type: string
+          maxLength: 128
+          pattern: ".*"
+        PostalCode:
+          type: string
+          maxLength: 16
+          pattern: ".*"
+        Street:
+          type: string
+          maxLength: 128
+          pattern: ".*"
+        AddressNumber:
+          type: string
+          maxLength: 16
+          pattern: ".*"
+    RegionDTO:
+      type: object
+      properties:
+        Name:
+          type: string
+          maxLength: 128
+          pattern: ".*"
+    SubRegionDTO:
+      type: object
+      properties:
+        Code:
+          type: string
+          maxLength: 64
+          pattern: ".*"
     ErrorDTO:
       type: object
       required:
@@ -136,51 +192,7 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              ResultItems:
-                type: array
-                maxItems: 1000
-                items:
-                  type: object
-                  properties:
-                    PlaceId:
-                      type: string
-                      maxLength: 64
-                      pattern: ".*"
-                    Address:
-                      type: object
-                      properties:
-                        Region:
-                          type: object
-                          properties:
-                            Name:
-                              type: string
-                              maxLength: 128
-                              pattern: ".*"
-                        SubRegion:
-                          type: object
-                          properties:
-                            Code:
-                              type: string
-                              maxLength: 64
-                              pattern: ".*"
-                        Locality:
-                          type: string
-                          maxLength: 128
-                          pattern: ".*"
-                        PostalCode:
-                          type: string
-                          maxLength: 16
-                          pattern: ".*"
-                        Street:
-                          type: string
-                          maxLength: 128
-                          pattern: ".*"
-                        AddressNumber:
-                          type: string
-                          maxLength: 16
-                          pattern: ".*"
+            $ref: '#/components/schemas/AddressAutocompleteResponseDTO'
 
     POST_autocomplete_400_Response:
       description: Bad request

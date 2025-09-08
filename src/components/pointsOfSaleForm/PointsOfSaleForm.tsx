@@ -19,7 +19,8 @@ import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
 import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
-import { PlaceItem } from '../../services/autocompleteService';
+import { AddressDTO } from '../../api/generated/autocomplete/AddressDTO';
+// import { PlaceItem } from '../../services/autocompleteService';
 
 
 
@@ -61,18 +62,18 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
       channelWebsite: '',
     },
   ]);
-  const handleAddressSelect = (index: number, selected: PlaceItem | null, value: string) => {
+  const handleAddressSelect = (index: number, selected: AddressDTO | null, value: string) => {
     if (selected) {
       setSalesPoints((prev) =>
         prev.map((sp, i) =>
           i === index
             ? {
               ...sp,
-              address: selected.Address.Label,
-              city: selected.Address.Locality ?? '',
-              zipCode: selected.Address.PostalCode ?? '',
-              region: selected.Address.Region?.Name ?? '',
-              province: selected.Address.SubRegion?.Name ?? '',
+              address: selected.Street.concat(selected.AddressNumber),
+              city: selected.Locality ?? '',
+              zipCode: selected.PostalCode ?? '',
+              region: selected.Region?.Name ?? '',
+              province: selected.SubRegion?.Code ?? '',
             }
             : sp
         )
@@ -386,7 +387,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           inputError={!!errors[index]?.address}
                           onChange={(value) => {
                             const selected = options.find(
-                              (opt) => opt.Address.Label === value
+                              (opt) => opt.Street === value
                             );
                             handleAddressSelect(index, selected ?? null, value);
                           }}

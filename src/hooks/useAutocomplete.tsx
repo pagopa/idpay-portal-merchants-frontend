@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { autocompleteService, AutocompleteResponse, PlaceItem } from "../services/autocompleteService";
+import { autocompleteService} from "../services/autocompleteService";
+import { AddressAutocompleteResponseDTO } from '../api/generated/autocomplete/AddressAutocompleteResponseDTO';
+import { AddressDTO } from '../api/generated/autocomplete/AddressDTO';
 
 export function usePlacesAutocomplete() {
-  const [options, setOptions] = useState<Array<PlaceItem>>([]);
+  const [options, setOptions] = useState<Array<AddressDTO>>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,11 +18,11 @@ export function usePlacesAutocomplete() {
     setError(null);
 
     try {
-      const res: AutocompleteResponse = await autocompleteService.places({
+      const res: AddressAutocompleteResponseDTO = await autocompleteService.getAddresses({
         QueryText: query,
         AdditionalFeatures: ["Core"],
       });
-      setOptions(res.ResultItems);
+      setOptions([...(res?.ResultItems ?? [])]);
     } catch (err: any) {
       console.error("Autocomplete error", err);
       setError("Errore nella ricerca");
