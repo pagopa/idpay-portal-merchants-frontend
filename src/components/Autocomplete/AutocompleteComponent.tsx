@@ -4,7 +4,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from "react-i18next";
 import { MANDATORY_FIELD } from '../../utils/constants';
-import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 
 
 export default function AutocompleteComponent({
@@ -12,11 +11,15 @@ export default function AutocompleteComponent({
   onChangeDebounce,
   inputError,
   onChange,
+  errorText,
+  required,
 }: Readonly<{
-  options: Array<PointOfSaleDTO>;
+  options: Array<any>;
   onChangeDebounce?: (value: string) => void;
   inputError?: boolean;
-  onChange?: (value: string) => void;
+  onChange?: (value: any) => void;
+  errorText?: string;
+  required?: boolean;
 }>) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,6 +49,11 @@ export default function AutocompleteComponent({
     setLoading(false);
   }, [options]);
 
+  const getHelperText = () => {
+    if (!inputError) {return '';}
+    return errorText || MANDATORY_FIELD;
+  };
+
   return (
     <Autocomplete
       id="server-side-autocomplete"
@@ -64,18 +72,20 @@ export default function AutocompleteComponent({
       }}
       isOptionEqualToValue={(option, value) => option?.address === value?.address}
       getOptionLabel={(option) => {
-        setOptionValue(option?.address ?? '');
-        return option?.address ?? '';
+        setOptionValue(option?.Address?.Label ?? '');
+        return option?.Address?.Label ?? '';
       }}
       options={options}
       loading={loading}
       noOptionsText={t('pages.pointOfSales.noOptionsText')}
       loadingText={t('pages.pointOfSales.loadingText')}
+      onChange={(_, optionValue) => {
+        if (onChange) {
+          onChange(optionValue);
+        }
+      }}
       onInputChange={(_, newInputValue) => {
         setInputValue(newInputValue);
-        if (onChange) {
-          onChange(newInputValue);
-        }
       }}
       filterOptions={(x) => x}
       renderInput={(params) => (
@@ -84,7 +94,8 @@ export default function AutocompleteComponent({
           label="Cerca"
           size="small"
           error={inputError}
-          helperText={inputError ? MANDATORY_FIELD : ''}
+          helperText={getHelperText()}
+          required={required}
           sx={{ marginTop: 2 }}
           InputProps={{
             ...params.InputProps,

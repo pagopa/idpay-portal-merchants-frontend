@@ -88,7 +88,6 @@ components:
       type: object
       required:
         - QueryText
-        - AdditionalFeatures
       properties:
         QueryText:
           type: string
@@ -97,17 +96,6 @@ components:
           description: >
             ENG: The input address for autocomplete
             IT: L'indirizzo di input per l'autocomplete
-        AdditionalFeatures:
-          type: array
-          description: >
-            ENG: Must always be ["Core"] to receive detailed responses
-            IT: Deve essere sempre ["Core"] per ottenere risposte dettagliate
-          items:
-            type: string
-            enum: [ "Core" ]
-          minItems: 1
-          maxItems: 1
-          default: [ "Core" ]
     AddressAutocompleteResponseDTO:
       type: object
       properties:

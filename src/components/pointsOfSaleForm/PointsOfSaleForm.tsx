@@ -19,10 +19,6 @@ import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
 import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
-import { AddressDTO } from '../../api/generated/autocomplete/AddressDTO';
-// import { PlaceItem } from '../../services/autocompleteService';
-
-
 
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
@@ -62,43 +58,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
       channelWebsite: '',
     },
   ]);
-  const handleAddressSelect = (index: number, selected: AddressDTO | null, value: string) => {
-    if (selected) {
-      setSalesPoints((prev) =>
-        prev.map((sp, i) =>
-          i === index
-            ? {
-              ...sp,
-              address: selected.Street.concat(selected.AddressNumber),
-              city: selected.Locality ?? '',
-              zipCode: selected.PostalCode ?? '',
-              region: selected.Region?.Name ?? '',
-              province: selected.SubRegion?.Code ?? '',
-            }
-            : sp
-        )
-      );
-    } else {
-      setSalesPoints((prev) =>
-        prev.map((sp, i) => (i === index ? { ...sp, address: value } : sp))
-      );
-    }
-  };
-  // const handleAddressInputChange = (index: number, inputValue: string) => {
-  //   setSalesPoints(prevSalesPoints =>
-  //     prevSalesPoints.map((salesPoint, i) =>
-  //       i === index
-  //         ? { ...salesPoint, address: inputValue }
-  //         : salesPoint
-  //     )
-  //   );
-  //
-  //   if (inputValue.length === 0) {
-  //     updateError(index, 'address', 'Indirizzo non valido');
-  //   } else {
-  //     clearError(index, 'address');
-  //   }
-  // };
   const [errors, setErrors] = useState<FormErrors>({});
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
 
@@ -154,7 +113,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           }));
           if (!isValidEmail(value)) {
             updateError(index, 'confirmContactEmail', 'Email non valida');
-            }else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
+          } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
           } else {
             clearError(index, 'confirmContactEmail');
@@ -298,6 +257,47 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
 
   };
 
+  const handleChangeAddress = (salesPointIndex: number, addressObj: any) => {
+    if (addressObj?.Address) {
+      if (!addressObj.Address.Street || !addressObj.Address.Locality || !addressObj.Address.PostalCode || !addressObj.Address.Region || !addressObj.Address.SubRegion) {
+        updateError(salesPointIndex, 'address', 'Indirizzo non completo, selezionane un altro');
+        return;
+      };
+      clearError(salesPointIndex, 'address');
+
+      setSalesPoints((prev) =>
+        prev.map((sp, i) =>
+          i === salesPointIndex
+            ? {
+              ...sp,
+              address: addressObj.Address.Street.concat(addressObj.Address.AddressNumber ?? ''),
+              city: addressObj.Address.Locality ?? '',
+              zipCode: addressObj.Address.PostalCode ?? '',
+              region: addressObj.Address.Region?.Name ?? '',
+              province: addressObj.Address.SubRegion?.Code ?? '',
+            }
+            : sp
+        )
+      );
+    }else{
+      setSalesPoints((prev) =>
+        prev.map((sp, i) =>
+          i === salesPointIndex
+            ? {
+              ...sp,
+              address: '',
+              city: '',
+              zipCode: '',
+              region: '',
+              province: '',
+            }
+            : sp
+        )
+      );
+    }
+
+  };
+
 
   return (
     <Box sx={{ bgcolor: 'background.paper', boxShadow: 3 }}>
@@ -383,14 +383,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                       <Box sx={{ mt: 2 }}>
                         <AutocompleteComponent
                           options={options}
+                          required
                           onChangeDebounce={(value) => search(value)}
                           inputError={!!errors[index]?.address}
-                          onChange={(value) => {
-                            const selected = options.find(
-                              (opt) => opt.Street === value
-                            );
-                            handleAddressSelect(index, selected ?? null, value);
+                          onChange={(addressObj) => {
+                            console.log("VALUE", addressObj, index);
+                            handleChangeAddress(index, addressObj);
                           }}
+                          errorText={errors[index]?.address}
                         />
                         {loading && (
                           <Typography variant="body2">Caricamento...</Typography>
@@ -410,11 +410,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         label="Città"
                         name="city"
                         value={salesPoint.city}
+                        disabled
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="normal"
                         error={!!getFieldError(index, 'city')}
                         helperText={getFieldError(index, 'city')}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
@@ -425,11 +425,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         label="CAP"
                         name="zipCode"
                         value={salesPoint.zipCode}
+                        disabled
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="normal"
                         error={!!getFieldError(index, 'zipCode')}
                         helperText={getFieldError(index, 'zipCode')}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
@@ -440,11 +440,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         label="Regione"
                         name="region"
                         value={salesPoint.region}
+                        disabled
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="normal"
                         error={!!getFieldError(index, 'region')}
                         helperText={getFieldError(index, 'region')}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
@@ -455,11 +455,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         label="Provincia"
                         name="province"
                         value={salesPoint.province}
+                        disabled
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="normal"
                         error={!!getFieldError(index, 'province')}
                         helperText={getFieldError(index, 'province')}
-                        required
                       />
                     </Grid>
                   </Grid>
@@ -569,7 +569,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         <ButtonNaked
                           color="primary"
                           endIcon={<ArrowOutward fontSize="small" />}
-                          onFocusVisible={() => {
+                          onClick={() => {
                             const url = salesPoint.channelGeolink;
                             if (url && isValidUrl(url)) {
                               window.open(url, '_blank', 'noopener,noreferrer');

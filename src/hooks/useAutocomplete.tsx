@@ -20,7 +20,6 @@ export function usePlacesAutocomplete() {
     try {
       const res: AddressAutocompleteResponseDTO = await autocompleteService.getAddresses({
         QueryText: query,
-        AdditionalFeatures: ["Core"],
       });
       setOptions([...(res?.ResultItems ?? [])]);
     } catch (err: any) {
