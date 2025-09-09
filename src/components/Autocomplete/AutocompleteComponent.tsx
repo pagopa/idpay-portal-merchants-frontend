@@ -30,7 +30,6 @@ export default function AutocompleteComponent({
   const { t } = useTranslation();
 
   useEffect(() => {
-    console.log(open);
     if (inputValue.length < 5 || inputValue.trim().length === 0 || optionValue === inputValue) {
       setLoading(false);
       return;
