@@ -13,6 +13,7 @@ export default function AutocompleteComponent({
   onChange,
   errorText,
   required,
+  label,
 }: Readonly<{
   options: Array<any>;
   onChangeDebounce?: (value: string) => void;
@@ -20,6 +21,7 @@ export default function AutocompleteComponent({
   onChange?: (value: any) => void;
   errorText?: string;
   required?: boolean;
+  label?: string;
 }>) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -28,6 +30,7 @@ export default function AutocompleteComponent({
   const { t } = useTranslation();
 
   useEffect(() => {
+    console.log(open);
     if (inputValue.length < 5 || inputValue.trim().length === 0 || optionValue === inputValue) {
       setLoading(false);
       return;
@@ -50,7 +53,7 @@ export default function AutocompleteComponent({
   }, [options]);
 
   const getHelperText = () => {
-    if (!inputError) {return '';}
+    if (!inputError) { return ''; }
     return errorText || MANDATORY_FIELD;
   };
 
@@ -58,7 +61,9 @@ export default function AutocompleteComponent({
     <Autocomplete
       id="server-side-autocomplete"
       sx={{
-        width: 300,
+        '& .MuiAutocompleteRoot': {
+          width: '100%',
+        },
         '& .MuiFormLabel-root.Mui-error': {
           color: '#5C6E82 !important',
         },
@@ -91,7 +96,7 @@ export default function AutocompleteComponent({
       renderInput={(params) => (
         <TextField
           {...params}
-          label="Cerca"
+          label={label}
           size="small"
           error={inputError}
           helperText={getHelperText()}
@@ -106,7 +111,11 @@ export default function AutocompleteComponent({
       componentsProps={{
         popper: {
           sx: {
+            boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+            marginTop: '10px !important',
+            borderRadius: '4px !important',
             '& .MuiAutocomplete-option': {
+              fontWeight: theme => theme.typography.fontWeightMedium,
               '&:hover': {
                 backgroundColor: '#0073E614 !important',
                 color: '#0073E6 !important',
