@@ -70,7 +70,7 @@ const InitiativeStores: React.FC = () => {
     },
     {
       field: 'address',
-      headerName: t('pages.initiativeStores.address'),
+      headerName: t('pages.initiativeStores.addressURL'),
       width: 200,
       editable: false,
       disableColumnMenu: true,
