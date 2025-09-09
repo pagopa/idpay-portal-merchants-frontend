@@ -378,12 +378,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
               <Grid item xs={12}>
                 <Box sx={{ mb: 3, mt: 2 }}>
                   <Grid container spacing={1}>
-                    <Grid item xs={12} sm={6} md={10}>
+                    <Grid item xs={12} sm={10} md={10} lg={10}>
                       <Typography variant="h6" gutterBottom>Indirizzo</Typography>
                       <Box sx={{ mt: 2 }}>
                         <AutocompleteComponent
                           options={options}
                           required
+                          label="Indirizzo completo"
                           onChangeDebounce={(value) => search(value)}
                           inputError={!!errors[index]?.address}
                           onChange={(addressObj) => {
