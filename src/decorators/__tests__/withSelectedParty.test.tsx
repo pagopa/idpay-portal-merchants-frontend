@@ -41,7 +41,7 @@ const renderApp = async (
   );
 
   if (waitSelectedParty) {
-    await waitFor(() => expect(store.getState().parties.selected).toBeUndefined());
+    await waitFor(() => expect(store.getState().parties.selected).not.toBeUndefined());
   }
 
   return { store, history };

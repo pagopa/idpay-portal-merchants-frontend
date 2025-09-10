@@ -53,7 +53,7 @@ export default function AutocompleteComponent({
 
   const getHelperText = () => {
     if (!inputError) { return ''; }
-    return errorText || MANDATORY_FIELD;
+    return errorText ?? MANDATORY_FIELD;
   };
 
   return (
