@@ -17,8 +17,8 @@ import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
-
-
+import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
+import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
 
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
@@ -37,6 +37,7 @@ interface FieldErrors {
 
 const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChange, pointsOfSaleLoaded }) => {
   const { t } = useTranslation();
+  const { options, loading, error, search } = usePlacesAutocomplete();
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
     {
       type: TypeEnum.PHYSICAL,
@@ -57,7 +58,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
       channelWebsite: '',
     },
   ]);
-
   const [errors, setErrors] = useState<FormErrors>({});
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
 
@@ -113,7 +113,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           }));
           if (!isValidEmail(value)) {
             updateError(index, 'confirmContactEmail', 'Email non valida');
-            }else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
+          } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
           } else {
             clearError(index, 'confirmContactEmail');
@@ -257,6 +257,47 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
 
   };
 
+  const handleChangeAddress = (salesPointIndex: number, addressObj: any) => {
+    if (addressObj?.Address) {
+      if (!addressObj.Address.Street || !addressObj.Address.Locality || !addressObj.Address.PostalCode || !addressObj.Address.Region || !addressObj.Address.SubRegion) {
+        updateError(salesPointIndex, 'address', 'Indirizzo non completo, selezionane un altro');
+        return;
+      };
+      clearError(salesPointIndex, 'address');
+
+      setSalesPoints((prev) =>
+        prev.map((sp, i) =>
+          i === salesPointIndex
+            ? {
+              ...sp,
+              address: addressObj.Address.Street.concat(addressObj.Address.AddressNumber ?? ''),
+              city: addressObj.Address.Locality ?? '',
+              zipCode: addressObj.Address.PostalCode ?? '',
+              region: addressObj.Address.Region?.Name ?? '',
+              province: addressObj.Address.SubRegion?.Code ?? '',
+            }
+            : sp
+        )
+      );
+    }else{
+      setSalesPoints((prev) =>
+        prev.map((sp, i) =>
+          i === salesPointIndex
+            ? {
+              ...sp,
+              address: '',
+              city: '',
+              zipCode: '',
+              region: '',
+              province: '',
+            }
+            : sp
+        )
+      );
+    }
+
+  };
+
 
   return (
     <Box sx={{ bgcolor: 'background.paper', boxShadow: 3 }}>
@@ -337,75 +378,89 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
               <Grid item xs={12}>
                 <Box sx={{ mb: 3, mt: 2 }}>
                   <Grid container spacing={1}>
-                    <Grid item xs={12} sm={6} md={10}>
+                    <Grid item xs={12} sm={10} md={10} lg={10}>
                       <Typography variant="h6" gutterBottom>Indirizzo</Typography>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        label="Indirizzo completo"
-                        name="address"
-                        value={salesPoint.address}
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
-                        margin="normal"
-                        error={!!getFieldError(index, 'address')}
-                        helperText={getFieldError(index, 'address')}
-                        required
-                      />
+                      <Box sx={{ mt: 2 }}>
+                        <AutocompleteComponent
+                          options={options}
+                          required
+                          label="Indirizzo completo"
+                          onChangeDebounce={(value) => search(value)}
+                          inputError={!!errors[index]?.address}
+                          onChange={(addressObj) => {
+                            console.log("VALUE", addressObj, index);
+                            handleChangeAddress(index, addressObj);
+                          }}
+                          errorText={errors[index]?.address}
+                        />
+                        {loading && (
+                          <Typography variant="body2">Caricamento...</Typography>
+                        )}
+                        {error && (
+                          <Typography variant="body2" color="error">
+                            {error}
+                          </Typography>
+                        )}
+                      </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
                       <TextField
                         size="small"
+                        aria-readonly={true}
                         fullWidth
                         label="Città"
                         name="city"
                         value={salesPoint.city}
+                        disabled
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="normal"
                         error={!!getFieldError(index, 'city')}
                         helperText={getFieldError(index, 'city')}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
                       <TextField
                         size="small"
+                        aria-readonly={true}
                         fullWidth
                         label="CAP"
                         name="zipCode"
                         value={salesPoint.zipCode}
+                        disabled
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="normal"
                         error={!!getFieldError(index, 'zipCode')}
                         helperText={getFieldError(index, 'zipCode')}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
                       <TextField
                         size="small"
+                        aria-readonly={true}
                         fullWidth
                         label="Regione"
                         name="region"
                         value={salesPoint.region}
+                        disabled
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="normal"
                         error={!!getFieldError(index, 'region')}
                         helperText={getFieldError(index, 'region')}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
                       <TextField
                         size="small"
+                        aria-readonly={true}
                         fullWidth
                         label="Provincia"
                         name="province"
                         value={salesPoint.province}
+                        disabled
                         onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                         margin="normal"
                         error={!!getFieldError(index, 'province')}
                         helperText={getFieldError(index, 'province')}
-                        required
                       />
                     </Grid>
                   </Grid>
@@ -515,7 +570,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         <ButtonNaked
                           color="primary"
                           endIcon={<ArrowOutward fontSize="small" />}
-                          onFocusVisible={() => {
+                          onClick={() => {
                             const url = salesPoint.channelGeolink;
                             if (url && isValidUrl(url)) {
                               window.open(url, '_blank', 'noopener,noreferrer');
