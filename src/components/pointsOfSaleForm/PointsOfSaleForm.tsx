@@ -270,7 +270,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           i === salesPointIndex
             ? {
               ...sp,
-              address: addressObj.Address.Street.concat(addressObj.Address.AddressNumber ?? ''),
+              address: addressObj.Address.Street.concat(` ${addressObj.Address.AddressNumber}`),
               city: addressObj.Address.Locality ?? '',
               zipCode: addressObj.Address.PostalCode ?? '',
               region: addressObj.Address.Region?.Name ?? '',
