@@ -270,7 +270,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           i === salesPointIndex
             ? {
               ...sp,
-              address: addressObj.Address.Street.concat(addressObj.Address.AddressNumber ?? ''),
+              address: addressObj.Address.Street.concat(`,${addressObj.Address.AddressNumber}`),
               city: addressObj.Address.Locality ?? '',
               zipCode: addressObj.Address.PostalCode ?? '',
               region: addressObj.Address.Region?.Name ?? '',
@@ -300,9 +300,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
 
 
   return (
-    <Box sx={{ bgcolor: 'background.paper', boxShadow: 3 }}>
+    <Box bgcolor={'background.paper'} boxShadow={3}>
       {salesPoints.map((salesPoint, index) => (
-        <Box p={2} key={`${salesPoint.id}`} sx={{ mb: 2, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+        <Box p={2} key={`${salesPoint.id}`} mb={2} borderColor={'divider'} borderRadius={2}>
           <Grid container>
             <Grid item xs={11}>
               <Typography variant="h5" gutterBottom fontWeight={theme.typography.fontWeightBold}>
@@ -316,9 +316,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             </Grid>
             <Grid item xs={12}>
               <FormControl component="fieldset" sx={{ mb: 3, mt: 2 }}>
-                <Typography variant="h6" >{t('pages.pointOfSales.type')}</Typography>
+                <Typography variant="h6">{t('pages.pointOfSales.type')}</Typography>
 
-                <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
+                <Typography variant="body1" mb={2} mt={2}>
                   {t('pages.pointOfSales.typeDescription')}
                 </Typography>
                 <Box p={1.5}>
@@ -328,14 +328,20 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     value={salesPoint.type}
                     onChange={(e) => handleFieldChange(index, e)}
                   >
-                    <FormControlLabel value={POS_TYPE.Physical} control={<Radio />} label="Fisico" />
+                    <FormControlLabel
+                      value={POS_TYPE.Physical}
+                      control={<Radio />}
+                      label="Fisico"
+                    />
                     <FormControlLabel value={POS_TYPE.Online} control={<Radio />} label="Online" />
                   </RadioGroup>
                 </Box>
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>Nome insegna</Typography>
+              <Typography variant="h6" gutterBottom>
+                {'Nome insegna'}
+              </Typography>
             </Grid>
             <Grid item xs={5}>
               <TextField
@@ -353,34 +359,38 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
               />
             </Grid>
             <Grid item xs={7} />
-            {
-              salesPoint.type === 'ONLINE' && (
-                <>
-                  <Typography variant="subtitle1" gutterBottom>Indirizzo web</Typography>
-                  <TextField
-                    size="small"
-                    fullWidth
-                    label="Indirizzo completo"
-                    name="webSite"
-                    value={salesPoint.webSite}
-                    onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
-                    margin="normal"
-                    sx={{ mb: 2 }}
-                    error={!!getFieldError(index, 'webSite')}
-                    helperText={getFieldError(index, 'webSite')}
-                    required
-                  />
-                </>
-              )
-            }
+            {salesPoint.type === 'ONLINE' && (
+              <>
+                <Typography variant="subtitle1" gutterBottom>
+                  {'Indirizzo web'}
+                </Typography>
+                <TextField
+                  size="small"
+                  fullWidth
+                  label="Indirizzo completo"
+                  name="webSite"
+                  value={salesPoint.webSite}
+                  onChange={(e) =>
+                    handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                  }
+                  margin="normal"
+                  sx={{ mb: 2 }}
+                  error={!!getFieldError(index, 'webSite')}
+                  helperText={getFieldError(index, 'webSite')}
+                  required
+                />
+              </>
+            )}
 
-            {salesPoint.type === 'PHYSICAL' &&
+            {salesPoint.type === 'PHYSICAL' && (
               <Grid item xs={12}>
-                <Box sx={{ mb: 3, mt: 2 }}>
+                <Box mb={3} mt={2}>
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={10} md={10} lg={10}>
-                      <Typography variant="h6" gutterBottom>Indirizzo</Typography>
-                      <Box sx={{ mt: 2 }}>
+                      <Typography variant="h6" gutterBottom>
+                        {'Indirizzo'}
+                      </Typography>
+                      <Box mt={2}>
                         <AutocompleteComponent
                           options={options}
                           required
@@ -388,14 +398,12 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           onChangeDebounce={(value) => search(value)}
                           inputError={!!errors[index]?.address}
                           onChange={(addressObj) => {
-                            console.log("VALUE", addressObj, index);
+                            console.log('VALUE', addressObj, index);
                             handleChangeAddress(index, addressObj);
                           }}
                           errorText={errors[index]?.address}
                         />
-                        {loading && (
-                          <Typography variant="body2">Caricamento...</Typography>
-                        )}
+                        {loading && <Typography variant="body2">{'Caricamento...'}</Typography>}
                         {error && (
                           <Typography variant="body2" color="error">
                             {error}
@@ -412,7 +420,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         name="city"
                         value={salesPoint.city}
                         disabled
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="normal"
                         error={!!getFieldError(index, 'city')}
                         helperText={getFieldError(index, 'city')}
@@ -427,7 +437,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         name="zipCode"
                         value={salesPoint.zipCode}
                         disabled
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="normal"
                         error={!!getFieldError(index, 'zipCode')}
                         helperText={getFieldError(index, 'zipCode')}
@@ -442,7 +454,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         name="region"
                         value={salesPoint.region}
                         disabled
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="normal"
                         error={!!getFieldError(index, 'region')}
                         helperText={getFieldError(index, 'region')}
@@ -457,7 +471,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         name="province"
                         value={salesPoint.province}
                         disabled
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="normal"
                         error={!!getFieldError(index, 'province')}
                         helperText={getFieldError(index, 'province')}
@@ -466,14 +482,18 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                   </Grid>
                 </Box>
               </Grid>
-            }
+            )}
 
             {/* Contatti referente */}
             <Grid item xs={12}>
-              <Box sx={{ mb: 3, mt: 2 }}>
-                <Typography variant="h6" gutterBottom>Contatti referente</Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
-                  Indica la persona di contatto per questo punto vendita. Può coincidere &lt;con te stesso&gt;
+              <Box mb={3} mt={2}>
+                <Typography variant="h6" gutterBottom>
+                  {'Contatti referente'}
+                </Typography>
+                <Typography variant="body1" mb={2}>
+                  {
+                    'Indica la persona di contatto per questo punto vendita. Può coincidere &lt;con te stesso&gt;'
+                  }
                 </Typography>
                 <Grid container spacing={1}>
                   <Grid item xs={12} sm={6}>
@@ -484,7 +504,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         label="E-mail"
                         name="contactEmail"
                         value={salesPoint.contactEmail}
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="normal"
                         error={!!getFieldError(index, 'contactEmail')}
                         helperText={getFieldError(index, 'contactEmail')}
@@ -500,7 +522,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         label="Conferma e-mail"
                         name="confirmContactEmail"
                         value={contactEmailConfirm[index] || ''}
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="normal"
                         error={!!getFieldError(index, 'confirmContactEmail')}
                         helperText={getFieldError(index, 'confirmContactEmail')}
@@ -517,7 +541,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         label="Nome"
                         name="contactName"
                         value={salesPoint.contactName}
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="dense"
                         error={!!getFieldError(index, 'contactName')}
                         helperText={getFieldError(index, 'contactName')}
@@ -533,7 +559,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         label="Cognome"
                         name="contactSurname"
                         value={salesPoint.contactSurname}
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="dense"
                         error={!!getFieldError(index, 'contactSurname')}
                         helperText={getFieldError(index, 'contactSurname')}
@@ -545,13 +573,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
               </Box>
             </Grid>
             {/* Contatti punto vendita */}
-            {
-              salesPoint.type === 'PHYSICAL' &&
+            {salesPoint.type === 'PHYSICAL' && (
               <Grid item xs={12}>
                 <Box mt={2}>
                   <Grid container spacing={1}>
                     <Grid item xs={12}>
-                      <Typography variant="h6" gutterBottom>Contatti punto vendita</Typography>
+                      <Typography variant="h6" gutterBottom>
+                        {'Contatti punto vendita'}
+                      </Typography>
                     </Grid>
                     <Grid item xs={12} sm={10}>
                       <Box mr={2} mt={2}>
@@ -561,12 +590,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           label="Scheda Google MYBusiness"
                           name="channelGeolink"
                           value={salesPoint.channelGeolink}
-                          onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                          onChange={(e) =>
+                            handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                          }
                         />
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={2}>
-                      <Box mx={4} mt={2.5} >
+                      <Box mx={4} mt={2.5}>
                         <ButtonNaked
                           color="primary"
                           endIcon={<ArrowOutward fontSize="small" />}
@@ -578,57 +609,59 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           }}
                           size="medium"
                         >
-                          Verifica URL
+                          {'Verifica URL'}
                         </ButtonNaked>
                       </Box>
                     </Grid>
-                    <Grid item xs={12} >
+                    <Grid item xs={12}>
                       <TextField
                         size="small"
                         fullWidth
                         label="Numero di telefono"
                         name="channelPhone"
                         value={salesPoint.channelPhone}
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="dense"
                       />
                     </Grid>
-                    <Grid item xs={12} >
+                    <Grid item xs={12}>
                       <TextField
                         size="small"
                         fullWidth
                         label="Email"
                         name="channelEmail"
                         value={salesPoint.channelEmail}
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="dense"
                       />
                     </Grid>
-                    <Grid item xs={12} >
+                    <Grid item xs={12}>
                       <TextField
                         size="small"
                         fullWidth
                         label="Sito web"
                         name="channelWebsite"
                         value={salesPoint.channelWebsite}
-                        onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
+                        onChange={(e) =>
+                          handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
+                        }
                         margin="dense"
                       />
                     </Grid>
                   </Grid>
                 </Box>
               </Grid>
-            }
+            )}
           </Grid>
         </Box>
       ))}
 
-      <Button
-        startIcon={<AddIcon />}
-        onClick={addAnotherSalesPoint}
-        sx={{ p: 1 }}
-      >
-        Aggiungi un altro punto vendita
+      <Button startIcon={<AddIcon />} onClick={addAnotherSalesPoint} sx={{ p: 1 }}>
+        {'Aggiungi un altro punto vendita'}
       </Button>
     </Box>
   );
