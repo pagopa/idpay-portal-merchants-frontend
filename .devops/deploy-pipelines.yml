@@ -28,6 +28,7 @@ variables:
     cdn_profile: '$(UAT_CDN_PROFILE)'
     resource_group: '$(UAT_RESOURCE_GROUP)'
     storage_account: '$(UAT_STORAGE_ACCOUNT)'
+    cdn_domains: '$(UAT_CDN_DOMAINS)'
 
     react_app_url_cdn: '$(UAT_REACT_APP_URL_CDN)'
 
@@ -61,6 +62,7 @@ variables:
     cdn_profile: '$(PROD_CDN_PROFILE)'
     resource_group: '$(PROD_RESOURCE_GROUP)'
     storage_account: '$(PROD_STORAGE_ACCOUNT)'
+    cdn_domains: '$(PROD_CDN_DOMAINS)'
 
     react_app_url_cdn: '$(PROD_REACT_APP_URL_CDN)'
 
@@ -95,6 +97,7 @@ variables:
     cdn_profile: '$(DEV_CDN_PROFILE)'
     resource_group: '$(DEV_RESOURCE_GROUP)'
     storage_account: '$(DEV_STORAGE_ACCOUNT)'
+    cdn_domains: '$(DEV_CDN_DOMAINS)'
 
     react_app_url_cdn: '$(DEV_REACT_APP_URL_CDN)'
 
@@ -255,9 +258,13 @@ stages:
                 az storage blob sync --container '$(blob_container_name)' --account-name $(storage_account) -s "$(Pipeline.Workspace)/Bundle" --destination '$(basePath)/'
 
           - task: AzureCLI@1
-            displayName: 'Purge CDN endpoint'
+            displayName: 'Purge Azure Front Door CDN'
             inputs:
               azureSubscription: '$(AZURE_SUBSCRIPTION)'
               scriptLocation: inlineScript
               inlineScript: |
-                az cdn endpoint purge -g $(resource_group) -n $(cdn_endpoint) --profile-name $(cdn_profile) --content-paths "/$(basePath)" "/$(basePath)/*" "/"
+                az afd endpoint purge -g $(resource_group) \
+                --profile-name $(cdn_profile) \
+                --endpoint-name $(cdn_endpoint) \
+                --domains $(cdn_domains) \
+                --content-paths "/$(basePath)" "/$(basePath)/*" "/"
