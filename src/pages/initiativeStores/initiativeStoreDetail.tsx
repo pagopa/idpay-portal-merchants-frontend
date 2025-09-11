@@ -18,7 +18,7 @@ import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail } from '../../helpers';
 import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
 import { formatDate } from '../../utils/formatUtils';
-import { POS_TYPE } from '../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, POS_TYPE } from '../../utils/constants';
 import InitiativeDetailCard from './InitiativeDetailCard';
 
 
@@ -141,13 +141,13 @@ const InitiativeStoreDetail = () => {
     { label: t('pages.initiativeStores.id'), value: obj?.id },
     ...(obj?.type === POS_TYPE.Physical
       ? [
-        { label: t('pages.initiativeStores.address'), value: obj?.address },
-        { label: t('pages.initiativeStores.phone'), value: obj?.channelPhone },
-        { label: t('pages.initiativeStores.contactEmail'), value: obj?.channelEmail },
-        { label: t('pages.initiativeStores.geoLink'), value: obj?.channelGeolink },
+        { label: t('pages.initiativeStores.address'), value: obj?.address.concat(`,${obj?.city}`).concat(`,${obj?.province}`) },
+        { label: t('pages.initiativeStores.phone'), value: obj?.channelPhone === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelPhone},
+        { label: t('pages.initiativeStores.contactEmail'), value: obj?.channelEmail === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelEmail},
+        { label: t('pages.initiativeStores.geoLink'), value: obj?.channelGeolink === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelGeolink},
       ]
       : []),
-    { label: t('pages.initiativeStores.website'), value: obj?.type === POS_TYPE.Physical ? obj?.channelWebsite : obj?.webSite },
+    { label: t('pages.initiativeStores.website'), value: obj?.type === POS_TYPE.Online ? obj?.webSite : obj?.channelWebsite === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelWebsite},
   ];
 
   const getKeyValueReferent = (obj: any) => [
