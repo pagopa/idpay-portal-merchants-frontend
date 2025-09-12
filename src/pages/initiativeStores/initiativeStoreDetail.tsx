@@ -141,7 +141,7 @@ const InitiativeStoreDetail = () => {
     { label: t('pages.initiativeStores.id'), value: obj?.id },
     ...(obj?.type === POS_TYPE.Physical
       ? [
-        { label: t('pages.initiativeStores.address'), value: obj?.address.concat(`,${obj?.city}`).concat(`,${obj?.province}`) },
+        { label: t('pages.initiativeStores.address'), value: obj?.address.concat(` - ${obj?.zipCode}`).concat(`, ${obj?.city}`).concat(`, ${obj?.province}`) },
         { label: t('pages.initiativeStores.phone'), value: obj?.channelPhone === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelPhone},
         { label: t('pages.initiativeStores.contactEmail'), value: obj?.channelEmail === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelEmail},
         { label: t('pages.initiativeStores.geoLink'), value: obj?.channelGeolink === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelGeolink},

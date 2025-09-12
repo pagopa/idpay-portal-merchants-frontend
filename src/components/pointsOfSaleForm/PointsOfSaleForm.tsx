@@ -13,8 +13,7 @@ import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked, theme } from '@pagopa/mui-italia';
 import { useTranslation } from 'react-i18next';
-import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
-import { TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
+import { TypeEnum,PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
@@ -262,7 +261,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
       if (!addressObj.Address.Street || !addressObj.Address.Locality || !addressObj.Address.PostalCode || !addressObj.Address.Region || !addressObj.Address.SubRegion) {
         updateError(salesPointIndex, 'address', 'Indirizzo non completo, selezionane un altro');
         return;
-      };
+      }
       clearError(salesPointIndex, 'address');
 
       setSalesPoints((prev) =>
@@ -270,7 +269,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           i === salesPointIndex
             ? {
               ...sp,
-              address: addressObj.Address.Street.concat(`,${addressObj.Address.AddressNumber}`),
+              address: addressObj.Address.Street.concat(`, ${addressObj.Address.AddressNumber}`),
               city: addressObj.Address.Locality ?? '',
               zipCode: addressObj.Address.PostalCode ?? '',
               region: addressObj.Address.Region?.Name ?? '',
