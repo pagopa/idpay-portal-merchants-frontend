@@ -35,7 +35,18 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, isLink }) => (
       </Grid>
       :
       <Grid item xs={7}>
-        <Box mb={1}>
+        <Box
+          mb={1}
+          display={'-webkit-box'}
+          overflow={'hidden'}
+          textOverflow={'ellipsis'}
+          color={theme.palette.primary.main}
+          sx={{
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            wordBreak: 'break-word'
+          }}
+        >
           <Tooltip title={value ?? MISSING_DATA_PLACEHOLDER}>
             <Link
               fontWeight={theme.typography.fontWeightMedium}
