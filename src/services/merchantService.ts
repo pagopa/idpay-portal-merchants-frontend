@@ -4,7 +4,7 @@ import { MerchantDetailDTO } from '../api/generated/merchants/MerchantDetailDTO'
 import { MerchantStatisticsDTO } from '../api/generated/merchants/MerchantStatisticsDTO';
 import { MerchantTransactionsListDTO } from '../api/generated/merchants/MerchantTransactionsListDTO';
 import { MerchantTransactionsProcessedListDTO } from '../api/generated/merchants/MerchantTransactionsProcessedListDTO';
-import { PointOfSaleDetailDTO } from '../api/generated/merchants/PointOfSaleDetailDTO';
+import { PointOfSaleDTO } from '../api/generated/merchants/PointOfSaleDTO';
 import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
 import { GetPointOfSalesFilters, GetPointOfSalesResponse, GetPointOfSaleTransactionsFilters } from '../types/types';
 import { PointOfSaleTransactionsListDTO } from '../api/generated/merchants/PointOfSaleTransactionsListDTO';
@@ -46,11 +46,11 @@ export const authPaymentBarCode = (
   idTrxAcquirer: string
 ): Promise<any> => MerchantApi.authPaymentBarCode(trxCode, amountCents, idTrxAcquirer);
 
-export const updateMerchantPointOfSales = (merchantId: string, pointOfSales: Array<PointOfSaleDetailDTO>): Promise<void> => MerchantApi.updateMerchantPointOfSales(merchantId, pointOfSales);
+export const updateMerchantPointOfSales = (merchantId: string, pointOfSales: Array<PointOfSaleDTO>): Promise<void> => MerchantApi.updateMerchantPointOfSales(merchantId, pointOfSales);
 
 export const getMerchantPointOfSales = (merchantId: string, filters: GetPointOfSalesFilters): Promise<GetPointOfSalesResponse> => MerchantApi.getMerchantPointOfSales(merchantId, filters);
 
-export const getMerchantPointOfSalesById = (merchantId: string, pointOfSaleId: string): Promise<PointOfSaleDetailDTO> => MerchantApi.getMerchantPointOfSalesById(merchantId, pointOfSaleId);
+export const getMerchantPointOfSalesById = (merchantId: string, pointOfSaleId: string): Promise<PointOfSaleDTO> => MerchantApi.getMerchantPointOfSalesById(merchantId, pointOfSaleId);
 
 export const getMerchantPointOfSaleTransactions = (initiativeId: string, pointOfSaleId: string, filters?: GetPointOfSaleTransactionsFilters): Promise<PointOfSaleTransactionsListDTO> => MerchantApi.getMerchantPointOfSaleTransactions(initiativeId, pointOfSaleId, filters);
 
