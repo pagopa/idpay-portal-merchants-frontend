@@ -15,7 +15,6 @@ import { InitiativeDTOArray } from './generated/merchants/InitiativeDTOArray';
 import { MerchantTransactionsProcessedListDTO } from './generated/merchants/MerchantTransactionsProcessedListDTO';
 import { PointOfSaleDTO } from './generated/merchants/PointOfSaleDTO';
 import { PointOfSaleTransactionsListDTO } from './generated/merchants/PointOfSaleTransactionsListDTO';
-import { PointOfSaleDetailDTO } from './generated/merchants/PointOfSaleDetailDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -130,7 +129,7 @@ export const MerchantApi = {
   },
 
   getMerchantPointOfSalesById: async (merchantId: string,
-    pointOfSaleId: string): Promise<PointOfSaleDetailDTO> => {
+    pointOfSaleId: string): Promise<PointOfSaleDTO> => {
     const result = await apiClient.getPointOfSale({ merchantId, pointOfSaleId });
     return extractResponse(result, 200, onRedirectToLogin);
   },
