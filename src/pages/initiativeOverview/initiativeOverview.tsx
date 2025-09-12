@@ -9,7 +9,7 @@ import { theme } from '@pagopa/mui-italia';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
 import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
-import { formatIban, formattedCurrency } from '../../helpers';
+import { formatDate, formatIban, formattedCurrency } from '../../helpers';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../../utils/constants';
 
 
@@ -35,11 +35,11 @@ const InitiativeOverview = () => {
   const addError = useErrorDispatcher();
 
   useEffect(() => {
-    setIbanHolder("Mario Rossi");
-    setOnboardingDate("01/01/1999");
     getMerchantDetail(id)
       .then((response) => {
         setIban(response?.iban);
+        setIbanHolder(response?.ibanHolder);
+        setOnboardingDate(formatDate(response?.activationDate));
       })
       .catch((error) =>
         addError({
@@ -108,7 +108,7 @@ const InitiativeOverview = () => {
                 </Grid>
                 <Grid item xs={8}>
                   <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {onboardingDate? onboardingDate : MISSING_DATA_PLACEHOLDER}
+                    {onboardingDate ?? MISSING_DATA_PLACEHOLDER}
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
