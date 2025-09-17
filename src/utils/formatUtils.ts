@@ -11,3 +11,5 @@ export const curFormatter = (amount: number): string => Intl.NumberFormat('it-EU
 export const currencyFormatter = (v: number) => v||v===0 ? curFormatter(v) : v;
 
 export const formatValues=(v: string) => v ? v : MISSING_DATA_PLACEHOLDER;
+
+export const normalizeUrl = (url?: string): string => url?.trim().startsWith('http') ? url?.trim() : `https://${url?.trim()}`;
