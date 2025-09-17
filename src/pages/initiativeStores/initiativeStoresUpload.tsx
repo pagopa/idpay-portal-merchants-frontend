@@ -93,14 +93,13 @@ const InitiativeStoresUpload: React.FC = () => {
           id: 'UPLOAD_STORES',
           blocking: false,
           error,
-          techDescription: 'An error occurred uploading stores',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
+          techDescription: `${error.message}`,
+          displayableTitle: error.code === 'POINT_OF_SALE_ALREADY_REGISTERED' ? 'Errore punto vendita' : t('errors.genericTitle'),
+          displayableDescription: error.code === 'POINT_OF_SALE_ALREADY_REGISTERED' ? 'Email referente già associata ad altro punto vendita ' : t('errors.genericDescription'),
           toNotify: true,
           component: 'Toast',
           showCloseIcon: true,
         });
-        // history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
         history.push(generatePath(ROUTES.STORES, { id }));
 
         setShowErrorAlert(true);
