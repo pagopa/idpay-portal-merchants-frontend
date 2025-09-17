@@ -93,6 +93,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
     const { name, value } = event.target;
     if (name !== 'type') {
       switch (name) {
+        case 'channelEmail':
+          if (!isValidEmail(value)) {
+            updateError(index, 'channelEmail', 'Email non valida');
+          } else {
+            clearError(index, 'channelEmail');
+          }
+          break;
         case 'contactEmail':
           if (contactEmailConfirm[index] && value !== contactEmailConfirm[index]) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
@@ -269,7 +276,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           i === salesPointIndex
             ? {
               ...sp,
-              address: addressObj.Address.Street.concat(`, ${addressObj.Address.AddressNumber}`),
+              address: addressObj.Address.Street.concat(`, ${addressObj.Address.AddressNumber ?? 'SNC'}`),
               city: addressObj.Address.Locality ?? '',
               zipCode: addressObj.Address.PostalCode ?? '',
               region: addressObj.Address.Region?.Name ?? '',
@@ -490,9 +497,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                   {'Contatti referente'}
                 </Typography>
                 <Typography variant="body1" mb={2}>
-                  {
-                    'Indica la persona di contatto per questo punto vendita. Può coincidere &lt;con te stesso&gt;'
-                  }
+                  Indica la persona di contatto per questo punto vendita. Può coincidere &lt;con te
+                  stesso&gt;
                 </Typography>
                 <Grid container spacing={1}>
                   <Grid item xs={12} sm={6}>
@@ -592,24 +598,32 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           onChange={(e) =>
                             handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                           }
+                          error={!!getFieldError(index, 'channelGeolink')}
+                          helperText={getFieldError(index, 'channelGeolink')}
                         />
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={2}>
                       <Box mx={4} mt={2.5}>
-                        <ButtonNaked
-                          color="primary"
-                          endIcon={<ArrowOutward fontSize="small" />}
-                          onClick={() => {
-                            const url = salesPoint.channelGeolink;
-                            if (url && isValidUrl(url)) {
-                              window.open(url, '_blank', 'noopener,noreferrer');
-                            }
-                          }}
-                          size="medium"
-                        >
-                          {'Verifica URL'}
-                        </ButtonNaked>
+                        {salesPoint.channelGeolink?.trim() && (
+                          <ButtonNaked
+                            color="primary"
+                            endIcon={<ArrowOutward fontSize="small" />}
+                            onClick={() => {
+                              const url = salesPoint.channelGeolink?.trim().startsWith('http')
+                                ? salesPoint.channelGeolink?.trim()
+                                : `https://${salesPoint.channelGeolink?.trim()}`;
+                              if (url && isValidUrl(url)) {
+                                window.open(url, '_blank', 'noopener,noreferrer');
+                              } else {
+                                alert('Inserisci un URL valido prima di verificare.');
+                              }
+                            }}
+                            size="medium"
+                          >
+                            {'Verifica URL'}
+                          </ButtonNaked>
+                        )}
                       </Box>
                     </Grid>
                     <Grid item xs={12}>
@@ -618,11 +632,23 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         fullWidth
                         label="Numero di telefono"
                         name="channelPhone"
+                        type={'number'}
                         value={salesPoint.channelPhone}
                         onChange={(e) =>
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
                         margin="dense"
+                        inputProps={{ max: 10 }}
+                        sx={{
+                          '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button':
+                            {
+                              WebkitAppearance: 'none',
+                              margin: 0,
+                            },
+                          '& input[type=number]': {
+                            MozAppearance: 'textfield',
+                          },
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -636,6 +662,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
                         margin="dense"
+                        error={!!getFieldError(index, 'channelEmail')}
+                        helperText={getFieldError(index, 'channelEmail')}
                       />
                     </Grid>
                     <Grid item xs={12}>
