@@ -19,6 +19,7 @@ import { useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
+import { normalizeUrl } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
@@ -83,8 +84,13 @@ const InitiativeStoresUpload: React.FC = () => {
         });
         return;
       }
+      const normalizedSalesPoints = salesPoints.map(sp => ({
+        ...sp,
+        channelWebsite: normalizeUrl(sp.channelWebsite),
+        channelGeolink: normalizeUrl(sp.channelGeolink),
+      }));
       try {
-        await updateMerchantPointOfSales(merchantId, salesPoints);
+        await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
         setPointsOfSaleLoaded(true);
         setShowSuccessAlert(true);
         history.push(generatePath(ROUTES.STORES, { id }));
@@ -100,7 +106,6 @@ const InitiativeStoresUpload: React.FC = () => {
           component: 'Toast',
           showCloseIcon: true,
         });
-        history.push(generatePath(ROUTES.STORES, { id }));
 
         setShowErrorAlert(true);
       }
