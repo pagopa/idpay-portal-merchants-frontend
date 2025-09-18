@@ -292,7 +292,7 @@ const InitiativeStoreDetail = () => {
                     key={`${field?.label}-${field?.value}`}
                     label={field?.label}
                     value={field?.value}
-                    isLink={field?.value?.includes('https://')}
+                    isLink={field?.value?.includes('https://') || field?.value?.includes('http://')}
                   />
                 )}
               </Grid>
