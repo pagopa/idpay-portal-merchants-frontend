@@ -18,6 +18,7 @@ import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
 import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
+import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
@@ -93,11 +94,26 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
     const { name, value } = event.target;
     if (name !== 'type') {
       switch (name) {
-        case 'channelEmail':
-          if (!isValidEmail(value)) {
-            updateError(index, 'channelEmail', 'Email non valida');
+        case 'channelGeolink':
+          if (value) {
+            if (!isValidUrl(normalizeUrlHttp(value))) {
+              updateError(index, "channelGeolink", "Deve essere un sito valido");
+            } else {
+              clearError(index, "channelGeolink");
+            }
           } else {
-            clearError(index, 'channelEmail');
+            clearError(index, "channelGeolink");
+          }
+          break;
+        case 'channelWebsite':
+          if (value) {
+            if (!isValidUrl(normalizeUrlHttps(value))) {
+              updateError(index, "channelWebsite", "Deve essere un sito valido");
+            } else {
+              clearError(index, "channelWebsite");
+            }
+          } else {
+            clearError(index, "channelWebsite");
           }
           break;
         case 'contactEmail':
@@ -632,13 +648,30 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         fullWidth
                         label="Numero di telefono"
                         name="channelPhone"
-                        type={'number'}
+                        type="number"
                         value={salesPoint.channelPhone}
                         onChange={(e) =>
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
+                        onBlur={() => {
+                          if (String(salesPoint.channelPhone ?? '').trim()) {
+                            if (
+                              String(salesPoint.channelPhone ?? '').trim().length < 7 ||
+                              String(salesPoint.channelPhone ?? '').trim().length > 15
+                            ) {
+                              updateError(
+                                index,
+                                'channelPhone',
+                                'Il numero deve avere tra 7 e 15 cifre'
+                              );
+                            } else {
+                              clearError(index, 'channelPhone');
+                            }
+                          } else {
+                            clearError(index, 'channelPhone');
+                          }
+                        }}
                         margin="dense"
-                        inputProps={{ max: 10 }}
                         sx={{
                           '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button':
                             {
@@ -649,6 +682,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                             MozAppearance: 'textfield',
                           },
                         }}
+                        error={!!getFieldError(index, 'channelPhone')}
+                        helperText={getFieldError(index, 'channelPhone')}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -662,6 +697,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
                         margin="dense"
+                        onBlur={(e) => {
+                          if (e.target.value.trim() !== '' && !isValidEmail(e.target.value)) {
+                            updateError(index, 'channelEmail', 'Email non valida');
+                          } else {
+                            clearError(index, 'channelEmail');
+                          }
+                        }}
                         error={!!getFieldError(index, 'channelEmail')}
                         helperText={getFieldError(index, 'channelEmail')}
                       />
@@ -677,6 +719,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
                         margin="dense"
+                        error={!!getFieldError(index, 'channelWebsite')}
+                        helperText={getFieldError(index, 'channelWebsite')}
                       />
                     </Grid>
                   </Grid>
@@ -687,9 +731,12 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
         </Box>
       ))}
 
-      <Button startIcon={<AddIcon />} onClick={addAnotherSalesPoint} sx={{ p: 1 }}>
-        {'Aggiungi un altro punto vendita'}
-      </Button>
+      { salesPoints.length < 5 ?
+        <Button startIcon={<AddIcon />} onClick={addAnotherSalesPoint} sx={{ p: 1 }}>
+          {'Aggiungi un altro punto vendita'}
+        </Button>
+        : null
+      }
     </Box>
   );
 };
