@@ -117,12 +117,17 @@ export const isValidEmail = (email: string) => {
 };
 
 export const isValidUrl = (url: string) => {
-  try {
-    new URL(url); // Tenta di creare un oggetto URL
-    return true;  // Se non lancia errori, l'URL è valido
-  } catch (e) {
-    return false; // Se si verifica un errore, l'URL non è valido
+  if (url.endsWith('.it') || url.endsWith('.com')) {
+    try {
+      new URL(url); // Tenta di creare un oggetto URL
+      return true; // Se non lancia errori, l'URL è valido
+    } catch (e) {
+      return false; // Se si verifica un errore, l'URL non è valido
+    }
+  } else {
+    return false;
   }
+
 };
 
 export const generateUniqueId = () => Date.now().toString() + Math.random().toString(36).substring(2, 9);

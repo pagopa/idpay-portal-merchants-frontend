@@ -14,11 +14,11 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { generatePath, useParams } from 'react-router-dom';
-import { useHistory } from 'react-router-dom';
+import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
+import { normalizeUrlHttp , normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
@@ -83,8 +83,13 @@ const InitiativeStoresUpload: React.FC = () => {
         });
         return;
       }
+      const normalizedSalesPoints = salesPoints.map(sp => ({
+        ...sp,
+        channelWebsite: normalizeUrlHttps(sp.channelWebsite),
+        channelGeolink: normalizeUrlHttp(sp.channelGeolink),
+      }));
       try {
-        await updateMerchantPointOfSales(merchantId, salesPoints);
+        await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
         setPointsOfSaleLoaded(true);
         setShowSuccessAlert(true);
         history.push(generatePath(ROUTES.STORES, { id }));
@@ -93,15 +98,13 @@ const InitiativeStoresUpload: React.FC = () => {
           id: 'UPLOAD_STORES',
           blocking: false,
           error,
-          techDescription: 'An error occurred uploading stores',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
+          techDescription: `${error.message}`,
+          displayableTitle: error.code === 'POINT_OF_SALE_ALREADY_REGISTERED' ? 'Errore punto vendita' : t('errors.genericTitle'),
+          displayableDescription: error.code === 'POINT_OF_SALE_ALREADY_REGISTERED' ? 'Email referente già associata ad altro punto vendita ' : t('errors.genericDescription'),
           toNotify: true,
           component: 'Toast',
           showCloseIcon: true,
         });
-        // history.push(`${BASE_ROUTE}/${id}/${ROUTES.SIDE_MENU_STORES}`);
-        history.push(generatePath(ROUTES.STORES, { id }));
 
         setShowErrorAlert(true);
       }
