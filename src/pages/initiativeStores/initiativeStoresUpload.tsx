@@ -14,12 +14,11 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { generatePath, useParams } from 'react-router-dom';
-import { useHistory } from 'react-router-dom';
+import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
-import { normalizeUrl } from '../../utils/formatUtils';
+import { normalizeUrlHttp , normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
@@ -86,8 +85,8 @@ const InitiativeStoresUpload: React.FC = () => {
       }
       const normalizedSalesPoints = salesPoints.map(sp => ({
         ...sp,
-        channelWebsite: normalizeUrl(sp.channelWebsite),
-        channelGeolink: normalizeUrl(sp.channelGeolink),
+        channelWebsite: normalizeUrlHttps(sp.channelWebsite),
+        channelGeolink: normalizeUrlHttp(sp.channelGeolink),
       }));
       try {
         await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);

@@ -12,4 +12,6 @@ export const currencyFormatter = (v: number) => v||v===0 ? curFormatter(v) : v;
 
 export const formatValues=(v: string) => v ? v : MISSING_DATA_PLACEHOLDER;
 
-export const normalizeUrl = (url?: string): string => url?.trim().startsWith('http') ? url?.trim() : `https://${url?.trim()}`;
+export const normalizeUrlHttps = (url?: string): string => url?.trim().startsWith('http') || url?.trim().startsWith('https')  ? url?.trim() : `https://${url?.trim()}`;
+
+export const normalizeUrlHttp = (url?: string): string => url?.trim().startsWith('http')  ? url?.trim() : `http://${url?.trim()}`;
