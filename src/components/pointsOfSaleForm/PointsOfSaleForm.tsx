@@ -13,6 +13,7 @@ import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked, theme } from '@pagopa/mui-italia';
 import { useTranslation } from 'react-i18next';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { TypeEnum,PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
@@ -326,15 +327,24 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
       {salesPoints.map((salesPoint, index) => (
         <Box p={2} key={`${salesPoint.id}`} mb={2} borderColor={'divider'} borderRadius={2}>
           <Grid container>
-            <Grid item xs={11}>
+            <Grid item xs={10}>
               <Typography variant="h5" gutterBottom fontWeight={theme.typography.fontWeightBold}>
                 Punto vendita {index + 1}
               </Typography>
             </Grid>
             <Grid item xs={1}>
-              <Typography variant="body2" sx={{ float: 'right' }}>
+              <Typography variant="body1" sx={{ float: 'right' }}>
                 {index + 1}/{salesPoints.length}
               </Typography>
+            </Grid>
+            <Grid item xs={1}>
+              { index > 0 && (
+                <DeleteOutlineIcon
+                  cursor={'pointer'}
+                  onClick={() => setSalesPoints((prev) => prev.filter((_, i) => i !== index))}
+                  color="error"
+                  fontSize="medium" />
+                )}
             </Grid>
             <Grid item xs={12}>
               <FormControl component="fieldset" sx={{ mb: 3, mt: 2 }}>
@@ -731,12 +741,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
         </Box>
       ))}
 
-      { salesPoints.length < 5 ?
+      {salesPoints.length < 5 && (
         <Button startIcon={<AddIcon />} onClick={addAnotherSalesPoint} sx={{ p: 1 }}>
           {'Aggiungi un altro punto vendita'}
         </Button>
-        : null
-      }
+      )}
     </Box>
   );
 };
