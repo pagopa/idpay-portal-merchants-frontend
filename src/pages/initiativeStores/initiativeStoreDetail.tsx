@@ -9,16 +9,16 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage'
 import { CheckCircleOutline, Edit } from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';
 import { ButtonNaked } from '@pagopa/mui-italia';
-import { getMerchantPointOfSalesById, getMerchantPointOfSaleTransactions, updateMerchantPointOfSales } from '../../services/merchantService';
+import { getMerchantPointOfSalesById, getMerchantPointOfSaleTransactionsProcessed, updateMerchantPointOfSales } from '../../services/merchantService';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import LabelValuePair from '../../components/labelValuePair/labelValuePair';
 import MerchantTransactions from '../../components/Transactions/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail } from '../../helpers';
-import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
 import { formatDate } from '../../utils/formatUtils';
 import { MISSING_DATA_PLACEHOLDER, POS_TYPE } from '../../utils/constants';
+import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import InitiativeDetailCard from './InitiativeDetailCard';
 
 
@@ -32,7 +32,7 @@ interface RouteParams {
 const InitiativeStoreDetail = () => {
   const [storeDetail, setStoreDetail] = useState<any>(null);
   const [transactionsFilters, setTransactionsFilters] = useState<any>({});
-  const [storeTransactions, setStoreTransactions] = useState<Array<PointOfSaleTransactionDTO>>([]);
+  const [storeTransactions, setStoreTransactions] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [paginationModel, setPaginationModel] = useState<any>({});
   const [contactNameModal, setContactNameModal] = useState<string>('');
@@ -111,7 +111,7 @@ const InitiativeStoreDetail = () => {
 
   const fetchStoreTransactions = async (filters?: any) => {
     try {
-      const response = await getMerchantPointOfSaleTransactions(id, store_id, { size: 10, ...filters });
+      const response = await getMerchantPointOfSaleTransactionsProcessed(id, store_id, { size: 10, ...filters });
       const { content, ...paginationData } = response;
       setPaginationModel(paginationData);
       if (content) {

@@ -8,6 +8,7 @@ import { PointOfSaleDTO } from '../api/generated/merchants/PointOfSaleDTO';
 import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
 import { GetPointOfSalesFilters, GetPointOfSalesResponse, GetPointOfSaleTransactionsFilters } from '../types/types';
 import { PointOfSaleTransactionsListDTO } from '../api/generated/merchants/PointOfSaleTransactionsListDTO';
+import { PointOfSaleTransactionsProcessedListDTO } from '../api/generated/merchants/PointOfSaleTransactionsProcessedListDTO';
 
 export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> => MerchantApi.getMerchantInitiativeList();
 
@@ -53,5 +54,7 @@ export const getMerchantPointOfSales = (merchantId: string, filters: GetPointOfS
 export const getMerchantPointOfSalesById = (merchantId: string, pointOfSaleId: string): Promise<PointOfSaleDTO> => MerchantApi.getMerchantPointOfSalesById(merchantId, pointOfSaleId);
 
 export const getMerchantPointOfSaleTransactions = (initiativeId: string, pointOfSaleId: string, filters?: GetPointOfSaleTransactionsFilters): Promise<PointOfSaleTransactionsListDTO> => MerchantApi.getMerchantPointOfSaleTransactions(initiativeId, pointOfSaleId, filters);
+
+export const getMerchantPointOfSaleTransactionsProcessed = (initiativeId: string, pointOfSaleId: string, filters?: GetPointOfSaleTransactionsFilters): Promise<PointOfSaleTransactionsProcessedListDTO> => MerchantApi.getMerchantPointOfSaleTransactionsProcessed(initiativeId, pointOfSaleId, filters);
 
   

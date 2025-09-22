@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { PAGINATION_SIZE } from '../../utils/constants';
-import { PointOfSaleTransactionDTO } from '../../api/generated/merchants/PointOfSaleTransactionDTO';
 import EmptyList from '../../pages/components/EmptyList';
 
 import DetailDrawer from '../Drawer/DetailDrawer';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import CustomChip from '../Chip/CustomChip';
+import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import TransactionDataTable from './TransactionDataTable';
 import TransactionDetail from './TransactionDetail';
 import getStatus from './useStatus';
@@ -22,7 +22,7 @@ import CurrencyColumn from './CurrencyColumn';
 
 
 interface MerchantTransactionsProps {
-  transactions: Array<PointOfSaleTransactionDTO>;
+  transactions: Array<PointOfSaleTransactionProcessedDTO>;
   handleFiltersApplied: (filters: any) => void;
   handleFiltersReset: () => void;
   handleSortChange?: (sortModel: GridSortModel) => void;
@@ -35,8 +35,8 @@ interface MerchantTransactionsProps {
 
 const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFiltersReset, handleSortChange, sortModel, handlePaginationPageChange, paginationModel }: MerchantTransactionsProps) => {
   const { t } = useTranslation();
-  const [rows, setRows] = useState<Array<PointOfSaleTransactionDTO>>([]);
-  const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionDTO>>([]);
+  const [rows, setRows] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
+  const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const listItemDetail = getDetailFieldList();
 
@@ -47,6 +47,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   const formik = useFormik<any>({
     initialValues: {
       fiscalCode: '',
+      gtin: '',
       status: '',
       page: 0
     },
@@ -56,17 +57,24 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   });
 
   const filterByStatusOptionsList = [
-    { value: 'IDENTIFIED', label: t('commons.discountStatusEnum.identified') },
-    { value: 'AUTHORIZED', label: t('commons.discountStatusEnum.authorized') },
-    { value: 'REJECTED', label: t('commons.discountStatusEnum.invalidated') },
+    { value: 'REFUNDED', label: t('commons.discountStatusEnum.refunded')},
+    { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled')},
+    { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded')},
   ];
 
   const StatusChip = ({ status }: any) => {
     const chipItem = getStatus(status);
-    return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
+    return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="medium" textColorChip={chipItem?.textColor} />;
   };
 
   const columns: Array<GridColDef> = [
+    {
+      field: 'elettrodomestico',
+      headerName: 'Elettrodomestico',
+      flex: 1,
+      editable: false,
+      disableColumnMenu: true,
+    },
     {
       field: 'updateDate',
       headerName: 'Data e ora',
@@ -79,6 +87,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       headerName: 'Beneficiario',
       flex: 1,
       editable: false,
+      sortable: false,
       disableColumnMenu: true,
     },
     {
@@ -87,6 +96,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
+      sortable: false,
       renderCell: (params: any) => (
         <CurrencyColumn value={params.value} />
       ),
@@ -97,6 +107,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
+      sortable: false,
       renderCell: (params: any) => (
         <CurrencyColumn value={params.value} />
       ),
@@ -107,7 +118,6 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
-      // sortable: false,
       renderCell: (params: any) => (
         <StatusChip status={params.value} />
       ),
@@ -151,8 +161,8 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
         <Grid item xs={12} sm={6} md={3} lg={3}>
           <FormControl fullWidth size="small">
             <TextField
-              label={t('pages.initiativeDiscounts.searchByFiscalCode')}
-              placeholder={t('pages.initiativeDiscounts.searchByFiscalCode')}
+              label={t('pages.pointOfSaleTransactions.searchByFiscalCode')}
+              placeholder={t('pages.pointOfSaleTransactions.searchByFiscalCode')}
               name="fiscalCode"
               aria-label="searchUser"
               role="input"
@@ -164,30 +174,22 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
             />
           </FormControl>
         </Grid>
-
-        {/* <Grid item xs={12} sm={6} md={3} lg={3}>
-          <FormControl size="small" fullWidth>
-            <InputLabel>{'Categoria'}</InputLabel>
-            <Select
-              id="filterCategory"
-              inputProps={{
-                'data-testid': 'filterCategory-select',
-              }}
-              name="filterCategory"
-              label={'Categoria'}
-              placeholder={'Seleziona una categoria'}
-              onChange={(e) => formik.handleChange(e)}
-              value={formik.values.status}
-            >
-              {filterByStatusOptionsList.map((category) => (
-                <MenuItem key={category.value} value={category.value}>
-                  {category.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid> */}
         <Grid item xs={12} sm={6} md={3} lg={3}>
+          <FormControl fullWidth size="small">
+            <TextField
+              label={t('pages.pointOfSaleTransactions.searchByGtin')}
+              placeholder={t('pages.pointOfSaleTransactions.searchByGtin')}
+              name="gtin"
+              aria-label="searchGtin"
+              role="input"
+              InputLabelProps={{ required: false }}
+              value={formik.values.gtin}
+              onChange={(e) => formik.handleChange(e)}
+              size="small"
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3} lg={2}>
           <FormControl size="small" fullWidth>
             <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
             <Select
@@ -203,7 +205,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
             >
               {filterByStatusOptionsList.map((item) => (
                 <MenuItem key={item.value} value={item.value}>
-                  {item.label}
+                  <StatusChip status={item.value} />
                 </MenuItem>
               ))}
             </Select>
