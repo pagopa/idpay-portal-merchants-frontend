@@ -65,7 +65,7 @@ const FiltersForm = <T extends Record<string, any>>({
         variant="outlined"
         size="small"
         onClick={handleApplyFilters}
-        disabled={formik.isSubmitting}
+        disabled={!formik.dirty}
         data-testid="apply-filters-test"
       >
         {t('commons.filterBtn')}
@@ -81,7 +81,7 @@ const FiltersForm = <T extends Record<string, any>>({
           gridColumn: 'span 1'
         }}
         onClick={handleResetFilters}
-        disabled={formik.isSubmitting}
+        disabled={!formik.dirty}
         data-testid="reset-filters-test"
       >
         {t('commons.removeFiltersBtn')}

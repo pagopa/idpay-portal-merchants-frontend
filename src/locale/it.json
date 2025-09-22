@@ -17,7 +17,8 @@
       "identified": "Da autorizzare",
       "invalidated": "Invalidato",
       "rejected": "Rifiutato",
-      "rewarded": "Contabilizzato"
+      "rewarded": "Rimborso richiesto",
+      "refunded": "Stornato"
     },
     "downloadQrBtn": "Scarica codice QR",
     "exitBtn": "Esci",
@@ -229,6 +230,10 @@
       "spendingInfoTitle": "Qual è l'Importo totale della spesa?",
       "subtitle": "Compila i campi e genera buoni sconto da inviare ai tuoi clienti per usufruire dell’iniziativa.",
       "title": "Crea un nuovo buono sconto"
+    },
+    "pointOfSaleTransactions": {
+      "searchByFiscalCode": "Cerca per Codice Fiscale",
+      "searchByGtin": "Cerca per GTIN"
     }
   },
   "roles": {
