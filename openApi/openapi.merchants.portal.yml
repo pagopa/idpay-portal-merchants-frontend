@@ -374,15 +374,18 @@ paths:
             type: string
             enum:
               - elaborationDateTime, desc
+              - status, desc
               - elaborationDateTime, asc
+              - status, asc
         - name: fiscalCode
           in: query
           description: Fiscal Code
           required: false
           schema:
             type: string
+            minLength: 16
             maxLength: 16
-            pattern: .*
+            pattern: '^[A-Z0-9]+$'
         - name: status
           in: query
           description: Transaction processed status
@@ -392,6 +395,7 @@ paths:
             enum:
               - REWARDED
               - CANCELLED
+              - REFUNDED
       responses:
         "200":
           description: Ok
@@ -1808,6 +1812,7 @@ components:
           enum:
             - REWARDED
             - CANCELLED
+            - REFUNDED
         channel:
           type: string
           description: 'ENG: Channel from which the transaction takes place - IT: Canale da cui avviene la transazione'

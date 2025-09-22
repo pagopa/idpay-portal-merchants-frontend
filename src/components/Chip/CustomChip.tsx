@@ -5,13 +5,15 @@ export interface Props {
   colorChip?: string;
   sizeChip?:"small" | "medium";
   variantChip?:"filled" | "outlined";
+  textColorChip?: string;
 }
 
-export default function CustomChip({label, colorChip, sizeChip, variantChip}: Props) {
+export default function CustomChip({label, colorChip, sizeChip, variantChip,textColorChip}: Props) {
   
     const StyledChip = styled(Chip)({
     [`&.MuiChip-filled`]: {
-      backgroundColor: colorChip
+      backgroundColor: colorChip,
+      color: textColorChip,
     }
   });
   return (

@@ -332,19 +332,24 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                 Punto vendita {index + 1}
               </Typography>
             </Grid>
-            <Grid item xs={1}>
-              <Typography variant="body1" sx={{ float: 'right' }}>
-                {index + 1}/{salesPoints.length}
-              </Typography>
-            </Grid>
-            <Grid item xs={1}>
-              { index > 0 && (
-                <DeleteOutlineIcon
-                  cursor={'pointer'}
-                  onClick={() => setSalesPoints((prev) => prev.filter((_, i) => i !== index))}
-                  color="error"
-                  fontSize="medium" />
+            <Grid item xs={2}>
+              <Grid container alignItems="center" justifyContent="flex-end" spacing={2}>
+                <Grid item>
+                  <Typography>
+                    {index + 1}/{salesPoints.length}
+                  </Typography>
+                </Grid>
+                {index > 0 && (
+                  <Grid item>
+                    <DeleteOutlineIcon
+                      cursor={'pointer'}
+                      onClick={() => setSalesPoints((prev) => prev.filter((_, i) => i !== index))}
+                      fontSize="small"
+                      htmlColor={theme.palette.error.dark}
+                    />
+                  </Grid>
                 )}
+              </Grid>
             </Grid>
             <Grid item xs={12}>
               <FormControl component="fieldset" sx={{ mb: 3, mt: 2 }}>
@@ -639,10 +644,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                               const url = salesPoint.channelGeolink?.trim().startsWith('http')
                                 ? salesPoint.channelGeolink?.trim()
                                 : `https://${salesPoint.channelGeolink?.trim()}`;
-                              if (url && isValidUrl(url)) {
+                              if (url) {
                                 window.open(url, '_blank', 'noopener,noreferrer');
-                              } else {
-                                alert('Inserisci un URL valido prima di verificare.');
                               }
                             }}
                             size="medium"
