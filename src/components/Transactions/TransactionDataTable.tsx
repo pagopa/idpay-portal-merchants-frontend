@@ -1,8 +1,7 @@
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid,GridSortModel } from '@mui/x-data-grid';
 import { useEffect, useState, useCallback } from 'react';
 import { IconButton, Box } from '@mui/material';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { GridSortModel } from '@mui/x-data-grid';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { theme } from '@pagopa/mui-italia';
 import {MISSING_DATA_PLACEHOLDER} from '../../utils/constants';
 
@@ -47,7 +46,7 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onS
                   onClick={() => handleRowAction(params.row)}
                   size="small"
                 >
-                  <ArrowForwardIosIcon color='primary' fontSize='small' />
+                  <ChevronRightIcon color='primary' fontSize='inherit' />
                 </IconButton>
               </Box>
             )
