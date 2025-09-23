@@ -189,7 +189,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
             />
           </FormControl>
         </Grid>
-        <Grid item xs={12} sm={6} md={3} lg={2}>
+        <Grid item xs={12} sm={6} md={3} lg={2.5}>
           <FormControl size="small" fullWidth>
             <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
             <Select
@@ -202,6 +202,16 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
               placeholder={t('pages.initiativeDiscounts.filterByStatus')}
               onChange={formik.handleChange}
               value={formik.values.status}
+              sx={{
+                height: 44,
+                '& .MuiSelect-select': {
+                  display: 'flex',
+                  alignItems: 'center',
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                  height: '100%',
+                },
+              }}
             >
               {filterByStatusOptionsList.map((item) => (
                 <MenuItem key={item.value} value={item.value}>

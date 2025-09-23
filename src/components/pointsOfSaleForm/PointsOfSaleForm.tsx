@@ -340,7 +340,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                   </Typography>
                 </Grid>
                 {index > 0 && (
-                  <Grid item>
+                  <Grid item mt={'5px'}>
                     <DeleteOutlineIcon
                       cursor={'pointer'}
                       onClick={() => setSalesPoints((prev) => prev.filter((_, i) => i !== index))}
@@ -636,15 +636,15 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     </Grid>
                     <Grid item xs={12} sm={2}>
                       <Box mx={4} mt={2.5}>
-                        {salesPoint.channelGeolink?.trim() && (
                           <ButtonNaked
+                            disabled={!salesPoint.channelGeolink?.trim() || !!getFieldError(index, 'channelGeolink')}
                             color="primary"
                             endIcon={<ArrowOutward fontSize="small" />}
                             onClick={() => {
                               const url = salesPoint.channelGeolink?.trim().startsWith('http')
                                 ? salesPoint.channelGeolink?.trim()
                                 : `https://${salesPoint.channelGeolink?.trim()}`;
-                              if (url) {
+                              if (url && isValidUrl(url)) {
                                 window.open(url, '_blank', 'noopener,noreferrer');
                               }
                             }}
@@ -652,7 +652,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           >
                             {'Verifica URL'}
                           </ButtonNaked>
-                        )}
                       </Box>
                     </Grid>
                     <Grid item xs={12}>
