@@ -47,7 +47,7 @@ export const authPaymentBarCode = (
   idTrxAcquirer: string
 ): Promise<any> => MerchantApi.authPaymentBarCode(trxCode, amountCents, idTrxAcquirer);
 
-export const updateMerchantPointOfSales = (merchantId: string, pointOfSales: Array<PointOfSaleDTO>): Promise<void> => MerchantApi.updateMerchantPointOfSales(merchantId, pointOfSales);
+export const updateMerchantPointOfSales = (merchantId: string, pointOfSales: Array<PointOfSaleDTO>): Promise<any> => MerchantApi.updateMerchantPointOfSales(merchantId, pointOfSales);
 
 export const getMerchantPointOfSales = (merchantId: string, filters: GetPointOfSalesFilters): Promise<GetPointOfSalesResponse> => MerchantApi.getMerchantPointOfSales(merchantId, filters);
 

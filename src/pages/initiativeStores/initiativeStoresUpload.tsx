@@ -42,7 +42,6 @@ interface RouteParams {
 
 const InitiativeStoresUpload: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(POS_UPDATE.Csv);
-  const [_showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [_showErrorAlert, setShowErrorAlert] = useState(false);
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([]);
   const [_errors, setErrors] = useState<FormErrors>({});
@@ -88,26 +87,46 @@ const InitiativeStoresUpload: React.FC = () => {
         channelWebsite: normalizeUrlHttps(sp.channelWebsite),
         channelGeolink: normalizeUrlHttp(sp.channelGeolink),
       }));
-      try {
-        await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
-        setPointsOfSaleLoaded(true);
-        setShowSuccessAlert(true);
-        history.push(generatePath(ROUTES.STORES, { id }));
-      } catch (error: any) {
-        addError({
-          id: 'UPLOAD_STORES',
-          blocking: false,
-          error,
-          techDescription: `${error.message}`,
-          displayableTitle: error.code === 'POINT_OF_SALE_ALREADY_REGISTERED' ? 'Errore punto vendita' : t('errors.genericTitle'),
-          displayableDescription: error.code === 'POINT_OF_SALE_ALREADY_REGISTERED' ? 'Email referente già associata ad altro punto vendita ' : t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
 
-        setShowErrorAlert(true);
+        const response = await  updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
+        setPointsOfSaleLoaded(true);
+        // history.push(generatePath(ROUTES.STORES, { id }));
+      if(response){
+        if(response?.code ===  'POINT_OF_SALE_ALREADY_REGISTERED'){
+          addError({
+            id: 'UPLOAD_STORES',
+            blocking: false,
+            error: new Error('Point of sale already registered'),
+            techDescription: 'Point of sale already registered',
+            displayableTitle: t('errors.genericTitle'),
+            displayableDescription: 'Email referente già associata ad altro punto vendita ',
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          });
+          setShowErrorAlert(true);
+        }else{
+          addError({
+            id: 'UPLOAD_STORES',
+            blocking: false,
+            error: new Error('error points of sale upload'),
+            techDescription: 'error points of sale upload',
+            displayableTitle: t('errors.genericTitle'),
+            displayableDescription: t('errors.genericDescription'),
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          });
+
+          setShowErrorAlert(true);
+        }
+      }else{
+        history.push({
+          pathname: generatePath(ROUTES.STORES, { id }),
+          state: { showSuccessAlert: true },
+        });
       }
+
     }
     if (uploadMethod === POS_UPDATE.Csv) {
       history.push(generatePath(ROUTES.STORES, { id }));

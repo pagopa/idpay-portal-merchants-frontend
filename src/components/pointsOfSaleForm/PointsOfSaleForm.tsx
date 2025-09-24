@@ -117,6 +117,17 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             clearError(index, "channelWebsite");
           }
           break;
+        case 'webSite':
+          if (value) {
+            if (!isValidUrl(normalizeUrlHttps(value))) {
+              updateError(index, "webSite", "Deve essere un sito valido");
+            } else {
+              clearError(index, "webSite");
+            }
+          } else {
+            clearError(index, "webSite");
+          }
+          break;
         case 'contactEmail':
           if (contactEmailConfirm[index] && value !== contactEmailConfirm[index]) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
@@ -189,13 +200,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             updateError(index, 'province', 'Provincia non valida');
           } else {
             clearError(index, 'province');
-          }
-          break;
-        case 'webSite':
-          if (value.length === 0 || !isValidUrl(value)) {
-            updateError(index, 'webSite', 'Sito web non valido');
-          } else {
-            clearError(index, 'webSite');
           }
           break;
         case 'address':
@@ -329,7 +333,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           <Grid container>
             <Grid item xs={10}>
               <Typography variant="h5" gutterBottom fontWeight={theme.typography.fontWeightBold}>
-                Punto vendita {index + 1}
+                {t('pages.pointOfSales.title')} {index + 1}
               </Typography>
             </Grid>
             <Grid item xs={2}>
@@ -377,7 +381,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             </Grid>
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
-                {'Nome insegna'}
+                {t('pages.pointOfSales.signName')}
               </Typography>
             </Grid>
             <Grid item xs={5}>
@@ -398,8 +402,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             <Grid item xs={7} />
             {salesPoint.type === 'ONLINE' && (
               <>
-                <Typography variant="subtitle1" gutterBottom>
-                  {'Indirizzo web'}
+                <Typography variant="h6" gutterBottom>
+                  {t('pages.pointOfSales.website')}
                 </Typography>
                 <TextField
                   size="small"
@@ -425,7 +429,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={10} md={10} lg={10}>
                       <Typography variant="h6" gutterBottom>
-                        {'Indirizzo'}
+                        {t('pages.pointOfSales.address')}
                       </Typography>
                       <Box mt={2}>
                         <AutocompleteComponent
@@ -440,7 +444,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           }}
                           errorText={errors[index]?.address}
                         />
-                        {loading && <Typography variant="body2">{'Caricamento...'}</Typography>}
+                        {loading && <Typography variant="body2">{t('pages.pointOfSales.loandingText')}</Typography>}
                         {error && (
                           <Typography variant="body2" color="error">
                             {error}
@@ -525,11 +529,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
             <Grid item xs={12}>
               <Box mb={3} mt={2}>
                 <Typography variant="h6" gutterBottom>
-                  {'Contatti referente'}
+                  {t('pages.pointOfSales.referentContactTitle')}
                 </Typography>
                 <Typography variant="body1" mb={2}>
-                  Indica la persona di contatto per questo punto vendita. Può coincidere &lt;con te
-                  stesso&gt;
+                  {t('pages.pointOfSales.referentContactDescription')}
                 </Typography>
                 <Grid container spacing={1}>
                   <Grid item xs={12} sm={6}>
