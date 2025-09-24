@@ -5,8 +5,7 @@ import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
 import { isRight } from 'fp-ts/Either';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
-import { GetPointOfSalesFilters, GetPointOfSalesResponse } from '../types/types';
-import { GetPointOfSaleTransactionsFilters } from '../types/types';
+import { GetPointOfSalesFilters, GetPointOfSalesResponse,GetPointOfSaleTransactionsFilters  } from '../types/types';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
 import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
 import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsDTO';
@@ -15,7 +14,6 @@ import { TransactionResponse } from './generated/merchants/TransactionResponse';
 import { InitiativeDTOArray } from './generated/merchants/InitiativeDTOArray';
 import { MerchantTransactionsProcessedListDTO } from './generated/merchants/MerchantTransactionsProcessedListDTO';
 import { PointOfSaleDTO } from './generated/merchants/PointOfSaleDTO';
-import { PointOfSaleTransactionsListDTO } from './generated/merchants/PointOfSaleTransactionsListDTO';
 import { PointOfSaleTransactionsProcessedListDTO } from './generated/merchants/PointOfSaleTransactionsProcessedListDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
@@ -147,19 +145,6 @@ export const MerchantApi = {
     pointOfSaleId: string
   ): Promise<PointOfSaleDTO> => {
     const result = await apiClient.getPointOfSale({ merchantId, pointOfSaleId });
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
-
-  getMerchantPointOfSaleTransactions: async (
-    initiativeId: string,
-    pointOfSaleId: string,
-    filters?: GetPointOfSaleTransactionsFilters
-  ): Promise<PointOfSaleTransactionsListDTO> => {
-    const result = await apiClient.getPointOfSaleTransactions({
-      initiativeId,
-      pointOfSaleId,
-      ...filters,
-    });
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
