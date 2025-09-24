@@ -42,7 +42,6 @@ interface RouteParams {
 
 const InitiativeStoresUpload: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(POS_UPDATE.Csv);
-  const [_showErrorAlert, setShowErrorAlert] = useState(false);
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([]);
   const [_errors, setErrors] = useState<FormErrors>({});
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
@@ -89,8 +88,6 @@ const InitiativeStoresUpload: React.FC = () => {
       }));
 
         const response = await  updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
-        setPointsOfSaleLoaded(true);
-        // history.push(generatePath(ROUTES.STORES, { id }));
       if(response){
         if(response?.code ===  'POINT_OF_SALE_ALREADY_REGISTERED'){
           addError({
@@ -98,13 +95,12 @@ const InitiativeStoresUpload: React.FC = () => {
             blocking: false,
             error: new Error('Point of sale already registered'),
             techDescription: 'Point of sale already registered',
-            displayableTitle: t('errors.genericTitle'),
+            displayableTitle: t('errors.pointOfSaleError'),
             displayableDescription: 'Email referente già associata ad altro punto vendita ',
             toNotify: true,
             component: 'Toast',
             showCloseIcon: true,
           });
-          setShowErrorAlert(true);
         }else{
           addError({
             id: 'UPLOAD_STORES',
@@ -117,10 +113,9 @@ const InitiativeStoresUpload: React.FC = () => {
             component: 'Toast',
             showCloseIcon: true,
           });
-
-          setShowErrorAlert(true);
         }
       }else{
+        setPointsOfSaleLoaded(true);
         history.push({
           pathname: generatePath(ROUTES.STORES, { id }),
           state: { showSuccessAlert: true },
