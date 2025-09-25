@@ -47,7 +47,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   const formik = useFormik<any>({
     initialValues: {
       fiscalCode: '',
-      gtin: '',
+      productGtin: '',
       status: '',
       page: 0
     },
@@ -74,6 +74,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
+      valueGetter: (params) => params.row?.additionalProperties?.productName ?? '',
     },
     {
       field: 'updateDate',
@@ -179,11 +180,11 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
             <TextField
               label={t('pages.pointOfSaleTransactions.searchByGtin')}
               placeholder={t('pages.pointOfSaleTransactions.searchByGtin')}
-              name="gtin"
+              name="productGtin"
               aria-label="searchGtin"
               role="input"
               InputLabelProps={{ required: false }}
-              value={formik.values.gtin}
+              value={formik.values.productGtin}
               onChange={(e) => formik.handleChange(e)}
               size="small"
             />
