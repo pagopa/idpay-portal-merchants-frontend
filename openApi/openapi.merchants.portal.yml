@@ -288,10 +288,10 @@ paths:
           schema:
             type: string
             enum:
-              - elaborationDateTime, desc
+              - updateDate, desc
               - status, desc
               - productCategory, desc
-              - elaborationDateTime, asc
+              - updateDate, asc
               - status, asc
               - productCategory, asc
         - name: fiscalCode
