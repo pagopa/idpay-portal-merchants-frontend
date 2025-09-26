@@ -28,6 +28,12 @@ const Layout = ({ children }: Props) => {
     strict: false,
   });
 
+  const matchNoSideMenu = matchPath(location.pathname, {
+    path: [ROUTES.STORES_UPLOAD],
+    exact: true,
+    strict: false,
+  });
+
   useEffect(() => {
     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
   }, [location.pathname]);
@@ -52,7 +58,7 @@ const Layout = ({ children }: Props) => {
           parties={[]}
         />
       </Box>
-      {match !== null ? (
+      {match !== null && matchNoSideMenu === null ? (
         <Box gridArea="body" display="grid" gridTemplateColumns="minmax(300px, 2fr) 10fr">
           <Box gridColumn="auto" sx={{ backgroundColor: 'background.paper' }}>
             <SideMenu />

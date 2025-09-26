@@ -83,6 +83,7 @@ const InitiativeStoresUpload: React.FC = () => {
       }
       const normalizedSalesPoints = salesPoints.map(sp => ({
         ...sp,
+        webSite: normalizeUrlHttps(sp.webSite),
         channelWebsite: normalizeUrlHttps(sp.channelWebsite),
         channelGeolink: normalizeUrlHttp(sp.channelGeolink),
       }));
@@ -135,7 +136,7 @@ const InitiativeStoresUpload: React.FC = () => {
   const isFormValid = (): boolean => salesPoints.every(salesPoint => {
     if (salesPoint.type === TypeEnum.ONLINE) {
       return !!salesPoint.franchiseName &&
-        (!!salesPoint.webSite && isValidUrl(salesPoint.webSite)) &&
+        (!!salesPoint.webSite && isValidUrl(normalizeUrlHttps(salesPoint.webSite))) &&
         (!!salesPoint.contactEmail && isValidEmail(salesPoint.contactEmail)) &&
         !!salesPoint.contactName &&
         !!salesPoint.contactSurname;
