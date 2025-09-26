@@ -6,7 +6,7 @@ import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import EmptyList from '../../pages/components/EmptyList';
-
+import { useProductCategoryLabel } from "../../hooks/useProductCategoryLabel";
 import DetailDrawer from '../Drawer/DetailDrawer';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import CustomChip from '../Chip/CustomChip';
@@ -39,6 +39,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const listItemDetail = getDetailFieldList();
+  const { getCategoryLabel } = useProductCategoryLabel();
 
   useEffect(() => {
     setRows([...transactions]);
@@ -74,7 +75,8 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
-      valueGetter: (params) => params.row?.additionalProperties?.productName ?? '',
+      valueGetter: (params) =>
+        getCategoryLabel(params.row?.additionalProperties?.productCategory),
     },
     {
       field: 'updateDate',
@@ -98,9 +100,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       editable: false,
       disableColumnMenu: true,
       sortable: false,
-      renderCell: (params: any) => (
-        <CurrencyColumn value={params.value} />
-      ),
+      renderCell: (params: any) => <CurrencyColumn value={params.value/100} />,
     },
     {
       field: 'rewardAmountCents',
@@ -109,9 +109,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       editable: false,
       disableColumnMenu: true,
       sortable: false,
-      renderCell: (params: any) => (
-        <CurrencyColumn value={params.value} />
-      ),
+      renderCell: (params: any) => <CurrencyColumn value={params.value/100} />,
     },
     {
       field: 'status',
@@ -119,9 +117,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => (
-        <StatusChip status={params.value} />
-      ),
+      renderCell: (params: any) => <StatusChip status={params.value} />,
     },
   ];
 
