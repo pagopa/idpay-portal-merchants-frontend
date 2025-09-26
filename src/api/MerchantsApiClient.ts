@@ -2,10 +2,10 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage'
 import { appStateActions } from '@pagopa/selfcare-common-frontend/redux/slices/appStateSlice';
 import { buildFetchApi, extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
 import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
+import { isRight } from 'fp-ts/Either';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
-import { GetPointOfSalesFilters, GetPointOfSalesResponse } from '../types/types';
-import { GetPointOfSaleTransactionsFilters } from '../types/types';
+import { GetPointOfSalesFilters, GetPointOfSalesResponse,GetPointOfSaleTransactionsFilters  } from '../types/types';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
 import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
 import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsDTO';
@@ -14,7 +14,6 @@ import { TransactionResponse } from './generated/merchants/TransactionResponse';
 import { InitiativeDTOArray } from './generated/merchants/InitiativeDTOArray';
 import { MerchantTransactionsProcessedListDTO } from './generated/merchants/MerchantTransactionsProcessedListDTO';
 import { PointOfSaleDTO } from './generated/merchants/PointOfSaleDTO';
-import { PointOfSaleTransactionsListDTO } from './generated/merchants/PointOfSaleTransactionsListDTO';
 import { PointOfSaleTransactionsProcessedListDTO } from './generated/merchants/PointOfSaleTransactionsProcessedListDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
@@ -118,33 +117,47 @@ export const MerchantApi = {
     // return extractResponse(result, 200, onRedirectToLogin);
     await apiClient.authPaymentBarCode({ trxCode, body: { amountCents, idTrxAcquirer } }),
 
-  updateMerchantPointOfSales: async (merchantId: string, pointOfSales: Array<PointOfSaleDTO>): Promise<void> => {
+  updateMerchantPointOfSales: async (
+    merchantId: string,
+    pointOfSales: Array<PointOfSaleDTO>
+  ): Promise<{ code:string}> => {
     const result = await apiClient.putPointOfSales({ merchantId, body: pointOfSales });
-    return extractResponse(result, 204, onRedirectToLogin);
+    if (!isRight(result)) {
+      const codeStr = (result.left as any)?.at?.(0)?.value ?? (result.left as any)?.at?.(0)?.actual;
+      return {
+        code: codeStr,
+      };
+    } else {
+      return extractResponse(result, 204, onRedirectToLogin);
+    }
   },
 
-  getMerchantPointOfSales: async (merchantId: string,
-    filters: GetPointOfSalesFilters): Promise<GetPointOfSalesResponse> => {
+  getMerchantPointOfSales: async (
+    merchantId: string,
+    filters: GetPointOfSalesFilters
+  ): Promise<GetPointOfSalesResponse> => {
     const result = await apiClient.getPointOfSales({ merchantId, ...filters });
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
-  getMerchantPointOfSalesById: async (merchantId: string,
-    pointOfSaleId: string): Promise<PointOfSaleDTO> => {
+  getMerchantPointOfSalesById: async (
+    merchantId: string,
+    pointOfSaleId: string
+  ): Promise<PointOfSaleDTO> => {
     const result = await apiClient.getPointOfSale({ merchantId, pointOfSaleId });
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
-  getMerchantPointOfSaleTransactions: async (initiativeId: string, pointOfSaleId: string,
-    filters?: GetPointOfSaleTransactionsFilters): Promise<PointOfSaleTransactionsListDTO> => {
-    const result = await apiClient.getPointOfSaleTransactions({ initiativeId, pointOfSaleId, ...filters });
+  getMerchantPointOfSaleTransactionsProcessed: async (
+    initiativeId: string,
+    pointOfSaleId: string,
+    filters?: GetPointOfSaleTransactionsFilters
+  ): Promise<PointOfSaleTransactionsProcessedListDTO> => {
+    const result = await apiClient.getPointOfSaleTransactionsProcessed({
+      initiativeId,
+      pointOfSaleId,
+      ...filters,
+    });
     return extractResponse(result, 200, onRedirectToLogin);
   },
-
-  getMerchantPointOfSaleTransactionsProcessed: async (initiativeId: string, pointOfSaleId: string,
-    filters?: GetPointOfSaleTransactionsFilters): Promise<PointOfSaleTransactionsProcessedListDTO> => {
-    const result = await apiClient.getPointOfSaleTransactionsProcessed({ initiativeId, pointOfSaleId, ...filters });
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
-
 };

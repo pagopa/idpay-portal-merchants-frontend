@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Stack, Grid, FormControl, InputLabel, Select, MenuItem, TextField, Paper, Typography, Link } from '@mui/material';
+import {
+  Box,
+  Button,
+  Stack,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Paper,
+  Typography,
+  Link,
+  Alert, Slide,
+} from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -7,8 +21,9 @@ import StoreIcon from '@mui/icons-material/Store';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import {useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import { CheckCircleOutline } from '@mui/icons-material';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
 import { GetPointOfSalesFilters } from '../../types/types';
@@ -34,6 +49,7 @@ interface RouteParams {
 
 const InitiativeStores: React.FC = () => {
 
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesPagination, setStoresPagination] = useState<any>({});
   const [storesLoading, setStoresLoading] = useState(false);
@@ -41,6 +57,14 @@ const InitiativeStores: React.FC = () => {
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
+
+  const location = useLocation<{ showSuccessAlert?: boolean }>();
+  useEffect(() => {
+    if (location.state?.showSuccessAlert) {
+      setShowSuccessAlert(true);
+    }
+    setTimeout(() => setShowSuccessAlert(false), 3000);
+  }, [location.state]);
 
 
   const addError = useErrorDispatcher();
@@ -341,6 +365,29 @@ const InitiativeStores: React.FC = () => {
           </>
         )
       }
+      <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
+        <Alert
+          severity="success"
+          icon={<CheckCircleOutline />}
+          sx={{
+            position: 'fixed',
+            bottom: 40,
+            right: 20,
+            backgroundColor: 'white',
+            width: 'auto',
+            maxWidth: '400px',
+            minWidth: '300px',
+            zIndex: 1300,
+            boxShadow: 3,
+            borderRadius: 1,
+            '& .MuiAlert-icon': {
+              color: '#6CC66A',
+            },
+          }}
+        >
+          {t('pages.initiativeStores.pointOfSalesUploadSuccess')}
+        </Alert>
+      </Slide>
 
     </Box>
   );

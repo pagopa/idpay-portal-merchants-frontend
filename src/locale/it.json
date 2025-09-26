@@ -39,7 +39,8 @@
     "sessionExpiredTitle": "La tua sessione è scaduta",
     "tcDescription": "Non siamo riusciti a recuperare le informazioni sull’accettazione dei termini e condizioni d’uso. Riprova.",
     "tcSave": "Non siamo riusciti a salvare l'accettazione dei Termini e condizioni d’uso. Riprova",
-    "validationDescription": "Verifica che i dati inseriti siano corretti"
+    "validationDescription": "Verifica che i dati inseriti siano corretti",
+    "pointOfSaleError": "Errore punto vendita"
   },
   "pages": {
     "acceptNewDiscount": {
@@ -184,7 +185,8 @@
       "geoLink": "Landing google",
       "website": "Sito web",
       "modalDescription": "Qui puoi modificare  idati del referente di questo punto vendita.<Se modifica l' indirizzo email gli verrà inviata una email di conferma, e verranno invalidate le credenziali inviate alla precedente email>.",
-      "referentChangeSuccess": "Dati modificati con successo"
+      "referentChangeSuccess": "Dati modificati con successo",
+      "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati"
     },
     "initiativeStoreDetail": {
       "transactionHistory": "Storico transazioni",
@@ -206,7 +208,15 @@
       "type": "Tipologia di punto vendita",
       "typeDescription": "I punti vendita fisici richiedono l'indirizzo completo. Per quelli online è sufficiente l'URL del sito.",
       "noOptionsText": "Nessun risultato",
-      "loadingText": "Caricamento..."
+      "loadingText": "Caricamento...",
+      "referentContactDescription": "Indica chi sarà il referente per questo punto vendita. Riceverà via email le credenziali di accesso al portale. Puoi inserire anche i tuoi dati.",
+      "referentContactTitle": "Contatti referente",
+      "poitOfSaleContact": "Contatti punto vendita",
+      "title": "Punto vendita",
+      "signName": "Nome insegna",
+      "website": "Indirizzo web",
+      "address": "Indirizzo"
+
     },
     "newDiscount": {
       "codeCopied": "Codice copiato",
