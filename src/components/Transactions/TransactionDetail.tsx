@@ -3,7 +3,8 @@ import { Box, Grid, Typography } from '@mui/material';
 import { ReactNode } from 'react';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';
 import CustomChip from '../Chip/CustomChip';
-import { TYPE_TEXT } from '../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
+import { useProductCategoryLabel } from "../../hooks/useProductCategoryLabel";
 import getStatus from './useStatus';
 
 type Props = {
@@ -16,6 +17,8 @@ type Props = {
 
 export default function TransactionDetail({ title, itemValues, listItem }: Props) {
 
+  const { getCategoryLabel } = useProductCategoryLabel();
+  
   const getStatusChip = () => {
     const chipItem = getStatus(itemValues.status);
     return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
@@ -24,10 +27,24 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
   function getValueText(driver: string, type: TYPE_TEXT) {
     const index = Object.keys(itemValues).indexOf(driver);
     const val = Object.values(itemValues)[index] as string;
+    if (driver === "additionalProperties.productCategory") {
+      const index = Object.keys(itemValues).indexOf('additionalProperties');
+      const val = Object.values(itemValues)[index] as any;
+      return getCategoryLabel(val.productCategory) ?? MISSING_DATA_PLACEHOLDER;
+    }
+    if (driver === "additionalProperties.productName") {
+      const index = Object.keys(itemValues).indexOf('additionalProperties');
+      const val = Object.values(itemValues)[index] as any;
+      const categoryLabel = getCategoryLabel(val.productCategory);
+      if (categoryLabel && val?.productName?.startsWith(categoryLabel)) {
+        return val?.productName.replace(categoryLabel, "").trim();
+      }
+      return val ?? MISSING_DATA_PLACEHOLDER;
+    }
     if (type === TYPE_TEXT.Text) {
       return formatValues(val);
     } else if (type === TYPE_TEXT.Currency) {
-      return currencyFormatter(Number(val)).toString();
+      return currencyFormatter(Number(val)/100).toString();
     } else {
       return "error on type";
     }
