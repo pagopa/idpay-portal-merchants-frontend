@@ -123,6 +123,7 @@ const InitiativeStoreDetail = () => {
         setStoreTransactions([...responseWIthFormattedDate]);
       }
     } catch (error: any) {
+      console.log(error,'error');
       addError({
         id: 'GET_MERCHANT_TRANSACTIONS',
         blocking: false,
