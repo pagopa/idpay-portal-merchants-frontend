@@ -1619,13 +1619,13 @@ components:
           type: integer
           format: int64
           description: 'ENG: Transaction amount in cents - IT: Importo della transazione in centesimi'
-          minimum: 0
+          minimum: -1000000000
           maximum: 1000000000
         rewardAmountCents:
           type: integer
           format: int64
           description: 'ENG: Reward amount in cents - IT: Premio generato in centesimi'
-          minimum: 0
+          minimum: -1000000000
           maximum: 1000000000
         trxDate:
           type: string
