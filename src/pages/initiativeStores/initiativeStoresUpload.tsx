@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -95,12 +95,12 @@ const InitiativeStoresUpload: React.FC = () => {
       if(response){
         if(response?.code ===  'POINT_OF_SALE_ALREADY_REGISTERED'){
           addError({
-            id: 'UPLOAD_STORES',
+            id: 'UPLOAD_STORE',
             blocking: false,
             error: new Error('Point of sale already registered'),
             techDescription: 'Point of sale already registered',
-            displayableTitle: t('errors.pointOfSaleError'),
-            displayableDescription: 'Email referente già associata ad altro punto vendita ',
+            displayableTitle: t('errors.duplicateEmailError'),
+            displayableDescription: `Email referente ${response?.message} già associata ad altro punto vendita`,
             toNotify: true,
             component: 'Toast',
             showCloseIcon: true,

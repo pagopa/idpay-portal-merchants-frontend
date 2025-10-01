@@ -120,12 +120,12 @@ export const MerchantApi = {
   updateMerchantPointOfSales: async (
     merchantId: string,
     pointOfSales: Array<PointOfSaleDTO>
-  ): Promise<{ code:string}> => {
+  ): Promise<{ code:string ; message:string}> => {
     const result = await apiClient.putPointOfSales({ merchantId, body: pointOfSales });
     if (!isRight(result)) {
-      const codeStr = (result.left as any)?.at?.(0)?.value ?? (result.left as any)?.at?.(0)?.actual;
       return {
-        code: codeStr,
+        code: (result.left as any)?.at?.(0)?.value ?? (result.left as any)?.at?.(0)?.actual,
+        message: (result.left as any)?.at?.(0)?.context[1]?.actual?.message,
       };
     } else {
       return extractResponse(result, 204, onRedirectToLogin);
