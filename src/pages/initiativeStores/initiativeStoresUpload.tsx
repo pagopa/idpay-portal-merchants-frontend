@@ -50,6 +50,9 @@ const InitiativeStoresUpload: React.FC = () => {
   const history = useHistory();
   const addError = useErrorDispatcher();
 
+  useEffect(() => {
+    setUploadMethod(POS_UPDATE.Manual);
+  }, [uploadMethod]);
 
 
   const onFormChange = (salesPoints: Array<PointOfSaleDTO>) => {
@@ -197,6 +200,7 @@ const InitiativeStoresUpload: React.FC = () => {
                 {t('pages.initiativeStores.manualLink')}
               </Link>
             </Grid>
+            {uploadMethod === POS_UPDATE.Csv &&
             <Grid item xs={12}>
               <Box my={2}>
                 <RadioGroup
@@ -218,6 +222,7 @@ const InitiativeStoresUpload: React.FC = () => {
                 </RadioGroup>
               </Box>
             </Grid>
+            }
 
             {uploadMethod === POS_UPDATE.Csv &&
               <Grid item xs={12}>
