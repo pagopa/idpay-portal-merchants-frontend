@@ -224,30 +224,55 @@ const InitiativeStoreDetail = () => {
       contactSurname: contactSurnameModal,
       contactEmail: contactEmailModal,
     }];
-    try {
-      await updateMerchantPointOfSales(merchantId, obj);
-      setModalIsOpen(false);
-      setShowSuccessAlert(true);
-      fetchStoreDetail().catch((error) => {
-        console.log("error", error);
-      });
-    } catch (error: any) {
-      addError({
-        id: 'UPDATE_STORES',
-        blocking: false,
-        error,
-        techDescription: 'An error occurred updating stores',
-        displayableTitle: t('errors.genericTitle'),
-        displayableDescription: t('errors.genericDescription'),
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
-      });
-      setModalIsOpen(false);
-    }
-    setTimeout(() => {
-      setShowSuccessAlert(false);
-    }, 4000);
+      const response = await updateMerchantPointOfSales(merchantId, obj);
+      if(response){
+        if(response?.code ===  'POINT_OF_SALE_ALREADY_REGISTERED'){
+          addError({
+            id: 'UPDATE_STORES',
+            blocking: false,
+            error: new Error('Point of sale already registered'),
+            techDescription: 'Point of sale already registered',
+            displayableTitle: t('errors.duplicateEmailError'),
+            displayableDescription: `Email ${response?.message} è già associata ad altro punto vendita`,
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          });
+          setFieldErrors({ contactEmailModal: 'Email già censinta', contactEmailConfirmModal: 'Email già censinta' });
+          setModalIsOpen(false);
+        }else{
+          addError({
+            id: 'UPDATE_STORES',
+            blocking: false,
+            error: new Error('error points of sale upload'),
+            techDescription: 'error points of sale upload',
+            displayableTitle: t('errors.genericTitle'),
+            displayableDescription: t('errors.genericDescription'),
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          });
+        }
+      }else{
+        setModalIsOpen(false);
+        setShowSuccessAlert(true);
+        fetchStoreDetail().catch((error) => {
+          addError({
+            id: 'UPDATE_STORES',
+            blocking: false,
+            error,
+            techDescription: 'error points of sale upload',
+            displayableTitle: t('errors.genericTitle'),
+            displayableDescription: t('errors.genericDescription'),
+            toNotify: true,
+            component: 'Toast',
+            showCloseIcon: true,
+          });
+        });
+        setTimeout(() => {
+          setShowSuccessAlert(false);
+        }, 4000);
+      }
   };
 
   const handlePaginationPageChange = (page: number) => {

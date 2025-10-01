@@ -40,7 +40,8 @@
     "tcDescription": "Non siamo riusciti a recuperare le informazioni sull’accettazione dei termini e condizioni d’uso. Riprova.",
     "tcSave": "Non siamo riusciti a salvare l'accettazione dei Termini e condizioni d’uso. Riprova",
     "validationDescription": "Verifica che i dati inseriti siano corretti",
-    "pointOfSaleError": "Errore punto vendita"
+    "pointOfSaleError": "Errore punto vendita",
+    "duplicateEmailError": "Errore email referente"
   },
   "pages": {
     "acceptNewDiscount": {
