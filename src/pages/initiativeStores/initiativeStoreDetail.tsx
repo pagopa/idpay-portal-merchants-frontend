@@ -233,7 +233,7 @@ const InitiativeStoreDetail = () => {
             error: new Error('Point of sale already registered'),
             techDescription: 'Point of sale already registered',
             displayableTitle: t('errors.duplicateEmailError'),
-            displayableDescription: `Email ${response?.message} è già associata ad altro punto vendita`,
+            displayableDescription: `${response?.message} è già associata ad altro punto vendita`,
             toNotify: true,
             component: 'Toast',
             showCloseIcon: true,

@@ -100,7 +100,7 @@ const InitiativeStoresUpload: React.FC = () => {
             error: new Error('Point of sale already registered'),
             techDescription: 'Point of sale already registered',
             displayableTitle: t('errors.duplicateEmailError'),
-            displayableDescription: `Email referente ${response?.message} già associata ad altro punto vendita`,
+            displayableDescription: `${response?.message} già associata ad altro punto vendita`,
             toNotify: true,
             component: 'Toast',
             showCloseIcon: true,
