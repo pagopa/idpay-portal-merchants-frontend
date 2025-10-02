@@ -204,7 +204,7 @@ const InitiativeStoreDetail = () => {
       const { field, sort } = newSortModel[0];
       await fetchStoreTransactions({
         ...transactionsFilters,
-        sort: `${field === 'elettrodomestico' ? 'productCategory' : field !== 'fiscalCode' ? field : 'userId'},${sort}`,
+        sort: `${field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'},${sort}`,
       })
         .catch(error => {
           console.error('Error fetching stores:', error);

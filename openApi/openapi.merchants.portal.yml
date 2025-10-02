@@ -290,10 +290,10 @@ paths:
             enum:
               - updateDate, desc
               - status, desc
-              - productCategory, desc
+              - productName, desc
               - updateDate, asc
               - status, asc
-              - productCategory, asc
+              - productName, asc
         - name: fiscalCode
           in: query
           description: Fiscal Code
@@ -1480,7 +1480,7 @@ components:
     ListPointOfSaleDTO:
       type: object
       properties:
-        pointsOfSale:
+        content:
           type: array
           items:
             $ref: "#/components/schemas/PointOfSaleDTO"

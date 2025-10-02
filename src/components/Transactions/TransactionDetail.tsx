@@ -4,7 +4,6 @@ import { ReactNode } from 'react';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';
 import CustomChip from '../Chip/CustomChip';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
-import { useProductCategoryLabel } from "../../hooks/useProductCategoryLabel";
 import getStatus from './useStatus';
 
 type Props = {
@@ -17,7 +16,6 @@ type Props = {
 
 export default function TransactionDetail({ title, itemValues, listItem }: Props) {
 
-  const { getCategoryLabel } = useProductCategoryLabel();
   
   const getStatusChip = () => {
     const chipItem = getStatus(itemValues.status);
@@ -30,16 +28,12 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
     if (driver === "additionalProperties.productCategory") {
       const index = Object.keys(itemValues).indexOf('additionalProperties');
       const val = Object.values(itemValues)[index] as any;
-      return getCategoryLabel(val.productCategory) ?? MISSING_DATA_PLACEHOLDER;
+      return val.productCategory ?? MISSING_DATA_PLACEHOLDER;
     }
-    if (driver === "additionalProperties.productName") {
+    if (driver === "additionalProperties.productModel") {
       const index = Object.keys(itemValues).indexOf('additionalProperties');
       const val = Object.values(itemValues)[index] as any;
-      const categoryLabel = getCategoryLabel(val.productCategory);
-      if (categoryLabel && val?.productName?.startsWith(categoryLabel)) {
-        return val?.productName.replace(categoryLabel, "").trim();
-      }
-      return val ?? MISSING_DATA_PLACEHOLDER;
+      return val?.productBrand?.concat(` ${val?.productModel ?? MISSING_DATA_PLACEHOLDER}`) ?? MISSING_DATA_PLACEHOLDER;
     }
     if (type === TYPE_TEXT.Text) {
       return formatValues(val);
