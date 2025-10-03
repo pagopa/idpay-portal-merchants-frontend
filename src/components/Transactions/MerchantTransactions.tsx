@@ -70,7 +70,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     {
       field: 'elettrodomestico',
       headerName: 'Elettrodomestico',
-      flex: 1,
+      flex: 2.2,
       editable: false,
       disableColumnMenu: true,
       valueGetter: (params) => params.row?.additionalProperties?.productName,
@@ -85,7 +85,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     {
       field: 'fiscalCode',
       headerName: 'Beneficiario',
-      flex: 1,
+      flex: 1.2,
       editable: false,
       sortable: false,
       disableColumnMenu: true,
@@ -93,7 +93,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     {
       field: 'effectiveAmountCents',
       headerName: 'Totale della spesa',
-      flex: 1,
+      flex: 0.5,
       editable: false,
       disableColumnMenu: true,
       sortable: false,
@@ -102,7 +102,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     {
       field: 'rewardAmountCents',
       headerName: 'Importo autorizzato',
-      flex: 1,
+      flex: 0.5,
       editable: false,
       disableColumnMenu: true,
       sortable: false,
@@ -111,7 +111,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     {
       field: 'status',
       headerName: 'Stato',
-      flex: 1,
+      flex: 1.1,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => <StatusChip status={params.value} />,
