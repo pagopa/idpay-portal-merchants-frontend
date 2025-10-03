@@ -20,9 +20,8 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import { parseJwt } from '../../utils/jwt-utils';
 import { normalizeUrlHttp , normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
-import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
+import { PointOfSaleDTO} from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
-import { isValidUrl, isValidEmail } from '../../helpers';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { POS_UPDATE } from '../../utils/constants';
@@ -68,6 +67,35 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const handleConfirm = async () => {
     if (uploadMethod === POS_UPDATE.Manual) {
+      const emails = salesPoints.map(sp => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
+      const duplicates = emails
+        .map((email, idx) => (emails.indexOf(email) !== idx ? idx : -1))
+        .filter(idx => idx !== -1);
+      if (duplicates.length > 0) {
+        const newErrors: FormErrors = duplicates.reduce<FormErrors>((acc, dupIndex) => ({
+            ...acc,
+            [dupIndex]: {
+              ...(acc[dupIndex] ?? {}),
+              contactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+              confirmContactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+            },
+          }), {});
+
+        setErrors(newErrors);
+        addError({
+          id: 'UPLOAD_STORES',
+          blocking: false,
+          error: new Error('Duplicate contact emails'),
+          techDescription: 'Duplicate contact emails',
+          displayableTitle: t('errors.genericTitle'),
+          displayableDescription: 'Sono presenti email duplicate nei punti vendita',
+          toNotify: true,
+          component: 'Toast',
+          showCloseIcon: true,
+        });
+        return;
+      }
+
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
       if (!merchantId) {
@@ -136,26 +164,26 @@ const InitiativeStoresUpload: React.FC = () => {
     history.push(generatePath(ROUTES.OVERVIEW, { id }));
   };
 
-  const isFormValid = (): boolean => salesPoints.every(salesPoint => {
-    if (salesPoint.type === TypeEnum.ONLINE) {
-      return !!salesPoint.franchiseName &&
-        (!!salesPoint.webSite && isValidUrl(normalizeUrlHttps(salesPoint.webSite))) &&
-        (!!salesPoint.contactEmail && isValidEmail(salesPoint.contactEmail)) &&
-        !!salesPoint.contactName &&
-        !!salesPoint.contactSurname;
-    } else if (salesPoint.type === TypeEnum.PHYSICAL) {
-      return !!salesPoint.franchiseName &&
-        !!salesPoint.address &&
-        !!salesPoint.city &&
-        !!salesPoint.zipCode &&
-        !!salesPoint.region &&
-        !!salesPoint.province &&
-        (!!salesPoint.contactEmail && isValidEmail(salesPoint.contactEmail)) &&
-        !!salesPoint.contactName &&
-        !!salesPoint.contactSurname;
-    }
-    return false;
-  });
+  // const isFormValid = (): boolean => salesPoints.every(salesPoint => {
+  //   if (salesPoint.type === TypeEnum.ONLINE) {
+  //     return !!salesPoint.franchiseName &&
+  //       (!!salesPoint.webSite && isValidUrl(normalizeUrlHttps(salesPoint.webSite))) &&
+  //       (!!salesPoint.contactEmail && isValidEmail(salesPoint.contactEmail)) &&
+  //       !!salesPoint.contactName &&
+  //       !!salesPoint.contactSurname;
+  //   } else if (salesPoint.type === TypeEnum.PHYSICAL) {
+  //     return !!salesPoint.franchiseName &&
+  //       !!salesPoint.address &&
+  //       !!salesPoint.city &&
+  //       !!salesPoint.zipCode &&
+  //       !!salesPoint.region &&
+  //       !!salesPoint.province &&
+  //       (!!salesPoint.contactEmail && isValidEmail(salesPoint.contactEmail)) &&
+  //       !!salesPoint.contactName &&
+  //       !!salesPoint.contactSurname;
+  //   }
+  //   return false;
+  // });
 
   const onErrorChange = (errors: FormErrors) => {
     setErrors(errors);
@@ -249,7 +277,7 @@ const InitiativeStoresUpload: React.FC = () => {
             {
               uploadMethod === POS_UPDATE.Manual &&
               <Grid item xs={12}>
-                <PointsOfSaleForm onFormChange={onFormChange} onErrorChange={onErrorChange} pointsOfSaleLoaded={pointsOfSaleLoaded} />
+                <PointsOfSaleForm externalErrors={_errors} onFormChange={onFormChange} onErrorChange={onErrorChange} pointsOfSaleLoaded={pointsOfSaleLoaded} />
               </Grid>
             }
             {uploadMethod === POS_UPDATE.Csv &&
@@ -269,7 +297,7 @@ const InitiativeStoresUpload: React.FC = () => {
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
         <Button data-testid="back-stores-button" variant="outlined" onClick={handleBack}>{t('commons.backBtn')}</Button>
-        <Button data-testid="confirm-stores-button" variant="contained" disabled={!isFormValid()} onClick={handleConfirm}>
+        <Button data-testid="confirm-stores-button" variant="contained"  onClick={handleConfirm}>
           {t('commons.confirmBtn')}
         </Button>
       </Box>

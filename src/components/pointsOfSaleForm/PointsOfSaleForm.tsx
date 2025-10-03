@@ -25,6 +25,7 @@ interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
   onErrorChange: (errors: FormErrors) => void;
   pointsOfSaleLoaded: boolean;
+  externalErrors?: FormErrors;
 }
 
 interface FormErrors {
@@ -36,7 +37,7 @@ interface FieldErrors {
 }
 
 
-const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChange, pointsOfSaleLoaded }) => {
+const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChange, onErrorChange, pointsOfSaleLoaded }) => {
   const { t } = useTranslation();
   const { options, loading, error, search } = usePlacesAutocomplete();
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
@@ -61,6 +62,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
   ]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
+  const mergedErrors = { ...errors, ...externalErrors };
 
   useEffect(() => {
     onFormChange(salesPoints);
@@ -155,56 +157,56 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
           break;
         case 'contactName':
           if (value.length === 0) {
-            updateError(index, 'contactName', 'Nome non valido');
+            updateError(index, 'contactName', 'Campo obbligatorio');
           } else {
             clearError(index, 'contactName');
           }
           break;
         case 'contactSurname':
           if (value.length === 0) {
-            updateError(index, 'contactSurname', 'Cognome non valido');
+            updateError(index, 'contactSurname', 'Campo obbligatorio');
           } else {
             clearError(index, 'contactSurname');
           }
           break;
         case 'franchiseName':
           if (value.length === 0) {
-            updateError(index, 'franchiseName', 'Nome insegna non valido');
+            updateError(index, 'franchiseName', 'Campo obbligatorio');
           } else {
             clearError(index, 'franchiseName');
           }
           break;
         case 'city':
           if (value.length === 0) {
-            updateError(index, 'city', 'Città non valida');
+            updateError(index, 'city', ' ');
           } else {
             clearError(index, 'city');
           }
           break;
         case 'zipCode':
           if (value.length === 0) {
-            updateError(index, 'zipCode', 'CAP non valido');
+            updateError(index, 'zipCode', ' ');
           } else {
             clearError(index, 'zipCode');
           }
           break;
         case 'region':
           if (value.length === 0) {
-            updateError(index, 'region', 'Regione non valida');
+            updateError(index, 'region', ' ');
           } else {
             clearError(index, 'region');
           }
           break;
         case 'province':
           if (value.length === 0) {
-            updateError(index, 'province', 'Provincia non valida');
+            updateError(index, 'province', ' ');
           } else {
             clearError(index, 'province');
           }
           break;
         case 'address':
           if (value.length === 0) {
-            updateError(index, 'address', 'Indirizzo non valido');
+            updateError(index, 'address', 'Campo obbligatorio');
           } else {
             clearError(index, 'address');
           }
@@ -396,7 +398,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                 sx={{ mb: 2 }}
                 error={!!getFieldError(index, 'franchiseName')}
                 helperText={getFieldError(index, 'franchiseName')}
-                required
               />
             </Grid>
             <Grid item xs={7} />
@@ -418,7 +419,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                   sx={{ mb: 2 }}
                   error={!!getFieldError(index, 'webSite')}
                   helperText={getFieldError(index, 'webSite')}
-                  required
                 />
               </>
             )}
@@ -434,7 +434,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                       <Box mt={2}>
                         <AutocompleteComponent
                           options={options}
-                          required
                           label="Indirizzo completo"
                           onChangeDebounce={(value) => search(value)}
                           inputError={!!errors[index]?.address}
@@ -547,9 +546,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
                         margin="normal"
-                        error={!!getFieldError(index, 'contactEmail')}
-                        helperText={getFieldError(index, 'contactEmail')}
-                        required
+                        error={!!mergedErrors[index]?.contactEmail}
+                        helperText={mergedErrors[index]?.contactEmail}
                       />
                     </Box>
                   </Grid>
@@ -565,9 +563,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
                         margin="normal"
-                        error={!!getFieldError(index, 'confirmContactEmail')}
-                        helperText={getFieldError(index, 'confirmContactEmail')}
-                        required
+                        error={!!mergedErrors[index]?.confirmContactEmail}
+                        helperText={mergedErrors[index]?.confirmContactEmail}
                       />
                     </Box>
                   </Grid>
@@ -586,7 +583,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         margin="dense"
                         error={!!getFieldError(index, 'contactName')}
                         helperText={getFieldError(index, 'contactName')}
-                        required
                       />
                     </Box>
                   </Grid>
@@ -604,7 +600,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                         margin="dense"
                         error={!!getFieldError(index, 'contactSurname')}
                         helperText={getFieldError(index, 'contactSurname')}
-                        required
                       />
                     </Box>
                   </Grid>
@@ -640,6 +635,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({ onFormChange, onErrorChan
                     <Grid item xs={12} sm={2}>
                       <Box mx={4} mt={2.5}>
                           <ButtonNaked
+                            sx={{ whiteSpace: 'nowrap' }}
                             disabled={!salesPoint.channelGeolink?.trim() || !!getFieldError(index, 'channelGeolink')}
                             color="primary"
                             endIcon={<ArrowOutward fontSize="small" />}
