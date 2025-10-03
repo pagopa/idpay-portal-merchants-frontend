@@ -39,7 +39,7 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onS
             sortable: false,
             filterable: false,
             disableColumnMenu: true,
-            flex: 1,
+            flex: 0.1,
             renderCell: (params: any) => (
               <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
                 <IconButton
