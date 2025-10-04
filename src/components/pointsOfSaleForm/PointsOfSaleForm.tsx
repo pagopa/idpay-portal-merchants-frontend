@@ -108,26 +108,32 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
             clearError(index, "channelGeolink");
           }
           break;
-        case 'channelWebsite':
-          if (value) {
-            if (!isValidUrl(normalizeUrlHttps(value))) {
-              updateError(index, "channelWebsite", "Deve essere un sito valido");
-            } else {
-              clearError(index, "channelWebsite");
-            }
-          } else {
-            clearError(index, "channelWebsite");
-          }
-          break;
+        // case 'channelWebsite':
+        //   if (value) {
+        //     if (!isValidUrl(normalizeUrlHttps(value))) {
+        //       updateError(index, "channelWebsite", "Deve essere un sito valido");
+        //     } else {
+        //       clearError(index, "channelWebsite");
+        //     }
+        //   } else {
+        //     clearError(index, "channelWebsite");
+        //   }
+        //   break;
         case 'webSite':
-          if (value) {
-            if (!isValidUrl(normalizeUrlHttps(value))) {
-              updateError(index, "webSite", "Deve essere un sito valido");
+          if (salesPoints[index].type === 'ONLINE') {
+            if (!value || value.trim().length === 0) {
+              updateError(index, 'webSite', 'Campo obbligatorio');
+            } else if (!isValidUrl(normalizeUrlHttps(value))) {
+              updateError(index, 'webSite', 'Deve essere un sito valido');
             } else {
-              clearError(index, "webSite");
+              clearError(index, 'webSite');
             }
           } else {
-            clearError(index, "webSite");
+            if (value && !isValidUrl(normalizeUrlHttps(value))) {
+              updateError(index, 'webSite', 'Deve essere un sito valido');
+            } else {
+              clearError(index, 'webSite');
+            }
           }
           break;
         case 'contactEmail':
@@ -417,8 +423,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                   }
                   margin="normal"
                   sx={{ mb: 2 }}
-                  error={!!getFieldError(index, 'webSite')}
-                  helperText={getFieldError(index, 'webSite')}
+                  error={!!mergedErrors[index]?.webSite}
+                  helperText={mergedErrors[index]?.webSite}
                 />
               </>
             )}
@@ -724,14 +730,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         size="small"
                         fullWidth
                         label="Sito web"
-                        name="channelWebsite"
-                        value={salesPoint.channelWebsite}
+                        name="webSite"
+                        value={salesPoint.webSite}
                         onChange={(e) =>
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
                         margin="dense"
-                        error={!!getFieldError(index, 'channelWebsite')}
-                        helperText={getFieldError(index, 'channelWebsite')}
+                        error={!!getFieldError(index, 'webSite')}
+                        helperText={getFieldError(index, 'webSite')}
                       />
                     </Grid>
                   </Grid>

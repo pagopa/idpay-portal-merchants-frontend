@@ -72,14 +72,14 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'franchiseName',
       headerName: t('pages.initiativeStores.franchiseName'),
-      width: 250,
+      width: 130,
       editable: false,
       disableColumnMenu: true,
     },
     {
       field: 'type',
       headerName: t('pages.initiativeStores.type'),
-      width: 100,
+      width: 70,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => {
@@ -100,9 +100,16 @@ const InitiativeStores: React.FC = () => {
       disableColumnMenu: true,
     },
     {
+      field: 'webSite',
+      headerName: t('pages.initiativeStores.addressURL'),
+      width: 150,
+      editable: false,
+      disableColumnMenu: true,
+    },
+    {
       field: 'city',
       headerName: t('pages.initiativeStores.city'),
-      width: 200,
+      width: 150,
       editable: false,
       disableColumnMenu: true,
     },
@@ -117,7 +124,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'contactEmail',
       headerName: t('pages.initiativeStores.email'),
-      width: 300,
+      width: 240,
       editable: false,
       disableColumnMenu: true,
     },

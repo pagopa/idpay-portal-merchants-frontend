@@ -1,8 +1,8 @@
 import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState, useCallback } from 'react';
 import { IconButton, Box } from '@mui/material';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { GridSortModel } from '@mui/x-data-grid';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import {MISSING_DATA_PLACEHOLDER} from '../../utils/constants';
 
 export interface DataTableProps {
@@ -40,14 +40,14 @@ const DataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelCha
             sortable: false,
             filterable: false,
             disableColumnMenu: true,
-            flex: 1,
+            flex: 0.1,
             renderCell: (params: any) => (
               <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
                 <IconButton
                   onClick={() => handleRowAction(params.row)}
                   size="small"
                 >
-                  <ArrowForwardIosIcon color='primary' fontSize='small' />
+                  <ChevronRightIcon color='primary' fontSize='inherit' />
                 </IconButton>
               </Box>
             )
