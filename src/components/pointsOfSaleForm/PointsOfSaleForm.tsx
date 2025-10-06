@@ -123,7 +123,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
           if (salesPoints[index].type === 'ONLINE') {
             if (!value || value.trim().length === 0) {
               updateError(index, 'webSite', 'Campo obbligatorio');
-            } else if (!isValidUrl(normalizeUrlHttps(value))) {
+            } else if (value && !isValidUrl(normalizeUrlHttps(value))) {
               updateError(index, 'webSite', 'Deve essere un sito valido');
             } else {
               clearError(index, 'webSite');
@@ -416,7 +416,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                   size="small"
                   fullWidth
                   label="Indirizzo completo"
-                  name="webSite"
+                  name="website"
                   value={salesPoint.website}
                   onChange={(e) =>
                     handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
