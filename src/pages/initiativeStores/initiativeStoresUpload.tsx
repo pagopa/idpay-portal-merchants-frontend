@@ -143,7 +143,7 @@ const InitiativeStoresUpload: React.FC = () => {
       }
       const normalizedSalesPoints = salesPoints.map(sp => ({
         ...sp,
-        webSite: normalizeUrlHttps(sp.website),
+        website: normalizeUrlHttps(sp.website),
         channelWebsite: normalizeUrlHttps(sp.channelWebsite),
         channelGeolink: normalizeUrlHttp(sp.channelGeolink),
       }));
