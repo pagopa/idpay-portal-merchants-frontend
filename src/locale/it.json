@@ -153,7 +153,7 @@
       "addStore": "Inserisci i punti vendita",
       "addStoreList": "Aggiungi punti vendita",
       "uploadStores": "Censisci i tuoi punti vendita",
-      "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online. Puoi aggiungerli singolarmente o caricarli in blocco con un file CSV.  \nLe credenziali per accedere al portale operativo vengono generate automaticamente e inviate via email ai referenti indicati.",
+      "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online.\nLe credenziali per accedere al portale operativo vengono generate automaticamente e inviate via email al referente indicato.",
       "manualLink": "Dubbi? Vai al manuale",
       "uploadCSV": "Carica CSV",
       "dragCSV": "Trascina qui il file CSV con la lista dei punti vendita oppure ",
