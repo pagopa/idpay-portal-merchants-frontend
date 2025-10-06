@@ -148,7 +148,7 @@ const InitiativeStoreDetail = () => {
         { label: t('pages.initiativeStores.geoLink'), value: obj?.channelGeolink === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelGeolink},
       ]
       : []),
-    { label: t('pages.initiativeStores.website'), value: obj?.type === POS_TYPE.Online ? obj?.webSite : obj?.channelWebsite === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelWebsite},
+    { label: t('pages.initiativeStores.website'), value: obj?.website ?? MISSING_DATA_PLACEHOLDER},
   ];
 
   const getKeyValueReferent = (obj: any) => [

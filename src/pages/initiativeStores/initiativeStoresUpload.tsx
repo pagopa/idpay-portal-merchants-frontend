@@ -79,7 +79,7 @@ const InitiativeStoresUpload: React.FC = () => {
               ...acc,
               [idx]: {
                 ...(acc[idx] ?? {}),
-                webSite: 'Campo obbligatorio',
+                website: 'Campo obbligatorio',
               },
             };
           }
@@ -88,7 +88,7 @@ const InitiativeStoresUpload: React.FC = () => {
               ...acc,
               [idx]: {
                 ...(acc[idx] ?? {}),
-                webSite: 'Indirizzo web non valido',
+                website: 'Indirizzo web non valido',
               },
             };
           }
