@@ -100,7 +100,7 @@ const InitiativeStores: React.FC = () => {
       disableColumnMenu: true,
     },
     {
-      field: 'webSite',
+      field: 'website',
       headerName: t('pages.initiativeStores.addressURL'),
       width: 150,
       editable: false,

@@ -74,7 +74,7 @@ const InitiativeStoresUpload: React.FC = () => {
         .filter(idx => idx !== -1);
       const websiteErrors: FormErrors = salesPoints.reduce<FormErrors>((acc, sp, idx) => {
         if (sp.type === 'ONLINE') {
-          if (!sp.webSite || sp.webSite.trim().length === 0) {
+          if (!sp.website || sp.website.trim().length === 0) {
             return {
               ...acc,
               [idx]: {
@@ -83,7 +83,7 @@ const InitiativeStoresUpload: React.FC = () => {
               },
             };
           }
-          if (!isValidUrl(normalizeUrlHttps(sp.webSite))) {
+          if (!isValidUrl(normalizeUrlHttps(sp.website))) {
             return {
               ...acc,
               [idx]: {
@@ -143,7 +143,7 @@ const InitiativeStoresUpload: React.FC = () => {
       }
       const normalizedSalesPoints = salesPoints.map(sp => ({
         ...sp,
-        webSite: normalizeUrlHttps(sp.webSite),
+        webSite: normalizeUrlHttps(sp.website),
         channelWebsite: normalizeUrlHttps(sp.channelWebsite),
         channelGeolink: normalizeUrlHttp(sp.channelGeolink),
       }));

@@ -50,7 +50,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
       zipCode: '',
       region: '',
       province: '',
-      webSite: '',
+      website: '',
       contactEmail: '',
       contactName: '',
       contactSurname: '',
@@ -80,7 +80,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
           zipCode: '',
           region: '',
           province: '',
-          webSite: '',
+          website: '',
           contactEmail: '',
           contactName: '',
           contactSurname: '',
@@ -417,7 +417,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                   fullWidth
                   label="Indirizzo completo"
                   name="webSite"
-                  value={salesPoint.webSite}
+                  value={salesPoint.website}
                   onChange={(e) =>
                     handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                   }
@@ -731,7 +731,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         fullWidth
                         label="Sito web"
                         name="webSite"
-                        value={salesPoint.webSite}
+                        value={salesPoint.website}
                         onChange={(e) =>
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
