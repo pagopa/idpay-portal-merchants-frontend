@@ -117,7 +117,7 @@ export const isValidEmail = (email: string) => {
 };
 
 export const isValidUrl = (url: string) => {
-  if (url.endsWith('.it') || url.endsWith('.com')) {
+  if (url.endsWith('.it') || url.endsWith('.com')|| url.endsWith('.info')|| url.endsWith('.io')|| url.endsWith('.net')|| url.endsWith('.eu')) {
     try {
       new URL(url); // Tenta di creare un oggetto URL
       return true; // Se non lancia errori, l'URL è valido

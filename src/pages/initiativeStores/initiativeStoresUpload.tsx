@@ -25,6 +25,7 @@ import { updateMerchantPointOfSales } from '../../services/merchantService';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { POS_UPDATE } from '../../utils/constants';
+import { isValidUrl } from '../../helpers';
 
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
@@ -71,31 +72,59 @@ const InitiativeStoresUpload: React.FC = () => {
       const duplicates = emails
         .map((email, idx) => (emails.indexOf(email) !== idx ? idx : -1))
         .filter(idx => idx !== -1);
-      if (duplicates.length > 0) {
-        const newErrors: FormErrors = duplicates.reduce<FormErrors>((acc, dupIndex) => ({
-            ...acc,
-            [dupIndex]: {
-              ...(acc[dupIndex] ?? {}),
-              contactEmail: `Email già presente nel punto vendita ${dupIndex}`,
-              confirmContactEmail: `Email già presente nel punto vendita ${dupIndex}`,
-            },
-          }), {});
+      const websiteErrors: FormErrors = salesPoints.reduce<FormErrors>((acc, sp, idx) => {
+        if (sp.type === 'ONLINE') {
+          if (!sp.website || sp.website.trim().length === 0) {
+            return {
+              ...acc,
+              [idx]: {
+                ...(acc[idx] ?? {}),
+                webSite: 'Campo obbligatorio',
+              },
+            };
+          }
+          if (!isValidUrl(normalizeUrlHttps(sp.website))) {
+            return {
+              ...acc,
+              [idx]: {
+                ...(acc[idx] ?? {}),
+                webSite: 'Indirizzo web non valido',
+              },
+            };
+          }
+        }
+        return acc;
+      }, {});
 
+      const duplicateErrors: FormErrors = duplicates.reduce<FormErrors>((acc, dupIndex) => ({
+        ...acc,
+        [dupIndex]: {
+          ...(acc[dupIndex] ?? {}),
+          contactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+          confirmContactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+        },
+      }), {});
+
+      const newErrors: FormErrors = {
+        ...websiteErrors,
+        ...duplicateErrors,
+      };
+
+      if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         addError({
           id: 'UPLOAD_STORES',
           blocking: false,
-          error: new Error('Duplicate contact emails'),
-          techDescription: 'Duplicate contact emails',
+          error: new Error('Validation errors'),
+          techDescription: 'Validation errors on POS upload',
           displayableTitle: t('errors.genericTitle'),
-          displayableDescription: 'Sono presenti email duplicate nei punti vendita',
+          displayableDescription: t('errors.genericDescription'),
           toNotify: true,
           component: 'Toast',
           showCloseIcon: true,
         });
         return;
       }
-
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
       if (!merchantId) {
@@ -114,7 +143,7 @@ const InitiativeStoresUpload: React.FC = () => {
       }
       const normalizedSalesPoints = salesPoints.map(sp => ({
         ...sp,
-        webSite: normalizeUrlHttps(sp.webSite),
+        webSite: normalizeUrlHttps(sp.website),
         channelWebsite: normalizeUrlHttps(sp.channelWebsite),
         channelGeolink: normalizeUrlHttp(sp.channelGeolink),
       }));

@@ -290,10 +290,10 @@ paths:
             enum:
               - updateDate, desc
               - status, desc
-              - productCategory, desc
+              - productName, desc
               - updateDate, asc
               - status, asc
-              - productCategory, asc
+              - productName, asc
         - name: fiscalCode
           in: query
           description: Fiscal Code
@@ -1453,7 +1453,7 @@ components:
         streetNumber:
           type: string
           description: "ENG: The street number of the point of sale <br> IT: Il numero civico del punto vendita"
-        webSite:
+        website:
           type: string
           description: "ENG: The website of the point of sale <br> IT: Il sito web del punto vendita"
         contactEmail:
@@ -1480,7 +1480,7 @@ components:
     ListPointOfSaleDTO:
       type: object
       properties:
-        pointsOfSale:
+        content:
           type: array
           items:
             $ref: "#/components/schemas/PointOfSaleDTO"
