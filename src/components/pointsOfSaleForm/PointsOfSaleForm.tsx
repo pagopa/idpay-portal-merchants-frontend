@@ -119,7 +119,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
         //     clearError(index, "channelWebsite");
         //   }
         //   break;
-        case 'webSite':
+        case 'website':
           if (salesPoints[index].type === 'ONLINE') {
             if (!value || value.trim().length === 0) {
               updateError(index, 'webSite', 'Campo obbligatorio');
