@@ -26,7 +26,6 @@ import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { POS_UPDATE } from '../../utils/constants';
 import { isValidUrl } from '../../helpers';
-import { ENV } from '../../utils/env';
 
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
@@ -249,7 +248,7 @@ const InitiativeStoresUpload: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <Link fontWeight={theme.typography.fontWeightBold} href={ENV.ASSISTANCE.MANUAL_LINK.toString()} underline="hover">
+              <Link fontWeight={theme.typography.fontWeightBold} href='#' underline="hover">
                 {t('pages.initiativeStores.manualLink')}
               </Link>
             </Grid>
