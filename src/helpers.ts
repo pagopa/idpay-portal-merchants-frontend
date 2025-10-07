@@ -1,6 +1,8 @@
 /* eslint-disable functional/no-let */
 /* eslint-disable functional/immutable-data */
+import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
+import { ENV } from './utils/env';
 
 export const copyTextToClipboard = (magicLink: string | undefined) => {
   if (typeof magicLink === 'string') {
@@ -128,6 +130,27 @@ export const isValidUrl = (url: string) => {
     return false;
   }
 
+};
+export const customExitAction = () => {
+  storageTokenOps.delete();
+  storageUserOps.delete();
+  Object.keys(localStorage).forEach((key) => {
+    if (
+      key.toLowerCase().includes('filter') ||
+      key === 'user' ||
+      key === 'token' ||
+      key.startsWith('persist:')
+    ) {
+      localStorage.removeItem(key);
+    }
+  });
+  Object.keys(sessionStorage).forEach((key) => {
+    if (key.toLowerCase().includes('filter') || key === 'user' || key === 'token') {
+      sessionStorage.removeItem(key);
+    }
+  });
+
+  window.location.assign(ENV.URL_FE.LOGOUT);
 };
 
 export const generateUniqueId = () => Date.now().toString() + Math.random().toString(36).substring(2, 9);

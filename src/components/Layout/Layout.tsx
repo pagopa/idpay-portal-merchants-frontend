@@ -2,43 +2,50 @@ import { Box } from '@mui/material';
 import { Footer } from '@pagopa/selfcare-common-frontend';
 import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/hooks/useUnloadEventInterceptor';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { userSelectors } from '@pagopa/selfcare-common-frontend/redux/slices/userSlice';
 import { useLocation } from 'react-router-dom';
-import { matchPath } from 'react-router';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/utils/storage';
 import Header from '../Header/Header';
-import SideMenu from '../SideMenu/SideMenu';
 import ROUTES from '../../routes';
-import routes from '../../routes';
-import { useInitiativesList } from '../../hooks/useInitiativesList';
 
 type Props = {
   children?: React.ReactNode;
 };
 
+import { ENV } from '../../utils/env';
+
 const Layout = ({ children }: Props) => {
+  const customExitAction = () => {
+    storageTokenOps.delete();
+    storageUserOps.delete();
+    Object.keys(localStorage).forEach((key) => {
+      if (
+        key.toLowerCase().includes('filter') ||
+        key === 'user' ||
+        key === 'token' ||
+        key.startsWith('persist:')
+      ) {
+        localStorage.removeItem(key);
+      }
+    });
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.toLowerCase().includes('filter') || key === 'user' || key === 'token') {
+        sessionStorage.removeItem(key);
+      }
+    });
+
+    window.location.assign(ENV.URL_FE.LOGOUT);
+  };
+
   const onExit = useUnloadEventOnExit();
-  const loggedUser = useSelector(userSelectors.selectLoggedUser);
   const location = useLocation();
-  const [showAssistanceInfo, setShowAssistanceInfo] = useState(true);
-
-  const match = matchPath(location.pathname, {
-    path: [ROUTES.HOME, ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.STORES_DETAIL],
-    exact: true,
-    strict: false,
-  });
-
-  const matchNoSideMenu = matchPath(location.pathname, {
-    path: [ROUTES.STORES_UPLOAD],
-    exact: true,
-    strict: false,
-  });
+  const [, setShowAssistanceInfo] = useState(true);
 
   useEffect(() => {
     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
   }, [location.pathname]);
-
-  useInitiativesList(match);
 
   return (
     <Box
@@ -52,31 +59,11 @@ const Layout = ({ children }: Props) => {
     >
       <Box gridArea="header">
         <Header
-          withSecondHeader={showAssistanceInfo}
-          onExit={onExit}
-          loggedUser={loggedUser}
+          onExit={() => onExit(customExitAction)}
           parties={[]}
+          withSecondHeader={false}
         />
       </Box>
-      {match !== null && matchNoSideMenu === null ? (
-        <Box gridArea="body" display="grid" gridTemplateColumns="minmax(300px, 2fr) 10fr">
-          <Box gridColumn="auto" sx={{ backgroundColor: 'background.paper' }}>
-            <SideMenu />
-          </Box>
-          <Box
-            gridColumn="auto"
-            sx={{ backgroundColor: '#F5F5F5' }}
-            display="grid"
-            justifyContent="center"
-            pb={16}
-            pt={2}
-            px={2}
-            gridTemplateColumns="1fr"
-          >
-            {children}
-          </Box>
-        </Box>
-      ) : (
         <Box
           gridArea="body"
           display="grid"
@@ -86,12 +73,10 @@ const Layout = ({ children }: Props) => {
           <Box
             display="grid"
             justifyContent="center"
-            pb={16}
-            pt={2}
             gridColumn="span 12"
             maxWidth={
-              location.pathname !== routes.PRIVACY_POLICY && location.pathname !== routes.TOS
-                ? '75%'
+              location.pathname !== ROUTES.PRIVACY_POLICY && location.pathname !== ROUTES.TOS
+                ? 920
                 : '100%'
             }
             justifySelf="center"
@@ -99,12 +84,10 @@ const Layout = ({ children }: Props) => {
             {children}
           </Box>
         </Box>
-      )}
       <Box gridArea="footer">
-        <Footer onExit={onExit} loggedUser={true} />
+        <Footer onExit={() => onExit(customExitAction)} loggedUser={true} />
       </Box>
     </Box>
   );
 };
-// export default withParties(Layout);
 export default Layout;

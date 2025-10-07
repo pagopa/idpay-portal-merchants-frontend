@@ -245,6 +245,10 @@
     "pointOfSaleTransactions": {
       "searchByFiscalCode": "Cerca per Codice Fiscale",
       "searchByGtin": "Cerca per GTIN"
+    },
+    "upcomingInitiative": {
+      "title": "Ci siamo quasi!",
+      "subTitle": "Torna il {{x}} per accedere alla piattaforma"
     }
   },
   "roles": {

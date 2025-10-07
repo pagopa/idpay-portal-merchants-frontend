@@ -3,7 +3,7 @@ import { ENV } from './utils/env';
 export const BASE_ROUTE = ENV.PUBLIC_URL;
 
 const ROUTES = {
-  AUTH: `${BASE_ROUTE}/auth`,
+  UPCOMING: `${BASE_ROUTE}/iniziativa-in-arrivo`,
   HOME: `${BASE_ROUTE}`,
   ASSISTANCE: `${BASE_ROUTE}/assistenza`,
   OVERVIEW: `${BASE_ROUTE}/:id/panoramica`,
