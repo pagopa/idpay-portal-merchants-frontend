@@ -79,7 +79,7 @@ const InitiativeStoresUpload: React.FC = () => {
               ...acc,
               [idx]: {
                 ...(acc[idx] ?? {}),
-                webSite: 'Campo obbligatorio',
+                website: 'Campo obbligatorio',
               },
             };
           }
@@ -88,7 +88,7 @@ const InitiativeStoresUpload: React.FC = () => {
               ...acc,
               [idx]: {
                 ...(acc[idx] ?? {}),
-                webSite: 'Indirizzo web non valido',
+                website: 'Indirizzo web non valido',
               },
             };
           }
@@ -143,8 +143,7 @@ const InitiativeStoresUpload: React.FC = () => {
       }
       const normalizedSalesPoints = salesPoints.map(sp => ({
         ...sp,
-        webSite: normalizeUrlHttps(sp.website),
-        channelWebsite: normalizeUrlHttps(sp.channelWebsite),
+        website: normalizeUrlHttps(sp.website),
         channelGeolink: normalizeUrlHttp(sp.channelGeolink),
       }));
 
@@ -249,45 +248,52 @@ const InitiativeStoresUpload: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <Link
-                fontWeight={theme.typography.fontWeightBold}
-                href="#"
-                underline="hover"
-              >
+              <Link fontWeight={theme.typography.fontWeightBold} href='#' underline="hover">
                 {t('pages.initiativeStores.manualLink')}
               </Link>
             </Grid>
-            {uploadMethod === POS_UPDATE.Csv &&
-            <Grid item xs={12}>
-              <Box my={2}>
-                <RadioGroup
-                  row
-                  value={uploadMethod}
-                  onChange={(e) => setUploadMethod(e.target.value as POS_UPDATE.Csv | POS_UPDATE.Manual)}
-                  sx={{ mb: 2 }}
-                >
-                  <FormControlLabel
-                    value= {POS_UPDATE.Csv}
-                    control={<Radio />}
-                    label={t('pages.initiativeStores.uploadCSV')}
-                  />
-                  <FormControlLabel
-                    value={POS_UPDATE.Manual}
-                    control={<Radio />}
-                    label={t('pages.initiativeStores.enterManually')}
-                  />
-                </RadioGroup>
-              </Box>
-            </Grid>
-            }
-
-            {uploadMethod === POS_UPDATE.Csv &&
+            {uploadMethod === POS_UPDATE.Csv && (
               <Grid item xs={12}>
-                <Box p={2} mb={4} display="flex" alignItems={"center"} justifyContent={"center"}
+                <Box my={2}>
+                  <RadioGroup
+                    row
+                    value={uploadMethod}
+                    onChange={(e) =>
+                      setUploadMethod(e.target.value as POS_UPDATE.Csv | POS_UPDATE.Manual)
+                    }
+                    sx={{ mb: 2 }}
+                  >
+                    <FormControlLabel
+                      value={POS_UPDATE.Csv}
+                      control={<Radio />}
+                      label={t('pages.initiativeStores.uploadCSV')}
+                    />
+                    <FormControlLabel
+                      value={POS_UPDATE.Manual}
+                      control={<Radio />}
+                      label={t('pages.initiativeStores.enterManually')}
+                    />
+                  </RadioGroup>
+                </Box>
+              </Grid>
+            )}
+
+            {uploadMethod === POS_UPDATE.Csv && (
+              <Grid item xs={12}>
+                <Box
+                  p={2}
+                  mb={4}
+                  display="flex"
+                  alignItems={'center'}
+                  justifyContent={'center'}
                   sx={{
-                    borderWidth: '1px', borderStyle: "dashed", borderColor: theme.palette.primary.main, borderRadius: "10px",
-                    backgroundColor: theme.palette.primaryAction.selected
-                  }}>
+                    borderWidth: '1px',
+                    borderStyle: 'dashed',
+                    borderColor: theme.palette.primary.main,
+                    borderRadius: '10px',
+                    backgroundColor: theme.palette.primaryAction.selected,
+                  }}
+                >
                   <Box mr={1}>
                     <CloudUploadIcon fontSize="large" color="primary" />
                   </Box>
@@ -301,15 +307,19 @@ const InitiativeStoresUpload: React.FC = () => {
                   </Box>
                 </Box>
               </Grid>
-            }
+            )}
 
-            {
-              uploadMethod === POS_UPDATE.Manual &&
+            {uploadMethod === POS_UPDATE.Manual && (
               <Grid item xs={12}>
-                <PointsOfSaleForm externalErrors={_errors} onFormChange={onFormChange} onErrorChange={onErrorChange} pointsOfSaleLoaded={pointsOfSaleLoaded} />
+                <PointsOfSaleForm
+                  externalErrors={_errors}
+                  onFormChange={onFormChange}
+                  onErrorChange={onErrorChange}
+                  pointsOfSaleLoaded={pointsOfSaleLoaded}
+                />
               </Grid>
-            }
-            {uploadMethod === POS_UPDATE.Csv &&
+            )}
+            {uploadMethod === POS_UPDATE.Csv && (
               <Grid item xs={12}>
                 <Typography variant="body1" color="text.primary">
                   {t('pages.initiativeStores.prepareList')}
@@ -318,15 +328,16 @@ const InitiativeStoresUpload: React.FC = () => {
                   </Link>
                 </Typography>
               </Grid>
-            }
+            )}
           </Grid>
         </Box>
       </Paper>
 
-
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-        <Button data-testid="back-stores-button" variant="outlined" onClick={handleBack}>{t('commons.backBtn')}</Button>
-        <Button data-testid="confirm-stores-button" variant="contained"  onClick={handleConfirm}>
+        <Button data-testid="back-stores-button" variant="outlined" onClick={handleBack}>
+          {t('commons.backBtn')}
+        </Button>
+        <Button data-testid="confirm-stores-button" variant="contained" onClick={handleConfirm}>
           {t('commons.confirmBtn')}
         </Button>
       </Box>

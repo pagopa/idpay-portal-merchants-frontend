@@ -8,6 +8,7 @@ export const ENV = {
 
   ASSISTANCE: {
     EMAIL: env.get('REACT_APP_PAGOPA_HELP_EMAIL').required().asString(),
+    // MANUAL_LINK: env.get('REACT_APP_MANUAL_LINK').required().asString(),
   },
 
   URL_FE: {
