@@ -23,7 +23,13 @@ const Layout = ({ children }: Props) => {
   const [showAssistanceInfo, setShowAssistanceInfo] = useState(true);
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.HOME, ROUTES.DISCOUNTS],
+    path: [ROUTES.HOME, ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.STORES_DETAIL],
+    exact: true,
+    strict: false,
+  });
+
+  const matchNoSideMenu = matchPath(location.pathname, {
+    path: [ROUTES.STORES_UPLOAD],
     exact: true,
     strict: false,
   });
@@ -52,7 +58,7 @@ const Layout = ({ children }: Props) => {
           parties={[]}
         />
       </Box>
-      {match !== null ? (
+      {match !== null && matchNoSideMenu === null ? (
         <Box gridArea="body" display="grid" gridTemplateColumns="minmax(300px, 2fr) 10fr">
           <Box gridColumn="auto" sx={{ backgroundColor: 'background.paper' }}>
             <SideMenu />
@@ -85,7 +91,7 @@ const Layout = ({ children }: Props) => {
             gridColumn="span 12"
             maxWidth={
               location.pathname !== routes.PRIVACY_POLICY && location.pathname !== routes.TOS
-                ? 920
+                ? '75%'
                 : '100%'
             }
             justifySelf="center"

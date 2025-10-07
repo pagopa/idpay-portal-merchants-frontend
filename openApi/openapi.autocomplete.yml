@@ -1,0 +1,266 @@
+openapi: 3.0.1
+info:
+  title: IDPAY ITN Amazon Location Service Autocomplete API
+  description: IDPAY ITN Amazon Location Service Autocomplete API
+  version: '1.0'
+  contact:
+    name: PagoPA S.p.A.
+    email: cstar@pagopa.it
+
+servers:
+  - url: https://api-io.dev.cstar.pagopa.it/idpay-itn/merchant/address-search
+    x-internal: true
+
+tags:
+  - name: autocomplete
+    description: Operation related to address autocomplete
+
+paths:
+  /autocomplete:
+    post:
+      tags:
+        - autocomplete
+      summary: Returns suggested addresses using autocomplete
+      description: >
+        ENG: Returns suggested addresses using autocomplete
+        IT: Restituisce gli indirizzi suggeriti tramite autocomplete
+      operationId: autocomplete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressAutocompleteRequestDTO'
+      responses:
+        '200':
+          $ref: '#/components/responses/POST_autocomplete_200_Response'
+        '400':
+          $ref: '#/components/responses/POST_autocomplete_400_Response'
+        '401':
+          $ref: '#/components/responses/POST_autocomplete_401_Response'
+        '403':
+          $ref: '#/components/responses/POST_autocomplete_403_Response'
+        '429':
+          $ref: '#/components/responses/POST_autocomplete_429_Response'
+        '500':
+          $ref: '#/components/responses/POST_autocomplete_500_Response'
+
+components:
+  headers:
+    X-RateLimit-Limit:
+      description: The maximum number of requests allowed in the current period
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 1000000
+    X-RateLimit-Remaining:
+      description: The number of requests remaining in the current period
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 1000000
+    X-RateLimit-Reset:
+      description: The time at which the rate limit resets (in UTC epoch seconds)
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 9999999999
+    Access-Control-Allow-Origin:
+      description: CORS header to allow cross-origin requests
+      schema:
+        type: string
+        maxLength: 255
+        pattern: .*
+    Retry-After:
+      description: Indicates how long the user agent should wait before making a follow-up
+        request
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 86400
+
+  schemas:
+    AddressAutocompleteRequestDTO:
+      type: object
+      required:
+        - QueryText
+      properties:
+        QueryText:
+          type: string
+          maxLength: 256
+          pattern: ".+"
+          description: >
+            ENG: The input address for autocomplete
+            IT: L'indirizzo di input per l'autocomplete
+    AddressAutocompleteResponseDTO:
+      type: object
+      properties:
+        ResultItems:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: '#/components/schemas/AddressAutocompleteResultItemDTO'
+    AddressAutocompleteResultItemDTO:
+      type: object
+      properties:
+        PlaceId:
+          type: string
+          maxLength: 64
+          pattern: ".*"
+        Address:
+          $ref: '#/components/schemas/AddressDTO'
+    AddressDTO:
+      type: object
+      properties:
+        Region:
+          $ref: '#/components/schemas/RegionDTO'
+        SubRegion:
+          $ref: '#/components/schemas/SubRegionDTO'
+        Locality:
+          type: string
+          maxLength: 128
+          pattern: ".*"
+        PostalCode:
+          type: string
+          maxLength: 16
+          pattern: ".*"
+        Street:
+          type: string
+          maxLength: 128
+          pattern: ".*"
+        AddressNumber:
+          type: string
+          maxLength: 16
+          pattern: ".*"
+    RegionDTO:
+      type: object
+      properties:
+        Name:
+          type: string
+          maxLength: 128
+          pattern: ".*"
+    SubRegionDTO:
+      type: object
+      properties:
+        Code:
+          type: string
+          maxLength: 64
+          pattern: ".*"
+    ErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          maxLength: 255
+          pattern: .*
+        message:
+          type: string
+          maxLength: 255
+          pattern: ".*"
+
+  responses:
+    POST_autocomplete_200_Response:
+      description: Successful response with a list of suggested addresses
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddressAutocompleteResponseDTO'
+
+    POST_autocomplete_400_Response:
+      description: Bad request
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+
+    POST_autocomplete_401_Response:
+      description: Unauthorized - Authentication Failed
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+
+    POST_autocomplete_403_Response:
+      description: Forbidden
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+
+    POST_autocomplete_429_Response:
+      description: Too Many Requests
+      headers:
+        Retry-After:
+          $ref: '#/components/headers/Retry-After'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+
+    POST_autocomplete_500_Response:
+      description: Internal Server Error
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+security:
+  - Bearer: []

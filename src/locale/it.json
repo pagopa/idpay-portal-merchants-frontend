@@ -5,6 +5,9 @@
     "closeBtn": "Chiudi",
     "confirmBtn": "Conferma",
     "continueBtn": "Continua",
+    "modify": "Modifica",
+    "saveBtn": "Salva",
+    "cancel": "Annulla",
     "copyCodeBtn": "Copia codice",
     "copyLinkBtn": "Copia link",
     "discountStatusEnum": {
@@ -14,7 +17,8 @@
       "identified": "Da autorizzare",
       "invalidated": "Invalidato",
       "rejected": "Rifiutato",
-      "rewarded": "Contabilizzato"
+      "rewarded": "Rimborso richiesto",
+      "refunded": "Stornato"
     },
     "downloadQrBtn": "Scarica codice QR",
     "exitBtn": "Esci",
@@ -25,7 +29,7 @@
     },
     "removeFiltersBtn": "Rimuovi filtri",
     "sendBtn": "Invia",
-    "title": "Portale Esercenti"
+    "title": "PARI"
   },
   "errors": {
     "contactAdmin": "Contatta l'assistenza",
@@ -35,7 +39,9 @@
     "sessionExpiredTitle": "La tua sessione è scaduta",
     "tcDescription": "Non siamo riusciti a recuperare le informazioni sull’accettazione dei termini e condizioni d’uso. Riprova.",
     "tcSave": "Non siamo riusciti a salvare l'accettazione dei Termini e condizioni d’uso. Riprova",
-    "validationDescription": "Verifica che i dati inseriti siano corretti"
+    "validationDescription": "Verifica che i dati inseriti siano corretti",
+    "pointOfSaleError": "Errore punto vendita",
+    "duplicateEmailError": "Errore email referente"
   },
   "pages": {
     "acceptNewDiscount": {
@@ -84,7 +90,7 @@
       "termsDescription": "Accedendo, accetti i",
       "termsDescription2": "del servizio e confermi di aver letto l’",
       "termsDescriptionChanged": "Recentemente abbiamo cambiato i",
-      "title": "Portale Esercenti"
+      "title": "PARI"
     },
     "initiativeDiscounts": {
       "acceptBtn": "Accetta buono sconto",
@@ -120,6 +126,74 @@
       "totalSpent": "Totale della spesa",
       "iban": "IBAN"
     },
+    "initiativeOverview": {
+      "subtitle": "Tieni sotto controllo tutte le tue attività da qui.",
+      "title": "Panoramica",
+      "information": "Informazioni",
+      "stores": "Punti vendita",
+      "uploadStores": "Censisci i tuoi punti vendita",
+      "storesSubtitle": "Inserisci i tuoi punti vendita direttamente sul portale.",
+      "iban": "IBAN",
+      "holder": "Intestatario",
+      "refundsDataTitle": "Dati rimborso",
+      "refundsStatusTitle": "Stato rimborsi",
+      "totalAmount": "Totale erogato",
+      "totalRefunded": "Totale rimborsato",
+      "missingIban": "E' necessario inserire dai dati validi per ottenere i rimborsi.",
+      "insertIban": "Inserisci IBAN",
+      "insertIbanDescription": "L’IBAN indicato sarà utilizzato per l’accredito degli importi maturati tramite l’uso del buono. Assicurati che i dati siano corretti e intestati all’azienda.",
+      "insertIbanHolder": "Inserisci intestatario",
+      "modify": "Modifica",
+      "successIban": "IBAN inserito con successo",
+      "onboardingDate": "Data di adesione"
+    },
+    "initiativeStores": {
+      "title": "Punti vendita",
+      "subtitle": "Consulta i tuoi punti vendita",
+      "addStore": "Inserisci i punti vendita",
+      "addStoreList": "Aggiungi punti vendita",
+      "uploadStores": "Censisci i tuoi punti vendita",
+      "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online.\nLe credenziali per accedere al portale operativo vengono generate automaticamente e inviate via email al referente indicato.",
+      "manualLink": "Dubbi? Vai al manuale",
+      "uploadCSV": "Carica CSV",
+      "dragCSV": "Trascina qui il file CSV con la lista dei punti vendita oppure ",
+      "selectFromPc": "selezionalo dal tuo computer",
+      "downloadExampleFile": "Scarica il file di esempio",
+      "enterManually": "Inserisci manualmente",
+      "prepareList": "Non sai come preparare la lista? ",
+      "referent": "Referente",
+      "address": "Indirizzo",
+      "addressURL": "URL",
+      "city": "Città",
+      "pointOfSaleType": "Tipologia punto vendita",
+      "online": "Online",
+      "physical": "Fisico",
+      "contactName": "Nome",
+      "contactSurname": "Cognome",
+      "contactEmail": "E-mail",
+      "contactEmailModal": "Indirizzo e-mail",
+      "contactEmailModalConfirm": "Conferma indirizzo e-mail",
+      "franchiseName": "Insegna",
+      "region": "Regione",
+      "province": "Provincia",
+      "zipCode": "CAP",
+      "type": "Tipologia",
+      "email": "E-mail",
+      "noStores": "Non ci sono punti vendita,",
+      "addStoreNoResults": "aggiungili per iniziare",
+      "id": "Id",
+      "phone": "Telefono",
+      "geoLink": "Landing google",
+      "website": "Sito web",
+      "modalDescription": "Qui puoi modificare  idati del referente di questo punto vendita.<Se modifica l' indirizzo email gli verrà inviata una email di conferma, e verranno invalidate le credenziali inviate alla precedente email>.",
+      "referentChangeSuccess": "Dati modificati con successo",
+      "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati"
+    },
+    "initiativeStoreDetail": {
+      "transactionHistory": "Storico transazioni",
+      "contactEmail": "Indirizzo e-mail",
+      "confirmContactEmail": "Conferma indirizzo e-mail"
+    },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
       "initiativeStatus": "Stato",
@@ -130,6 +204,20 @@
       "subtitle": "Visualizza e gestisci le iniziative di supporto alla spesa a cui hai aderito.",
       "title": "Iniziative",
       "initiativeName": "Nome"
+    },
+    "pointOfSales": {
+      "type": "Tipologia di punto vendita",
+      "typeDescription": "I punti vendita fisici richiedono l'indirizzo completo. Per quelli online è sufficiente l'URL del sito.",
+      "noOptionsText": "Nessun risultato",
+      "loadingText": "Caricamento...",
+      "referentContactDescription": "Indica chi sarà il referente per questo punto vendita. Riceverà via email le credenziali di accesso al portale. Puoi inserire anche i tuoi dati.",
+      "referentContactTitle": "Contatti referente",
+      "poitOfSaleContact": "Contatti punto vendita",
+      "title": "Punto vendita",
+      "signName": "Nome insegna",
+      "website": "Indirizzo web",
+      "address": "Indirizzo"
+
     },
     "newDiscount": {
       "codeCopied": "Codice copiato",
@@ -153,6 +241,10 @@
       "spendingInfoTitle": "Qual è l'Importo totale della spesa?",
       "subtitle": "Compila i campi e genera buoni sconto da inviare ai tuoi clienti per usufruire dell’iniziativa.",
       "title": "Crea un nuovo buono sconto"
+    },
+    "pointOfSaleTransactions": {
+      "searchByFiscalCode": "Cerca per Codice Fiscale",
+      "searchByGtin": "Cerca per GTIN"
     }
   },
   "roles": {
@@ -166,5 +258,9 @@
     "positiveNumber": "Inserisci un valore positivo",
     "requiredField": "Campo obbligatorio",
     "number": "Inserisci un numero"
+  },
+  "initiativeStoresUpload": {
+    "uploadError": "Errore durante il caricamento dei punti vendita",
+    "uploadSuccess": "Punti vendita caricati con successo"
   }
 }

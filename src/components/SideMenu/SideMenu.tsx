@@ -12,7 +12,8 @@ import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/hooks/use
 import { useTranslation } from 'react-i18next';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListAltIcon from '@mui/icons-material/ListAlt';
-import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import StoreIcon from '@mui/icons-material/Store';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
 import ROUTES, { BASE_ROUTE } from '../../routes';
@@ -43,7 +44,7 @@ export default function SideMenu() {
   });
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS],
+    path: [ROUTES.DISCOUNTS,ROUTES.OVERVIEW,ROUTES.STORES],
     exact: true,
     strict: false,
   });
@@ -98,13 +99,29 @@ export default function SideMenu() {
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls={`panel-${item.initiativeId}-content`}
                 id={`panel-${item.initiativeId}-header`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onExit(() => {
+                    dispatch(
+                      setSelectedInitative({
+                        spendingPeriod:
+                          `${item.startDate?.toLocaleDateString(
+                            'fr-FR'
+                          )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
+                        initiativeName: item.initiativeName,
+                      })
+                    );
+                    history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`);
+                    setExpanded(`panel-${item.initiativeId}`);
+                  });
+                }}
               >
                 <ListItemText sx={{ wordBreak: 'break-word' }} primary={item.initiativeName} />
               </AccordionSummary>
               <AccordionDetails sx={{ p: 0 }}>
                 <List disablePadding>
                   <SidenavItem
-                    title={t('pages.initiativeDiscounts.title')}
+                    title={t('pages.initiativeOverview.title')}
                     handleClick={() =>
                       onExit(() => {
                         dispatch(
@@ -116,13 +133,33 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        history.replace(`${BASE_ROUTE}/sconti-iniziativa/${item.initiativeId}`);
-                      })
-                    }
-                    isSelected={pathname === `${BASE_ROUTE}/sconti-iniziativa/${item.initiativeId}`}
-                    icon={ConfirmationNumberIcon}
+                        history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`);
+                      })}
+                    isSelected={pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`}
+                    icon={DashboardIcon}
                     level={2}
-                    data-testid="initiativeDiscountsTitle-click-test"
+                    data-testid="initiativeOverviewTitle-click-test"
+                  />
+                  <SidenavItem
+                    title={t('pages.initiativeStores.title')}
+                    handleClick={() =>
+                      onExit(() => {
+                        dispatch(
+                          setSelectedInitative({
+                            spendingPeriod:
+                              `${item.startDate?.toLocaleDateString(
+                                'fr-FR'
+                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
+                            initiativeName: item.initiativeName,
+                          })
+                        );
+                        console.log(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
+                        history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
+                      })}
+                    isSelected={pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`}
+                    icon={StoreIcon}
+                    level={2}
+                    data-testid="initiativeStoresTitle-click-test"
                   />
                 </List>
               </AccordionDetails>

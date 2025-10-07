@@ -12,7 +12,7 @@ import { MerchantTransactionProcessedDTO } from '../../api/generated/merchants/M
 import {
   TransactionsComponentProps,
   renderTrasactionProcessedStatus,
-  resetForm,
+  // resetForm,
   tableHeadData,
 } from './helpers';
 import FiltersForm from './FiltersForm';
@@ -37,7 +37,7 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
       searchUser: '',
       filterStatus: '',
     },
-    onSubmit: (values) => {
+    onSubmit: (values: any) => {
       if (typeof id === 'string') {
         const fU = values.searchUser.length > 0 ? values.searchUser : undefined;
         const fS = values.filterStatus.length > 0 ? values.filterStatus : undefined;
@@ -48,10 +48,10 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
     },
   });
 
-  const filterByStatusOptionsList = [
-    { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded') },
-    { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
-  ];
+  // const filterByStatusOptionsList = [
+  //   { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded') },
+  //   { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
+  // ];
 
   const getTableData = (
     initiativeId: string,
@@ -94,10 +94,9 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
     <Box sx={{ width: '100%' }}>
       <FiltersForm
         formik={formik}
-        resetForm={() =>
-          resetForm(id, formik, setFilterDataByUser, setFilterDataByStatus, setRows, getTableData)
-        }
-        filterByStatusOptionsList={filterByStatusOptionsList}
+        // resetForm={() =>
+        //   resetForm(id, formik, setFilterDataByUser, setFilterDataByStatus, setRows, getTableData)
+        // }
       />
       {rows.length > 0 ? (
         <Box
@@ -115,8 +114,8 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
                     <TableRow key={i}>
                       <TableCell>{formatDate(r.updateDate)}</TableCell>
                       <TableCell>{r.fiscalCode}</TableCell>
-                      <TableCell>{formattedCurrency(r.effectiveAmount, '-', true)}</TableCell>
-                      <TableCell>{formattedCurrency(r.rewardAmount, '-', true)}</TableCell>
+                      <TableCell>{formattedCurrency(r.effectiveAmountCents, '-', true)}</TableCell>
+                      <TableCell>{formattedCurrency(r.rewardAmountCents, '-', true)}</TableCell>
                       <TableCell>{renderTrasactionProcessedStatus(r.status)}</TableCell>
                     </TableRow>
                   ))}

@@ -1,5 +1,7 @@
 /* eslint-disable functional/no-let */
 /* eslint-disable functional/immutable-data */
+import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
+
 export const copyTextToClipboard = (magicLink: string | undefined) => {
   if (typeof magicLink === 'string') {
     void navigator.clipboard.writeText(magicLink);
@@ -72,7 +74,7 @@ export const mapDataForDiscoutTimeRecap = (
 
 export const formattedCurrency = (
   number: number | undefined,
-  symbol: string = '-',
+  symbol: string = MISSING_EURO_PLACEHOLDER,
   cents: boolean = false
 ) => {
   if (number && cents === false) {
@@ -94,7 +96,7 @@ export const formatIban = (iban: string | undefined) => {
       10
     )} ${iban.slice(10, 15)} ${iban.slice(15, 32)}`;
   }
-  return '';
+  return MISSING_DATA_PLACEHOLDER;
 };
 
 export const formatDate = (date: Date | undefined) => {
@@ -104,9 +106,28 @@ export const formatDate = (date: Date | undefined) => {
       month: '2-digit',
       year: 'numeric',
       timeZone: 'Europe/Rome',
-      hour: 'numeric',
-      minute: 'numeric',
     });
   }
   return '';
 };
+
+export const isValidEmail = (email: string) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
+export const isValidUrl = (url: string) => {
+  if (url.endsWith('.it') || url.endsWith('.com')|| url.endsWith('.info')|| url.endsWith('.io')|| url.endsWith('.net')|| url.endsWith('.eu')) {
+    try {
+      new URL(url); // Tenta di creare un oggetto URL
+      return true; // Se non lancia errori, l'URL è valido
+    } catch (e) {
+      return false; // Se si verifica un errore, l'URL non è valido
+    }
+  } else {
+    return false;
+  }
+
+};
+
+export const generateUniqueId = () => Date.now().toString() + Math.random().toString(36).substring(2, 9);

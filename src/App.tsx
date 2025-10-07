@@ -17,9 +17,13 @@ import routes from './routes';
 import useTCAgreement from './hooks/useTCAgreement';
 import InitiativesList from './pages/initiativesList/initiativesList';
 import Assistance from './pages/assistance/assistance';
-import InitiativeDiscounts from './pages/initiativeDiscounts/initiativeDiscounts';
+// import InitiativeDiscounts from './pages/initiativeDiscounts/initiativeDiscounts';
 import NewDiscount from './pages/newDiscount/newDiscount';
 import AcceptNewDiscount from './pages/acceptNewDiscount/acceptNewDiscount';
+import InitiativeOverview from './pages/initiativeOverview/initiativeOverview';
+import InitiativeStoresUpload from './pages/initiativeStores/initiativeStoresUpload';
+import InitiativeStores from './pages/initiativeStores/InitiativeStores';
+import InitiativeStoreDetail from './pages/initiativeStores/initiativeStoreDetail';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -64,8 +68,20 @@ const SecuredRoutes = withLogin(
           <Route path={routes.PRIVACY_POLICY} exact={true}>
             <PrivacyPolicy />
           </Route>
-          <Route path={routes.DISCOUNTS} exact={true}>
+          {/* <Route path={routes.DISCOUNTS} exact={true}>
             <InitiativeDiscounts />
+          </Route> */}
+          <Route path={routes.OVERVIEW} exact={true}>
+            <InitiativeOverview />
+          </Route>
+          <Route path={routes.STORES_UPLOAD} exact={true}>
+            <InitiativeStoresUpload />
+          </Route>
+          <Route path={routes.STORES} exact={true}>
+            <InitiativeStores />
+          </Route>
+          <Route path={routes.STORES_DETAIL} exact={true}>
+            <InitiativeStoreDetail />
           </Route>
           <Route path={routes.NEW_DISCOUNT} exact={true}>
             <NewDiscount />

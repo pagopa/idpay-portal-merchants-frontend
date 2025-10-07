@@ -8,6 +8,7 @@
     "@mui/lab": "^5.0.0-alpha.100",
     "@mui/material": "^5.10.9",
     "@mui/system": "^5.10.8",
+    "@mui/x-data-grid": "^5.17.0",
     "@pagopa/mui-italia": "^0.9.4",
     "@pagopa/selfcare-common-frontend": "^1.20.0",
     "@types/react": "^17.0.2",
@@ -39,11 +40,13 @@
     "prettify": "prettier --write \"./**/*.{ts,tsx}\"",
     "generate": "npm-run-all generate:*",
     "clean:api-merchants": "rimraf src/api/generated/merchants && rimraf openApi/generated",
-    "generate:api-merchants": "yarn run clean:api-merchants && mkdirp openApi/generated && api-spec-converter --from=openapi_3 --to=swagger_2 openApi/merchants.openapi.yml > openApi/generated/merchants-swagger20.json && node ./node_modules/@pagopa/selfcare-common-frontend/utils/fixSwagger20ArraySchemaDef.js openApi/generated/merchants-swagger20.json && node ./openApi/scripts/api-merchants_fixPreGen.js && gen-api-models --api-spec openApi/generated/merchants-swagger20.json --out-dir src/api/generated/merchants --no-strict --request-types --response-decoders --client && node openApi/scripts/api-merchants_fixPostGen.js",
+    "generate:api-merchants": "yarn run clean:api-merchants && mkdirp openApi/generated && api-spec-converter --from=openapi_3 --to=swagger_2 openApi/openapi.merchants.portal.yml > openApi/generated/merchants-swagger20.json && node ./node_modules/@pagopa/selfcare-common-frontend/utils/fixSwagger20ArraySchemaDef.js openApi/generated/merchants-swagger20.json && node ./openApi/scripts/api-merchants_fixPreGen.js && gen-api-models --api-spec openApi/generated/merchants-swagger20.json --out-dir src/api/generated/merchants --no-strict --request-types --response-decoders --client && node openApi/scripts/api-merchants_fixPostGen.js",
     "clean:api-role-permission": "rimraf src/api/generated/role-permission",
     "generate:api-role-permission": "yarn run clean:api-role-permission && mkdirp openApi/generated && api-spec-converter --from=openapi_3 --to=swagger_2 openApi/role-permission.openapi.yml > openApi/generated/role-permission-swagger20.json && node ./node_modules/@pagopa/selfcare-common-frontend/utils/fixSwagger20ArraySchemaDef.js openApi/generated/role-permission-swagger20.json && node ./openApi/scripts/api-role-permission_fixPreGen.js && gen-api-models --api-spec openApi/generated/role-permission-swagger20.json --out-dir src/api/generated/role-permission --no-strict --request-types --response-decoders --client && node openApi/scripts/api-role-permission_fixPostGen.js",
     "clean:api-email-notification": "rimraf src/api/generated/email-notification",
-    "generate:api-email-notification": "yarn run clean:api-email-notification && mkdirp openApi/generated && api-spec-converter --from=openapi_3 --to=swagger_2 openApi/email-notification.openapi.yml > openApi/generated/email-notification-swagger20.json && node ./node_modules/@pagopa/selfcare-common-frontend/utils/fixSwagger20ArraySchemaDef.js openApi/generated/email-notification-swagger20.json && node ./openApi/scripts/api-email-notification_fixPreGen.js && gen-api-models --api-spec openApi/generated/email-notification-swagger20.json --out-dir src/api/generated/email-notification --no-strict --request-types --response-decoders --client && node openApi/scripts/api-email-notification_fixPostGen.js"
+    "generate:api-email-notification": "yarn run clean:api-email-notification && mkdirp openApi/generated && api-spec-converter --from=openapi_3 --to=swagger_2 openApi/email-notification.openapi.yml > openApi/generated/email-notification-swagger20.json && node ./node_modules/@pagopa/selfcare-common-frontend/utils/fixSwagger20ArraySchemaDef.js openApi/generated/email-notification-swagger20.json && node ./openApi/scripts/api-email-notification_fixPreGen.js && gen-api-models --api-spec openApi/generated/email-notification-swagger20.json --out-dir src/api/generated/email-notification --no-strict --request-types --response-decoders --client && node openApi/scripts/api-email-notification_fixPostGen.js",
+    "clean:api-autocomplete": "rimraf src/api/generated/autocomplete",
+    "generate:api-autocomplete": "yarn run clean:api-autocomplete && mkdirp openApi/generated && api-spec-converter --from=openapi_3 --to=swagger_2 openApi/openapi.autocomplete.yml > openApi/generated/autocomplete-swagger20.json && node ./node_modules/@pagopa/selfcare-common-frontend/utils/fixSwagger20ArraySchemaDef.js openApi/generated/autocomplete-swagger20.json && node ./openApi/scripts/api-autocomplete_fixPreGen.js && gen-api-models --api-spec openApi/generated/autocomplete-swagger20.json --out-dir src/api/generated/autocomplete --no-strict --request-types --response-decoders --client && node ./openApi/scripts/api-autocomplete_fixPostGen.js"
   },
   "eslintConfig": {
     "extends": [

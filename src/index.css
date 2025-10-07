@@ -18,3 +18,9 @@
   overflow: hidden !important;
   text-overflow: ellipsis;
 }
+
+.cursor-pointer {
+  &:hover {
+    cursor: pointer;
+  }
+}

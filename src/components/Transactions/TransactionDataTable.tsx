@@ -1,0 +1,151 @@
+import { DataGrid,GridSortModel } from '@mui/x-data-grid';
+import { useEffect, useState, useCallback } from 'react';
+import { IconButton, Box } from '@mui/material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { theme } from '@pagopa/mui-italia';
+import {MISSING_DATA_PLACEHOLDER} from '../../utils/constants';
+
+export interface DataTableProps {
+  rows: any;
+  columns: any;
+  pageSize: number;
+  rowsPerPage: number;
+  handleRowAction: (row: any) => void; 
+  onSortModelChange?: (model: any) => void;
+  sortModel?: GridSortModel;
+  onPaginationPageChange?: (page: number) => void;
+  paginationModel?: any;
+}
+
+
+const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel }: DataTableProps) => {
+  const [finalColumns, setFinalColumns] = useState(Array<any>);
+  const [sortModelState, setSortModelState] = useState<any>([]);
+
+
+  useEffect(() => {
+    if (columns && columns.length > 0) {
+      const processedColumns = columns.map((col: any) => ({
+        ...col,
+        renderCell: col.renderCell ? col.renderCell : renderEmptyCell
+      }));
+
+      setFinalColumns(
+        [
+          ...processedColumns,
+          {
+            field: 'actions',
+            headerName: '',
+            sortable: false,
+            filterable: false,
+            disableColumnMenu: true,
+            flex: 0.1,
+            renderCell: (params: any) => (
+              <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+                <IconButton
+                  onClick={() => handleRowAction(params.row)}
+                  size="small"
+                >
+                  <ChevronRightIcon color='primary' fontSize='inherit' />
+                </IconButton>
+              </Box>
+            )
+          }
+        ]
+      );
+    }
+  }, [columns]);
+
+
+  const renderEmptyCell = (params: any) => {
+    if (params.value === null || params.value === undefined || params.value === '') {
+      return MISSING_DATA_PLACEHOLDER;
+    }
+    return params.value;
+  };
+
+  const handlePageChange = (page: number) => {
+    onPaginationPageChange?.(page);
+  };
+
+  const handleSortModelChange = useCallback((model: any) => {
+    if(model.length > 0){
+      setSortModelState(model);
+      onSortModelChange?.(model);
+    }else{
+      setSortModelState((prevState: any) => {
+        const newSortModel = prevState?.[0].sort === 'asc'
+          ? [{field: prevState?.[0].field, sort: 'desc'}]
+          : [{field: prevState?.[0].field, sort: 'asc'}];
+        
+        onSortModelChange?.(newSortModel);        
+        return newSortModel;
+      });
+    }
+    
+  }, [onSortModelChange]);
+
+  return (
+    <>
+      {
+        rows?.length > 0 && columns?.length > 0 && (
+          <DataGrid
+            rows={rows}
+            columns={finalColumns}
+            rowsPerPageOptions={[rowsPerPage]}
+            disableSelectionOnClick
+            autoHeight
+            sortingMode='server'
+            paginationMode='server'
+            onSortModelChange={handleSortModelChange}
+            sortModel={sortModelState}
+            onPageChange={handlePageChange}
+            page={paginationModel?.pageNo}
+            pageSize={paginationModel?.pageSize}
+            rowCount={paginationModel?.totalElements}
+            localeText={{
+              noRowsLabel: 'Nessun punto vendita da visualizzare.',
+              MuiTablePagination: {
+                labelDisplayedRows(paginationInfo) {
+                  return `${paginationInfo.from}-${paginationInfo.to} di ${paginationInfo.count}`;
+                },
+              }
+            }}
+            sx={{
+              border: 'none',
+              '& .MuiDataGrid-row': {
+                backgroundColor: theme.palette.background.paper,
+                '&:hover': {
+                  backgroundColor: theme.palette.background.paper,
+                },
+              },
+              '& .MuiDataGrid-columnSeparator': {
+                display: 'none'
+              },
+              '& .MuiDataGrid-footerContainer': {
+                border: 'none'
+              }, 
+               '& .MuiDataGrid-cell:focus': {
+                outline: 'none'
+              }, 
+               '& .MuiDataGrid-columnHeader:focus': {
+                outline: 'none'
+              },
+               '& .MuiDataGrid-cell:focus-within': {
+                outline: 'none'
+              },  
+              '& .MuiDataGrid-columnHeader:focus-within': {
+                outline: 'none'
+              }
+              
+
+            }}
+          />
+        )
+      }
+    </>
+
+  );
+};
+
+export default TransactionDataTable;
