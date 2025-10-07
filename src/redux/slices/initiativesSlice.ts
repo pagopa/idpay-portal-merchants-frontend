@@ -1,10 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
-import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOArray';
 
 interface InitiativesState {
-  list?: InitiativeDTOArray;
   selectedInitative?:
     | { initiativeName?: string | undefined; spendingPeriod?: string | undefined }
     | undefined;
@@ -17,9 +15,6 @@ export const initiativesSlice = createSlice({
   name: 'initiatives',
   initialState,
   reducers: {
-    setInitiativesList: (state, action: PayloadAction<InitiativeDTOArray>) => {
-      state.list = [...action.payload];
-    },
     setSelectedInitative: (
       state,
       action: PayloadAction<
@@ -35,11 +30,7 @@ export const initiativesSlice = createSlice({
   },
 });
 
-export const { setInitiativesList, setSelectedInitative } = initiativesSlice.actions;
 export const initiativesReducer = initiativesSlice.reducer;
-
-export const intiativesListSelector = (state: RootState): InitiativeDTOArray | undefined =>
-  state.initiatives.list;
 
 export const initiativeSelector = (
   state: RootState

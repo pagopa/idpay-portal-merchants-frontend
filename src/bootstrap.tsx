@@ -3,18 +3,18 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import '@pagopa/selfcare-common-frontend/index.css';
 import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { theme } from '@pagopa/mui-italia';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/config/env';
+import { Provider } from 'react-redux';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { store } from './redux/store';
 import { MOCK_USER, testToken } from './utils/constants';
 import { ENV } from './utils/env';
 import './consentAndAnalyticsConfiguration.ts';
 import './locale';
 import ROUTES from './routes';
+import { store } from './redux/store';
 
 // eslint-disable-next-line functional/immutable-data
 CONFIG.MOCKS.MOCK_USER = MOCK_USER;
@@ -32,7 +32,7 @@ CONFIG.HEADER.LINK.PRODUCTURL = ROUTES.HOME;
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={store}>
+    <Provider store={store} >
       <BrowserRouter>
         <ThemeProvider theme={theme}>
           <CssBaseline />

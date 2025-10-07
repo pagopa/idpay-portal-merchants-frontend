@@ -3,42 +3,15 @@ import { Footer } from '@pagopa/selfcare-common-frontend';
 import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/hooks/useUnloadEventInterceptor';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  storageTokenOps,
-  storageUserOps,
-} from '@pagopa/selfcare-common-frontend/utils/storage';
 import Header from '../Header/Header';
 import ROUTES from '../../routes';
+import { customExitAction } from '../../helpers';
 
 type Props = {
   children?: React.ReactNode;
 };
 
-import { ENV } from '../../utils/env';
-
 const Layout = ({ children }: Props) => {
-  const customExitAction = () => {
-    storageTokenOps.delete();
-    storageUserOps.delete();
-    Object.keys(localStorage).forEach((key) => {
-      if (
-        key.toLowerCase().includes('filter') ||
-        key === 'user' ||
-        key === 'token' ||
-        key.startsWith('persist:')
-      ) {
-        localStorage.removeItem(key);
-      }
-    });
-    Object.keys(sessionStorage).forEach((key) => {
-      if (key.toLowerCase().includes('filter') || key === 'user' || key === 'token') {
-        sessionStorage.removeItem(key);
-      }
-    });
-
-    window.location.assign(ENV.URL_FE.LOGOUT);
-  };
-
   const onExit = useUnloadEventOnExit();
   const location = useLocation();
   const [, setShowAssistanceInfo] = useState(true);
@@ -58,11 +31,7 @@ const Layout = ({ children }: Props) => {
       minHeight="100vh"
     >
       <Box gridArea="header">
-        <Header
-          onExit={() => onExit(customExitAction)}
-          parties={[]}
-          withSecondHeader={false}
-        />
+        <Header />
       </Box>
         <Box
           gridArea="body"
