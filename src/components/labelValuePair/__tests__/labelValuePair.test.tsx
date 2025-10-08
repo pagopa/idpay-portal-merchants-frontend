@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import LabelValuePair from '../LabelValuePair';
+import LabelValuePair from '../labelValuePair';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 
 describe('LabelValuePair', () => {

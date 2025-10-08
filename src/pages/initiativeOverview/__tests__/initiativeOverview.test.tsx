@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { createMemoryHistory, History } from 'history';
 import { MemoryRouter, Route } from 'react-router-dom';
-import InitiativeOverview from '../InitiativeOverview';
+import InitiativeOverview from '../initiativeOverview';
 import {
   getMerchantDetail,
   getMerchantInitiativeStatistics,
@@ -32,7 +32,7 @@ const mockedGetMerchantDetail = getMerchantDetail as jest.Mock;
 const mockedGetMerchantInitiativeStatistics = getMerchantInitiativeStatistics as jest.Mock;
 const mockedUseErrorDispatcher = useErrorDispatcher as jest.Mock;
 
-const renderComponent = (initiativeId: string) => {
+const renderComponent = (initiativeId: string, history?: any) => {
   const path = ROUTES.OVERVIEW.replace(':id', initiativeId);
   return render(
     <MemoryRouter initialEntries={[path]}>

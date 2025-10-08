@@ -36,7 +36,7 @@ describe('EmailNotificationApi', () => {
 
     let EmailNotificationApi: any;
     jest.isolateModules(() => {
-      EmailNotificationApi = require('../EmailNotificationApiClient').EmailNotificationApi;
+      EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
     });
 
     const result = await EmailNotificationApi.getInstitutionProductUserInfo();
@@ -51,7 +51,7 @@ describe('EmailNotificationApi', () => {
 
     let EmailNotificationApi: any;
     jest.isolateModules(() => {
-      EmailNotificationApi = require('../EmailNotificationApiClient').EmailNotificationApi;
+      EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
     });
 
     const emailData = {

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import InitiativeStoreDetail from '../InitiativeStoreDetail';
+import InitiativeStoreDetail from '../initiativeStoreDetail';
 import { useParams } from 'react-router-dom';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import {

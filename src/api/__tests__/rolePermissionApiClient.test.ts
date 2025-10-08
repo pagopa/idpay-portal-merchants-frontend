@@ -35,7 +35,7 @@ describe('RolePermissionApi', () => {
   const loadApi = () => {
     let RolePermissionApi: any;
     jest.isolateModules(() => {
-      RolePermissionApi = require('../RolePermissionApiClient').RolePermissionApi;
+      RolePermissionApi = require('../rolePermissionApiClient').RolePermissionApi;
     });
     return RolePermissionApi;
   };
@@ -73,7 +73,7 @@ describe('RolePermissionApi', () => {
 
     let RolePermissionApi: any;
     jest.isolateModules(() => {
-      RolePermissionApi = require('../RolePermissionApiClient').RolePermissionApi;
+      RolePermissionApi = require('../rolePermissionApiClient').RolePermissionApi;
     });
 
     const result = await RolePermissionApi.savePortalConsent('v1');

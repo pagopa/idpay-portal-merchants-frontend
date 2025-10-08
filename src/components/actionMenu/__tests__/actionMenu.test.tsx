@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider, createTheme } from '@mui/material';
-import ActionMenu from '../ActionMenu';
+import ActionMenu from '../actionMenu';
 import {
   MerchantTransactionDTO,
   StatusEnum as TransactionStatusEnum,
@@ -62,7 +62,7 @@ describe('ActionMenu', () => {
   it('should render the actions button and handle menu open/close', () => {
     render(
       <Wrapper>
-        <ActionMenu {...mockBaseData} />
+        <ActionMenu status={mockBaseData.data.status} {...mockBaseData} />
       </Wrapper>
     );
 

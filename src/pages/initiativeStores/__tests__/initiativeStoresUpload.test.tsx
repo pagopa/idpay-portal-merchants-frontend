@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import InitiativeStoresUpload from '../InitiativeStoresUpload';
+import InitiativeStoresUpload from '../initiativeStoresUpload';
 import { POS_UPDATE } from '../../../utils/constants';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
