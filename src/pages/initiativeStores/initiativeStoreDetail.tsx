@@ -20,6 +20,7 @@ import { formatDate } from '../../utils/formatUtils';
 import { MISSING_DATA_PLACEHOLDER, POS_TYPE } from '../../utils/constants';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import InitiativeDetailCard from './InitiativeDetailCard';
+import { useStore } from './StoreContext';
 
 
 
@@ -48,6 +49,8 @@ const InitiativeStoreDetail = () => {
   const { id, store_id } = useParams<RouteParams>();
   const addError = useErrorDispatcher();
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
+  const { setStoreId } = useStore();
+
 
 
   useEffect(() => {
@@ -57,7 +60,7 @@ const InitiativeStoreDetail = () => {
     fetchStoreTransactions().catch((error) => {
       console.log("error", error);
     });
-
+    setStoreId(store_id);
   }, [id, store_id]);
 
   useEffect(() => {
