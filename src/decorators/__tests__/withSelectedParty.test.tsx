@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { createStore} from '../../redux/store';
+import { createStore } from '../../redux/store';
 import withSelectedParty from '../withSelectedParty';
 import { verifyFetchPartyDetailsMockExecution } from '../../services/__mocks__/partyService';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';

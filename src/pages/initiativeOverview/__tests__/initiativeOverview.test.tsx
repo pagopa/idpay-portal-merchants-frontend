@@ -1,173 +1,136 @@
-import { render} from '@testing-library/react';
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { BrowserRouter } from 'react-router-dom';
-// import InitiativeOverview from '../InitiativeOverview';
+import { createMemoryHistory, History } from 'history';
+import { MemoryRouter, Route } from 'react-router-dom';
+import InitiativeOverview from '../initiativeOverview';
+import {
+  getMerchantDetail,
+  getMerchantInitiativeStatistics,
+} from '../../../services/merchantService';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../../../utils/constants';
+import ROUTES from '../../../routes';
 
-
-const mockMatchPath = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  matchPath: () => mockMatchPath(),
+jest.mock('../../../services/merchantService', () => ({
+  getMerchantDetail: jest.fn(),
+  getMerchantInitiativeStatistics: jest.fn(),
 }));
 
+jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
 jest.mock('react-i18next', () => ({
+  // La parte che avevi già
   useTranslation: () => ({
     t: (key: string) => key,
-    i18n: {
-      language: 'it',
-      changeLanguage: jest.fn(),
-    },
   }),
-  withTranslation: () => (Component: any) => Component,
+  withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
+    <Component {...props} />,
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
-  __esModule: true,
-  default: () => jest.fn(),
-}));
+const mockedGetMerchantDetail = getMerchantDetail as jest.Mock;
+const mockedGetMerchantInitiativeStatistics = getMerchantInitiativeStatistics as jest.Mock;
+const mockedUseErrorDispatcher = useErrorDispatcher as jest.Mock;
 
-const renderComponent = () => {
+const renderComponent = (initiativeId: string, history?: any) => {
+  const path = ROUTES.OVERVIEW.replace(':id', initiativeId);
   return render(
-    <BrowserRouter>
-      {/*<InitiativeOverview />*/}
-    </BrowserRouter>
+    <MemoryRouter initialEntries={[path]}>
+      <Route path={ROUTES.OVERVIEW}>
+        <InitiativeOverview />
+      </Route>
+    </MemoryRouter>
   );
 };
 
 describe('InitiativeOverview', () => {
+  const mockAddError = jest.fn();
+  const initiativeId = 'test-initiative-id';
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mockMatchPath.mockReturnValue({
-      params: { id: 'test-id' }
-    });
-
+    mockedUseErrorDispatcher.mockReturnValue(mockAddError);
   });
 
-  describe('Component rendering', () => {
-    test('should render the main title and subtitle', () => {
-      renderComponent();
+  test('should render component with fetched data on success', async () => {
+    const detailData = {
+      iban: 'IT60X0542811101000000123456',
+      ibanHolder: 'Test Holder',
+      activationDate: new Date('2023-01-01'),
+    };
+    const statsData = { amountCents: 10000, refundedCents: 2500 };
+    mockedGetMerchantDetail.mockResolvedValue(detailData);
+    mockedGetMerchantInitiativeStatistics.mockResolvedValue(statsData);
 
-      // expect(screen.getByText('pages.initiativeOverview.title')).toBeInTheDocument();
-      // expect(screen.getByText('pages.initiativeOverview.subtitle')).toBeInTheDocument();
+    const history = createMemoryHistory();
+    renderComponent(initiativeId, history);
+
+    await waitFor(() => {
+      expect(screen.getByText('01/01/2023')).toBeInTheDocument();
+      expect(screen.getByText('Test Holder')).toBeInTheDocument();
+      expect(screen.getByText('IT 60 X 05428 11101 000000123456')).toBeInTheDocument();
+      expect(screen.getByText('100,00 €')).toBeInTheDocument();
+      expect(screen.getByText('25,00 €')).toBeInTheDocument();
     });
+  });
 
-  //   test('should render the information section', () => {
-  //     renderComponent();
-  //
-  //     expect(screen.getByText('pages.initiativeOverview.information')).toBeInTheDocument();
-  //     expect(screen.getByText('pages.initiativeOverview.refundsStatusTitle')).toBeInTheDocument();
-  //     expect(screen.getByText('pages.initiativeOverview.totalAmount')).toBeInTheDocument();
-  //     expect(screen.getByText('pages.initiativeOverview.totalRefunded')).toBeInTheDocument();
-  //   });
-  //
-  //   test('should render the stores section', () => {
-  //     renderComponent();
-  //
-  //     expect(screen.getByText('pages.initiativeOverview.stores')).toBeInTheDocument();
-  //   });
-  //
-  //   test('should render IBAN data section', () => {
-  //     renderComponent();
-  //
-  //     expect(screen.getByText('pages.initiativeOverview.refundsDataTitle')).toBeInTheDocument();
-  //     expect(screen.getByText('pages.initiativeOverview.holder')).toBeInTheDocument();
-  //     expect(screen.getByText('pages.initiativeOverview.iban')).toBeInTheDocument();
-  //   });
-  // });
+  test('should render placeholders for missing data', async () => {
+    const detailData = {
+      iban: null,
+      ibanHolder: undefined,
+      activationDate: null,
+    };
+    const statsData = {
+      amountCents: undefined,
+      refundedCents: null,
+    };
+    mockedGetMerchantDetail.mockResolvedValue(detailData);
+    mockedGetMerchantInitiativeStatistics.mockResolvedValue(statsData);
 
-  // describe('IBAN Alert', () => {
-  //   test('should show IBAN missing alert when IBAN is missing', async () => {
-  //     renderComponent();
-  //
-  //     await waitFor(() => {
-  //       expect(screen.getByText('pages.initiativeOverview.missingIban')).toBeInTheDocument();
-  //     });
-  //   });
-  //
-  //   test('should show insert IBAN button in alert', async () => {
-  //     renderComponent();
-  //
-  //     await waitFor(() => {
-  //       expect(screen.getByText('pages.initiativeOverview.insertIban')).toBeInTheDocument();
-  //     });
-  //   });
-   });
+    renderComponent(initiativeId);
 
-  // describe('Success Alert', () => {
-  //   test('should show success alert on component mount', async () => {
-  //     renderComponent();
-  //
-  //     await waitFor(() => {
-  //       expect(screen.getByText('pages.initiativeOverview.successIban')).toBeInTheDocument();
-  //     });
-  //   });
-  //
-  //   test('should hide success alert after 5 seconds', async () => {
-  //     jest.useFakeTimers();
-  //     renderComponent();
-  //
-  //     await waitFor(() => {
-  //       expect(screen.getByText('pages.initiativeOverview.successIban')).toBeInTheDocument();
-  //     });
-  //
-  //     jest.advanceTimersByTime(5000);
-  //
-  //     await waitFor(() => {
-  //       expect(screen.queryByText('pages.initiativeOverview.successIban')).not.toBeInTheDocument();
-  //     });
-  //
-  //     jest.useRealTimers();
-  //   });
-  // });
+    await waitFor(() => {
+      const placeholders = screen.getAllByText(MISSING_DATA_PLACEHOLDER);
+      expect(placeholders).toHaveLength(3);
+      expect(screen.getAllByText(MISSING_EURO_PLACEHOLDER)).toHaveLength(2);
+    });
+  });
 
-  // describe('Text Input Handling', () => {
-  //   test('should handle IBAN input changes and filter non-alphanumeric characters', () => {
-  //     renderComponent();
-  //
-  //     const insertIbanButton = screen.getByTestId('insert-iban-button');
-  //     fireEvent.click(insertIbanButton);
-  //
-  //     const ibanInput = screen.getByLabelText('pages.initiativeOverview.insertIban');
-  //     fireEvent.change(ibanInput, { target: { value: 'IT60-X054-2811-101' } });
-  //
-  //     expect(ibanInput).toHaveValue('IT60X0542811101');
-  //   });
-  //
-  //   test('should handle IBAN holder input changes', () => {
-  //     renderComponent();
-  //
-  //     const insertIbanButton = screen.getByTestId('insert-iban-button');
-  //     fireEvent.click(insertIbanButton);
-  //
-  //     const holderInput = screen.getByLabelText('pages.initiativeOverview.insertIbanHolder');
-  //     fireEvent.change(holderInput, { target: { value: 'Mario Rossi' } });
-  //
-  //     expect(holderInput).toHaveValue('Mario Rossi');
-  //   });
-  //
-  //   test('should show character counter for IBAN input', () => {
-  //     renderComponent();
-  //
-  //     const insertIbanButton = screen.getByTestId('insert-iban-button');
-  //     fireEvent.click(insertIbanButton);
-  //
-  //     expect(screen.getByLabelText('pages.initiativeOverview.insertIban')).toBeInTheDocument();
-  //
-  //     const ibanInput = screen.getByLabelText('pages.initiativeOverview.insertIban');
-  //     fireEvent.change(ibanInput, { target: { value: 'IT60X0542811101' } });
-  //
-  //     expect(screen.getByText(/\d+\/27/)).toBeInTheDocument();
-  //   });
-  // });
+  test('should call addError if getMerchantDetail fails', async () => {
+    const error = new Error('Failed to fetch detail');
+    mockedGetMerchantDetail.mockRejectedValue(error);
+    mockedGetMerchantInitiativeStatistics.mockResolvedValue({});
 
+    renderComponent(initiativeId);
 
-  // describe('Store Button', () => {
-  //   test('should render store button with correct text', () => {
-  //     renderComponent();
-  //
-  //     const storeButton = screen.getByTestId('add-stores-button');
-  //     expect(storeButton).toBeInTheDocument();
-  //     expect(storeButton).toHaveTextContent('pages.initiativeOverview.storesSubtitle');
-  //   });
-  // });
+    await waitFor(() => {
+      expect(mockAddError).toHaveBeenCalledTimes(1);
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'GET_MERCHANT_DETAIL',
+          error,
+        })
+      );
+    });
+  });
+
+  test('should call addError and show placeholders if getMerchantInitiativeStatistics fails', async () => {
+    const error = new Error('Failed to fetch stats');
+    mockedGetMerchantDetail.mockResolvedValue({ ibanHolder: 'Test Holder' });
+    mockedGetMerchantInitiativeStatistics.mockRejectedValue(error);
+
+    renderComponent(initiativeId);
+
+    await waitFor(() => {
+      expect(mockAddError).toHaveBeenCalledTimes(1);
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'GET_MERCHANT_STATISTICS',
+          error,
+        })
+      );
+      expect(screen.getByText('Test Holder')).toBeInTheDocument();
+      expect(screen.getAllByText(MISSING_EURO_PLACEHOLDER)).toHaveLength(2);
+    });
+  });
 });

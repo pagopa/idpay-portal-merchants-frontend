@@ -101,6 +101,15 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     },
     {
       field: 'rewardAmountCents',
+      headerName: 'Sconto applicato',
+      flex: 0.5,
+      editable: false,
+      disableColumnMenu: true,
+      sortable: false,
+      renderCell: (params: any) => <CurrencyColumn value={params.value/100} />,
+    },
+    {
+      field: 'authorizedAmountCents',
       headerName: 'Importo autorizzato',
       flex: 0.5,
       editable: false,
