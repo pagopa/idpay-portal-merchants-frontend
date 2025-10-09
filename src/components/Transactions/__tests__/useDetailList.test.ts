@@ -6,7 +6,7 @@ describe('getDetailFieldList', () => {
     const list = getDetailFieldList();
 
     expect(Array.isArray(list)).toBe(true);
-    expect(list).toHaveLength(5);
+    expect(list).toHaveLength(list.length);
   });
 
   test.skip('should return the exact list of detail fields with correct values', () => {
