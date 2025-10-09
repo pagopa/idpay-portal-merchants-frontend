@@ -61,8 +61,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
     const index = Object.keys(itemValues).indexOf(driver);
     const val = Object.values(itemValues)[index] as string;
     if (driver === "additionalProperties.productName") {
-      const val = Object.values(itemValues)[Object.keys(itemValues).indexOf('additionalProperties')] as any;
-      return val?.productName ?? MISSING_DATA_PLACEHOLDER;
+      return itemValues?.additionalProperties?.productName ?? MISSING_DATA_PLACEHOLDER;
     }
     if (type === TYPE_TEXT.Text) {
       return formatValues(val);

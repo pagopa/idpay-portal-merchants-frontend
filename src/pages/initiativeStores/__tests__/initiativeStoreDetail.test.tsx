@@ -14,6 +14,7 @@ import { parseJwt } from '../../../utils/jwt-utils';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { isValidEmail } from '../../../helpers';
 import { POS_TYPE } from '../../../utils/constants';
+import { StoreProvider } from '../StoreContext';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -100,14 +101,22 @@ describe('InitiativeStoreDetail', () => {
   });
 
   test('renders store detail and calls APIs', async () => {
-    render(<InitiativeStoreDetail />);
+    render(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
+    );
     expect(await screen.findByText('Mock Store')).toBeInTheDocument();
     expect(mockGetById).toHaveBeenCalled();
     expect(mockGetTransactions).toHaveBeenCalled();
   });
 
   test('opens and closes modal', async () => {
-    render(<InitiativeStoreDetail />);
+    render(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
+      );
     await screen.findByText('Mock Store');
     const editButton = screen.getByRole('button', { name: /Modifica/i });
     await userEvent.click(editButton);
@@ -130,7 +139,11 @@ describe('InitiativeStoreDetail', () => {
   });
 
   test.skip('handles mismatched emails', async () => {
-    render(<InitiativeStoreDetail />);
+    render(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
+    );
     await userEvent.click(await screen.findByRole('button', { name: /Modifica/i }));
     const email1 = screen.getAllByLabelText('pages.initiativeStores.contactEmail')[0];
     const email2 = screen.getAllByLabelText('pages.initiativeStores.contactEmail')[1];
@@ -144,7 +157,11 @@ describe('InitiativeStoreDetail', () => {
 
   test.skip('handles update success and alert', async () => {
     mockUpdate.mockResolvedValue(undefined);
-    render(<InitiativeStoreDetail />);
+    render(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
+    );
     await userEvent.click(await screen.findByRole('button', { name: /Modifica/i }));
     const modify = screen.getAllByRole('button', { name: 'commons.modify' })[1];
     await act(async () => userEvent.click(modify));
@@ -154,7 +171,11 @@ describe('InitiativeStoreDetail', () => {
 
   test.skip('handles duplicate email error', async () => {
     mockUpdate.mockResolvedValue({ code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' });
-    render(<InitiativeStoreDetail />);
+    render(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
+    );
     await userEvent.click(await screen.findByRole('button', { name: /Modifica/i }));
     const modify = screen.getAllByRole('button', { name: 'commons.modify' })[1];
     await userEvent.click(modify);
@@ -163,7 +184,11 @@ describe('InitiativeStoreDetail', () => {
 
   test.skip('handles generic update error', async () => {
     mockUpdate.mockResolvedValue({ code: 'OTHER' });
-    render(<InitiativeStoreDetail />);
+    render(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
+    );
     await userEvent.click(await screen.findByRole('button', { name: /Modifica/i }));
     const modify = screen.getAllByRole('button', { name: 'commons.modify' })[1];
     await userEvent.click(modify);
@@ -172,7 +197,11 @@ describe('InitiativeStoreDetail', () => {
 
   test('handles fetchStoreDetail failure', async () => {
     mockGetById.mockRejectedValueOnce(new Error('fail'));
-    render(<InitiativeStoreDetail />);
+    render(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
+    );
     await waitFor(() =>
       expect(mockAddError).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'GET_MERCHANT_DETAIL' })
@@ -182,7 +211,11 @@ describe('InitiativeStoreDetail', () => {
 
   test('handles fetchStoreTransactions failure', async () => {
     mockGetTransactions.mockRejectedValueOnce(new Error('fail'));
-    render(<InitiativeStoreDetail />);
+    render(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
+    );
     await waitFor(() =>
       expect(mockAddError).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'GET_MERCHANT_TRANSACTIONS' })
@@ -191,7 +224,11 @@ describe('InitiativeStoreDetail', () => {
   });
 
   test('calls handleFiltersApplied, handleFiltersReset, sort and pagination', async () => {
-    render(<InitiativeStoreDetail />);
+    render(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
+    );
     await screen.findByTestId('transactions');
     await userEvent.click(screen.getByText('apply'));
     await userEvent.click(screen.getByText('reset'));
