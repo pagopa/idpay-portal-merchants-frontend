@@ -2,8 +2,6 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { StoreProvider, useStore } from '../StoreContext';
 
-
-// ✅ Componente di test interno per verificare il comportamento dell'hook
 const TestComponent = () => {
   const { storeId, setStoreId } = useStore();
 
@@ -23,7 +21,6 @@ describe('StoreProvider', () => {
       </StoreProvider>
     );
 
-    // Controlla che il valore iniziale sia una stringa vuota
     expect(screen.getByTestId('store-id')).toHaveTextContent('');
   });
 
@@ -41,7 +38,6 @@ describe('StoreProvider', () => {
   });
 
   test('should throw an error if useStore is used outside of StoreProvider', () => {
-    // Disabilita l'errore React in console per evitare rumore nel log
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     const FaultyComponent = () => {
