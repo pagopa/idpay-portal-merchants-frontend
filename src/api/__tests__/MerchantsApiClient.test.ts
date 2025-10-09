@@ -35,6 +35,7 @@ describe('MerchantApi', () => {
       getPointOfSales: jest.fn(),
       getPointOfSale: jest.fn(),
       getPointOfSaleTransactionsProcessed: jest.fn(),
+      downloadInvoiceFile: jest.fn(),
     };
 
     (createClient as jest.Mock).mockReturnValue(mockApiClient);
@@ -48,6 +49,19 @@ describe('MerchantApi', () => {
     });
     return MerchantApi;
   };
+  it('downloadInvoiceFile', async () => {
+    mockApiClient.downloadInvoiceFile.mockResolvedValue({ right: 'data' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.downloadInvoiceFile('trx1', 'pos1');
+
+    expect(mockApiClient.downloadInvoiceFile).toHaveBeenCalledWith({
+      transactionId: 'trx1',
+      pointOfSaleId: 'pos1',
+    });
+    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
+    expect(result).toBe('extracted');
+  });
 
   it('getMerchantInitiativeList', async () => {
     mockApiClient.getMerchantInitiativeList.mockResolvedValue({ right: 'data' });

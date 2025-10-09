@@ -12,6 +12,7 @@ import {
   getMerchantPointOfSales,
   getMerchantPointOfSalesById,
   getMerchantPointOfSaleTransactionsProcessed,
+  downloadInvoiceFile,
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
@@ -28,10 +29,21 @@ jest.mock('../../api/MerchantsApiClient', () => ({
     getMerchantPointOfSales: jest.fn(),
     getMerchantPointOfSalesById: jest.fn(),
     getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
+    downloadInvoiceFile: jest.fn(),
   },
 }));
 
 const mockedMerchantApi = MerchantApi as jest.Mocked<typeof MerchantApi>;
+
+describe('downloadInvoiceFile', () => {
+  test('should call MerchantApi.downloadInvoiceFile with correct params', async () => {
+    const params = { transactionId: 'trx-1', pointOfSaleId: 'pos-1' };
+    await downloadInvoiceFile(params.transactionId, params.pointOfSaleId);
+    expect(mockedMerchantApi.downloadInvoiceFile).toHaveBeenCalledWith(
+      ...Object.values(params)
+    );
+  });
+});
 
 describe('merchantService', () => {
   beforeEach(() => {
