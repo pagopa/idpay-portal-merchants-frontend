@@ -33,7 +33,6 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
     try {
       const response = await downloadInvoiceFile(selectedTransaction?.id,pointOfSaleId);
       const { invoiceUrl } = response;
-
       const filename = selectedTransaction?.invoiceFile?.filename || "fattura.pdf";
 
       const link = document.createElement("a");
