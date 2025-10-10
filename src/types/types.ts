@@ -1,5 +1,6 @@
 import { PointOfSaleDTO, TypeEnum } from '../api/generated/merchants/PointOfSaleDTO';
 
+
 export interface GetPointOfSalesFilters {
     type?: TypeEnum.PHYSICAL | TypeEnum.ONLINE;
     city?: string;
@@ -25,5 +26,44 @@ export interface GetPointOfSaleTransactionsFilters {
     sort?: string;
     fiscalCode?: string;
     status?: string;
+}
+
+export interface SalePointFormDTO {
+
+    address?: string;
+
+    channelEmail?: string;
+
+    channelGeolink?: string;
+
+    channelPhone?: string;
+
+    channelWebsite?: string;
+
+    city?: string;
+
+    contactEmail?: string;
+
+    confirmContactEmail?: string;
+
+    contactName?: string;
+
+    contactSurname?: string;
+
+    franchiseName?: string;
+
+    id?: string;
+
+    province?: string;
+
+    region?: string;
+
+    streetNumber?: string;
+
+    type?: string;
+
+    website?: string;
+
+    zipCode?: string;
 }
     
