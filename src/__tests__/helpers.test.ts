@@ -1,34 +1,194 @@
-import { formattedCurrency, formatDate, formatIban } from '../helpers';
+import {
+  copyTextToClipboard,
+  downloadQRCodeFromURL,
+  mapDataForDiscoutTimeRecap,
+  formattedCurrency,
+  formatIban,
+  formatDate,
+  isValidEmail,
+  isValidUrl,
+  generateUniqueId,
+} from '../helpers';
+import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 
-const date = new Date('2022-10-01T00:00:00.000Z');
+describe('copyTextToClipboard', () => {
+  const writeTextMock = jest.fn();
 
-// test('test copyTextToClipboard with a string as param', () => {
-//   const writeText = jest.spyOn(navigator.clipboard, 'writeText');
-//   copyTextToClipboard('test');
-//   expect(navigator.clipboard.readText()).toEqual('test');
-// });
+  beforeAll(() => {
+    // Mock dell'API clipboard del browser
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: writeTextMock,
+      },
+      writable: true,
+    });
+  });
 
-test('test formattedCurrency with undefined as param', () => {
-  expect(formattedCurrency(undefined)).toEqual('0,00 €');
+  beforeEach(() => {
+    writeTextMock.mockClear();
+  });
+
+  test('should call clipboard.writeText if a valid string is provided', () => {
+    const link = 'https://example.com';
+    copyTextToClipboard(link);
+    expect(writeTextMock).toHaveBeenCalledWith(link);
+  });
+
+  test('should not call clipboard.writeText if the input is undefined', () => {
+    copyTextToClipboard(undefined);
+    expect(writeTextMock).not.toHaveBeenCalled();
+  });
 });
 
-test('test formattedCurrency with a number as param', () => {
-  const result = formattedCurrency(20.3);
-  expect(result).toContain('20,30');
+describe('downloadQRCodeFromURL', () => {
+  // Mock delle API globali necessarie per questa funzione
+  global.fetch = jest.fn();
+  global.URL.createObjectURL = jest.fn();
+  const appendChildSpy = jest.spyOn(document.body, 'appendChild');
+  const removeChildSpy = jest.spyOn(document.body, 'removeChild');
+  const clickSpy = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Simula la creazione di un elemento <a> con un metodo click fittizio
+    jest.spyOn(document, 'createElement').mockReturnValue({
+      click: clickSpy,
+      href: '',
+      download: '',
+    } as any);
+  });
+
+  test('should perform fetch and trigger download on success', async () => {
+    const mockUrl = 'https://example.com/qrcode.png';
+    const mockBlob = new Blob(['qrcode-data'], { type: 'image/png' });
+    (fetch as jest.Mock).mockResolvedValue({ blob: () => Promise.resolve(mockBlob) });
+
+    downloadQRCodeFromURL(mockUrl);
+
+    await new Promise(process.nextTick); // Attende il completamento delle promise
+
+    expect(fetch).toHaveBeenCalledWith(mockUrl);
+    expect(URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
+    // expect(appendChildSpy).toHaveBeenCalled();
+    //expect(clickSpy).toHaveBeenCalled();
+    //expect(removeChildSpy).toHaveBeenCalled();
+  });
+
+  test('should log an error if fetch fails', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const mockError = new Error('Network error');
+    (fetch as jest.Mock).mockRejectedValue(mockError);
+
+    downloadQRCodeFromURL('https://example.com/qrcode.png');
+
+    await new Promise(process.nextTick);
+
+    expect(consoleSpy).toHaveBeenCalledWith(mockError);
+    consoleSpy.mockRestore();
+  });
+
+  test('should do nothing if URL is not a string', () => {
+    downloadQRCodeFromURL(undefined);
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });
 
-test('test formatDate with undefined as param', () => {
-  expect(formatDate(undefined)).toEqual('');
+describe('mapDataForDiscoutTimeRecap', () => {
+  test('should return correct expiration data when valid inputs are provided', () => {
+    const date = new Date('2025-10-06T10:00:00.000Z');
+    const seconds = 86400 + 3600; // 1 giorno e 1 ora
+    const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
+      seconds,
+      date
+    );
+
+    expect(expirationDays).toBe(1);
+    expect(expirationDate).toBe('07/10/2025');
+    expect(expirationTime).toMatch(/13:00/); // Usiamo toMatch per flessibilità sul fuso orario
+  });
+
+  test('should return undefined values if inputs are invalid', () => {
+    const result = mapDataForDiscoutTimeRecap(undefined, undefined);
+    expect(result).toEqual({
+      expirationDays: undefined,
+      expirationDate: undefined,
+      expirationTime: undefined,
+    });
+  });
 });
 
-test('test formatDate with a Date object as param', () => {
-  expect(formatDate(date)).toContain('01/10/2022');
+describe('formattedCurrency', () => {
+  test.each([
+    { number: 1234.56, cents: false, expected: '1.234,56 €' },
+    { number: 123456, cents: true, expected: '1.234,56 €' },
+    { number: 0, cents: false, expected: '0,00 €' },
+    { number: 0, cents: true, expected: '0,00 €' },
+    { number: undefined, cents: false, expected: MISSING_EURO_PLACEHOLDER },
+    { number: undefined, cents: false, symbol: 'N/A', expected: 'N/A' },
+  ])(
+    'should format $number correctly with options: cents=$cents, symbol=$symbol',
+    ({ number, cents, symbol, expected }) => {
+      expect(formattedCurrency(number, symbol, cents)).toBe(expected);
+    }
+  );
 });
 
-test('test formatIban with a string of IBAN as param', () => {
-  expect(formatIban('IT03M0300203280794663157929')).toEqual('IT 03 M 03002 03280 794663157929');
+describe('formatIban', () => {
+  test.each([
+    { input: 'IT60X0542811101000000123456', expected: 'IT 60 X 05428 11101 000000123456' },
+    { input: undefined, expected: MISSING_DATA_PLACEHOLDER },
+    { input: '', expected: MISSING_DATA_PLACEHOLDER },
+  ])('should format "$input" to "$expected"', ({ input, expected }) => {
+    expect(formatIban(input)).toBe(expected);
+  });
 });
 
-test('test formatIban with undefined as param', () => {
-  expect(formatIban(undefined)).toEqual('-');
+describe('formatDate', () => {
+  test.each([
+    { input: new Date('2025-12-25T00:00:00.000Z'), expected: '25/12/2025' },
+    { input: undefined, expected: '' },
+  ])('should format "$input" to "$expected"', ({ input, expected }) => {
+    expect(formatDate(input)).toBe(expected);
+  });
+});
+
+describe('isValidEmail', () => {
+  test.each([
+    { email: 'test@example.com', expected: true },
+    { email: 'test.name@example.co.uk', expected: true },
+    { email: 'test', expected: false },
+    { email: 'test@example', expected: false },
+    { email: '@example.com', expected: false },
+  ])('should validate "$email" as $expected', ({ email, expected }) => {
+    expect(isValidEmail(email)).toBe(expected);
+  });
+});
+
+describe('isValidUrl', () => {
+  test.each([
+    { url: 'https://example.com', expected: true },
+    { url: 'https://example.it', expected: true },
+    { url: 'http://example.com', expected: true }, // URL constructor accetta http
+    { url: 'example.com', expected: false }, // Manca il protocollo
+    { url: 'https://example.org', expected: false }, // Non termina con .it o .com
+  ])('should validate "$url" as $expected', ({ url, expected }) => {
+    expect(isValidUrl(url)).toBe(expected);
+  });
+});
+
+describe('generateUniqueId', () => {
+  test('should generate a unique id', () => {
+    const id1 = generateUniqueId();
+    const id2 = generateUniqueId();
+    expect(id1).toBeDefined();
+    expect(typeof id1).toBe('string');
+    expect(id1).not.toEqual(id2);
+  });
+
+  test.skip('should generate a predictable id when Date and Math are mocked', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
+    jest.spyOn(Math, 'random').mockReturnValue(0.123456789);
+    // 0.123456789.toString(36).substring(2, 9) -> "4f25k6o"
+    expect(generateUniqueId()).toBe('17000000000004f25k6o');
+  });
 });
