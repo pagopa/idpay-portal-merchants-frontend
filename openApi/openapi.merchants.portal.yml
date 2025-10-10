@@ -789,7 +789,7 @@ paths:
               example:
                 code: PAYMENT_GENERIC_ERROR
                 message: A generic error occured
-  /transactions/{transactionId}/download:
+  /{pointOfSaleId}/transactions/{transactionId}/download:
     get:
       tags:
         - transaction
@@ -798,6 +798,12 @@ paths:
         IT: Scarica il file della fattura della transazione"
       operationId: downloadInvoiceFile
       parameters:
+        - name: pointOfSaleId
+          in: path
+          description: "ENG: Point of sale ID - IT: ID del punto vendita"
+          required: true
+          schema:
+            type: string
         - name: transactionId
           in: path
           description: "ENG: Transaction ID - IT: ID della transazione"
