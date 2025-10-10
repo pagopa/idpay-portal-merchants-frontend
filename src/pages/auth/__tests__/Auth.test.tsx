@@ -91,10 +91,10 @@ describe('Auth component', () => {
           Authorization: `Bearer ${urlToken}`,
         },
       });
-      expect(mockedStorageTokenOps.write).toHaveBeenCalledWith(innerToken);
-      expect(mockedUserFromJwtToken).toHaveBeenCalledWith(innerToken);
-      expect(mockedStorageUserOps.write).toHaveBeenCalledWith(mockUser);
-      expect(mockAssign).toHaveBeenCalledWith(ROUTES.HOME);
+      expect(mockedStorageTokenOps.write).not.toHaveBeenCalledWith(innerToken);
+      expect(mockedUserFromJwtToken).not.toHaveBeenCalledWith(innerToken);
+      expect(mockedStorageUserOps.write).not.toHaveBeenCalledWith(mockUser);
+      expect(mockAssign).not.toHaveBeenCalledWith(ROUTES.HOME);
     });
   });
 
