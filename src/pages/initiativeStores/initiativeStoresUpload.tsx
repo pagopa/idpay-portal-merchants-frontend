@@ -18,14 +18,14 @@ import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
-import { normalizeUrlHttp , normalizeUrlHttps } from '../../utils/formatUtils';
+import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { POS_UPDATE } from '../../utils/constants';
-import {  isValidUrl } from '../../helpers';
+import { isValidUrl } from '../../helpers';
 import { SalePointFormDTO } from '../../types/types';
 
 interface FormErrors {
@@ -36,13 +36,14 @@ interface FieldErrors {
   [fieldName: string]: string;
 }
 
-
 interface RouteParams {
   id: string;
 }
 
 const InitiativeStoresUpload: React.FC = () => {
-  const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(POS_UPDATE.Csv);
+  const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(
+    POS_UPDATE.Manual
+  );
   const [salesPoints, setSalesPoints] = useState<Array<SalePointFormDTO>>([]);
   const [_errors, setErrors] = useState<FormErrors>({});
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
@@ -54,14 +55,12 @@ const InitiativeStoresUpload: React.FC = () => {
   // const [validatePointsOfSaleForm, setValidatePointsOfSaleForm] = useState(true);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
-
   useEffect(() => {
-    setUploadMethod(POS_UPDATE.Manual);
+    // setUploadMethod(POS_UPDATE.Manual);
     // if(Object.keys(_errors).length === 0){
     //   setShowErrorAlert(hasMandatoryErrors(_errors));
     // }
-  }, [uploadMethod,_errors]);
-
+  }, [uploadMethod, _errors]);
 
   const onFormChange = (salesPoints: Array<SalePointFormDTO>) => {
     if (pointsOfSaleLoaded) {
@@ -83,10 +82,10 @@ const InitiativeStoresUpload: React.FC = () => {
       //   return;
       // }
 
-      const emails = salesPoints.map(sp => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
+      const emails = salesPoints.map((sp) => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
       const duplicates = emails
         .map((email, idx) => (emails.indexOf(email) !== idx ? idx : -1))
-        .filter(idx => idx !== -1);
+        .filter((idx) => idx !== -1);
       const websiteErrors: FormErrors = salesPoints.reduce<FormErrors>((acc, sp, idx) => {
         const currentErrors = [
           !sp.franchiseName?.trim() && { franchiseName: 'Campo obbligatorio' },
@@ -97,10 +96,10 @@ const InitiativeStoresUpload: React.FC = () => {
           // ||
           // (!isValidEmail(sp?.contactEmail?.trim()) && { contactEmail: 'Email non valida' }),
           sp.type === 'ONLINE' &&
-          ((!sp.website?.trim() && { website: 'Campo obbligatorio' }) ||
-            (!isValidUrl(normalizeUrlHttps(sp.website)) && {
-              website: 'Indirizzo web non valido',
-            })),
+            ((!sp.website?.trim() && { website: 'Campo obbligatorio' }) ||
+              (!isValidUrl(normalizeUrlHttps(sp.website)) && {
+                website: 'Indirizzo web non valido',
+              })),
           sp.type === 'PHYSICAL' && [
             !sp.address?.trim() && { address: 'Campo obbligatorio' },
             !sp.city?.trim() && { city: 'Campo obbligatorio' },
@@ -127,14 +126,17 @@ const InitiativeStoresUpload: React.FC = () => {
         return acc;
       }, {});
 
-      const duplicateErrors: FormErrors = duplicates.reduce<FormErrors>((acc, dupIndex) => ({
-        ...acc,
-        [dupIndex]: {
-          ...(acc[dupIndex] ?? {}),
-          contactEmail: `Email già presente nel punto vendita ${dupIndex}`,
-          confirmContactEmail: `Email già presente nel punto vendita ${dupIndex}`,
-        },
-      }), {});
+      const duplicateErrors: FormErrors = duplicates.reduce<FormErrors>(
+        (acc, dupIndex) => ({
+          ...acc,
+          [dupIndex]: {
+            ...(acc[dupIndex] ?? {}),
+            contactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+            confirmContactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+          },
+        }),
+        {}
+      );
 
       const newErrors: FormErrors = {
         ...websiteErrors,
@@ -168,7 +170,7 @@ const InitiativeStoresUpload: React.FC = () => {
       //   return normalizedSalePoint;
       // });
 
-      const normalizedSalesPoints : Array<PointOfSaleDTO> = salesPoints.map(sp => ({
+      const normalizedSalesPoints: Array<PointOfSaleDTO> = salesPoints.map((sp) => ({
         website: normalizeUrlHttps(sp.website),
         channelGeolink: normalizeUrlHttp(sp.channelGeolink),
         address: sp.address,
@@ -187,9 +189,9 @@ const InitiativeStoresUpload: React.FC = () => {
         zipCode: sp.zipCode,
       }));
 
-        const response = await  updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
-      if(response){
-        if(response?.code ===  'POINT_OF_SALE_ALREADY_REGISTERED'){
+      const response = await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
+      if (response) {
+        if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
           addError({
             id: 'UPLOAD_STORE',
             blocking: false,
@@ -201,7 +203,7 @@ const InitiativeStoresUpload: React.FC = () => {
             component: 'Toast',
             showCloseIcon: true,
           });
-        }else{
+        } else {
           addError({
             id: 'UPLOAD_STORES',
             blocking: false,
@@ -214,14 +216,13 @@ const InitiativeStoresUpload: React.FC = () => {
             showCloseIcon: true,
           });
         }
-      }else{
+      } else {
         setPointsOfSaleLoaded(true);
         history.push({
           pathname: generatePath(ROUTES.STORES, { id }),
           state: { showSuccessAlert: true },
         });
       }
-
     }
     if (uploadMethod === POS_UPDATE.Csv) {
       history.push(generatePath(ROUTES.STORES, { id }));
@@ -255,8 +256,6 @@ const InitiativeStoresUpload: React.FC = () => {
     setShowErrorAlert(hasMandatoryErrors);
   };
 
-
-
   return (
     <Box sx={{ width: '100%' }}>
       <Box>
@@ -286,7 +285,7 @@ const InitiativeStoresUpload: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <Link fontWeight={theme.typography.fontWeightBold} href='#' underline="hover">
+              <Link fontWeight={theme.typography.fontWeightBold} href="#" underline="hover">
                 {t('pages.initiativeStores.manualLink')}
               </Link>
             </Grid>
@@ -296,9 +295,9 @@ const InitiativeStoresUpload: React.FC = () => {
                   <RadioGroup
                     row
                     value={uploadMethod}
-                    onChange={(e) =>
-                      setUploadMethod(e.target.value as POS_UPDATE.Csv | POS_UPDATE.Manual)
-                    }
+                    onChange={(e) => {
+                      setUploadMethod(e.target.value as POS_UPDATE.Csv | POS_UPDATE.Manual);
+                    }}
                     sx={{ mb: 2 }}
                   >
                     <FormControlLabel

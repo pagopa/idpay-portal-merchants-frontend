@@ -30,7 +30,6 @@ const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
     const location = useLocation();
     const { isTOSAccepted, acceptTOS, firstAcceptance } = useTCAgreement();
-
     if (
       isTOSAccepted === false &&
       location.pathname !== routes.PRIVACY_POLICY &&

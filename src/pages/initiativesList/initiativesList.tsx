@@ -114,10 +114,9 @@ const InitiativesList = () => {
         initiativeId: item.initiativeId || '',
         initiativeName: item.initiativeName || '',
         organizationName: item.organizationName || '',
-        spendingPeriod:
-          `${item.startDate?.toLocaleDateString('fr-FR')} - ${item.endDate?.toLocaleDateString(
-            'fr-FR'
-          )}` || '',
+        spendingPeriod: `${item.startDate?.toLocaleDateString(
+          'fr-FR'
+        )} - ${item.endDate?.toLocaleDateString('fr-FR')}`,
         serviceId: item.serviceId || '',
         status: item.status || '',
         id: index,
@@ -256,9 +255,7 @@ const InitiativesList = () => {
                                   initiativeName: row.initiativeName,
                                 })
                               );
-                              history.push(
-                                generatePath(ROUTES.OVERVIEW, { id: row.initiativeId })
-                              );
+                              history.push(generatePath(ROUTES.OVERVIEW, { id: row.initiativeId }));
                             }}
                             data-testid="initiative-btn-test"
                           >
@@ -270,37 +267,37 @@ const InitiativesList = () => {
                         <TableCell>{row.serviceId}</TableCell>
                         <TableCell>{renderInitiativeStatus(row.status as StatusEnum)}</TableCell>
                       </TableRow>
-              );
+                    );
                   }
                 )}
-            </TableBody>
+              </TableBody>
             </Table>
-        ) : (
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(12, 1fr)',
-            justifyContent: 'center',
-            width: '100%',
-            backgroundColor: 'white',
-            p: 2,
-          }}
-        >
-          <Box
-            sx={{
-              display: 'inline',
-              gridColumn: 'span 12',
-              justifyContent: 'center',
-              textAlign: 'center',
-            }}
-          >
-            <EmptyList message={t('pages.initiativesList.emptyList')} />
-          </Box>
-        </Box>
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(12, 1fr)',
+                justifyContent: 'center',
+                width: '100%',
+                backgroundColor: 'white',
+                p: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'inline',
+                  gridColumn: 'span 12',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                }}
+              >
+                <EmptyList message={t('pages.initiativesList.emptyList')} />
+              </Box>
+            </Box>
           )}
-      </TableContainer>
-    </Paper>
-    </Box >
+        </TableContainer>
+      </Paper>
+    </Box>
   );
 };
 export default InitiativesList;
