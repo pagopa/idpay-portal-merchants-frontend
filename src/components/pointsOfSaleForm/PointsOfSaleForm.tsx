@@ -26,7 +26,8 @@ interface PointsOfSaleFormProps {
   onErrorChange: (errors: FormErrors) => void;
   pointsOfSaleLoaded: boolean;
   externalErrors?: FormErrors;
-  showErrorAlert: boolean;
+  showErrorAlert: Array<boolean>;
+  setShowErrorAlert: (showErrorAlert: Array<boolean>) => void;
   // onValidate?: (validateFn: () => boolean) => void;
   hasAttemptedSubmit: boolean;
 }
@@ -69,6 +70,24 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
   useEffect(() => {
     validateForm(hasAttemptedSubmit);
   }, [hasAttemptedSubmit]);
+
+  // useEffect(() => {
+  //   console.log('errors', errors);
+  //   let arrayAlert  = {};
+  //   Object.entries(errors).forEach(([,value], salesPointIndex) => {
+  //     let salesPointError = false;
+  //     Object.entries(value).forEach(([ ,valore],) => {
+  //       console.log(valore,'valore');
+  //       if (valore === 'Campo obbligatorio'){
+  //         salesPointError = true;
+  //       }
+  //     });
+  //     arrayAlert = { ...arrayAlert, [salesPointIndex]: salesPointError };
+  //
+  //   });
+  // console.log('arrayAlert',arrayAlert);
+  // }, [errors]);
+
 
   useEffect(() => {
     onFormChange(salesPoints);
@@ -161,15 +180,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
     if (showErrors) {
       setErrors(newErrors);
     }
+
+
     return isValid;
   };
 
-  // useEffect(() => {
-  //   if (onValidate) {
-  //     // onValidate(() => validateForm(hasAttemptedSubmit));
-  //     validateForm(hasAttemptedSubmit);
-  //   }
-  // }, [onValidate, salesPoints]);
 
   useEffect(() => {
     if (pointsOfSaleLoaded) {
@@ -361,6 +376,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
   };
 
   const clearError = (salesPointIndex: number, fieldName: string) => {
+    console.log('clear');
+    // setShowErrorAlert(
+    //   salesPoints.map(() => false));
     setErrors(prevErrors => {
       if (!prevErrors[salesPointIndex]?.[fieldName]) {
         return prevErrors;
@@ -509,11 +527,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
               </FormControl>
             </Grid>
             <Grid item xs={12} pb={3}>
-              <Slide direction="left" in={showErrorAlert} mountOnEnter unmountOnExit>
+              <Slide direction="left" in={showErrorAlert?.[index] === true} mountOnEnter unmountOnExit>
                 <Alert
                   severity="error"
                 >
-                  {'Per continuare è neccessario compilare tutti i campi obbligatori.'}
+                  {'Per continuare è necessario compilare tutti i campi obbligatori.'}
                 </Alert>
               </Slide>
             </Grid>

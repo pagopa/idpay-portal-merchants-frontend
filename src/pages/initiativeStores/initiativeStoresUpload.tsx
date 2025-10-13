@@ -51,12 +51,13 @@ const InitiativeStoresUpload: React.FC = () => {
   const { id } = useParams<RouteParams>();
   const history = useHistory();
   const addError = useErrorDispatcher();
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
   // const [validatePointsOfSaleForm, setValidatePointsOfSaleForm] = useState(true);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   useEffect(() => {
-  }, [uploadMethod, _errors]);
+    console.log(showErrorAlert,'showErrorAlert');
+  }, [showErrorAlert]);
 
   const onFormChange = (salesPoints: Array<SalePointFormDTO>) => {
     if (pointsOfSaleLoaded) {
@@ -71,7 +72,9 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const handleConfirm = async () => {
     if (uploadMethod === POS_UPDATE.Manual) {
-      setShowErrorAlert(false);
+      setShowErrorAlert(() =>
+        salesPoints.map(() => false)
+      );
       setHasAttemptedSubmit(true);
 
       const emails = salesPoints.map((sp) => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
@@ -105,7 +108,10 @@ const InitiativeStoresUpload: React.FC = () => {
           .reduce((errAcc, e) => ({ ...errAcc, ...e }), {});
 
         if (Object.keys(currentErrors).length > 0) {
-          setShowErrorAlert(true);
+          setShowErrorAlert((prev) =>
+            prev.map((value, i) => (i === idx ? true : value))
+          );
+
           return {
             ...acc,
             [idx]: {
@@ -227,25 +233,34 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const onErrorChange = (errors: FormErrors) => {
     setErrors(errors);
-    const hasMandatoryErrors = Object.values(errors).some((fieldErrors) =>
-      Object.keys(fieldErrors).some((fieldName) =>
-        [
-          'franchiseName',
-          'contactEmail',
-          'confirmContactEmail',
-          'contactName',
-          'contactSurname',
-          'website',
-          'address',
-          'city',
-          'zipCode',
-          'region',
-          'province',
-        ].includes(fieldName)
-      )
-    );
-    if(hasAttemptedSubmit){
-      setShowErrorAlert(hasMandatoryErrors);
+    if (hasAttemptedSubmit) {
+      const mandatoryFields = [
+        'franchiseName',
+        'contactEmail',
+        'confirmContactEmail',
+        'contactName',
+        'contactSurname',
+        'website',
+        'address',
+        'city',
+        'zipCode',
+        'region',
+        'province',
+      ];
+
+      setShowErrorAlert((prev) =>
+        salesPoints.map((_, idx) => {
+          const fieldErrors = errors[idx] ?? {};
+          const hasMandatoryError = Object.keys(fieldErrors).some((fieldName) =>
+            mandatoryFields.includes(fieldName)
+          );
+
+          if (hasMandatoryError) {
+            return true;
+          }
+          return prev[idx] ?? false;
+        })
+      );
     }
   };
 
@@ -343,6 +358,7 @@ const InitiativeStoresUpload: React.FC = () => {
               <Grid item xs={12}>
                 <PointsOfSaleForm
                   showErrorAlert={showErrorAlert}
+                  setShowErrorAlert={setShowErrorAlert}
                   externalErrors={_errors}
                   onFormChange={onFormChange}
                   onErrorChange={onErrorChange}
