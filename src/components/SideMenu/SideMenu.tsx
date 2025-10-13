@@ -140,9 +140,9 @@ export default function SideMenu() {
                         );
                       })
                     }
-                    isSelected={
-                      pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
-                    }
+                    isSelected={pathname.startsWith(
+                      `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
+                    )}
                     icon={DashboardIcon}
                     level={2}
                     data-testid="initiativeOverviewTitle-click-test"

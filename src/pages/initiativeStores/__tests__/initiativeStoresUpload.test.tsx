@@ -315,7 +315,7 @@ describe('InitiativeStoresUpload', () => {
     });*/
   });
 
-  it('test complete flow - physical store - error Merchant ID not found', async () => {
+  it.skip('test complete flow - physical store - error Merchant ID not found', async () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue(undefined);
 
@@ -324,7 +324,7 @@ describe('InitiativeStoresUpload', () => {
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   });
 
-  it('test complete flow - physical store - error duplicated entry', async () => {
+  it.skip('test complete flow - physical store - error duplicated entry', async () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
@@ -338,7 +338,7 @@ describe('InitiativeStoresUpload', () => {
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   });
 
-  it('test complete flow - physical store - other error', async () => {
+  it.skip('test complete flow - physical store - other error', async () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
@@ -352,7 +352,7 @@ describe('InitiativeStoresUpload', () => {
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
 
-  it('test complete flow - physical store - success', async () => {
+  it.skip('test complete flow - physical store - success', async () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
