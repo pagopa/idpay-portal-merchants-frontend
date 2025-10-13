@@ -57,6 +57,7 @@ const InitiativeStores: React.FC = () => {
   const [storesPagination, setStoresPagination] = useState<any>({});
   const [storesLoading, setStoresLoading] = useState(false);
   const [currentSort, setCurrentSort] = useState<string>('asc');
+  const [filtersAppliedOnce, setFiltersAppliedOnce] = useState(false);
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
@@ -137,8 +138,7 @@ const InitiativeStores: React.FC = () => {
       disableColumnMenu: true,
       renderCell: (params: any) =>
         renderCellWithTooltip(
-          `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${
-            params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
+          `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
           }`,
           11
         ),
@@ -179,6 +179,7 @@ const InitiativeStores: React.FC = () => {
       return;
     }
     try {
+
       if (!fromSort) {
         setStoresLoading(true);
       }
@@ -228,6 +229,7 @@ const InitiativeStores: React.FC = () => {
       sort: currentSort,
       page: 0,
     };
+    setFiltersAppliedOnce(true);
     fetchStores(filtersWithSort).catch((error) => {
       console.error('Error fetching stores:', error);
     });
@@ -235,6 +237,7 @@ const InitiativeStores: React.FC = () => {
 
   const handleFiltersReset = () => {
     console.log('Callback dopo reset filtri');
+    setFiltersAppliedOnce(false);
     void fetchStores(initialValues);
   };
 
@@ -314,12 +317,13 @@ const InitiativeStores: React.FC = () => {
         </Box>
       ) : (
         <>
-          {stores.length > 0 || (stores.length === 0 && filtersSetted()) ? (
+          {(stores.length > 0 || (stores.length === 0 && filtersSetted()) || filtersAppliedOnce) && (
             <>
               <FiltersForm
                 onFiltersApplied={handleFiltersApplied}
                 onFiltersReset={handleFiltersReset}
                 formik={formik}
+                filtersAppliedOnce={filtersAppliedOnce}
               >
                 <Grid item xs={12} sm={6} md={3} lg={3}>
                   <FormControl fullWidth size="small">
@@ -384,7 +388,7 @@ const InitiativeStores: React.FC = () => {
                 </Grid>
               </FiltersForm>
 
-              <Box sx={{ height: 500, width: '100%' }}>
+              <Box sx={{ height: 'auto', width: '100%' }}>
                 <DataTable
                   rows={stores}
                   columns={columns}
@@ -396,28 +400,8 @@ const InitiativeStores: React.FC = () => {
                 />
               </Box>
             </>
-          ) : (
-            <Paper
-              sx={{
-                my: 4,
-                p: 3,
-                textAlign: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Typography variant="body2">{t('pages.initiativeStores.noStores')}</Typography>
-              <Link
-                onClick={() => goToAddStorePage()}
-                className="cursor-pointer"
-                variant="body2"
-                sx={{ fontWeight: '600' }}
-              >
-                {t('pages.initiativeStores.addStoreNoResults')}
-              </Link>
-            </Paper>
-          )}
+          )
+          }
         </>
       )}
       <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
@@ -443,6 +427,32 @@ const InitiativeStores: React.FC = () => {
           {t('pages.initiativeStores.pointOfSalesUploadSuccess')}
         </Alert>
       </Slide>
+      {
+        !storesLoading && stores?.length === 0 && (
+          <Paper
+            sx={{
+              my: 4,
+              p: 3,
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Stack spacing={0.5} direction="row">
+              <Typography variant="body2">{t('pages.initiativeStores.noStores')} </Typography>
+              <Link
+                onClick={() => goToAddStorePage()}
+                className="cursor-pointer"
+                variant="body2"
+                sx={{ fontWeight: '600' }}
+              >
+                {t('pages.initiativeStores.addStoreNoResults')}
+              </Link>
+            </Stack>
+          </Paper>
+        )
+      }
     </Box>
   );
 };
