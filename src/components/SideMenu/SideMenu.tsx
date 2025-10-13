@@ -141,7 +141,7 @@ export default function SideMenu() {
                       })
                     }
                     isSelected={pathname.startsWith(
-                      `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
+                      `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
                     )}
                     icon={DashboardIcon}
                     level={2}
