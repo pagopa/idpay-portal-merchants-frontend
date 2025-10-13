@@ -56,10 +56,6 @@ const InitiativeStoresUpload: React.FC = () => {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   useEffect(() => {
-    // setUploadMethod(POS_UPDATE.Manual);
-    // if(Object.keys(_errors).length === 0){
-    //   setShowErrorAlert(hasMandatoryErrors(_errors));
-    // }
   }, [uploadMethod, _errors]);
 
   const onFormChange = (salesPoints: Array<SalePointFormDTO>) => {
@@ -77,10 +73,6 @@ const InitiativeStoresUpload: React.FC = () => {
     if (uploadMethod === POS_UPDATE.Manual) {
       setShowErrorAlert(false);
       setHasAttemptedSubmit(true);
-      // if (!validatePointsOfSaleForm) {
-      //   setShowErrorAlert(true);
-      //   return;
-      // }
 
       const emails = salesPoints.map((sp) => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
       const duplicates = emails
@@ -252,8 +244,9 @@ const InitiativeStoresUpload: React.FC = () => {
         ].includes(fieldName)
       )
     );
-
-    setShowErrorAlert(hasMandatoryErrors);
+    if(hasAttemptedSubmit){
+      setShowErrorAlert(hasMandatoryErrors);
+    }
   };
 
   return (
