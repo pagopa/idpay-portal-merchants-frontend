@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { theme } from '@pagopa/mui-italia';
 import {
   Box,
   Button,
@@ -12,8 +13,12 @@ import {
   Paper,
   Typography,
   Link,
-  Alert, Slide,
+  Alert,
+  Slide,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -31,7 +36,7 @@ import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { parseJwt } from '../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
-import { MISSING_DATA_PLACEHOLDER,PAGINATION_SIZE} from '../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -40,15 +45,13 @@ const initialValues: GetPointOfSalesFilters = {
   contactName: '',
   page: 0,
   size: PAGINATION_SIZE,
-  sort: 'asc'
+  sort: 'asc',
 };
 interface RouteParams {
   id: string;
 }
 
-
 const InitiativeStores: React.FC = () => {
-
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesPagination, setStoresPagination] = useState<any>({});
@@ -66,77 +69,108 @@ const InitiativeStores: React.FC = () => {
     setTimeout(() => setShowSuccessAlert(false), 3000);
   }, [location.state]);
 
-
   const addError = useErrorDispatcher();
+  const infoStyles = {
+    fontWeight: theme.typography.fontWeightRegular,
+    fontSize: theme.typography.fontSize,
+  };
+
+  const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
+    <Tooltip
+      title={value && value.length >= tooltipThreshold ? value : ''}
+      placement="top"
+      arrow={true}
+    >
+      <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
+        {value && value !== '' ? value : '-'}
+      </Typography>
+    </Tooltip>
+  );
+
   const columns: Array<GridColDef> = [
     {
       field: 'franchiseName',
       headerName: t('pages.initiativeStores.franchiseName'),
-      width: 130,
+      flex: 9.698,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
     {
       field: 'type',
       headerName: t('pages.initiativeStores.type'),
-      width: 70,
+      flex: 10.338,
       editable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => {
-        if(params.value === 'PHYSICAL') {
-          return 'Fisico';
-        } else if(params.value === 'ONLINE') {
-          return 'Online';
-        } else {
-          return '-';
-        }
-      },
+      renderCell: (params: any) =>
+        params.value === 'PHYSICAL' ? 'Fisico' : params.value === 'ONLINE' ? 'Online' : '-',
     },
     {
       field: 'address',
       headerName: t('pages.initiativeStores.address'),
-      width: 200,
+      flex: 12.992,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
     {
       field: 'website',
       headerName: t('pages.initiativeStores.addressURL'),
-      width: 150,
+      flex: 12.992,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
     {
       field: 'city',
       headerName: t('pages.initiativeStores.city'),
-      width: 150,
+      flex: 10.747,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
     {
       field: 'referent',
       headerName: t('pages.initiativeStores.referent'),
-      width: 200,
+      flex: 11.566,
       editable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER}`,
+      renderCell: (params: any) =>
+        renderCellWithTooltip(
+          `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${
+            params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
+          }`,
+          11
+        ),
     },
     {
       field: 'contactEmail',
       headerName: t('pages.initiativeStores.email'),
-      width: 240,
+      flex: 13.57,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
-  
+    {
+      field: 'actions',
+      headerName: '',
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      flex: 4.736,
+      renderCell: (params: any) => (
+        <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+          <IconButton onClick={() => goToStoreDetail(params.row)} size="small">
+            <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
+          </IconButton>
+        </Box>
+      ),
+    },
   ];
 
   useEffect(() => {
-    fetchStores(initialValues).catch(error => {
-      console.error('Error fetching stores:', error);
-    });
+    void fetchStores(initialValues);
   }, []);
-
 
   const fetchStores = async (filters: GetPointOfSalesFilters, fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
@@ -145,7 +179,7 @@ const InitiativeStores: React.FC = () => {
       return;
     }
     try {
-      if(!fromSort) {
+      if (!fromSort) {
         setStoresLoading(true);
       }
       const response = await getMerchantPointOfSales(merchantId, {
@@ -160,11 +194,11 @@ const InitiativeStores: React.FC = () => {
       const { content, ...paginationData } = response;
       setStores(content);
       setStoresPagination(paginationData);
-      if(!fromSort) {
+      if (!fromSort) {
         setStoresLoading(false);
       }
     } catch (error: any) {
-      if(!fromSort) {
+      if (!fromSort) {
         setStoresLoading(false);
       }
       addError({
@@ -185,26 +219,23 @@ const InitiativeStores: React.FC = () => {
     initialValues,
     onSubmit: (values) => {
       console.log('Eseguo ricerca con filtri:', values);
-    }
+    },
   });
 
   const handleFiltersApplied = (values: GetPointOfSalesFilters) => {
     const filtersWithSort = {
       ...values,
       sort: currentSort,
-      page: 0
+      page: 0,
     };
-    fetchStores(filtersWithSort).catch(error => {
+    fetchStores(filtersWithSort).catch((error) => {
       console.error('Error fetching stores:', error);
     });
-
   };
 
   const handleFiltersReset = () => {
     console.log('Callback dopo reset filtri');
-    fetchStores(initialValues).catch(error => {
-      console.error('Error fetching stores:', error);
-    });
+    void fetchStores(initialValues);
   };
 
   const goToAddStorePage = () => {
@@ -215,20 +246,24 @@ const InitiativeStores: React.FC = () => {
     history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
   };
 
-  const filtersSetted = () => formik.values.type !== undefined || formik.values.city !== '' || formik.values.address !== '' || formik.values.contactName !== '';
+  const filtersSetted = () =>
+    formik.values.type !== undefined ||
+    formik.values.city !== '' ||
+    formik.values.address !== '' ||
+    formik.values.contactName !== '';
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     if (newSortModel.length > 0) {
       const { field, sort } = newSortModel[0];
       const sortKey = field === 'referent' ? `contactName,${sort}` : `${field},${sort}`;
       setCurrentSort(sortKey);
-      await fetchStores({
-        ...formik.values,
-        sort: sortKey,
-      }, true).catch(error => {
-        console.error('Error fetching stores:', error);
-      });
-
+      await fetchStores(
+        {
+          ...formik.values,
+          sort: sortKey,
+        },
+        true
+      );
     } else {
       console.log('Ordinamento rimosso.');
       setCurrentSort('asc');
@@ -237,15 +272,12 @@ const InitiativeStores: React.FC = () => {
 
   const handlePaginationPageChange = (page: number) => {
     setStoresPagination(page);
-    fetchStores({
+    void fetchStores({
       ...formik.values,
       page,
-      sort: currentSort
-    }).catch(error => {
-      console.error('Error fetching stores:', error);
+      sort: currentSort,
     });
   };
-
 
   return (
     <Box sx={{ my: 2 }}>
@@ -262,116 +294,132 @@ const InitiativeStores: React.FC = () => {
           variantTitle="h4"
           variantSubTitle="body1"
         />
-       {
-        stores.length > 0 && !storesLoading && (
+        {stores.length > 0 && !storesLoading && (
           <Button
-          variant="contained"
-          size="small"
-          onClick={() => goToAddStorePage()}
-          startIcon={<StoreIcon />}
-          sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '200px' } }}
-        >
-          {t('pages.initiativeStores.addStoreList')}
-        </Button>
-        )
-       }
+            variant="contained"
+            size="small"
+            onClick={() => goToAddStorePage()}
+            startIcon={<StoreIcon />}
+            sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '200px' } }}
+          >
+            {t('pages.initiativeStores.addStoreList')}
+          </Button>
+        )}
       </Stack>
-      {
-        storesLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <>
-        {
-        stores.length > 0 || ( stores.length === 0 && filtersSetted()) ? (
+      {storesLoading ? (
+        <Box
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
         <>
-          <FiltersForm
-            onFiltersApplied={handleFiltersApplied}
-            onFiltersReset={handleFiltersReset}
-            formik={formik}
-      >
-        <Grid item xs={12} sm={6} md={3} lg={3}>
-          <FormControl fullWidth size="small">
-            <InputLabel id="pos-type-label">{t('pages.initiativeStores.pointOfSaleType')}</InputLabel>
-            <Select
-              labelId="pos-type-label"
-              id="pos-type-select"
-              label={t('pages.initiativeStores.pointOfSaleType')}
-              name="type"
-              value={formik.values.type}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
+          {stores.length > 0 || (stores.length === 0 && filtersSetted()) ? (
+            <>
+              <FiltersForm
+                onFiltersApplied={handleFiltersApplied}
+                onFiltersReset={handleFiltersReset}
+                formik={formik}
+              >
+                <Grid item xs={12} sm={6} md={3} lg={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="pos-type-label">
+                      {t('pages.initiativeStores.pointOfSaleType')}
+                    </InputLabel>
+                    <Select
+                      labelId="pos-type-label"
+                      id="pos-type-select"
+                      label={t('pages.initiativeStores.pointOfSaleType')}
+                      name="type"
+                      value={formik.values.type}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                    >
+                      <MenuItem value="">
+                        <em>Nessuna</em>
+                      </MenuItem>
+                      <MenuItem value="PHYSICAL">{t('pages.initiativeStores.physical')}</MenuItem>
+                      <MenuItem value="ONLINE">{t('pages.initiativeStores.online')}</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                {/* Città */}
+                <Grid item xs={12} sm={6} md={3} lg={2}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label={t('pages.initiativeStores.city')}
+                    name="city"
+                    value={formik.values.city}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                </Grid>
+
+                {/* Indirizzo */}
+                <Grid item xs={12} sm={6} md={3} lg={2}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    name="address"
+                    label={t('pages.initiativeStores.address')}
+                    value={formik.values.address}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                </Grid>
+
+                {/* Referente */}
+                <Grid item xs={12} sm={6} md={3} lg={2}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label={t('pages.initiativeStores.referent')}
+                    name="contactName"
+                    value={formik.values.contactName}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                </Grid>
+              </FiltersForm>
+
+              <Box sx={{ height: 500, width: '100%' }}>
+                <DataTable
+                  rows={stores}
+                  columns={columns}
+                  pageSize={PAGINATION_SIZE}
+                  rowsPerPage={PAGINATION_SIZE}
+                  onSortModelChange={handleSortModelChange}
+                  paginationModel={storesPagination}
+                  onPaginationPageChange={handlePaginationPageChange}
+                />
+              </Box>
+            </>
+          ) : (
+            <Paper
+              sx={{
+                my: 4,
+                p: 3,
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              <MenuItem value=""><em>Nessuna</em></MenuItem>
-              <MenuItem value="PHYSICAL">{t('pages.initiativeStores.physical')}</MenuItem>
-              <MenuItem value="ONLINE">{t('pages.initiativeStores.online')}</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-
-        {/* Città */}
-        <Grid item xs={12} sm={6} md={3} lg={2}>
-          <TextField
-            fullWidth
-            size="small"
-            label={t('pages.initiativeStores.city')}
-            name="city"
-            value={formik.values.city}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
-        </Grid>
-
-        {/* Indirizzo */}
-        <Grid item xs={12} sm={6} md={3} lg={2}>
-          <TextField
-            fullWidth
-            size="small"
-            name="address"
-            label={t('pages.initiativeStores.address')}
-            value={formik.values.address}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
-        </Grid>
-
-        {/* Referente */}
-        <Grid item xs={12} sm={6} md={3} lg={2}>
-          <TextField
-            fullWidth
-            size="small"
-            label={t('pages.initiativeStores.referent')}
-            name="contactName"
-            value={formik.values.contactName}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
-        </Grid>
-
-      </FiltersForm>
-
-      <Box sx={{ height: 500, width: '100%' }}>
-
-        <DataTable 
-          rows={stores} 
-          columns={columns} 
-          pageSize={PAGINATION_SIZE}
-          rowsPerPage={PAGINATION_SIZE}
-          handleRowAction={goToStoreDetail} 
-          onSortModelChange={handleSortModelChange}
-          paginationModel={storesPagination}
-          onPaginationPageChange={handlePaginationPageChange}
-        />
-      </Box>
-        </> ) : <Paper sx={{my: 4, p: 3, textAlign: 'center', display: 'flex',alignItems: 'center', justifyContent: 'center'}}>
-        <Typography variant="body2">{t('pages.initiativeStores.noStores')}</Typography>
-        <Link onClick={() => goToAddStorePage()} className='cursor-pointer' variant="body2" sx={{fontWeight: '600'}}>{t('pages.initiativeStores.addStoreNoResults')}</Link>
-        </Paper>
-      }
-          </>
-        )
-      }
+              <Typography variant="body2">{t('pages.initiativeStores.noStores')}</Typography>
+              <Link
+                onClick={() => goToAddStorePage()}
+                className="cursor-pointer"
+                variant="body2"
+                sx={{ fontWeight: '600' }}
+              >
+                {t('pages.initiativeStores.addStoreNoResults')}
+              </Link>
+            </Paper>
+          )}
+        </>
+      )}
       <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
         <Alert
           severity="success"
@@ -395,7 +443,6 @@ const InitiativeStores: React.FC = () => {
           {t('pages.initiativeStores.pointOfSalesUploadSuccess')}
         </Alert>
       </Slide>
-
     </Box>
   );
 };

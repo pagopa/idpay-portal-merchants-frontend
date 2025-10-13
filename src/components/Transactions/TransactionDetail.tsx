@@ -98,6 +98,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
             {getStatusChip()}
           </Box>
         </Grid>
+        {itemValues.status !== 'CANCELLED' && (
         <Grid item xs={12} pb={3}>
           <Box mt={2}>
             <Typography variant="body1">
@@ -113,6 +114,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
             </Link>
           </Box>
         </Grid>
+        )}
       </Grid>
     </Box>
   );
