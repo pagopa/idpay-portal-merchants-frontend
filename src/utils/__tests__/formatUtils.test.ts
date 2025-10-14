@@ -59,7 +59,7 @@ describe('normalizeUrlHttps', () => {
     { input: '  example.com  ', expected: 'https://example.com' },
     { input: '', expected: '' },
     { input: undefined, expected: '' },
-    { input: 'http://example.com', expected: 'https://http://example.com' },
+    { input: 'http://example.com', expected: 'https://example.com' },
   ])('should normalize "$input" to "$expected"', ({ input, expected }) => {
     expect(normalizeUrlHttps(input)).toBe(expected);
   });

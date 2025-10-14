@@ -159,18 +159,28 @@ describe('isValidEmail', () => {
     { email: 'test', expected: false },
     { email: 'test@example', expected: false },
     { email: '@example.com', expected: false },
+    { email: 'test@example.google', expected: true },
   ])('should validate "$email" as $expected', ({ email, expected }) => {
     expect(isValidEmail(email)).toBe(expected);
   });
 });
-
 describe('isValidUrl', () => {
   test.each([
-    { url: 'https://example.com', expected: true },
+    { url: 'http://example.it', expected: true },
+    { url: 'http://example.com', expected: true },
+    { url: 'http://example.info', expected: true },
+    { url: 'http://example.io', expected: true },
+    { url: 'http://example.net', expected: true },
+    { url: 'http://example.eu', expected: true },
+    { url: 'http://example.google', expected: true },
+    { url: 'http://example.it/test-page', expected: true },
+    { url: 'http://example.it/test-page?param=test&name=test#token=123', expected: true },
+    { url: 'https://example.subdomain.com', expected: true },
     { url: 'https://example.it', expected: true },
-    { url: 'http://example.com', expected: true }, // URL constructor accetta http
-    { url: 'example.com', expected: false }, // Manca il protocollo
-    { url: 'https://example.org', expected: false }, // Non termina con .it o .com
+    { url: 'https://www.example.it:8080/test', expected: true },
+    { url: 'http://example.com', expected: true },
+    { url: 'example.com', expected: false },
+    { url: 'https://example.org', expected: false },
   ])('should validate "$url" as $expected', ({ url, expected }) => {
     expect(isValidUrl(url)).toBe(expected);
   });

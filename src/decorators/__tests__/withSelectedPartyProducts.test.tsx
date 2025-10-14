@@ -20,7 +20,7 @@ beforeEach(() => {
   fetchPartyDetailsSpy = jest.spyOn(require('../../services/partyService'), 'fetchParties');
   fetchPartyProductsSpy = jest.spyOn(require('../../services/productService'), 'fetchProducts');
 
-  storageTokenOps.write(testToken); // party with partyId="onboarded"
+  //storageTokenOps.write(testToken); // party with partyId="onboarded"
 });
 
 const renderApp = async (

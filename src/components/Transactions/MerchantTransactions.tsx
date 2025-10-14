@@ -37,6 +37,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   const [rows, setRows] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
+  const [filtersAppliedOnce, setFiltersAppliedOnce] = useState<boolean>(false);
   const listItemDetail = getDetailFieldList();
 
   useEffect(() => {
@@ -129,11 +130,13 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
 
   const handleOnFiltersApplied = (filters: any) => {
     console.log('Callback dopo applicazione filtri', filters);
+    setFiltersAppliedOnce(true);
     if (handleFiltersApplied) { handleFiltersApplied(filters); }
   };
 
   const handleOnFiltersReset = () => {
     console.log('Callback dopo reset filtri');
+    setFiltersAppliedOnce(false);
     if (handleFiltersReset) { handleFiltersReset(); }
   };
 
@@ -160,6 +163,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
         formik={formik}
         onFiltersApplied={handleOnFiltersApplied}
         onFiltersReset={handleOnFiltersReset}
+        filtersAppliedOnce={filtersAppliedOnce}
       >
         <Grid item xs={12} sm={6} md={3} lg={3}>
           <FormControl fullWidth size="small">

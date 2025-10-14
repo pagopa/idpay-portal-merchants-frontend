@@ -18,14 +18,14 @@ import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
-import { normalizeUrlHttp , normalizeUrlHttps } from '../../utils/formatUtils';
+import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { POS_UPDATE } from '../../utils/constants';
-import {  isValidUrl } from '../../helpers';
+import { isValidUrl } from '../../helpers';
 import { SalePointFormDTO } from '../../types/types';
 
 interface FormErrors {
@@ -36,13 +36,14 @@ interface FieldErrors {
   [fieldName: string]: string;
 }
 
-
 interface RouteParams {
   id: string;
 }
 
 const InitiativeStoresUpload: React.FC = () => {
-  const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(POS_UPDATE.Csv);
+  const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(
+    POS_UPDATE.Manual
+  );
   const [salesPoints, setSalesPoints] = useState<Array<SalePointFormDTO>>([]);
   const [_errors, setErrors] = useState<FormErrors>({});
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
@@ -50,18 +51,13 @@ const InitiativeStoresUpload: React.FC = () => {
   const { id } = useParams<RouteParams>();
   const history = useHistory();
   const addError = useErrorDispatcher();
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
   // const [validatePointsOfSaleForm, setValidatePointsOfSaleForm] = useState(true);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
-
   useEffect(() => {
-    setUploadMethod(POS_UPDATE.Manual);
-    // if(Object.keys(_errors).length === 0){
-    //   setShowErrorAlert(hasMandatoryErrors(_errors));
-    // }
-  }, [uploadMethod,_errors]);
-
+    // console.log(showErrorAlert,'showErrorAlert');
+  }, [showErrorAlert]);
 
   const onFormChange = (salesPoints: Array<SalePointFormDTO>) => {
     if (pointsOfSaleLoaded) {
@@ -76,17 +72,15 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const handleConfirm = async () => {
     if (uploadMethod === POS_UPDATE.Manual) {
-      setShowErrorAlert(false);
+      setShowErrorAlert(() =>
+        salesPoints.map(() => false)
+      );
       setHasAttemptedSubmit(true);
-      // if (!validatePointsOfSaleForm) {
-      //   setShowErrorAlert(true);
-      //   return;
-      // }
 
-      const emails = salesPoints.map(sp => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
+      const emails = salesPoints.map((sp) => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
       const duplicates = emails
         .map((email, idx) => (emails.indexOf(email) !== idx ? idx : -1))
-        .filter(idx => idx !== -1);
+        .filter((idx) => idx !== -1);
       const websiteErrors: FormErrors = salesPoints.reduce<FormErrors>((acc, sp, idx) => {
         const currentErrors = [
           !sp.franchiseName?.trim() && { franchiseName: 'Campo obbligatorio' },
@@ -97,10 +91,10 @@ const InitiativeStoresUpload: React.FC = () => {
           // ||
           // (!isValidEmail(sp?.contactEmail?.trim()) && { contactEmail: 'Email non valida' }),
           sp.type === 'ONLINE' &&
-          ((!sp.website?.trim() && { website: 'Campo obbligatorio' }) ||
-            (!isValidUrl(normalizeUrlHttps(sp.website)) && {
-              website: 'Indirizzo web non valido',
-            })),
+            ((!sp.website?.trim() && { website: 'Campo obbligatorio' }) ||
+              (!isValidUrl(normalizeUrlHttps(sp.website)) && {
+                website: 'Indirizzo web non valido',
+              })),
           sp.type === 'PHYSICAL' && [
             !sp.address?.trim() && { address: 'Campo obbligatorio' },
             !sp.city?.trim() && { city: 'Campo obbligatorio' },
@@ -114,7 +108,10 @@ const InitiativeStoresUpload: React.FC = () => {
           .reduce((errAcc, e) => ({ ...errAcc, ...e }), {});
 
         if (Object.keys(currentErrors).length > 0) {
-          setShowErrorAlert(true);
+          setShowErrorAlert((prev) =>
+            prev.map((value, i) => (i === idx ? true : value))
+          );
+
           return {
             ...acc,
             [idx]: {
@@ -127,14 +124,17 @@ const InitiativeStoresUpload: React.FC = () => {
         return acc;
       }, {});
 
-      const duplicateErrors: FormErrors = duplicates.reduce<FormErrors>((acc, dupIndex) => ({
-        ...acc,
-        [dupIndex]: {
-          ...(acc[dupIndex] ?? {}),
-          contactEmail: `Email già presente nel punto vendita ${dupIndex}`,
-          confirmContactEmail: `Email già presente nel punto vendita ${dupIndex}`,
-        },
-      }), {});
+      const duplicateErrors: FormErrors = duplicates.reduce<FormErrors>(
+        (acc, dupIndex) => ({
+          ...acc,
+          [dupIndex]: {
+            ...(acc[dupIndex] ?? {}),
+            contactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+            confirmContactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+          },
+        }),
+        {}
+      );
 
       const newErrors: FormErrors = {
         ...websiteErrors,
@@ -168,7 +168,7 @@ const InitiativeStoresUpload: React.FC = () => {
       //   return normalizedSalePoint;
       // });
 
-      const normalizedSalesPoints : Array<PointOfSaleDTO> = salesPoints.map(sp => ({
+      const normalizedSalesPoints: Array<PointOfSaleDTO> = salesPoints.map((sp) => ({
         website: normalizeUrlHttps(sp.website),
         channelGeolink: normalizeUrlHttp(sp.channelGeolink),
         address: sp.address,
@@ -187,9 +187,9 @@ const InitiativeStoresUpload: React.FC = () => {
         zipCode: sp.zipCode,
       }));
 
-        const response = await  updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
-      if(response){
-        if(response?.code ===  'POINT_OF_SALE_ALREADY_REGISTERED'){
+      const response = await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
+      if (response) {
+        if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
           addError({
             id: 'UPLOAD_STORE',
             blocking: false,
@@ -201,7 +201,7 @@ const InitiativeStoresUpload: React.FC = () => {
             component: 'Toast',
             showCloseIcon: true,
           });
-        }else{
+        } else {
           addError({
             id: 'UPLOAD_STORES',
             blocking: false,
@@ -214,14 +214,13 @@ const InitiativeStoresUpload: React.FC = () => {
             showCloseIcon: true,
           });
         }
-      }else{
+      } else {
         setPointsOfSaleLoaded(true);
         history.push({
           pathname: generatePath(ROUTES.STORES, { id }),
           state: { showSuccessAlert: true },
         });
       }
-
     }
     if (uploadMethod === POS_UPDATE.Csv) {
       history.push(generatePath(ROUTES.STORES, { id }));
@@ -234,28 +233,36 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const onErrorChange = (errors: FormErrors) => {
     setErrors(errors);
-    const hasMandatoryErrors = Object.values(errors).some((fieldErrors) =>
-      Object.keys(fieldErrors).some((fieldName) =>
-        [
-          'franchiseName',
-          'contactEmail',
-          'confirmContactEmail',
-          'contactName',
-          'contactSurname',
-          'website',
-          'address',
-          'city',
-          'zipCode',
-          'region',
-          'province',
-        ].includes(fieldName)
-      )
-    );
+    if (hasAttemptedSubmit) {
+      const mandatoryFields = [
+        'franchiseName',
+        'contactEmail',
+        'confirmContactEmail',
+        'contactName',
+        'contactSurname',
+        'website',
+        'address',
+        'city',
+        'zipCode',
+        'region',
+        'province',
+      ];
 
-    setShowErrorAlert(hasMandatoryErrors);
+      setShowErrorAlert((prev) =>
+        salesPoints.map((_, idx) => {
+          const fieldErrors = errors[idx] ?? {};
+          const hasMandatoryError = Object.keys(fieldErrors).some((fieldName) =>
+            mandatoryFields.includes(fieldName)
+          );
+
+          if (hasMandatoryError) {
+            return true;
+          }
+          return prev[idx] ?? false;
+        })
+      );
+    }
   };
-
-
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -286,7 +293,7 @@ const InitiativeStoresUpload: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <Link fontWeight={theme.typography.fontWeightBold} href='#' underline="hover">
+              <Link fontWeight={theme.typography.fontWeightBold} href="#" underline="hover">
                 {t('pages.initiativeStores.manualLink')}
               </Link>
             </Grid>
@@ -296,9 +303,9 @@ const InitiativeStoresUpload: React.FC = () => {
                   <RadioGroup
                     row
                     value={uploadMethod}
-                    onChange={(e) =>
-                      setUploadMethod(e.target.value as POS_UPDATE.Csv | POS_UPDATE.Manual)
-                    }
+                    onChange={(e) => {
+                      setUploadMethod(e.target.value as POS_UPDATE.Csv | POS_UPDATE.Manual);
+                    }}
                     sx={{ mb: 2 }}
                   >
                     <FormControlLabel
@@ -351,6 +358,7 @@ const InitiativeStoresUpload: React.FC = () => {
               <Grid item xs={12}>
                 <PointsOfSaleForm
                   showErrorAlert={showErrorAlert}
+                  setShowErrorAlert={setShowErrorAlert}
                   externalErrors={_errors}
                   onFormChange={onFormChange}
                   onErrorChange={onErrorChange}

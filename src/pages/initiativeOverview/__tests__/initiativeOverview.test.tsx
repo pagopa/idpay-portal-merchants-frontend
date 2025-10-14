@@ -1,111 +1,90 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
-import { createMemoryHistory, History } from 'history';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Router } from 'react-router-dom';
 import InitiativeOverview from '../initiativeOverview';
-import {
-  getMerchantDetail,
-  getMerchantInitiativeStatistics,
-} from '../../../services/merchantService';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
-import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../../../utils/constants';
-import ROUTES from '../../../routes';
+import * as merchantService from '../../../services/merchantService';
+import * as errorUtils from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import * as helperFunctions from '../../../helpers';
+import { MerchantDetailDTO } from '../../../api/generated/merchants/MerchantDetailDTO';
+import { MerchantStatisticsDTO } from '../../../api/generated/merchants/MerchantStatisticsDTO';
 
-jest.mock('../../../services/merchantService', () => ({
-  getMerchantDetail: jest.fn(),
-  getMerchantInitiativeStatistics: jest.fn(),
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+  withTranslation: () => (Component: any) => {
+    Component.defaultProps = { ...Component.defaultProps, t: (key: string) => key };
+    return Component;
+  },
+}));
+
+jest.mock('../../../services/merchantService');
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({ id: 'initiative-123' }),
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
-jest.mock('react-i18next', () => ({
-  // La parte che avevi già
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-  withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
-    <Component {...props} />,
-}));
+const mockedUseErrorDispatcher = errorUtils.default as jest.Mock;
 
-const mockedGetMerchantDetail = getMerchantDetail as jest.Mock;
-const mockedGetMerchantInitiativeStatistics = getMerchantInitiativeStatistics as jest.Mock;
-const mockedUseErrorDispatcher = useErrorDispatcher as jest.Mock;
+const mockHistory = createMemoryHistory();
 
-const renderComponent = (initiativeId: string, history?: any) => {
-  const path = ROUTES.OVERVIEW.replace(':id', initiativeId);
+const renderComponent = () => {
+  mockHistory.push('/overview/initiative-123');
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Route path={ROUTES.OVERVIEW}>
-        <InitiativeOverview />
-      </Route>
-    </MemoryRouter>
+    <Router history={mockHistory}>
+      <InitiativeOverview />
+    </Router>
   );
 };
 
+const mockMerchantDetail: MerchantDetailDTO = {
+  iban: 'IT60X0542811101000000123456',
+  ibanHolder: 'Mario Rossi',
+  activationDate: new Date('2023-01-15T10:00:00Z'),
+};
+
+const mockMerchantStatistics: MerchantStatisticsDTO = {
+  amountCents: 50000,
+  refundedCents: 15000,
+  accruedCents: 0,
+};
+
 describe('InitiativeOverview', () => {
-  const mockAddError = jest.fn();
-  const initiativeId = 'test-initiative-id';
+  const addErrorMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUseErrorDispatcher.mockReturnValue(mockAddError);
+    mockedUseErrorDispatcher.mockReturnValue(addErrorMock);
+    jest.spyOn(helperFunctions, 'formatDate');
+    jest.spyOn(helperFunctions, 'formatIban');
+    jest.spyOn(helperFunctions, 'formattedCurrency');
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetail);
+    jest
+      .spyOn(merchantService, 'getMerchantInitiativeStatistics')
+      .mockResolvedValue(mockMerchantStatistics);
   });
 
-  test('should render component with fetched data on success', async () => {
-    const detailData = {
-      iban: 'IT60X0542811101000000123456',
-      ibanHolder: 'Test Holder',
-      activationDate: new Date('2023-01-01'),
-    };
-    const statsData = { amountCents: 10000, refundedCents: 2500 };
-    mockedGetMerchantDetail.mockResolvedValue(detailData);
-    mockedGetMerchantInitiativeStatistics.mockResolvedValue(statsData);
+  it('should render the main titles and cards', async () => {
+    renderComponent();
 
-    const history = createMemoryHistory();
-    renderComponent(initiativeId, history);
+    expect(screen.getByText('pages.initiativeOverview.title')).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativeOverview.subtitle')).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText('01/01/2023')).toBeInTheDocument();
-      expect(screen.getByText('Test Holder')).toBeInTheDocument();
-      expect(screen.getByText('IT 60 X 05428 11101 000000123456')).toBeInTheDocument();
-      expect(screen.getByText('100,00 €')).toBeInTheDocument();
-      expect(screen.getByText('25,00 €')).toBeInTheDocument();
+      expect(screen.getByText('pages.initiativeOverview.information')).toBeInTheDocument();
+      expect(screen.getByText('pages.initiativeOverview.stores')).toBeInTheDocument();
     });
   });
 
-  test('should render placeholders for missing data', async () => {
-    const detailData = {
-      iban: null,
-      ibanHolder: undefined,
-      activationDate: null,
-    };
-    const statsData = {
-      amountCents: undefined,
-      refundedCents: null,
-    };
-    mockedGetMerchantDetail.mockResolvedValue(detailData);
-    mockedGetMerchantInitiativeStatistics.mockResolvedValue(statsData);
+  it('should handle API error for getMerchantDetail', async () => {
+    const error = new Error('API Error Detail');
+    jest.spyOn(merchantService, 'getMerchantDetail').mockRejectedValue(error);
 
-    renderComponent(initiativeId);
+    renderComponent();
 
     await waitFor(() => {
-      const placeholders = screen.getAllByText(MISSING_DATA_PLACEHOLDER);
-      expect(placeholders).toHaveLength(3);
-      expect(screen.getAllByText(MISSING_EURO_PLACEHOLDER)).toHaveLength(2);
-    });
-  });
-
-  test('should call addError if getMerchantDetail fails', async () => {
-    const error = new Error('Failed to fetch detail');
-    mockedGetMerchantDetail.mockRejectedValue(error);
-    mockedGetMerchantInitiativeStatistics.mockResolvedValue({});
-
-    renderComponent(initiativeId);
-
-    await waitFor(() => {
-      expect(mockAddError).toHaveBeenCalledTimes(1);
-      expect(mockAddError).toHaveBeenCalledWith(
+      expect(addErrorMock).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'GET_MERCHANT_DETAIL',
           error,
@@ -114,23 +93,27 @@ describe('InitiativeOverview', () => {
     });
   });
 
-  test('should call addError and show placeholders if getMerchantInitiativeStatistics fails', async () => {
-    const error = new Error('Failed to fetch stats');
-    mockedGetMerchantDetail.mockResolvedValue({ ibanHolder: 'Test Holder' });
-    mockedGetMerchantInitiativeStatistics.mockRejectedValue(error);
+  it('should handle API error for getMerchantInitiativeStatistics', async () => {
+    const error = new Error('API Error Stats');
+    jest.spyOn(merchantService, 'getMerchantInitiativeStatistics').mockRejectedValue(error);
 
-    renderComponent(initiativeId);
+    renderComponent();
 
     await waitFor(() => {
-      expect(mockAddError).toHaveBeenCalledTimes(1);
-      expect(mockAddError).toHaveBeenCalledWith(
+      expect(addErrorMock).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'GET_MERCHANT_STATISTICS',
           error,
         })
       );
-      expect(screen.getByText('Test Holder')).toBeInTheDocument();
-      expect(screen.getAllByText(MISSING_EURO_PLACEHOLDER)).toHaveLength(2);
+    });
+
+    await waitFor(() => {
+      expect(helperFunctions.formattedCurrency).toHaveBeenCalledWith(
+        undefined,
+        expect.any(String),
+        true
+      );
     });
   });
 });

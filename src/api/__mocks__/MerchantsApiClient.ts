@@ -43,6 +43,16 @@ export const mockedInitiativesList = [
     startDate,
     status: StatusEnum.CLOSED,
   },
+  {
+    enabled: true,
+    endDate: undefined,
+    initiativeId: '5678',
+    initiativeName: 'Iniziativa mock 5678',
+    organizationName: 'Organizzazione mock 5678',
+    serviceId: '5678',
+    startDate: undefined,
+    status: StatusEnum.CLOSED,
+  },
 ];
 
 export const mockedMerchantTransactionList = {
