@@ -56,7 +56,7 @@ const InitiativeStoresUpload: React.FC = () => {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   useEffect(() => {
-    console.log(showErrorAlert,'showErrorAlert');
+    // console.log(showErrorAlert,'showErrorAlert');
   }, [showErrorAlert]);
 
   const onFormChange = (salesPoints: Array<SalePointFormDTO>) => {

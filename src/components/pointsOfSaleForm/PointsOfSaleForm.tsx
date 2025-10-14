@@ -376,7 +376,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
   };
 
   const clearError = (salesPointIndex: number, fieldName: string) => {
-    console.log('clear');
     // setShowErrorAlert(
     //   salesPoints.map(() => false));
     setErrors(prevErrors => {
@@ -601,7 +600,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
                           label="Indirizzo completo"
                           onChangeDebounce={(value) => search(value)}
                           onChange={(addressObj) => {
-                            console.log('VALUE', addressObj, index);
                             handleChangeAddress(index, addressObj);
                           }}
                           inputError={!!getFieldError(index, 'address')}

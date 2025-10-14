@@ -315,16 +315,30 @@ describe('InitiativeStoresUpload', () => {
     });*/
   });
 
-  it.skip('test complete flow - physical store - error Merchant ID not found', async () => {
+  it('test complete flow - physical store - error Merchant ID not found', async () => {
+    console.log('1');
+    mockUsePlacesAutocomplete.mockReturnValue({
+      options: optionsAutocomplete,
+      loading: false,
+      error: false,
+      search: false,
+    });
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue(undefined);
 
     await render(<InitiativeStoresUpload />);
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  });
+  }, 10000);
 
-  it.skip('test complete flow - physical store - error duplicated entry', async () => {
+  it('test complete flow - physical store - error duplicated entry', async () => {
+    console.log('2');
+    mockUsePlacesAutocomplete.mockReturnValue({
+      options: optionsAutocomplete,
+      loading: false,
+      error: false,
+      search: false,
+    });
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
@@ -336,9 +350,16 @@ describe('InitiativeStoresUpload', () => {
     const rendered = await render(<InitiativeStoresUpload />);
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  });
+  }, 10000);
 
-  it.skip('test complete flow - physical store - other error', async () => {
+  it('test complete flow - physical store - other error', async () => {
+    console.log('3');
+    mockUsePlacesAutocomplete.mockReturnValue({
+      options: optionsAutocomplete,
+      loading: false,
+      error: false,
+      search: false,
+    });
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
@@ -352,7 +373,14 @@ describe('InitiativeStoresUpload', () => {
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
 
-  it.skip('test complete flow - physical store - success', async () => {
+  it('test complete flow - physical store - success', async () => {
+    console.log('4');
+    mockUsePlacesAutocomplete.mockReturnValue({
+      options: optionsAutocomplete,
+      loading: false,
+      error: false,
+      search: false,
+    });
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
@@ -361,7 +389,7 @@ describe('InitiativeStoresUpload', () => {
     const rendered = await render(<InitiativeStoresUpload />);
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  });
+  },  10000);
 });
 
 const fillFormForSuccess = async (screen: any) => {
@@ -379,10 +407,12 @@ const fillFormForSuccess = async (screen: any) => {
 
   const contactSurnameField = screen.getByLabelText('Cognome');
   await userEvent.type(contactSurnameField, 'TechStore');
-  const addressField = screen.getByRole('combobox');
-  await userEvent.type(addressField, 'Via roma 100');
-  
-  await screen.findByText('Via Roma, 100, 32013 Longarone BL, Italia');
+
+  const addressField = screen.getAllByRole('combobox')[0];
+  fireEvent.change(addressField, {target: {value: 'Via roma 100' }});
+
   const addressAutocompleteItem = await screen.findAllByRole('option');
   fireEvent.click(addressAutocompleteItem[3]);
+  // const addressFieldFilled = screen.getAllByRole('combobox')[0];
+
 };
