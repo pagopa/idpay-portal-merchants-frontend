@@ -339,9 +339,6 @@ const InitiativeStores: React.FC = () => {
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                     >
-                      <MenuItem value="">
-                        <em>Nessuna</em>
-                      </MenuItem>
                       <MenuItem value="PHYSICAL">{t('pages.initiativeStores.physical')}</MenuItem>
                       <MenuItem value="ONLINE">{t('pages.initiativeStores.online')}</MenuItem>
                     </Select>
@@ -440,8 +437,10 @@ const InitiativeStores: React.FC = () => {
             }}
           >
             <Stack spacing={0.5} direction="row">
-              <Typography variant="body2">{t('pages.initiativeStores.noStores')} </Typography>
-              <Link
+              <Typography variant="body2">{!filtersAppliedOnce ? t('pages.initiativeStores.noStores') : t('pages.initiativeStores.noStoresInitiative')} </Typography>
+             {
+              !filtersAppliedOnce && (
+                <Link
                 onClick={() => goToAddStorePage()}
                 className="cursor-pointer"
                 variant="body2"
@@ -449,6 +448,8 @@ const InitiativeStores: React.FC = () => {
               >
                 {t('pages.initiativeStores.addStoreNoResults')}
               </Link>
+              )
+             }
             </Stack>
           </Paper>
         )
