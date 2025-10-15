@@ -1,7 +1,5 @@
 import { DataGrid,GridSortModel } from '@mui/x-data-grid';
 import { useEffect, useState, useCallback } from 'react';
-import { IconButton, Box } from '@mui/material';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { theme } from '@pagopa/mui-italia';
 import {MISSING_DATA_PLACEHOLDER} from '../../utils/constants';
 
@@ -18,7 +16,7 @@ export interface DataTableProps {
 }
 
 
-const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onSortModelChange, onPaginationPageChange, paginationModel }: DataTableProps) => {
+const TransactionDataTable = ({ rows, columns, rowsPerPage, onSortModelChange, onPaginationPageChange, paginationModel }: DataTableProps) => {
   const [finalColumns, setFinalColumns] = useState(Array<any>);
   const [sortModelState, setSortModelState] = useState<any>([]);
 
@@ -33,24 +31,24 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, handleRowAction, onS
       setFinalColumns(
         [
           ...processedColumns,
-          {
-            field: 'actions',
-            headerName: '',
-            sortable: false,
-            filterable: false,
-            disableColumnMenu: true,
-            flex: 0.1,
-            renderCell: (params: any) => (
-              <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
-                <IconButton
-                  onClick={() => handleRowAction(params.row)}
-                  size="small"
-                >
-                  <ChevronRightIcon color='primary' fontSize='inherit' />
-                </IconButton>
-              </Box>
-            )
-          }
+          // {
+          //   field: 'actions',
+          //   headerName: '',
+          //   sortable: false,
+          //   filterable: false,
+          //   disableColumnMenu: true,
+          //   flex: 0.1,
+          //   renderCell: (params: any) => (
+          //     <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+          //       <IconButton
+          //         onClick={() => handleRowAction(params.row)}
+          //         size="small"
+          //       >
+          //         <ChevronRightIcon color='primary' fontSize='inherit' />
+          //       </IconButton>
+          //     </Box>
+          //   )
+          // }
         ]
       );
     }
