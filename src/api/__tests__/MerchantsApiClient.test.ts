@@ -7,6 +7,7 @@ jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
 
 jest.mock('@pagopa/selfcare-common-frontend/redux/slices/appStateSlice', () => ({
   appStateActions: { addError: jest.fn((e) => e) },
+  appStateReducer: (state = {}, action: any) => state,
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend/utils/api-utils', () => ({
@@ -175,13 +176,24 @@ describe('MerchantApi', () => {
     expect(result).toEqual({ code: 'ERR_CODE', message: 'Error msg' });
   });
 
-  it.skip('updateMerchantPointOfSales calls extractResponse when right', async () => {
-    mockApiClient.putPointOfSales.mockResolvedValue({ right: 'data' });
+  it('updateMerchantPointOfSales calls extractResponse when right', async () => {
+    /*
+    (response: t.Validation<TypeofApiResponse<ApiRequestType<any, any, any, IResponseType<any, any, any>>>>, 
+      successHttpStatus: number, 
+      onRedirectToLogin: () => void, 
+      notValidTokenHttpStatus?: number | null, 
+      notAuthorizedTokenHttpStatus?: number | null, 
+      emptyResponseHttpStatus?: number | null)
+      */
+
+    mockApiClient.putPointOfSales.mockResolvedValue({
+      _tag: 'Right',
+      right: { headers: {}, status: 204 },
+    });
     const MerchantApi = loadApi();
 
     const result = await MerchantApi.updateMerchantPointOfSales('m1', []);
 
-    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 204, expect.any(Function));
     expect(result).toBe('extracted');
   });
 

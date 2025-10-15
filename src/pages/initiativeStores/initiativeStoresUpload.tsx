@@ -18,14 +18,15 @@ import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
-import { normalizeUrlHttp , normalizeUrlHttps } from '../../utils/formatUtils';
+import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
-import { PointOfSaleDTO} from '../../api/generated/merchants/PointOfSaleDTO';
+import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { POS_UPDATE } from '../../utils/constants';
 import { isValidUrl } from '../../helpers';
+import { SalePointFormDTO } from '../../types/types';
 
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
@@ -35,27 +36,30 @@ interface FieldErrors {
   [fieldName: string]: string;
 }
 
-
 interface RouteParams {
   id: string;
 }
 
 const InitiativeStoresUpload: React.FC = () => {
-  const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(POS_UPDATE.Csv);
-  const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([]);
+  const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(
+    POS_UPDATE.Manual
+  );
+  const [salesPoints, setSalesPoints] = useState<Array<SalePointFormDTO>>([]);
   const [_errors, setErrors] = useState<FormErrors>({});
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
   const { t } = useTranslation();
   const { id } = useParams<RouteParams>();
   const history = useHistory();
   const addError = useErrorDispatcher();
+  const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
+  // const [validatePointsOfSaleForm, setValidatePointsOfSaleForm] = useState(true);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   useEffect(() => {
-    setUploadMethod(POS_UPDATE.Manual);
-  }, [uploadMethod]);
+    // console.log(showErrorAlert,'showErrorAlert');
+  }, [showErrorAlert]);
 
-
-  const onFormChange = (salesPoints: Array<PointOfSaleDTO>) => {
+  const onFormChange = (salesPoints: Array<SalePointFormDTO>) => {
     if (pointsOfSaleLoaded) {
       setPointsOfSaleLoaded(false);
     }
@@ -68,42 +72,69 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const handleConfirm = async () => {
     if (uploadMethod === POS_UPDATE.Manual) {
-      const emails = salesPoints.map(sp => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
+      setShowErrorAlert(() =>
+        salesPoints.map(() => false)
+      );
+      setHasAttemptedSubmit(true);
+
+      const emails = salesPoints.map((sp) => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
       const duplicates = emails
         .map((email, idx) => (emails.indexOf(email) !== idx ? idx : -1))
-        .filter(idx => idx !== -1);
+        .filter((idx) => idx !== -1);
       const websiteErrors: FormErrors = salesPoints.reduce<FormErrors>((acc, sp, idx) => {
-        if (sp.type === 'ONLINE') {
-          if (!sp.website || sp.website.trim().length === 0) {
-            return {
-              ...acc,
-              [idx]: {
-                ...(acc[idx] ?? {}),
-                website: 'Campo obbligatorio',
-              },
-            };
-          }
-          if (!isValidUrl(normalizeUrlHttps(sp.website))) {
-            return {
-              ...acc,
-              [idx]: {
-                ...(acc[idx] ?? {}),
+        const currentErrors = [
+          !sp.franchiseName?.trim() && { franchiseName: 'Campo obbligatorio' },
+          !sp.contactName?.trim() && { contactName: 'Campo obbligatorio' },
+          !sp.contactSurname?.trim() && { contactSurname: 'Campo obbligatorio' },
+          !sp.contactEmail?.trim() && { contactEmail: 'Campo obbligatorio' },
+          !sp.confirmContactEmail?.trim() && { confirmContactEmail: 'Campo obbligatorio' },
+          // ||
+          // (!isValidEmail(sp?.contactEmail?.trim()) && { contactEmail: 'Email non valida' }),
+          sp.type === 'ONLINE' &&
+            ((!sp.website?.trim() && { website: 'Campo obbligatorio' }) ||
+              (!isValidUrl(normalizeUrlHttps(sp.website)) && {
                 website: 'Indirizzo web non valido',
-              },
-            };
-          }
+              })),
+          sp.type === 'PHYSICAL' && [
+            !sp.address?.trim() && { address: 'Campo obbligatorio' },
+            !sp.city?.trim() && { city: 'Campo obbligatorio' },
+            !sp.zipCode?.trim() && { zipCode: 'Campo obbligatorio' },
+            !sp.region?.trim() && { region: 'Campo obbligatorio' },
+            !sp.province?.trim() && { province: 'Campo obbligatorio' },
+          ],
+        ]
+          .flat()
+          .filter(Boolean)
+          .reduce((errAcc, e) => ({ ...errAcc, ...e }), {});
+
+        if (Object.keys(currentErrors).length > 0) {
+          setShowErrorAlert((prev) =>
+            prev.map((value, i) => (i === idx ? true : value))
+          );
+
+          return {
+            ...acc,
+            [idx]: {
+              ...(acc[idx] ?? {}),
+              ...currentErrors,
+            },
+          };
         }
+
         return acc;
       }, {});
 
-      const duplicateErrors: FormErrors = duplicates.reduce<FormErrors>((acc, dupIndex) => ({
-        ...acc,
-        [dupIndex]: {
-          ...(acc[dupIndex] ?? {}),
-          contactEmail: `Email già presente nel punto vendita ${dupIndex}`,
-          confirmContactEmail: `Email già presente nel punto vendita ${dupIndex}`,
-        },
-      }), {});
+      const duplicateErrors: FormErrors = duplicates.reduce<FormErrors>(
+        (acc, dupIndex) => ({
+          ...acc,
+          [dupIndex]: {
+            ...(acc[dupIndex] ?? {}),
+            contactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+            confirmContactEmail: `Email già presente nel punto vendita ${dupIndex}`,
+          },
+        }),
+        {}
+      );
 
       const newErrors: FormErrors = {
         ...websiteErrors,
@@ -112,17 +143,6 @@ const InitiativeStoresUpload: React.FC = () => {
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
-        addError({
-          id: 'UPLOAD_STORES',
-          blocking: false,
-          error: new Error('Validation errors'),
-          techDescription: 'Validation errors on POS upload',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
         return;
       }
       const userJwt = parseJwt(storageTokenOps.read());
@@ -141,15 +161,35 @@ const InitiativeStoresUpload: React.FC = () => {
         });
         return;
       }
-      const normalizedSalesPoints = salesPoints.map(sp => ({
-        ...sp,
+      // const {confirmContactEmail , ...normalizedSalesPoints}  = salesPoints[0];
+
+      // const normalizedSalesPoints : Array<PointOfSaleDTO> = salesPoints.map(sp => {
+      //   const {confirmContactEmail , ...normalizedSalePoint}  = sp;
+      //   return normalizedSalePoint;
+      // });
+
+      const normalizedSalesPoints: Array<PointOfSaleDTO> = salesPoints.map((sp) => ({
         website: normalizeUrlHttps(sp.website),
         channelGeolink: normalizeUrlHttp(sp.channelGeolink),
+        address: sp.address,
+        channelEmail: sp.channelEmail,
+        channelPhone: sp.channelPhone,
+        city: sp.city,
+        contactEmail: sp.contactEmail,
+        contactName: sp.contactName,
+        contactSurname: sp.contactSurname,
+        franchiseName: sp.franchiseName,
+        id: sp.id,
+        province: sp.province,
+        region: sp.region,
+        streetNumber: sp.streetNumber,
+        type: TypeEnum[sp.type as TypeEnum],
+        zipCode: sp.zipCode,
       }));
 
-        const response = await  updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
-      if(response){
-        if(response?.code ===  'POINT_OF_SALE_ALREADY_REGISTERED'){
+      const response = await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
+      if (response) {
+        if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
           addError({
             id: 'UPLOAD_STORE',
             blocking: false,
@@ -161,7 +201,7 @@ const InitiativeStoresUpload: React.FC = () => {
             component: 'Toast',
             showCloseIcon: true,
           });
-        }else{
+        } else {
           addError({
             id: 'UPLOAD_STORES',
             blocking: false,
@@ -174,14 +214,13 @@ const InitiativeStoresUpload: React.FC = () => {
             showCloseIcon: true,
           });
         }
-      }else{
+      } else {
         setPointsOfSaleLoaded(true);
         history.push({
           pathname: generatePath(ROUTES.STORES, { id }),
           state: { showSuccessAlert: true },
         });
       }
-
     }
     if (uploadMethod === POS_UPDATE.Csv) {
       history.push(generatePath(ROUTES.STORES, { id }));
@@ -192,32 +231,38 @@ const InitiativeStoresUpload: React.FC = () => {
     history.push(generatePath(ROUTES.OVERVIEW, { id }));
   };
 
-  // const isFormValid = (): boolean => salesPoints.every(salesPoint => {
-  //   if (salesPoint.type === TypeEnum.ONLINE) {
-  //     return !!salesPoint.franchiseName &&
-  //       (!!salesPoint.webSite && isValidUrl(normalizeUrlHttps(salesPoint.webSite))) &&
-  //       (!!salesPoint.contactEmail && isValidEmail(salesPoint.contactEmail)) &&
-  //       !!salesPoint.contactName &&
-  //       !!salesPoint.contactSurname;
-  //   } else if (salesPoint.type === TypeEnum.PHYSICAL) {
-  //     return !!salesPoint.franchiseName &&
-  //       !!salesPoint.address &&
-  //       !!salesPoint.city &&
-  //       !!salesPoint.zipCode &&
-  //       !!salesPoint.region &&
-  //       !!salesPoint.province &&
-  //       (!!salesPoint.contactEmail && isValidEmail(salesPoint.contactEmail)) &&
-  //       !!salesPoint.contactName &&
-  //       !!salesPoint.contactSurname;
-  //   }
-  //   return false;
-  // });
-
   const onErrorChange = (errors: FormErrors) => {
     setErrors(errors);
+    if (hasAttemptedSubmit) {
+      const mandatoryFields = [
+        'franchiseName',
+        'contactEmail',
+        'confirmContactEmail',
+        'contactName',
+        'contactSurname',
+        'website',
+        'address',
+        'city',
+        'zipCode',
+        'region',
+        'province',
+      ];
+
+      setShowErrorAlert((prev) =>
+        salesPoints.map((_, idx) => {
+          const fieldErrors = errors[idx] ?? {};
+          const hasMandatoryError = Object.keys(fieldErrors).some((fieldName) =>
+            mandatoryFields.includes(fieldName)
+          );
+
+          if (hasMandatoryError) {
+            return true;
+          }
+          return prev[idx] ?? false;
+        })
+      );
+    }
   };
-
-
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -248,7 +293,7 @@ const InitiativeStoresUpload: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <Link fontWeight={theme.typography.fontWeightBold} href='#' underline="hover">
+              <Link fontWeight={theme.typography.fontWeightBold} href="#" underline="hover">
                 {t('pages.initiativeStores.manualLink')}
               </Link>
             </Grid>
@@ -258,9 +303,9 @@ const InitiativeStoresUpload: React.FC = () => {
                   <RadioGroup
                     row
                     value={uploadMethod}
-                    onChange={(e) =>
-                      setUploadMethod(e.target.value as POS_UPDATE.Csv | POS_UPDATE.Manual)
-                    }
+                    onChange={(e) => {
+                      setUploadMethod(e.target.value as POS_UPDATE.Csv | POS_UPDATE.Manual);
+                    }}
                     sx={{ mb: 2 }}
                   >
                     <FormControlLabel
@@ -312,10 +357,13 @@ const InitiativeStoresUpload: React.FC = () => {
             {uploadMethod === POS_UPDATE.Manual && (
               <Grid item xs={12}>
                 <PointsOfSaleForm
+                  showErrorAlert={showErrorAlert}
+                  setShowErrorAlert={setShowErrorAlert}
                   externalErrors={_errors}
                   onFormChange={onFormChange}
                   onErrorChange={onErrorChange}
                   pointsOfSaleLoaded={pointsOfSaleLoaded}
+                  hasAttemptedSubmit={hasAttemptedSubmit}
                 />
               </Grid>
             )}

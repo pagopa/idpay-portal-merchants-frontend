@@ -1,127 +1,134 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import Auth, { readUserFromToken } from '../Auth';
 import {
   trackAppError,
   trackEvent,
 } from '@pagopa/selfcare-common-frontend/services/analyticsService';
 import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { userFromJwtTokenAsJWTUser } from '../../../hooks/useLogin';
-import { ENV } from '../../../utils/env';
 import ROUTES from '../../../routes';
-import Auth, { readUserFromToken } from '../Auth';
+import { ENV } from '../../../utils/env';
 
-jest.mock('@pagopa/selfcare-common-frontend/services/analyticsService');
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage');
-jest.mock('../../../hooks/useLogin');
+jest.mock('@pagopa/selfcare-common-frontend/services/analyticsService', () => ({
+  trackAppError: jest.fn(),
+  trackEvent: jest.fn(),
+}));
 
-const mockedUserFromJwtToken = userFromJwtTokenAsJWTUser as jest.Mock;
-const mockedStorageUserOps = storageUserOps as jest.Mocked<typeof storageUserOps>;
-const mockedStorageTokenOps = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
-const mockedTrackEvent = trackEvent as jest.Mock;
-const mockedTrackAppError = trackAppError as jest.Mock;
+jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+  storageTokenOps: { write: jest.fn(), read: jest.fn() },
+  storageUserOps: { write: jest.fn() },
+}));
+
+jest.mock('../../../hooks/useLogin', () => ({
+  userFromJwtTokenAsJWTUser: jest.fn(),
+}));
+
+jest.mock('../../../routes', () => ({
+  __esModule: true,
+  default: { HOME: '/home' },
+}));
+
+jest.mock('../../../utils/env', () => ({
+  ENV: {
+    URL_FE: { PRE_LOGIN: '/api/prelogin', LOGIN: '/login' },
+  },
+}));
+
+const originalLocation = window.location;
+beforeAll(() => {
+  delete (window as any).location;
+  (window as any).location = {
+    assign: jest.fn(),
+  };
+});
+afterAll(() => {
+  window.location = originalLocation;
+});
 
 describe('readUserFromToken', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  it('should parse user from token and store it', () => {
+    const fakeUser = { name: 'Francesco' };
+    (userFromJwtTokenAsJWTUser as jest.Mock).mockReturnValueOnce(fakeUser);
+
+    const result = readUserFromToken('fakeToken');
+
+    expect(userFromJwtTokenAsJWTUser).toHaveBeenCalledWith('fakeToken');
+    expect(storageUserOps.write).toHaveBeenCalledWith(fakeUser);
+    expect(result).toBe(fakeUser);
   });
 
-  test('should call userFromJwtToken and write to storage if user is valid', () => {
-    const mockUser = { name: 'Test', surname: 'User' };
-    mockedUserFromJwtToken.mockReturnValue(mockUser);
-
-    const result = readUserFromToken('fake-token');
-
-    expect(mockedUserFromJwtToken).toHaveBeenCalledWith('fake-token');
-    expect(mockedStorageUserOps.write).toHaveBeenCalledWith(mockUser);
-    expect(result).toEqual(mockUser);
-  });
-
-  test('should not write to storage if user is falsy', () => {
-    mockedUserFromJwtToken.mockReturnValue(null);
-    readUserFromToken('fake-token');
-    expect(mockedStorageUserOps.write).not.toHaveBeenCalled();
+  it('should return null if no user parsed', () => {
+    (userFromJwtTokenAsJWTUser as jest.Mock).mockReturnValueOnce(null);
+    const result = readUserFromToken('invalid');
+    expect(result).toBeNull();
+    expect(storageUserOps.write).not.toHaveBeenCalled();
   });
 });
 
 describe('Auth component', () => {
-  const originalLocation = window.location;
-  const mockAssign = jest.fn();
-  const mockFetch = jest.fn();
-
-  beforeAll(() => {
-    Object.defineProperty(window, 'location', {
-      value: {
-        hash: '',
-        assign: mockAssign,
-      },
-      writable: true,
-    });
-    global.fetch = mockFetch;
-  });
-
-  afterAll(() => {
-    window.location = originalLocation;
-    (global.fetch as jest.Mock).mockClear();
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('should handle successful login, fetch inner token, and redirect to HOME', async () => {
-    const urlToken = 'fake-url-token';
-    const innerToken = 'fake-inner-token';
-    const mockUser = { name: 'Test', surname: 'User' };
-    window.location.hash = `#token=${urlToken}`;
-    mockFetch.mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve(innerToken),
-    });
-    mockedUserFromJwtToken.mockReturnValue(mockUser);
+  it('should handle successful login flow with token and redirect to HOME', async () => {
+    (window as any).location.hash = '#token=validToken';
+
+    const mockResponse = {
+      headers: { get: jest.fn(() => null) },
+      text: jest.fn().mockResolvedValueOnce('innerToken'),
+    };
+    global.fetch = jest.fn(() => Promise.resolve(mockResponse as any)) as any;
+
+    (userFromJwtTokenAsJWTUser as jest.Mock).mockReturnValueOnce({ id: '123' });
 
     render(<Auth />);
 
     await waitFor(() => {
-      expect(mockedTrackEvent).toHaveBeenCalledWith('AUTH_SUCCESS');
-      expect(mockFetch).toHaveBeenCalledWith(ENV.URL_FE.PRE_LOGIN, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${urlToken}`,
-        },
-      });
-      expect(mockedStorageTokenOps.write).not.toHaveBeenCalledWith(innerToken);
-      expect(mockedUserFromJwtToken).not.toHaveBeenCalledWith(innerToken);
-      expect(mockedStorageUserOps.write).not.toHaveBeenCalledWith(mockUser);
-      expect(mockAssign).not.toHaveBeenCalledWith(ROUTES.HOME);
+      expect(trackEvent).toHaveBeenCalledWith('AUTH_SUCCESS');
+      expect(storageTokenOps.write).toHaveBeenCalledWith('innerToken');
+      expect(window.location.assign).toHaveBeenCalledWith(ROUTES.HOME);
     });
   });
 
-  test('should redirect to LOGIN if no token is in the hash', async () => {
-    window.location.hash = '';
+  it('should redirect to x-location-to header if present', async () => {
+    (window as any).location.hash = '#token=headerToken';
+    const mockResponse = {
+      headers: { get: jest.fn(() => '/redirectUrl') },
+      text: jest.fn().mockResolvedValueOnce('unused'),
+    };
+    global.fetch = jest.fn(() => Promise.resolve(mockResponse as any)) as any;
 
     render(<Auth />);
 
     await waitFor(() => {
-      expect(mockedTrackAppError).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'INVALIDAUTHREQUEST' })
+      expect(window.location.assign).toHaveBeenCalledWith('/redirectUrl');
+    });
+  });
+
+  it('should handle fetch failure and redirect to LOGIN', async () => {
+    (window as any).location.hash = '#token=errorToken';
+    global.fetch = jest.fn(() => Promise.reject(new Error('network error'))) as any;
+
+    render(<Auth />);
+
+    await waitFor(() => {
+      expect(window.location.assign).toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
+    });
+  });
+
+  it('should call trackAppError if no token in URL', async () => {
+    (window as any).location.hash = '';
+    render(<Auth />);
+
+    await waitFor(() => {
+      expect(trackAppError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'INVALIDAUTHREQUEST',
+          toNotify: true,
+        })
       );
-      expect(mockAssign).toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
+      expect(window.location.assign).toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
     });
-  });
-
-  test('should redirect to LOGIN if the fetch for the inner token fails', async () => {
-    window.location.hash = '#token=some-token';
-    mockFetch.mockRejectedValue(new Error('Fetch failed'));
-
-    render(<Auth />);
-
-    await waitFor(() => {
-      expect(mockedTrackEvent).toHaveBeenCalledWith('AUTH_SUCCESS');
-      expect(mockAssign).toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
-    });
-
-    expect(mockedStorageTokenOps.write).not.toHaveBeenCalled();
   });
 });

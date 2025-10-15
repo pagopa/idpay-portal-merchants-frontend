@@ -1,4 +1,4 @@
-import { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import {
   Box,
   Typography,
@@ -7,9 +7,9 @@ import {
   FormControlLabel,
   FormControl,
   TextField,
-  Grid, Button,
+  Grid, Button, Alert, Slide,
 } from '@mui/material';
-import { ArrowOutward } from '@mui/icons-material';
+import { ArrowOutward} from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked, theme } from '@pagopa/mui-italia';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +26,10 @@ interface PointsOfSaleFormProps {
   onErrorChange: (errors: FormErrors) => void;
   pointsOfSaleLoaded: boolean;
   externalErrors?: FormErrors;
+  showErrorAlert: Array<boolean>;
+  setShowErrorAlert: (showErrorAlert: Array<boolean>) => void;
+  // onValidate?: (validateFn: () => boolean) => void;
+  hasAttemptedSubmit: boolean;
 }
 
 interface FormErrors {
@@ -37,7 +41,7 @@ interface FieldErrors {
 }
 
 
-const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChange, onErrorChange, pointsOfSaleLoaded }) => {
+const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErrorAlert,externalErrors, onFormChange, onErrorChange, pointsOfSaleLoaded }) => {
   const { t } = useTranslation();
   const { options, loading, error, search } = usePlacesAutocomplete();
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
@@ -64,9 +68,126 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
   const mergedErrors = { ...errors, ...externalErrors };
 
   useEffect(() => {
+    validateForm(hasAttemptedSubmit);
+  }, [hasAttemptedSubmit]);
+
+  // useEffect(() => {
+  //   console.log('errors', errors);
+  //   let arrayAlert  = {};
+  //   Object.entries(errors).forEach(([,value], salesPointIndex) => {
+  //     let salesPointError = false;
+  //     Object.entries(value).forEach(([ ,valore],) => {
+  //       console.log(valore,'valore');
+  //       if (valore === 'Campo obbligatorio'){
+  //         salesPointError = true;
+  //       }
+  //     });
+  //     arrayAlert = { ...arrayAlert, [salesPointIndex]: salesPointError };
+  //
+  //   });
+  // console.log('arrayAlert',arrayAlert);
+  // }, [errors]);
+
+
+  useEffect(() => {
     onFormChange(salesPoints);
     onErrorChange(errors);
-  }, [salesPoints]);
+  }, [salesPoints,errors]);
+
+  const validateForm = (showErrors: boolean): boolean => {
+    let isValid = true;
+
+    const newErrors = salesPoints.reduce<FormErrors>((acc, sp, index) => {
+      let fieldErrors: FieldErrors = {};
+
+      if (!sp.contactEmail?.trim()) {
+        fieldErrors = { ...fieldErrors, contactEmail: 'Campo obbligatorio' };
+        isValid = false;
+      }
+      // else if (!isValidEmail(sp.contactEmail)) {
+      //   fieldErrors = { ...fieldErrors, contactEmail: 'Email non valida' };
+      //   isValid = false;
+      // }
+
+      if (!contactEmailConfirm[index]?.trim()) {
+        fieldErrors = { ...fieldErrors, confirmContactEmail: 'Campo obbligatorio' };
+        isValid = false;
+      }
+      // else if (sp.contactEmail?.trim() !== contactEmailConfirm[index]?.trim()) {
+      //   fieldErrors = { ...fieldErrors, confirmContactEmail: 'Le email non coincidono' };
+      //   isValid = false;
+      // }
+
+      if (!sp.contactName?.trim()) {
+        fieldErrors = { ...fieldErrors, contactName: 'Campo obbligatorio' };
+        isValid = false;
+      }
+      if (!sp.contactSurname?.trim()) {
+        fieldErrors = { ...fieldErrors, contactSurname: 'Campo obbligatorio' };
+        isValid = false;
+      }
+      if (!sp.franchiseName?.trim()) {
+        fieldErrors = { ...fieldErrors, franchiseName: 'Campo obbligatorio' };
+        isValid = false;
+      }
+      if (sp.type === TypeEnum.PHYSICAL) {
+
+        if (!sp.city?.trim()) {
+          fieldErrors = { ...fieldErrors, city: 'Campo obbligatorio' };
+          isValid = false;
+        }
+        if (!sp.zipCode?.trim()) {
+          fieldErrors = { ...fieldErrors, zipCode: 'Campo obbligatorio' };
+          isValid = false;
+        }
+        if (!sp.region?.trim()) {
+          fieldErrors = { ...fieldErrors, region: 'Campo obbligatorio' };
+          isValid = false;
+        }
+        if (!sp.province?.trim()) {
+          fieldErrors = { ...fieldErrors, province: 'Campo obbligatorio' };
+          isValid = false;
+        }
+        if (!sp.address?.trim()) {
+          fieldErrors = { ...fieldErrors, address: 'Campo obbligatorio' };
+          isValid = false;
+        }
+      }
+      if (sp.type === TypeEnum.ONLINE) {
+        if (!sp.website?.trim()) {
+          fieldErrors = { ...fieldErrors, website: 'Campo obbligatorio' };
+          isValid = false;
+        }
+        else if (!isValidUrl(normalizeUrlHttps(sp.website))) {
+          fieldErrors = { ...fieldErrors, website: 'Deve essere un sito valido' };
+          isValid = false;
+        }
+      }
+      // eslint-disable-next-line sonarjs/no-collapsible-if
+      if (sp.type === TypeEnum.PHYSICAL) {
+        if (!sp.address?.trim()) {
+          fieldErrors = { ...fieldErrors, address: 'Campo obbligatorio' };
+          isValid = false;
+        }
+        if (sp.channelGeolink?.trim() && !isValidUrl(normalizeUrlHttp(sp.channelGeolink?.trim()))) {
+          fieldErrors = { ...fieldErrors, channelGeolink: 'Deve essere un sito valido' };
+          isValid = false;
+        }
+      }
+
+      return Object.keys(fieldErrors).length > 0
+        ? { ...acc, [index]: fieldErrors }
+        : acc;
+    }, {});
+
+    if (showErrors) {
+      setErrors(newErrors);
+    }
+
+
+    return isValid;
+  };
+
 
   useEffect(() => {
     if (pointsOfSaleLoaded) {
@@ -91,10 +212,30 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
     }
   }, [pointsOfSaleLoaded]);
 
+  const clearFormOnTypeChanging = (index : number, type: string) => {
+    setErrors({});
+    setSalesPoints(prevSalesPoints =>
+      prevSalesPoints.map((salesPoint, i) =>
+       i === index && type === 'ONLINE' ?
+         { ...salesPoint,
+           ['address']: '' ,
+           ['city']: '' ,
+           ['zipCode']: '' ,
+           ['province']: '' ,
+           ['region']: '' ,
+         }
+       : salesPoint
+
+      )
+    );
+  };
+
   const handleFieldChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    if (name !== 'type') {
       switch (name) {
+        case 'type' :
+          clearFormOnTypeChanging(index, value);
+          break;
         case 'channelGeolink':
           if (value) {
             if (!isValidUrl(normalizeUrlHttp(value))) {
@@ -124,81 +265,90 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
           }
           break;
         case 'contactEmail':
-          if (contactEmailConfirm[index] && value !== contactEmailConfirm[index]) {
-            updateError(index, 'confirmContactEmail', 'Le email non coincidono');
-          } else {
-            clearError(index, 'confirmContactEmail');
+          if (value){
+            if (contactEmailConfirm[index] && value !== contactEmailConfirm[index]) {
+              updateError(index, 'confirmContactEmail', 'Le email non coincidono');
+            } else {
+              clearError(index, 'confirmContactEmail');
+            }
+            if (!isValidEmail(value)) {
+              updateError(index, 'contactEmail', 'Email non valida');
+            } else {
+              clearError(index, 'contactEmail');
+            }
+          }else{
+            updateError(index, 'confirmContactEmail', 'Campo obbligatorio');
           }
-          if (!isValidEmail(value)) {
-            updateError(index, 'contactEmail', 'Email non valida');
-          } else {
-            clearError(index, 'contactEmail');
-          }
+
           break;
         case 'confirmContactEmail':
           setContactEmailConfirm((prev) => ({
             ...prev,
             [index]: value,
           }));
-          if (!isValidEmail(value)) {
-            updateError(index, 'confirmContactEmail', 'Email non valida');
-          } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
-            updateError(index, 'confirmContactEmail', 'Le email non coincidono');
-          } else {
-            clearError(index, 'confirmContactEmail');
+          if(value){
+            if (!isValidEmail(value)) {
+              updateError(index, 'confirmContactEmail', 'Email non valida');
+            } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
+              updateError(index, 'confirmContactEmail', 'Le email non coincidono');
+            } else {
+              clearError(index, 'confirmContactEmail');
+            }
+          }else{
+            updateError(index, 'confirmContactEmail', 'Campo obbligatorio');
           }
           break;
         case 'contactName':
-          if (value.length === 0) {
+          if (!value.trim()) {
             updateError(index, 'contactName', 'Campo obbligatorio');
           } else {
             clearError(index, 'contactName');
           }
           break;
         case 'contactSurname':
-          if (value.length === 0) {
+          if (!value.trim()) {
             updateError(index, 'contactSurname', 'Campo obbligatorio');
           } else {
             clearError(index, 'contactSurname');
           }
           break;
         case 'franchiseName':
-          if (value.length === 0) {
+          if (!value.trim()) {
             updateError(index, 'franchiseName', 'Campo obbligatorio');
           } else {
             clearError(index, 'franchiseName');
           }
           break;
         case 'city':
-          if (value.length === 0) {
+          if (!value.trim()) {
             updateError(index, 'city', ' ');
           } else {
             clearError(index, 'city');
           }
           break;
         case 'zipCode':
-          if (value.length === 0) {
+          if (!value.trim()) {
             updateError(index, 'zipCode', ' ');
           } else {
             clearError(index, 'zipCode');
           }
           break;
         case 'region':
-          if (value.length === 0) {
+          if (!value.trim()) {
             updateError(index, 'region', ' ');
           } else {
             clearError(index, 'region');
           }
           break;
         case 'province':
-          if (value.length === 0) {
+          if (!value.trim()) {
             updateError(index, 'province', ' ');
           } else {
             clearError(index, 'province');
           }
           break;
         case 'address':
-          if (value.length === 0) {
+          if (!value.trim()) {
             updateError(index, 'address', 'Campo obbligatorio');
           } else {
             clearError(index, 'address');
@@ -207,9 +357,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
         default:
           break;
       }
-    } else {
-      setErrors({});
-    }
 
     setSalesPoints(prevSalesPoints =>
       prevSalesPoints.map((salesPoint, i) =>
@@ -232,6 +379,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
   };
 
   const clearError = (salesPointIndex: number, fieldName: string) => {
+    // setShowErrorAlert(
+    //   salesPoints.map(() => false));
     setErrors(prevErrors => {
       if (!prevErrors[salesPointIndex]?.[fieldName]) {
         return prevErrors;
@@ -251,7 +400,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
     });
   };
 
-  const getFieldError = (salesPointIndex: number, fieldName: string): string => errors[salesPointIndex]?.[fieldName] || '';
+  const getFieldError = (salesPointIndex: number, fieldName: string): string =>
+    mergedErrors[salesPointIndex]?.[fieldName] ?? '';
 
   const addAnotherSalesPoint = () => {
     if (salesPoints.length < 5) {
@@ -286,6 +436,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
         return;
       }
       clearError(salesPointIndex, 'address');
+      clearError(salesPointIndex, 'city');
+      clearError(salesPointIndex, 'province');
+      clearError(salesPointIndex, 'region');
+      clearError(salesPointIndex, 'zipCode');
 
       setSalesPoints((prev) =>
         prev.map((sp, i) =>
@@ -374,6 +528,15 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                 </Box>
               </FormControl>
             </Grid>
+            <Grid item xs={12} pb={3}>
+              <Slide direction="left" in={showErrorAlert?.[index] === true} mountOnEnter unmountOnExit>
+                <Alert
+                  severity="error"
+                >
+                  {'Per continuare è necessario compilare tutti i campi obbligatori.'}
+                </Alert>
+              </Slide>
+            </Grid>
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
                 {t('pages.pointOfSales.signName')}
@@ -388,7 +551,12 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                 value={salesPoint.franchiseName}
                 onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                 margin="normal"
-                sx={{ mb: 2 }}
+                sx={{
+                  mb: 2,
+                  '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                    color: theme.palette.text.secondary,
+                  },
+                }}
                 error={!!getFieldError(index, 'franchiseName')}
                 helperText={getFieldError(index, 'franchiseName')}
               />
@@ -409,9 +577,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                     handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                   }
                   margin="normal"
-                  sx={{ mb: 2 }}
-                  error={!!mergedErrors[index]?.website}
-                  helperText={mergedErrors[index]?.website}
+                  sx={{
+                    mb: 2,
+                    '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                      color: theme.palette.text.secondary,
+                    },
+                  }}
+                  error={!!getFieldError(index, 'website')}
+                  helperText={getFieldError(index, 'website')}
                 />
               </>
             )}
@@ -429,12 +602,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                           options={options}
                           label="Indirizzo completo"
                           onChangeDebounce={(value) => search(value)}
-                          inputError={!!errors[index]?.address}
                           onChange={(addressObj) => {
-                            console.log('VALUE', addressObj, index);
                             handleChangeAddress(index, addressObj);
                           }}
-                          errorText={errors[index]?.address}
+                          inputError={!!getFieldError(index, 'address')}
+                          errorText={getFieldError(index, 'address')}
                         />
                         {loading && <Typography variant="body2">{t('pages.pointOfSales.loandingText')}</Typography>}
                         {error && (
@@ -458,7 +630,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         }
                         margin="normal"
                         error={!!getFieldError(index, 'city')}
-                        helperText={getFieldError(index, 'city')}
+                        helperText={''}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-disabled': {
+                            color: theme.palette.text.secondary,
+                            opacity: 1,
+                          },
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
@@ -475,7 +653,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         }
                         margin="normal"
                         error={!!getFieldError(index, 'zipCode')}
-                        helperText={getFieldError(index, 'zipCode')}
+                        helperText={''}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-disabled': {
+                            color: theme.palette.text.secondary,
+                            opacity: 1,
+                          },
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
@@ -492,7 +676,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         }
                         margin="normal"
                         error={!!getFieldError(index, 'region')}
-                        helperText={getFieldError(index, 'region')}
+                        helperText={''}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-disabled': {
+                            color: theme.palette.text.secondary,
+                            opacity: 1,
+                          },
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
@@ -509,7 +699,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         }
                         margin="normal"
                         error={!!getFieldError(index, 'province')}
-                        helperText={getFieldError(index, 'province')}
+                        helperText={''}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-disabled': {
+                            color: theme.palette.text.secondary,
+                            opacity: 1,
+                          },
+                        }}
                       />
                     </Grid>
                   </Grid>
@@ -541,6 +737,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         margin="normal"
                         error={!!mergedErrors[index]?.contactEmail}
                         helperText={mergedErrors[index]?.contactEmail}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                            color: theme.palette.text.secondary,
+                          },
+                        }}
                       />
                     </Box>
                   </Grid>
@@ -556,8 +757,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
                         margin="normal"
-                        error={!!mergedErrors[index]?.confirmContactEmail}
-                        helperText={mergedErrors[index]?.confirmContactEmail}
+                        error={!!getFieldError(index, 'confirmContactEmail')}
+                        helperText={getFieldError(index, 'confirmContactEmail')}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                            color: theme.palette.text.secondary,
+                          },
+                        }}
                       />
                     </Box>
                   </Grid>
@@ -576,6 +782,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         margin="dense"
                         error={!!getFieldError(index, 'contactName')}
                         helperText={getFieldError(index, 'contactName')}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                            color: theme.palette.text.secondary,
+                          },
+                        }}
                       />
                     </Box>
                   </Grid>
@@ -593,6 +804,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         margin="dense"
                         error={!!getFieldError(index, 'contactSurname')}
                         helperText={getFieldError(index, 'contactSurname')}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                            color: theme.palette.text.secondary,
+                          },
+                        }}
                       />
                     </Box>
                   </Grid>
@@ -622,6 +838,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                           }
                           error={!!getFieldError(index, 'channelGeolink')}
                           helperText={getFieldError(index, 'channelGeolink')}
+                          sx={{
+                            '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                              color: theme.palette.text.secondary,
+                            },
+                          }}
                         />
                       </Box>
                     </Grid>
@@ -629,7 +850,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                       <Box mx={4} mt={2.5}>
                           <ButtonNaked
                             sx={{ whiteSpace: 'nowrap' }}
-                            disabled={!salesPoint.channelGeolink?.trim() || !!getFieldError(index, 'channelGeolink')}
                             color="primary"
                             endIcon={<ArrowOutward fontSize="small" />}
                             onClick={() => {
@@ -685,6 +905,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                           '& input[type=number]': {
                             MozAppearance: 'textfield',
                           },
+                          '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                            color: theme.palette.text.secondary,
+                          },
                         }}
                         error={!!getFieldError(index, 'channelPhone')}
                         helperText={getFieldError(index, 'channelPhone')}
@@ -710,6 +933,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         }}
                         error={!!getFieldError(index, 'channelEmail')}
                         helperText={getFieldError(index, 'channelEmail')}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                            color: theme.palette.text.secondary,
+                          },
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -725,6 +953,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({externalErrors, onFormChan
                         margin="dense"
                         error={!!getFieldError(index, 'website')}
                         helperText={getFieldError(index, 'website')}
+                        sx={{
+                          '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
+                            color: theme.palette.text.secondary,
+                          },
+                        }}
                       />
                     </Grid>
                   </Grid>
