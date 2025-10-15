@@ -1,7 +1,7 @@
 {
   "name": "idpay-portal-merchants-frontend",
   "version": "1.0.0",
-  "homepage": "portale-esercenti",
+  "homepage": "portale-esercenti-in-arrivo",
   "private": true,
   "dependencies": {
     "@mui/icons-material": "^5.11.11",
