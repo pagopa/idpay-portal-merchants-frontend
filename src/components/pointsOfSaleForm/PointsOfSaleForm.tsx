@@ -103,18 +103,20 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
       if (!sp.contactEmail?.trim()) {
         fieldErrors = { ...fieldErrors, contactEmail: 'Campo obbligatorio' };
         isValid = false;
-      } else if (!isValidEmail(sp.contactEmail)) {
-        fieldErrors = { ...fieldErrors, contactEmail: 'Email non valida' };
-        isValid = false;
       }
+      // else if (!isValidEmail(sp.contactEmail)) {
+      //   fieldErrors = { ...fieldErrors, contactEmail: 'Email non valida' };
+      //   isValid = false;
+      // }
 
       if (!contactEmailConfirm[index]?.trim()) {
         fieldErrors = { ...fieldErrors, confirmContactEmail: 'Campo obbligatorio' };
         isValid = false;
-      } else if (sp.contactEmail?.trim() !== contactEmailConfirm[index]?.trim()) {
-        fieldErrors = { ...fieldErrors, confirmContactEmail: 'Le email non coincidono' };
-        isValid = false;
       }
+      // else if (sp.contactEmail?.trim() !== contactEmailConfirm[index]?.trim()) {
+      //   fieldErrors = { ...fieldErrors, confirmContactEmail: 'Le email non coincidono' };
+      //   isValid = false;
+      // }
 
       if (!sp.contactName?.trim()) {
         fieldErrors = { ...fieldErrors, contactName: 'Campo obbligatorio' };
@@ -155,7 +157,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
         if (!sp.website?.trim()) {
           fieldErrors = { ...fieldErrors, website: 'Campo obbligatorio' };
           isValid = false;
-        } else if (!isValidUrl(normalizeUrlHttps(sp.website))) {
+        }
+        else if (!isValidUrl(normalizeUrlHttps(sp.website))) {
           fieldErrors = { ...fieldErrors, website: 'Deve essere un sito valido' };
           isValid = false;
         }
