@@ -100,7 +100,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'franchiseName',
       headerName: t('pages.initiativeStores.franchiseName'),
-      flex: 9.698,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -108,7 +108,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'type',
       headerName: t('pages.initiativeStores.type'),
-      flex: 10.338,
+      flex: 0.8,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
@@ -117,7 +117,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'address',
       headerName: t('pages.initiativeStores.address'),
-      flex: 12.992,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -125,7 +125,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'website',
       headerName: t('pages.initiativeStores.addressURL'),
-      flex: 12.992,
+      flex: 1.2,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -133,7 +133,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'city',
       headerName: t('pages.initiativeStores.city'),
-      flex: 10.747,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -141,7 +141,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'referent',
       headerName: t('pages.initiativeStores.referent'),
-      flex: 11.566,
+      flex: 1.2,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
@@ -154,7 +154,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'contactEmail',
       headerName: t('pages.initiativeStores.email'),
-      flex: 13.57,
+      flex: 1.5,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -165,7 +165,7 @@ const InitiativeStores: React.FC = () => {
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
-      flex: 4.736,
+      flex: 0.3,
       renderCell: (params: any) => (
         <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
           <IconButton onClick={() => goToStoreDetail(params.row)} size="small">
