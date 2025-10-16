@@ -66,9 +66,17 @@ const InitiativeStores: React.FC = () => {
   useEffect(() => {
     if (location.state?.showSuccessAlert) {
       setShowSuccessAlert(true);
+
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+      }, 3000);
+
+      history.replace({
+        ...location,
+        state: { ...location.state, showSuccessAlert: false }
+      });
     }
-    setTimeout(() => setShowSuccessAlert(false), 3000);
-  }, [location.state]);
+  }, [location, history]);
 
   const addError = useErrorDispatcher();
   const infoStyles = {
@@ -92,7 +100,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'franchiseName',
       headerName: t('pages.initiativeStores.franchiseName'),
-      flex: 9.698,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -100,7 +108,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'type',
       headerName: t('pages.initiativeStores.type'),
-      flex: 10.338,
+      flex: 0.8,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
@@ -109,7 +117,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'address',
       headerName: t('pages.initiativeStores.address'),
-      flex: 12.992,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -117,7 +125,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'website',
       headerName: t('pages.initiativeStores.addressURL'),
-      flex: 12.992,
+      flex: 1.2,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -125,7 +133,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'city',
       headerName: t('pages.initiativeStores.city'),
-      flex: 10.747,
+      flex: 1,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -133,7 +141,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'referent',
       headerName: t('pages.initiativeStores.referent'),
-      flex: 11.566,
+      flex: 1.2,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
@@ -146,7 +154,7 @@ const InitiativeStores: React.FC = () => {
     {
       field: 'contactEmail',
       headerName: t('pages.initiativeStores.email'),
-      flex: 13.57,
+      flex: 1.5,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
@@ -157,7 +165,7 @@ const InitiativeStores: React.FC = () => {
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
-      flex: 4.736,
+      flex: 0.3,
       renderCell: (params: any) => (
         <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
           <IconButton onClick={() => goToStoreDetail(params.row)} size="small">
@@ -339,9 +347,6 @@ const InitiativeStores: React.FC = () => {
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                     >
-                      <MenuItem value="">
-                        <em>Nessuna</em>
-                      </MenuItem>
                       <MenuItem value="PHYSICAL">{t('pages.initiativeStores.physical')}</MenuItem>
                       <MenuItem value="ONLINE">{t('pages.initiativeStores.online')}</MenuItem>
                     </Select>
@@ -440,8 +445,10 @@ const InitiativeStores: React.FC = () => {
             }}
           >
             <Stack spacing={0.5} direction="row">
-              <Typography variant="body2">{t('pages.initiativeStores.noStores')} </Typography>
-              <Link
+              <Typography variant="body2">{!filtersAppliedOnce ? t('pages.initiativeStores.noStores') : t('pages.initiativeStores.noStoresInitiative')} </Typography>
+             {
+              !filtersAppliedOnce && (
+                <Link
                 onClick={() => goToAddStorePage()}
                 className="cursor-pointer"
                 variant="body2"
@@ -449,6 +456,8 @@ const InitiativeStores: React.FC = () => {
               >
                 {t('pages.initiativeStores.addStoreNoResults')}
               </Link>
+              )
+             }
             </Stack>
           </Paper>
         )

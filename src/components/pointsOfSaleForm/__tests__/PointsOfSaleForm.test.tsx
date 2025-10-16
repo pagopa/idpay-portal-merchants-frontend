@@ -33,8 +33,9 @@ describe('PointsOfSaleForm full coverage', () => {
 
   const defaultProps = {
     onFormChange: jest.fn(),
-    onErrorChange: jest.fn(),
+    onValidationChange: jest.fn(),
     pointsOfSaleLoaded: false,
+    submitAttempt: 0,
   };
 
   beforeEach(() => {
@@ -54,7 +55,7 @@ describe('PointsOfSaleForm full coverage', () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     expect(screen.getByLabelText('Nome insegna')).toBeInTheDocument();
     expect(defaultProps.onFormChange).toHaveBeenCalled();
-    expect(defaultProps.onErrorChange).toHaveBeenCalled();
+    expect(defaultProps.onValidationChange).toHaveBeenCalled();
   });
 
   it('should add and remove sales points correctly', () => {
@@ -113,7 +114,7 @@ describe('PointsOfSaleForm full coverage', () => {
     }
 
     await waitFor(() => {
-      expect(defaultProps.onErrorChange).toHaveBeenCalled();
+      expect(defaultProps.onValidationChange).toHaveBeenCalled();
     });
   });
 
@@ -228,7 +229,7 @@ describe('PointsOfSaleForm full coverage', () => {
     fireEvent.change(channelWebsite, { target: { value: 'invalid-url' } });
 
     await waitFor(() => {
-      expect(defaultProps.onErrorChange).toHaveBeenCalled();
+      expect(defaultProps.onValidationChange).toHaveBeenCalled();
     });
   });
 
@@ -303,8 +304,9 @@ describe('PointsOfSaleForm additional coverage', () => {
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
   const defaultProps = {
     onFormChange: jest.fn(),
-    onErrorChange: jest.fn(),
+    onValidationChange: jest.fn(),
     pointsOfSaleLoaded: false,
+    submitAttempt: 0,
   };
 
   beforeEach(() => {
@@ -387,7 +389,7 @@ describe('PointsOfSaleForm additional coverage', () => {
     });
   });
 });
-describe('PointsOfSaleForm full coverage', () => {
+describe('PointsOfSaleForm validation tests', () => {
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
 
   beforeEach(() => {
@@ -405,8 +407,9 @@ describe('PointsOfSaleForm full coverage', () => {
 
   const defaultProps = {
     onFormChange: jest.fn(),
-    onErrorChange: jest.fn(),
+    onValidationChange: jest.fn(),
     pointsOfSaleLoaded: false,
+    submitAttempt: 0,
   };
 
   it.skip('handles complete and incomplete addresses', () => {
@@ -478,13 +481,13 @@ describe('PointsOfSaleForm full coverage', () => {
   });
 });
 
-describe('PointsOfSaleForm full coverage', () => {
+describe('PointsOfSaleForm integration tests', () => {
   let onFormChangeMock: jest.Mock;
-  let onErrorChangeMock: jest.Mock;
+  let onValidationChangeMock: jest.Mock;
 
   beforeEach(() => {
     onFormChangeMock = jest.fn();
-    onErrorChangeMock = jest.fn();
+    onValidationChangeMock = jest.fn();
 
     jest.spyOn(hooks, 'usePlacesAutocomplete').mockReturnValue({
       options: [],
@@ -504,17 +507,18 @@ describe('PointsOfSaleForm full coverage', () => {
     jest.resetAllMocks();
   });
 
-  it('should call onFormChange and onErrorChange on mount and after changes', async () => {
+  it('should call onFormChange and onValidationChange on mount and after changes', async () => {
     render(
       <PointsOfSaleForm
         onFormChange={onFormChangeMock}
-        onErrorChange={onErrorChangeMock}
+        onValidationChange={onValidationChangeMock}
         pointsOfSaleLoaded={false}
+        submitAttempt={0}
       />
     );
 
     expect(onFormChangeMock).toHaveBeenCalledTimes(1);
-    expect(onErrorChangeMock).toHaveBeenCalledTimes(1);
+    expect(onValidationChangeMock).toHaveBeenCalledTimes(1);
 
     const franchiseInput = screen.getByLabelText('Nome insegna');
     fireEvent.change(franchiseInput, { target: { value: 'My Shop' } });
@@ -528,16 +532,18 @@ describe('PointsOfSaleForm full coverage', () => {
     const { rerender } = render(
       <PointsOfSaleForm
         onFormChange={onFormChangeMock}
-        onErrorChange={onErrorChangeMock}
+        onValidationChange={onValidationChangeMock}
         pointsOfSaleLoaded={false}
+        submitAttempt={0}
       />
     );
 
     rerender(
       <PointsOfSaleForm
         onFormChange={onFormChangeMock}
-        onErrorChange={onErrorChangeMock}
+        onValidationChange={onValidationChangeMock}
         pointsOfSaleLoaded={true}
+        submitAttempt={0}
       />
     );
 
@@ -548,8 +554,9 @@ describe('PointsOfSaleForm full coverage', () => {
     render(
       <PointsOfSaleForm
         onFormChange={onFormChangeMock}
-        onErrorChange={onErrorChangeMock}
+        onValidationChange={onValidationChangeMock}
         pointsOfSaleLoaded={false}
+        submitAttempt={0}
       />
     );
 
@@ -577,8 +584,9 @@ describe('PointsOfSaleForm full coverage', () => {
     render(
       <PointsOfSaleForm
         onFormChange={onFormChangeMock}
-        onErrorChange={onErrorChangeMock}
+        onValidationChange={onValidationChangeMock}
         pointsOfSaleLoaded={false}
+        submitAttempt={0}
       />
     );
 
@@ -599,8 +607,9 @@ describe('PointsOfSaleForm full coverage', () => {
     render(
       <PointsOfSaleForm
         onFormChange={onFormChangeMock}
-        onErrorChange={onErrorChangeMock}
+        onValidationChange={onValidationChangeMock}
         pointsOfSaleLoaded={false}
+        submitAttempt={0}
       />
     );
 
@@ -613,12 +622,41 @@ describe('PointsOfSaleForm full coverage', () => {
     expect(window.open).toHaveBeenCalledWith('http://example.com', '_blank', 'noopener,noreferrer');
   });
 
+  it('should trigger validation when submitAttempt changes', async () => {
+    const { rerender } = render(
+      <PointsOfSaleForm
+        onFormChange={onFormChangeMock}
+        onValidationChange={onValidationChangeMock}
+        pointsOfSaleLoaded={false}
+        submitAttempt={0}
+      />
+    );
+
+    expect(onValidationChangeMock).toHaveBeenCalled();
+    onValidationChangeMock.mockClear();
+
+    // Simulate submit attempt
+    rerender(
+      <PointsOfSaleForm
+        onFormChange={onFormChangeMock}
+        onValidationChange={onValidationChangeMock}
+        pointsOfSaleLoaded={false}
+        submitAttempt={1}
+      />
+    );
+
+    await waitFor(() => {
+      expect(onValidationChangeMock).toHaveBeenCalled();
+    });
+  });
+
   it.skip('should handle handleChangeAddress for complete and incomplete address', async () => {
     render(
       <PointsOfSaleForm
         onFormChange={onFormChangeMock}
-        onErrorChange={onErrorChangeMock}
+        onValidationChange={onValidationChangeMock}
         pointsOfSaleLoaded={false}
+        submitAttempt={0}
       />
     );
 

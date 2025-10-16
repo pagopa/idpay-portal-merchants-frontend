@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions version="1">
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/pointsOfSaleForm/__tests__/PointsOfSaleForm.test.tsx">
+    <testCase name="PointsOfSaleForm full coverage should render initial form" duration="104"/>
+    <testCase name="PointsOfSaleForm full coverage should add and remove sales points correctly" duration="215"/>
+    <testCase name="PointsOfSaleForm full coverage should handle type change" duration="51"/>
+    <testCase name="PointsOfSaleForm full coverage should handle field validation errors" duration="78"/>
+    <testCase name="PointsOfSaleForm full coverage should handle autocomplete change" duration="40"/>
+    <testCase name="PointsOfSaleForm full coverage should handle incomplete and complete address objects" duration="38"/>
+    <testCase name="PointsOfSaleForm full coverage should open channelGeolink URL only if valid" duration="46"/>
+    <testCase name="PointsOfSaleForm full coverage should not add more than 5 points of sale" duration="297"/>
+    <testCase name="PointsOfSaleForm full coverage should call onFormChange when input changes" duration="43"/>
+    <testCase name="PointsOfSaleForm full coverage should handle pointsOfSaleLoaded true" duration="64"/>
+    <testCase name="PointsOfSaleForm full coverage should handle all field validations" duration="181"/>
+    <testCase name="PointsOfSaleForm full coverage should handle ONLINE type and webSite validation" duration="52"/>
+    <testCase name="PointsOfSaleForm full coverage should handle Autocomplete change and incomplete/complete addresses" duration="0"/>
+    <testCase name="PointsOfSaleForm full coverage should handle add/remove multiple points of sale" duration="168"/>
+    <testCase name="PointsOfSaleForm full coverage should handle Verifica URL button" duration="65"/>
+    <testCase name="PointsOfSaleForm additional coverage should trigger onBlur validation for channelPhone and channelEmail" duration="83"/>
+    <testCase name="PointsOfSaleForm additional coverage should trigger Verifica URL click with valid and invalid URL" duration="41"/>
+    <testCase name="PointsOfSaleForm additional coverage should handle externalErrors correctly" duration="35"/>
+    <testCase name="PointsOfSaleForm additional coverage should handle multiple physical sales points with channels" duration="77"/>
+    <testCase name="PointsOfSaleForm additional coverage should handle complete and incomplete autocomplete addresses" duration="0"/>
+    <testCase name="PointsOfSaleForm validation tests handles complete and incomplete addresses" duration="0"/>
+    <testCase name="PointsOfSaleForm validation tests validates contactEmail and confirmContactEmail" duration="73"/>
+    <testCase name="PointsOfSaleForm validation tests handles channel inputs and Verifica URL click" duration="64"/>
+    <testCase name="PointsOfSaleForm validation tests adds and removes sales points" duration="78"/>
+    <testCase name="PointsOfSaleForm integration tests should call onFormChange and onValidationChange on mount and after changes" duration="41"/>
+    <testCase name="PointsOfSaleForm integration tests should reset salesPoints when pointsOfSaleLoaded becomes true" duration="61"/>
+    <testCase name="PointsOfSaleForm integration tests should handle field validations correctly" duration="0"/>
+    <testCase name="PointsOfSaleForm integration tests should add and remove another sales point" duration="0"/>
+    <testCase name="PointsOfSaleForm integration tests should handle URL verification click" duration="43"/>
+    <testCase name="PointsOfSaleForm integration tests should trigger validation when submitAttempt changes" duration="60"/>
+    <testCase name="PointsOfSaleForm integration tests should handle handleChangeAddress for complete and incomplete address" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/__tests__/App.test.tsx">
+    <testCase name="Test suite for App component Render App with TOS accepted" duration="8"/>
+    <testCase name="Test suite for App component Render App with TOS not accepted" duration="38"/>
+    <testCase name="Test suite for App component Render App with TOS accepted" duration="27"/>
+    <testCase name="Test suite for App component Render App with MemoryHistory" duration="12"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Transactions/__tests__/TransactionDataTable.test.tsx">
+    <testCase name="TransactionDataTable renders rows and columns" duration="54"/>
+    <testCase name="TransactionDataTable renders placeholder for empty cell" duration="24"/>
+    <testCase name="TransactionDataTable calls handleRowAction when action button is clicked" duration="0"/>
+    <testCase name="TransactionDataTable calls onPaginationPageChange when page changes" duration="0"/>
+    <testCase name="TransactionDataTable calls onSortModelChange when sorting changes" duration="56"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Transactions/__tests__/MerchantTransactions.test.tsx">
+    <testCase name="MerchantTransactions when all props are provided renders data table when transactions exist" duration="24"/>
+    <testCase name="MerchantTransactions when all props are provided renders empty list when no transactions exist" duration="11"/>
+    <testCase name="MerchantTransactions when all props are provided handles filter application and reset" duration="124"/>
+    <testCase name="MerchantTransactions when all props are provided handles data table interactions (sort, pagination, row click)" duration="83"/>
+    <testCase name="MerchantTransactions when optional props are omitted does not throw error when sort and pagination are triggered" duration="45"/>
+    <testCase name="MerchantTransactions should update form values on user input" duration="94"/>
+    <testCase name="MerchantTransactions column render functions valueGetter for &quot;elettrodomestico&quot; should return productName" duration="0"/>
+    <testCase name="MerchantTransactions column render functions valueGetter for &quot;elettrodomestico&quot; should handle missing properties" duration="0"/>
+    <testCase name="MerchantTransactions column render functions renderCell for currency columns should render correctly" duration="1"/>
+    <testCase name="MerchantTransactions column render functions renderCell for status column should render StatusChip" duration="0"/>
+    <testCase name="MerchantTransactions column render functions renderCell for status column should handle undefined status item" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Layout/__tests__/Layout.test.tsx">
+    <testCase name="Test suite for Layout Test render Layout" duration="27"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/TOSLayout/__tests__/TOSLayout.test.tsx">
+    <testCase name="test suite for TOSLayout test render TosLayout" duration="26"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Header/__tests__/Header.test.tsx">
+    <testCase name="test suite for Header render Header with no parties" duration="14"/>
+    <testCase name="test suite for Header render Header with parties" duration="3"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/dataTable/__tests__/DataTable.test.tsx">
+    <testCase name="DataTable - advanced renders rows and columns correctly" duration="37"/>
+    <testCase name="DataTable - advanced renders placeholder for null/undefined values" duration="20"/>
+    <testCase name="DataTable - advanced calls handleRowAction when clicking action button" duration="32"/>
+    <testCase name="DataTable - advanced calls onPaginationPageChange when changing page" duration="20"/>
+    <testCase name="DataTable - advanced calls onSortModelChange when clicking column header" duration="38"/>
+    <testCase name="DataTable - advanced auto-adds actions column" duration="30"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/hooks/__tests__/useTCAgreement.test.tsx">
+    <testCase name="useTCAgreement should set isTOSAccepted to false if there are pending consents" duration="53"/>
+    <testCase name="useTCAgreement should set isTOSAccepted to true if there are no pending consents" duration="58"/>
+    <testCase name="useTCAgreement should call addError and set isTOSAccepted to false if getPortalConsent fails" duration="51"/>
+    <testCase name="useTCAgreement should call savePortalConsent and update state on acceptTOS success" duration="54"/>
+    <testCase name="useTCAgreement should call addError if savePortalConsent fails" duration="56"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/SideMenu/__tests__/SideMenu.test.tsx">
+    <testCase name="Test suite for SideMenu component Render component" duration="6"/>
+    <testCase name="Test suite for SideMenu component User clicks the link to home page" duration="68"/>
+    <testCase name="Test suite for SideMenu component User clicks to an accordion title to collapse it" duration="33"/>
+    <testCase name="Test suite for SideMenu component User clicks a link with an id parameter" duration="0"/>
+    <testCase name="Test suite for SideMenu component Appropriate item expanded based on parameter id value" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/hooks/__tests__/useInitiativesList.test.tsx">
+    <testCase name="useInitiativesList should do nothing if match is null" duration="1"/>
+    <testCase name="useInitiativesList should fetch, filter, and dispatch initiatives on success" duration="51"/>
+    <testCase name="useInitiativesList should call addError when getMerchantInitiativeList fails" duration="52"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/hooks/__tests__/useAutocomplete.test.tsx">
+    <testCase name="usePlacesAutocomplete should return the initial state correctly" duration="1"/>
+    <testCase name="usePlacesAutocomplete should not call the api and should clear options if query is too short" duration="3"/>
+    <testCase name="usePlacesAutocomplete should call the api and update options on successful search" duration="53"/>
+    <testCase name="usePlacesAutocomplete should handle API errors gracefully" duration="52"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/actionMenu/__tests__/actionMenu.test.tsx">
+    <testCase name="ActionMenu should render the actions button and handle menu open/close" duration="13"/>
+    <testCase name="ActionMenu RenderAuthorizeTransaction logic should show Authorize button for status: IDENTIFIED" duration="20"/>
+    <testCase name="ActionMenu RenderAuthorizeTransaction logic should show Authorize button for status: CREATED" duration="8"/>
+    <testCase name="ActionMenu RenderAuthorizeTransaction logic should NOT show Authorize button for REJECTED status" duration="5"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Transactions/__tests__/TransactionDetail.test.tsx">
+    <testCase name="TransactionDetail should render the title and map all list items" duration="0"/>
+    <testCase name="TransactionDetail getValueText logic should correctly handle TYPE_TEXT.Text and call formatValues" duration="6"/>
+    <testCase name="TransactionDetail getValueText logic should correctly handle TYPE_TEXT.Currency and call currencyFormatter" duration="0"/>
+    <testCase name="TransactionDetail getValueText logic should return &quot;error on type&quot; for unhandled TYPE_TEXT" duration="2"/>
+    <testCase name="TransactionDetail getValueText logic should correctly extract nested productName and ignore type" duration="2"/>
+    <testCase name="TransactionDetail getValueText logic should return MISSING_DATA_PLACEHOLDER for missing nested productName" duration="2"/>
+    <testCase name="TransactionDetail getStatusChip and Status Display should render the status label and CustomChip correctly" duration="0"/>
+    <testCase name="TransactionDetail getStatusChip and Status Display should use default status configuration for unmocked status" duration="0"/>
+    <testCase name="TransactionDetail Invoice Download functionality should display &quot;Fattura&quot; label and filename when status is not REFUNDED" duration="0"/>
+    <testCase name="TransactionDetail Invoice Download functionality should display &quot;Nota di credito&quot; label when status is REFUNDED" duration="0"/>
+    <testCase name="TransactionDetail Invoice Download functionality should display MISSING_DATA_PLACEHOLDER when invoice filename is missing" duration="0"/>
+    <testCase name="TransactionDetail Invoice Download functionality should successfully download invoice file when link is clicked" duration="0"/>
+    <testCase name="TransactionDetail Invoice Download functionality should use default filename &quot;fattura.pdf&quot; when filename is not provided" duration="0"/>
+    <testCase name="TransactionDetail Invoice Download functionality should handle download when invoiceFile is undefined" duration="0"/>
+    <testCase name="TransactionDetail Invoice Download functionality should dispatch error when download fails" duration="0"/>
+    <testCase name="TransactionDetail Invoice Download functionality should handle network error during download" duration="0"/>
+    <testCase name="TransactionDetail Invoice Download functionality should handle download for REFUNDED status" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Autocomplete/__tests__/AutocompleteComponent.test.tsx">
+    <testCase name="AutocompleteComponent renders correctly with label" duration="14"/>
+    <testCase name="AutocompleteComponent does not trigger onChangeDebounce for input shorter than 5 chars" duration="42"/>
+    <testCase name="AutocompleteComponent shows error message when inputError is true" duration="3"/>
+    <testCase name="AutocompleteComponent shows custom error message if errorText is provided" duration="4"/>
+    <testCase name="AutocompleteComponent calls onChange when an option is selected" duration="26"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/ExitModal/__tests__/ExitModal.test.tsx">
+    <testCase name="&lt;ExitModal /&gt; renders without crashing" duration="0"/>
+    <testCase name="&lt;ExitModal /&gt; the modal should be in the document" duration="14"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/TOS/__tests__/TOSWall.test.tsx">
+    <testCase name="tests for TOSWall test render of TOSWall component with not already accepted tos" duration="6"/>
+    <testCase name="tests for TOSWall test render of TOSWall component with tos already accepted" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/decorators/__tests__/withSelectedParty.test.tsx">
+    <testCase name="Test default behavior when no parties" duration="7"/>
+    <testCase name="Test party not active" duration="53"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/labelValuePair/__tests__/labelValuePair.test.tsx">
+    <testCase name="LabelValuePair should render a simple label and value when isLink is false" duration="4"/>
+    <testCase name="LabelValuePair should render a link when isLink is true" duration="5"/>
+    <testCase name="LabelValuePair should render the placeholder for a missing value when isLink is false" duration="1"/>
+    <testCase name="LabelValuePair should render a link with the placeholder for a missing value when isLink is true" duration="3"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/decorators/__tests__/withParties.test.tsx">
+    <testCase name="Test" duration="55"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/SideMenu/__tests__/SideNavItem.test.tsx">
+    <testCase name="Test suite for SideNavItem component renders without crashing" duration="0"/>
+    <testCase name="Test suite for SideNavItem component Testing rendering of SideMenu component" duration="7"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Transactions/__tests__/useStatus.test.ts">
+    <testCase name="getStatus should return correct configuration for REWARDED status" duration="0"/>
+    <testCase name="getStatus should return correct configuration for CANCELLED status" duration="0"/>
+    <testCase name="getStatus should return correct configuration for REFUNDED status" duration="0"/>
+    <testCase name="getStatus should return correct configuration for CAPTURED status" duration="0"/>
+    <testCase name="getStatus should return correct configuration for AUTHORIZED status" duration="0"/>
+    <testCase name="getStatus should return MISSING_DATA_PLACEHOLDER configuration for an unknown status (default case)" duration="0"/>
+    <testCase name="getStatus should return MISSING_DATA_PLACEHOLDER configuration for null or undefined input" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/utils/__tests__/formatUtils.test.ts">
+    <testCase name="formatDate should format a valid date object correctly" duration="1"/>
+    <testCase name="formatDate should throw an error for invalid date inputs" duration="5"/>
+    <testCase name="curFormatter should format a number into an Italian EUR currency string" duration="1"/>
+    <testCase name="currencyFormatter should format 1234.56 into 1234,56 €" duration="0"/>
+    <testCase name="currencyFormatter should format 0 into 0,00 €" duration="0"/>
+    <testCase name="currencyFormatter should format null into null" duration="0"/>
+    <testCase name="currencyFormatter should format undefined into undefined" duration="1"/>
+    <testCase name="formatValues should format &quot;Hello World&quot; into &quot;Hello World&quot;" duration="0"/>
+    <testCase name="formatValues should format &quot;&quot; into &quot;-&quot;" duration="0"/>
+    <testCase name="formatValues should format &quot;null&quot; into &quot;-&quot;" duration="0"/>
+    <testCase name="formatValues should format &quot;undefined&quot; into &quot;-&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttps should normalize &quot;example.com&quot; to &quot;https://example.com&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttps should normalize &quot;https://example.com&quot; to &quot;https://example.com&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttps should normalize &quot;  example.com  &quot; to &quot;https://example.com&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttps should normalize &quot;&quot; to &quot;&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttps should normalize &quot;undefined&quot; to &quot;&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttps should normalize &quot;http://example.com&quot; to &quot;https://example.com&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttp should normalize &quot;example.com&quot; to &quot;http://example.com&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttp should normalize &quot;http://example.com&quot; to &quot;http://example.com&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttp should normalize &quot;https://example.com&quot; to &quot;https://example.com&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttp should normalize &quot;  example.com  &quot; to &quot;http://example.com&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttp should normalize &quot;&quot; to &quot;&quot;" duration="0"/>
+    <testCase name="normalizeUrlHttp should normalize &quot;undefined&quot; to &quot;&quot;" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Transactions/__tests__/CurrencyColumn.test.tsx">
+    <testCase name="CurrencyColumn should format the value and render it inside Typography with default variant (body1)" duration="2"/>
+    <testCase name="CurrencyColumn should render with the specified variant &quot;body2&quot;" duration="1"/>
+    <testCase name="CurrencyColumn should handle string input and convert it to number for formatting" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/decorators/__tests__/withLogin.test.tsx">
+    <testCase name="Test no auth session" duration="1"/>
+    <testCase name="Test auth session" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/decorators/__tests__/withSelectedPartyProducts.test.tsx">
+    <testCase name="Test default behavior when no parties" duration="3"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Transactions/__tests__/TransactionRowDetail.test.tsx">
+    <testCase name="TransactionRowDetail should render the label and value correctly with default variants (body1 and body2)" duration="3"/>
+    <testCase name="TransactionRowDetail should apply custom labelVariant (body2) and valueVariant (h6)" duration="1"/>
+    <testCase name="TransactionRowDetail should render ReactNode content for value prop" duration="1"/>
+    <testCase name="TransactionRowDetail should apply custom sx prop to the wrapping Box" duration="2"/>
+    <testCase name="TransactionRowDetail should apply fontWeightMedium to the value element" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/modal/__tests__/ModalComponent.test.tsx">
+    <testCase name="ModalComponent should not render the modal when open prop is false" duration="1"/>
+    <testCase name="ModalComponent should render the modal and its children when open prop is true" duration="4"/>
+    <testCase name="ModalComponent should call onClose when the modal is closed" duration="2"/>
+    <testCase name="ModalComponent should apply custom style when provided" duration="2"/>
+    <testCase name="ModalComponent should apply default style when no custom style is provided" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Chip/__tests__/CustomChip.test.tsx">
+    <testCase name="CustomChip should render the chip with default label, size, and variant" duration="3"/>
+    <testCase name="CustomChip should render the chip with &quot;small&quot; size and &quot;outlined&quot; variant" duration="5"/>
+    <testCase name="CustomChip should apply custom backgroundColor and textColor for &quot;filled&quot; variant" duration="3"/>
+    <testCase name="CustomChip should NOT apply custom colors when variant is &quot;outlined&quot;" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Drawer/__tests__/DetailDrawer.test.tsx">
+    <testCase name="DetailDrawer should render the drawer when open prop is true" duration="8"/>
+    <testCase name="DetailDrawer should not render the content when open prop is false" duration="1"/>
+    <testCase name="DetailDrawer should call toggleDrawer(false) when the CloseIcon button is clicked" duration="3"/>
+    <testCase name="DetailDrawer should call toggleDrawer(false) when the drawer is closed via background click (onClose event)" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeStores/__tests__/initiativeStoresUpload.test.tsx">
+    <testCase name="InitiativeStoresUpload renders correctly with Manual upload by default" duration="84"/>
+    <testCase name="InitiativeStoresUpload calls handleBack when back button is clicked" duration="45"/>
+    <testCase name="InitiativeStoresUpload sets salesPoints when form changes" duration="47"/>
+    <testCase name="InitiativeStoresUpload shows POINT_OF_SALE_ALREADY_REGISTERED error" duration="87"/>
+    <testCase name="InitiativeStoresUpload navigates to STORES when response is null" duration="76"/>
+    <testCase name="InitiativeStoresUpload normalizes URLs when uploading manually" duration="72"/>
+    <testCase name="InitiativeStoresUpload test complete flow - physical store - error Merchant ID not found" duration="1318"/>
+    <testCase name="InitiativeStoresUpload test complete flow - physical store - error duplicated entry" duration="1260"/>
+    <testCase name="InitiativeStoresUpload test complete flow - physical store - other error" duration="1284"/>
+    <testCase name="InitiativeStoresUpload test complete flow - physical store - success" duration="1236"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeStores/__tests__/initiativeStoreDetail.test.tsx">
+    <testCase name="InitiativeStoreDetail renders store detail and calls APIs" duration="20"/>
+    <testCase name="InitiativeStoreDetail opens and closes modal" duration="96"/>
+    <testCase name="InitiativeStoreDetail open modal, fill fields, handleUpdateReferent" duration="4215"/>
+    <testCase name="InitiativeStoreDetail validates email fields on blur" duration="144"/>
+    <testCase name="InitiativeStoreDetail handles mismatched emails" duration="148"/>
+    <testCase name="InitiativeStoreDetail handles update success and alert" duration="66"/>
+    <testCase name="InitiativeStoreDetail handles duplicate email error" duration="73"/>
+    <testCase name="InitiativeStoreDetail handles generic update error" duration="66"/>
+    <testCase name="InitiativeStoreDetail handles fetchStoreDetail failure" duration="54"/>
+    <testCase name="InitiativeStoreDetail handles fetchStoreTransactions failure" duration="11"/>
+    <testCase name="InitiativeStoreDetail calls handleFiltersApplied, handleFiltersReset, sort and pagination" duration="55"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/acceptNewDiscount/__tests__/DiscountCode.test.tsx">
+    <testCase name="Test suite for DiscountCode component Render component" duration="30"/>
+    <testCase name="Test suite for DiscountCode component User clicks back button" duration="24"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit OK" duration="77"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_NOT_FOUND_OR_EXPIRED" duration="62"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_USER_NOT_ASSOCIATED" duration="54"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_NOT_ALLOWED_FOR_TRX_STATUS" duration="59"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_ALREADY_AUTHORIZED" duration="55"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_BUDGET_EXHAUSTED" duration="53"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_GENERIC_REJECTED" duration="63"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_USER_SUSPENDED" duration="56"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_MERCHANT_NOT_ONBOARDED" duration="49"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_AMOUNT_NOT_VALID" duration="53"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_USER_UNSUBSCRIBED" duration="49"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_USER_NOT_ONBOARDED" duration="50"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT" duration="51"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_INITIATIVE_INVALID_DATE" duration="50"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_INITIATIVE_NOT_FOUND" duration="49"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with error code PAYMENT_TRANSACTION_EXPIRED" duration="51"/>
+    <testCase name="Test suite for DiscountCode component Form filling and submit KO with promise rejected" duration="50"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeStores/__tests__/InitiativeStores.test.tsx">
+    <testCase name="&lt;InitiativeStores /&gt; renderizza correttamente, mostra il loader e poi i dati della tabella" duration="49"/>
+    <testCase name="&lt;InitiativeStores /&gt; mostra lo stato vuoto se non ci sono punti vendita" duration="6"/>
+    <testCase name="&lt;InitiativeStores /&gt; gestisce il fallimento della chiamata API iniziale" duration="3"/>
+    <testCase name="&lt;InitiativeStores /&gt; gestisce un errore API durante il reset dei filtri" duration="19"/>
+    <testCase name="&lt;InitiativeStores /&gt; gestisce la rimozione dell&apos;ordinamento" duration="31"/>
+    <testCase name="&lt;InitiativeStores /&gt; gestisce un errore nel .catch di handleFiltersReset" duration="14"/>
+    <testCase name="&lt;InitiativeStores /&gt; gestisce la rimozione dell&apos;ordinamento" duration="29"/>
+    <testCase name="&lt;InitiativeStores /&gt; non effettua la chiamata API se manca il merchant_id nel token" duration="5"/>
+    <testCase name="&lt;InitiativeStores /&gt; mostra e nasconde l&apos;alert di successo" duration="27"/>
+    <testCase name="&lt;InitiativeStores /&gt; applica i filtri e ricarica i dati" duration="41"/>
+    <testCase name="&lt;InitiativeStores /&gt; resetta i filtri e ricarica i dati iniziali" duration="15"/>
+    <testCase name="&lt;InitiativeStores /&gt; mostra la tabella vuota se i filtri non producono risultati" duration="38"/>
+    <testCase name="&lt;InitiativeStores /&gt; naviga alla pagina di aggiunta punto vendita al click sul pulsante" duration="18"/>
+    <testCase name="&lt;InitiativeStores /&gt; gestisce l&apos;ordinamento della tabella" duration="26"/>
+    <testCase name="&lt;InitiativeStores /&gt; gestisce la paginazione della tabella" duration="27"/>
+    <testCase name="&lt;InitiativeStores /&gt; naviga al dettaglio del punto vendita al click su una riga" duration="0"/>
+    <testCase name="Column rendering logic il renderCell della colonna &quot;type&quot; formatta correttamente i valori" duration="2"/>
+    <testCase name="Column rendering logic il renderCell della colonna &quot;referent&quot; gestisce dati completi e mancanti" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeDiscounts/__tests__/InitiativeDiscountSummary.test.tsx">
+    <testCase name="Test suite for InitiativeDiscountSummary component Render component" duration="8"/>
+    <testCase name="Test suite for InitiativeDiscountSummary component render component with undefined id as prop " duration="1"/>
+    <testCase name="Test suite for InitiativeDiscountSummary component catch in case of error from api getMerchantDetail and getMerchantInitiativeStatistics" duration="3"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/newDiscount/__tests__/DiscountCreatedRecap.test.tsx">
+    <testCase name="Test suite for DiscountCreatedRecap component Render component" duration="45"/>
+    <testCase name="Test suite for DiscountCreatedRecap component User copies the magic link" duration="40"/>
+    <testCase name="Test suite for DiscountCreatedRecap component User copies the authorization id" duration="36"/>
+    <testCase name="Test suite for DiscountCreatedRecap component User downloads the QR code" duration="28"/>
+    <testCase name="Test suite for DiscountCreatedRecap component User navigates back to initiative discount list page" duration="21"/>
+    <testCase name="Test suite for DiscountCreatedRecap component Render component with undefined data" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/newDiscount/__tests__/newDiscount.test.tsx">
+    <testCase name="Test suite for newDiscount page Render component" duration="41"/>
+    <testCase name="Test suite for newDiscount page Render component" duration="15"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativesList/__tests__/initiativesList.test.tsx">
+    <testCase name="Test suite for initiativeList page Render component" duration="7"/>
+    <testCase name="Test suite for initiativeList page User searches an initiative by name that shows results" duration="35"/>
+    <testCase name="Test suite for initiativeList page User searches an initiative by name that doesn&apos;t show results" duration="24"/>
+    <testCase name="Test suite for initiativeList page User resets previous search" duration="25"/>
+    <testCase name="Test suite for initiativeList page User sorts initiatives by name" duration="27"/>
+    <testCase name="Test suite for initiativeList page Render an initiative with an unexpected data" duration="11"/>
+    <testCase name="Test suite for initiativeList page User navigate to discounts list pege of an initiative" duration="23"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeDiscounts/__tests__/initiativeDiscounts.test.tsx">
+    <testCase name="Test suite for initiativeDiscounts page Render component" duration="31"/>
+    <testCase name="Test suite for initiativeDiscounts page on click of back button and upload new discount button" duration="9"/>
+    <testCase name="Test suite for initiativeDiscounts page on change of merchant transactions tabs" duration="40"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/acceptNewDiscount/__tests__/acceptNewDiscount.test.tsx">
+    <testCase name="Test suite for AcceptnewDiscount page Render component with step 0 active" duration="45"/>
+    <testCase name="Test suite for AcceptnewDiscount page Render component with step 1 active" duration="12"/>
+    <testCase name="Test suite for AcceptnewDiscount page Render component with unexpected step 2 active" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeOverview/__tests__/initiativeOverview.test.tsx">
+    <testCase name="InitiativeOverview should render the main titles and cards" duration="29"/>
+    <testCase name="InitiativeOverview should handle API error for getMerchantDetail" duration="12"/>
+    <testCase name="InitiativeOverview should handle API error for getMerchantInitiativeStatistics" duration="55"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/newDiscount/__tests__/CreateForm.test.tsx">
+    <testCase name="Test suite for CreateForm component Render component" duration="17"/>
+    <testCase name="Test suite for CreateForm component Navigate to InitiativeDiscounts page clicking the back button" duration="14"/>
+    <testCase name="Test suite for CreateForm component Form filling and submit OK" duration="63"/>
+    <testCase name="Test suite for CreateForm component Render component with id prop undefined" duration="41"/>
+    <testCase name="Test suite for CreateForm component Submit KO" duration="40"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/acceptNewDiscount/__tests__/TotalAmount.test.tsx">
+    <testCase name="Test suite for TotalAmount component Render component" duration="31"/>
+    <testCase name="Test suite for TotalAmount component Navigate to InitiativeDiscounts page clicking the back button" duration="10"/>
+    <testCase name="Test suite for TotalAmount component Render component" duration="12"/>
+    <testCase name="Test suite for TotalAmount component Form filling and submit OK" duration="49"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/auth/__tests__/Auth.test.tsx">
+    <testCase name="readUserFromToken should parse user from token and store it" duration="0"/>
+    <testCase name="readUserFromToken should return null if no user parsed" duration="0"/>
+    <testCase name="Auth component should handle successful login flow with token and redirect to HOME" duration="53"/>
+    <testCase name="Auth component should redirect to x-location-to header if present" duration="52"/>
+    <testCase name="Auth component should handle fetch failure and redirect to LOGIN" duration="52"/>
+    <testCase name="Auth component should call trackAppError if no token in URL" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/assistance/__tests__/assistance.test.tsx">
+    <testCase name="&lt;Assistance /&gt; renders without crashing" duration="1"/>
+    <testCase name="&lt;Assistance /&gt; Should render the Assistance component" duration="96"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeDiscounts/__tests__/MerchantTransactionsProcessed.test.tsx">
+    <testCase name="MerchantTransactionsProcessed renders EmptyList if no rows" duration="10"/>
+    <testCase name="MerchantTransactionsProcessed renders table with data" duration="18"/>
+    <testCase name="MerchantTransactionsProcessed calls addError if getMerchantTransactionsProcessed fails" duration="6"/>
+    <testCase name="MerchantTransactionsProcessed should call the API with correct filters when the form is submitted" duration="16"/>
+    <testCase name="MerchantTransactionsProcessed renders TablePaginator with correct props" duration="8"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeDiscounts/__tests__/AuthorizeTransactionModal.test.tsx">
+    <testCase name="Test suite for AuthorizeTransactionModal component Render component and and onClose with escape button" duration="40"/>
+    <testCase name="Test suite for AuthorizeTransactionModal component Render component and close modal clicking the dedicated icon button" duration="9"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeDiscounts/__tests__/CancelTransactionModal.test.tsx">
+    <testCase name="Test suite for CancelTransactionModal component Render component with status enum IDENTIFIED and onClose with escape button" duration="10"/>
+    <testCase name="Test suite for CancelTransactionModal component Render component with status enum AUTHORIZED and onClick of back button" duration="10"/>
+    <testCase name="Test suite for CancelTransactionModal component Render component and cancel transaction" duration="4"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/api/__tests__/MerchantsApiClient.test.ts">
+    <testCase name="MerchantApi downloadInvoiceFile" duration="7"/>
+    <testCase name="MerchantApi getMerchantInitiativeList" duration="2"/>
+    <testCase name="MerchantApi getMerchantTransactions" duration="1"/>
+    <testCase name="MerchantApi getMerchantTransactionsProcessed" duration="7"/>
+    <testCase name="MerchantApi getMerchantInitiativeStatistics" duration="2"/>
+    <testCase name="MerchantApi getMerchantDetail" duration="2"/>
+    <testCase name="MerchantApi deleteTransaction" duration="2"/>
+    <testCase name="MerchantApi createTransaction" duration="2"/>
+    <testCase name="MerchantApi authPaymentBarCode" duration="6"/>
+    <testCase name="MerchantApi updateMerchantPointOfSales returns error object when left" duration="2"/>
+    <testCase name="MerchantApi updateMerchantPointOfSales calls extractResponse when right" duration="2"/>
+    <testCase name="MerchantApi getMerchantPointOfSales" duration="2"/>
+    <testCase name="MerchantApi getMerchantPointOfSalesById" duration="2"/>
+    <testCase name="MerchantApi getMerchantPointOfSaleTransactionsProcessed" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/hooks/__tests__/useLogin.test.tsx">
+    <testCase name="JWT Helper Functions userFromJwtToken should correctly map JWT payload to User object" duration="1"/>
+    <testCase name="JWT Helper Functions userFromJwtTokenAsJWTUser should correctly map JWT payload to IDPayUser object" duration="0"/>
+    <testCase name="useLogin should do nothing and redirect to login if no token is found" duration="1"/>
+    <testCase name="useLogin should use token from storage to set user if session user is empty" duration="8"/>
+    <testCase name="useLogin should use user from session storage if present" duration="1"/>
+    <testCase name="useLogin should call addError if getUserPermission fails" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/hooks/__tests__/useSelectedParty.test.tsx">
+    <testCase name="useSelectedParty retrieveSelectedPartyIdConfig should return party config if token is valid" duration="1"/>
+    <testCase name="useSelectedParty retrieveSelectedPartyIdConfig should return null if token is invalid or incomplete" duration="0"/>
+    <testCase name="useSelectedParty retrieveSelectedPartyIdConfig should return null if no token is present" duration="0"/>
+    <testCase name="useSelectedParty useSelectedParty hook should redirect to logout if no party is in token" duration="1"/>
+    <testCase name="useSelectedParty useSelectedParty hook should return selected party from Redux if it matches JWT" duration="0"/>
+    <testCase name="useSelectedParty useSelectedParty hook should fetch party details if not in Redux and save to store on success" duration="5"/>
+    <testCase name="useSelectedParty useSelectedParty hook should create a fallback party if API returns no data" duration="0"/>
+    <testCase name="useSelectedParty useSelectedParty hook should throw an error if fetched party is not ACTIVE" duration="4"/>
+    <testCase name="useSelectedParty useSelectedParty hook should handle API fetch rejection" duration="2"/>
+    <testCase name="useSelectedParty useSelectedParty hook should fetch party if partyId in Redux is different from JWT" duration="0"/>
+    <testCase name="useSelectedParty useSelectedParty hook should create a fallback party if API returns no data and JWT is valid" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/api/__tests__/rolePermissionApiClient.test.ts">
+    <testCase name="RolePermissionApi userPermission calls client and extractResponse" duration="5"/>
+    <testCase name="RolePermissionApi getPortalConsent calls client and extractResponse" duration="6"/>
+    <testCase name="RolePermissionApi savePortalConsent calls client and extractResponse with versionId" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/api/__tests__/emailNotificationApiClient.test.ts">
+    <testCase name="EmailNotificationApi getInstitutionProductUserInfo calls client and extractResponse" duration="4"/>
+    <testCase name="EmailNotificationApi sendEmail calls client with body and extractResponse" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/__tests__/helpers.test.ts">
+    <testCase name="copyTextToClipboard should call clipboard.writeText if a valid string is provided" duration="0"/>
+    <testCase name="copyTextToClipboard should not call clipboard.writeText if the input is undefined" duration="0"/>
+    <testCase name="downloadQRCodeFromURL should perform fetch and trigger download on success" duration="0"/>
+    <testCase name="downloadQRCodeFromURL should log an error if fetch fails" duration="1"/>
+    <testCase name="downloadQRCodeFromURL should do nothing if URL is not a string" duration="0"/>
+    <testCase name="mapDataForDiscoutTimeRecap should return correct expiration data when valid inputs are provided" duration="0"/>
+    <testCase name="mapDataForDiscoutTimeRecap should return undefined values if inputs are invalid" duration="0"/>
+    <testCase name="formattedCurrency should format 1234.56 correctly with options: cents=false, symbol=$symbol" duration="0"/>
+    <testCase name="formattedCurrency should format 123456 correctly with options: cents=true, symbol=$symbol" duration="0"/>
+    <testCase name="formattedCurrency should format 0 correctly with options: cents=false, symbol=$symbol" duration="0"/>
+    <testCase name="formattedCurrency should format 0 correctly with options: cents=true, symbol=$symbol" duration="0"/>
+    <testCase name="formattedCurrency should format undefined correctly with options: cents=false, symbol=$symbol" duration="1"/>
+    <testCase name="formattedCurrency should format undefined correctly with options: cents=false, symbol=N/A" duration="0"/>
+    <testCase name="formatIban should format &quot;IT60X0542811101000000123456&quot; to &quot;IT 60 X 05428 11101 000000123456&quot;" duration="0"/>
+    <testCase name="formatIban should format &quot;undefined&quot; to &quot;-&quot;" duration="0"/>
+    <testCase name="formatIban should format &quot;&quot; to &quot;-&quot;" duration="0"/>
+    <testCase name="formatDate should format &quot;2025-12-25T00:00:00.000Z&quot; to &quot;25/12/2025&quot;" duration="0"/>
+    <testCase name="formatDate should format &quot;undefined&quot; to &quot;&quot;" duration="0"/>
+    <testCase name="isValidEmail should validate &quot;test@example.com&quot; as true" duration="0"/>
+    <testCase name="isValidEmail should validate &quot;test.name@example.co.uk&quot; as true" duration="0"/>
+    <testCase name="isValidEmail should validate &quot;test&quot; as false" duration="0"/>
+    <testCase name="isValidEmail should validate &quot;test@example&quot; as false" duration="0"/>
+    <testCase name="isValidEmail should validate &quot;@example.com&quot; as false" duration="0"/>
+    <testCase name="isValidEmail should validate &quot;test@example.google&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;http://example.it&quot; as true" duration="1"/>
+    <testCase name="isValidUrl should validate &quot;http://example.com&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;http://example.info&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;http://example.io&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;http://example.net&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;http://example.eu&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;http://example.google&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;http://example.it/test-page&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;http://example.it/test-page?param=test&amp;name=test#token=123&quot; as true" duration="1"/>
+    <testCase name="isValidUrl should validate &quot;https://example.subdomain.com&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;https://example.it&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;https://www.example.it:8080/test&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;http://example.com&quot; as true" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;example.com&quot; as false" duration="0"/>
+    <testCase name="isValidUrl should validate &quot;https://example.org&quot; as false" duration="0"/>
+    <testCase name="generateUniqueId should generate a unique id" duration="0"/>
+    <testCase name="generateUniqueId should generate a predictable id when Date and Math are mocked" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/api/__tests__/AutocompleteApiClient.test.ts">
+    <testCase name="AutocompleteApiClient chiama apiClient.autocomplete con Bearer token corretto" duration="2"/>
+    <testCase name="AutocompleteApiClient inserisce Bearer anche se il token è vuoto" duration="4"/>
+    <testCase name="AutocompleteApiClient invoca onRedirectToLogin se extractResponse richiama callback" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/components/Transactions/__tests__/useDetailList.test.ts">
+    <testCase name="getDetailFieldList should return an array of 5 objects" duration="0"/>
+    <testCase name="getDetailFieldList should return the exact list of detail fields with correct values" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/components/__tests__/initiativeOverviewCard.test.tsx">
+    <testCase name="InitiativeOverviewCard renders with required props" duration="14"/>
+    <testCase name="InitiativeOverviewCard renders with title and subtitle" duration="1"/>
+    <testCase name="InitiativeOverviewCard renders without subtitle" duration="0"/>
+    <testCase name="InitiativeOverviewCard applies default title variant (h5)" duration="1"/>
+    <testCase name="InitiativeOverviewCard applies custom title variant" duration="0"/>
+    <testCase name="InitiativeOverviewCard applies default subtitle variant (caption)" duration="1"/>
+    <testCase name="InitiativeOverviewCard applies custom subtitle variant" duration="0"/>
+    <testCase name="InitiativeOverviewCard renders multiple children correctly" duration="1"/>
+    <testCase name="InitiativeOverviewCard applies correct structure and styling" duration="0"/>
+    <testCase name="InitiativeOverviewCard handles all titleVariant options" duration="2"/>
+    <testCase name="InitiativeOverviewCard handles all subtitleVariant options" duration="1"/>
+    <testCase name="InitiativeOverviewCard renders with complex children content" duration="9"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeDiscounts/__tests__/helpers.test.tsx">
+    <testCase name="initiativeDiscounts/helpers renderTransactionCreatedStatus should render AUTHORIZED status chip" duration="2"/>
+    <testCase name="initiativeDiscounts/helpers renderTransactionCreatedStatus should render AUTHORIZATION_REQUESTED status chip" duration="1"/>
+    <testCase name="initiativeDiscounts/helpers renderTransactionCreatedStatus should render CREATED status as identified" duration="0"/>
+    <testCase name="initiativeDiscounts/helpers renderTransactionCreatedStatus should render IDENTIFIED status chip" duration="1"/>
+    <testCase name="initiativeDiscounts/helpers renderTransactionCreatedStatus should render REJECTED status chip" duration="1"/>
+    <testCase name="initiativeDiscounts/helpers renderTrasactionProcessedStatus should render REWARDED status chip" duration="1"/>
+    <testCase name="initiativeDiscounts/helpers renderTrasactionProcessedStatus should render CANCELLED status chip" duration="0"/>
+    <testCase name="initiativeDiscounts/helpers mapDatesFromPeriod should return start and end dates from a valid period string" duration="0"/>
+    <testCase name="initiativeDiscounts/helpers mapDatesFromPeriod should return undefined if period is undefined" duration="0"/>
+    <testCase name="initiativeDiscounts/helpers userCanCreateDiscount should return true if current date is within the period" duration="4"/>
+    <testCase name="initiativeDiscounts/helpers userCanCreateDiscount should return false if current date is before the start date" duration="0"/>
+    <testCase name="initiativeDiscounts/helpers userCanCreateDiscount should return false if current date is after the end date" duration="0"/>
+    <testCase name="initiativeDiscounts/helpers userCanCreateDiscount should return true if dates are undefined" duration="0"/>
+    <testCase name="initiativeDiscounts/helpers resetForm should reset form and fetch data" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeDiscounts/__tests__/MerchantTransactions.test.tsx">
+    <testCase name="test suite for MerchantTransactions render component MerchantTransactions" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeDiscounts/__tests__/useTableDataFilter.test.tsx">
+    <testCase name="useTableDataFiltered dovrebbe chiamare getTableData e scrollTo al primo render" duration="1"/>
+    <testCase name="useTableDataFiltered dovrebbe rieseguire l&apos;effetto quando la dipendenza &quot;page&quot; cambia" duration="1"/>
+    <testCase name="useTableDataFiltered NON dovrebbe rieseguire l&apos;effetto se cambiano solo i filtri" duration="0"/>
+    <testCase name="useTableDataFiltered dovrebbe chiamare la funzione di pulizia (setRows) allo smontaggio del componente" duration="0"/>
+    <testCase name="useTableDataFiltered NON dovrebbe chiamare getTableData se l&apos;ID non è una stringa" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeDiscounts/__tests__/FiltersForm.test.tsx">
+    <testCase name="FiltersForm should render children and buttons initially disabled" duration="24"/>
+    <testCase name="FiltersForm should enable buttons when a form field is changed" duration="45"/>
+    <testCase name="FiltersForm should call onFiltersApplied with correct values when apply button is clicked" duration="47"/>
+    <testCase name="FiltersForm should call onFiltersReset and clear the form when reset button is clicked" duration="96"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/hooks/__tests__/useOneTrustNotice.test.tsx">
+    <testCase name="useOneTrustNotice should initialize and load notices on mount, then call setContentLoaded" duration="1"/>
+    <testCase name="useOneTrustNotice should modify DOM elements after a delay when content is loaded" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/hooks/__tests__/useSelectedPartyProducts.test.tsx">
+    <testCase name="useSelectedPartyProducts should call useReduxCachedValue with correct parameters when a party is selected" duration="1"/>
+    <testCase name="useSelectedPartyProducts should throw an error if no party is selected" duration="5"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/model/__tests__/Product.test.ts">
+    <testCase name="Test institutionInfo2Party" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/services/__tests__/partyService.test.ts">
+    <testCase name="partyService fetchParties should return a promise that resolves to an empty array" duration="0"/>
+    <testCase name="partyService fetchPartyDetails should return a party from the provided list if found" duration="0"/>
+    <testCase name="partyService fetchPartyDetails should return null if the party is not found in the provided list" duration="0"/>
+    <testCase name="partyService fetchPartyDetails should return null if no parties list is provided" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/privacyPolicy/__tests__/PrivacyPolicy.test.tsx">
+    <testCase name="PrivacyPolicy should call useOneTrustNotice and render OneTrustContentWrapper with correct props" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativesList/__tests__/helpers.test.tsx">
+    <testCase name="Test suite for helpers.ts of InitiativesList descendingComparator" duration="0"/>
+    <testCase name="Test suite for helpers.ts of InitiativesList stableSort" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/tos/__tests__/TOS.test.tsx">
+    <testCase name="TOS component should call useOneTrustNotice and render OneTrustContentWrapper with correct props" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/hooks/__tests__/useIDPayUser.test.tsx">
+    <testCase name="useIDPayUser should return undefined if the user is not in the store" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeStores/__tests__/StoreContext.test.tsx">
+    <testCase name="StoreProvider should provide default empty storeId" duration="1"/>
+    <testCase name="StoreProvider should update storeId when setStoreId is called" duration="11"/>
+    <testCase name="StoreProvider should throw an error if useStore is used outside of StoreProvider" duration="5"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/model/__tests__/Party.test.ts">
+    <testCase name="Test institutionResource2Party" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/initiativeStores/__tests__/initiativeDetailCard.test.tsx">
+    <testCase name="InitiativeDetailCard should render the title and children correctly" duration="2"/>
+    <testCase name="InitiativeDetailCard should render only the title when no children are provided" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/model/__tests__/JwtUser.test.ts">
+    <testCase name="test jwt2JWTUser" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/model/__tests__/IDPayUser.test.ts">
+    <testCase name="Test initiativeGeneral2GeneralInfo" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/model/__tests__/Permission.test.ts">
+    <testCase name="Test permission2PermissionModel" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/components/__tests__/OneTrustContentWrapper.test.tsx">
+    <testCase name="test suite for OneTrustContentWrapper render OneTrustContentWrapper" duration="3"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/acceptNewDiscount/__tests__/WizardNavigation.test.tsx">
+    <testCase name="Test suite for WizardNavigation component Render component" duration="6"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/components/__tests__/EmptyList.test.tsx">
+    <testCase name="test suite for EmptyList render EmptyList" duration="2"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/pages/components/__tests__/BreadcrumbsBox.test.tsx">
+    <testCase name="test suite for BreadcrumbsBox render BreadcrumbsBox" duration="6"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/services/__tests__/emailNotificationService.test.ts">
+    <testCase name="emailNotificationService getInstitutionProductUserInfo should call the API and return user info on success" duration="0"/>
+    <testCase name="emailNotificationService getInstitutionProductUserInfo should throw an error if the API call fails" duration="1"/>
+    <testCase name="emailNotificationService sendEmail should call the API with the correct data" duration="0"/>
+    <testCase name="emailNotificationService sendEmail should throw an error if the API call fails" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/services/__tests__/rolePermissionService.test.ts">
+    <testCase name="rolePermissionService getUserPermission should call the API and return user permissions on success" duration="5"/>
+    <testCase name="rolePermissionService getUserPermission should throw an error if the API call fails" duration="2"/>
+    <testCase name="rolePermissionService getPortalConsent should call the API and return portal consent data on success" duration="0"/>
+    <testCase name="rolePermissionService getPortalConsent should throw an error if the API call fails" duration="0"/>
+    <testCase name="rolePermissionService savePortalConsent should call the API with the correct versionId" duration="0"/>
+    <testCase name="rolePermissionService savePortalConsent should throw an error if the API call fails" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/redux/__tests__/store.test.ts">
+    <testCase name="Redux Store Configuration dovrebbe creare uno store con tutti i reducer combinati correttamente" duration="1"/>
+    <testCase name="Redux Store Configuration Configurazione del Middleware dovrebbe configurare i middleware di default senza il logger se LOG_REDUX_ACTIONS è false" duration="1"/>
+    <testCase name="Redux Store Configuration Configurazione del Middleware dovrebbe aggiungere il logger ai middleware di default se LOG_REDUX_ACTIONS è true" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/redux/slices/__tests__/permissionsSlice.test.ts">
+    <testCase name="initiative Summary slice  initiative Summary slice actions" duration="0"/>
+    <testCase name="initiative Summary slice  initiative Summary slice slectors" duration="1"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/services/__tests__/productService.test.ts">
+    <testCase name="fetchProducts Service should return an empty array" duration="0"/>
+    <testCase name="Test fetchProducts" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/services/__tests__/merchantService.test.ts">
+    <testCase name="downloadInvoiceFile should call MerchantApi.downloadInvoiceFile with correct params" duration="0"/>
+    <testCase name="merchantService getMerchantInitiativeList should call MerchantApi.getMerchantInitiativeList" duration="0"/>
+    <testCase name="merchantService getMerchantTransactions should call MerchantApi.getMerchantTransactions with correct params" duration="0"/>
+    <testCase name="merchantService getMerchantTransactionsProcessed should call MerchantApi.getMerchantTransactionsProcessed with correct params" duration="0"/>
+    <testCase name="merchantService getMerchantInitiativeStatistics should call MerchantApi.getMerchantInitiativeStatistics with correct initiativeId" duration="0"/>
+    <testCase name="merchantService getMerchantDetail should call MerchantApi.getMerchantDetail with correct initiativeId" duration="0"/>
+    <testCase name="merchantService deleteTransaction should call MerchantApi.deleteTransaction with correct transactionId" duration="0"/>
+    <testCase name="merchantService createTransaction should call MerchantApi.createTransaction with correct params" duration="0"/>
+    <testCase name="merchantService authPaymentBarCode should call MerchantApi.authPaymentBarCode with correct params" duration="0"/>
+    <testCase name="merchantService updateMerchantPointOfSales should call MerchantApi.updateMerchantPointOfSales with correct params" duration="0"/>
+    <testCase name="merchantService getMerchantPointOfSales should call MerchantApi.getMerchantPointOfSales with correct params" duration="0"/>
+    <testCase name="merchantService getMerchantPointOfSalesById should call MerchantApi.getMerchantPointOfSalesById with correct params" duration="1"/>
+    <testCase name="merchantService getMerchantPointOfSaleTransactionsProcessed should call MerchantApi.getMerchantPointOfSaleTransactionsProcessed with correct params" duration="0"/>
+  </file>
+  <file path="/Users/mattialaurenzana/Documents/Progetti-lavoro/pagoPa/idpay-portal-merchants-frontend/src/services/__tests__/autocompleteService.test.ts">
+    <testCase name="autocompleteService getAddresses should call AutocompleteApi.getAddresses with the correct payload and return the response" duration="0"/>
+    <testCase name="autocompleteService getAddresses should throw an error if the API call fails" duration="2"/>
+  </file>
+</testExecutions>
