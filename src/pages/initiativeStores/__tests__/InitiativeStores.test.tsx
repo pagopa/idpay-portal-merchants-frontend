@@ -7,9 +7,13 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage'
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import { useLocation } from 'react-router-dom';
 
-const mockHistoryPush = jest.fn();
+// const mockHistoryPush = jest.fn();
 const mockAddError = jest.fn();
 const mockId = 'initiative-123';
+const mockHistory= {
+  replace: jest.fn(),
+  push: jest.fn()
+};
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -19,7 +23,7 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockHistoryPush }),
+  useHistory: () => ({ ...mockHistory }),
   useParams: () => ({ id: mockId }),
   useLocation: jest.fn(),
 }));
@@ -123,7 +127,7 @@ describe('<InitiativeStores />', () => {
       expect(screen.getByText('pages.initiativeStores.noStores')).toBeInTheDocument();
     });
     fireEvent.click(screen.getByText('pages.initiativeStores.addStoreNoResults'));
-    expect(mockHistoryPush).toHaveBeenCalledWith(
+    expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/initiative-123/punti-vendita/censisci/`
     );
   });
@@ -231,9 +235,9 @@ describe('<InitiativeStores />', () => {
       jest.advanceTimersByTime(3000);
     });
     await waitFor(() => {
-      expect(
-        screen.queryByText('pages.initiativeStores.pointOfSalesUploadSuccess')
-      ).not.toBeInTheDocument();
+      expect(mockHistory.replace).toHaveBeenCalledWith({
+        state: { showSuccessAlert: false } 
+    });
     });
     jest.useRealTimers();
   });
@@ -293,7 +297,7 @@ describe('<InitiativeStores />', () => {
     await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
     const addButton = screen.getByText('pages.initiativeStores.addStoreList');
     fireEvent.click(addButton);
-    expect(mockHistoryPush).toHaveBeenCalledWith(
+    expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/initiative-123/punti-vendita/censisci/`
     );
   });
@@ -326,7 +330,7 @@ describe('<InitiativeStores />', () => {
     renderWithContext(<InitiativeStores />);
     await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
     fireEvent.click(screen.getByText('Store A'));
-    expect(mockHistoryPush).toHaveBeenCalledWith(
+    expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/initiative-123/punti-vendita/1/`
     );
   });
