@@ -66,9 +66,17 @@ const InitiativeStores: React.FC = () => {
   useEffect(() => {
     if (location.state?.showSuccessAlert) {
       setShowSuccessAlert(true);
+
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+      }, 3000);
+
+      history.replace({
+        ...location,
+        state: { ...location.state, showSuccessAlert: false }
+      });
     }
-    setTimeout(() => setShowSuccessAlert(false), 3000);
-  }, [location.state]);
+  }, [location, history]);
 
   const addError = useErrorDispatcher();
   const infoStyles = {
