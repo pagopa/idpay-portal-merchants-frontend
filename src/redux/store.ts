@@ -7,6 +7,7 @@ import { partiesReducer } from './slices/partiesSlice';
 import { permissionsReducer } from './slices/permissionsSlice';
 import { initiativesReducer } from './slices/initiativesSlice';
 
+
 const additionalMiddlewares = [LOG_REDUX_ACTIONS ? logger : undefined];
 
 export const createStore = () =>
@@ -18,11 +19,11 @@ export const createStore = () =>
       permissions: permissionsReducer,
       initiatives: initiativesReducer,
     },
-    middleware: (getDefaultMiddleware) =>
-      additionalMiddlewares.reduce(
-        (array, middleware) => (middleware ? array.concat(middleware) : array),
-        getDefaultMiddleware({ serializableCheck: false })
-      ),
+    middleware: (getDefaultMiddleware: (arg0: { serializableCheck: boolean }) => any) =>
+            additionalMiddlewares.reduce(
+                (array, middleware) => (middleware ? array.concat(middleware) : array),
+                getDefaultMiddleware({ serializableCheck: false })
+            ),
   });
 
 export const store = createStore();
