@@ -21,8 +21,8 @@ import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail } from '../../helpers';
 import { formatDate } from '../../utils/formatUtils';
-import { MISSING_DATA_PLACEHOLDER, POS_TYPE } from '../../utils/constants';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
+import { POS_TYPE } from '../../utils/constants';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
@@ -150,19 +150,21 @@ const InitiativeStoreDetail = () => {
           },
           {
             label: t('pages.initiativeStores.phone'),
-            value: obj?.channelPhone === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelPhone,
+            value: obj?.channelPhone,
           },
           {
             label: t('pages.initiativeStores.contactEmail'),
-            value: obj?.channelEmail === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelEmail,
+            value: obj?.channelEmail,
           },
           {
             label: t('pages.initiativeStores.geoLink'),
-            value: obj?.channelGeolink === '' ? MISSING_DATA_PLACEHOLDER : obj?.channelGeolink,
+            value: obj?.channelGeolink,
           },
         ]
       : []),
-    { label: t('pages.initiativeStores.website'), value: obj?.website ?? MISSING_DATA_PLACEHOLDER },
+    { label: t('pages.initiativeStores.website'),
+      value: obj?.website,
+    },
   ];
 
   const getKeyValueReferent = (obj: any) => [

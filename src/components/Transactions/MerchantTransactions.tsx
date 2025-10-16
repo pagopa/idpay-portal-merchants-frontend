@@ -1,9 +1,10 @@
 
-import { Box, FormControl, Grid, InputLabel, MenuItem, Select, TextField, } from '@mui/material';
+import { Box, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import EmptyList from '../../pages/components/EmptyList';
 import DetailDrawer from '../Drawer/DetailDrawer';
@@ -126,6 +127,24 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       disableColumnMenu: true,
       renderCell: (params: any) => <StatusChip status={params.value} />,
     },
+    {
+      field: 'actions',
+      headerName: '',
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      flex: 0.1,
+      renderCell: (params: any) => (
+        <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+          <IconButton
+            onClick={() => handleListButtonClick(params.row)}
+            size="small"
+          >
+            <ChevronRightIcon color='primary' fontSize='inherit' />
+          </IconButton>
+        </Box>
+      )
+    }
   ];
 
   const handleOnFiltersApplied = (filters: any) => {
