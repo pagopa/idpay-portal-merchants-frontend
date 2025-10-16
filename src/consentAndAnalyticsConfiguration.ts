@@ -9,4 +9,4 @@ CONFIG.ANALYTCS.TOKEN = ENV.ANALYTCS.TOKEN;
 CONFIG.ANALYTCS.API_HOST = ENV.ANALYTCS.API_HOST;
 CONFIG.ANALYTCS.ADDITIONAL_PROPERTIES_IMPORTANT = { env: ENV.ENV };
 
-import '@pagopa/selfcare-common-frontend/consentManagementConfigure';
+import '@pagopa/selfcare-common-frontend/lib/consentManagementConfigure';
