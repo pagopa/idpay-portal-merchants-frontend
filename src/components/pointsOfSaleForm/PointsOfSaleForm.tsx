@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, FC, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -23,13 +23,10 @@ import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
-  onErrorChange: (errors: FormErrors) => void;
+  onValidationChange: (isValid: boolean) => void;
   pointsOfSaleLoaded: boolean;
   externalErrors?: FormErrors;
-  showErrorAlert: Array<boolean>;
-  setShowErrorAlert: (showErrorAlert: Array<boolean>) => void;
-  // onValidate?: (validateFn: () => boolean) => void;
-  hasAttemptedSubmit: boolean;
+  submitAttempt: number;
 }
 
 interface FormErrors {
@@ -41,7 +38,13 @@ interface FieldErrors {
 }
 
 
-const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErrorAlert,externalErrors, onFormChange, onErrorChange, pointsOfSaleLoaded }) => {
+const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
+  submitAttempt,
+  externalErrors,
+  onFormChange,
+  onValidationChange,
+  pointsOfSaleLoaded,
+}) => {
   const { t } = useTranslation();
   const { options, loading, error, search } = usePlacesAutocomplete();
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
@@ -65,34 +68,51 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
   ]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
-  const mergedErrors = { ...errors, ...externalErrors };
-
-  useEffect(() => {
-    validateForm(hasAttemptedSubmit);
-  }, [hasAttemptedSubmit]);
-
-  // useEffect(() => {
-  //   console.log('errors', errors);
-  //   let arrayAlert  = {};
-  //   Object.entries(errors).forEach(([,value], salesPointIndex) => {
-  //     let salesPointError = false;
-  //     Object.entries(value).forEach(([ ,valore],) => {
-  //       console.log(valore,'valore');
-  //       if (valore === 'Campo obbligatorio'){
-  //         salesPointError = true;
-  //       }
-  //     });
-  //     arrayAlert = { ...arrayAlert, [salesPointIndex]: salesPointError };
-  //
-  //   });
-  // console.log('arrayAlert',arrayAlert);
-  // }, [errors]);
-
+  const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
+  
+  const mergedErrors = useMemo(
+    () => ({ ...errors, ...externalErrors }),
+    [errors, externalErrors]
+  );
 
   useEffect(() => {
     onFormChange(salesPoints);
-    onErrorChange(errors);
-  }, [salesPoints,errors]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [salesPoints]);
+
+  // Validate and notify on every submit attempt
+  useEffect(() => {
+    if (submitAttempt > 0) {
+      const isValid = validateForm(true);
+      onValidationChange(isValid);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submitAttempt]);
+
+  // Validate when salesPoints or contactEmailConfirm change
+  useEffect(() => {
+    const isValid = validateForm(false);
+    onValidationChange(isValid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [salesPoints, contactEmailConfirm]);
+
+  // Update showErrorAlert when there are errors
+  useEffect(() => {
+    if (submitAttempt > 0) {
+      const newShowErrorAlert = salesPoints.map((_, idx) => {
+        const fieldErrors = mergedErrors[idx] ?? {};
+        return Object.keys(fieldErrors).length > 0;
+      });
+      
+      setShowErrorAlert(prev => {
+        const hasChanged = prev.length !== newShowErrorAlert.length || 
+          prev.some((val, index) => val !== newShowErrorAlert[index]);
+        return hasChanged ? newShowErrorAlert : prev;
+      });
+    } else {
+      setShowErrorAlert([]);
+    }
+  }, [errors, externalErrors, submitAttempt, salesPoints.length]);
 
   const validateForm = (showErrors: boolean): boolean => {
     let isValid = true;
@@ -104,19 +124,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
         fieldErrors = { ...fieldErrors, contactEmail: 'Campo obbligatorio' };
         isValid = false;
       }
-      // else if (!isValidEmail(sp.contactEmail)) {
-      //   fieldErrors = { ...fieldErrors, contactEmail: 'Email non valida' };
-      //   isValid = false;
-      // }
 
       if (!contactEmailConfirm[index]?.trim()) {
         fieldErrors = { ...fieldErrors, confirmContactEmail: 'Campo obbligatorio' };
         isValid = false;
       }
-      // else if (sp.contactEmail?.trim() !== contactEmailConfirm[index]?.trim()) {
-      //   fieldErrors = { ...fieldErrors, confirmContactEmail: 'Le email non coincidono' };
-      //   isValid = false;
-      // }
 
       if (!sp.contactName?.trim()) {
         fieldErrors = { ...fieldErrors, contactName: 'Campo obbligatorio' };
@@ -379,8 +391,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
   };
 
   const clearError = (salesPointIndex: number, fieldName: string) => {
-    // setShowErrorAlert(
-    //   salesPoints.map(() => false));
     setErrors(prevErrors => {
       if (!prevErrors[salesPointIndex]?.[fieldName]) {
         return prevErrors;
@@ -528,15 +538,15 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({hasAttemptedSubmit,showErr
                 </Box>
               </FormControl>
             </Grid>
-            <Grid item xs={12} pb={3}>
-              <Slide direction="left" in={showErrorAlert?.[index] === true} mountOnEnter unmountOnExit>
-                <Alert
-                  severity="error"
-                >
-                  {'Per continuare è necessario compilare tutti i campi obbligatori.'}
-                </Alert>
-              </Slide>
-            </Grid>
+            {showErrorAlert[index] && (
+              <Grid item xs={12} pb={3}>
+                <Slide direction="left" in={showErrorAlert[index]} mountOnEnter unmountOnExit>
+                  <Alert severity="error">
+                    {'Per continuare è necessario compilare tutti i campi obbligatori.'}
+                  </Alert>
+                </Slide>
+              </Grid>
+            )}
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
                 {t('pages.pointOfSales.signName')}

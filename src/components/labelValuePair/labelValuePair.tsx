@@ -23,12 +23,12 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, isLink }) => (
     {!isLink ?
       <Grid item xs={7}>
         <Box mb={1}>
-          <Tooltip title={value ?? MISSING_DATA_PLACEHOLDER}>
+          <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}>
             <Typography
               fontWeight={theme.typography.fontWeightMedium}
               variant="body2"
             >
-              {value ?? MISSING_DATA_PLACEHOLDER}
+              {value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}
             </Typography>
           </Tooltip>
         </Box>
@@ -47,14 +47,14 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, isLink }) => (
             wordBreak: 'break-word'
           }}
         >
-          <Tooltip title={value ?? MISSING_DATA_PLACEHOLDER}>
+          <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}>
             <Link
               fontWeight={theme.typography.fontWeightMedium}
               href={`${value}`}
               underline="hover"
               target='blank'
             >
-              {value ?? MISSING_DATA_PLACEHOLDER}
+              {value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}
             </Link>
           </Tooltip>
         </Box>
