@@ -1,12 +1,12 @@
 import { renderHook } from '@testing-library/react-hooks';
-import useReduxCachedValue from '@pagopa/selfcare-common-frontend/hooks/useReduxCachedValue';
+import useReduxCachedValue from '@pagopa/selfcare-common-frontend/lib/hooks/useReduxCachedValue';
 import { useSelectedPartyProducts } from '../useSelectedPartyProducts';
 import { useAppSelector } from '../../redux/hooks';
 import { partiesActions, partiesSelectors } from '../../redux/slices/partiesSlice';
 import * as productService from '../../services/productService';
 import { Party } from '../../model/Party';
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useReduxCachedValue');
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useReduxCachedValue');
 const mockedUseReduxCachedValue = useReduxCachedValue as jest.Mock;
 
 jest.mock('../../redux/hooks');

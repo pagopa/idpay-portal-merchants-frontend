@@ -3,7 +3,7 @@ import {
   LoadingOverlay,
   UnloadEventHandler,
   UserNotifyHandle,
-} from '@pagopa/selfcare-common-frontend';
+} from '@pagopa/selfcare-common-frontend/lib';
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import withSelectedPartyProducts from './decorators/withSelectedPartyProducts';
 import withLogin from './decorators/withLogin';

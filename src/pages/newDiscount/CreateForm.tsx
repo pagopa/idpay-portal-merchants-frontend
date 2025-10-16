@@ -11,7 +11,7 @@ import {
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { Dispatch, SetStateAction } from 'react';
 import { useHistory } from 'react-router-dom';
 import { createTransaction } from '../../services/merchantService';

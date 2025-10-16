@@ -1,6 +1,6 @@
 /* eslint-disable functional/immutable-data */
 import { Chip } from '@mui/material';
-import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
+import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
 import { FormikProps } from 'formik';
 import { Dispatch, SetStateAction } from 'react';
 import { StatusEnum as TransactionCreatedStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';

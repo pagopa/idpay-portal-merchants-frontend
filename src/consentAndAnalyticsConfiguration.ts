@@ -1,5 +1,5 @@
 /* eslint-disable functional/immutable-data */
-import { CONFIG } from '@pagopa/selfcare-common-frontend/config/env';
+import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import { ENV } from './utils/env';
 
 CONFIG.ANALYTCS.ENABLE = ENV.ANALYTCS.ENABLE;

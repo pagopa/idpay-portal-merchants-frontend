@@ -1,7 +1,10 @@
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { appStateActions } from '@pagopa/selfcare-common-frontend/redux/slices/appStateSlice';
-import { buildFetchApi, extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
-import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
+import {
+  buildFetchApi,
+  extractResponse,
+} from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
+import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
 import { createClient, WithDefaultsT } from './generated/role-permission/client';

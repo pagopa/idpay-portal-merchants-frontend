@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { useTranslation } from 'react-i18next';
 import { ThemeProvider, createTheme } from '@mui/material';
 import ActionMenu from '../actionMenu';
 import {

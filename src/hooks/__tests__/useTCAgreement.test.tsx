@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { useTranslation } from 'react-i18next';
 import { getPortalConsent, savePortalConsent } from '../../services/rolePermissionService';
 import useTCAgreement from '../useTCAgreement';
@@ -10,7 +10,7 @@ jest.mock('../../services/rolePermissionService', () => ({
   savePortalConsent: jest.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
 jest.mock('react-i18next');
 
 const mockedGetPortalConsent = getPortalConsent as jest.Mock;

@@ -13,7 +13,7 @@ import {
   TextField,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useTranslation } from 'react-i18next';
 import SearchIcon from '@mui/icons-material/Search';
 import { grey } from '@mui/material/colors';

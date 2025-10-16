@@ -21,13 +21,13 @@ import {
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from 'react-i18next';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import StoreIcon from '@mui/icons-material/Store';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { CheckCircleOutline } from '@mui/icons-material';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
@@ -73,7 +73,7 @@ const InitiativeStores: React.FC = () => {
 
       history.replace({
         ...location,
-        state: { ...location.state, showSuccessAlert: false }
+        state: { ...location.state, showSuccessAlert: false },
       });
     }
   }, [location, history]);
@@ -146,7 +146,8 @@ const InitiativeStores: React.FC = () => {
       disableColumnMenu: true,
       renderCell: (params: any) =>
         renderCellWithTooltip(
-          `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
+          `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${
+            params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
           }`,
           11
         ),
@@ -187,7 +188,6 @@ const InitiativeStores: React.FC = () => {
       return;
     }
     try {
-
       if (!fromSort) {
         setStoresLoading(true);
       }
@@ -325,7 +325,9 @@ const InitiativeStores: React.FC = () => {
         </Box>
       ) : (
         <>
-          {(stores.length > 0 || (stores.length === 0 && filtersSetted()) || filtersAppliedOnce) && (
+          {(stores.length > 0 ||
+            (stores.length === 0 && filtersSetted()) ||
+            filtersAppliedOnce) && (
             <>
               <FiltersForm
                 onFiltersApplied={handleFiltersApplied}
@@ -405,8 +407,7 @@ const InitiativeStores: React.FC = () => {
                 />
               </Box>
             </>
-          )
-          }
+          )}
         </>
       )}
       <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
@@ -432,23 +433,25 @@ const InitiativeStores: React.FC = () => {
           {t('pages.initiativeStores.pointOfSalesUploadSuccess')}
         </Alert>
       </Slide>
-      {
-        !storesLoading && stores?.length === 0 && (
-          <Paper
-            sx={{
-              my: 4,
-              p: 3,
-              textAlign: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Stack spacing={0.5} direction="row">
-              <Typography variant="body2">{!filtersAppliedOnce ? t('pages.initiativeStores.noStores') : t('pages.initiativeStores.noStoresInitiative')} </Typography>
-             {
-              !filtersAppliedOnce && (
-                <Link
+      {!storesLoading && stores?.length === 0 && (
+        <Paper
+          sx={{
+            my: 4,
+            p: 3,
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Stack spacing={0.5} direction="row">
+            <Typography variant="body2">
+              {!filtersAppliedOnce
+                ? t('pages.initiativeStores.noStores')
+                : t('pages.initiativeStores.noStoresInitiative')}{' '}
+            </Typography>
+            {!filtersAppliedOnce && (
+              <Link
                 onClick={() => goToAddStorePage()}
                 className="cursor-pointer"
                 variant="body2"
@@ -456,12 +459,10 @@ const InitiativeStores: React.FC = () => {
               >
                 {t('pages.initiativeStores.addStoreNoResults')}
               </Link>
-              )
-             }
-            </Stack>
-          </Paper>
-        )
-      }
+            )}
+          </Stack>
+        </Paper>
+      )}
     </Box>
   );
 };

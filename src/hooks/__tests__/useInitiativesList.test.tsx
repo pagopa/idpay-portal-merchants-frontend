@@ -3,7 +3,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useInitiativesList } from '../useInitiativesList';
 import { getMerchantInitiativeList } from '../../services/merchantService';
 import { useAppDispatch } from '../../redux/hooks';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { setInitiativesList } from '../../redux/slices/initiativesSlice';
 import { InitiativeDTO, StatusEnum } from '../../api/generated/merchants/InitiativeDTO';
 import { match } from 'react-router-dom';
@@ -17,7 +17,7 @@ const mockedGetMerchantInitiativeList = getMerchantInitiativeList as jest.Mock;
 jest.mock('../../redux/hooks');
 const mockedUseAppDispatch = useAppDispatch as jest.Mock;
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
 const mockedUseErrorDispatcher = useErrorDispatcher as jest.Mock;
 
 jest.mock('react-i18next');

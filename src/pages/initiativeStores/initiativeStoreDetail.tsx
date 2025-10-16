@@ -1,11 +1,11 @@
 import { Box, Button, Grid, Typography, TextField, Alert, Slide } from '@mui/material';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { theme } from '@pagopa/mui-italia/dist/theme/theme';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { CheckCircleOutline, Edit } from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';
 import { ButtonNaked } from '@pagopa/mui-italia';
@@ -162,9 +162,7 @@ const InitiativeStoreDetail = () => {
           },
         ]
       : []),
-    { label: t('pages.initiativeStores.website'),
-      value: obj?.website,
-    },
+    { label: t('pages.initiativeStores.website'), value: obj?.website },
   ];
 
   const getKeyValueReferent = (obj: any) => [

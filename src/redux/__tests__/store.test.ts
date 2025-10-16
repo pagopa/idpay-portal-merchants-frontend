@@ -11,10 +11,10 @@ jest.mock('redux-logger', () => ({
   default: 'mocked-logger',
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/redux/slices/appStateSlice', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
   appStateReducer: jest.fn(),
 }));
-jest.mock('@pagopa/selfcare-common-frontend/redux/slices/userSlice', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice', () => ({
   userReducer: jest.fn(),
 }));
 jest.mock('../slices/partiesSlice', () => ({ partiesReducer: jest.fn() }));

@@ -2,12 +2,17 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import InitiativeOverviewCard from '../initiativeOverviewCard';
 
-
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib', () => ({
   TitleBox: ({ title, subTitle, variantTitle, variantSubTitle, ...props }: any) => (
     <div data-testid="title-box" {...props}>
-      <h1 data-testid="title" data-variant={variantTitle}>{title}</h1>
-      {subTitle && <p data-testid="subtitle" data-variant={variantSubTitle}>{subTitle}</p>}
+      <h1 data-testid="title" data-variant={variantTitle}>
+        {title}
+      </h1>
+      {subTitle && (
+        <p data-testid="subtitle" data-variant={variantSubTitle}>
+          {subTitle}
+        </p>
+      )}
     </div>
   ),
 }));
@@ -34,12 +39,7 @@ describe('InitiativeOverviewCard', () => {
   });
 
   test('renders with title and subtitle', () => {
-    render(
-      <InitiativeOverviewCard
-        {...defaultProps}
-        subtitle="Test Subtitle"
-      />
-    );
+    render(<InitiativeOverviewCard {...defaultProps} subtitle="Test Subtitle" />);
 
     expect(screen.getByTestId('title')).toHaveTextContent('Test Title');
     expect(screen.getByTestId('subtitle')).toHaveTextContent('Test Subtitle');
@@ -59,34 +59,20 @@ describe('InitiativeOverviewCard', () => {
   });
 
   test('applies custom title variant', () => {
-    render(
-      <InitiativeOverviewCard
-        {...defaultProps}
-        titleVariant="h4"
-      />
-    );
+    render(<InitiativeOverviewCard {...defaultProps} titleVariant="h4" />);
 
     expect(screen.getByTestId('title')).toHaveAttribute('data-variant', 'h4');
   });
 
   test('applies default subtitle variant (caption)', () => {
-    render(
-      <InitiativeOverviewCard
-        {...defaultProps}
-        subtitle="Test Subtitle"
-      />
-    );
+    render(<InitiativeOverviewCard {...defaultProps} subtitle="Test Subtitle" />);
 
     expect(screen.getByTestId('subtitle')).toHaveAttribute('data-variant', 'caption');
   });
 
   test('applies custom subtitle variant', () => {
     render(
-      <InitiativeOverviewCard
-        {...defaultProps}
-        subtitle="Test Subtitle"
-        subtitleVariant="body1"
-      />
+      <InitiativeOverviewCard {...defaultProps} subtitle="Test Subtitle" subtitleVariant="body1" />
     );
 
     expect(screen.getByTestId('subtitle')).toHaveAttribute('data-variant', 'body1');
@@ -100,12 +86,7 @@ describe('InitiativeOverviewCard', () => {
       </>
     );
 
-    render(
-      <InitiativeOverviewCard
-        title="Test Title"
-        children={multipleChildren}
-      />
-    );
+    render(<InitiativeOverviewCard title="Test Title" children={multipleChildren} />);
 
     expect(screen.getByTestId('child-1')).toHaveTextContent('Child 1');
     expect(screen.getByTestId('child-2')).toHaveTextContent('Child 2');
@@ -126,12 +107,9 @@ describe('InitiativeOverviewCard', () => {
   test('handles all titleVariant options', () => {
     const titleVariants: Array<'h4' | 'h5' | 'h6'> = ['h4', 'h5', 'h6'];
 
-    titleVariants.forEach(variant => {
+    titleVariants.forEach((variant) => {
       const { unmount } = render(
-        <InitiativeOverviewCard
-          {...defaultProps}
-          titleVariant={variant}
-        />
+        <InitiativeOverviewCard {...defaultProps} titleVariant={variant} />
       );
 
       expect(screen.getByTestId('title')).toHaveAttribute('data-variant', variant);
@@ -142,7 +120,7 @@ describe('InitiativeOverviewCard', () => {
   test('handles all subtitleVariant options', () => {
     const subtitleVariants: Array<'body1' | 'body2' | 'caption'> = ['body1', 'body2', 'caption'];
 
-    subtitleVariants.forEach(variant => {
+    subtitleVariants.forEach((variant) => {
       const { unmount } = render(
         <InitiativeOverviewCard
           {...defaultProps}
@@ -168,12 +146,7 @@ describe('InitiativeOverviewCard', () => {
       </div>
     );
 
-    render(
-      <InitiativeOverviewCard
-        title="Test Title"
-        children={complexChildren}
-      />
-    );
+    render(<InitiativeOverviewCard title="Test Title" children={complexChildren} />);
 
     expect(screen.getByTestId('complex-content')).toBeInTheDocument();
     expect(screen.getByRole('button')).toHaveTextContent('Click me');

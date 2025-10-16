@@ -1,16 +1,16 @@
-import { extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
+import { extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
 import { createClient } from '../generated/merchants/client';
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/redux/slices/appStateSlice', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
   appStateActions: { addError: jest.fn((e) => e) },
   appStateReducer: (state = {}, action: any) => state,
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/api-utils', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/api-utils', () => ({
   buildFetchApi: jest.fn(),
   extractResponse: jest.fn(),
 }));

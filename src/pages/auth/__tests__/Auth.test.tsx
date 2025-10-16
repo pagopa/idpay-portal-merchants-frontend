@@ -4,18 +4,21 @@ import Auth, { readUserFromToken } from '../Auth';
 import {
   trackAppError,
   trackEvent,
-} from '@pagopa/selfcare-common-frontend/services/analyticsService';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+} from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { userFromJwtTokenAsJWTUser } from '../../../hooks/useLogin';
 import ROUTES from '../../../routes';
 import { ENV } from '../../../utils/env';
 
-jest.mock('@pagopa/selfcare-common-frontend/services/analyticsService', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService', () => ({
   trackAppError: jest.fn(),
   trackEvent: jest.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: { write: jest.fn(), read: jest.fn() },
   storageUserOps: { write: jest.fn() },
 }));

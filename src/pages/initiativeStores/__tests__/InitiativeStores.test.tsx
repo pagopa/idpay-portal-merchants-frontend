@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import InitiativeStores from '../InitiativeStores';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import { useLocation } from 'react-router-dom';
 
@@ -28,7 +28,10 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => () => mockAddError);
+jest.mock(
+  '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher',
+  () => () => mockAddError
+);
 
 let dataTableProps: any = {};
 jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
@@ -61,7 +64,7 @@ jest.mock('../../../services/merchantService', () => ({
 }));
 
 jest.mock('../../../utils/jwt-utils');
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage');
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
 
 const mockParseJwt = jwtUtils.parseJwt as jest.Mock;
 const mockStorageRead = storageTokenOps.read as jest.Mock;

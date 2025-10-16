@@ -1,10 +1,13 @@
 import { act, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useDispatch } from 'react-redux';
-import { CONFIG } from '@pagopa/selfcare-common-frontend/config/env';
-import { userActions } from '@pagopa/selfcare-common-frontend/redux/slices/userSlice';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
+import { userActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { useTranslation } from 'react-i18next';
 import { parseJwt } from '../../utils/jwt-utils';
 import { getUserPermission } from '../../services/rolePermissionService';
@@ -12,9 +15,9 @@ import { setUserRole, setPermissionsList } from '../../redux/slices/permissionsS
 import { useLogin, userFromJwtToken, userFromJwtTokenAsJWTUser } from '../useLogin';
 
 jest.mock('react-redux');
-jest.mock('@pagopa/selfcare-common-frontend/config/env');
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage');
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
+jest.mock('@pagopa/selfcare-common-frontend/lib/config/env');
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
 jest.mock('react-i18next');
 jest.mock('../../utils/jwt-utils');
 jest.mock('../../services/rolePermissionService', () => ({

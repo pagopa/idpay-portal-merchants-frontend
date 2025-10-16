@@ -1,7 +1,6 @@
 import { Box, Card, CardContent } from '@mui/material';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { ReactNode } from 'react';
-
 
 interface InitiativeOverviewCardProps {
   children: ReactNode;
@@ -23,19 +22,21 @@ const InitiativeOverviewCard = ({
       borderRadius: 0,
       width: '100%',
       display: 'grid',
-      gridColumn: 'span 12'
+      gridColumn: 'span 12',
     }}
-    data-testid="card">
+    data-testid="card"
+  >
     <CardContent
       sx={{
         display: 'grid',
         width: '100%',
         gridTemplateColumns: 'repeat(12, 1fr)',
         alignItems: 'baseline',
-        rowGap: 1
+        rowGap: 1,
       }}
-      data-testid="card-content">
-      <Box sx={{ display: 'grid', gridColumn: 'span 12'}} data-testid="box">
+      data-testid="card-content"
+    >
+      <Box sx={{ display: 'grid', gridColumn: 'span 12' }} data-testid="box">
         <TitleBox
           title={title}
           subTitle={subtitle}

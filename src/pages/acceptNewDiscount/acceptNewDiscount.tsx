@@ -1,7 +1,7 @@
 import { Box, Step, StepLabel, Stepper } from '@mui/material';
 import { matchPath } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useState } from 'react';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';

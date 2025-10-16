@@ -4,14 +4,14 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import InitiativeStoreDetail from '../initiativeStoreDetail';
 import { useParams } from 'react-router-dom';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import {
   getMerchantPointOfSalesById,
   getMerchantPointOfSaleTransactionsProcessed,
   updateMerchantPointOfSales,
 } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { isValidEmail } from '../../../helpers';
 import { POS_TYPE } from '../../../utils/constants';
 import { StoreProvider } from '../StoreContext';
@@ -25,14 +25,14 @@ jest.mock('react-i18next', () => ({
   withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
     <Component {...props} />,
 }));
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
 jest.mock('../../../services/merchantService', () => ({
   getMerchantPointOfSalesById: jest.fn(),
   getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
   updateMerchantPointOfSales: jest.fn(),
 }));
 jest.mock('../../../utils/jwt-utils');
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage');
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
 jest.mock('../../../helpers');
 jest.mock('../../components/BreadcrumbsBox', () => () => <div data-testid="breadcrumbs-box" />);
 /*jest.mock(

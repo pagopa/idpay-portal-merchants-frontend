@@ -15,7 +15,7 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib', () => ({
   useLoading: jest.fn(),
 }));
 

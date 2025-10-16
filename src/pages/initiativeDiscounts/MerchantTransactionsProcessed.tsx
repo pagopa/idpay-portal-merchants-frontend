@@ -1,6 +1,6 @@
 import { Box, Table, TableBody, TableCell, TableRow } from '@mui/material';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
-import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
+import useLoading from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
@@ -38,7 +38,7 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
       filterStatus: '',
     },
     onSubmit: (values: any) => {
-      //TODO: check if still needed, delete otherwhise
+      // TODO: check if still needed, delete otherwhise
       if (typeof id === 'string') {
         const fU = values.searchUser.length > 0 ? values.searchUser : undefined;
         const fS = values.filterStatus.length > 0 ? values.filterStatus : undefined;

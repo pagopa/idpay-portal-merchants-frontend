@@ -11,12 +11,12 @@ import {
   Grid,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useTranslation } from 'react-i18next';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
@@ -53,12 +53,15 @@ const InitiativeStoresUpload: React.FC = () => {
   const addError = useErrorDispatcher();
   const [submitAttempt, setSubmitAttempt] = useState(0);
 
-  const onFormChange = useCallback((newSalesPoints: Array<SalePointFormDTO>) => {
-    if (pointsOfSaleLoaded) {
-      setPointsOfSaleLoaded(false);
-    }
-    setSalesPoints(newSalesPoints);
-  }, [pointsOfSaleLoaded]);
+  const onFormChange = useCallback(
+    (newSalesPoints: Array<SalePointFormDTO>) => {
+      if (pointsOfSaleLoaded) {
+        setPointsOfSaleLoaded(false);
+      }
+      setSalesPoints(newSalesPoints);
+    },
+    [pointsOfSaleLoaded]
+  );
 
   const onValidationChange = useCallback((isValid: boolean) => {
     setIsFormValid(isValid);
@@ -66,10 +69,8 @@ const InitiativeStoresUpload: React.FC = () => {
 
   // Calculate duplicate email errors
   useEffect(() => {
-    const emails = salesPoints
-      .map((sp) => sp.contactEmail?.trim().toLowerCase())
-      .filter(Boolean);
-    
+    const emails = salesPoints.map((sp) => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
+
     const duplicates = emails
       .map((email, idx) => (emails.indexOf(email) !== idx ? idx : -1))
       .filter((idx) => idx !== -1);
@@ -85,10 +86,11 @@ const InitiativeStoresUpload: React.FC = () => {
       {}
     );
 
-
     setDuplicateEmailErrors((prev) => {
       const prevKeys = [...Object.keys(prev)].sort((a, b) => a.localeCompare(b)).join(',');
-      const newKeys = [...Object.keys(newDuplicateErrors)].sort((a, b) => a.localeCompare(b)).join(',');
+      const newKeys = [...Object.keys(newDuplicateErrors)]
+        .sort((a, b) => a.localeCompare(b))
+        .join(',');
       return prevKeys === newKeys ? prev : newDuplicateErrors;
     });
   }, [salesPoints]);
@@ -96,11 +98,10 @@ const InitiativeStoresUpload: React.FC = () => {
   const handleConfirm = async () => {
     if (uploadMethod === POS_UPDATE.Manual) {
       // Increment submitAttempt to force validation
-      setSubmitAttempt(prev => prev + 1);
+      setSubmitAttempt((prev) => prev + 1);
 
       // Use timeout to wait for useEffect to run
-      await new Promise(resolve => setTimeout(resolve, 50));
-
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       if (!isFormValid || Object.keys(duplicateEmailErrors).length > 0) {
         return;
@@ -175,7 +176,6 @@ const InitiativeStoresUpload: React.FC = () => {
   const handleBack = () => {
     history.push(generatePath(ROUTES.OVERVIEW, { id }));
   };
-
 
   return (
     <Box sx={{ width: '100%' }}>

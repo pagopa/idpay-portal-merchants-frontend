@@ -11,7 +11,7 @@ import { StatusEnum as TransactionCreatedStatusEnum } from '../../../api/generat
 import { StatusEnum as TransactionProcessedStatusEnum } from '../../../api/generated/merchants/MerchantTransactionProcessedDTO';
 import { FormikProps } from 'formik';
 
-jest.mock('@pagopa/selfcare-common-frontend/locale/locale-utils', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
   t: (key: string) => key,
 }));
 

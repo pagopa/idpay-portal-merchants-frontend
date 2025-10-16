@@ -1,10 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent} from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useParams } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
@@ -14,8 +14,8 @@ jest.mock('react-i18next', () => ({
   withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
     <Component {...props} />,
 }));
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: { read: jest.fn() },
 }));
 jest.mock('../../../services/merchantService', () => ({
@@ -368,8 +368,8 @@ describe('InitiativeStoresUpload', () => {
       message: 'Error with SailPoint',
     });
 
-     render(<InitiativeStoresUpload />);
-     await fillFormForSuccess(screen);
+    render(<InitiativeStoresUpload />);
+    await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
 
@@ -389,7 +389,7 @@ describe('InitiativeStoresUpload', () => {
     const rendered = await render(<InitiativeStoresUpload />);
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  },  10000);
+  }, 10000);
 });
 
 const fillFormForSuccess = async (screen: any) => {
@@ -409,10 +409,9 @@ const fillFormForSuccess = async (screen: any) => {
   await userEvent.type(contactSurnameField, 'TechStore');
 
   const addressField = screen.getAllByRole('combobox')[0];
-  fireEvent.change(addressField, {target: {value: 'Via roma 100' }});
+  fireEvent.change(addressField, { target: { value: 'Via roma 100' } });
 
   const addressAutocompleteItem = await screen.findAllByRole('option');
   fireEvent.click(addressAutocompleteItem[3]);
   // const addressFieldFilled = screen.getAllByRole('combobox')[0];
-
 };

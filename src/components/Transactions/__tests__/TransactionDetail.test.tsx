@@ -1,5 +1,4 @@
-
-import { render, screen,fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import TransactionDetail from '../TransactionDetail';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
@@ -7,14 +6,13 @@ import { StoreProvider } from '../../../pages/initiativeStores/StoreContext';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { downloadInvoiceFile } from '../../../services/merchantService';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 
 jest.mock('../../../services/merchantService', () => ({
   downloadInvoiceFile: jest.fn(),
 }));
 
-
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
   __esModule: true,
   default: jest.fn(() => jest.fn()),
 }));
@@ -185,7 +183,11 @@ describe('TransactionDetail', () => {
               <TransactionDetail
                 itemValues={{ additionalProperties: null }}
                 listItem={[
-                  { id: 'additionalProperties.productName', label: 'Product', type: TYPE_TEXT.Text },
+                  {
+                    id: 'additionalProperties.productName',
+                    label: 'Product',
+                    type: TYPE_TEXT.Text,
+                  },
                 ]}
               />
             </ThemeProvider>
@@ -325,7 +327,7 @@ describe('TransactionDetail', () => {
 
       // Cerca il MISSING_DATA_PLACEHOLDER nel link
       const links = screen.getAllByRole('link');
-      const invoiceLink = links.find(link =>
+      const invoiceLink = links.find((link) =>
         link.textContent?.includes(MISSING_DATA_PLACEHOLDER)
       );
       expect(invoiceLink).toBeInTheDocument();
@@ -391,7 +393,7 @@ describe('TransactionDetail', () => {
 
       // Trova il link con MISSING_DATA_PLACEHOLDER
       const links = screen.getAllByRole('link');
-      const downloadLink = links.find(link =>
+      const downloadLink = links.find((link) =>
         link.textContent?.includes(MISSING_DATA_PLACEHOLDER)
       );
 
@@ -431,7 +433,7 @@ describe('TransactionDetail', () => {
       );
 
       const links = screen.getAllByRole('link');
-      const downloadLink = links.find(link =>
+      const downloadLink = links.find((link) =>
         link.textContent?.includes(MISSING_DATA_PLACEHOLDER)
       );
 
@@ -565,5 +567,4 @@ describe('TransactionDetail', () => {
       });
     });
   });
-
 });
