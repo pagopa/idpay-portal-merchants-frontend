@@ -1,6 +1,7 @@
 import { ProductEntity } from '@pagopa/mui-italia';
 import { PartySwitchItem } from '@pagopa/mui-italia/dist/components/PartySwitch';
 import { Header as CommonHeader } from '@pagopa/selfcare-common-frontend';
+
 import { User } from '@pagopa/selfcare-common-frontend/model/User';
 import { trackEvent } from '@pagopa/selfcare-common-frontend/services/analyticsService';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/config/env';
@@ -56,6 +57,7 @@ const Header = ({ withSecondHeader, onExit, loggedUser }: /* , parties */ Props)
   return (
     <CommonHeader
       onExit={onExit}
+      onDocumentationClick={() => window.open(ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK, '_blank')}
       withSecondHeader={withSecondHeader}
       selectedPartyId={selectedParty?.partyId}
       selectedProductId={welfareProduct.id}
