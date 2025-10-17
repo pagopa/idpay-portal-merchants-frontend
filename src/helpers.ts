@@ -1,6 +1,6 @@
 /* eslint-disable functional/no-let */
 /* eslint-disable functional/immutable-data */
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
 import { ENV } from './utils/env';
 

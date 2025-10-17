@@ -1,6 +1,6 @@
 import { Box, Button, Typography } from '@mui/material';
 import {useTranslation} from "react-i18next";
-import {useUnloadEventOnExit} from "@pagopa/selfcare-common-frontend/hooks/useUnloadEventInterceptor";
+import {useUnloadEventOnExit} from "@pagopa/selfcare-common-frontend/lib/hooks/useUnloadEventInterceptor";
 import {customExitAction} from "../../helpers";
 import {UPCOMING_INITIATIVE_DAY} from "../../utils/constants";
 import Layout from "../../components/Layout/Layout";

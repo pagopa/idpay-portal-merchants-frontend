@@ -1,24 +1,19 @@
 import { Box } from '@mui/material';
-import { Footer } from '@pagopa/selfcare-common-frontend';
-import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/hooks/useUnloadEventInterceptor';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { matchPath } from 'react-router';
 import Header from '../Header/Header';
 import ROUTES from '../../routes';
-import { customExitAction } from '../../helpers';
+import { CustomFooter } from '../Footer/CustomFooter';
 
 type Props = {
   children?: React.ReactNode;
 };
 
 const Layout = ({ children }: Props) => {
-  const onExit = useUnloadEventOnExit();
   const location = useLocation();
-  const [, setShowAssistanceInfo] = useState(true);
 
-  useEffect(() => {
-    setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
-  }, [location.pathname]);
+  const match = matchPath({ path: ROUTES.HOME, end: true }, location.pathname);
 
   return (
     <Box
@@ -33,6 +28,22 @@ const Layout = ({ children }: Props) => {
       <Box gridArea="header">
         <Header />
       </Box>
+      {match !== null ? (
+        <Box gridArea="body" display="grid" gridTemplateColumns="minmax(300px, 2fr) 10fr">
+          <Box
+            gridColumn="auto"
+            sx={{ backgroundColor: '#F5F5F5' }}
+            display="grid"
+            justifyContent="center"
+            pb={16}
+            pt={2}
+            px={2}
+            gridTemplateColumns="1fr"
+          >
+            {children}
+          </Box>
+        </Box>
+      ) : (
         <Box
           gridArea="body"
           display="grid"
@@ -53,8 +64,9 @@ const Layout = ({ children }: Props) => {
             {children}
           </Box>
         </Box>
+      )}
       <Box gridArea="footer">
-        <Footer onExit={() => onExit(customExitAction)} loggedUser={true} />
+        <CustomFooter />
       </Box>
     </Box>
   );
