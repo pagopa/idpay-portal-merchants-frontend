@@ -1,83 +1,54 @@
-/* istanbul ignore file */
-// import { fetchParties, fetchPartyDetails } from '../partyService';
-// import { institutionResource2Party, Party } from '../../model/Party';
-// import { PortalApi } from '../../api/PortalApiClient';
-// import { mockedInstitutionResources } from '../../api/__mocks__/PortalApiClient';
+import { Party } from '../../model/Party';
+import { fetchParties, fetchPartyDetails } from '../partyService';
 
-// jest.mock('../../api/PortalApiClient');
-
-// let portalApiGetInstitutionSpy;
-// let portalApiGetInstitutionsSpy;
-
-import { fetchPartyDetails } from '../../services/partyService';
-import { verifyFetchPartyDetailsMockExecution } from '../../services/__mocks__/partyService';
-
-beforeEach(() => {
-  // portalApiGetInstitutionSpy = jest.spyOn(PortalApi, 'getInstitution');
-  // portalApiGetInstitutionsSpy = jest.spyOn(PortalApi, 'getInstitutions');
-});
+describe('partyService', () => {
+  describe('fetchParties', () => {
+    test('should return a promise that resolves to an empty array', async () => {
+      const parties = await fetchParties();
+      expect(parties).toEqual([]);
+    });
+  });
 
   describe('fetchPartyDetails', () => {
-    it('should fetch party details successfully', async () => {
-      const partyId = '2b48bf96-fd74-477e-a70a-286b410f020a';
-      const party = await fetchPartyDetails(partyId);
-    
-      if (party !== null) {
-        verifyFetchPartyDetailsMockExecution(party);
-      } else {
-        expect(party).toBeNull();
-      }
+    const mockParties: Array<Party> = [
+      {
+        partyId: '1',
+        externalId: 'ext1',
+        originId: 'orig1',
+        origin: 'TEST',
+        description: 'Party One',
+        status: 'ACTIVE',
+        digitalAddress: 'one@test.com',
+        userRole: 'ADMIN',
+      },
+      {
+        partyId: '2',
+        externalId: 'ext2',
+        originId: 'orig2',
+        origin: 'TEST',
+        description: 'Party Two',
+        status: 'ACTIVE',
+        digitalAddress: 'two@test.com',
+        userRole: 'ADMIN',
+      },
+    ];
+
+    test('should return a party from the provided list if found', async () => {
+      const partyIdToFind = '1';
+      const result = await fetchPartyDetails(partyIdToFind, mockParties);
+      expect(result).toEqual(mockParties[0]);
     });
 
-    it('should handle party not found', async () => {
-      const partyId = 'nonexistentpartyid';
-      const party = await fetchPartyDetails(partyId);
-      expect(party).toBeNull();
+    test('should return null if the party is not found in the provided list', async () => {
+      const partyIdToFind = '3';
+      const result = await fetchPartyDetails(partyIdToFind, mockParties);
+      expect(result).toBeNull();
     });
-  });
 
-test('Test fetchParties', async () => {
-  // const parties = await fetchParties();
-  // expect(parties).toMatchObject(mockedInstitutionResources.map(institutionResource2Party));
-  // parties.forEach((p) =>
-  // expect(p.urlLogo).toBe(`http://checkout.selfcare/institutions/${p.partyId}/logo.png`)
-  // );
-  // expect(portalApiGetInstitutionsSpy).toBeCalledTimes(1);
-});
-
-describe('Test fetchPartyDetails', () => {
-  // const expectedPartyId: string = '1';
-
-  // const checkSelectedParty = (party: Party | null) => {
-  // expect(party).not.toBeNull();
-  // expect(party).toMatchObject(institutionResource2Party(mockedInstitutionResources[0]));
-
-  // expect(party!.urlLogo).toBe(
-  // `http://checkout.selfcare/institutions/${expectedPartyId}/logo.png`;
-  // );
-  // };
-
-  const checkPortalApiInvocation = (expectedCallsNumber: number) => {
-    // expect(PortalApi.getInstitution).toBeCalledTimes(expectedCallsNumber);
-    if (expectedCallsNumber > 0) {
-      // expect(PortalApi.getInstitution).toBeCalledWith(expectedPartyId);
-    }
-  };
-
-  test('Test no parties as cache', async () => {
-    // const party = await fetchPartyDetails(expectedPartyId);
-    // checkSelectedParty(party);
-    // checkPortalApiInvocation(1);
-  });
-
-  test('Test parties as cache', async () => {
-    // const parties = mockedInstitutionResources.map(institutionResource2Party);
-    // const party = await fetchPartyDetails(expectedPartyId, parties);
-    // checkSelectedParty(party);
-    // checkPortalApiInvocation(0);
-    // const partialParties = parties.filter((p) => p.partyId !== expectedPartyId);
-    // const party2 = await fetchPartyDetails(expectedPartyId, partialParties);
-    // expect(party2).toStrictEqual(party);
-    // checkPortalApiInvocation(1);
+    test('should return null if no parties list is provided', async () => {
+      const partyIdToFind = '1';
+      const result = await fetchPartyDetails(partyIdToFind); // No list passed
+      expect(result).toBeNull();
+    });
   });
 });

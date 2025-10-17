@@ -1,4 +1,17 @@
 {
+  "common": {
+    "sessionModal": {
+      "closeButton": "Esci"
+    },
+    "footer": {
+      "postLoginLinks": {
+        "privacyPolicy": "Informativa Privacy",
+        "protectionofpersonaldata": "Diritto alla protezione dei dati personali",
+        "termsandconditions": "Termini e condizioni d'uso",
+        "accessibility": "Accessibilità"
+      }
+    }
+  },
   "commons": {
     "backBtn": "Indietro",
     "cancelBtn": "Torna indietro",
@@ -10,6 +23,11 @@
     "cancel": "Annulla",
     "copyCodeBtn": "Copia codice",
     "copyLinkBtn": "Copia link",
+    "footer": {
+      "postLoginLinks": {
+        "accessibility": "Accessibilità"
+      }
+    },
     "discountStatusEnum": {
       "authorized": "Autorizzato",
       "authorizationRequested": "Autorizzazione in corso",
@@ -152,7 +170,7 @@
       "subtitle": "Consulta i tuoi punti vendita",
       "addStore": "Inserisci i punti vendita",
       "addStoreList": "Aggiungi punti vendita",
-      "uploadStores": "Censisci i tuoi punti vendita",
+      "uploadStores": "Inserisci l’elenco dei tuoi punti vendita",
       "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online.\nLe credenziali per accedere al portale operativo vengono generate automaticamente e inviate via email al referente indicato.",
       "manualLink": "Dubbi? Vai al manuale",
       "uploadCSV": "Carica CSV",
@@ -180,6 +198,7 @@
       "type": "Tipologia",
       "email": "E-mail",
       "noStores": "Non ci sono punti vendita,",
+      "noStoresInitiative": "Non ci sono punti vendita per questa iniziativa",
       "addStoreNoResults": "aggiungili per iniziare",
       "id": "Id",
       "phone": "Telefono",
@@ -217,7 +236,6 @@
       "signName": "Nome insegna",
       "website": "Indirizzo web",
       "address": "Indirizzo"
-
     },
     "newDiscount": {
       "codeCopied": "Codice copiato",

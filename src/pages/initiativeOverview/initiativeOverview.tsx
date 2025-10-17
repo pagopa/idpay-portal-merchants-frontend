@@ -108,7 +108,7 @@ const InitiativeOverview = () => {
                 </Grid>
                 <Grid item xs={8}>
                   <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {onboardingDate ?? MISSING_DATA_PLACEHOLDER}
+                    {onboardingDate?.trim() === '' || !onboardingDate ? MISSING_DATA_PLACEHOLDER : onboardingDate}
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -153,7 +153,7 @@ const InitiativeOverview = () => {
                 </Grid>
                 <Grid item xs={8}>
                   <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {ibanHolder ?? MISSING_DATA_PLACEHOLDER}
+                    {ibanHolder?.trim() === '' || !ibanHolder ? MISSING_DATA_PLACEHOLDER : ibanHolder}
                   </Typography>
                 </Grid>
                 

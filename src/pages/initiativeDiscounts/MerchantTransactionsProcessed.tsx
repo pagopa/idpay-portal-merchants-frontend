@@ -38,6 +38,7 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
       filterStatus: '',
     },
     onSubmit: (values: any) => {
+      //TODO: check if still needed, delete otherwhise
       if (typeof id === 'string') {
         const fU = values.searchUser.length > 0 ? values.searchUser : undefined;
         const fS = values.filterStatus.length > 0 ? values.filterStatus : undefined;

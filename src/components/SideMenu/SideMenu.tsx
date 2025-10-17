@@ -44,7 +44,7 @@ export default function SideMenu() {
   });
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS,ROUTES.OVERVIEW,ROUTES.STORES],
+    path: [ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.STORES_DETAIL],
     exact: true,
     strict: false,
   });
@@ -67,6 +67,10 @@ export default function SideMenu() {
   const handleChange = (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false);
   };
+
+  const checkIsSelected = (item: any) => pathname.startsWith(
+    `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
+  );
 
   return (
     <Box display="grid" mt={1}>
@@ -111,7 +115,9 @@ export default function SideMenu() {
                         initiativeName: item.initiativeName,
                       })
                     );
-                    history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`);
+                    history.replace(
+                      `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
+                    );
                     setExpanded(`panel-${item.initiativeId}`);
                   });
                 }}
@@ -133,9 +139,14 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`);
-                      })}
-                    isSelected={pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`}
+                        history.replace(
+                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
+                        );
+                      })
+                    }
+                    isSelected={pathname.startsWith(
+                      `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
+                    )}
                     icon={DashboardIcon}
                     level={2}
                     data-testid="initiativeOverviewTitle-click-test"
@@ -153,10 +164,15 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        console.log(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
-                        history.replace(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
-                      })}
-                    isSelected={pathname === `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`}
+                        console.log(
+                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
+                        );
+                        history.replace(
+                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
+                        );
+                      })
+                    }
+                    isSelected={checkIsSelected(item)}
                     icon={StoreIcon}
                     level={2}
                     data-testid="initiativeStoresTitle-click-test"

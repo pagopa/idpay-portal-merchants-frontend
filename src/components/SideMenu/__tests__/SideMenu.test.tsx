@@ -1,11 +1,10 @@
-
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import SideMenu from '../SideMenu';
 import { setInitiativesList } from '../../../redux/slices/initiativesSlice';
 import { mockedInitiativesList } from '../../../api/__mocks__/MerchantsApiClient';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ROUTES from '../../../routes';
+import ROUTES, { BASE_ROUTE } from '../../../routes';
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -35,25 +34,25 @@ describe('Test suite for SideMenu component', () => {
     await waitFor(() => expect(link.ariaExpanded).toBeFalsy());
   });
 
-  // test('User clicks a link with an id parameter', async () => {
-  //   const { store, history } = renderWithContext(<SideMenu />);
-  //   store.dispatch(setInitiativesList(mockedInitiativesList));
-  //   const link = await screen.findAllByText('pages.initiativeDiscounts.title');
-  //   const user = userEvent.setup();
-  //   const oldLocationPathname = history.location.pathname;
-  //   await user.click(link[0]);
-  //   await waitFor(() => expect(oldLocationPathname !== history.location.pathname).toBeTruthy());
-  // });
+  test.skip('User clicks a link with an id parameter', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+    const link = await screen.findAllByText('pages.initiativeDiscounts.title');
+    const user = userEvent.setup();
+    const oldLocationPathname = history.location.pathname;
+    await user.click(link[0]);
+    await waitFor(() => expect(oldLocationPathname !== history.location.pathname).toBeTruthy());
+  });
 
-  // test('Appropriate item expanded based on parameter id value', () => {
-  //   const mockedLocation = {
-  //     assign: jest.fn(),
-  //     pathname: `${BASE_ROUTE}/sconti-iniziativa/1234`,
-  //     origin: 'MOCKED_ORIGIN',
-  //     search: '',
-  //     hash: '',
-  //   };
-  //   Object.defineProperty(window, 'location', { value: mockedLocation });
-  //   renderWithContext(<SideMenu />);
-  // });
+  test('Appropriate item expanded based on parameter id value', () => {
+    const mockedLocation = {
+      assign: jest.fn(),
+      pathname: `${BASE_ROUTE}/sconti-iniziativa/1234`,
+      origin: 'MOCKED_ORIGIN',
+      search: '',
+      hash: '',
+    };
+    Object.defineProperty(window, 'location', { value: mockedLocation });
+    renderWithContext(<SideMenu />);
+  });
 });

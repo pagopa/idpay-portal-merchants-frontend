@@ -1,22 +1,72 @@
-import { mockedBody } from '../__mocks__/emailNotificationService';
-// import { getInstitutionProductUserInfo, sendEmail } from '../__mocks__/emailNotificationService';
+import { EmailNotificationApi } from '../../api/emailNotificationApiClient';
 import { getInstitutionProductUserInfo, sendEmail } from '../emailNotificationService';
-// import { EmailNotificationApiMocked } from '../../api/__mocks__/emeailNotificationApiClient';
-import { EmailNotificationApiMocked } from '../../api/__mocks__/emailNotificationApiClient';
+import { EmailMessageDTO } from '../../api/generated/email-notification/EmailMessageDTO';
+import { UserInstitutionInfoDTO } from '../../api/generated/email-notification/UserInstitutionInfoDTO';
 
-jest.mock('../../services/emailNotificationService');
+jest.mock('../../api/emailNotificationApiClient', () => ({
+  EmailNotificationApi: {
+    getInstitutionProductUserInfo: jest.fn(),
+    sendEmail: jest.fn(),
+  },
+}));
 
-beforeEach(() => {
-  jest.spyOn(EmailNotificationApiMocked, 'getInstitutionProductUserInfo');
-  jest.spyOn(EmailNotificationApiMocked, 'sendEmail');
-});
+const mockedEmailNotificationApi = EmailNotificationApi as jest.Mocked<typeof EmailNotificationApi>;
 
-test('test get Institution Product User Info', async () => {
-  await getInstitutionProductUserInfo();
-  expect(EmailNotificationApiMocked.getInstitutionProductUserInfo).toHaveBeenCalled();
-});
+describe('emailNotificationService', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-test('test send email', async () => {
-  await sendEmail(mockedBody);
-  expect(EmailNotificationApiMocked.sendEmail).toHaveBeenCalledWith(mockedBody);
+  describe('getInstitutionProductUserInfo', () => {
+    test('should call the API and return user info on success', async () => {
+      const mockResponse: UserInstitutionInfoDTO = {
+        name: 'Mario',
+        surname: 'Rossi',
+        email: 'mario.rossi@example.com',
+      };
+      mockedEmailNotificationApi.getInstitutionProductUserInfo.mockResolvedValue(mockResponse);
+
+      const result = await getInstitutionProductUserInfo();
+
+      expect(mockedEmailNotificationApi.getInstitutionProductUserInfo).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockResponse);
+    });
+
+    test('should throw an error if the API call fails', async () => {
+      const mockError = new Error('API Error');
+      mockedEmailNotificationApi.getInstitutionProductUserInfo.mockRejectedValue(mockError);
+
+      await expect(getInstitutionProductUserInfo()).rejects.toThrow(mockError);
+    });
+  });
+
+  describe('sendEmail', () => {
+    test('should call the API with the correct data', async () => {
+      const emailData: EmailMessageDTO = {
+        subject: 'Test Subject',
+        content: '<p>Test Content</p>',
+        senderEmail: 'noreply@example.com',
+        recipientEmail: 'test@example.com',
+      };
+      mockedEmailNotificationApi.sendEmail.mockResolvedValue(undefined);
+
+      await sendEmail(emailData);
+
+      expect(mockedEmailNotificationApi.sendEmail).toHaveBeenCalledTimes(1);
+      expect(mockedEmailNotificationApi.sendEmail).toHaveBeenCalledWith(emailData);
+    });
+
+    test('should throw an error if the API call fails', async () => {
+      const emailData: EmailMessageDTO = {
+        subject: 'Test Subject',
+        content: '<p>Test Content</p>',
+        senderEmail: 'noreply@example.com',
+        recipientEmail: 'test@example.com',
+      };
+      const mockError = new Error('API Error');
+      mockedEmailNotificationApi.sendEmail.mockRejectedValue(mockError);
+
+      await expect(sendEmail(emailData)).rejects.toThrow(mockError);
+    });
+  });
 });

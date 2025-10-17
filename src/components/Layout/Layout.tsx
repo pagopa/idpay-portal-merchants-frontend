@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import { Footer } from '@pagopa/selfcare-common-frontend';
 import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/hooks/useUnloadEventInterceptor';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -11,6 +10,7 @@ import SideMenu from '../SideMenu/SideMenu';
 import ROUTES from '../../routes';
 import routes from '../../routes';
 import { useInitiativesList } from '../../hooks/useInitiativesList';
+import Footer from '../Footer/Footer';
 
 type Props = {
   children?: React.ReactNode;

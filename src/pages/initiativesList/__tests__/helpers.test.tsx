@@ -25,6 +25,12 @@ describe('Test suite for helpers.ts of InitiativesList', () => {
     b: 0,
   };
 
+  const arr2: any = ['1', '1'];
+  const comp2: any = {
+    a: 0,
+    b: 0,
+  };
+
   test('descendingComparator', () => {
     expect(descendingComparator(mockedCompA, mockedCompA, orderByInitiativeName)).toBe(0);
     expect(descendingComparator(mockedCompA, mockedCompC, orderByInitiativeName)).toBe(1);
@@ -36,5 +42,6 @@ describe('Test suite for helpers.ts of InitiativesList', () => {
 
   test('stableSort', () => {
     expect(stableSort(arr, getComparator(comp.a, comp.b))).toEqual(['1', '2']);
+    expect(stableSort(arr2, getComparator('desc', comp2.b))).toEqual(['1', '1']);
   });
 });

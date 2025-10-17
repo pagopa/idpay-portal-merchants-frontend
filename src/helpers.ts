@@ -116,18 +116,19 @@ export const isValidEmail = (email: string) => {
   return emailRegex.test(email);
 };
 
-export const isValidUrl = (url: string) => {
-  if (url.endsWith('.it') || url.endsWith('.com')|| url.endsWith('.info')|| url.endsWith('.io')|| url.endsWith('.net')|| url.endsWith('.eu')) {
-    try {
-      new URL(url); // Tenta di creare un oggetto URL
-      return true; // Se non lancia errori, l'URL è valido
-    } catch (e) {
-      return false; // Se si verifica un errore, l'URL non è valido
+export const isValidUrl = (urlToCheck: string) => {
+  const allowedDomain = ['it', 'com', 'info', 'io', 'net', 'eu', 'google'];
+  try {
+    const url = new URL(urlToCheck);
+    const domain = url.hostname.split('.').pop();
+    if (domain && !allowedDomain.includes(domain.toLowerCase())) {
+      return false;
     }
-  } else {
+  } catch (e) {
     return false;
   }
-
+  return true;
 };
 
-export const generateUniqueId = () => Date.now().toString() + Math.random().toString(36).substring(2, 9);
+export const generateUniqueId = () =>
+  Date.now().toString() + Math.random().toString(36).substring(2, 9);

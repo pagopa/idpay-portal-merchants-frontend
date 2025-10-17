@@ -27,7 +27,7 @@ export const useOneTrustNotice = (
       });
 
       const sidebar = document.getElementsByClassName('otnotice-menu');
-      sidebar[0].setAttribute('style', 'max-height: 65%');
+      sidebar[0]?.setAttribute('style', 'max-height: 65%');
     }, 1000);
   }, [contentLoaded]);
 };
