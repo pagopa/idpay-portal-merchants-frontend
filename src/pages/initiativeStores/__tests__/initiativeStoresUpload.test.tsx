@@ -257,7 +257,7 @@ describe('InitiativeStoresUpload', () => {
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: false,
+      search: jest.fn(),
     });
   });
 
@@ -321,7 +321,7 @@ describe('InitiativeStoresUpload', () => {
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: false,
+      search: jest.fn(),
     });
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue(undefined);
@@ -337,7 +337,7 @@ describe('InitiativeStoresUpload', () => {
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: false,
+      search: jest.fn(),
     });
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
@@ -358,7 +358,7 @@ describe('InitiativeStoresUpload', () => {
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: false,
+      search: jest.fn(),
     });
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
@@ -379,7 +379,7 @@ describe('InitiativeStoresUpload', () => {
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: false,
+      search: jest.fn(),
     });
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
