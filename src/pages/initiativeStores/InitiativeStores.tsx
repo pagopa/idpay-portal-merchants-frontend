@@ -283,6 +283,7 @@ const InitiativeStores: React.FC = () => {
         {
           ...formik.values,
           sort: sortKey,
+          page: storesPagination.pageNo,
         },
         true
       );
