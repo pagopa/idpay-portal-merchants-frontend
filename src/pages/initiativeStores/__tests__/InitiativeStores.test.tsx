@@ -268,7 +268,7 @@ describe('<InitiativeStores />', () => {
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
         'merchant-id-01',
-        expect.objectContaining({ page: 0, sort: 'asc', city: '' })
+        expect.objectContaining({address: "", city: "", contactName: "", page: 2, size: 10, sort: "asc", type: undefined})
       );
     });
   });

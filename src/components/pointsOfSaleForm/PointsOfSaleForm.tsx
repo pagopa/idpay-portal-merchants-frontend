@@ -615,6 +615,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                           onChange={(addressObj) => {
                             handleChangeAddress(index, addressObj);
                           }}
+                          onTextChange={async (value) => {
+                            if(value === ""){
+                              await search("");                          
+                            }
+                          }}
                           inputError={!!getFieldError(index, 'address')}
                           errorText={getFieldError(index, 'address')}
                         />
