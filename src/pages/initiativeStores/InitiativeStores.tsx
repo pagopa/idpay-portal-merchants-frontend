@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import {
   Box,
@@ -61,7 +61,10 @@ const InitiativeStores: React.FC = () => {
   });
   const [storesLoading, setStoresLoading] = useState(false);
   const [currentSort, setCurrentSort] = useState<string>('asc');
+  const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState(false);
+
+  const isGoingToDetail = useRef(false);
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
@@ -83,15 +86,35 @@ const InitiativeStores: React.FC = () => {
   }, [location, history]);
 
   useEffect(() => {
-    const storesPagination = sessionStorage.getItem('storesPagination');
-    if(storesPagination && JSON.parse(storesPagination)?.pageNo && JSON.parse(storesPagination)?.initiativeId === id ) {
-      setStoresPagination(JSON.parse(storesPagination));
-      void fetchStores({...initialValues, page: JSON.parse(storesPagination)?.pageNo ? JSON.parse(storesPagination).pageNo : 0});
+    const storedPagination = sessionStorage.getItem('storesPagination');
+    if(storedPagination && JSON.parse(storedPagination)?.pageNo !== undefined && JSON.parse(storedPagination)?.initiativeId === id ) {
+      const parsed = JSON.parse(storedPagination);
+      setStoresPagination(parsed);
+      
+      if (parsed.sort) {
+        setCurrentSort(parsed.sort);
+        
+        // Convert sort string to GridSortModel
+        const sortParts = parsed.sort.split(',');
+        if (sortParts.length === 2) {
+          const [field, order] = sortParts;
+          setSortModel([{ field, sort: order as 'asc' | 'desc' }]);
+        }
+      }
+      
+      void fetchStores({...initialValues, page: parsed.pageNo, sort: parsed.sort || 'asc'});
     } else {
       void fetchStores({...initialValues});
     }
+
+    return () => {
+      if (!isGoingToDetail.current) {
+        sessionStorage.removeItem('storesPagination');
+      }
+    };
     
   }, []);
+
 
   const addError = useErrorDispatcher();
   const infoStyles = {
@@ -265,6 +288,8 @@ const InitiativeStores: React.FC = () => {
   };
 
   const goToStoreDetail = (store: PointOfSaleDTO) => {
+     // eslint-disable-next-line functional/immutable-data
+    isGoingToDetail.current = true;
     history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
   };
 
@@ -279,6 +304,13 @@ const InitiativeStores: React.FC = () => {
       const { field, sort } = newSortModel[0];
       const sortKey = field === 'referent' ? `contactName,${sort}` : `${field},${sort}`;
       setCurrentSort(sortKey);
+      setSortModel(newSortModel);
+      
+      // Update sessionStorage with new sort
+      const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId: id };
+      setStoresPagination(updatedPagination);
+      sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
+      
       await fetchStores(
         {
           ...formik.values,
@@ -290,11 +322,12 @@ const InitiativeStores: React.FC = () => {
     } else {
       console.log('Ordinamento rimosso.');
       setCurrentSort('asc');
+      setSortModel([]);
     }
   };
 
   const handlePaginationPageChange = (page: number) => {
-    const updatedPagination = { ...storesPagination, pageNo: page, initiativeId: id };
+    const updatedPagination = { ...storesPagination, pageNo: page, initiativeId: id, sort: currentSort };
     setStoresPagination(updatedPagination);
     sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
     void fetchStores({
@@ -416,6 +449,7 @@ const InitiativeStores: React.FC = () => {
                   onSortModelChange={handleSortModelChange}
                   paginationModel={storesPagination}
                   onPaginationPageChange={handlePaginationPageChange}
+                  sortModel={sortModel}
                 />
               </Box>
             </>
