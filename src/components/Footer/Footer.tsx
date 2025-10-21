@@ -30,6 +30,8 @@ export default function Footer({
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<LangCode>();
 
+  const onClickNavigate = (url?: string) => window.open(url);
+
   const preLoginLinks: PreLoginFooterLinksType = {
     // First column
     aboutUs: {
@@ -40,21 +42,21 @@ export default function Footer({
           href: CONFIG.FOOTER.LINK.ABOUTUS,
           ariaLabel: 'Vai al link: Chi siamo',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.ABOUTUS),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.ABOUTUS),
         },
         {
           label: t('common.footer.preLoginLinks.aboutUs.links.media'),
           href: CONFIG.FOOTER.LINK.MEDIA,
           ariaLabel: 'Vai al link: Media',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.MEDIA),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.MEDIA),
         },
         {
           label: t('common.footer.preLoginLinks.aboutUs.links.workwithud'),
           href: CONFIG.FOOTER.LINK.WORKWITHUS,
           ariaLabel: 'Vai al link: Lavora con noi',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.WORKWITHUS),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.WORKWITHUS),
         },
       ],
     },
@@ -67,28 +69,28 @@ export default function Footer({
           href: CONFIG.FOOTER.LINK.PRIVACYPOLICY,
           ariaLabel: 'Vai al link: Privacy Policy',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.PRIVACYPOLICY),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.PRIVACYPOLICY),
         },
         {
           label: t('common.footer.preLoginLinks.resources.links.certifications'),
           href: CONFIG.FOOTER.LINK.CERTIFICATIONS,
           ariaLabel: 'Vai al link: Certificazioni',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.CERTIFICATIONS),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.CERTIFICATIONS),
         },
         {
           label: t('common.footer.preLoginLinks.resources.links.informationsecurity'),
           href: CONFIG.FOOTER.LINK.INFORMATIONSECURITY,
           ariaLabel: 'Vai al link: Sicurezza delle informazioni',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.INFORMATIONSECURITY),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.INFORMATIONSECURITY),
         },
         {
           label: t('common.footer.preLoginLinks.resources.links.protectionofpersonaldata'),
           href: CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA,
           ariaLabel: 'Vai al link: Diritto alla protezione dei dati personali',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA),
         },
         {
           label: t('common.footer.preLoginLinks.resources.links.cookies'),
@@ -101,28 +103,28 @@ export default function Footer({
           href: CONFIG.FOOTER.LINK.TERMSANDCONDITIONS,
           ariaLabel: 'Vai al link: Termini e Condizioni',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.TERMSANDCONDITIONS),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.TERMSANDCONDITIONS),
         },
         {
           label: t('common.footer.preLoginLinks.resources.links.transparentcompany'),
           href: CONFIG.FOOTER.LINK.TRANSPARENTCOMPANY,
           ariaLabel: 'Vai al link: Società trasparente',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.TRANSPARENTCOMPANY),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.TRANSPARENTCOMPANY),
         },
         {
           label: t('common.footer.preLoginLinks.resources.links.disclosurePolicy'),
           href: CONFIG.FOOTER.LINK.DISCLOSUREPOLICY,
           ariaLabel: 'Vai al link: Responsible Disclosure Policy',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.DISCLOSUREPOLICY),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.DISCLOSUREPOLICY),
         },
         {
           label: t('common.footer.preLoginLinks.resources.links.model231'),
           href: CONFIG.FOOTER.LINK.MODEL231,
           ariaLabel: 'Vai al link: Modello 231',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.MODEL231),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.MODEL231),
         },
       ],
     },
@@ -161,7 +163,7 @@ export default function Footer({
           href: CONFIG.FOOTER.LINK.ACCESSIBILITY,
           ariaLabel: 'Vai al link: Accessibilità',
           linkType: 'internal',
-          onClick: () => window.open(CONFIG.FOOTER.LINK.ACCESSIBILITY),
+          onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.ACCESSIBILITY),
         },
       ],
     },
@@ -172,28 +174,28 @@ export default function Footer({
       href: ENV.CONFIG.FOOTER.LINK.PRIVACYPOLICY,
       ariaLabel: 'Vai al link: Privacy policy',
       linkType: 'internal',
-      onClick: () => window.open(ENV.CONFIG.FOOTER.LINK.PRIVACYPOLICY),
+      onClick: () => onClickNavigate(ENV.CONFIG.FOOTER.LINK.PRIVACYPOLICY),
     },
     {
       label: t('common.footer.postLoginLinks.protectionofpersonaldata'),
       href: ENV.CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA,
       ariaLabel: 'Vai al link: Diritto alla protezione dei dati personali',
       linkType: 'internal',
-      onClick: () => window.open(ENV.CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA),
+      onClick: () => onClickNavigate(ENV.CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA),
     },
     {
       label: t('common.footer.postLoginLinks.termsandconditions'),
       href: ENV.CONFIG.FOOTER.LINK.TERMSANDCONDITIONS,
       ariaLabel: 'Vai al link: Termini e condizioni',
       linkType: 'internal',
-      onClick: () => window.open(ENV.CONFIG.FOOTER.LINK.TERMSANDCONDITIONS),
+      onClick: () => onClickNavigate(ENV.CONFIG.FOOTER.LINK.TERMSANDCONDITIONS),
     },
     {
       label: t('common.footer.postLoginLinks.accessibility'),
       href: ENV.CONFIG.FOOTER.LINK.ACCESSIBILITY,
       ariaLabel: 'Vai al link: Accessibilità',
       linkType: 'internal',
-      onClick: () => window.open(ENV.CONFIG.FOOTER.LINK.ACCESSIBILITY),
+      onClick: () => onClickNavigate(ENV.CONFIG.FOOTER.LINK.ACCESSIBILITY),
     },
   ];
   const companyLegalInfo = (
