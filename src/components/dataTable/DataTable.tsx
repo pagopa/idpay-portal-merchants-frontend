@@ -1,13 +1,12 @@
-import { DataGrid } from '@mui/x-data-grid';
-import { useState, useCallback } from 'react';
-import { GridSortModel } from '@mui/x-data-grid';
+import { DataGrid, GridSortModel } from '@mui/x-data-grid';
+import { useCallback } from 'react';
 
 export interface DataTableProps {
   rows: any;
   columns: any;
   pageSize: number;
   rowsPerPage: number;
-  onSortModelChange?: (model: any) => void;
+  onSortModelChange?: (model: GridSortModel) => void;
   sortModel?: GridSortModel;
   onPaginationPageChange?: (page: number) => void;
   paginationModel?: any;
@@ -20,32 +19,20 @@ const DataTable = ({
   onSortModelChange,
   onPaginationPageChange,
   paginationModel,
+  sortModel = [],
 }: DataTableProps) => {
-  const [sortModelState, setSortModelState] = useState<any>([]);
 
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
   };
 
   const handleSortModelChange = useCallback(
-    (model: any) => {
+    (model: GridSortModel) => {
       if (model.length > 0) {
-        setSortModelState(model);
         onSortModelChange?.(model);
-      } else {
-        setSortModelState((prevState: any) => {
-          const newSortModel =
-            prevState?.[0].sort === 'asc'
-              ? [{ field: prevState?.[0].field, sort: 'desc' }]
-              : [{ field: prevState?.[0].field, sort: 'asc' }];
-
-          onSortModelChange?.(newSortModel);
-
-          return newSortModel;
-        });
       }
     },
-    [onSortModelChange]
+    [sortModel]
   );
 
   return (
@@ -60,7 +47,7 @@ const DataTable = ({
           sortingMode="server"
           paginationMode="server"
           onSortModelChange={handleSortModelChange}
-          sortModel={sortModelState}
+          sortModel={sortModel}
           onPageChange={handlePageChange}
           page={paginationModel?.pageNo}
           pageSize={paginationModel?.pageSize}
