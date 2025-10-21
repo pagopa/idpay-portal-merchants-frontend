@@ -185,6 +185,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           fieldErrors = { ...fieldErrors, channelGeolink: 'Deve essere un sito valido' };
           isValid = false;
         }
+        if (sp?.channelEmail && !isValidEmail(sp?.channelEmail)) {
+          fieldErrors = { ...fieldErrors, channelEmail: 'Deve essere una mail valida' };
+          isValid = false;
+        }
       }
 
       return Object.keys(fieldErrors).length > 0
