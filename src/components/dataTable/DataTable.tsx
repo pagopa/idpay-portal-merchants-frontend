@@ -1,5 +1,5 @@
 import { DataGrid, GridSortModel } from '@mui/x-data-grid';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export interface DataTableProps {
   rows: any;
@@ -21,6 +21,7 @@ const DataTable = ({
   paginationModel,
   sortModel = [],
 }: DataTableProps) => {
+  const [sortModelState, setSortModelState] = useState<any>([]);
 
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
@@ -29,6 +30,7 @@ const DataTable = ({
   const handleSortModelChange = useCallback(
     (model: GridSortModel) => {
       if (model.length > 0) {
+        setSortModelState(model);
         onSortModelChange?.(model);
       }
     },
@@ -47,7 +49,7 @@ const DataTable = ({
           sortingMode="server"
           paginationMode="server"
           onSortModelChange={handleSortModelChange}
-          sortModel={sortModel}
+          sortModel={sortModelState}
           onPageChange={handlePageChange}
           page={paginationModel?.pageNo}
           pageSize={paginationModel?.pageSize}
