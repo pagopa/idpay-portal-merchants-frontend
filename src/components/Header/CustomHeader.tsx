@@ -1,4 +1,4 @@
-import { HeaderAccount, HeaderProduct, ProductEntity, RootLinkType } from '@pagopa/mui-italia';
+import { HeaderProduct, ProductEntity, RootLinkType } from '@pagopa/mui-italia';
 import { PartySwitchItem } from '@pagopa/mui-italia/dist/components/PartySwitch';
 
 import { User } from '@pagopa/selfcare-common-frontend/model/User';
@@ -12,6 +12,7 @@ import { useAppSelector } from '../../redux/hooks';
 import { partiesSelectors } from '../../redux/slices/partiesSlice';
 import { Party } from '../../model/Party';
 import { ENV } from '../../utils/env';
+import { CustomHeaderAccount } from './CustomHeaderAccount';
 
 type Props = WithPartiesProps & {
   withSecondHeader: boolean;
@@ -63,7 +64,7 @@ const CustomHeader = ({ onExit, loggedUser }: /* , parties */ Props) => {
 
   return (
     <>
-      <HeaderAccount
+      <CustomHeaderAccount
         onLogout={() => onExit(() => window.location.assign(ENV.URL_FE.LOGOUT))}
         onLogin={() => onExit(() => window.location.assign(ENV.URL_FE.LOGIN))}
         onDocumentationClick={() => window.open(ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK, '_blank')}
