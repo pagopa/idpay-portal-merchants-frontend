@@ -20,8 +20,9 @@ variables:
 
   # global variables
   react_app_pagopa_help_email: '$(REACT_APP_ASSISTANCE_EMAIL)'
-  react_app_pagopa_manual_link: https://developer.pagopa.it/app-io/guides
-  
+  react_app_pagopa_manual_link: https://developer.pagopa.it/pari/guides/manuale-tecnico-esercente
+  react_app_pagopa_help_link: https://developer.pagopa.it/pari/guides/manuale-tecnico-venditore/contatti
+
   ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/uat'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix')) }}:
     environment: 'UAT'
     azure_subscription: $(UAT_AZURE_SUBSCRIPTION)
@@ -57,6 +58,7 @@ variables:
     # react_app_one_trust_tos_json_url: $(UAT_REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS)
 
     react_app_pagopa_header_opearation_manual_link: $(react_app_pagopa_manual_link)
+    react_app_pagopa_assistance_link: $(react_app_pagopa_help_link)
     react_app_pagopa_footer_privacypolicy: https://welfare.uat.cstar.pagopa.it/portale-esercenti
     react_app_pagopa_footer_protectionofpersonaldata: https://privacyportal-de.onetrust.com/webform/77f17844-04c3-4969-a11d-462ee77acbe1/9ab6533d-be4a-482e-929a-0d8d2ab29df8
     react_app_pagopa_footer_termsandconditions: https://welfare.uat.cstar.pagopa.it/portale-esercenti
@@ -97,6 +99,7 @@ variables:
     # react_app_one_trust_tos_json_url: $(PROD_REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS)
 
     react_app_pagopa_header_opearation_manual_link: $(react_app_pagopa_manual_link)
+    react_app_pagopa_assistance_link: $(react_app_pagopa_help_link)
     react_app_pagopa_footer_privacypolicy: https://welfare.cstar.pagopa.it/portale-esercenti
     react_app_pagopa_footer_protectionofpersonaldata: https://privacyportal-de.onetrust.com/webform/77f17844-04c3-4969-a11d-462ee77acbe1/9ab6533d-be4a-482e-929a-0d8d2ab29df8
     react_app_pagopa_footer_termsandconditions: https://welfare.cstar.pagopa.it/portale-esercenti
@@ -138,9 +141,10 @@ variables:
     # react_app_one_trust_tos_json_url: $(DEV_REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS)
 
     react_app_pagopa_header_opearation_manual_link: $(react_app_pagopa_manual_link)
+    react_app_pagopa_assistance_link: $(react_app_pagopa_help_link)
     react_app_pagopa_footer_privacypolicy: https://welfare.dev.cstar.pagopa.it/portale-esercenti
     react_app_pagopa_footer_protectionofpersonaldata: https://privacyportal-de.onetrust.com/webform/77f17844-04c3-4969-a11d-462ee77acbe1/9ab6533d-be4a-482e-929a-0d8d2ab29df8
-    react_app_pagopa_footer_termsandconditions: https://welfare.dev.cstar.pagopa.it/portale-esercenti/
+    react_app_pagopa_footer_termsandconditions: https://welfare.dev.cstar.pagopa.it/portale-esercenti
     react_app_pagopa_footer_accessibility: https://form.agid.gov.it/view/87f46790-9798-11f0-b583-8b5f76942354
 
 # Automatically triggered on PR
@@ -234,6 +238,7 @@ stages:
               REACT_APP_URL_API_EMAIL_NOTIFICATION: '$(react_app_url_api_merchants)/email-notification'
 
               REACT_APP_PAGOPA_HELP_EMAIL: '$(react_app_pagopa_help_email)'
+              REACT_APP_PAGOPA_HELP_LINK: $(react_app_pagopa_help_link)
 
               REACT_APP_URL_INSTITUTION_LOGO_PREFIX: '$(react_app_url_storage)/institutions/'
 

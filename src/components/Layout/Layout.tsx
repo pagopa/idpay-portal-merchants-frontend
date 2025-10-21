@@ -5,11 +5,11 @@ import { useSelector } from 'react-redux';
 import { userSelectors } from '@pagopa/selfcare-common-frontend/redux/slices/userSlice';
 import { useLocation } from 'react-router-dom';
 import { matchPath } from 'react-router';
-import Header from '../Header/Header';
 import SideMenu from '../SideMenu/SideMenu';
 import ROUTES from '../../routes';
 import { useInitiativesList } from '../../hooks/useInitiativesList';
 import Footer from '../Footer/Footer';
+import CustomHeader from '../Header/CustomHeader';
 
 type Props = {
   children?: React.ReactNode;
@@ -50,7 +50,7 @@ const Layout = ({ children }: Props) => {
       minHeight="100vh"
     >
       <Box gridArea="header">
-        <Header
+        <CustomHeader
           withSecondHeader={showAssistanceInfo}
           onExit={onExit}
           loggedUser={loggedUser}
