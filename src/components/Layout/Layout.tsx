@@ -7,7 +7,6 @@ import { useLocation } from 'react-router-dom';
 import { matchPath } from 'react-router';
 import SideMenu from '../SideMenu/SideMenu';
 import ROUTES from '../../routes';
-import routes from '../../routes';
 import { useInitiativesList } from '../../hooks/useInitiativesList';
 import Footer from '../Footer/Footer';
 import CustomHeader from '../Header/CustomHeader';
@@ -89,11 +88,7 @@ const Layout = ({ children }: Props) => {
             pb={16}
             pt={2}
             gridColumn="span 12"
-            maxWidth={
-              location.pathname !== routes.PRIVACY_POLICY && location.pathname !== routes.TOS
-                ? '75%'
-                : '100%'
-            }
+            maxWidth="75%"
             justifySelf="center"
           >
             {children}
