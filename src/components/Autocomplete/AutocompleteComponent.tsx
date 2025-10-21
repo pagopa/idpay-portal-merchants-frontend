@@ -14,6 +14,7 @@ export default function AutocompleteComponent({
   errorText,
   required,
   label,
+  onTextChange
 }: Readonly<{
   options: Array<any>;
   onChangeDebounce?: (value: string) => void;
@@ -22,6 +23,7 @@ export default function AutocompleteComponent({
   errorText?: string;
   required?: boolean;
   label?: string;
+  onTextChange?: (value: string) => void;
 }>) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -90,6 +92,9 @@ export default function AutocompleteComponent({
       }}
       onInputChange={(_, newInputValue) => {
         setInputValue(newInputValue);
+        if(onTextChange){
+          onTextChange(newInputValue);
+        }
       }}
       filterOptions={(x) => x}
       renderInput={(params) => (

@@ -54,7 +54,11 @@ interface RouteParams {
 const InitiativeStores: React.FC = () => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
-  const [storesPagination, setStoresPagination] = useState<any>({});
+  const [storesPagination, setStoresPagination] = useState({
+    pageNo: 0,
+    pageSize: PAGINATION_SIZE,
+    totalElements: 0
+  });
   const [storesLoading, setStoresLoading] = useState(false);
   const [currentSort, setCurrentSort] = useState<string>('asc');
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState(false);
@@ -77,6 +81,17 @@ const InitiativeStores: React.FC = () => {
       });
     }
   }, [location, history]);
+
+  useEffect(() => {
+    const storesPagination = sessionStorage.getItem('storesPagination');
+    if(storesPagination && JSON.parse(storesPagination)?.pageNo && JSON.parse(storesPagination)?.initiativeId === id ) {
+      setStoresPagination(JSON.parse(storesPagination));
+      void fetchStores({...initialValues, page: JSON.parse(storesPagination)?.pageNo ? JSON.parse(storesPagination).pageNo : 0});
+    } else {
+      void fetchStores({...initialValues});
+    }
+    
+  }, []);
 
   const addError = useErrorDispatcher();
   const infoStyles = {
@@ -176,10 +191,6 @@ const InitiativeStores: React.FC = () => {
     },
   ];
 
-  useEffect(() => {
-    void fetchStores(initialValues);
-  }, []);
-
   const fetchStores = async (filters: GetPointOfSalesFilters, fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
@@ -197,7 +208,7 @@ const InitiativeStores: React.FC = () => {
         address: filters.address,
         contactName: filters.contactName,
         sort: filters.sort,
-        page: filters.page,
+        page: filters.page ?? 0,
         size: PAGINATION_SIZE,
       });
       const { content, ...paginationData } = response;
@@ -272,6 +283,7 @@ const InitiativeStores: React.FC = () => {
         {
           ...formik.values,
           sort: sortKey,
+          page: storesPagination.pageNo,
         },
         true
       );
@@ -282,7 +294,9 @@ const InitiativeStores: React.FC = () => {
   };
 
   const handlePaginationPageChange = (page: number) => {
-    setStoresPagination(page);
+    const updatedPagination = { ...storesPagination, pageNo: page, initiativeId: id };
+    setStoresPagination(updatedPagination);
+    sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
     void fetchStores({
       ...formik.values,
       page,
