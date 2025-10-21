@@ -28,6 +28,7 @@ export const ENV = {
   },
   ASSISTANCE: {
     EMAIL: env.get('REACT_APP_PAGOPA_HELP_EMAIL').required().asString(),
+    LINK: env.get('REACT_APP_PAGOPA_HELP_LINK').required().asString(),
     // MANUAL_LINK: env.get('REACT_APP_MANUAL_LINK').required().asString(),
   },
   URL_FE: {
@@ -69,15 +70,15 @@ export const ENV = {
       .get('REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS')
       .required()
       .asString(),
-    PRIVACY_POLICY_ID: env
-      .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID_MERCHANTS')
-      .required()
-      .asString(),
-    PRIVACY_POLICY_JSON_URL: env
-      .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL_MERCHANTS')
-      .required()
-      .asString(),
-    TOS_ID: env.get('REACT_APP_ONE_TRUST_TOS_ID_MERCHANTS').required().asString(),
-    TOS_JSON_URL: env.get('REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS').required().asString(),
+    // PRIVACY_POLICY_ID: env
+    //   .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID_MERCHANTS')
+    //   .required()
+    //   .asString(),
+    // PRIVACY_POLICY_JSON_URL: env
+    //   .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL_MERCHANTS')
+    //   .required()
+    //   .asString(),
+    // TOS_ID: env.get('REACT_APP_ONE_TRUST_TOS_ID_MERCHANTS').required().asString(),
+    // TOS_JSON_URL: env.get('REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS').required().asString(),
   },
 };
