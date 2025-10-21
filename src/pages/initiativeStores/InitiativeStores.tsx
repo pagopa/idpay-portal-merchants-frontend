@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import {
   Box,
@@ -62,6 +62,8 @@ const InitiativeStores: React.FC = () => {
   const [storesLoading, setStoresLoading] = useState(false);
   const [currentSort, setCurrentSort] = useState<string>('asc');
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState(false);
+
+  const isGoingToDetail = useRef(false);
   const { t } = useTranslation();
   const history = useHistory();
   const { id } = useParams<RouteParams>();
@@ -90,6 +92,12 @@ const InitiativeStores: React.FC = () => {
     } else {
       void fetchStores({...initialValues});
     }
+
+    return () => {
+      if (!isGoingToDetail.current) {
+        sessionStorage.removeItem('storesPagination');
+      }
+    };
     
   }, []);
 
@@ -265,6 +273,8 @@ const InitiativeStores: React.FC = () => {
   };
 
   const goToStoreDetail = (store: PointOfSaleDTO) => {
+     // eslint-disable-next-line functional/immutable-data
+    isGoingToDetail.current = true;
     history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
   };
 
