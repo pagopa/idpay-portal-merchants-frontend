@@ -177,7 +177,7 @@ const InitiativeStores: React.FC = () => {
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
     {
-      field: 'referent',
+      field: 'contactName',
       headerName: t('pages.initiativeStores.referent'),
       flex: 1.2,
       editable: false,
