@@ -1,6 +1,7 @@
 import React from 'react';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import Header from '../Header';
+import CustomHeader from '../Header';
 import { mockedUser } from '../../../decorators/__mocks__/withLogin';
 import { Party } from '../../../model/Party';
 
@@ -59,11 +60,27 @@ describe('test suite for Header', () => {
     renderWithContext(
       <Header parties={[]} loggedUser={mockedUser} withSecondHeader={false} onExit={jest.fn()} />
     );
+    renderWithContext(
+      <CustomHeader
+        parties={[]}
+        loggedUser={mockedUser}
+        withSecondHeader={false}
+        onExit={jest.fn()}
+      />
+    );
   });
 
   test('render Header with parties', () => {
     renderWithContext(
       <Header
+        parties={mockedParties}
+        loggedUser={mockedUser}
+        withSecondHeader={false}
+        onExit={jest.fn()}
+      />
+    );
+    renderWithContext(
+      <CustomHeader
         parties={mockedParties}
         loggedUser={mockedUser}
         withSecondHeader={false}
