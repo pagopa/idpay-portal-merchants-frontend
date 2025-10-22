@@ -9,12 +9,12 @@ import {
   TextField,
   Grid, Button, Alert, Slide,
 } from '@mui/material';
-import { ArrowOutward} from '@mui/icons-material';
+import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked, theme } from '@pagopa/mui-italia';
 import { useTranslation } from 'react-i18next';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { TypeEnum,PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
+import { TypeEnum, PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
@@ -69,7 +69,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   const [errors, setErrors] = useState<FormErrors>({});
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
   const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
-  
+
   const mergedErrors = useMemo(
     () => ({ ...errors, ...externalErrors }),
     [errors, externalErrors]
@@ -80,7 +80,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salesPoints]);
 
-  // Validate and notify on every submit attempt
   useEffect(() => {
     if (submitAttempt > 0) {
       const isValid = validateForm(true);
@@ -96,16 +95,21 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salesPoints, contactEmailConfirm]);
 
-  // Update showErrorAlert when there are errors
   useEffect(() => {
     if (submitAttempt > 0) {
-      const newShowErrorAlert = salesPoints.map((_, idx) => {
+      const excludedErrorKeys = ['channelEmail', 'channelGeolink', 'website', 'channelPhone'];
+
+      const newShowErrorAlert = salesPoints.map((sp, idx) => {
         const fieldErrors = mergedErrors[idx] ?? {};
-        return Object.keys(fieldErrors).length > 0;
+        const hasNonExcludedErrors = Object.keys(fieldErrors).some(
+          (key) => !excludedErrorKeys.includes(key)
+        );
+
+        return sp.type === TypeEnum.PHYSICAL && hasNonExcludedErrors;
       });
-      
+
       setShowErrorAlert(prev => {
-        const hasChanged = prev.length !== newShowErrorAlert.length || 
+        const hasChanged = prev.length !== newShowErrorAlert.length ||
           prev.some((val, index) => val !== newShowErrorAlert[index]);
         return hasChanged ? newShowErrorAlert : prev;
       });
@@ -171,7 +175,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           isValid = false;
         }
         else if (!isValidUrl(normalizeUrlHttps(sp.website))) {
-          fieldErrors = { ...fieldErrors, website: 'Deve essere un sito valido' };
+          fieldErrors = { ...fieldErrors, website: 'Devi inserire una URL valida' };
           isValid = false;
         }
       }
@@ -182,11 +186,20 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           isValid = false;
         }
         if (sp.channelGeolink?.trim() && !isValidUrl(normalizeUrlHttp(sp.channelGeolink?.trim()))) {
-          fieldErrors = { ...fieldErrors, channelGeolink: 'Deve essere un sito valido' };
+          fieldErrors = { ...fieldErrors, channelGeolink: 'Devi inserire una URL valida' };
           isValid = false;
         }
         if (sp?.channelEmail && !isValidEmail(sp?.channelEmail)) {
-          fieldErrors = { ...fieldErrors, channelEmail: 'Deve essere una mail valida' };
+          fieldErrors = { ...fieldErrors, channelEmail: 'Devi inserire una email valida' };
+          isValid = false;
+        }
+        if (sp?.channelPhone &&   String(sp?.channelPhone ?? '').trim().length < 7 ||
+          String(sp?.channelPhone ?? '').trim().length > 15) {
+          fieldErrors = { ...fieldErrors, channelPhone: 'Il numero deve avere tra 7 e 15 cifre' };
+          isValid = false;
+        }
+        if (sp?.website && !isValidUrl(normalizeUrlHttps(sp.website))) {
+          fieldErrors = { ...fieldErrors, website: 'Devi inserire una URL valida' };
           isValid = false;
         }
       }
@@ -228,19 +241,20 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
     }
   }, [pointsOfSaleLoaded]);
 
-  const clearFormOnTypeChanging = (index : number, type: string) => {
+  const clearFormOnTypeChanging = (index: number, type: string) => {
     setErrors({});
     setSalesPoints(prevSalesPoints =>
       prevSalesPoints.map((salesPoint, i) =>
-       i === index && type === 'ONLINE' ?
-         { ...salesPoint,
-           ['address']: '' ,
-           ['city']: '' ,
-           ['zipCode']: '' ,
-           ['province']: '' ,
-           ['region']: '' ,
-         }
-       : salesPoint
+        i === index && type === 'ONLINE' ?
+          {
+            ...salesPoint,
+            ['address']: '',
+            ['city']: '',
+            ['zipCode']: '',
+            ['province']: '',
+            ['region']: '',
+          }
+          : salesPoint
 
       )
     );
@@ -248,131 +262,131 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 
   const handleFieldChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-      switch (name) {
-        case 'type' :
-          clearFormOnTypeChanging(index, value);
-          break;
-        case 'channelGeolink':
-          if (value) {
-            if (!isValidUrl(normalizeUrlHttp(value))) {
-              updateError(index, "channelGeolink", "Deve essere un sito valido");
-            } else {
-              clearError(index, "channelGeolink");
-            }
+    switch (name) {
+      case 'type':
+        clearFormOnTypeChanging(index, value);
+        break;
+      case 'channelGeolink':
+        if (value) {
+          if (!isValidUrl(normalizeUrlHttp(value))) {
+            updateError(index, "channelGeolink", "Devi inserire una URL valida");
           } else {
             clearError(index, "channelGeolink");
           }
-          break;
-        case 'website':
-          if (salesPoints[index].type === 'ONLINE') {
-            if (!value || value.trim().length === 0) {
-              updateError(index, 'website', 'Campo obbligatorio');
-            } else if (value && !isValidUrl(normalizeUrlHttps(value))) {
-              updateError(index, 'website', 'Deve essere un sito valido');
-            } else {
-              clearError(index, 'website');
-            }
+        } else {
+          clearError(index, "channelGeolink");
+        }
+        break;
+      case 'website':
+        if (salesPoints[index].type === 'ONLINE') {
+          if (!value || value.trim().length === 0) {
+            updateError(index, 'website', 'Campo obbligatorio');
+          } else if (value && !isValidUrl(normalizeUrlHttps(value))) {
+            updateError(index, 'website', 'Devi inserire una URL valida');
           } else {
-            if (value && !isValidUrl(normalizeUrlHttps(value))) {
-              updateError(index, 'website', 'Deve essere un sito valido');
-            } else {
-              clearError(index, 'website');
-            }
+            clearError(index, 'website');
           }
-          break;
-        case 'contactEmail':
-          if (value){
-            if (contactEmailConfirm[index] && value !== contactEmailConfirm[index]) {
-              updateError(index, 'confirmContactEmail', 'Le email non coincidono');
-            } else {
-              clearError(index, 'confirmContactEmail');
-            }
-            if (!isValidEmail(value)) {
-              updateError(index, 'contactEmail', 'Email non valida');
-            } else {
-              clearError(index, 'contactEmail');
-            }
-          }else{
-            updateError(index, 'confirmContactEmail', 'Campo obbligatorio');
+        } else {
+          if (value && !isValidUrl(normalizeUrlHttps(value))) {
+            updateError(index, 'website', 'Devi inserire una URL valida');
+          } else {
+            clearError(index, 'website');
           }
+        }
+        break;
+      case 'contactEmail':
+        if (value) {
+          if (contactEmailConfirm[index] && value !== contactEmailConfirm[index]) {
+            updateError(index, 'confirmContactEmail', 'Le email non coincidono');
+          } else {
+            clearError(index, 'confirmContactEmail');
+          }
+          if (!isValidEmail(value)) {
+            updateError(index, 'contactEmail', 'Devi inserire una email valida');
+          } else {
+            clearError(index, 'contactEmail');
+          }
+        } else {
+          updateError(index, 'confirmContactEmail', 'Campo obbligatorio');
+        }
 
-          break;
-        case 'confirmContactEmail':
-          setContactEmailConfirm((prev) => ({
-            ...prev,
-            [index]: value,
-          }));
-          if(value){
-            if (!isValidEmail(value)) {
-              updateError(index, 'confirmContactEmail', 'Email non valida');
-            } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
-              updateError(index, 'confirmContactEmail', 'Le email non coincidono');
-            } else {
-              clearError(index, 'confirmContactEmail');
-            }
-          }else{
-            updateError(index, 'confirmContactEmail', 'Campo obbligatorio');
-          }
-          break;
-        case 'contactName':
-          if (!value.trim()) {
-            updateError(index, 'contactName', 'Campo obbligatorio');
+        break;
+      case 'confirmContactEmail':
+        setContactEmailConfirm((prev) => ({
+          ...prev,
+          [index]: value,
+        }));
+        if (value) {
+          if (!isValidEmail(value)) {
+            updateError(index, 'confirmContactEmail', 'Devi inserire una email valida');
+          } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
+            updateError(index, 'confirmContactEmail', 'Le email non coincidono');
           } else {
-            clearError(index, 'contactName');
+            clearError(index, 'confirmContactEmail');
           }
-          break;
-        case 'contactSurname':
-          if (!value.trim()) {
-            updateError(index, 'contactSurname', 'Campo obbligatorio');
-          } else {
-            clearError(index, 'contactSurname');
-          }
-          break;
-        case 'franchiseName':
-          if (!value.trim()) {
-            updateError(index, 'franchiseName', 'Campo obbligatorio');
-          } else {
-            clearError(index, 'franchiseName');
-          }
-          break;
-        case 'city':
-          if (!value.trim()) {
-            updateError(index, 'city', ' ');
-          } else {
-            clearError(index, 'city');
-          }
-          break;
-        case 'zipCode':
-          if (!value.trim()) {
-            updateError(index, 'zipCode', ' ');
-          } else {
-            clearError(index, 'zipCode');
-          }
-          break;
-        case 'region':
-          if (!value.trim()) {
-            updateError(index, 'region', ' ');
-          } else {
-            clearError(index, 'region');
-          }
-          break;
-        case 'province':
-          if (!value.trim()) {
-            updateError(index, 'province', ' ');
-          } else {
-            clearError(index, 'province');
-          }
-          break;
-        case 'address':
-          if (!value.trim()) {
-            updateError(index, 'address', 'Campo obbligatorio');
-          } else {
-            clearError(index, 'address');
-          }
-          break;
-        default:
-          break;
-      }
+        } else {
+          updateError(index, 'confirmContactEmail', 'Campo obbligatorio');
+        }
+        break;
+      case 'contactName':
+        if (!value.trim()) {
+          updateError(index, 'contactName', 'Campo obbligatorio');
+        } else {
+          clearError(index, 'contactName');
+        }
+        break;
+      case 'contactSurname':
+        if (!value.trim()) {
+          updateError(index, 'contactSurname', 'Campo obbligatorio');
+        } else {
+          clearError(index, 'contactSurname');
+        }
+        break;
+      case 'franchiseName':
+        if (!value.trim()) {
+          updateError(index, 'franchiseName', 'Campo obbligatorio');
+        } else {
+          clearError(index, 'franchiseName');
+        }
+        break;
+      case 'city':
+        if (!value.trim()) {
+          updateError(index, 'city', ' ');
+        } else {
+          clearError(index, 'city');
+        }
+        break;
+      case 'zipCode':
+        if (!value.trim()) {
+          updateError(index, 'zipCode', ' ');
+        } else {
+          clearError(index, 'zipCode');
+        }
+        break;
+      case 'region':
+        if (!value.trim()) {
+          updateError(index, 'region', ' ');
+        } else {
+          clearError(index, 'region');
+        }
+        break;
+      case 'province':
+        if (!value.trim()) {
+          updateError(index, 'province', ' ');
+        } else {
+          clearError(index, 'province');
+        }
+        break;
+      case 'address':
+        if (!value.trim()) {
+          updateError(index, 'address', 'Campo obbligatorio');
+        } else {
+          clearError(index, 'address');
+        }
+        break;
+      default:
+        break;
+    }
 
     setSalesPoints(prevSalesPoints =>
       prevSalesPoints.map((salesPoint, i) =>
@@ -417,8 +431,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   const getFieldError = (salesPointIndex: number, fieldName: string): string =>
     mergedErrors[salesPointIndex]?.[fieldName] ?? '';
 
-  const addAnotherSalesPoint = () => {
+  const addAnotherSalesPoint = async () => {
     if (salesPoints.length < 5) {
+      await search("");
       setSalesPoints([
         ...salesPoints,
         {
@@ -469,7 +484,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
             : sp
         )
       );
-    }else{
+    } else {
       setSalesPoints((prev) =>
         prev.map((sp, i) =>
           i === salesPointIndex
@@ -620,8 +635,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                             handleChangeAddress(index, addressObj);
                           }}
                           onTextChange={async (value) => {
-                            if(value === ""){
-                              await search("");                          
+                            if (value === "") {
+                              await search("");
                             }
                           }}
                           inputError={!!getFieldError(index, 'address')}
@@ -867,22 +882,22 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                     </Grid>
                     <Grid item xs={12} sm={2}>
                       <Box mx={4} mt={2.5}>
-                          <ButtonNaked
-                            sx={{ whiteSpace: 'nowrap' }}
-                            color="primary"
-                            endIcon={<ArrowOutward fontSize="small" />}
-                            onClick={() => {
-                              const url = salesPoint.channelGeolink?.trim().startsWith('http')
-                                ? salesPoint.channelGeolink?.trim()
-                                : `https://${salesPoint.channelGeolink?.trim()}`;
-                              if (url && isValidUrl(url)) {
-                                window.open(url, '_blank', 'noopener,noreferrer');
-                              }
-                            }}
-                            size="medium"
-                          >
-                            {'Verifica URL'}
-                          </ButtonNaked>
+                        <ButtonNaked
+                          sx={{ whiteSpace: 'nowrap' }}
+                          color="primary"
+                          endIcon={<ArrowOutward fontSize="small" />}
+                          onClick={() => {
+                            const url = salesPoint.channelGeolink?.trim().startsWith('http')
+                              ? salesPoint.channelGeolink?.trim()
+                              : `https://${salesPoint.channelGeolink?.trim()}`;
+                            if (url && isValidUrl(url)) {
+                              window.open(url, '_blank', 'noopener,noreferrer');
+                            }
+                          }}
+                          size="medium"
+                        >
+                          {'Verifica URL'}
+                        </ButtonNaked>
                       </Box>
                     </Grid>
                     <Grid item xs={12}>
@@ -896,6 +911,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         onChange={(e) =>
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
+                        onKeyDown={(e) => {
+                          if (
+                            ['e', 'E', '+', '-', '.', ',', ' '].includes(e.key)
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
                         onBlur={() => {
                           if (String(salesPoint.channelPhone ?? '').trim()) {
                             if (
@@ -917,10 +939,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         sx={{
                           '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button':
-                            {
-                              WebkitAppearance: 'none',
-                              margin: 0,
-                            },
+                          {
+                            WebkitAppearance: 'none',
+                            margin: 0,
+                          },
                           '& input[type=number]': {
                             MozAppearance: 'textfield',
                           },
@@ -945,7 +967,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         onBlur={(e) => {
                           if (e.target.value.trim() !== '' && !isValidEmail(e.target.value)) {
-                            updateError(index, 'channelEmail', 'Email non valida');
+                            updateError(index, 'channelEmail', 'Devi inserire una email valida');
                           } else {
                             clearError(index, 'channelEmail');
                           }
