@@ -157,7 +157,7 @@ describe('InitiativeStoreDetail', () => {
     await new Promise((r) => setTimeout(r, 4000));
     const successAlert = screen.getByText('pages.initiativeStores.referentChangeSuccess');
     expect(successAlert).toBeInTheDocument();
-  });
+  },10000);
 
   test('validates email fields on blur', async () => {
     render(
