@@ -163,7 +163,13 @@
       "insertIbanHolder": "Inserisci intestatario",
       "modify": "Modifica",
       "successIban": "IBAN inserito con successo",
-      "onboardingDate": "Data di adesione"
+      "onboardingDate": "Data di adesione",
+      "info": {
+        "title": "Cos'è Bonus Elettrodomestici?",
+        "message": "È il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica.",
+        "button": "Scopri di più",
+        "description": "Bonus Elettrodomestici è il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica ai sensi del Decreto del Ministro delle Imprese e del Made in Italy di concerto con il Ministero dell’Economia e delle Finanze 3 settembre 2025, ammesso alla registrazione dalla Corte dei conti in data 18 settembre 2025, al n. 1146."
+      }
     },
     "initiativeStores": {
       "title": "Punti vendita",
