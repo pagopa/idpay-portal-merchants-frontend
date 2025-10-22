@@ -203,6 +203,13 @@ const InitiativeStoreDetail = () => {
         field === 'contactEmailConfirmModal' ? errorMsg : confirmErrorMsg ?? '',
     }));
   };
+  const resetModalFieldsAndErrors = () => {
+    setFieldErrors({});
+    setContactEmailConfirmModal('');
+    setContactEmailModal('');
+    setContactSurnameModal('');
+    setContactNameModal('');
+  };
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     setSortModel(newSortModel);
@@ -247,6 +254,7 @@ const InitiativeStoreDetail = () => {
           contactEmailConfirmModal: 'Email già censinta',
         });
         setModalIsOpen(false);
+        resetModalFieldsAndErrors();
       } else {
         addError({
           id: 'UPDATE_STORES',
@@ -259,6 +267,7 @@ const InitiativeStoreDetail = () => {
           component: 'Toast',
           showCloseIcon: true,
         });
+        resetModalFieldsAndErrors();
       }
     } else {
       setModalIsOpen(false);
@@ -267,6 +276,7 @@ const InitiativeStoreDetail = () => {
       setTimeout(() => {
         setShowSuccessAlert(false);
       }, 4000);
+      resetModalFieldsAndErrors();
     }
   };
 
@@ -340,7 +350,10 @@ const InitiativeStoreDetail = () => {
               <Grid item xs={3}>
                 <Box display="flex" flexDirection="row" justifyContent="flex-end">
                   <ButtonNaked
-                    onClick={() => setModalIsOpen(true)}
+                    onClick={() => {
+                      setModalIsOpen(true);
+                      resetModalFieldsAndErrors();
+                    }}
                     size="medium"
                     // sx={{ display: 'flex', justifyContent: 'end', alignItems: 'start' }}
                     startIcon={<Edit />}

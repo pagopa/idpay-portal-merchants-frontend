@@ -80,7 +80,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salesPoints]);
 
-  // Validate and notify on every submit attempt
   useEffect(() => {
     if (submitAttempt > 0) {
       const isValid = validateForm(true);
@@ -96,12 +95,17 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salesPoints, contactEmailConfirm]);
 
-  // Update showErrorAlert when there are errors
   useEffect(() => {
     if (submitAttempt > 0) {
-      const newShowErrorAlert = salesPoints.map((_, idx) => {
+      const excludedErrorKeys = ['channelEmail', 'channelGeolink', 'website', 'channelPhone'];
+
+      const newShowErrorAlert = salesPoints.map((sp, idx) => {
         const fieldErrors = mergedErrors[idx] ?? {};
-        return Object.keys(fieldErrors).length > 0;
+        const hasNonExcludedErrors = Object.keys(fieldErrors).some(
+          (key) => !excludedErrorKeys.includes(key)
+        );
+
+        return sp.type === TypeEnum.PHYSICAL && hasNonExcludedErrors;
       });
 
       setShowErrorAlert(prev => {
@@ -171,7 +175,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           isValid = false;
         }
         else if (!isValidUrl(normalizeUrlHttps(sp.website))) {
-          fieldErrors = { ...fieldErrors, website: 'Deve essere un sito valido' };
+          fieldErrors = { ...fieldErrors, website: 'Devi inserire una URL valida' };
           isValid = false;
         }
       }
@@ -182,11 +186,20 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           isValid = false;
         }
         if (sp.channelGeolink?.trim() && !isValidUrl(normalizeUrlHttp(sp.channelGeolink?.trim()))) {
-          fieldErrors = { ...fieldErrors, channelGeolink: 'Deve essere un sito valido' };
+          fieldErrors = { ...fieldErrors, channelGeolink: 'Devi inserire una URL valida' };
           isValid = false;
         }
         if (sp?.channelEmail && !isValidEmail(sp?.channelEmail)) {
-          fieldErrors = { ...fieldErrors, channelEmail: 'Deve essere una mail valida' };
+          fieldErrors = { ...fieldErrors, channelEmail: 'Devi inserire una email valida' };
+          isValid = false;
+        }
+        if (sp?.channelPhone &&   String(sp?.channelPhone ?? '').trim().length < 7 ||
+          String(sp?.channelPhone ?? '').trim().length > 15) {
+          fieldErrors = { ...fieldErrors, channelPhone: 'Il numero deve avere tra 7 e 15 cifre' };
+          isValid = false;
+        }
+        if (sp?.website && !isValidUrl(normalizeUrlHttps(sp.website))) {
+          fieldErrors = { ...fieldErrors, website: 'Devi inserire una URL valida' };
           isValid = false;
         }
       }
@@ -256,7 +269,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       case 'channelGeolink':
         if (value) {
           if (!isValidUrl(normalizeUrlHttp(value))) {
-            updateError(index, "channelGeolink", "Deve essere un sito valido");
+            updateError(index, "channelGeolink", "Devi inserire una URL valida");
           } else {
             clearError(index, "channelGeolink");
           }
@@ -269,13 +282,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           if (!value || value.trim().length === 0) {
             updateError(index, 'website', 'Campo obbligatorio');
           } else if (value && !isValidUrl(normalizeUrlHttps(value))) {
-            updateError(index, 'website', 'Deve essere un sito valido');
+            updateError(index, 'website', 'Devi inserire una URL valida');
           } else {
             clearError(index, 'website');
           }
         } else {
           if (value && !isValidUrl(normalizeUrlHttps(value))) {
-            updateError(index, 'website', 'Deve essere un sito valido');
+            updateError(index, 'website', 'Devi inserire una URL valida');
           } else {
             clearError(index, 'website');
           }
@@ -289,7 +302,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
             clearError(index, 'confirmContactEmail');
           }
           if (!isValidEmail(value)) {
-            updateError(index, 'contactEmail', 'Email non valida');
+            updateError(index, 'contactEmail', 'Devi inserire una email valida');
           } else {
             clearError(index, 'contactEmail');
           }
@@ -305,7 +318,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         }));
         if (value) {
           if (!isValidEmail(value)) {
-            updateError(index, 'confirmContactEmail', 'Email non valida');
+            updateError(index, 'confirmContactEmail', 'Devi inserire una email valida');
           } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
           } else {
@@ -898,6 +911,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         onChange={(e) =>
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
+                        onKeyDown={(e) => {
+                          if (
+                            ['e', 'E', '+', '-', '.', ',', ' '].includes(e.key)
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
                         onBlur={() => {
                           if (String(salesPoint.channelPhone ?? '').trim()) {
                             if (
@@ -947,7 +967,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         onBlur={(e) => {
                           if (e.target.value.trim() !== '' && !isValidEmail(e.target.value)) {
-                            updateError(index, 'channelEmail', 'Email non valida');
+                            updateError(index, 'channelEmail', 'Devi inserire una email valida');
                           } else {
                             clearError(index, 'channelEmail');
                           }
