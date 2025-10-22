@@ -21,7 +21,6 @@ const DataTable = ({
   paginationModel,
   sortModel = [],
 }: DataTableProps) => {
-
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
   };
@@ -44,6 +43,7 @@ const DataTable = ({
           rowsPerPageOptions={[rowsPerPage]}
           disableSelectionOnClick
           autoHeight
+          sortingOrder={['asc', 'desc']}
           sortingMode="server"
           paginationMode="server"
           onSortModelChange={handleSortModelChange}
