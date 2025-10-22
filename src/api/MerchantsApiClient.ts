@@ -5,7 +5,11 @@ import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
 import { isRight } from 'fp-ts/Either';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
-import { GetPointOfSalesFilters, GetPointOfSalesResponse,GetPointOfSaleTransactionsFilters  } from '../types/types';
+import {
+  GetPointOfSalesFilters,
+  GetPointOfSalesResponse,
+  GetPointOfSaleTransactionsFilters,
+} from '../types/types';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
 import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
 import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsDTO';
@@ -15,6 +19,7 @@ import { InitiativeDTOArray } from './generated/merchants/InitiativeDTOArray';
 import { MerchantTransactionsProcessedListDTO } from './generated/merchants/MerchantTransactionsProcessedListDTO';
 import { PointOfSaleDTO } from './generated/merchants/PointOfSaleDTO';
 import { PointOfSaleTransactionsProcessedListDTO } from './generated/merchants/PointOfSaleTransactionsProcessedListDTO';
+import { DownloadInvoiceResponseDTO } from './generated/merchants/DownloadInvoiceResponseDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -31,7 +36,7 @@ const apiClient = createClient({
   withDefaults: withBearer,
 });
 
-const onRedirectToLogin = () =>
+const onRedirectToLogin = () => {
   store.dispatch(
     appStateActions.addError({
       id: 'tokenNotValid',
@@ -43,6 +48,7 @@ const onRedirectToLogin = () =>
       displayableDescription: i18n.t('errors.sessionExpiredMessage'),
     })
   );
+};
 
 export const MerchantApi = {
   getMerchantInitiativeList: async (): Promise<InitiativeDTOArray> => {
@@ -120,7 +126,7 @@ export const MerchantApi = {
   updateMerchantPointOfSales: async (
     merchantId: string,
     pointOfSales: Array<PointOfSaleDTO>
-  ): Promise<{ code:string ; message:string}> => {
+  ): Promise<{ code: string; message: string }> => {
     const result = await apiClient.putPointOfSales({ merchantId, body: pointOfSales });
     if (!isRight(result)) {
       return {
@@ -158,6 +164,14 @@ export const MerchantApi = {
       pointOfSaleId,
       ...filters,
     });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  downloadInvoiceFile: async (
+    transactionId: string,
+    pointOfSaleId: string
+  ): Promise<DownloadInvoiceResponseDTO> => {
+    const result = await apiClient.downloadInvoiceFile({ transactionId, pointOfSaleId });
     return extractResponse(result, 200, onRedirectToLogin);
   },
 };

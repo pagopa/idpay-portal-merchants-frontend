@@ -1,16 +1,15 @@
 import { Box } from '@mui/material';
-import { Footer } from '@pagopa/selfcare-common-frontend';
 import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/hooks/useUnloadEventInterceptor';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { userSelectors } from '@pagopa/selfcare-common-frontend/redux/slices/userSlice';
 import { useLocation } from 'react-router-dom';
 import { matchPath } from 'react-router';
-import Header from '../Header/Header';
 import SideMenu from '../SideMenu/SideMenu';
 import ROUTES from '../../routes';
-import routes from '../../routes';
 import { useInitiativesList } from '../../hooks/useInitiativesList';
+import Footer from '../Footer/Footer';
+import CustomHeader from '../Header/CustomHeader';
 
 type Props = {
   children?: React.ReactNode;
@@ -51,7 +50,7 @@ const Layout = ({ children }: Props) => {
       minHeight="100vh"
     >
       <Box gridArea="header">
-        <Header
+        <CustomHeader
           withSecondHeader={showAssistanceInfo}
           onExit={onExit}
           loggedUser={loggedUser}
@@ -89,11 +88,7 @@ const Layout = ({ children }: Props) => {
             pb={16}
             pt={2}
             gridColumn="span 12"
-            maxWidth={
-              location.pathname !== routes.PRIVACY_POLICY && location.pathname !== routes.TOS
-                ? '75%'
-                : '100%'
-            }
+            maxWidth="75%"
             justifySelf="center"
           >
             {children}

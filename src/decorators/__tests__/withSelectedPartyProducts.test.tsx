@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { createStore, RootState } from '../../redux/store';
@@ -5,22 +6,21 @@ import { verifyFetchPartyDetailsMockExecution } from '../../services/__mocks__/p
 import { verifyFetchPartyProductsMockExecution } from '../../services/__mocks__/productService';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { testToken } from '../../utils/constants';
-// import withSelectedPartyProducts from '../withSelectedPartyProducts';
-// import { Fragment } from 'react';
+import withSelectedPartyProducts from '../withSelectedPartyProducts';
 
 jest.mock('../../services/partyService');
 jest.mock('../../services/productService');
 
-// const expectedPartyId: string = '2b48bf96-fd74-477e-a70a-286b410f020a';
-//
-// let fetchPartyDetailsSpy: jest.SpyInstance;
-// let fetchPartyProductsSpy: jest.SpyInstance;
+const expectedPartyId: string = '26a0aabf-ce6a-4dfa-af4e-d4f744a8b944';
+
+let fetchPartyDetailsSpy: jest.SpyInstance;
+let fetchPartyProductsSpy: jest.SpyInstance;
 
 beforeEach(() => {
-  jest.spyOn(require('../../services/partyService'), 'fetchPartyDetails');
-   jest.spyOn(require('../../services/productService'), 'fetchProducts');
+  fetchPartyDetailsSpy = jest.spyOn(require('../../services/partyService'), 'fetchParties');
+  fetchPartyProductsSpy = jest.spyOn(require('../../services/productService'), 'fetchProducts');
 
-  storageTokenOps.write(testToken); // party with partyId="onboarded"
+  //storageTokenOps.write(testToken); // party with partyId="onboarded"
 });
 
 const renderApp = async (
@@ -29,12 +29,12 @@ const renderApp = async (
 ) => {
   const store = injectedStore ? injectedStore : createStore();
 
-  // const Component = () => <Fragment></Fragment>;
-  // const DecoratedComponent = withSelectedPartyProducts(Component);
+  const Component = () => <></>;
+  const DecoratedComponent = withSelectedPartyProducts(Component);
 
   render(
     <Provider store={store}>
-      {/*<DecoratedComponent />*/}
+      <DecoratedComponent />
     </Provider>
   );
 
@@ -51,19 +51,16 @@ test('Test default behavior when no parties', async () => {
 
   // test when selected party already in store
   await renderApp(true, store);
-  checkMockInvocation();
 });
 
 const checkSelectedParty = (state: RootState) => {
   const party = state.parties.selected;
+  const partyProducts = state.parties.selectedProducts;
   verifyFetchPartyDetailsMockExecution(party!);
-  verifyFetchPartyProductsMockExecution();
+  verifyFetchPartyProductsMockExecution(partyProducts!);
 };
 
-const checkMockInvocation = () => {
-  // expect(fetchPartyDetailsSpy).toBeCalledTimes(expectedCallsNumber);
-  // expect(fetchPartyDetailsSpy).toBeCalledWith(expectedPartyId, undefined);
-
-  // expect(fetchPartyProductsSpy).toBeCalledTimes(expectedCallsNumber);
-  // expect(fetchPartyProductsSpy).toBeCalledWith(expectedPartyId);
+const checkMockInvocation = (expectedCallsNumber: number) => {
+  expect(fetchPartyDetailsSpy).toBeCalledTimes(expectedCallsNumber);
+  expect(fetchPartyDetailsSpy).toBeCalledWith();
 };

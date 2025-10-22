@@ -1,9 +1,10 @@
 
-import { Box, FormControl, Grid, InputLabel, MenuItem, Select, TextField, } from '@mui/material';
+import { Box, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import EmptyList from '../../pages/components/EmptyList';
 import DetailDrawer from '../Drawer/DetailDrawer';
@@ -37,6 +38,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   const [rows, setRows] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
+  const [filtersAppliedOnce, setFiltersAppliedOnce] = useState<boolean>(false);
   const listItemDetail = getDetailFieldList();
 
   useEffect(() => {
@@ -101,6 +103,15 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     },
     {
       field: 'rewardAmountCents',
+      headerName: 'Sconto applicato',
+      flex: 0.5,
+      editable: false,
+      disableColumnMenu: true,
+      sortable: false,
+      renderCell: (params: any) => <CurrencyColumn value={params.value/100} />,
+    },
+    {
+      field: 'authorizedAmountCents',
       headerName: 'Importo autorizzato',
       flex: 0.5,
       editable: false,
@@ -116,15 +127,35 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       disableColumnMenu: true,
       renderCell: (params: any) => <StatusChip status={params.value} />,
     },
+    {
+      field: 'actions',
+      headerName: '',
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      flex: 0.1,
+      renderCell: (params: any) => (
+        <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+          <IconButton
+            onClick={() => handleListButtonClick(params.row)}
+            size="small"
+          >
+            <ChevronRightIcon color='primary' fontSize='inherit' />
+          </IconButton>
+        </Box>
+      )
+    }
   ];
 
   const handleOnFiltersApplied = (filters: any) => {
     console.log('Callback dopo applicazione filtri', filters);
+    setFiltersAppliedOnce(true);
     if (handleFiltersApplied) { handleFiltersApplied(filters); }
   };
 
   const handleOnFiltersReset = () => {
     console.log('Callback dopo reset filtri');
+    setFiltersAppliedOnce(false);
     if (handleFiltersReset) { handleFiltersReset(); }
   };
 
@@ -151,6 +182,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
         formik={formik}
         onFiltersApplied={handleOnFiltersApplied}
         onFiltersReset={handleOnFiltersReset}
+        filtersAppliedOnce={filtersAppliedOnce}
       >
         <Grid item xs={12} sm={6} md={3} lg={3}>
           <FormControl fullWidth size="small">
