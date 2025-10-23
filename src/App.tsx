@@ -11,8 +11,8 @@ import Layout from './components/Layout/Layout';
 import Auth from './pages/auth/Auth';
 // import TOSWall from './components/TOS/TOSWall';
 // import TOSLayout from './components/TOSLayout/TOSLayout';
-// import TOS from './pages/tos/TOS';
-// import PrivacyPolicy from './pages/privacyPolicy/PrivacyPolicy';
+import TOS from './pages/tos/TOS';
+import PrivacyPolicy from './pages/privacyPolicy/PrivacyPolicy';
 import routes from './routes';
 // import useTCAgreement from './hooks/useTCAgreement';
 import InitiativesList from './pages/initiativesList/initiativesList';
@@ -61,12 +61,16 @@ const SecuredRoutes = withLogin(
         <Route path={routes.ASSISTANCE} exact={true}>
           <Assistance />
         </Route>
-        {/* <Route path={routes.TOS} exact={true}>
+        {
+          <Route path={routes.TOS} exact={true}>
             <TOS />
-          </Route> */}
-        {/* <Route path={routes.PRIVACY_POLICY} exact={true}>
+          </Route>
+        }
+        {
+          <Route path={routes.PRIVACY_POLICY} exact={true}>
             <PrivacyPolicy />
-          </Route> */}
+          </Route>
+        }
         {/* <Route path={routes.DISCOUNTS} exact={true}>
             <InitiativeDiscounts />
           </Route> */}

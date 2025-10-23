@@ -110,6 +110,12 @@
       "termsDescriptionChanged": "Recentemente abbiamo cambiato i",
       "title": "PARI"
     },
+    "tosStatic": {
+      "title": "Termini e Condizioni"
+    },
+    "privacyPolicyStatic": {
+      "title": "Privacy Policy"
+    },
     "initiativeDiscounts": {
       "acceptBtn": "Accetta buono sconto",
       "amount": "Importo",
