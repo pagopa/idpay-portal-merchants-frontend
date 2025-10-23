@@ -225,6 +225,16 @@
       "contactEmail": "Indirizzo e-mail",
       "confirmContactEmail": "Conferma indirizzo e-mail"
     },
+    "reportedUsers": {
+      "title": "Utenti segnalati",
+      "subtitle": "Visualizza gli utenti che non hanno consegnato il RAEE dichiarato.",
+      "reportUser": "Segnala utente",
+      "userCf": "Beneficiario",
+      "date": "Data e ora",
+      "discountCode": "Codice sconto",
+      "cf": "Cerca per Codice Fiscale",
+      "noUsers": "Non ci sono utenti segnalati per questa iniziativa."
+    },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
       "initiativeStatus": "Stato",

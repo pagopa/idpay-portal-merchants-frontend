@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import InitiativeStores from '../InitiativeStores';
+import ReportedUsers from '../reportedUsers';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
@@ -104,7 +104,7 @@ describe('<ReportedUsers />', () => {
   });
 
   test('renderizza correttamente, mostra il loader e poi i dati della tabella', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
@@ -122,7 +122,7 @@ describe('<ReportedUsers />', () => {
       ...mockPagination,
       totalElements: 0,
     });
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => {
       expect(screen.getByText('pages.initiativeStores.noStores')).toBeInTheDocument();
     });
@@ -135,14 +135,14 @@ describe('<ReportedUsers />', () => {
   test('gestisce il fallimento della chiamata API iniziale', async () => {
     const error = new Error('API Failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledWith(expect.objectContaining({ error }));
     });
   });
 
   test('gestisce un errore API durante il reset dei filtri', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const error = new Error('Reset failure');
@@ -158,7 +158,7 @@ describe('<ReportedUsers />', () => {
 
   test("gestisce la rimozione dell'ordinamento", async () => {
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('sort-button-remove'));
@@ -179,7 +179,7 @@ describe('<ReportedUsers />', () => {
 
   test('gestisce un errore nel .catch di handleFiltersReset', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const error = new Error('External catch failure');
@@ -196,7 +196,7 @@ describe('<ReportedUsers />', () => {
 
   test("gestisce la rimozione dell'ordinamento", async () => {
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('sort-button-remove'));
@@ -217,7 +217,7 @@ describe('<ReportedUsers />', () => {
 
   test('non effettua la chiamata API se manca il merchant_id nel token', async () => {
     mockParseJwt.mockReturnValue({ not_merchant_id: 'some-value' });
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
@@ -227,7 +227,7 @@ describe('<ReportedUsers />', () => {
   test("mostra e nasconde l'alert di successo", async () => {
     jest.useFakeTimers();
     (useLocation as jest.Mock).mockReturnValue({ state: { showSuccessAlert: true } });
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     expect(
       screen.getByText('pages.initiativeStores.pointOfSalesUploadSuccess')
     ).toBeInTheDocument();
@@ -243,7 +243,7 @@ describe('<ReportedUsers />', () => {
   });
 
   test('applica i filtri e ricarica i dati', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
 
     const cityInput = screen.getByLabelText('pages.initiativeStores.city');
@@ -261,7 +261,7 @@ describe('<ReportedUsers />', () => {
   });
 
   test('resetta i filtri e ricarica i dati iniziali', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
     const resetButton = screen.getByTestId('reset-filters-test');
     fireEvent.click(resetButton);
@@ -274,7 +274,7 @@ describe('<ReportedUsers />', () => {
   });
 
   test('mostra la tabella vuota se i filtri non producono risultati', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
 
     (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
@@ -293,7 +293,7 @@ describe('<ReportedUsers />', () => {
   });
 
   test('naviga alla pagina di aggiunta punto vendita al click sul pulsante', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
     const addButton = screen.getByText('pages.initiativeStores.addStoreList');
     fireEvent.click(addButton);
@@ -303,7 +303,7 @@ describe('<ReportedUsers />', () => {
   });
 
   test("gestisce l'ordinamento della tabella", async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('sort-button'));
     /*await waitFor(() => {
@@ -315,7 +315,7 @@ describe('<ReportedUsers />', () => {
   });
 
   test('gestisce la paginazione della tabella', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('paginate-button'));
     await waitFor(() => {
@@ -327,7 +327,7 @@ describe('<ReportedUsers />', () => {
   });
 
   test.skip('naviga al dettaglio del punto vendita al click su una riga', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
     fireEvent.click(screen.getByText('Store A'));
     expect(mockHistory.push).toHaveBeenCalledWith(
@@ -347,7 +347,7 @@ describe('Column rendering logic', () => {
   });
 
   test('il renderCell della colonna "type" formatta correttamente i valori', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     //await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const typeColumn = dataTableProps.columns.find((c: any) => c.field === 'type');
@@ -357,7 +357,7 @@ describe('Column rendering logic', () => {
   });
 
   test.skip('il renderCell della colonna "referent" gestisce dati completi e mancanti', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderWithContext(<ReportedUsers />);
     //await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'referent');
