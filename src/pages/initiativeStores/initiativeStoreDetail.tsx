@@ -283,6 +283,10 @@ const InitiativeStoreDetail = () => {
     } else if (!isValidEmail(contactEmailConfirmModal)) {
       addErrorModal('contactEmailConfirmModal', 'Inserisci un indirizzo email valido');
     }
+    if (contactEmailModal.trim() === storeDetail.contactEmail) {
+      addErrorModal('contactEmailModal', 'E-Mail già censita');
+      addErrorModal('contactEmailConfirmModal', 'E-Mail già censita');
+    }
 
     if (
       contactEmailModal.trim() &&
@@ -337,11 +341,8 @@ const InitiativeStoreDetail = () => {
           component: 'Toast',
           showCloseIcon: true,
         });
-        setFieldErrors({
-          contactEmailModal: 'Email già censita',
-          contactEmailConfirmModal: 'Email già censita',
-        });
         setModalIsOpen(false);
+        setFieldErrors({});
       } else {
         addError({
           id: 'UPDATE_STORES',
@@ -438,6 +439,9 @@ const InitiativeStoreDetail = () => {
                     onClick={() => {
                       setModalIsOpen(true);
                       // resetModalFieldsAndErrors();
+                      setFieldErrors({});
+                      setContactEmailModal(storeDetail.contactEmail);
+                      setContactEmailConfirmModal(storeDetail.contactEmail);
                     }}
                     size="medium"
                     // sx={{ display: 'flex', justifyContent: 'end', alignItems: 'start' }}
@@ -561,15 +565,16 @@ const InitiativeStoreDetail = () => {
           </Grid>
         </Grid>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, marginTop: '40px' }}>
-          <Button variant="outlined" onClick={() => setModalIsOpen(false)}>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setModalIsOpen(false);
+              setFieldErrors({});
+            }}
+          >
             {t('commons.cancel')}
           </Button>
-          <Button
-            disabled={Object.values(fieldErrors).some((msg) => msg)}
-            variant="contained"
-            data-testid="update-button"
-            onClick={handleUpdateReferent}
-          >
+          <Button variant="contained" data-testid="update-button" onClick={handleUpdateReferent}>
             {t('commons.modify')}
           </Button>
         </Box>
