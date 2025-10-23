@@ -184,35 +184,68 @@ const InitiativeStoreDetail = () => {
     console.log('Callback dopo reset filtri');
     void fetchStoreTransactions({});
   };
-  const handleBlur = (field: 'contactSurnameModal' | 'contactEmailModal' | 'contactEmailConfirmModal' | 'contactNameModal', value: string) => {
-    const email = field === 'contactEmailModal' ? value : contactEmailModal;
-    const emailConfirm = field === 'contactEmailConfirmModal' ? value : contactEmailConfirmModal;
-    let errorMsg = '';
-    let confirmErrorMsg = '';
-    if (!value.trim()) {
-      errorMsg = 'Il campo è obbligatorio';
-    } else if (field === 'contactEmailModal' || field === 'contactEmailConfirmModal' && !isValidEmail(value)) {
-      errorMsg = 'Inserisci un indirizzo email valido';
-    }
-    if (email.trim() && emailConfirm.trim() && email !== emailConfirm) {
-      errorMsg = field === 'contactEmailModal' ? 'Le email non coincidono' : '';
-      confirmErrorMsg = 'Le email non coincidono';
-    }
-    setFieldErrors((prev) => ({
-      ...prev,
-      contactEmailModal: field === 'contactEmailModal' ? errorMsg : confirmErrorMsg ?? '',
-      contactEmailConfirmModal: field === 'contactEmailConfirmModal' ? errorMsg : confirmErrorMsg ?? '',
-      contactSurnameModal: errorMsg ?? '',
-      contactNameModal: errorMsg ?? ''
-    }));
+  const handleBlur = (
+    field:
+      | 'contactSurnameModal'
+      | 'contactEmailModal'
+      | 'contactEmailConfirmModal'
+      | 'contactNameModal',
+    value: string
+  ) => {
+    const trimmed = value?.trim() ?? '';
+
+    setFieldErrors((prev) => {
+      let updatedErrors = { ...prev };
+
+      const isNameField = field === 'contactNameModal' || field === 'contactSurnameModal';
+      if (isNameField) {
+        return {
+          ...prev,
+          [field]: trimmed ? '' : 'Il campo è obbligatorio',
+        };
+      }
+
+      const email = field === 'contactEmailModal' ? trimmed : contactEmailModal?.trim() ?? '';
+      const emailConfirm =
+        field === 'contactEmailConfirmModal'
+          ? trimmed
+          : contactEmailConfirmModal?.trim() ?? '';
+
+      let currentFieldError = '';
+      if (!trimmed) {
+        currentFieldError = 'Il campo è obbligatorio';
+      } else if (!isValidEmail(trimmed)) {
+        currentFieldError = 'Inserisci un indirizzo email valido';
+      }
+
+      updatedErrors = {
+        ...updatedErrors,
+        [field]: currentFieldError,
+      };
+
+      // --- 3️⃣ Controllo mismatch ---
+      const bothPresent = email && emailConfirm;
+      const bothValid = isValidEmail(email) && isValidEmail(emailConfirm);
+
+      if (bothPresent && bothValid && email !== emailConfirm) {
+        return {
+          ...updatedErrors,
+          contactEmailModal: 'Le email non coincidono',
+          contactEmailConfirmModal: 'Le email non coincidono',
+        };
+      }
+
+      return updatedErrors;
+    });
   };
-  const resetModalFieldsAndErrors = () => {
-    setFieldErrors({});
-    setContactEmailConfirmModal('');
-    setContactEmailModal('');
-    setContactSurnameModal('');
-    setContactNameModal('');
-  };
+
+  // const resetModalFieldsAndErrors = () => {
+  //   setFieldErrors({});
+  //   setContactEmailConfirmModal('');
+  //   setContactEmailModal('');
+  //   setContactSurnameModal('');
+  //   setContactNameModal('');
+  // };
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     setSortModel(newSortModel);
@@ -228,6 +261,42 @@ const InitiativeStoreDetail = () => {
   };
 
   const handleUpdateReferent = async () => {
+    let newErrors: typeof fieldErrors = {};
+
+    const addErrorModal = (field: keyof typeof fieldErrors, message: string) => {
+      newErrors = { ...newErrors, [field]: message };
+    };
+
+    if (!contactNameModal.trim()) {
+      addErrorModal('contactNameModal', 'Il campo è obbligatorio');
+    }
+    if (!contactSurnameModal.trim()) {
+      addErrorModal('contactSurnameModal', 'Il campo è obbligatorio');
+    }
+    if (!contactEmailModal.trim()) {
+      addErrorModal('contactEmailModal', 'Il campo è obbligatorio');
+    } else if (!isValidEmail(contactEmailModal)) {
+      addErrorModal('contactEmailModal', 'Inserisci un indirizzo email valido');
+    }
+    if (!contactEmailConfirmModal.trim()) {
+      addErrorModal('contactEmailConfirmModal', 'Il campo è obbligatorio');
+    } else if (!isValidEmail(contactEmailConfirmModal)) {
+      addErrorModal('contactEmailConfirmModal', 'Inserisci un indirizzo email valido');
+    }
+
+    if (
+      contactEmailModal.trim() &&
+      contactEmailConfirmModal.trim() &&
+      contactEmailModal !== contactEmailConfirmModal
+    ) {
+      addErrorModal('contactEmailModal', 'Le email non coincidono');
+      addErrorModal('contactEmailConfirmModal', 'Le email non coincidono');
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      return;
+    }
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     const obj = [
@@ -238,33 +307,22 @@ const InitiativeStoreDetail = () => {
         contactEmail: contactEmailModal,
       },
     ];
-    if(!contactNameModal){
-      setFieldErrors((prev) => ({
-        ...prev,
-        contactNameModal: 'Il campo è obbligatorio'
-      }));
-    }
-    if(!contactSurnameModal){
-      setFieldErrors((prev) => ({
-        ...prev,
-        contactSurnameModal: 'Il campo è obbligatorio'
-      }));
-    }
-    if(!contactEmailModal){
-      setFieldErrors((prev) => ({
-        ...prev,
-        contactEmailModal: 'Il campo è obbligatorio'
-      }));
-    }
-    if(!contactEmailConfirmModal){
-      setFieldErrors((prev) => ({
-        ...prev,
-        contactEmailConfirmModal: 'Il campo è obbligatorio'
-      }));
-    }
-    if (Object.values(fieldErrors).some((msg) => msg)){
+    if (storeDetail.contactEmail === contactEmailConfirmModal) {
+      addError({
+        id: 'UPDATE_STORES',
+        blocking: false,
+        error: new Error('Point of sale already registered'),
+        techDescription: 'Point of sale already registered',
+        displayableTitle: t('errors.duplicateEmailError'),
+        displayableDescription: `${storeDetail.contactEmail} è già associata ad altro punto vendita`,
+        toNotify: true,
+        component: 'Toast',
+        showCloseIcon: true,
+      });
+      setModalIsOpen(false);
       return;
     }
+
     const response = await updateMerchantPointOfSales(merchantId, obj);
     if (response) {
       if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
@@ -280,11 +338,10 @@ const InitiativeStoreDetail = () => {
           showCloseIcon: true,
         });
         setFieldErrors({
-          contactEmailModal: 'Email già censinta',
-          contactEmailConfirmModal: 'Email già censinta',
+          contactEmailModal: 'Email già censita',
+          contactEmailConfirmModal: 'Email già censita',
         });
         setModalIsOpen(false);
-        resetModalFieldsAndErrors();
       } else {
         addError({
           id: 'UPDATE_STORES',
@@ -297,7 +354,6 @@ const InitiativeStoreDetail = () => {
           component: 'Toast',
           showCloseIcon: true,
         });
-        resetModalFieldsAndErrors();
       }
     } else {
       setModalIsOpen(false);
@@ -306,7 +362,6 @@ const InitiativeStoreDetail = () => {
       setTimeout(() => {
         setShowSuccessAlert(false);
       }, 4000);
-      resetModalFieldsAndErrors();
     }
   };
 
@@ -382,7 +437,7 @@ const InitiativeStoreDetail = () => {
                   <ButtonNaked
                     onClick={() => {
                       setModalIsOpen(true);
-                      resetModalFieldsAndErrors();
+                      // resetModalFieldsAndErrors();
                     }}
                     size="medium"
                     // sx={{ display: 'flex', justifyContent: 'end', alignItems: 'start' }}
