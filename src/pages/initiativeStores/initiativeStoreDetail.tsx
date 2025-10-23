@@ -344,7 +344,13 @@ const InitiativeStoreDetail = () => {
       <Box
         mt={2}
         sx={{
-          '& .MuiTypography-h4': { overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80vw' },
+          '& .MuiTypography-h4': {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: 'calc(95vw - 300px)',
+            minWidth: '0',
+            whiteSpace: 'nowrap',
+          },
         }}
       >
         <BreadcrumbsBox
