@@ -164,9 +164,7 @@ const InitiativeStoreDetail = () => {
           },
         ]
       : []),
-    { label: t('pages.initiativeStores.website'),
-      value: obj?.website,
-    },
+    { label: t('pages.initiativeStores.website'), value: obj?.website },
   ];
 
   const getKeyValueReferent = (obj: any) => [
@@ -388,7 +386,18 @@ const InitiativeStoreDetail = () => {
 
   return (
     <Box>
-      <Box mt={2}>
+      <Box
+        mt={2}
+        sx={{
+          '& .MuiTypography-h4': {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: 'calc(95vw - 300px)',
+            minWidth: '0',
+            whiteSpace: 'nowrap',
+          },
+        }}
+      >
         <BreadcrumbsBox
           backLabel={t('commons.backBtn')}
           items={[t('pages.initiativeStores.title'), storeDetail?.franchiseName]}
