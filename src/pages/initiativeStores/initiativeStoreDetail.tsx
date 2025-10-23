@@ -165,6 +165,7 @@ const InitiativeStoreDetail = () => {
         ]
       : []),
     { label: t('pages.initiativeStores.website'), value: obj?.website },
+    { label: t('pages.initiativeStores.website'), value: obj?.website },
   ];
 
   const getKeyValueReferent = (obj: any) => [
@@ -190,12 +191,24 @@ const InitiativeStoreDetail = () => {
       | 'contactNameModal',
     value: string
   ) => {
+  const handleBlur = (
+    field:
+      | 'contactSurnameModal'
+      | 'contactEmailModal'
+      | 'contactEmailConfirmModal'
+      | 'contactNameModal',
+    value: string
+  ) => {
     const email = field === 'contactEmailModal' ? value : contactEmailModal;
     const emailConfirm = field === 'contactEmailConfirmModal' ? value : contactEmailConfirmModal;
     let errorMsg = '';
     let confirmErrorMsg = '';
     if (!value.trim()) {
       errorMsg = 'Il campo è obbligatorio';
+    } else if (
+      field === 'contactEmailModal' ||
+      (field === 'contactEmailConfirmModal' && !isValidEmail(value))
+    ) {
     } else if (
       field === 'contactEmailModal' ||
       (field === 'contactEmailConfirmModal' && !isValidEmail(value))
@@ -211,7 +224,10 @@ const InitiativeStoreDetail = () => {
       contactEmailModal: field === 'contactEmailModal' ? errorMsg : confirmErrorMsg ?? '',
       contactEmailConfirmModal:
         field === 'contactEmailConfirmModal' ? errorMsg : confirmErrorMsg ?? '',
+      contactEmailConfirmModal:
+        field === 'contactEmailConfirmModal' ? errorMsg : confirmErrorMsg ?? '',
       contactSurnameModal: errorMsg ?? '',
+      contactNameModal: errorMsg ?? '',
       contactNameModal: errorMsg ?? '',
     }));
   };
@@ -248,29 +264,38 @@ const InitiativeStoreDetail = () => {
       },
     ];
     if (!contactNameModal) {
+    if (!contactNameModal) {
       setFieldErrors((prev) => ({
         ...prev,
+        contactNameModal: 'Il campo è obbligatorio',
         contactNameModal: 'Il campo è obbligatorio',
       }));
     }
     if (!contactSurnameModal) {
+    if (!contactSurnameModal) {
       setFieldErrors((prev) => ({
         ...prev,
+        contactSurnameModal: 'Il campo è obbligatorio',
         contactSurnameModal: 'Il campo è obbligatorio',
       }));
     }
     if (!contactEmailModal) {
+    if (!contactEmailModal) {
       setFieldErrors((prev) => ({
         ...prev,
+        contactEmailModal: 'Il campo è obbligatorio',
         contactEmailModal: 'Il campo è obbligatorio',
       }));
     }
     if (!contactEmailConfirmModal) {
+    if (!contactEmailConfirmModal) {
       setFieldErrors((prev) => ({
         ...prev,
         contactEmailConfirmModal: 'Il campo è obbligatorio',
+        contactEmailConfirmModal: 'Il campo è obbligatorio',
       }));
     }
+    if (Object.values(fieldErrors).some((msg) => msg)) {
     if (Object.values(fieldErrors).some((msg) => msg)) {
       return;
     }
