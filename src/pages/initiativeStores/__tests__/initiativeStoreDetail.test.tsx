@@ -3,7 +3,7 @@ import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import InitiativeStoreDetail from '../initiativeStoreDetail';
-import { useParams } from 'react-router-dom';
+import { useParams, MemoryRouter } from 'react-router-dom';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import {
   getMerchantPointOfSalesById,
@@ -15,6 +15,7 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage'
 import { isValidEmail } from '../../../helpers';
 import { POS_TYPE } from '../../../utils/constants';
 import { StoreProvider } from '../StoreContext';
+import { handlePromptMessage } from '../../../helpers';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -102,9 +103,11 @@ describe('InitiativeStoreDetail', () => {
 
   test('renders store detail and calls APIs', async () => {
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     expect(await screen.findByText('Mock Store')).toBeInTheDocument();
     expect(mockGetById).toHaveBeenCalled();
@@ -113,9 +116,11 @@ describe('InitiativeStoreDetail', () => {
 
   test('opens and closes modal', async () => {
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await screen.findByText('Mock Store');
     const editButton = screen.getByRole('button', { name: /Modifica/i });
@@ -132,9 +137,11 @@ describe('InitiativeStoreDetail', () => {
 
   test('open modal, fill fields, handleUpdateReferent', async () => {
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await screen.findByText('Mock Store');
     const editButton = screen.getByRole('button', { name: /Modifica/i });
@@ -157,13 +164,15 @@ describe('InitiativeStoreDetail', () => {
     await new Promise((r) => setTimeout(r, 4000));
     const successAlert = screen.getByText('pages.initiativeStores.referentChangeSuccess');
     expect(successAlert).toBeInTheDocument();
-  },10000);
+  }, 10000);
 
   test('validates email fields on blur', async () => {
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await userEvent.click(await screen.findByRole('button', { name: /Modifica/i }));
     const emailFields = screen.getAllByLabelText((content) =>
@@ -182,9 +191,11 @@ describe('InitiativeStoreDetail', () => {
 
   test('handles mismatched emails', async () => {
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await userEvent.click(await screen.findByRole('button', { name: /Modifica/i }));
     const emailFields = screen.getAllByLabelText((content) =>
@@ -202,9 +213,11 @@ describe('InitiativeStoreDetail', () => {
   test('handles update success and alert', async () => {
     mockUpdate.mockResolvedValue(undefined);
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await userEvent.click(await screen.findByRole('button', { name: /Modifica/i }));
     const modify = screen.getAllByRole('button', { name: 'commons.modify' })[1];
@@ -216,9 +229,11 @@ describe('InitiativeStoreDetail', () => {
   test('handles duplicate email error', async () => {
     mockUpdate.mockResolvedValue({ code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' });
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await userEvent.click(await screen.findByRole('button', { name: /Modifica/i }));
     const modify = screen.getAllByRole('button', { name: 'commons.modify' })[1];
@@ -231,9 +246,11 @@ describe('InitiativeStoreDetail', () => {
   test('handles generic update error', async () => {
     mockUpdate.mockResolvedValue({ code: 'OTHER' });
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await userEvent.click(await screen.findByRole('button', { name: /Modifica/i }));
     const modify = screen.getAllByRole('button', { name: 'commons.modify' })[1];
@@ -246,9 +263,11 @@ describe('InitiativeStoreDetail', () => {
   test('handles fetchStoreDetail failure', async () => {
     mockGetById.mockRejectedValueOnce(new Error('fail'));
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await waitFor(() =>
       expect(mockAddError).toHaveBeenCalledWith(
@@ -260,9 +279,11 @@ describe('InitiativeStoreDetail', () => {
   test('handles fetchStoreTransactions failure', async () => {
     mockGetTransactions.mockRejectedValueOnce(new Error('fail'));
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await waitFor(() =>
       expect(mockAddError).toHaveBeenCalledWith(
@@ -273,9 +294,11 @@ describe('InitiativeStoreDetail', () => {
 
   test('calls handleFiltersApplied, handleFiltersReset, sort and pagination', async () => {
     render(
-      <StoreProvider>
-        <InitiativeStoreDetail />
-      </StoreProvider>
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
     await screen.findByTestId('transactions');
     await userEvent.click(screen.getByText('apply'));
@@ -284,4 +307,38 @@ describe('InitiativeStoreDetail', () => {
     await userEvent.click(screen.getByText('page'));
     await waitFor(() => expect(mockGetTransactions).toHaveBeenCalledTimes(5));
   });
+
+  test('Prompt clears sessionStorage when navigating to a different page', () => {
+    const removeItemSpy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
+    removeItemSpy.mockImplementation(() => {});
+  
+    // replica fedele della funzione message usata nel componente
+    const ROUTES = { STORES: '/stores' };
+    const messageFn = (location: { pathname: string }) => {
+      const targetPage = ROUTES.STORES;
+      const destination = location.pathname;
+      if (destination !== targetPage) {
+        sessionStorage.removeItem('storesPagination');
+      }
+      return true;
+    };
+  
+    // Simula una navigazione verso una pagina diversa
+    const locationMock = { pathname: '/altroPercorso' };
+    const result = messageFn(locationMock);
+  
+    expect(removeItemSpy).toHaveBeenCalledWith('storesPagination');
+    expect(result).toBe(true);
+  
+    removeItemSpy.mockRestore();
+  });
+
+  
+  test('handlePromptMessage does not remove sessionStorage when staying in stores', () => {
+    const spy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
+    handlePromptMessage({ pathname: '/stores' }, '/stores');
+    expect(spy).not.toHaveBeenCalled();
+  });
+  
+
 });

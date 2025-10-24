@@ -155,4 +155,17 @@ describe('<Footer />', () => {
 
     expect(i18n.changeLanguage).toHaveBeenCalledWith('en');
   });
+
+  test('should update selectedLanguage state when onLanguageChanged is called', async () => {
+    const { rerender } = render(<Footer loggedUser={false} />);
+    expect(mockedMuiFooterProps.currentLangCode).toBeUndefined();
+
+    await act(async () => {
+      await mockedMuiFooterProps.onLanguageChanged('en' as LangCode);
+    });
+
+    rerender(<Footer loggedUser={false} />);
+    expect(mockedMuiFooterProps.currentLangCode).toBe('en');
+  });
+
 });
