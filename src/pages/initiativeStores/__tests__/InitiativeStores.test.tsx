@@ -376,4 +376,209 @@ describe('Column rendering logic', () => {
       `${MISSING_DATA_PLACEHOLDER} ${MISSING_DATA_PLACEHOLDER}`
     );
   });
+
+  // Aggiungi questi test alla suite describe('<InitiativeStores />')
+
+  describe('sessionStorage behavior', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      sessionStorage.clear();
+      mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
+      mockStorageRead.mockReturnValue('DUMMY_TOKEN');
+      (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+        content: mockStores,
+        ...mockPagination,
+      });
+      (useLocation as jest.Mock).mockReturnValue({ state: {} });
+    });
+  
+    test('carica paginazione e ordinamento da sessionStorage se presenti e initiativeId corrisponde', async () => {
+      const storedPagination = {
+        pageNo: 2,
+        pageSize: 10,
+        totalElements: 30,
+        totalPages: 3,
+        sort: 'city,desc',
+        initiativeId: mockId,
+      };
+      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+  
+      renderWithContext(<InitiativeStores />);
+  
+      await waitFor(() => {
+        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'merchant-id-01',
+          expect.objectContaining({
+            page: 2,
+            sort: 'city,desc',
+          })
+        );
+      });
+    });
+  
+    test('ignora sessionStorage se initiativeId non corrisponde', async () => {
+      const storedPagination = {
+        pageNo: 2,
+        pageSize: 10,
+        totalElements: 30,
+        totalPages: 3,
+        sort: 'city,desc',
+        initiativeId: 'different-initiative-id',
+      };
+      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+  
+      renderWithContext(<InitiativeStores />);
+  
+      await waitFor(() => {
+        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'merchant-id-01',
+          expect.objectContaining({
+            page: 0,
+            sort: 'asc',
+          })
+        );
+      });
+    });
+  
+    test('ignora sessionStorage se pageNo è undefined', async () => {
+      const storedPagination = {
+        pageSize: 10,
+        totalElements: 30,
+        totalPages: 3,
+        sort: 'city,desc',
+        initiativeId: mockId,
+      };
+      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+  
+      renderWithContext(<InitiativeStores />);
+  
+      await waitFor(() => {
+        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'merchant-id-01',
+          expect.objectContaining({
+            page: 0,
+            sort: 'asc',
+          })
+        );
+      });
+    });
+  
+    test('gestisce sessionStorage senza campo sort', async () => {
+      const storedPagination = {
+        pageNo: 1,
+        pageSize: 10,
+        totalElements: 30,
+        totalPages: 3,
+        initiativeId: mockId,
+      };
+      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+  
+      renderWithContext(<InitiativeStores />);
+  
+      await waitFor(() => {
+        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'merchant-id-01',
+          expect.objectContaining({
+            page: 1,
+            sort: 'asc',
+          })
+        );
+      });
+    });
+  
+    test('converte correttamente il sort string in GridSortModel', async () => {
+      const storedPagination = {
+        pageNo: 0,
+        pageSize: 10,
+        totalElements: 30,
+        totalPages: 3,
+        sort: 'franchiseName,asc',
+        initiativeId: mockId,
+      };
+      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+  
+      renderWithContext(<InitiativeStores />);
+  
+      await waitFor(() => {
+        expect(dataTableProps.sortModel).toEqual([
+          { field: 'franchiseName', sort: 'asc' },
+        ]);
+      });
+    });
+  
+    test('gestisce sort string con formato non valido', async () => {
+      const storedPagination = {
+        pageNo: 0,
+        pageSize: 10,
+        totalElements: 30,
+        totalPages: 3,
+        sort: 'invalidformat',
+        initiativeId: mockId,
+      };
+      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+  
+      renderWithContext(<InitiativeStores />);
+  
+      await waitFor(() => {
+        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'merchant-id-01',
+          expect.objectContaining({
+            page: 0,
+            sort: 'invalidformat',
+          })
+        );
+      });
+    });
+  
+    test('rimuove sessionStorage quando il componente viene smontato (non andando al dettaglio)', async () => {
+      const { unmount: customUnmount } = render(<InitiativeStores />);
+  
+      await waitFor(() => {
+        expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+      });
+  
+      sessionStorage.setItem('storesPagination', JSON.stringify(mockPagination));
+      
+      customUnmount();
+  
+      expect(sessionStorage.getItem('storesPagination')).toBeNull();
+    });
+  
+
+    test('aggiorna sessionStorage quando cambia la paginazione', async () => {
+      renderWithContext(<InitiativeStores />);
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+      });
+  
+      fireEvent.click(screen.getByTestId('paginate-button'));
+  
+      await waitFor(() => {
+        const stored = sessionStorage.getItem('storesPagination');
+        expect(stored).not.toBeNull();
+        const parsed = JSON.parse(stored!);
+        expect(parsed.pageNo).toBe(2);
+        expect(parsed.initiativeId).toBe(mockId);
+      });
+    });
+  
+    test('aggiorna sessionStorage quando cambia l\'ordinamento', async () => {
+      renderWithContext(<InitiativeStores />);
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+      });
+  
+      fireEvent.click(screen.getByTestId('sort-button'));
+  
+      await waitFor(() => {
+        const stored = sessionStorage.getItem('storesPagination');
+        expect(stored).not.toBeNull();
+        const parsed = JSON.parse(stored!);
+        expect(parsed.sort).toBe('contactName,desc');
+        expect(parsed.initiativeId).toBe(mockId);
+      });
+    });
+  });
 });

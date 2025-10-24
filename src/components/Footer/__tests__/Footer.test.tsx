@@ -158,8 +158,17 @@ describe('<Footer />', () => {
 
     expect(i18n.changeLanguage).toHaveBeenCalledWith('en');
   });
-  test('should navigate in home page when pagoPa logo is clicked', () => {
-    render(<Footer loggedUser={false} />);
-    fireEvent.click(screen.getByText('Logo'));
+
+  test('should update selectedLanguage state when onLanguageChanged is called', async () => {
+    const { rerender } = render(<Footer loggedUser={false} />);
+    expect(mockedMuiFooterProps.currentLangCode).toBeUndefined();
+
+    await act(async () => {
+      await mockedMuiFooterProps.onLanguageChanged('en' as LangCode);
+    });
+
+    rerender(<Footer loggedUser={false} />);
+    expect(mockedMuiFooterProps.currentLangCode).toBe('en');
   });
+
 });

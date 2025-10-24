@@ -2,7 +2,7 @@ import { Box, Button, Grid, Typography, TextField, Alert, Slide } from '@mui/mat
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, Prompt } from 'react-router-dom';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { theme } from '@pagopa/mui-italia/dist/theme/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
@@ -23,6 +23,8 @@ import { isValidEmail } from '../../helpers';
 import { formatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { POS_TYPE } from '../../utils/constants';
+import ROUTES from '../../routes';
+import { handlePromptMessage } from '../../helpers';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
@@ -380,8 +382,13 @@ const InitiativeStoreDetail = () => {
     });
   };
 
+
   return (
     <Box>
+      <Prompt
+        when={true}
+        message={(location) => handlePromptMessage(location, ROUTES.STORES)}
+      />
       <Box
         mt={2}
         sx={{
