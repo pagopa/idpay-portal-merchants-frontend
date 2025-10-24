@@ -173,7 +173,9 @@ describe('InitiativeStoreDetail', () => {
       jest.advanceTimersByTime(100);
     });
 
-    expect(await screen.findByText('pages.initiativeStores.referentChangeSuccess')).toBeInTheDocument();
+    expect(
+      await screen.findByText('pages.initiativeStores.referentChangeSuccess')
+    ).toBeInTheDocument();
   });
 
   test('validates email fields on blur', async () => {
@@ -294,12 +296,14 @@ describe('InitiativeStoreDetail', () => {
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
 
-    await waitFor(() => expect(mockAddError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'UPDATE_STORES',
-        displayableTitle: 'errors.duplicateEmailError'
-      })
-    ));
+    await waitFor(() =>
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'UPDATE_STORES',
+          displayableTitle: 'errors.duplicateEmailError',
+        })
+      )
+    );
   });
 
   test('handles generic update error', async () => {
@@ -331,12 +335,14 @@ describe('InitiativeStoreDetail', () => {
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
 
-    await waitFor(() => expect(mockAddError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'UPDATE_STORES',
-        displayableTitle: 'errors.genericTitle'
-      })
-    ));
+    await waitFor(() =>
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'UPDATE_STORES',
+          displayableTitle: 'errors.genericTitle',
+        })
+      )
+    );
   });
 
   test('handles fetchStoreDetail failure', async () => {
@@ -409,7 +415,7 @@ describe('InitiativeStoreDetail', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getAllByText('E-Mail già censita')).toHaveLength(2);
+      expect(screen.getAllByText('E-mail già censita')).toHaveLength(2);
     });
   });
 

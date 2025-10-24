@@ -205,9 +205,7 @@ const InitiativeStoreDetail = () => {
 
       const email = field === 'contactEmailModal' ? trimmed : contactEmailModal?.trim() ?? '';
       const emailConfirm =
-        field === 'contactEmailConfirmModal'
-          ? trimmed
-          : contactEmailConfirmModal?.trim() ?? '';
+        field === 'contactEmailConfirmModal' ? trimmed : contactEmailConfirmModal?.trim() ?? '';
 
       let currentFieldError = '';
       if (!trimmed) {
@@ -220,8 +218,6 @@ const InitiativeStoreDetail = () => {
         ...updatedErrors,
         [field]: currentFieldError,
       };
-
-      // --- 3️⃣ Controllo mismatch ---
       const bothPresent = email && emailConfirm;
       const bothValid = isValidEmail(email) && isValidEmail(emailConfirm);
 
@@ -282,8 +278,8 @@ const InitiativeStoreDetail = () => {
       addErrorModal('contactEmailConfirmModal', 'Inserisci un indirizzo email valido');
     }
     if (contactEmailModal.trim() === storeDetail.contactEmail) {
-      addErrorModal('contactEmailModal', 'E-Mail già censita');
-      addErrorModal('contactEmailConfirmModal', 'E-Mail già censita');
+      addErrorModal('contactEmailModal', 'E-mail già censita');
+      addErrorModal('contactEmailConfirmModal', 'E-mail già censita');
     }
 
     if (
@@ -451,6 +447,8 @@ const InitiativeStoreDetail = () => {
                       setFieldErrors({});
                       setContactEmailModal(storeDetail.contactEmail);
                       setContactEmailConfirmModal(storeDetail.contactEmail);
+                      setContactNameModal(storeDetail.contactName);
+                      setContactSurnameModal(storeDetail.contactSurname);
                     }}
                     size="medium"
                     // sx={{ display: 'flex', justifyContent: 'end', alignItems: 'start' }}
