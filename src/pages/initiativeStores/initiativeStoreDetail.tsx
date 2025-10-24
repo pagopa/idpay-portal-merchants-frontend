@@ -552,7 +552,7 @@ const InitiativeStoreDetail = () => {
               onBlur={() => handleBlur('contactEmailModal', contactEmailModal)}
               onChange={(e) => {
                 setContactEmailModal(e.target.value);
-                setFieldErrors((prev) => ({ ...prev, contactEmailModal: '' }));
+                setFieldErrors((prev) => ({ ...prev, contactEmailModal: '', contactEmailConfirmModal: '' }));
               }}
               error={Boolean(fieldErrors.contactEmailModal)}
               helperText={fieldErrors.contactEmailModal}
@@ -571,7 +571,7 @@ const InitiativeStoreDetail = () => {
               onBlur={() => handleBlur('contactEmailConfirmModal', contactEmailConfirmModal)}
               onChange={(e) => {
                 setContactEmailConfirmModal(e.target.value);
-                setFieldErrors((prev) => ({ ...prev, contactEmailConfirmModal: '' }));
+                setFieldErrors((prev) => ({ ...prev, contactEmailConfirmModal: '', contactEmailModal: '' }));
               }}
               error={Boolean(fieldErrors.contactEmailConfirmModal)}
               helperText={fieldErrors.contactEmailConfirmModal}
