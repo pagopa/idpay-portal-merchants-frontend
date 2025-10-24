@@ -216,7 +216,7 @@
       "phone": "Telefono",
       "geoLink": "Landing google",
       "website": "Sito web",
-      "modalDescription": "Qui puoi modificare  i dati del referente di questo punto vendita.<Se modifica l' indirizzo email gli verrà inviata una email di conferma, e verranno invalidate le credenziali inviate alla precedente email>.",
+      "modalDescription": "Qui puoi modificare i dati del referente di questo punto vendita. Se procedi, il nuovo referente riceverà un’email di conferma all’indirizzo indicato. Le credenziali di accesso del vecchio referente non saranno più valide.",
       "referentChangeSuccess": "Dati modificati con successo",
       "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati"
     },
