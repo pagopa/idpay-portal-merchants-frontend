@@ -1,10 +1,12 @@
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import Footer from '../Footer';
 import { Footer as MuiItaliaFooter, LangCode } from '@pagopa/mui-italia';
+import { pagoPALink } from '../FooterConfig';
 
 let mockedMuiFooterProps: any;
+
+const mockedPagoPALink = { ...pagoPALink };
 
 jest.mock('@pagopa/mui-italia/dist/components/Footer/Footer', () => ({
   Footer: (props) => {
@@ -19,6 +21,7 @@ jest.mock('@pagopa/mui-italia/dist/components/Footer/Footer', () => ({
         <button data-testid="changelang" onClick={() => props.onLanguageChanged('en')}>
           Change Lang
         </button>
+        <button {...mockedPagoPALink}>Logo</button>
         <button onClick={() => props.onExit(() => {})}>Exit</button>
       </div>
     );
