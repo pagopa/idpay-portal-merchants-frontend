@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import PrivacyPolicy from '../PrivacyPolicy';
 import { useOneTrustNotice } from '../../../hooks/useOneTrustNotice';
@@ -24,26 +24,16 @@ jest.mock('../../../routes', () => ({
   PRIVACY_POLICY: '/mock-privacy-route',
 }));
 
-const mockedUseOneTrustNotice = useOneTrustNotice as jest.Mock;
-
 describe('PrivacyPolicy', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('should call useOneTrustNotice and render OneTrustContentWrapper with correct props', () => {
+  test('should render component and navigate back', () => {
     render(<PrivacyPolicy />);
 
-    // expect(mockedUseOneTrustNotice).toHaveBeenCalledTimes(1);
-    // expect(mockedUseOneTrustNotice).toHaveBeenCalledWith(
-    //   ENV.ONE_TRUST.PRIVACY_POLICY_JSON_URL,
-    //   expect.any(Boolean),
-    //   expect.any(Function),
-    //   routes.PRIVACY_POLICY
-    // );
+    const backButton = screen.getByTestId('back-stores-button');
 
-    // const wrapper = screen.getByTestId('onetrust-wrapper');
-    // expect(wrapper).toBeInTheDocument();
-    // expect(wrapper).toHaveAttribute('data-idselector', ENV.ONE_TRUST.PRIVACY_POLICY_ID);
+    fireEvent.click(backButton);
   });
 });

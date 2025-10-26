@@ -58,17 +58,19 @@ describe('PointsOfSaleForm full coverage', () => {
     expect(defaultProps.onValidationChange).toHaveBeenCalled();
   });
 
-  it('should add and remove sales points correctly', () => {
+  it('should add and remove sales points correctly', async () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const addButton = screen.getByText('Aggiungi un altro punto vendita');
 
-    fireEvent.click(addButton);
-    fireEvent.click(addButton);
+    await fireEvent.click(addButton);
+    await fireEvent.click(addButton);
 
     expect(screen.getAllByText(/pages.pointOfSales.title/)).toHaveLength(3);
 
-    const deleteIcons = screen.getAllByTestId('DeleteOutlineIcon');
-    fireEvent.click(deleteIcons[0]);
+    let deleteButtons = await screen.findAllByTestId('DeleteOutlineIcon');
+    expect(deleteButtons).toHaveLength(2);
+
+    fireEvent.click(deleteButtons[0]);
     expect(screen.getAllByText(/pages.pointOfSales.title/)).toHaveLength(2);
   });
 
@@ -169,12 +171,12 @@ describe('PointsOfSaleForm full coverage', () => {
     expect(openSpy).toHaveBeenCalledWith('https://valid.com', '_blank', 'noopener,noreferrer');
   });
 
-  it('should not add more than 5 points of sale', () => {
+  it('should not add more than 5 points of sale', async () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const addButton = screen.getByText('Aggiungi un altro punto vendita');
 
     for (let i = 0; i < 6; i++) {
-      fireEvent.click(addButton);
+      await fireEvent.click(addButton);
     }
 
     expect(screen.getAllByText(/pages.pointOfSales.title/)).toHaveLength(5);
@@ -275,15 +277,15 @@ describe('PointsOfSaleForm full coverage', () => {
     });
   });
 
-  it('should handle add/remove multiple points of sale', () => {
+  it('should handle add/remove multiple points of sale', async () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const addButton = screen.getByText('Aggiungi un altro punto vendita');
-    fireEvent.click(addButton);
-    fireEvent.click(addButton);
+    await fireEvent.click(addButton);
+    await fireEvent.click(addButton);
 
-    const deleteIcons = screen.getAllByTestId('DeleteOutlineIcon');
-    fireEvent.click(deleteIcons[1]);
-    fireEvent.click(deleteIcons[0]);
+    let deleteButtons = await screen.findAllByTestId('DeleteOutlineIcon');
+    await fireEvent.click(deleteButtons[1]);
+    await fireEvent.click(deleteButtons[0]);
   });
 
   it('should handle Verifica URL button', () => {
@@ -352,13 +354,13 @@ describe('PointsOfSaleForm additional coverage', () => {
     expect(screen.getByLabelText('E-mail').getAttribute('aria-invalid')).toBeTruthy();
   });
 
-  it('should handle multiple physical sales points with channels', () => {
+  it('should handle multiple physical sales points with channels', async () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const addButton = screen.getByText('Aggiungi un altro punto vendita');
-    fireEvent.click(addButton);
+    await fireEvent.click(addButton);
 
-    const deleteIcons = screen.getAllByTestId('DeleteOutlineIcon');
-    fireEvent.click(deleteIcons[0]);
+    let deleteButtons = await screen.findAllByTestId('DeleteOutlineIcon');
+    await fireEvent.click(deleteButtons[0]);
   });
 
   it.skip('should handle complete and incomplete autocomplete addresses', async () => {
@@ -471,13 +473,18 @@ describe('PointsOfSaleForm validation tests', () => {
     openSpy.mockRestore();
   });
 
-  it('adds and removes sales points', () => {
+  it('adds and removes sales points', async () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const addButton = screen.getByText('Aggiungi un altro punto vendita');
     fireEvent.click(addButton);
 
-    const deleteIcons = screen.getAllByTestId('DeleteOutlineIcon');
-    fireEvent.click(deleteIcons[0]);
+    let deleteButtons = await screen.findAllByTestId('DeleteOutlineIcon');
+    expect(deleteButtons).toHaveLength(1);
+
+    fireEvent.click(deleteButtons[0]);
+
+    expect(screen.queryAllByTestId('DeleteOutlineIcon')).toHaveLength(0);
+
   });
 });
 

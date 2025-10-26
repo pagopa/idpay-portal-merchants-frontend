@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { LangCode } from '@pagopa/mui-italia';
 import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/config/env';
+import ROUTES from '../../routes';
 import { ENV } from '../../utils/env';
 import { LANGUAGES, pagoPALink } from './FooterConfig';
 
@@ -171,10 +172,9 @@ export default function Footer({
   const postLoginLinks: Array<FooterLinksType> = [
     {
       label: t('common.footer.postLoginLinks.privacyPolicy'),
-      href: ENV.CONFIG.FOOTER.LINK.PRIVACYPOLICY,
+      href: ROUTES.PRIVACY_POLICY,
       ariaLabel: 'Vai al link: Privacy policy',
       linkType: 'internal',
-      onClick: () => onClickNavigate(ENV.CONFIG.FOOTER.LINK.PRIVACYPOLICY),
     },
     {
       label: t('common.footer.postLoginLinks.protectionofpersonaldata'),
@@ -185,10 +185,9 @@ export default function Footer({
     },
     {
       label: t('common.footer.postLoginLinks.termsandconditions'),
-      href: ENV.CONFIG.FOOTER.LINK.TERMSANDCONDITIONS,
+      href: ROUTES.TOS,
       ariaLabel: 'Vai al link: Termini e condizioni',
       linkType: 'internal',
-      onClick: () => onClickNavigate(ENV.CONFIG.FOOTER.LINK.TERMSANDCONDITIONS),
     },
     {
       label: t('common.footer.postLoginLinks.accessibility'),

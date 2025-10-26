@@ -47,6 +47,8 @@ const InitiativeStoreDetail = () => {
   const [fieldErrors, setFieldErrors] = useState<{
     contactEmailModal?: string;
     contactEmailConfirmModal?: string;
+    contactSurnameModal?: string;
+    contactNameModal?: string;
   }>({});
   const { t } = useTranslation();
   const { id, store_id } = useParams<RouteParams>();
@@ -162,9 +164,7 @@ const InitiativeStoreDetail = () => {
           },
         ]
       : []),
-    { label: t('pages.initiativeStores.website'),
-      value: obj?.website,
-    },
+    { label: t('pages.initiativeStores.website'), value: obj?.website },
   ];
 
   const getKeyValueReferent = (obj: any) => [
@@ -182,14 +182,24 @@ const InitiativeStoreDetail = () => {
     console.log('Callback dopo reset filtri');
     void fetchStoreTransactions({});
   };
-  const handleBlur = (field: 'contactEmailModal' | 'contactEmailConfirmModal', value: string) => {
+  const handleBlur = (
+    field:
+      | 'contactSurnameModal'
+      | 'contactEmailModal'
+      | 'contactEmailConfirmModal'
+      | 'contactNameModal',
+    value: string
+  ) => {
     const email = field === 'contactEmailModal' ? value : contactEmailModal;
     const emailConfirm = field === 'contactEmailConfirmModal' ? value : contactEmailConfirmModal;
     let errorMsg = '';
     let confirmErrorMsg = '';
     if (!value.trim()) {
       errorMsg = 'Il campo è obbligatorio';
-    } else if (!isValidEmail(value)) {
+    } else if (
+      field === 'contactEmailModal' ||
+      (field === 'contactEmailConfirmModal' && !isValidEmail(value))
+    ) {
       errorMsg = 'Inserisci un indirizzo email valido';
     }
     if (email.trim() && emailConfirm.trim() && email !== emailConfirm) {
@@ -201,7 +211,16 @@ const InitiativeStoreDetail = () => {
       contactEmailModal: field === 'contactEmailModal' ? errorMsg : confirmErrorMsg ?? '',
       contactEmailConfirmModal:
         field === 'contactEmailConfirmModal' ? errorMsg : confirmErrorMsg ?? '',
+      contactSurnameModal: errorMsg ?? '',
+      contactNameModal: errorMsg ?? '',
     }));
+  };
+  const resetModalFieldsAndErrors = () => {
+    setFieldErrors({});
+    setContactEmailConfirmModal('');
+    setContactEmailModal('');
+    setContactSurnameModal('');
+    setContactNameModal('');
   };
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
@@ -228,6 +247,33 @@ const InitiativeStoreDetail = () => {
         contactEmail: contactEmailModal,
       },
     ];
+    if (!contactNameModal) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        contactNameModal: 'Il campo è obbligatorio',
+      }));
+    }
+    if (!contactSurnameModal) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        contactSurnameModal: 'Il campo è obbligatorio',
+      }));
+    }
+    if (!contactEmailModal) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        contactEmailModal: 'Il campo è obbligatorio',
+      }));
+    }
+    if (!contactEmailConfirmModal) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        contactEmailConfirmModal: 'Il campo è obbligatorio',
+      }));
+    }
+    if (Object.values(fieldErrors).some((msg) => msg)) {
+      return;
+    }
     const response = await updateMerchantPointOfSales(merchantId, obj);
     if (response) {
       if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
@@ -247,6 +293,7 @@ const InitiativeStoreDetail = () => {
           contactEmailConfirmModal: 'Email già censinta',
         });
         setModalIsOpen(false);
+        resetModalFieldsAndErrors();
       } else {
         addError({
           id: 'UPDATE_STORES',
@@ -259,6 +306,7 @@ const InitiativeStoreDetail = () => {
           component: 'Toast',
           showCloseIcon: true,
         });
+        resetModalFieldsAndErrors();
       }
     } else {
       setModalIsOpen(false);
@@ -267,6 +315,7 @@ const InitiativeStoreDetail = () => {
       setTimeout(() => {
         setShowSuccessAlert(false);
       }, 4000);
+      resetModalFieldsAndErrors();
     }
   };
 
@@ -292,7 +341,18 @@ const InitiativeStoreDetail = () => {
 
   return (
     <Box>
-      <Box mt={2}>
+      <Box
+        mt={2}
+        sx={{
+          '& .MuiTypography-h4': {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: 'calc(95vw - 300px)',
+            minWidth: '0',
+            whiteSpace: 'nowrap',
+          },
+        }}
+      >
         <BreadcrumbsBox
           backLabel={t('commons.backBtn')}
           items={[t('pages.initiativeStores.title'), storeDetail?.franchiseName]}
@@ -340,7 +400,10 @@ const InitiativeStoreDetail = () => {
               <Grid item xs={3}>
                 <Box display="flex" flexDirection="row" justifyContent="flex-end">
                   <ButtonNaked
-                    onClick={() => setModalIsOpen(true)}
+                    onClick={() => {
+                      setModalIsOpen(true);
+                      resetModalFieldsAndErrors();
+                    }}
                     size="medium"
                     // sx={{ display: 'flex', justifyContent: 'end', alignItems: 'start' }}
                     startIcon={<Edit />}
@@ -403,6 +466,9 @@ const InitiativeStoreDetail = () => {
               label={t('pages.initiativeStores.contactName')}
               value={contactNameModal}
               onChange={(e) => setContactNameModal(e.target.value)}
+              onBlur={() => handleBlur('contactNameModal', contactNameModal)}
+              error={Boolean(fieldErrors.contactNameModal)}
+              helperText={fieldErrors.contactNameModal}
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -414,7 +480,10 @@ const InitiativeStoreDetail = () => {
               size="small"
               label={t('pages.initiativeStores.contactSurname')}
               value={contactSurnameModal}
+              onBlur={() => handleBlur('contactSurnameModal', contactSurnameModal)}
               onChange={(e) => setContactSurnameModal(e.target.value)}
+              error={Boolean(fieldErrors.contactSurnameModal)}
+              helperText={fieldErrors.contactSurnameModal}
             />
           </Grid>
           <Grid item xs={12} md={12}>
