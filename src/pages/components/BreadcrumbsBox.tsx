@@ -24,7 +24,18 @@ const BreadcrumbsBox = ({ backLabel, items }: Props) => {
           {backLabel}
         </ButtonNaked>
         {items.map((label, index) => (
-          <Typography color="text.primary" variant="body2" key={index}>
+          <Typography
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: 'calc(95vw - 300px)',
+              minWidth: '0',
+              whiteSpace: 'nowrap',
+            }}
+            color="text.primary"
+            variant="body2"
+            key={index}
+          >
             {label}
           </Typography>
         ))}
