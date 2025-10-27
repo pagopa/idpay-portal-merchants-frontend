@@ -45,7 +45,7 @@ const TOS = () => {
                 <div
                   className="content"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(tosHTML.html) }}
-                ></div>
+                />
               </Grid>
             </Grid>
           </Box>

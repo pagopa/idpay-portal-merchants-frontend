@@ -182,6 +182,7 @@ const InitiativeStoreDetail = () => {
 
   const handleFiltersReset = () => {
     console.log('Callback dopo reset filtri');
+    setTransactionsFilters({});
     void fetchStoreTransactions({});
   };
   const handleBlur = (
@@ -381,14 +382,9 @@ const InitiativeStoreDetail = () => {
       ...(sortParam && { sort: sortParam }),
     });
   };
-
-
   return (
     <Box>
-      <Prompt
-        when={true}
-        message={(location) => handlePromptMessage(location, ROUTES.STORES)}
-      />
+      <Prompt when={true} message={(location) => handlePromptMessage(location, ROUTES.STORES)} />
       <Box
         mt={2}
         sx={{
@@ -552,7 +548,11 @@ const InitiativeStoreDetail = () => {
               onBlur={() => handleBlur('contactEmailModal', contactEmailModal)}
               onChange={(e) => {
                 setContactEmailModal(e.target.value);
-                setFieldErrors((prev) => ({ ...prev, contactEmailModal: '', contactEmailConfirmModal: '' }));
+                setFieldErrors((prev) => ({
+                  ...prev,
+                  contactEmailModal: '',
+                  contactEmailConfirmModal: '',
+                }));
               }}
               error={Boolean(fieldErrors.contactEmailModal)}
               helperText={fieldErrors.contactEmailModal}
@@ -571,7 +571,11 @@ const InitiativeStoreDetail = () => {
               onBlur={() => handleBlur('contactEmailConfirmModal', contactEmailConfirmModal)}
               onChange={(e) => {
                 setContactEmailConfirmModal(e.target.value);
-                setFieldErrors((prev) => ({ ...prev, contactEmailConfirmModal: '', contactEmailModal: '' }));
+                setFieldErrors((prev) => ({
+                  ...prev,
+                  contactEmailConfirmModal: '',
+                  contactEmailModal: '',
+                }));
               }}
               error={Boolean(fieldErrors.contactEmailConfirmModal)}
               helperText={fieldErrors.contactEmailConfirmModal}
