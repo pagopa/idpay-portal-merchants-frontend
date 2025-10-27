@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent} from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
@@ -274,6 +274,11 @@ describe('InitiativeStoresUpload', () => {
     );
   });
 
+  it('Click to open manual link', () => {
+    render(<InitiativeStoresUpload />);
+    fireEvent.click(screen.getByText('pages.initiativeStores.manualLink'));
+  });
+
   it('sets salesPoints when form changes', () => {
     render(<InitiativeStoresUpload />);
     const instance = screen.getByTestId('confirm-stores-button');
@@ -368,8 +373,8 @@ describe('InitiativeStoresUpload', () => {
       message: 'Error with SailPoint',
     });
 
-     render(<InitiativeStoresUpload />);
-     await fillFormForSuccess(screen);
+    render(<InitiativeStoresUpload />);
+    await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
 
@@ -389,7 +394,7 @@ describe('InitiativeStoresUpload', () => {
     const rendered = await render(<InitiativeStoresUpload />);
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  },  10000);
+  }, 10000);
 });
 
 const fillFormForSuccess = async (screen: any) => {
@@ -409,10 +414,12 @@ const fillFormForSuccess = async (screen: any) => {
   await userEvent.type(contactSurnameField, 'TechStore');
 
   const addressField = screen.getAllByRole('combobox')[0];
-  fireEvent.change(addressField, {target: {value: 'Via roma 100' }});
+  fireEvent.change(addressField, { target: { value: 'Via roma 100' } });
 
   const addressAutocompleteItem = await screen.findAllByRole('option');
   fireEvent.click(addressAutocompleteItem[3]);
   // const addressFieldFilled = screen.getAllByRole('combobox')[0];
-
 };
+function t(arg0: string): import('@testing-library/dom').Matcher {
+  throw new Error('Function not implemented.');
+}

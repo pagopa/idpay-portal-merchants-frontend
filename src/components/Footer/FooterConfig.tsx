@@ -4,6 +4,7 @@ import { CONFIG } from '@pagopa/selfcare-common-frontend/config/env';
 export const pagoPALink: CompanyLinkType = {
   href: CONFIG.FOOTER.LINK.PAGOPALINK,
   ariaLabel: 'Link: vai al sito di PagoPA S.p.A.',
+  onClick: () => window.open(CONFIG.FOOTER.LINK.PAGOPALINK),
 };
 
 declare const window: any;
