@@ -20,8 +20,8 @@ variables:
 
   # global variables
   react_app_pagopa_help_email: '$(REACT_APP_ASSISTANCE_EMAIL)'
-  react_app_pagopa_manual_link: https://developer.pagopa.it/pari/guides/manuale-tecnico-venditore
-  react_app_pagopa_help_link: https://developer.pagopa.it/pari/guides/manuale-tecnico-venditore/contatti
+  react_app_pagopa_manual_link: https://developer.pagopa.it/pari/guides/bonuselettrodomestici-manuale-tecnico-venditore
+  react_app_pagopa_help_link: https://developer.pagopa.it/pari/guides/bonuselettrodomestici-manuale-tecnico-venditore/contatti
 
   ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/uat'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix')) }}:
     environment: 'UAT'

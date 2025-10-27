@@ -132,3 +132,10 @@ export const isValidUrl = (urlToCheck: string) => {
 
 export const generateUniqueId = () =>
   Date.now().toString() + Math.random().toString(36).substring(2, 9);
+
+export const handlePromptMessage = (location: { pathname: string }, targetPage: string) => {
+  if (location.pathname !== targetPage) {
+    sessionStorage.removeItem('storesPagination');
+  }
+  return true;
+};
