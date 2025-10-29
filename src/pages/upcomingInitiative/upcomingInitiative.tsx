@@ -2,7 +2,6 @@ import { Box, Button, Typography } from '@mui/material';
 import {useTranslation} from "react-i18next";
 import {useUnloadEventOnExit} from "@pagopa/selfcare-common-frontend/lib/hooks/useUnloadEventInterceptor";
 import {customExitAction} from "../../helpers";
-import {UPCOMING_INITIATIVE_DAY} from "../../utils/constants";
 import Layout from "../../components/Layout/Layout";
 
 const UpcomingInitiative = () => {
@@ -32,7 +31,7 @@ const UpcomingInitiative = () => {
                 <Box>
                     <Typography variant="h4" py={1}>{ t('pages.upcomingInitiative.title') }</Typography>
                     <Typography variant="body1" py={1}>
-                        { t('pages.upcomingInitiative.subTitle',  {x: UPCOMING_INITIATIVE_DAY}) }
+                        { t('pages.upcomingInitiative.subTitle') }
                     </Typography>
                 </Box>
 
