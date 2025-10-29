@@ -384,7 +384,7 @@ const InitiativeStoreDetail = () => {
   };
   return (
     <Box>
-      <Prompt when={true} message={(location) => handlePromptMessage(location, ROUTES.STORES)} />
+      <Prompt when={true} message={(location) => handlePromptMessage(location, ROUTES.STORES  )} />
       <Box
         mt={2}
         sx={{
