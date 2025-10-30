@@ -11,7 +11,7 @@ const ROUTES = {
   STORES: `${BASE_ROUTE}/:id/punti-vendita/`,
   REPORTED_USERS: `${BASE_ROUTE}/:id/utenti-segnalati`,
   SIDE_MENU_REPORTED_USERS: `utenti-segnalati`,
-  REPORTED_USERS_INSERT: `${BASE_ROUTE}/:id/utenti-segnalati/inserisci`,
+  REPORTED_USERS_INSERT: `${BASE_ROUTE}/:id/utenti-segnalati/segnalazione-utenti`,
   STORES_DETAIL: `${BASE_ROUTE}/:id/punti-vendita/:store_id`,
   STORES_UPLOAD: `${BASE_ROUTE}/:id/punti-vendita/censisci`,
   SIDE_MENU_STORES: `punti-vendita`,

@@ -12,7 +12,7 @@ export interface GetPointOfSalesFilters {
 }
 
 export interface GetReportedUsersFilters {
-  cf?: string;
+  cf: string;
   gtin?: string;
   status?: string;
   page?: number;
@@ -75,4 +75,3 @@ export interface SalePointFormDTO {
 
     zipCode?: string;
 }
-    

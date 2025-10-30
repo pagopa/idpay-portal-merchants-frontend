@@ -9,8 +9,9 @@ import DataTable from '../../components/dataTable/DataTable';
 import { GetReportedUsersFilters } from '../../types/types';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import routes from '../../routes';
-import SearchTaxCode, { isValidCF } from './SearchTaxCode';
 import MsgResult from './MsgResult';
+import { isValidCF } from './helpers';
+import SearchTaxCode from './SearchTaxCode';
 
 const NoResultPaper: React.FC<{ translationKey: string }> = ({ translationKey }) => {
   const { t } = useTranslation();
