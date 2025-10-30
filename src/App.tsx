@@ -22,7 +22,7 @@ import InitiativeStores from './pages/initiativeStores/InitiativeStores';
 import InitiativeStoreDetail from './pages/initiativeStores/initiativeStoreDetail';
 import { StoreProvider } from './pages/initiativeStores/StoreContext';
 import ReportedUsers from './pages/reportedUsers/reportedUsers';
-
+import InsertReportedUser from './pages/reportedUsers/insertReportedUser';
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => (
     <Layout>
@@ -33,48 +33,50 @@ const SecuredRoutes = withLogin(
         <Route path={routes.ASSISTANCE} exact={true}>
           <Assistance />
         </Route>
-        
-          <Route path={routes.TOS} exact={true}>
-            <TOS />
-          </Route>
-        
-          <Route path={routes.PRIVACY_POLICY} exact={true}>
-            <PrivacyPolicy />
-          </Route>
-      
+
+        <Route path={routes.TOS} exact={true}>
+          <TOS />
+        </Route>
+
+        <Route path={routes.PRIVACY_POLICY} exact={true}>
+          <PrivacyPolicy />
+        </Route>
+
         {/* <Route path={routes.DISCOUNTS} exact={true}>
             <InitiativeDiscounts />
           </Route> */}
-          <Route path={routes.OVERVIEW} exact={true}>
-            <InitiativeOverview />
-          </Route>
-          <Route path={routes.STORES_UPLOAD} exact={true}>
-            <InitiativeStoresUpload />
-          </Route>
-          <Route path={routes.STORES} exact={true}>
-            <InitiativeStores />
-          </Route>
-          <Route path={routes.REPORTED_USERS} exact={true}>
-            <ReportedUsers />
-          </Route>
-          <Route path={routes.STORES_DETAIL} exact={true}>
-            <StoreProvider>
-              <InitiativeStoreDetail />
-            </StoreProvider>
-          </Route>
-          <Route path={routes.NEW_DISCOUNT} exact={true}>
-            <NewDiscount />
-          </Route>
-          <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
-            <AcceptNewDiscount />
-          </Route>
-          <Route path="*">
-            <Redirect to={routes.HOME} />
-          </Route>
-        </Switch>
-      </Layout>
-    )
-   )
+        <Route path={routes.OVERVIEW} exact={true}>
+          <InitiativeOverview />
+        </Route>
+        <Route path={routes.STORES_UPLOAD} exact={true}>
+          <InitiativeStoresUpload />
+        </Route>
+        <Route path={routes.STORES} exact={true}>
+          <InitiativeStores />
+        </Route>
+        <Route path={routes.REPORTED_USERS} exact={true}>
+          <ReportedUsers />
+        </Route>
+        <Route path={routes.REPORTED_USERS_INSERT} exact={true}>
+          <InsertReportedUser />
+        </Route>
+        <Route path={routes.STORES_DETAIL} exact={true}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Route>
+        <Route path={routes.NEW_DISCOUNT} exact={true}>
+          <NewDiscount />
+        </Route>
+        <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
+          <AcceptNewDiscount />
+        </Route>
+        <Route path="*">
+          <Redirect to={routes.HOME} />
+        </Route>
+      </Switch>
+    </Layout>
+  ))
 );
 
 const App = () => (

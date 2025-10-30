@@ -226,14 +226,33 @@
       "confirmContactEmail": "Conferma indirizzo e-mail"
     },
     "reportedUsers": {
-      "title": "Utenti segnalati",
-      "subtitle": "Visualizza gli utenti che non hanno consegnato il RAEE dichiarato.",
+      "title": "Segnalazione utenti",
+      "subtitle": "Comunica gli utenti che hanno beneficiato del bonus, ma non hanno consegnato un elettrodomestico obsoleto.",
+      "filterBtn": "Cerca",
       "reportUser": "Segnala utente",
       "userCf": "Beneficiario",
       "date": "Data e ora",
       "discountCode": "Codice sconto",
       "cf": "Cerca per Codice Fiscale",
-      "noUsers": "Non ci sono utenti segnalati per questa iniziativa."
+      "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
+      "noResultUser": "Codice Fiscale assente.",
+      "insertCf":"Inserire Codice Fiscale"
+    },
+    "insertReportedUser": {
+      "title": "Segnala utente",
+      "subtitle": "Segnala un utente che non ha presentato l'elettrodomestico obsoleto.",
+      "mtTitle":"La segnalazione servirà solo ai fini di controllo e monitoraggio e non influenza la richiesta di rimborso al suo acquisto.",
+      "searchTitle":"Qual è il codice fiscale?",
+      "searchDescription":"Inserire il codice fiscale dell'utente",
+      "filterBtn": "Continua",
+      "reportUser": "Segnala utente",
+      "userCf": "Beneficiario",
+      "date": "Data e ora",
+      "discountCode": "Codice sconto",
+      "cf": "Cerca per Codice Fiscale",
+      "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
+      "noResultUser": "Codice Fiscale assente.",
+      "insertCf":"Inserire Codice Fiscale"
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
