@@ -1,7 +1,8 @@
 
-import { Box, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Box, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { theme } from '@pagopa/mui-italia';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -16,8 +17,6 @@ import TransactionDetail from './TransactionDetail';
 import getStatus from './useStatus';
 import getDetailFieldList from './useDetailList';
 import CurrencyColumn from './CurrencyColumn';
-
-
 
 
 
@@ -39,7 +38,14 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState<boolean>(false);
+  const [gtinError, setGtinError] = useState<string>('');
+  // const [gtinValue, setGtinValue] = useState<string>('');
   const listItemDetail = getDetailFieldList();
+
+    const infoStyles = {
+      fontWeight: theme.typography.fontWeightRegular,
+      fontSize: theme.typography.fontSize,
+    };
 
   useEffect(() => {
     setRows([...transactions]);
@@ -72,10 +78,11 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     {
       field: 'elettrodomestico',
       headerName: 'Elettrodomestico',
-      flex: 2.2,
+      flex: 2,
       editable: false,
       disableColumnMenu: true,
       valueGetter: (params) => params.row?.additionalProperties?.productName,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
     {
       field: 'updateDate',
@@ -83,6 +90,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 1,
       editable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
     {
       field: 'fiscalCode',
@@ -91,6 +99,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       editable: false,
       sortable: false,
       disableColumnMenu: true,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
     {
       field: 'effectiveAmountCents',
@@ -176,6 +185,36 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     setDrawerOpened(newOpen);
   };
 
+ const handleGtinChange = (event: any) => {
+  const value = event.target.value;
+  
+   if (value.includes(' ') || value.length > 14) {
+      return;
+    }
+  
+  const alphanumericRegex = /^[a-zA-Z0-9]*$/;
+  
+  if (!alphanumericRegex.test(value)) {
+    setGtinError('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.');
+    return;
+  }
+  
+  setGtinError('');
+  formik.handleChange(event);
+};
+
+  const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
+    <Tooltip
+      title={value && value.length >= tooltipThreshold ? value : ''}
+      placement="top"
+      arrow={true}
+    >
+      <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
+        {value && value !== '' ? value : '-'}
+      </Typography>
+    </Tooltip>
+  );
+
   return (
     <Box width={'100%'}>
       <FiltersForm
@@ -210,8 +249,11 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
               role="input"
               InputLabelProps={{ required: false }}
               value={formik.values.productGtin}
-              onChange={(e) => formik.handleChange(e)}
+              onChange={(e) => handleGtinChange(e)}
               size="small"
+              inputProps={{ maxLength: 14 }}
+              error={!!gtinError}
+              helperText={gtinError}
             />
           </FormControl>
         </Grid>

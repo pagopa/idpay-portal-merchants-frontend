@@ -503,6 +503,15 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 
   };
 
+  const deleteSalesPoint = (index: number) => {
+    setSalesPoints((prev) => prev.filter((_, i) => i !== index));
+    const newErrors = Object.fromEntries(
+      Object.entries(errors).filter(([key]) => Number(key) !== index)
+    );
+    setErrors(newErrors);
+    
+  };
+
 
   return (
     <Box bgcolor={'background.paper'} boxShadow={3}>
@@ -525,7 +534,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                   <Grid item mt={'5px'}>
                     <DeleteOutlineIcon
                       cursor={'pointer'}
-                      onClick={() => setSalesPoints((prev) => prev.filter((_, i) => i !== index))}
+                      onClick={() => deleteSalesPoint(index)}
                       fontSize="small"
                       htmlColor={theme.palette.error.dark}
                     />
