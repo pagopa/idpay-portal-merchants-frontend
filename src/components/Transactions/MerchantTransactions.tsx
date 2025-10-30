@@ -1,5 +1,15 @@
-
-import { Box, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia';
@@ -18,8 +28,6 @@ import getStatus from './useStatus';
 import getDetailFieldList from './useDetailList';
 import CurrencyColumn from './CurrencyColumn';
 
-
-
 interface MerchantTransactionsProps {
   transactions: Array<PointOfSaleTransactionProcessedDTO>;
   handleFiltersApplied: (filters: any) => void;
@@ -30,9 +38,15 @@ interface MerchantTransactionsProps {
   paginationModel?: any;
 }
 
-
-
-const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFiltersReset, handleSortChange, sortModel, handlePaginationPageChange, paginationModel }: MerchantTransactionsProps) => {
+const MerchantTransactions = ({
+  transactions,
+  handleFiltersApplied,
+  handleFiltersReset,
+  handleSortChange,
+  sortModel,
+  handlePaginationPageChange,
+  paginationModel,
+}: MerchantTransactionsProps) => {
   const { t } = useTranslation();
   const [rows, setRows] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
@@ -42,10 +56,10 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   // const [gtinValue, setGtinValue] = useState<string>('');
   const listItemDetail = getDetailFieldList();
 
-    const infoStyles = {
-      fontWeight: theme.typography.fontWeightRegular,
-      fontSize: theme.typography.fontSize,
-    };
+  const infoStyles = {
+    fontWeight: theme.typography.fontWeightRegular,
+    fontSize: theme.typography.fontSize,
+  };
 
   useEffect(() => {
     setRows([...transactions]);
@@ -56,7 +70,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       fiscalCode: '',
       productGtin: '',
       status: '',
-      page: 0
+      page: 0,
     },
     onSubmit: (values) => {
       console.log(values);
@@ -64,14 +78,21 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
   });
 
   const filterByStatusOptionsList = [
-    { value: 'REFUNDED', label: t('commons.discountStatusEnum.refunded')},
-    { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled')},
-    { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded')},
+    { value: 'REFUNDED', label: t('commons.discountStatusEnum.refunded') },
+    { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
+    { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded') },
   ];
 
   const StatusChip = ({ status }: any) => {
     const chipItem = getStatus(status);
-    return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="medium" textColorChip={chipItem?.textColor} />;
+    return (
+      <CustomChip
+        label={chipItem?.label}
+        colorChip={chipItem?.color}
+        sizeChip="medium"
+        textColorChip={chipItem?.textColor}
+      />
+    );
   };
 
   const columns: Array<GridColDef> = [
@@ -108,7 +129,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       editable: false,
       disableColumnMenu: true,
       sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value/100} />,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
     },
     {
       field: 'rewardAmountCents',
@@ -117,7 +138,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       editable: false,
       disableColumnMenu: true,
       sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value/100} />,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
     },
     {
       field: 'authorizedAmountCents',
@@ -126,7 +147,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       editable: false,
       disableColumnMenu: true,
       sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value/100} />,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
     },
     {
       field: 'status',
@@ -145,35 +166,40 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       flex: 0.1,
       renderCell: (params: any) => (
         <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
-          <IconButton
-            onClick={() => handleListButtonClick(params.row)}
-            size="small"
-          >
-            <ChevronRightIcon color='primary' fontSize='inherit' />
+          <IconButton onClick={() => handleListButtonClick(params.row)} size="small">
+            <ChevronRightIcon color="primary" fontSize="inherit" />
           </IconButton>
         </Box>
-      )
-    }
+      ),
+    },
   ];
 
   const handleOnFiltersApplied = (filters: any) => {
     console.log('Callback dopo applicazione filtri', filters);
     setFiltersAppliedOnce(true);
-    if (handleFiltersApplied) { handleFiltersApplied(filters); }
+    if (handleFiltersApplied) {
+      handleFiltersApplied(filters);
+    }
   };
 
   const handleOnFiltersReset = () => {
     console.log('Callback dopo reset filtri');
     setFiltersAppliedOnce(false);
-    if (handleFiltersReset) { handleFiltersReset(); }
+    if (handleFiltersReset) {
+      handleFiltersReset();
+    }
   };
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
-    if (handleSortChange) { handleSortChange(newSortModel); }
+    if (handleSortChange) {
+      handleSortChange(newSortModel);
+    }
   };
 
   const onPaginationChange = (page: number) => {
-    if (handlePaginationPageChange) { handlePaginationPageChange(page); }
+    if (handlePaginationPageChange) {
+      handlePaginationPageChange(page);
+    }
   };
 
   const handleListButtonClick = (row: any) => {
@@ -185,23 +211,23 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
     setDrawerOpened(newOpen);
   };
 
- const handleGtinChange = (event: any) => {
-  const value = event.target.value;
-  
-   if (value.includes(' ') || value.length > 14) {
+  const handleGtinChange = (event: any) => {
+    const value = event.target.value;
+
+    if (value.includes(' ') || value.length > 14) {
       return;
     }
-  
-  const alphanumericRegex = /^[a-zA-Z0-9]*$/;
-  
-  if (!alphanumericRegex.test(value)) {
-    setGtinError('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.');
-    return;
-  }
-  
-  setGtinError('');
-  formik.handleChange(event);
-};
+
+    const alphanumericRegex = /^[a-zA-Z0-9]*$/;
+
+    if (!alphanumericRegex.test(value)) {
+      setGtinError('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.');
+      return;
+    }
+
+    setGtinError('');
+    formik.handleChange(event);
+  };
 
   const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
     <Tooltip
@@ -289,10 +315,8 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
             </Select>
           </FormControl>
         </Grid>
-
-      </FiltersForm >
-      {rows.length > 0 ?
-
+      </FiltersForm>
+      {rows.length > 0 ? (
         <Box mb={2} sx={{ width: '100%' }}>
           <TransactionDataTable
             rows={rows}
@@ -306,15 +330,19 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
             onPaginationPageChange={onPaginationChange}
           />
         </Box>
-        :
+      ) : (
         <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
-      }
+      )}
       <DetailDrawer
         data-testid="detail-drawer"
         open={drawerOpened}
         toggleDrawer={handleToggleDrawer}
       >
-        <TransactionDetail title={"Dettaglio Transazione"} itemValues={rowDetail} listItem={listItemDetail} />
+        <TransactionDetail
+          title={'Dettaglio Transazione'}
+          itemValues={rowDetail}
+          listItem={listItemDetail}
+        />
       </DetailDrawer>
     </Box>
   );

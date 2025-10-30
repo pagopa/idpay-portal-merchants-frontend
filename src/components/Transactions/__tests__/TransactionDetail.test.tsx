@@ -1,5 +1,4 @@
-
-import { render, screen,fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import TransactionDetail from '../TransactionDetail';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
@@ -12,7 +11,6 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 jest.mock('../../../services/merchantService', () => ({
   downloadInvoiceFile: jest.fn(),
 }));
-
 
 jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
   __esModule: true,
@@ -67,7 +65,7 @@ describe('TransactionDetail', () => {
     { id: 'id', label: 'ID Transazione', type: TYPE_TEXT.Text },
     { id: 'amount', label: 'Importo', type: TYPE_TEXT.Currency },
     { id: 'description', label: 'Descrizione', type: TYPE_TEXT.Text },
-    { id: 'unmappedKey', label: 'Chiave non mappata', type: TYPE_TEXT.Boolean },
+    { id: 'unmappedKey', label: 'Chiave non mappata', type: TYPE_TEXT.Text },
     { id: 'additionalProperties.productName', label: 'Nome Prodotto', type: TYPE_TEXT.Text },
   ];
 
@@ -92,6 +90,7 @@ describe('TransactionDetail', () => {
 
     expect(screen.getByText('Dettaglio Transazione')).toBeInTheDocument();
     expect(screen.getByText('ID Transazione')).toBeInTheDocument();
+    expect(screen.getByText('TRX-123')).toBeInTheDocument();
     expect(screen.getByText('Importo')).toBeInTheDocument();
     expect(screen.getByText('Descrizione')).toBeInTheDocument();
     expect(screen.getByText('Nome Prodotto')).toBeInTheDocument();
@@ -146,7 +145,7 @@ describe('TransactionDetail', () => {
             <ThemeProvider theme={createTheme()}>
               <TransactionDetail
                 itemValues={itemValues}
-                listItem={[{ id: 'valueText', label: 'Error Field', type: TYPE_TEXT.Boolean }]}
+                listItem={[{ id: 'valueText', label: 'Error Field', type: TYPE_TEXT.Text }]}
               />
             </ThemeProvider>
           </StoreProvider>
@@ -185,7 +184,11 @@ describe('TransactionDetail', () => {
               <TransactionDetail
                 itemValues={{ additionalProperties: null }}
                 listItem={[
-                  { id: 'additionalProperties.productName', label: 'Product', type: TYPE_TEXT.Text },
+                  {
+                    id: 'additionalProperties.productName',
+                    label: 'Product',
+                    type: TYPE_TEXT.Text,
+                  },
                 ]}
               />
             </ThemeProvider>
@@ -325,7 +328,7 @@ describe('TransactionDetail', () => {
 
       // Cerca il MISSING_DATA_PLACEHOLDER nel link
       const links = screen.getAllByRole('link');
-      const invoiceLink = links.find(link =>
+      const invoiceLink = links.find((link) =>
         link.textContent?.includes(MISSING_DATA_PLACEHOLDER)
       );
       expect(invoiceLink).toBeInTheDocument();
@@ -391,7 +394,7 @@ describe('TransactionDetail', () => {
 
       // Trova il link con MISSING_DATA_PLACEHOLDER
       const links = screen.getAllByRole('link');
-      const downloadLink = links.find(link =>
+      const downloadLink = links.find((link) =>
         link.textContent?.includes(MISSING_DATA_PLACEHOLDER)
       );
 
@@ -431,7 +434,7 @@ describe('TransactionDetail', () => {
       );
 
       const links = screen.getAllByRole('link');
-      const downloadLink = links.find(link =>
+      const downloadLink = links.find((link) =>
         link.textContent?.includes(MISSING_DATA_PLACEHOLDER)
       );
 
@@ -565,5 +568,4 @@ describe('TransactionDetail', () => {
       });
     });
   });
-
 });

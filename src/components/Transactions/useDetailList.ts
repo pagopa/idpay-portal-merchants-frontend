@@ -8,7 +8,9 @@ const getDetailFieldList: any = () => [
     { label: "Totale della spesa", id: "effectiveAmountCents", type: TYPE_TEXT.Currency },
     { label: "Sconto applicato", id: "rewardAmountCents", type: TYPE_TEXT.Currency },
     { label: "Importo autorizzato", id: "authorizedAmountCents", type: TYPE_TEXT.Currency },
+    { label: "ID transazione", id: "id", type: TYPE_TEXT.Text },
+
 ];
 
 
-export default getDetailFieldList; 
+export default getDetailFieldList;
