@@ -15,6 +15,14 @@ function SearchTaxCode<T extends { cf: string }>({ formik, onSearch }: SearchTax
   const { t } = useTranslation();
   const [showErrors, setShowErrors] = useState(false);
 
+  const cfButtonStyle = {
+    fontFamily: "'Titillium Web', sans-serif",
+    fontWeight: 700,
+    fontSize: 16,
+    lineHeight: '21px',
+    letterSpacing: 0.3,
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowErrors(true);
@@ -67,13 +75,32 @@ function SearchTaxCode<T extends { cf: string }>({ formik, onSearch }: SearchTax
           }}
         >
           <Button
-            sx={{ height: '44.5px', width: '100%' }}
+            sx={{ height: '44.5px', width: '100%', ...cfButtonStyle }}
             variant="outlined"
             size="small"
             type="submit"
-            data-testid="apply-filters-test"
+            data-testid="btn-filters-cf"
           >
             {t('pages.reportedUsers.filterBtn')}
+          </Button>
+        </Box>
+        <Box
+          sx={{
+            minWidth: 100,
+            maxWidth: 160,
+            flexBasis: { xs: '100%', sm: '50%', md: '8.33%', lg: '8.33%' },
+            flexGrow: 0,
+            display: 'flex',
+            alignItems: 'flex-start',
+          }}
+        >
+          <Button
+            variant="text"
+            onClick={() => formik.setFieldValue('cf', '')}
+            data-testid="btn-cancel-cf"
+            sx={cfButtonStyle}
+          >
+            {t('pages.reportedUsers.cancelBtn')}
           </Button>
         </Box>
       </Box>

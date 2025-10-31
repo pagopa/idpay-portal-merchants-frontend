@@ -229,6 +229,7 @@
       "title": "Segnalazione utenti",
       "subtitle": "Comunica gli utenti che hanno beneficiato del bonus, ma non hanno consegnato un elettrodomestico obsoleto.",
       "filterBtn": "Cerca",
+      "cancelBtn": "Cancella",
       "reportUser": "Segnala utente",
       "userCf": "Beneficiario",
       "date": "Data e ora",
