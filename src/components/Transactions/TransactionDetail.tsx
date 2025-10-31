@@ -2,8 +2,8 @@
 import { Box, Grid, Link, Typography } from '@mui/material';
 import { ReactNode } from 'react';
 import { theme } from '@pagopa/mui-italia';
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import { ReceiptLong } from '@mui/icons-material';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';
 import CustomChip from '../Chip/CustomChip';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
@@ -105,11 +105,12 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
               {itemValues.status === 'REFUNDED' ? 'Nota di credito'  : 'Fattura'}
             </Typography>
             <Link
+              p={0}
               fontWeight={theme.typography.fontWeightBold}
               onClick={() => downloadFile(itemValues,storeId)}
               underline="hover"
             >
-              <DescriptionOutlinedIcon />{' '}
+              <ReceiptLong />{' '}
               {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
             </Link>
           </Box>
