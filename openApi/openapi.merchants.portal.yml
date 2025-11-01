@@ -1076,96 +1076,79 @@ paths:
                 message: An error occurred during the update
   /reported-user:
     post:
-      tags:
-        - reported-user
+      tags: [ reported-user ]
       summary: Create reported user
-      description: "ENG: Flag a user (fiscal code) for a merchant/initiative pair <br> IT: Segnala un utente (CF) per coppia merchant/iniziativa"
+      description: >
+        ENG: Flag a user (fiscal code) for a merchant/initiative pair
+        IT: Segnala un utente (CF) per coppia merchant/iniziativa
       operationId: createReportedUser
+      parameters:
+        - $ref: '#/components/parameters/MerchantIdHeader'
+        - $ref: '#/components/parameters/InitiativeIdHeader'
       requestBody:
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
-              $ref: '#/components/schemas/ReportedUserRequestDTO'
+              type: string
+              description: Citizen fiscal code
+              maxLength: 16
+              pattern: '^[A-Z0-9]{11,16}$'
             examples:
-              createReportedUser:
-                value:
-                  merchantId: "MERCHANT_12345"
-                  initiativeId: "INITIATIVE_67890"
-                  userFiscalCode: "RSSMRA85T10A562S"
+              cf:
+                value: RSSMRA85T10A562S
       responses:
         "200":
-          description: Ok
+          description: Business outcome
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MerchantDetailDTO"
+                $ref: '#/components/schemas/ReportedUserCreateResponseDTO'
+              examples:
+                ok: { value: { status: "OK", errorKey: "" } }
+                entityNotFound: { value: { status: "KO", errorKey: "Entity not found" } }
+                serviceUnavailable: { value: { status: "KO", errorKey: "Service unavailable" } }
+                differentMerchant: { value: { status: "KO", errorKey: "Different Merchant Id" } }
+                differentInitiative: { value: { status: "KO", errorKey: "Different Initiative Id" } }
         "400":
           description: Bad request
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/MerchantErrorDTO"
-              example:
-                code: MERCHANT_INVALID_REQUEST
-                message: Something went wrong handling request
-        '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MerchantErrorDTO'
-              example:
-                code: MERCHANT_NOT_FOUND
-                message: Resource not found
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+              example: { code: MERCHANT_INVALID_REQUEST, message: "Invalid request" }
         "401":
           description: Authentication failed
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/MerchantErrorDTO"
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
         "429":
-          description: Too many Request
+          description: Too Many Requests
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/MerchantErrorDTO"
-              example:
-                code: MERCHANT_TOO_MANY_REQUESTS
-                message: Too many requests
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+              example: { code: MERCHANT_TOO_MANY_REQUESTS, message: "Too many requests" }
         "500":
-          description: Server ERROR
+          description: Server error
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/MerchantErrorDTO"
-              example:
-                code: MERCHANT_GENERIC_ERROR
-                message: An error occurred during the update
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+
     get:
       tags: [ reported-user ]
       summary: Search reported users
-      description: "ENG: Search reported users by optional filters <br> IT: Ricerca segnalazioni con filtri opzionali"
-      operationId: searchReportedUsers
+      description: >
+        ENG: Search reported users by fiscal code (headers define merchant/initiative)
+        IT: Ricerca segnalazioni per codice fiscale (merchant/initiative via header)
+      operationId: getReportedUser
       parameters:
-        - name: merchantId
-          in: query
-          required: false
-          description: Merchant ID
-          schema: { type: string, maxLength: 64, pattern: '^[A-Z0-9\-_]+$' }
-          example: MERCHANT_12345
-        - name: initiativeId
-          in: query
-          required: false
-          description: Initiative ID
-          schema: { type: string, maxLength: 64, pattern: '^[A-Z0-9\-_]+$' }
-          example: INITIATIVE_67890
         - name: userFiscalCode
           in: query
-          required: false
+          required: true
           description: Citizen fiscal code
           schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
           example: RSSMRA85T10A562S
+        - $ref: '#/components/parameters/MerchantIdHeader'
+        - $ref: '#/components/parameters/InitiativeIdHeader'
       responses:
         '200':
           description: Ok
@@ -1173,7 +1156,6 @@ paths:
             application/json:
               schema:
                 type: array
-                maxItems: 1000
                 items:
                   $ref: '#/components/schemas/ReportedUserDTO'
               examples:
@@ -1214,7 +1196,9 @@ paths:
     delete:
       tags: [ reported-user ]
       summary: Delete reported user
-      description: "ENG: Remove a report for the given fiscal code <br> IT: Rimuove la segnalazione per il codice fiscale indicato"
+      description: >
+        ENG: Remove a report for the given fiscal code
+        IT: Rimuove la segnalazione per il codice fiscale indicato
       operationId: deleteReportedUser
       parameters:
         - name: userFiscalCode
@@ -1223,6 +1207,8 @@ paths:
           description: Citizen fiscal code of the reported user
           schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
           example: RSSMRA85T10A562S
+        - $ref: '#/components/parameters/MerchantIdHeader'
+        - $ref: '#/components/parameters/InitiativeIdHeader'
       responses:
         '200':
           description: Business outcome
@@ -1264,6 +1250,21 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
 components:
+  parameters:
+    MerchantIdHeader:
+      name: merchant-id
+      in: header
+      required: true
+      description: Merchant ID (header)
+      schema: { type: string, maxLength: 64, pattern: '^[A-Z0-9\-_]+$' }
+      example: MERCHANT_12345
+    InitiativeIdHeader:
+      name: initiative-id
+      in: header
+      required: true
+      description: Initiative ID (header)
+      schema: { type: string, maxLength: 64, pattern: '^[A-Z0-9\-_]+$' }
+      example: INITIATIVE_67890
   schemas:
     InitiativeDTO:
       type: object
@@ -2024,28 +2025,6 @@ components:
           description: "ENG: URL to download the invoice file - IT: URL per scaricare il file della fattura"
       required:
         - invoiceUrl
-    ReportedUserRequestDTO:
-      type: object
-      required: [ merchantId, initiativeId, userFiscalCode ]
-      properties:
-        merchantId:
-          type: string
-          maxLength: 64
-          pattern: '^[A-Z0-9\-_]+$'
-          description: Merchant ID
-          example: MERCHANT_12345
-        initiativeId:
-          type: string
-          maxLength: 64
-          pattern: '^[A-Z0-9\-_]+$'
-          description: Initiative ID
-          example: INITIATIVE_67890
-        userFiscalCode:
-          type: string
-          maxLength: 16
-          pattern: '^[A-Z0-9]{11,16}$'
-          description: Citizen fiscal code
-          example: RSSMRA85T10A562S
     ReportedUserCreateResponseDTO:
       type: object
       required: [ status, errorKey ]

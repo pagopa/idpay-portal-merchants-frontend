@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Button } from '@mui/material';
 import { FormikProps } from 'formik';
-import { isValidCF } from './helpers';
+import { isValidCF } from './helpersReportedUsers';
 import CfTextField from './CfTextField';
 
 interface SearchTaxCodeProps<T> {
