@@ -4,6 +4,9 @@ export function isValidCF(cf: string): boolean {
   if (!cf) {
     return false;
   }
+  if (/^[A-Za-z]{16}$/.test(cf) || /^[0-9]{16}$/.test(cf)) {
+    return false;
+  }
   return /^[A-Z0-9]{16}$/i.test(cf);
 }
 

@@ -33,11 +33,11 @@ function SearchTaxCode<T extends { cf: string }>({ formik, onSearch }: SearchTax
       .trim();
     formik.setFieldValue('cf', cleaned, false);
     if (!cleaned) {
-      formik.setFieldError('cf', t('pages.reportedUsers.insertCf'));
+      formik.setFieldError('cf', t('pages.reportedUsers.cf.insertCf'));
       return;
     }
     if (!isValidCF(cleaned)) {
-      formik.setFieldError('cf', 'Codice fiscale non valido');
+      formik.setFieldError('cf', t('pages.reportedUsers.cf.invalid'));
       return;
     }
     onSearch({ ...formik.values, cf: cleaned });
@@ -60,7 +60,7 @@ function SearchTaxCode<T extends { cf: string }>({ formik, onSearch }: SearchTax
             formik={formik}
             showErrors={showErrors}
             setShowErrors={setShowErrors}
-            label={t('pages.reportedUsers.cf')}
+            label={t('pages.reportedUsers.cfPlaceholder')}
             name="cf"
           />
         </Box>

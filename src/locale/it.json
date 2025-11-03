@@ -234,10 +234,20 @@
       "userCf": "Beneficiario",
       "date": "Data e ora",
       "discountCode": "Codice sconto",
-      "cf": "Cerca per Codice Fiscale",
       "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
-      "noResultUser": "Codice Fiscale assente.",
-      "insertCf":"Inserire Codice Fiscale"
+      "cfPlaceholder": "Cerca per Codice Fiscale",
+      "cf": {
+        "invalid": "Codice fiscale non valido",
+        "noResultUser": "Campo obbligatorio",
+        "insertCf":"Campo obbligatorio"
+    },
+      "ModalReportedUser": {
+        "title": "Vuoi procedere con la cancellazione?",
+        "description": "Stai per cancellare il soggetto {{cf}} dalla lista degli utenti segnalati.",
+        "descriptionTwo": "Questa operazione non comporta il blocco della relativa richiesta di rimborso.",
+        "cancelText": "Annulla",
+        "confirmText": "Conferma"
+      }
     },
     "insertReportedUser": {
       "title": "Segnala utente",
@@ -252,8 +262,13 @@
       "discountCode": "Codice sconto",
       "cf": "Cerca per Codice Fiscale",
       "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
-      "noResultUser": "Codice Fiscale assente.",
-      "insertCf":"Inserire Codice Fiscale"
+      "ModalReportedUser": {
+        "title": "Vuoi procedere con la segnalazione?",
+        "description": "Stai dichiarando che il soggetto <b>{{cf}}</b> non ha consegnato l'elettrodomestico obsoleto.",
+        "descriptionTwo": "Questa operazione non comporta il blocco della relativa richiesta di rimborso.",
+        "cancelText": "Annulla",
+        "confirmText": "Conferma"
+      }
     },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",

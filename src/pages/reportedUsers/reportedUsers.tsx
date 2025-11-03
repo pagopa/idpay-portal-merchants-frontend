@@ -4,14 +4,13 @@ import { Box, Stack, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import ReportIcon from '@mui/icons-material/Report';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { matchPath, useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import DataTable from '../../components/dataTable/DataTable';
 import { GetReportedUsersFilters } from '../../types/types';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import routes from '../../routes';
 import { getReportedUser, deleteReportedUser } from '../../services/merchantService';
-import ROUTES from '../../routes';
 import { parseJwt } from '../../utils/jwt-utils';
 import MsgResult from './MsgResult';
 import { isValidCF, normalizeValue } from './helpersReportedUsers';
@@ -19,7 +18,7 @@ import SearchTaxCode from './SearchTaxCode';
 import NoResultPaper from './NoResultPaper';
 import { getReportedUsersColumns } from './columnsReportedUser';
 import ModalReportedUser from './modalReportedUser';
-interface MatchParams {
+interface RouteParams {
   id: string;
 }
 
@@ -47,19 +46,13 @@ const ReportedUsers: React.FC = () => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Stato per il modale di conferma cancellazione
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedCf, setSelectedCf] = useState<string | null>(null);
-  // Stato per mostrare il messaggio di successo dopo la cancellazione
   const [showDeleteSuccessAlert, setShowDeleteSuccessAlert] = useState(false);
   const history = useHistory();
-  const match = matchPath(location.pathname, {
-    path: [ROUTES.OVERVIEW],
-    exact: true,
-    strict: false,
-  });
-  // initiativeID
-  const { id } = (match?.params as MatchParams) || {};
+
+  const { id } = useParams<RouteParams>();
+
   const userJwt = parseJwt(storageTokenOps.read());
   const merchantId = userJwt?.merchant_id;
 
@@ -71,7 +64,6 @@ const ReportedUsers: React.FC = () => {
     }
   }, [user, lastSearchedCF]);
 
-  // Ricerca automatica e messaggio successo se arrivo da insert
   React.useEffect(() => {
     if (location.state && location.state.newCf) {
       void formik.setFieldValue('cf', location.state.newCf);
@@ -80,7 +72,6 @@ const ReportedUsers: React.FC = () => {
       setTimeout(() => {
         void formik.handleSubmit();
       }, 0);
-      // Pulizia dello state per evitare ripetizioni se si torna indietro
       history.replace({ ...location, state: {} });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,7 +82,7 @@ const ReportedUsers: React.FC = () => {
     validate: (values) => {
       let errors: Partial<GetReportedUsersFilters> = {};
       if (values.cf && !isValidCF(values.cf)) {
-        errors = { ...errors, cf: 'Codice fiscale non valido' };
+        errors = { ...errors, cf: t('validation.cf.invalid') };
       }
       return errors;
     },
@@ -238,15 +229,15 @@ const ReportedUsers: React.FC = () => {
         )}
         <ModalReportedUser
           open={deleteModalOpen}
-          title="Vuoi procedere con la cancellazione?"
+          title={t('pages.reportedUsers.ModalReportedUser.title')}
           description={
             selectedCf
-              ? `Stai per cancellare il soggetto ${selectedCf} dalla lista degli utenti segnalati.`
+              ? t('pages.reportedUsers.ModalReportedUser.description', { cf: selectedCf })
               : ''
           }
-          descriptionTwo="Questa operazione non comporta il blocco della relativa richiesta di rimborso."
-          cancelText="Annulla"
-          confirmText="Conferma"
+          descriptionTwo={t('pages.reportedUsers.ModalReportedUser.descriptionTwo')}
+          cancelText={t('pages.reportedUsers.ModalReportedUser.cancelText')}
+          confirmText={t('pages.reportedUsers.ModalReportedUser.confirmText')}
           onCancel={handleCloseDeleteModal}
           onConfirm={handleConfirmDelete}
           cfModal={undefined}
@@ -263,7 +254,7 @@ const ReportedUsers: React.FC = () => {
             {showEmptyAlert ? (
               <MsgResult
                 severity="error"
-                message={t('pages.reportedUsers.noResultUser')}
+                message={t('pages.reportedUsers.cf.noResultUser')}
                 bottom={170}
               />
             ) : (

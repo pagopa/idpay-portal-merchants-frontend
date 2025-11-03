@@ -11,7 +11,7 @@ import {
 interface ModalReportedUserProps {
   open: boolean;
   title: string;
-  description: string;
+  description: React.ReactNode;
   cancelText: string;
   confirmText: string;
   onCancel: () => void;
@@ -28,7 +28,6 @@ const ModalReportedUser: React.FC<ModalReportedUserProps> = ({
   confirmText,
   onCancel,
   onConfirm,
-  cfModal,
   descriptionTwo,
 }) => (
   <Dialog open={open} onClose={onCancel} PaperProps={{ style: { minWidth: 600, minHeight: 267 } }}>
@@ -46,11 +45,6 @@ const ModalReportedUser: React.FC<ModalReportedUserProps> = ({
       {title}
     </DialogTitle>
     <DialogContent>
-      {cfModal && (
-        <Typography fontWeight="bold" gutterBottom>
-          {cfModal}
-        </Typography>
-      )}
       <Typography>{description}</Typography>
       {descriptionTwo && <Typography>{descriptionTwo}</Typography>}
     </DialogContent>

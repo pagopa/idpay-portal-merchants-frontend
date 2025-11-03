@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import { Box, Typography, Paper, Button, Grid, Breadcrumbs } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useHistory, useLocation } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
@@ -40,9 +40,9 @@ const InsertReportedUser: React.FC = () => {
     validate: (values) => {
       let errors: Partial<GetReportedUsersFilters> = {};
       if (!values.cf) {
-        errors = { ...errors, cf: 'Campo obbligatorio' };
+        errors = { ...errors, cf: t('pages.reportedUsers.cf.noResultUser') };
       } else if (!isValidCF(values.cf)) {
-        errors = { ...errors, cf: 'Codice fiscale non valido' };
+        errors = { ...errors, cf: t('pages.reportedUsers.cf.invalid') };
       }
       return errors;
     },
@@ -58,11 +58,18 @@ const InsertReportedUser: React.FC = () => {
     <>
       <ModalReportedUser
         open={showConfirmModal}
-        title="Vuoi procedere con la segnalazione?"
-        description={`Stai dichiarando che il soggetto non ha consegnato l'elettrodomestico obsoleto.`}
+        title={t('pages.insertReportedUser.ModalReportedUser.title')}
+        description={
+          <Trans
+            i18nKey="pages.insertReportedUser.ModalReportedUser.description"
+            values={{ cf: cfToReport ?? '' }}
+            components={{ b: <b /> }}
+          />
+        }
+        descriptionTwo={t('pages.insertReportedUser.ModalReportedUser.descriptionTwo')}
         cfModal={cfToReport ?? ''}
-        cancelText="Annulla"
-        confirmText="Conferma"
+        cancelText={t('pages.insertReportedUser.ModalReportedUser.cancelText')}
+        confirmText={t('pages.insertReportedUser.ModalReportedUser.confirmText')}
         onCancel={() => setShowConfirmModal(false)}
         onConfirm={async () => {
           setShowConfirmModal(false);
@@ -159,7 +166,7 @@ const InsertReportedUser: React.FC = () => {
                 formik={formik}
                 showErrors={showErrors}
                 setShowErrors={setShowErrors}
-                label={t('pages.reportedUsers.cf')}
+                label={t('pages.reportedUsers.cfPlaceholder')}
                 name="cf"
               />
             </Box>
