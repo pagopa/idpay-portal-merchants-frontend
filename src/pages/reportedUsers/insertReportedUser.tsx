@@ -3,23 +3,15 @@ import { useFormik } from 'formik';
 import { Box, Typography, Paper, Button, Grid, Breadcrumbs } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { useParams, useHistory, matchPath } from 'react-router-dom';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useAppSelector } from '../../redux/hooks';
-import { partiesSelectors } from '../../redux/slices/partiesSlice';
 import { GetReportedUsersFilters } from '../../types/types';
-import { parseJwt } from '../../utils/jwt-utils';
 import ROUTES from '../../routes';
 import { createReportedUser } from '../../services/merchantService';
 import { isValidCF } from './helpersReportedUsers';
 import CfTextField from './CfTextField';
 import ModalReportedUser from './modalReportedUser';
-
-interface MatchParams {
-  id: string;
-}
 
 const initialValues: GetReportedUsersFilters = {
   cf: '',
@@ -39,19 +31,9 @@ const InsertReportedUser: React.FC = () => {
   const history = useHistory();
   const handleBack = () => history.goBack();
 
-  const { id: initiativeID } = useParams<{ id: string }>();
-  const match = matchPath(location.pathname, {
-    path: [ROUTES.OVERVIEW],
-    exact: true,
-    strict: false,
-  });
-  // initiativeID
-  const { id } = (match?.params as MatchParams) || {};
-  alert(id);
-  const userJwt = parseJwt(storageTokenOps.read());
-  const merchantId = userJwt?.merchant_id;
-
-  const selectedParty = useAppSelector(partiesSelectors.selectPartySelected);
+  const location = useLocation<{ merchantId: string; initiativeID: string }>();
+  const merchantId = location.state?.merchantId;
+  const initiativeID = location.state?.initiativeID;
 
   const formik = useFormik<GetReportedUsersFilters>({
     initialValues,
@@ -86,20 +68,11 @@ const InsertReportedUser: React.FC = () => {
           setShowConfirmModal(false);
           if (cfToReport) {
             // eslint-disable-next-line no-console
-            console.log(
-              'merchantId (JWT):',
+            console.log('[InsertReportedUser] API request:', {
               merchantId,
-              'initiativeID (route):',
               initiativeID,
-              'selectedParty.partyId:',
-              selectedParty?.partyId,
-              'selectedParty.externalId:',
-              selectedParty?.externalId,
-              'selectedParty.originId:',
-              selectedParty?.originId,
-              'selectedParty.description:',
-              selectedParty?.description
-            );
+              cf: cfToReport,
+            });
             await createReportedUser(merchantId, initiativeID, cfToReport);
             history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), { newCf: cfToReport });
           }

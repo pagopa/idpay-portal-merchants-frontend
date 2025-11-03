@@ -103,8 +103,13 @@ const ReportedUsers: React.FC = () => {
       if (values.cf && isValidCF(values.cf)) {
         setLoading(true);
         try {
+          // eslint-disable-next-line no-console
+          console.log('[ReportedUsers] API request:', {
+            merchantId,
+            initiativeID: id,
+            cf: values.cf,
+          });
           const res = await getReportedUser(id, merchantId, values.cf);
-          // normalizeValue moved to helpers
           if (!res) {
             setUser([]);
           } else {
@@ -141,28 +146,31 @@ const ReportedUsers: React.FC = () => {
       return;
     }
     try {
+      // eslint-disable-next-line no-console
+      console.log('[ReportedUsers] API request:', {
+        merchantId,
+        initiativeID: id,
+        cf,
+      });
       await deleteReportedUser(merchantId, id, cf);
       setUser([]);
       setShowDeleteSuccessAlert(true);
       setTimeout(() => setShowDeleteSuccessAlert(false), 3000);
     } catch (e) {
-      alert('Errore durante la cancellazione');
+      console.log('Errore durante la cancellazione');
     }
   };
 
-  // Funzione per aprire il modale di conferma cancellazione
   const handleOpenDeleteModal = (cf: string) => {
     setSelectedCf(cf);
     setDeleteModalOpen(true);
   };
 
-  // Funzione per chiudere il modale
   const handleCloseDeleteModal = () => {
     setDeleteModalOpen(false);
     setSelectedCf(null);
   };
 
-  // Funzione chiamata su conferma nel modale
   const handleConfirmDelete = async () => {
     if (selectedCf) {
       await handleDelete(selectedCf);
@@ -196,7 +204,10 @@ const ReportedUsers: React.FC = () => {
             variant="contained"
             size="small"
             onClick={() => {
-              history.push(routes.REPORTED_USERS_INSERT.replace(':id', id));
+              history.push(routes.REPORTED_USERS_INSERT.replace(':id', id), {
+                merchantId,
+                initiativeID: id,
+              });
             }}
             startIcon={<ReportIcon />}
             sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '174px' } }}
@@ -225,7 +236,6 @@ const ReportedUsers: React.FC = () => {
             />
           </Box>
         )}
-        {/* Modale di conferma cancellazione */}
         <ModalReportedUser
           open={deleteModalOpen}
           title="Vuoi procedere con la cancellazione?"

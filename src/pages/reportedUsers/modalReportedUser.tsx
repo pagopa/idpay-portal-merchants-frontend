@@ -31,8 +31,20 @@ const ModalReportedUser: React.FC<ModalReportedUserProps> = ({
   cfModal,
   descriptionTwo,
 }) => (
-  <Dialog open={open} onClose={onCancel}>
-    <DialogTitle>{title}</DialogTitle>
+  <Dialog open={open} onClose={onCancel} PaperProps={{ style: { minWidth: 600, minHeight: 267 } }}>
+    <DialogTitle
+      sx={{
+        fontFamily: '"Titillium Web", sans-serif',
+        fontWeight: 700,
+        fontStyle: 'bold',
+        fontSize: '24px',
+        lineHeight: '32px',
+        letterSpacing: '0px',
+        mt: 2,
+      }}
+    >
+      {title}
+    </DialogTitle>
     <DialogContent>
       {cfModal && (
         <Typography fontWeight="bold" gutterBottom>
@@ -40,9 +52,9 @@ const ModalReportedUser: React.FC<ModalReportedUserProps> = ({
         </Typography>
       )}
       <Typography>{description}</Typography>
-      {descriptionTwo && <Typography sx={{ mt: 1 }}>{descriptionTwo}</Typography>}
+      {descriptionTwo && <Typography>{descriptionTwo}</Typography>}
     </DialogContent>
-    <DialogActions>
+    <DialogActions sx={{ mb: 3, mr: 3 }}>
       <Button variant="outlined" onClick={onCancel}>
         {cancelText}
       </Button>
