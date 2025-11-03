@@ -46,40 +46,40 @@ describe('SearchTaxCode', () => {
     return { formik, onSearch };
   };
 
-  it('renderizza campo cf e bottoni', () => {
+  it('renders cf field and buttons', () => {
     setup();
-    expect(screen.getByLabelText(/codice fiscale/i)).toBeInTheDocument();
+    expect(screen.getByLabelText('pages.reportedUsers.cfPlaceholder')).toBeInTheDocument();
     expect(screen.getByTestId('btn-filters-cf')).toBeInTheDocument();
     expect(screen.getByTestId('btn-cancel-cf')).toBeInTheDocument();
   });
 
-  it('mostra errore se si invia con cf vuoto', () => {
+  it('shows error if submitted with empty cf', () => {
     const { formik } = setup();
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
     expect(formik.setFieldError).toHaveBeenCalledWith('cf', expect.any(String));
   });
 
-  it('mostra errore se si invia con cf non valido', () => {
+  it('shows error if submitted with invalid cf', () => {
     const { formik } = setup({
       values: { cf: '123' },
     });
-    fireEvent.change(screen.getByLabelText(/codice fiscale/i), { target: { value: '123' } });
+    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), { target: { value: '123' } });
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
-    expect(formik.setFieldError).toHaveBeenCalledWith('cf', 'Codice fiscale non valido');
+    expect(formik.setFieldError).toHaveBeenCalledWith('cf', 'pages.reportedUsers.cf.invalid');
   });
 
-  it('chiama onSearch con cf pulito se valido', () => {
+  it('calls onSearch with cleaned cf if valid', () => {
     const { formik, onSearch } = setup({
       values: { cf: 'abcDEF12g34h567i' },
     });
-    fireEvent.change(screen.getByLabelText(/codice fiscale/i), {
+    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), {
       target: { value: 'abcDEF12g34h567i' },
     });
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
     expect(onSearch).toHaveBeenCalledWith({ cf: 'ABCDEF12G34H567I' });
   });
 
-  it('resetta il campo cf al click su Annulla', () => {
+  it('resets cf field on Cancel click', () => {
     const { formik } = setup({
       values: { cf: 'SOMECF' },
     });
