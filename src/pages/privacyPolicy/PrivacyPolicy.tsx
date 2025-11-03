@@ -47,8 +47,10 @@ const PrivacyPolicy = () => {
               <Grid item xs={12}>
                 <div
                   className="content"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(privacyHTML.html) }}
-                ></div>
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(privacyHTML.html),
+                  }}
+                />
               </Grid>
             </Grid>
           </Box>

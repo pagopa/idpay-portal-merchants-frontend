@@ -20,8 +20,9 @@ variables:
 
   # global variables
   react_app_pagopa_help_email: '$(REACT_APP_ASSISTANCE_EMAIL)'
-  react_app_pagopa_manual_link: https://developer.pagopa.it/pari/guides/manuale-tecnico-venditore
-  react_app_pagopa_help_link: https://developer.pagopa.it/pari/guides/manuale-tecnico-venditore/contatti
+  react_app_pagopa_manual_link: https://developer.pagopa.it/pari/guides/bonuselettrodomestici-manuale-tecnico-venditore
+  react_app_pagopa_help_link: https://developer.pagopa.it/pari/guides/bonuselettrodomestici-manuale-tecnico-venditore/contatti
+  REACT_APP_ONE_TRUST_BASE_URL_GLOBAL: https://cdn.cookielaw.org
 
   ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/uat'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix')) }}:
     environment: 'UAT'
@@ -44,11 +45,11 @@ variables:
 
     react_app_url_storage: '$(UAT_REACT_APP_URL_STORAGE)'
 
-    react_app_one_trust_base_url: '$(UAT_REACT_APP_URL_CDN)/ot'
+    react_app_one_trust_base_url: '$(REACT_APP_ONE_TRUST_BASE_URL_GLOBAL)'
     react_app_analytics_enabled: '$(UAT_ANALYTICS_ENABLED)'
     react_app_analytics_mocked: '$(UAT_ANALYTICS_MOCKED)'
     react_app_mixpanel_token: '$(UAT_MIXPANEL_TOKEN)'
-    react_app_onetrust_domain_id: '$(UAT_ONETRUST_DOMAIN_ID)'
+    react_app_onetrust_domain_id: 019a15b5-bdb4-7d03-8046-deb3bed80d75
 
     react_app_one_trust_otnotice_cdn_url: $(UAT_REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL)
     react_app_one_trust_otnotice_cdn_settings: $(UAT_REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS)
@@ -85,11 +86,11 @@ variables:
 
     react_app_url_storage: '$(PROD_REACT_APP_URL_STORAGE)'
 
-    react_app_one_trust_base_url: '$(PROD_REACT_APP_URL_CDN)/ot'
+    react_app_one_trust_base_url: '$(REACT_APP_ONE_TRUST_BASE_URL_GLOBAL)'
     react_app_analytics_enabled: '$(PROD_ANALYTICS_ENABLED)'
     react_app_analytics_mocked: '$(PROD_ANALYTICS_MOCKED)'
     react_app_mixpanel_token: '$(PROD_MIXPANEL_TOKEN)'
-    react_app_onetrust_domain_id: '$(PROD_ONETRUST_DOMAIN_ID)'
+    react_app_onetrust_domain_id: 019a15d0-8140-7fc9-9550-800aa9b1be13
 
     react_app_one_trust_otnotice_cdn_url: $(PROD_REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL)
     react_app_one_trust_otnotice_cdn_settings: $(PROD_REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS)
@@ -127,11 +128,11 @@ variables:
 
     react_app_url_storage: '$(DEV_REACT_APP_URL_STORAGE)'
 
-    react_app_one_trust_base_url: '$(DEV_REACT_APP_URL_CDN)/ot/test'
+    react_app_one_trust_base_url: '$(REACT_APP_ONE_TRUST_BASE_URL_GLOBAL)'
     react_app_analytics_enabled: '$(DEV_ANALYTICS_ENABLED)'
     react_app_analytics_mocked: '$(DEV_ANALYTICS_MOCKED)'
     react_app_mixpanel_token: '$(DEV_MIXPANEL_TOKEN)'
-    react_app_onetrust_domain_id: '$(DEV_ONETRUST_DOMAIN_ID)'
+    react_app_onetrust_domain_id: 019a15b5-bdb4-7d03-8046-deb3bed80d75
 
     react_app_one_trust_otnotice_cdn_url: $(DEV_REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL)
     react_app_one_trust_otnotice_cdn_settings: $(DEV_REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS)
