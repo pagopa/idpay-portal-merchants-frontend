@@ -11,7 +11,7 @@ export function getReportedUsersColumns(handleDelete: (cf: string) => void) {
     {
       field: 'cf',
       headerName: 'Codice fiscale',
-      flex: 1,
+      flex: 2,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => {
@@ -69,7 +69,7 @@ export function getReportedUsersColumns(handleDelete: (cf: string) => void) {
     {
       field: 'reportedDate',
       headerName: 'Segnalato il',
-      flex: 1,
+      flex: 1.5,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => <Typography>{safeFormatDate(params.value)}</Typography>,
@@ -77,7 +77,7 @@ export function getReportedUsersColumns(handleDelete: (cf: string) => void) {
     {
       field: 'transactionId',
       headerName: 'ID transazione',
-      flex: 1,
+      flex: 5,
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => (
@@ -85,9 +85,17 @@ export function getReportedUsersColumns(handleDelete: (cf: string) => void) {
       ),
     },
     {
+      field: 'transactionDate',
+      headerName: 'Data transazione',
+      flex: 1.5,
+      editable: false,
+      disableColumnMenu: true,
+      renderCell: (params: any) => <Typography>{safeFormatDate(params.value)}</Typography>,
+    },
+    {
       field: 'actions',
       headerName: '',
-      flex: 0.3,
+      flex: 0.5,
       sortable: false,
       filterable: false,
       disableColumnMenu: true,

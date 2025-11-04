@@ -114,15 +114,20 @@ const ReportedUsers: React.FC = () => {
             );
           }
         } catch (e: any) {
-          setUser([
-            {
-              cf: MISSING_DATA_PLACEHOLDER,
-              reportedDate: MISSING_DATA_PLACEHOLDER,
-              transactionDate: MISSING_DATA_PLACEHOLDER,
-              transactionId: MISSING_DATA_PLACEHOLDER,
-            },
-          ]);
-          setError('Errore durante il recupero dell’utente segnalato');
+          if (e?.status === 404 || e?.response?.status === 404) {
+            // eslint-disable-next-line no-console
+            console.log('[ReportedUsers] Not found (404):', e);
+          } else {
+            setUser([
+              {
+                cf: MISSING_DATA_PLACEHOLDER,
+                reportedDate: MISSING_DATA_PLACEHOLDER,
+                transactionDate: MISSING_DATA_PLACEHOLDER,
+                transactionId: MISSING_DATA_PLACEHOLDER,
+              },
+            ]);
+            setError('Errore durante il recupero dell’utente segnalato');
+          }
         } finally {
           setLoading(false);
         }
