@@ -9,6 +9,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { GetReportedUsersFilters } from '../../types/types';
 import ROUTES from '../../routes';
 import { createReportedUser } from '../../services/merchantService';
+import { MerchantApi } from '../../api/MerchantsApiClient';
 import { isValidCF } from './helpersReportedUsers';
 import CfTextField from './CfTextField';
 import ModalReportedUser from './modalReportedUser';
@@ -35,6 +36,19 @@ const InsertReportedUser: React.FC = () => {
   const merchantId = location.state?.merchantId;
   const initiativeID = location.state?.initiativeID;
 
+  const checkCfAlreadyReported = async (
+    initiativeID: string,
+    merchantId: string,
+    cf: string
+  ): Promise<boolean> => {
+    try {
+      const res = await MerchantApi.getReportedUser(initiativeID, merchantId, cf);
+      return Array.isArray(res) && res.length > 0;
+    } catch {
+      return false;
+    }
+  };
+
   const formik = useFormik<GetReportedUsersFilters>({
     initialValues,
     validate: (values) => {
@@ -48,6 +62,13 @@ const InsertReportedUser: React.FC = () => {
     },
     onSubmit: async (values: GetReportedUsersFilters) => {
       if (values.cf && isValidCF(values.cf)) {
+        if (initiativeID && merchantId) {
+          const alreadyReported = await checkCfAlreadyReported(initiativeID, merchantId, values.cf);
+          if (alreadyReported) {
+            formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyRegistered'));
+            return;
+          }
+        }
         setCfToReport(values.cf);
         setShowConfirmModal(true);
       }
@@ -175,11 +196,11 @@ const InsertReportedUser: React.FC = () => {
       </Paper>
 
       <Box sx={{ mt: 5, display: 'flex', justifyContent: 'space-between' }}>
-        <Button data-testid="back-stores-button" variant="outlined" onClick={handleBack}>
+        <Button data-testid="back-reportedUsers-button" variant="outlined" onClick={handleBack}>
           {t('commons.backBtn')}
         </Button>
         <Button
-          data-testid="confirm-stores-button"
+          data-testid="confirm-reportedUsers-button"
           variant="contained"
           onClick={() => {
             setShowErrors(true);

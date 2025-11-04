@@ -239,7 +239,8 @@
       "cf": {
         "invalid": "Codice fiscale non valido",
         "noResultUser": "Codice fiscale assente",
-        "insertCf":"Campo obbligatorio"
+        "insertCf":"Campo obbligatorio",
+        "alreadyRegistered": "Il codice fiscale è già stato registrato"
     },
       "ModalReportedUser": {
         "title": "Vuoi procedere con la cancellazione?",

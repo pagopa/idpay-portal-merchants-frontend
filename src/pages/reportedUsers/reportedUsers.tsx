@@ -266,11 +266,14 @@ const ReportedUsers: React.FC = () => {
         {user.length === 0 && !loading && !error && (
           <>
             {showEmptyAlert ? (
-              <MsgResult
-                severity="error"
-                message={t('pages.reportedUsers.cf.noResultUser')}
-                bottom={170}
-              />
+              <>
+                <MsgResult
+                  severity="error"
+                  message={t('pages.reportedUsers.cf.noResultUser')}
+                  bottom={170}
+                />
+                <NoResultPaper translationKey="pages.reportedUsers.noUsers" />
+              </>
             ) : (
               <NoResultPaper translationKey="pages.reportedUsers.noUsers" />
             )}
