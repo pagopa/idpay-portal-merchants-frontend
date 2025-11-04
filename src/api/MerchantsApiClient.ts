@@ -206,8 +206,7 @@ export const MerchantApi = {
       },
       body: fiscalCode,
     });
-    const result = await response.json();
-    return extractResponse(result, 200, onRedirectToLogin);
+    return await response.json();
   },
 
   deleteReportedUser: async (

@@ -238,12 +238,12 @@
       "cfPlaceholder": "Cerca per Codice Fiscale",
       "cf": {
         "invalid": "Codice fiscale non valido",
-        "noResultUser": "Campo obbligatorio",
+        "noResultUser": "Codice fiscale assente",
         "insertCf":"Campo obbligatorio"
     },
       "ModalReportedUser": {
         "title": "Vuoi procedere con la cancellazione?",
-        "description": "Stai per cancellare il soggetto {{cf}} dalla lista degli utenti segnalati.",
+"description": "Stai per cancellare il soggetto <strong>{{cf}}</strong> dalla lista degli utenti segnalati.",
         "descriptionTwo": "Questa operazione non comporta il blocco della relativa richiesta di rimborso.",
         "cancelText": "Annulla",
         "confirmText": "Conferma"

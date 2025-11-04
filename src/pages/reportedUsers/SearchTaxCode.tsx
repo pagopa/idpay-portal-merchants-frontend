@@ -8,10 +8,15 @@ import CfTextField from './CfTextField';
 interface SearchTaxCodeProps<T> {
   formik: FormikProps<T>;
   onSearch: (values: T) => void;
+  onReset?: () => void;
   filtersAppliedOnce?: boolean;
 }
 
-function SearchTaxCode<T extends { cf: string }>({ formik, onSearch }: SearchTaxCodeProps<T>) {
+function SearchTaxCode<T extends { cf: string }>({
+  formik,
+  onSearch,
+  onReset,
+}: SearchTaxCodeProps<T>) {
   const { t } = useTranslation();
   const [showErrors, setShowErrors] = useState(false);
 
@@ -96,7 +101,13 @@ function SearchTaxCode<T extends { cf: string }>({ formik, onSearch }: SearchTax
         >
           <Button
             variant="text"
-            onClick={() => formik.setFieldValue('cf', '')}
+            onClick={() => {
+              if (onReset) {
+                onReset();
+              } else {
+                formik.setFieldValue('cf', '');
+              }
+            }}
             data-testid="btn-cancel-cf"
             sx={cfButtonStyle}
           >

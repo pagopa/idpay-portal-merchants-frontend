@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import { Box, Stack, Button } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import ReportIcon from '@mui/icons-material/Report';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
@@ -101,17 +101,17 @@ const ReportedUsers: React.FC = () => {
             cf: values.cf,
           });
           const res = await getReportedUser(id, merchantId, values.cf);
-          if (!res) {
+          if (!Array.isArray(res) || res.length === 0) {
             setUser([]);
           } else {
-            setUser([
-              {
-                cf: normalizeValue(res.fiscalCode),
-                reportedDate: normalizeValue(res.reportedDate),
-                transactionDate: normalizeValue(res.transactionDate),
-                transactionId: normalizeValue(res.transactionId),
-              },
-            ]);
+            setUser(
+              res.map((item) => ({
+                cf: normalizeValue(item.fiscalCode),
+                reportedDate: normalizeValue(item.reportedDate),
+                transactionDate: normalizeValue(item.trxChargeDate),
+                transactionId: normalizeValue(item.transactionId),
+              }))
+            );
           }
         } catch (e: any) {
           setUser([
@@ -145,6 +145,7 @@ const ReportedUsers: React.FC = () => {
       });
       await deleteReportedUser(merchantId, id, cf);
       setUser([]);
+      setLastSearchedCF(undefined);
       setShowDeleteSuccessAlert(true);
       setTimeout(() => setShowDeleteSuccessAlert(false), 3000);
     } catch (e) {
@@ -167,6 +168,7 @@ const ReportedUsers: React.FC = () => {
       await handleDelete(selectedCf);
     }
     handleCloseDeleteModal();
+    void formik.setFieldValue('cf', '');
   };
 
   const rowsWithId = user.map((r, idx) => ({ id: r.cf ?? `row-${idx}`, ...r }));
@@ -206,7 +208,15 @@ const ReportedUsers: React.FC = () => {
             {t('pages.reportedUsers.reportUser')}
           </Button>
         </Stack>
-        <SearchTaxCode formik={formik as any} onSearch={handleFiltersApplied} />
+        <SearchTaxCode
+          formik={formik as any}
+          onSearch={handleFiltersApplied}
+          onReset={() => {
+            setUser([]);
+            setLastSearchedCF(undefined);
+            void formik.setFieldValue('cf', '');
+          }}
+        />
         {showSuccessAlert && (
           <MsgResult severity="success" message="La segnalazione è stata registrata" bottom={170} />
         )}
@@ -231,9 +241,15 @@ const ReportedUsers: React.FC = () => {
           open={deleteModalOpen}
           title={t('pages.reportedUsers.ModalReportedUser.title')}
           description={
-            selectedCf
-              ? t('pages.reportedUsers.ModalReportedUser.description', { cf: selectedCf })
-              : ''
+            selectedCf ? (
+              <Trans
+                i18nKey="pages.reportedUsers.ModalReportedUser.description"
+                values={{ cf: selectedCf }}
+                components={{ strong: <strong /> }}
+              />
+            ) : (
+              ''
+            )
           }
           descriptionTwo={t('pages.reportedUsers.ModalReportedUser.descriptionTwo')}
           cancelText={t('pages.reportedUsers.ModalReportedUser.cancelText')}
@@ -245,9 +261,7 @@ const ReportedUsers: React.FC = () => {
         {showDeleteSuccessAlert && (
           <MsgResult severity="success" message="La segnalazione è stata rimossa" bottom={170} />
         )}
-        {loading && (
-          <MsgResult severity="info" message={t('pages.reportedUsers.loading')} bottom={170} />
-        )}
+
         {error && <MsgResult severity="error" message={error} bottom={170} />}
         {user.length === 0 && !loading && !error && (
           <>
