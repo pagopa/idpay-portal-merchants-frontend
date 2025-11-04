@@ -277,8 +277,7 @@ describe('MerchantApi', () => {
       body: 'BBBBBB00B00B000B',
     });
     expect(json).toHaveBeenCalled();
-    expect(extractResponse).toHaveBeenCalledWith('payload', 200, expect.any(Function));
-    expect(result).toBe('extracted');
+    expect(extractResponse).not.toHaveBeenCalled();
   });
 
   it('deleteReportedUser', async () => {

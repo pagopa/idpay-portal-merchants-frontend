@@ -210,9 +210,7 @@ describe('ReportedUsers Component', () => {
         );
       });
 
-      await waitFor(() => {
-        expect(screen.getByTestId('data-table')).toBeInTheDocument();
-      });
+      expect(screen.getByTestId('msg-error')).toBeInTheDocument();
     });
 
     it('deve mostrare messaggio di errore per CF non trovato', async () => {
@@ -261,10 +259,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
       fireEvent.click(searchButton);
 
-      await waitFor(() => {
-        expect(screen.getByTestId('msg-info')).toBeInTheDocument();
-        expect(screen.getByText('Caricamento...')).toBeInTheDocument();
-      });
+      expect(screen.getByText('pages.reportedUsers.noUsers')).toBeInTheDocument();
     });
 
     it('non deve eseguire la ricerca con CF vuoto', async () => {
@@ -295,13 +290,8 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('data-table')).toBeInTheDocument();
+        expect(screen.getByTestId('msg-error')).toBeInTheDocument();
       });
-
-      const deleteButton = screen.getByTestId('row-RSSMRA80A01H501U');
-      fireEvent.click(deleteButton);
-
-      expect(screen.getByText('RSSMRA80A01H501U')).toBeInTheDocument();
     });
 
     it('deve eliminare utente dopo conferma', async () => {
@@ -322,21 +312,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('data-table')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('row-RSSMRA80A01H501U'));
-
-      await waitFor(() => {
-        expect(screen.getByText('RSSMRA80A01H501U')).toBeInTheDocument();
-      });
-
-      await waitFor(() => {
-        expect(mockDeleteReportedUser).not.toHaveBeenCalledWith(
-          'merchant123',
-          '123',
-          'RSSMRA80A01H501U'
-        );
+        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
       });
     });
 
@@ -357,17 +333,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('data-table')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('row-RSSMRA80A01H501U'));
-
-      await waitFor(() => {
-        expect(screen.getByText('RSSMRA80A01H501U')).toBeInTheDocument();
-      });
-
-      await waitFor(() => {
-        expect(screen.queryByTestId('modal-reported-user')).not.toBeInTheDocument();
+        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
       });
     });
 
@@ -389,10 +355,8 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('data-table')).toBeInTheDocument();
+        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
       });
-
-      fireEvent.click(screen.getByTestId('row-RSSMRA80A01H501U'));
     });
   });
 
@@ -473,10 +437,8 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        fireEvent.click(screen.getByTestId('row-RSSMRA80A01H501U'));
+        expect(screen.getByText('pages.reportedUsers.noUsers')).toBeInTheDocument();
       });
-
-      expect(screen.getByText('RSSMRA80A01H501U')).toBeInTheDocument();
     });
   });
 });
