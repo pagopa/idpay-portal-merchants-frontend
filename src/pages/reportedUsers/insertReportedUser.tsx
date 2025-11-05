@@ -44,7 +44,8 @@ const InsertReportedUser: React.FC = () => {
     try {
       const res = await MerchantApi.getReportedUser(initiativeID, merchantId, cf);
       return Array.isArray(res) && res.length > 0;
-    } catch {
+    } catch (e) {
+      console.error('Error while checking if user is already reported:', e);
       return false;
     }
   };
@@ -95,14 +96,14 @@ const InsertReportedUser: React.FC = () => {
         onConfirm={async () => {
           setShowConfirmModal(false);
           if (cfToReport) {
-            // eslint-disable-next-line no-console
-            console.log('[InsertReportedUser] API request:', {
-              merchantId,
-              initiativeID,
-              cf: cfToReport,
-            });
-            await createReportedUser(merchantId, initiativeID, cfToReport);
-            history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), { newCf: cfToReport });
+            try {
+              await createReportedUser(merchantId, initiativeID, cfToReport);
+              history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
+                newCf: cfToReport,
+              });
+            } catch (e) {
+              console.error('Error while creating reported user:', e);
+            }
           }
         }}
       />

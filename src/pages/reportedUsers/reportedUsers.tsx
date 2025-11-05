@@ -94,12 +94,6 @@ const ReportedUsers: React.FC = () => {
       if (values.cf && isValidCF(values.cf)) {
         setLoading(true);
         try {
-          // eslint-disable-next-line no-console
-          console.log('[ReportedUsers] API request:', {
-            merchantId,
-            initiativeID: id,
-            cf: values.cf,
-          });
           const res = await getReportedUser(id, merchantId, values.cf);
           if (!Array.isArray(res) || res.length === 0) {
             setUser([]);
@@ -115,8 +109,7 @@ const ReportedUsers: React.FC = () => {
           }
         } catch (e: any) {
           if (e?.status === 404 || e?.response?.status === 404) {
-            // eslint-disable-next-line no-console
-            console.log('[ReportedUsers] Not found (404):', e);
+            console.error('Reported user not found (404):', e);
           } else {
             setUser([
               {
@@ -127,6 +120,7 @@ const ReportedUsers: React.FC = () => {
               },
             ]);
             setError('Errore durante il recupero dell’utente segnalato');
+            console.error('Error while fetching reported user:', e);
           }
         } finally {
           setLoading(false);
@@ -142,19 +136,13 @@ const ReportedUsers: React.FC = () => {
       return;
     }
     try {
-      // eslint-disable-next-line no-console
-      console.log('[ReportedUsers] API request:', {
-        merchantId,
-        initiativeID: id,
-        cf,
-      });
       await deleteReportedUser(merchantId, id, cf);
       setUser([]);
       setLastSearchedCF(undefined);
       setShowDeleteSuccessAlert(true);
       setTimeout(() => setShowDeleteSuccessAlert(false), 3000);
     } catch (e) {
-      console.log('Errore durante la cancellazione');
+      console.error('Error while deleting reported user:', e);
     }
   };
 
