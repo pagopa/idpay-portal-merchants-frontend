@@ -85,7 +85,7 @@ const MerchantTransactions = ({ transactions, handleFiltersApplied, handleFilter
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
     {
-      field: 'updateDate',
+      field: 'trxChargeDate',
       headerName: 'Data e ora',
       flex: 1,
       editable: false,
