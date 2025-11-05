@@ -1,7 +1,7 @@
 import React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import Footer from '../Footer';
-import { Footer as MuiItaliaFooter, LangCode } from '@pagopa/mui-italia';
+import { LangCode } from '@pagopa/mui-italia';
 import { pagoPALink } from '../FooterConfig';
 
 let mockedMuiFooterProps: any;
@@ -36,7 +36,10 @@ jest.mock('react-i18next', () => ({
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend/locale/locale-utils', () => ({
-  changeLanguage: jest.fn().mockResolvedValue(undefined),
+  __esModule: true,
+  default: {
+    changeLanguage: jest.fn().mockResolvedValue(undefined),
+  },
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend/config/env', () => ({
@@ -44,21 +47,53 @@ jest.mock('@pagopa/selfcare-common-frontend/config/env', () => ({
     FOOTER: {
       LINK: {
         ABOUTUS: '#aboutus',
+        MEDIA: '#media',
+        WORKWITHUS: '#workwithus',
         PRIVACYPOLICY: '#privacy',
+        CERTIFICATIONS: '#certifications',
+        INFORMATIONSECURITY: '#infosecurity',
+        PROTECTIONOFPERSONALDATA: '#protection',
+        COOKIES: '#cookies',
+        TERMSANDCONDITIONS: '#terms',
+        TRANSPARENTCOMPANY: '#transparent',
+        DISCLOSUREPOLICY: '#disclosure',
+        MODEL231: '#model231',
+        ACCESSIBILITY: '#accessibility',
+        LINKEDIN: '#linkedin',
+        TWITTER: '#twitter',
+        INSTAGRAM: '#instagram',
+        MEDIUM: '#medium',
       },
     },
   },
 }));
+
 jest.mock('../../../utils/env', () => ({
   ENV: {
     CONFIG: {
       FOOTER: {
         LINK: {
           PRIVACYPOLICY: '#privacy-logged',
-          TERMSANDCONDITIONS: '#terms-logged',
+          PROTECTIONOFPERSONALDATA: '#protection-logged',
+          ACCESSIBILITY: '#accessibility-logged',
         },
       },
     },
+  },
+}));
+
+jest.mock('../FooterConfig', () => ({
+  pagoPALink: { href: 'https://www.pagopa.it' },
+  LANGUAGES: [
+    { it: 'Italiano' },
+    { en: 'English' },
+  ],
+}));
+
+jest.mock('../../../routes', () => ({
+  default: {
+    PRIVACY_POLICY: '/privacy-policy',
+    TOS: '/terms-of-service',
   },
 }));
 
@@ -85,8 +120,6 @@ describe('<Footer />', () => {
     expect(preLoginLinks).toHaveTextContent(
       'common.footer.preLoginLinks.resources.links.privacyPolicy'
     );
-
-    const postLoginLinks = screen.getByTestId('post-login-links-prop');
   });
 
   test('should render the post-login footer when user is logged', () => {
@@ -121,7 +154,7 @@ describe('<Footer />', () => {
     );
 
     expect(cookieLink).toBeDefined();
-    cookieLink.onClick();
+    cookieLink?.onClick();
 
     expect(window.OneTrust.ToggleInfoDisplay).toHaveBeenCalledTimes(1);
   });
@@ -147,7 +180,7 @@ describe('<Footer />', () => {
   });
 
   test('should call i18n.changeLanguage when onLanguageChanged is triggered', async () => {
-    const i18n = require('@pagopa/selfcare-common-frontend/locale/locale-utils');
+    const i18nModule = require('@pagopa/selfcare-common-frontend/locale/locale-utils');
     render(<Footer loggedUser={false} />);
 
     expect(mockedMuiFooterProps.onLanguageChanged).toBeDefined();
@@ -156,7 +189,7 @@ describe('<Footer />', () => {
       await mockedMuiFooterProps.onLanguageChanged('en' as LangCode);
     });
 
-    expect(i18n.changeLanguage).toHaveBeenCalledWith('en');
+    expect(i18nModule.default.changeLanguage).toHaveBeenCalledWith('en');
   });
 
   test('should update selectedLanguage state when onLanguageChanged is called', async () => {
@@ -171,4 +204,10 @@ describe('<Footer />', () => {
     expect(mockedMuiFooterProps.currentLangCode).toBe('en');
   });
 
+  test('should pass productsJsonUrl prop to MuiItaliaFooter', () => {
+    const testUrl = 'https://example.com/products.json';
+    render(<Footer loggedUser={false} productsJsonUrl={testUrl} />);
+
+    expect(mockedMuiFooterProps.productsJsonUrl).toBe(testUrl);
+  });
 });

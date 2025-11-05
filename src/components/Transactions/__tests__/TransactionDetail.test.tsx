@@ -139,13 +139,14 @@ describe('TransactionDetail', () => {
     });
 
     it('should return "error on type" for unhandled TYPE_TEXT', () => {
+      const unknownType = 'UNKNOWN_TYPE' as any;
       render(
         <Provider store={store}>
           <StoreProvider>
             <ThemeProvider theme={createTheme()}>
               <TransactionDetail
                 itemValues={itemValues}
-                listItem={[{ id: 'valueText', label: 'Error Field', type: TYPE_TEXT.Text }]}
+                listItem={[{ id: 'valueText', label: 'Error Field', type: unknownType }]}
               />
             </ThemeProvider>
           </StoreProvider>
