@@ -227,6 +227,11 @@ const ReportedUsers: React.FC = () => {
               columns={getReportedUsersColumns(handleOpenDeleteModal)}
               pageSize={1}
               rowsPerPage={1}
+              paginationModel={{
+                pageNo: 0,
+                pageSize: 1,
+                totalElements: user.length,
+              }}
             />
           </Box>
         )}
