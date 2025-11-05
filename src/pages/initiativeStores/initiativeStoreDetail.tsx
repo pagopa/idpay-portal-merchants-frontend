@@ -19,12 +19,11 @@ import LabelValuePair from '../../components/labelValuePair/labelValuePair';
 import MerchantTransactions from '../../components/Transactions/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
-import { isValidEmail } from '../../helpers';
+import { isValidEmail, handlePromptMessage } from '../../helpers';
 import { formatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { POS_TYPE } from '../../utils/constants';
 import ROUTES from '../../routes';
-import { handlePromptMessage } from '../../helpers';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
@@ -122,6 +121,7 @@ const InitiativeStoreDetail = () => {
           ...transaction,
           trxDate: formatDate(transaction.trxDate),
           updateDate: formatDate(transaction.updateDate),
+          trxChargeDate: formatDate(transaction.trxChargeDate),
         }));
         setStoreTransactions([...responseWIthFormattedDate]);
       }
