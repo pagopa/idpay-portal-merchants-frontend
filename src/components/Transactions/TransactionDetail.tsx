@@ -1,4 +1,3 @@
-
 import { Box, Grid, Link, Typography } from '@mui/material';
 import { ReactNode } from 'react';
 import { theme } from '@pagopa/mui-italia';
@@ -12,15 +11,13 @@ import { useStore } from '../../pages/initiativeStores/StoreContext';
 import getStatus from './useStatus';
 
 type Props = {
-  title?:string;
+  title?: string;
   itemValues: any;
   listItem: Array<any>;
   children?: ReactNode;
 };
 
-
 export default function TransactionDetail({ title, itemValues, listItem }: Props) {
-
   const addError = useErrorDispatcher();
   const { storeId } = useStore();
 
@@ -28,20 +25,19 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
     const chipItem = getStatus(itemValues.status);
     return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
   };
-  const downloadFile = async (selectedTransaction: any,pointOfSaleId: string) => {
-    console.log(selectedTransaction ,'transaction');
+  const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
+    console.log(selectedTransaction, 'transaction');
     try {
-      const response = await downloadInvoiceFile(selectedTransaction?.id,pointOfSaleId);
+      const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
       const { invoiceUrl } = response;
-      const filename = selectedTransaction?.invoiceFile?.filename || "fattura.pdf";
+      const filename = selectedTransaction?.invoiceFile?.filename || 'fattura.pdf';
 
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       // eslint-disable-next-line functional/immutable-data
       link.href = invoiceUrl;
       // eslint-disable-next-line functional/immutable-data
       link.download = filename;
       link.click();
-
     } catch (error) {
       addError({
         id: 'FILE_DOWNLOAD',
@@ -60,20 +56,20 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
   function getValueText(driver: string, type: TYPE_TEXT) {
     const index = Object.keys(itemValues).indexOf(driver);
     const val = Object.values(itemValues)[index] as string;
-    if (driver === "additionalProperties.productName") {
+    if (driver === 'additionalProperties.productName') {
       return itemValues?.additionalProperties?.productName ?? MISSING_DATA_PLACEHOLDER;
     }
     if (type === TYPE_TEXT.Text) {
       return formatValues(val);
     } else if (type === TYPE_TEXT.Currency) {
-      return currencyFormatter(Number(val)/100).toString();
+      return currencyFormatter(Number(val) / 100).toString();
     } else {
-      return "error on type";
+      return 'error on type';
     }
-  };
+  }
 
   return (
-    <Box sx={{ width: 350 }} pl={2} data-testid="product-detail">
+    <Box sx={{ width: 375 }} pl={2} data-testid="product-detail">
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Typography variant="h5">{title}</Typography>
