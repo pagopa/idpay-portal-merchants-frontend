@@ -193,14 +193,13 @@ export const MerchantApi = {
     fiscalCode: string
   ): Promise<ReportedUserCreateResponseDTO> => {
     const token = storageTokenOps.read();
-    const response = await fetch(`${ENV.URL_API.MERCHANTS_PORTAL}/reported-user`, {
+    const response = await fetch(`${ENV.URL_API.MERCHANTS_PORTAL}/reported-user/${fiscalCode}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'initiative-id': initiativeId,
         'Content-Type': 'text/plain',
       },
-      body: fiscalCode,
     });
     return await response.json();
   },
