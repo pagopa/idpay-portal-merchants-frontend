@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import InsertReportedUser from '../insertReportedUser';
 
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (k: string) => k,
@@ -11,12 +12,15 @@ jest.mock('react-i18next', () => ({
   },
 }));
 
+
+const mockPush = jest.fn();
+const mockGoBack = jest.fn();
 const mockUseLocation = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
-    push: jest.fn(),
-    goBack: jest.fn(),
+    push: mockPush,
+    goBack: mockGoBack,
   }),
   useParams: () => ({ id: 'INITIATIVE_ID' }),
   matchPath: () => ({ params: { id: 'INITIATIVE_ID' } }),
@@ -36,69 +40,174 @@ jest.mock('../../../utils/jwt-utils', () => ({
   parseJwt: () => ({ merchant_id: 'MERCHANT_ID' }),
 }));
 
+const mockCreateReportedUser = jest.fn().mockResolvedValue({});
 jest.mock('../../../services/merchantService', () => ({
-  createReportedUser: jest.fn().mockResolvedValue({}),
+  createReportedUser: (...args: any[]) => mockCreateReportedUser(...args),
 }));
+
+const mockGetReportedUser = jest.fn();
+jest.mock('../../../api/MerchantsApiClient', () => ({
+  MerchantApi: {
+    getReportedUser: (...args: any[]) => mockGetReportedUser(...args),
+  },
+}));
+
 
 jest.mock('../modalReportedUser', () => (props: any) => {
   if (!props.open) return null;
   return (
     <div data-testid="modal-reported-user">
-      <button onClick={props.onCancel}>Cancel</button>
-      <button onClick={props.onConfirm}>Confirm</button>
-      <span>{props.cfModal}</span>
+      <button data-testid="modal-cancel" onClick={props.onCancel}>
+        Cancel
+      </button>
+      <button data-testid="modal-confirm" onClick={props.onConfirm}>
+        Confirm
+      </button>
+      <span data-testid="cf-modal">{props.cfModal}</span>
     </div>
+  );
+});
+
+
+jest.mock('../CfTextField', () => (props: any) => {
+  const { name, formik } = props;
+  return (
+    <input
+      aria-label="pages.reportedUsers.cfPlaceholder"
+      data-testid="cf-input"
+      value={formik.values[name]}
+      onChange={(e) => formik.setFieldValue(name, e.target.value)}
+    />
   );
 });
 
 describe('InsertReportedUser', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseLocation.mockReturnValue({ state: {} });
+    mockUseLocation.mockReturnValue({
+      state: { merchantId: 'MERCHANT123', initiativeID: 'INITIATIVE456' },
+    });
   });
 
   it('renders CF field, buttons and titles', () => {
     render(<InsertReportedUser />);
     expect(screen.getByLabelText('pages.reportedUsers.cfPlaceholder')).toBeInTheDocument();
+    expect(screen.getByText('Utenti segnalati')).toBeInTheDocument();
+    expect(screen.getByText('Segnalazione utenti')).toBeInTheDocument();
+    expect(screen.getByTestId('confirm-reportedUsers-button')).toBeInTheDocument();
+    expect(screen.getByTestId('back-reportedUsers-button')).toBeInTheDocument();
   });
 
-  /*
-  it('shows error if trying to confirm with empty field', async () => {
+  it('shows error when trying to confirm with empty CF', async () => {
     render(<InsertReportedUser />);
-    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
     await waitFor(() => {
-      expect(screen.getByLabelText('pages.reportedUsers.cfPlaceholder')).toBeInTheDocument();
+      expect(mockGetReportedUser).not.toHaveBeenCalled();
     });
   });
-  */
-  it('shows error if invalid CF is entered', async () => {
-    render(<InsertReportedUser />);
-    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), { target: { value: '123' } });
-    expect(screen.getByText('pages.insertReportedUser.searchDescription')).toBeInTheDocument();
-  });
 
-  it('shows confirmation modal if CF is valid', async () => {
+  it('shows error when CF is invalid', async () => {
     render(<InsertReportedUser />);
-    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), {
-      target: { value: 'ABCDEF12G34H567I' },
+    const input = screen.getByTestId('cf-input');
+    fireEvent.change(input, { target: { value: 'INVALID' } });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+    await waitFor(() => {
+      expect(mockGetReportedUser).not.toHaveBeenCalled();
     });
-    expect(screen.getByText('Utenti segnalati')).toBeInTheDocument();
   });
 
-  it('on modal confirmation calls createReportedUser and redirects', async () => {
-    const { createReportedUser } = require('../../../services/merchantService');
-    const { useHistory } = require('react-router-dom');
+  it('shows confirmation modal when CF is valid and not already reported', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([]); 
     render(<InsertReportedUser />);
-    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), {
-      target: { value: 'ABCDEF12G34H567I' },
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
     });
-    expect(screen.getByText('Utenti segnalati')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
+      expect(screen.getByTestId('cf-modal')).toHaveTextContent('RSSMRA80A01F205X');
+    });
   });
 
-  it('back button calls history.goBack', () => {
-    const { useHistory } = require('react-router-dom');
+  it('does not open modal when CF already reported', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([{ cf: 'RSSMRA80A01F205X' }]);
     render(<InsertReportedUser />);
-    expect(screen.getByText('Utenti segnalati')).toBeInTheDocument();
-    expect(useHistory().goBack).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+    await waitFor(() => {
+      expect(mockGetReportedUser).toHaveBeenCalled();
+      expect(screen.queryByTestId('modal-reported-user')).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls createReportedUser and redirects when modal confirmed', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([]);
+    render(<InsertReportedUser />);
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+
+    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    fireEvent.click(screen.getByTestId('modal-confirm'));
+
+    await waitFor(() => {
+      expect(mockCreateReportedUser).toHaveBeenCalledWith(
+        'MERCHANT123',
+        'INITIATIVE456',
+        'RSSMRA80A01F205X'
+      );
+      expect(mockPush).toHaveBeenCalled();
+    });
+  });
+
+  it('closes modal when canceled', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([]);
+    render(<InsertReportedUser />);
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    fireEvent.click(screen.getByTestId('modal-cancel'));
+    await waitFor(() => {
+      expect(screen.queryByTestId('modal-reported-user')).not.toBeInTheDocument();
+    });
+  });
+
+  it('goes back when pressing back button', () => {
+    render(<InsertReportedUser />);
+    fireEvent.click(screen.getByTestId('back-reportedUsers-button'));
+    expect(mockGoBack).toHaveBeenCalled();
+  });
+
+  it('handles API error gracefully when checking CF', async () => {
+    mockGetReportedUser.mockRejectedValueOnce(new Error('network error'));
+    render(<InsertReportedUser />);
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+    await waitFor(() => {
+      expect(mockGetReportedUser).toHaveBeenCalled();
+    });
+  });
+
+  it('handles API error gracefully when creating reported user', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([]);
+    mockCreateReportedUser.mockRejectedValueOnce(new Error('create failed'));
+    render(<InsertReportedUser />);
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    fireEvent.click(screen.getByTestId('modal-confirm'));
+    await waitFor(() => {
+      expect(mockCreateReportedUser).toHaveBeenCalled();
+    });
   });
 });
