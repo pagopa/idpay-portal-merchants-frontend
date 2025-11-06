@@ -13,6 +13,9 @@ import {
   getMerchantPointOfSalesById,
   getMerchantPointOfSaleTransactionsProcessed,
   downloadInvoiceFile,
+  getReportedUser,
+  createReportedUser,
+  deleteReportedUser,
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
@@ -30,6 +33,9 @@ jest.mock('../../api/MerchantsApiClient', () => ({
     getMerchantPointOfSalesById: jest.fn(),
     getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
     downloadInvoiceFile: jest.fn(),
+    getReportedUser: jest.fn(),
+    createReportedUser: jest.fn(),
+    deleteReportedUser: jest.fn(),
   },
 }));
 
@@ -178,6 +184,54 @@ describe('merchantService', () => {
       );
       expect(mockedMerchantApi.getMerchantPointOfSaleTransactionsProcessed).toHaveBeenCalledWith(
         ...Object.values(params)
+      );
+    });
+  });
+
+  describe('merchantService reported users', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should call MerchantApi.getReportedUser with correct params', async () => {
+      const params = {
+        initiativeId: 'init-1',
+        merchantId: 'merchant-1',
+        userFiscalCode: 'AAAAAA00A00A000A',
+      };
+      await getReportedUser(params.initiativeId, params.merchantId, params.userFiscalCode);
+      expect(mockedMerchantApi.getReportedUser).toHaveBeenCalledWith(
+        params.initiativeId,
+        params.merchantId,
+        params.userFiscalCode
+      );
+    });
+
+    it('should call MerchantApi.createReportedUser with correct params', async () => {
+      const params = {
+        merchantId: 'merchant-2',
+        initiativeId: 'init-2',
+        fiscalCode: 'BBBBBB00B00B000B',
+      };
+      await createReportedUser(params.merchantId, params.initiativeId, params.fiscalCode);
+      expect(mockedMerchantApi.createReportedUser).toHaveBeenCalledWith(
+        params.merchantId,
+        params.initiativeId,
+        params.fiscalCode
+      );
+    });
+
+    it('should call MerchantApi.deleteReportedUser with correct params', async () => {
+      const params = {
+        merchantId: 'merchant-3',
+        initiativeId: 'init-3',
+        userFiscalCode: 'CCCCCC00C00C000C',
+      };
+      await deleteReportedUser(params.merchantId, params.initiativeId, params.userFiscalCode);
+      expect(mockedMerchantApi.deleteReportedUser).toHaveBeenCalledWith(
+        params.merchantId,
+        params.initiativeId,
+        params.userFiscalCode
       );
     });
   });

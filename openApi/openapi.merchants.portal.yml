@@ -3,8 +3,13 @@ info:
   title: IDPAY ITN Welfare Portal Merchant API
   description: IDPAY ITN Welfare Portal Merchant
   version: 1.0.1
+  contact:
+    name: PagoPA S.p.A.
+    url: https://www.pagopa.it
+    email: support@pagopa.it
 servers:
   - url: "https://api-io.dev.cstar.pagopa.it/idpay-itn/merchant/portal"
+    x-internal: true
 
 tags:
   - name: point-of-sales
@@ -37,16 +42,75 @@ paths:
       responses:
         "204":
           description: No Content - Successfully saved or updated
+          headers:
+            X-RateLimit-Limit:
+              description: The number of allowed requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              description: The number of remaining requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              description: The number of seconds left in the current period
+              schema:
+                type: integer
         "400":
           description: Bad request - Invalid input data
+          headers:
+            X-RateLimit-Limit:
+              description: The number of allowed requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              description: The number of remaining requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              description: The number of seconds left in the current period
+              schema:
+                type: integer
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ValidationErrorDTO"
         "401":
           description: Unauthorized - Authentication failed
+          headers:
+            X-RateLimit-Limit:
+              description: The number of allowed requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              description: The number of remaining requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              description: The number of seconds left in the current period
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_UNAUTHORIZED
+                message: Authentication failed
         "404":
           description: Not Found
+          headers:
+            X-RateLimit-Limit:
+              description: The number of allowed requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              description: The number of remaining requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              description: The number of seconds left in the current period
+              schema:
+                type: integer
           content:
             application/json:
               schema:
@@ -56,6 +120,19 @@ paths:
                 message: Point of sale with id 123 not found.
         "429":
           description: Too many Request - Rate limit exceeded
+          headers:
+            X-RateLimit-Limit:
+              description: The number of allowed requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              description: The number of remaining requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              description: The number of seconds left in the current period
+              schema:
+                type: integer
           content:
             application/json:
               schema:
@@ -217,6 +294,19 @@ paths:
           description: Unauthorized - Authentication Failed
         "404":
           description: Not Found
+          headers:
+            X-RateLimit-Limit:
+              description: The number of allowed requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              description: The number of remaining requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              description: The number of seconds left in the current period
+              schema:
+                type: integer
           content:
             application/json:
               schema:
@@ -226,6 +316,19 @@ paths:
                 message: Point of sale with id 123 not found.
         "429":
           description: Too many Request - Rate limit exceeded
+          headers:
+            X-RateLimit-Limit:
+              description: The number of allowed requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              description: The number of remaining requests in the current period
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              description: The number of seconds left in the current period
+              schema:
+                type: integer
           content:
             application/json:
               schema:
@@ -972,7 +1075,197 @@ paths:
               example:
                 code: MERCHANT_GENERIC_ERROR
                 message: An error occurred during the update
+  /reported-user:
+    post:
+      tags: [ reported-user ]
+      summary: Create reported user
+      description: >
+        ENG: Flag a user (fiscal code) for a merchant/initiative pair
+        IT: Segnala un utente (CF) per coppia merchant/iniziativa
+      operationId: createReportedUser
+      parameters:
+        - $ref: '#/components/parameters/MerchantIdHeader'
+        - $ref: '#/components/parameters/InitiativeIdHeader'
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: Citizen fiscal code
+              maxLength: 16
+              pattern: '^[A-Z0-9]{11,16}$'
+            examples:
+              cf:
+                value: RSSMRA85T10A562S
+      responses:
+        "200":
+          description: Business outcome
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportedUserCreateResponseDTO'
+              examples:
+                ok: { value: { status: "OK", errorKey: "" } }
+                entityNotFound: { value: { status: "KO", errorKey: "Entity not found" } }
+                serviceUnavailable: { value: { status: "KO", errorKey: "Service unavailable" } }
+                differentMerchant: { value: { status: "KO", errorKey: "Different Merchant Id" } }
+                differentInitiative: { value: { status: "KO", errorKey: "Different Initiative Id" } }
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+              example: { code: MERCHANT_INVALID_REQUEST, message: "Invalid request" }
+        "401":
+          description: Authentication failed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+              example: { code: MERCHANT_TOO_MANY_REQUESTS, message: "Too many requests" }
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+
+    get:
+      tags: [ reported-user ]
+      summary: Search reported users
+      description: >
+        ENG: Search reported users by fiscal code (headers define merchant/initiative)
+        IT: Ricerca segnalazioni per codice fiscale (merchant/initiative via header)
+      operationId: getReportedUser
+      parameters:
+        - name: userFiscalCode
+          in: query
+          required: true
+          description: Citizen fiscal code
+          schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
+          example: RSSMRA85T10A562S
+        - $ref: '#/components/parameters/MerchantIdHeader'
+        - $ref: '#/components/parameters/InitiativeIdHeader'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportedUserDTO'
+              examples:
+                list:
+                  value:
+                    - fiscalCode: "RSSMRA85T10A562S"
+                      reportedDate: "2025-10-30T09:15:12Z"
+                      transactionId: "TRX_001"
+                      transactionDate: "2025-10-30T09:14:50Z"
+                    - fiscalCode: "VRDLGI90A01H501Z"
+                      reportedDate: "2025-10-29T16:02:45Z"
+                      transactionId: "TRX_002"
+                      transactionDate: "2025-10-29T15:59:10Z"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+              example: { code: MERCHANT_INVALID_REQUEST, message: "Invalid request" }
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+              example: { code: MERCHANT_TOO_MANY_REQUESTS, message: "Too many requests" }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+
+  /reported-user/{userFiscalCode}:
+    delete:
+      tags: [ reported-user ]
+      summary: Delete reported user
+      description: >
+        ENG: Remove a report for the given fiscal code
+        IT: Rimuove la segnalazione per il codice fiscale indicato
+      operationId: deleteReportedUser
+      parameters:
+        - name: userFiscalCode
+          in: path
+          required: true
+          description: Citizen fiscal code of the reported user
+          schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
+          example: RSSMRA85T10A562S
+        - $ref: '#/components/parameters/MerchantIdHeader'
+        - $ref: '#/components/parameters/InitiativeIdHeader'
+      responses:
+        '200':
+          description: Business outcome
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportedUserCreateResponseDTO' }
+              examples:
+                ok: { value: { status: "OK", errorKey: "" } }
+                notFound: { value: { status: "KO", errorKey: "UserId not found" } }
+                entityNotFound: { value: { status: "KO", errorKey: "Entity not found" } }
+                serviceUnavailable: { value: { status: "KO", errorKey: "Service unavailable" } }
+                differentMerchant: { value: { status: "KO", errorKey: "Different Merchant Id" } }
+                differentInitiative: { value: { status: "KO", errorKey: "Different Initiative Id" } }
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+              example: { code: MERCHANT_INVALID_REQUEST, message: "Invalid request" }
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+        '403':
+          description: Not authorized
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
+              example: { code: MERCHANT_TOO_MANY_REQUESTS, message: "Too many requests" }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
 components:
+  parameters:
+    MerchantIdHeader:
+      name: merchant-id
+      in: header
+      required: true
+      description: Merchant ID (header)
+      schema: { type: string, maxLength: 64, pattern: '^[A-Z0-9\-_]+$' }
+      example: MERCHANT_12345
+    InitiativeIdHeader:
+      name: initiative-id
+      in: header
+      required: true
+      description: Initiative ID (header)
+      schema: { type: string, maxLength: 64, pattern: '^[A-Z0-9\-_]+$' }
+      example: INITIATIVE_67890
   schemas:
     InitiativeDTO:
       type: object
@@ -1739,6 +2032,36 @@ components:
           description: "ENG: URL to download the invoice file - IT: URL per scaricare il file della fattura"
       required:
         - invoiceUrl
+    ReportedUserCreateResponseDTO:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Outcome of the operation
+          example: OK
+        errorKey:
+          type: string
+          nullable: true
+          description: >
+            Error reason if status == KO; empty string otherwise.
+            Possible business messages:
+             - "UserId not found"
+             - "Entity not found"
+             - "Service unavailable"
+             - "Different Merchant Id"
+             - "Already reported"
+             - "Different Initiative Id"
+          maxLength: 64
+          example: ""
+      required: [ status, errorKey ]
+    ReportedUserDTO:
+      type: object
+      required: [ fiscalCode, reportedDate ]
+      properties:
+        fiscalCode: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$', description: Citizen fiscal code, example: RSSMRA85T10A562S }
+        reportedDate: { type: string, format: date-time, maxLength: 64, description: When the user was reported, example: 2025-10-30T09:15:12Z }
+        transactionId: { type: string, nullable: true, maxLength: 64, description: Related transaction ID (if any), example: TRX_001 }
+        trxChargeDate: { type: string, format: date-time, nullable: true, maxLength: 64, description: Related transaction date (if any), example: 2025-10-30T09:14:50Z }
   securitySchemes:
     Bearer:
       type: apiKey

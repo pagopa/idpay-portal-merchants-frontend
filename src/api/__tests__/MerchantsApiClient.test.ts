@@ -37,6 +37,8 @@ describe('MerchantApi', () => {
       getPointOfSale: jest.fn(),
       getPointOfSaleTransactionsProcessed: jest.fn(),
       downloadInvoiceFile: jest.fn(),
+      getReportedUser: jest.fn(),
+      deleteReportedUser: jest.fn(),
     };
 
     (createClient as jest.Mock).mockReturnValue(mockApiClient);
@@ -233,6 +235,89 @@ describe('MerchantApi', () => {
       pointOfSaleId: 'pos1',
       page: 1,
     });
+    expect(result).toBe('extracted');
+  });
+
+  it('getReportedUser', async () => {
+    mockApiClient.getReportedUser.mockResolvedValue({ right: 'data' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.getReportedUser('initA', 'merchantA', 'AAAAAA00A00A000A');
+
+    expect(mockApiClient.getReportedUser).toHaveBeenCalledWith({
+      'initiative-id': 'initA',
+      'merchant-id': 'merchantA',
+      userFiscalCode: 'AAAAAA00A00A000A',
+    });
+    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
+    expect(result).toBe('extracted');
+  });
+
+  it('createReportedUser sends fetch and extracts response', async () => {
+    const json = jest.fn().mockResolvedValue('payload');
+    // @ts-ignore
+    global.fetch = jest.fn().mockResolvedValue({ json });
+
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.createReportedUser(
+      'merchant-1',
+      'initiative-1',
+      'BBBBBB00B00B000B'
+    );
+
+    expect(global.fetch).toHaveBeenCalledWith(expect.any(String), {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer mocked-token',
+        'merchant-id': 'merchant-1',
+        'initiative-id': 'initiative-1',
+        'Content-Type': 'text/plain',
+      },
+      body: 'BBBBBB00B00B000B',
+    });
+    expect(json).toHaveBeenCalled();
+    expect(extractResponse).not.toHaveBeenCalled();
+  });
+
+  it('deleteReportedUser', async () => {
+    mockApiClient.deleteReportedUser.mockResolvedValue({ right: 'ok' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.deleteReportedUser(
+      'merchant-2',
+      'initiative-2',
+      'CCCCCC00C00C000C'
+    );
+
+    expect(mockApiClient.deleteReportedUser).toHaveBeenCalledWith({
+      'merchant-id': 'merchant-2',
+      'initiative-id': 'initiative-2',
+      userFiscalCode: 'CCCCCC00C00C000C',
+    });
+    expect(extractResponse).toHaveBeenCalledWith({ right: 'ok' }, 200, expect.any(Function));
+    expect(result).toBe('extracted');
+  });
+
+  it('getMerchantTransactionsProcessed with filters', async () => {
+    mockApiClient.getMerchantTransactionsProcessed.mockResolvedValue({ right: 'data' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.getMerchantTransactionsProcessed(
+      'init-filter',
+      3,
+      'DDD',
+      'OK'
+    );
+
+    expect(mockApiClient.getMerchantTransactionsProcessed).toHaveBeenCalledWith({
+      initiativeId: 'init-filter',
+      page: 3,
+      size: 10,
+      fiscalCode: 'DDD',
+      status: 'OK',
+    });
+    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
     expect(result).toBe('extracted');
   });
 });

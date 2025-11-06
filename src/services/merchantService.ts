@@ -9,6 +9,7 @@ import { TransactionResponse } from '../api/generated/merchants/TransactionRespo
 import { GetPointOfSalesFilters, GetPointOfSalesResponse, GetPointOfSaleTransactionsFilters } from '../types/types';
 import { PointOfSaleTransactionsProcessedListDTO } from '../api/generated/merchants/PointOfSaleTransactionsProcessedListDTO';
 import { DownloadInvoiceResponseDTO } from '../api/generated/merchants/DownloadInvoiceResponseDTO';
+import { ReportedUserDTO } from '../api/generated/merchants/ReportedUserDTO';
 
 export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> => MerchantApi.getMerchantInitiativeList();
 
@@ -57,4 +58,25 @@ export const getMerchantPointOfSaleTransactionsProcessed = (initiativeId: string
 
 export const downloadInvoiceFile = (transactionId: string,pointOfSaleId: string): Promise<DownloadInvoiceResponseDTO> => MerchantApi.downloadInvoiceFile(transactionId,pointOfSaleId);
 
-  
+export const getReportedUser = (
+  initiativeId: string,
+  merchantId: string,
+  userFiscalCode: string
+): Promise<ReportedUserDTO> =>
+  MerchantApi.getReportedUser(initiativeId, merchantId, userFiscalCode);
+
+import { ReportedUserCreateResponseDTO } from '../api/generated/merchants/ReportedUserCreateResponseDTO';
+
+export const createReportedUser = (
+  merchantId: string,
+  initiativeId: string,
+  fiscalCode: string
+): Promise<ReportedUserCreateResponseDTO> =>
+  MerchantApi.createReportedUser(merchantId, initiativeId, fiscalCode);
+
+export const deleteReportedUser = (
+  merchantId: string,
+  initiativeId: string,
+  userFiscalCode: string
+): Promise<ReportedUserCreateResponseDTO> =>
+  MerchantApi.deleteReportedUser(merchantId, initiativeId, userFiscalCode);
