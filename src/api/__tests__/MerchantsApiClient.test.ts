@@ -242,11 +242,10 @@ describe('MerchantApi', () => {
     mockApiClient.getReportedUser.mockResolvedValue({ right: 'data' });
     const MerchantApi = loadApi();
 
-    const result = await MerchantApi.getReportedUser('initA', 'merchantA', 'AAAAAA00A00A000A');
+    const result = await MerchantApi.getReportedUser('initA', 'AAAAAA00A00A000A');
 
     expect(mockApiClient.getReportedUser).toHaveBeenCalledWith({
       'initiative-id': 'initA',
-      'merchant-id': 'merchantA',
       userFiscalCode: 'AAAAAA00A00A000A',
     });
     expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
@@ -260,17 +259,12 @@ describe('MerchantApi', () => {
 
     const MerchantApi = loadApi();
 
-    const result = await MerchantApi.createReportedUser(
-      'merchant-1',
-      'initiative-1',
-      'BBBBBB00B00B000B'
-    );
+    const result = await MerchantApi.createReportedUser('initiative-1', 'BBBBBB00B00B000B');
 
     expect(global.fetch).toHaveBeenCalledWith(expect.any(String), {
       method: 'POST',
       headers: {
         Authorization: 'Bearer mocked-token',
-        'merchant-id': 'merchant-1',
         'initiative-id': 'initiative-1',
         'Content-Type': 'text/plain',
       },
@@ -284,14 +278,9 @@ describe('MerchantApi', () => {
     mockApiClient.deleteReportedUser.mockResolvedValue({ right: 'ok' });
     const MerchantApi = loadApi();
 
-    const result = await MerchantApi.deleteReportedUser(
-      'merchant-2',
-      'initiative-2',
-      'CCCCCC00C00C000C'
-    );
+    const result = await MerchantApi.deleteReportedUser('initiative-2', 'CCCCCC00C00C000C');
 
     expect(mockApiClient.deleteReportedUser).toHaveBeenCalledWith({
-      'merchant-id': 'merchant-2',
       'initiative-id': 'initiative-2',
       userFiscalCode: 'CCCCCC00C00C000C',
     });

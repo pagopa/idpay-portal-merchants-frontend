@@ -179,30 +179,26 @@ export const MerchantApi = {
 
   getReportedUser: async (
     initiativeId: string,
-    merchantId: string,
     userFiscalCode: string
   ): Promise<ReportedUserDTO> => {
     const result = await apiClient.getReportedUser({
-      "initiative-id": initiativeId,
-      "merchant-id": merchantId,
+      'initiative-id': initiativeId,
       userFiscalCode,
     });
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
   createReportedUser: async (
-    merchantId: string,
     initiativeId: string,
     fiscalCode: string
   ): Promise<ReportedUserCreateResponseDTO> => {
     const token = storageTokenOps.read();
     const response = await fetch(`${ENV.URL_API.MERCHANTS_PORTAL}/reported-user`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        "merchant-id": merchantId,
-        "initiative-id": initiativeId,
-        "Content-Type": "text/plain",
+        'initiative-id': initiativeId,
+        'Content-Type': 'text/plain',
       },
       body: fiscalCode,
     });
@@ -210,13 +206,11 @@ export const MerchantApi = {
   },
 
   deleteReportedUser: async (
-    merchantId: string,
     initiativeId: string,
     userFiscalCode: string
   ): Promise<ReportedUserCreateResponseDTO> => {
     const result = await apiClient.deleteReportedUser({
-      "merchant-id": merchantId,
-      "initiative-id": initiativeId,
+      'initiative-id': initiativeId,
       userFiscalCode,
     });
     return extractResponse(result, 200, onRedirectToLogin);

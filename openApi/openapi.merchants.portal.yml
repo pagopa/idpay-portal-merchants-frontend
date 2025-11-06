@@ -1065,7 +1065,7 @@ paths:
               example:
                 code: MERCHANT_GENERIC_ERROR
                 message: An error occurred during the update
-  /reported-user:
+  /reported-user/{userFiscalCode}:
     post:
       tags: [ reported-user ]
       summary: Create reported user
@@ -1074,20 +1074,13 @@ paths:
         IT: Segnala un utente (CF) per coppia merchant/iniziativa
       operationId: createReportedUser
       parameters:
-        - $ref: '#/components/parameters/MerchantIdHeader'
+        - name: userFiscalCode
+          in: path
+          required: true
+          description: Citizen fiscal code of the reported user
+          schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
+          example: RSSMRA85T10A562S
         - $ref: '#/components/parameters/InitiativeIdHeader'
-      requestBody:
-        required: true
-        content:
-          text/plain:
-            schema:
-              type: string
-              description: Citizen fiscal code
-              maxLength: 16
-              pattern: '^[A-Z0-9]{11,16}$'
-            examples:
-              cf:
-                value: RSSMRA85T10A562S
       responses:
         "200":
           description: Business outcome
@@ -1133,12 +1126,11 @@ paths:
       operationId: getReportedUser
       parameters:
         - name: userFiscalCode
-          in: query
+          in: path
           required: true
-          description: Citizen fiscal code
+          description: Citizen fiscal code of the reported user
           schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
           example: RSSMRA85T10A562S
-        - $ref: '#/components/parameters/MerchantIdHeader'
         - $ref: '#/components/parameters/InitiativeIdHeader'
       responses:
         '200':
@@ -1182,8 +1174,6 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
-
-  /reported-user/{userFiscalCode}:
     delete:
       tags: [ reported-user ]
       summary: Delete reported user
@@ -1198,7 +1188,6 @@ paths:
           description: Citizen fiscal code of the reported user
           schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
           example: RSSMRA85T10A562S
-        - $ref: '#/components/parameters/MerchantIdHeader'
         - $ref: '#/components/parameters/InitiativeIdHeader'
       responses:
         '200':
