@@ -276,6 +276,7 @@ const MerchantTransactions = ({
               InputLabelProps={{ required: false }}
               value={formik.values.productGtin}
               onChange={(e) => handleGtinChange(e)}
+              onBlur={() => setGtinError('')}
               size="small"
               inputProps={{ maxLength: 14 }}
               error={!!gtinError}
