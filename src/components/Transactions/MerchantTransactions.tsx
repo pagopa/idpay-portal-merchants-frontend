@@ -340,7 +340,7 @@ const MerchantTransactions = ({
         toggleDrawer={handleToggleDrawer}
       >
         <TransactionDetail
-          title={'Dettaglio Transazione'}
+          title={'Dettaglio transazione'}
           itemValues={rowDetail}
           listItem={listItemDetail}
         />
