@@ -52,11 +52,9 @@ jest.mock('react-i18next', () => ({
   },
 }));
 
-
-
 jest.mock('../../../components/dataTable/DataTable', () => ({
   __esModule: true,
-  default: ({ rows,  }: any) => (
+  default: ({ rows }: any) => (
     <div data-testid="data-table">
       {rows.map((row: any) => (
         <div key={row.id} data-testid={`row-${row.cf}`}>
@@ -85,21 +83,17 @@ jest.mock('../SearchTaxCode', () => ({
 
 jest.mock('../MsgResult', () => ({
   __esModule: true,
-  default: ({ severity, message }: any) => (
-    <div data-testid={`msg-${severity}`}>{message}</div>
-  ),
+  default: ({ severity, message }: any) => <div data-testid={`msg-${severity}`}>{message}</div>,
 }));
 
 jest.mock('../NoResultPaper', () => ({
   __esModule: true,
-  default: ({ translationKey }: any) => (
-    <div data-testid="no-result-paper">{translationKey}</div>
-  ),
+  default: ({ translationKey }: any) => <div data-testid="no-result-paper">{translationKey}</div>,
 }));
 
 jest.mock('../modalReportedUser', () => ({
   __esModule: true,
-  default: ({ open, onCancel, onConfirm, }: any) =>
+  default: ({ open, onCancel, onConfirm }: any) =>
     open ? (
       <div data-testid="modal-reported-user">
         <button data-testid="modal-cancel" onClick={onCancel}>
@@ -144,7 +138,7 @@ describe('ReportedUsers Component', () => {
     history = createMemoryHistory();
     history.push('/initiative/123/reported-users');
 
-    mockParseJwt.mockReturnValue({ merchant_id: 'merchant123' });
+    mockParseJwt.mockReturnValue({});
     mockStorageTokenOps.read.mockReturnValue('mock-token');
 
     jest.clearAllMocks();
@@ -203,11 +197,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(searchButton);
 
       await waitFor(() => {
-        expect(mockGetReportedUser).toHaveBeenCalledWith(
-          undefined,
-          'merchant123',
-          'RSSMRA80A01H501U'
-        );
+        expect(mockGetReportedUser).toHaveBeenCalledWith(undefined, 'RSSMRA80A01H501U');
       });
 
       expect(screen.getByTestId('msg-error')).toBeInTheDocument();
@@ -367,10 +357,11 @@ describe('ReportedUsers Component', () => {
       const reportButton = screen.getByText('Segnala Utente');
       fireEvent.click(reportButton);
 
-      expect(history.location.pathname).toBe('/portale-esercenti/undefined/utenti-segnalati/segnalazione-utenti');
+      expect(history.location.pathname).toBe(
+        '/portale-esercenti/undefined/utenti-segnalati/segnalazione-utenti'
+      );
       expect(history.location.state).toEqual({
         initiativeID: undefined,
-        merchantId: "merchant123",
       });
     });
   });
@@ -395,11 +386,7 @@ describe('ReportedUsers Component', () => {
       jest.advanceTimersByTime(3000);
 
       await waitFor(() => {
-        expect(mockGetReportedUser).toHaveBeenCalledWith(
-          undefined,
-          'merchant123',
-          'RSSMRA80A01H501U'
-        );
+        expect(mockGetReportedUser).toHaveBeenCalledWith(undefined, 'RSSMRA80A01H501U');
       });
     });
   });

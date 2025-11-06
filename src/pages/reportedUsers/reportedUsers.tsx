@@ -94,7 +94,7 @@ const ReportedUsers: React.FC = () => {
       if (values.cf && isValidCF(values.cf)) {
         setLoading(true);
         try {
-          const res = await getReportedUser(id, merchantId, values.cf);
+          const res = await getReportedUser(id, values.cf);
           if (!Array.isArray(res) || res.length === 0) {
             setUser([]);
           } else {
@@ -136,7 +136,7 @@ const ReportedUsers: React.FC = () => {
       return;
     }
     try {
-      await deleteReportedUser(merchantId, id, cf);
+      await deleteReportedUser(id, cf);
       setUser([]);
       setLastSearchedCF(undefined);
       setShowDeleteSuccessAlert(true);

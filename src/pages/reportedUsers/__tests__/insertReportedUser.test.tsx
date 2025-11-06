@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import InsertReportedUser from '../insertReportedUser';
 
-
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (k: string) => k,
@@ -11,7 +10,6 @@ jest.mock('react-i18next', () => ({
     return Component;
   },
 }));
-
 
 const mockPush = jest.fn();
 const mockGoBack = jest.fn();
@@ -52,7 +50,6 @@ jest.mock('../../../api/MerchantsApiClient', () => ({
   },
 }));
 
-
 jest.mock('../modalReportedUser', () => (props: any) => {
   if (!props.open) return null;
   return (
@@ -67,7 +64,6 @@ jest.mock('../modalReportedUser', () => (props: any) => {
     </div>
   );
 });
-
 
 jest.mock('../CfTextField', () => (props: any) => {
   const { name, formik } = props;
@@ -117,7 +113,7 @@ describe('InsertReportedUser', () => {
   });
 
   it('shows confirmation modal when CF is valid and not already reported', async () => {
-    mockGetReportedUser.mockResolvedValueOnce([]); 
+    mockGetReportedUser.mockResolvedValueOnce([]);
     render(<InsertReportedUser />);
     fireEvent.change(screen.getByTestId('cf-input'), {
       target: { value: 'RSSMRA80A01F205X' },
@@ -155,11 +151,7 @@ describe('InsertReportedUser', () => {
     fireEvent.click(screen.getByTestId('modal-confirm'));
 
     await waitFor(() => {
-      expect(mockCreateReportedUser).toHaveBeenCalledWith(
-        'MERCHANT123',
-        'INITIATIVE456',
-        'RSSMRA80A01F205X'
-      );
+      expect(mockCreateReportedUser).toHaveBeenCalledWith('INITIATIVE456', 'RSSMRA80A01F205X');
       expect(mockPush).toHaveBeenCalled();
     });
   });

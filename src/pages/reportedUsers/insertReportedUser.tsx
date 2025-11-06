@@ -36,13 +36,9 @@ const InsertReportedUser: React.FC = () => {
   const merchantId = location.state?.merchantId;
   const initiativeID = location.state?.initiativeID;
 
-  const checkCfAlreadyReported = async (
-    initiativeID: string,
-    merchantId: string,
-    cf: string
-  ): Promise<boolean> => {
+  const checkCfAlreadyReported = async (initiativeID: string, cf: string): Promise<boolean> => {
     try {
-      const res = await MerchantApi.getReportedUser(initiativeID, merchantId, cf);
+      const res = await MerchantApi.getReportedUser(initiativeID, cf);
       return Array.isArray(res) && res.length > 0;
     } catch (e) {
       console.error('Error while checking if user is already reported:', e);
@@ -64,7 +60,7 @@ const InsertReportedUser: React.FC = () => {
     onSubmit: async (values: GetReportedUsersFilters) => {
       if (values.cf && isValidCF(values.cf)) {
         if (initiativeID && merchantId) {
-          const alreadyReported = await checkCfAlreadyReported(initiativeID, merchantId, values.cf);
+          const alreadyReported = await checkCfAlreadyReported(initiativeID, values.cf);
           if (alreadyReported) {
             formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyRegistered'));
             return;
@@ -97,7 +93,7 @@ const InsertReportedUser: React.FC = () => {
           setShowConfirmModal(false);
           if (cfToReport) {
             try {
-              await createReportedUser(merchantId, initiativeID, cfToReport);
+              await createReportedUser(initiativeID, cfToReport);
               history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
                 newCf: cfToReport,
               });
