@@ -1,7 +1,6 @@
-
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ModalReportedUser from '../ModalReportedUser';
+import ModalReportedUser from '../modalReportedUser';
 
 describe('ModalReportedUser', () => {
   const defaultProps = {
@@ -59,24 +58,14 @@ describe('ModalReportedUser', () => {
           <span>React Node Description</span>
         </div>
       );
-      render(
-        <ModalReportedUser
-          {...defaultProps}
-          description={descriptionNode}
-        />
-      );
+      render(<ModalReportedUser {...defaultProps} description={descriptionNode} />);
       expect(screen.getByText('React Node Description')).toBeInTheDocument();
     });
   });
 
   describe('DescriptionTwo prop', () => {
     it('should render descriptionTwo when provided', () => {
-      render(
-        <ModalReportedUser
-          {...defaultProps}
-          descriptionTwo="Test Description Two"
-        />
-      );
+      render(<ModalReportedUser {...defaultProps} descriptionTwo="Test Description Two" />);
       expect(screen.getByText('Test Description Two')).toBeInTheDocument();
     });
 
@@ -162,9 +151,7 @@ describe('ModalReportedUser', () => {
 
   describe('Optional props', () => {
     it('should render with cfModal prop (even though unused)', () => {
-      render(
-        <ModalReportedUser {...defaultProps} cfModal="test-cf-modal" />
-      );
+      render(<ModalReportedUser {...defaultProps} cfModal="test-cf-modal" />);
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
   });
@@ -172,13 +159,7 @@ describe('ModalReportedUser', () => {
   describe('Edge cases', () => {
     it('should handle empty strings for text props', () => {
       render(
-        <ModalReportedUser
-          {...defaultProps}
-          title=""
-          description=""
-          cancelText=""
-          confirmText=""
-        />
+        <ModalReportedUser {...defaultProps} title="" description="" cancelText="" confirmText="" />
       );
       const buttons = screen.getAllByRole('button');
       expect(buttons).toHaveLength(2);
@@ -187,11 +168,7 @@ describe('ModalReportedUser', () => {
     it('should handle very long text content', () => {
       const longText = 'A'.repeat(100);
       render(
-        <ModalReportedUser
-          {...defaultProps}
-          title={longText}
-          description="Short description"
-        />
+        <ModalReportedUser {...defaultProps} title={longText} description="Short description" />
       );
       expect(screen.getByText(longText)).toBeInTheDocument();
     });
@@ -206,7 +183,7 @@ describe('ModalReportedUser', () => {
         />
       );
       expect(screen.getByText(specialTitle)).toBeInTheDocument();
-      expect(screen.getByText("Special chars: @#$%^&*()")).toBeInTheDocument();
+      expect(screen.getByText('Special chars: @#$%^&*()')).toBeInTheDocument();
     });
 
     it('should handle multiple rapid button clicks', () => {
