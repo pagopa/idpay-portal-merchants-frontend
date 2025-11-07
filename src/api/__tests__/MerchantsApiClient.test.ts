@@ -268,7 +268,6 @@ describe('MerchantApi', () => {
         'initiative-id': 'initiative-1',
         'Content-Type': 'text/plain',
       },
-      body: 'BBBBBB00B00B000B',
     });
     expect(json).toHaveBeenCalled();
     expect(extractResponse).not.toHaveBeenCalled();
