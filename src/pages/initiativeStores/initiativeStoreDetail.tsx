@@ -44,6 +44,7 @@ const InitiativeStoreDetail = () => {
   const [contactSurnameModal, setContactSurnameModal] = useState<string>('');
   const [contactEmailModal, setContactEmailModal] = useState<string>('');
   const [contactEmailConfirmModal, setContactEmailConfirmModal] = useState<string>('');
+  const [dataTableIsLoading, setDataTableIsLoading] = useState<boolean>(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{
     contactEmailModal?: string;
@@ -109,6 +110,7 @@ const InitiativeStoreDetail = () => {
   };
 
   const fetchStoreTransactions = async (filters?: any) => {
+    setDataTableIsLoading(true);
     try {
       const response = await getMerchantPointOfSaleTransactionsProcessed(id, store_id, {
         size: 10,
@@ -138,6 +140,8 @@ const InitiativeStoreDetail = () => {
         component: 'Toast',
         showCloseIcon: true,
       });
+    } finally {
+      setDataTableIsLoading(false);
     }
   };
 
@@ -490,6 +494,7 @@ const InitiativeStoreDetail = () => {
           handleSortChange={handleSortModelChange}
           handlePaginationPageChange={handlePaginationPageChange}
           paginationModel={paginationModel}
+          dataTableIsLoading={dataTableIsLoading}
         />
       </Box>
 

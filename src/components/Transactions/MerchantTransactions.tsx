@@ -1,5 +1,6 @@
 import {
   Box,
+  CircularProgress,
   FormControl,
   Grid,
   IconButton,
@@ -36,6 +37,7 @@ interface MerchantTransactionsProps {
   sortModel?: GridSortModel;
   handlePaginationPageChange?: (page: number) => void;
   paginationModel?: any;
+  dataTableIsLoading?: boolean;
 }
 
 const MerchantTransactions = ({
@@ -46,6 +48,7 @@ const MerchantTransactions = ({
   sortModel,
   handlePaginationPageChange,
   paginationModel,
+  dataTableIsLoading,
 }: MerchantTransactionsProps) => {
   const { t } = useTranslation();
   const [rows, setRows] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
@@ -81,6 +84,7 @@ const MerchantTransactions = ({
     { value: 'REFUNDED', label: t('commons.discountStatusEnum.refunded') },
     { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
     { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded') },
+    { value: 'INVOICED', label: t('commons.discountStatusEnum.invoiced') },
   ];
 
   const StatusChip = ({ status }: any) => {
@@ -89,7 +93,7 @@ const MerchantTransactions = ({
       <CustomChip
         label={chipItem?.label}
         colorChip={chipItem?.color}
-        sizeChip="medium"
+        sizeChip="small"
         textColorChip={chipItem?.textColor}
       />
     );
@@ -317,7 +321,12 @@ const MerchantTransactions = ({
           </FormControl>
         </Grid>
       </FiltersForm>
-      {rows.length > 0 ? (
+      {dataTableIsLoading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <CircularProgress />
+        </Box>
+      )}
+      {rows.length > 0 && !dataTableIsLoading && (
         <Box mb={2} sx={{ width: '100%' }}>
           <TransactionDataTable
             rows={rows}
@@ -331,7 +340,8 @@ const MerchantTransactions = ({
             onPaginationPageChange={onPaginationChange}
           />
         </Box>
-      ) : (
+      )}
+      {!dataTableIsLoading && rows.length === 0 && (
         <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
       )}
       <DetailDrawer
