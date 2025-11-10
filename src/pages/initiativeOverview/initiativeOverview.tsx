@@ -8,9 +8,9 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import { theme } from '@pagopa/mui-italia';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
-import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
-import { formatDate, formatIban, formattedCurrency } from '../../helpers';
-import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../../utils/constants';
+import { getMerchantDetail } from '../../services/merchantService';
+import { formatDate, formatIban } from '../../helpers';
+import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
 
 interface MatchParams {
@@ -26,8 +26,8 @@ const InitiativeOverview = () => {
     strict: false,
   });
   const { id } = (match?.params as MatchParams) || {};
-  const [amount, setAmount] = useState<number | undefined>(undefined);
-  const [refunded, setRefunded] = useState<number | undefined>(undefined);
+  // const [amount, setAmount] = useState<number | undefined>(undefined);
+  // const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
   const [ibanHolder, setIbanHolder] = useState<string | undefined>();
   const [onboardingDate, setOnboardingDate] = useState<string | undefined>();
@@ -55,28 +55,28 @@ const InitiativeOverview = () => {
       );
   }, [id]);
 
-  useEffect(() => {
-    getMerchantInitiativeStatistics(id)
-      .then((response) => {
-        setAmount(response?.amountCents);
-        setRefunded(response?.refundedCents);
-      })
-      .catch((error) => {
-        setAmount(undefined);
-        setRefunded(undefined);
-        addError({
-          id: 'GET_MERCHANT_STATISTICS',
-          blocking: false,
-          error,
-          techDescription: 'An error occurred getting merchant statistics',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
-      });
-  }, [id]);
+  // useEffect(() => {
+  //   getMerchantInitiativeStatistics(id)
+  //     .then((response) => {
+  //       setAmount(response?.amountCents);
+  //       setRefunded(response?.refundedCents);
+  //     })
+  //     .catch((error) => {
+  //       setAmount(undefined);
+  //       setRefunded(undefined);
+  //       addError({
+  //         id: 'GET_MERCHANT_STATISTICS',
+  //         blocking: false,
+  //         error,
+  //         techDescription: 'An error occurred getting merchant statistics',
+  //         displayableTitle: t('errors.genericTitle'),
+  //         displayableDescription: t('errors.genericDescription'),
+  //         toNotify: true,
+  //         component: 'Toast',
+  //         showCloseIcon: true,
+  //       });
+  //     });
+  // }, [id]);
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -110,7 +110,7 @@ const InitiativeOverview = () => {
                       : onboardingDate}
                   </Typography>
                 </Grid>
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                   <Box my={2}>
                     <Typography variant="overline">
                       {t('pages.initiativeOverview.refundsStatusTitle')}
@@ -131,12 +131,12 @@ const InitiativeOverview = () => {
                   <Typography variant="body1">
                     {t('pages.initiativeOverview.totalRefunded')}
                   </Typography>
-                </Grid>
+                </Grid> 
                 <Grid item xs={8}>
                   <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
                     {formattedCurrency(refunded, MISSING_EURO_PLACEHOLDER, true)}
                   </Typography>
-                </Grid>
+                </Grid> */}
 
                 <Grid item xs={12}>
                   <Box my={2}>
