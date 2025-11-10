@@ -5,6 +5,18 @@ export function formatDate(value: any) {
   return format(value, 'dd/MM/yyyy HH:mm');
 }
 
+export function safeFormatDate(value: any) {
+  try {
+    const date = value instanceof Date ? value : new Date(value);
+    if (isNaN(date.getTime())) {
+      return MISSING_DATA_PLACEHOLDER;
+    }
+    return format(date, 'dd/MM/yyyy HH:mm');
+  } catch {
+    return MISSING_DATA_PLACEHOLDER;
+  }
+}
+
 export const curFormatter = (amount: number): string =>
   Intl.NumberFormat('it-EU', { style: 'currency', currency: 'EUR' }).format(amount);
 

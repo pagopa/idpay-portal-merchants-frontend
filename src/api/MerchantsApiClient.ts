@@ -20,6 +20,8 @@ import { MerchantTransactionsProcessedListDTO } from './generated/merchants/Merc
 import { PointOfSaleDTO } from './generated/merchants/PointOfSaleDTO';
 import { PointOfSaleTransactionsProcessedListDTO } from './generated/merchants/PointOfSaleTransactionsProcessedListDTO';
 import { DownloadInvoiceResponseDTO } from './generated/merchants/DownloadInvoiceResponseDTO';
+import { ReportedUserDTO } from './generated/merchants/ReportedUserDTO';
+import { ReportedUserCreateResponseDTO } from './generated/merchants/ReportedUserCreateResponseDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -172,6 +174,44 @@ export const MerchantApi = {
     pointOfSaleId: string
   ): Promise<DownloadInvoiceResponseDTO> => {
     const result = await apiClient.downloadInvoiceFile({ transactionId, pointOfSaleId });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  getReportedUser: async (
+    initiativeId: string,
+    userFiscalCode: string
+  ): Promise<ReportedUserDTO> => {
+    const result = await apiClient.getReportedUser({
+      'initiative-id': initiativeId,
+      userFiscalCode,
+    });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  createReportedUser: async (
+    initiativeId: string,
+    fiscalCode: string
+  ): Promise<ReportedUserCreateResponseDTO> => {
+    const token = storageTokenOps.read();
+    const response = await fetch(`${ENV.URL_API.MERCHANTS_PORTAL}/reported-user/${fiscalCode}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'initiative-id': initiativeId,
+        'Content-Type': 'text/plain',
+      },
+    });
+    return await response.json();
+  },
+
+  deleteReportedUser: async (
+    initiativeId: string,
+    userFiscalCode: string
+  ): Promise<ReportedUserCreateResponseDTO> => {
+    const result = await apiClient.deleteReportedUser({
+      'initiative-id': initiativeId,
+      userFiscalCode,
+    });
     return extractResponse(result, 200, onRedirectToLogin);
   },
 };
