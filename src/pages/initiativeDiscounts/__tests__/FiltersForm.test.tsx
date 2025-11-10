@@ -93,4 +93,174 @@ describe('FiltersForm', () => {
     expect(resetButton).toBeDisabled();
     expect(applyButton).toBeDisabled();
   });
+
+  test('should clone valid children with name prop and call onChange/onBlur correctly', async () => {
+  const mockOnChange = jest.fn();
+  const mockOnBlur = jest.fn();
+
+  const formik = {
+    values: { field1: '' },
+    handleChange: jest.fn(),
+    handleBlur: jest.fn(),
+    resetForm: jest.fn(),
+    dirty: true,
+  } as any;
+
+  render(
+    <FiltersForm formik={formik}>
+      <input
+        name="field1"
+        data-testid="cloned-input"
+        onChange={mockOnChange}
+        onBlur={mockOnBlur}
+      />
+      <div data-testid="not-cloned">Non clonato</div>
+    </FiltersForm>
+  );
+
+  const clonedInput = screen.getByTestId('cloned-input');
+  await userEvent.type(clonedInput, 'A');
+  await userEvent.tab();
+
+  expect(formik.handleChange).toHaveBeenCalled();
+  expect(formik.handleBlur).toHaveBeenCalled();
+  expect(mockOnChange).toHaveBeenCalled();
+  expect(mockOnBlur).toHaveBeenCalled();
+
+  expect(screen.getByTestId('not-cloned')).toBeInTheDocument();
+});
+
+test('should clone valid children with name prop and call onChange/onBlur correctly', async () => {
+  const mockOnChange = jest.fn();
+  const mockOnBlur = jest.fn();
+
+  const formik = {
+    values: { field1: '' },
+    handleChange: jest.fn(),
+    handleBlur: jest.fn(),
+    resetForm: jest.fn(),
+    dirty: true,
+  } as any;
+
+  render(
+    <FiltersForm formik={formik}>
+      {/* Child con name -> verrà clonato */}
+      <input
+        name="field1"
+        data-testid="cloned-input"
+        onChange={mockOnChange}
+        onBlur={mockOnBlur}
+      />
+      {/* Child senza name -> non viene clonato */}
+      <div data-testid="not-cloned">Non clonato</div>
+    </FiltersForm>
+  );
+
+  const clonedInput = screen.getByTestId('cloned-input');
+
+  // Simuliamo eventi
+  await userEvent.type(clonedInput, 'A');
+  await userEvent.tab(); // scatena onBlur
+
+  // Verifica che Formik e le callback originali siano state chiamate
+  expect(formik.handleChange).toHaveBeenCalled();
+  expect(formik.handleBlur).toHaveBeenCalled();
+  expect(mockOnChange).toHaveBeenCalled();
+  expect(mockOnBlur).toHaveBeenCalled();
+
+  // Verifica che l'elemento senza name sia stato renderizzato invariato
+  expect(screen.getByTestId('not-cloned')).toBeInTheDocument();
+});
+
+test('should call onFiltersApplied when provided', async () => {
+  const handleApply = jest.fn();
+  const formik = {
+    values: { testField: 'value' },
+    handleChange: jest.fn(),
+    handleBlur: jest.fn(),
+    resetForm: jest.fn(),
+    dirty: true,
+  } as any;
+
+  render(
+    <FiltersForm formik={formik} onFiltersApplied={handleApply}>
+      <div>Mock Child</div>
+    </FiltersForm>
+  );
+
+  const applyButton = screen.getByRole('button', { name: /Applica/i });
+  await userEvent.click(applyButton);
+
+  expect(handleApply).toHaveBeenCalledTimes(1);
+  expect(handleApply).toHaveBeenCalledWith({ testField: 'value' });
+});
+
+test('should not throw if onFiltersApplied is not provided', async () => {
+  const formik = {
+    values: { testField: 'value' },
+    handleChange: jest.fn(),
+    handleBlur: jest.fn(),
+    resetForm: jest.fn(),
+    dirty: true,
+  } as any;
+
+  render(
+    <FiltersForm formik={formik}>
+      <div>Mock Child</div>
+    </FiltersForm>
+  );
+
+  const applyButton = screen.getByRole('button', { name: /Applica/i });
+
+  // Nessuna eccezione anche senza onFiltersApplied
+  await expect(userEvent.click(applyButton)).resolves.not.toThrow();
+});
+
+test('should call onFiltersReset and formik.resetForm when provided', async () => {
+  const handleReset = jest.fn();
+  const formik = {
+    values: {},
+    handleChange: jest.fn(),
+    handleBlur: jest.fn(),
+    resetForm: jest.fn(),
+    dirty: true,
+  } as any;
+
+  render(
+    <FiltersForm formik={formik} onFiltersReset={handleReset}>
+      <div>Mock Child</div>
+    </FiltersForm>
+  );
+
+  const resetButton = screen.getByRole('button', { name: /Rimuovi filtri/i });
+  await userEvent.click(resetButton);
+
+  expect(formik.resetForm).toHaveBeenCalledTimes(1);
+  expect(handleReset).toHaveBeenCalledTimes(1);
+});
+
+test('should not throw if onFiltersReset is not provided', async () => {
+  const formik = {
+    values: {},
+    handleChange: jest.fn(),
+    handleBlur: jest.fn(),
+    resetForm: jest.fn(),
+    dirty: true,
+  } as any;
+
+  render(
+    <FiltersForm formik={formik}>
+      <div>Mock Child</div>
+    </FiltersForm>
+  );
+
+  const resetButton = screen.getByRole('button', { name: /Rimuovi filtri/i });
+
+  // Nessuna eccezione anche senza onFiltersReset
+  await expect(userEvent.click(resetButton)).resolves.not.toThrow();
+
+  expect(formik.resetForm).toHaveBeenCalledTimes(1);
+});
+
+
 });

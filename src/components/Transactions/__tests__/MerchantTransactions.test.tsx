@@ -2,9 +2,12 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { Tooltip } from '@mui/material';
 import MerchantTransactions from '../MerchantTransactions';
 import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import getStatus from '../useStatus';
+import CustomChip from '../../Chip/CustomChip';
+import TransactionDataTable from '../TransactionDataTable';
 
 // --- Mocks ---
 
@@ -15,7 +18,18 @@ jest.mock('react-i18next', () => ({
 // FIX #1: Define the mock as a jest.fn()
 jest.mock('../useStatus', () => jest.fn());
 jest.mock('../useDetailList', () => () => []);
-jest.mock('../../Chip/CustomChip', () => (props: any) => <div>{props.label}</div>);
+jest.mock('../../Chip/CustomChip', () => jest.fn((props: any) => (
+  <div data-testid="custom-chip" {...props}>{props.label}</div>
+)));
+
+jest.mock('@mui/material', () => ({
+  ...jest.requireActual('@mui/material'), 
+  Tooltip: jest.fn(({ title, children }) => ( 
+    <div data-testid="mock-tooltip" data-title={title}>
+      {children}
+    </div>
+  )),
+}));
 jest.mock('../CurrencyColumn', () => (props: any) => <div>{props.value}</div>);
 jest.mock('../../../pages/components/EmptyList', () => (props: any) => (
   <div data-testid="empty-list">{props.message}</div>
@@ -49,7 +63,12 @@ jest.mock(
       ) : null
 );
 
+const MockedCustomChip = CustomChip as jest.Mock;
+const MockedTransactionDataTable = TransactionDataTable as jest.Mock;
+
 const mockedGetStatus = getStatus as jest.Mock;
+
+const MockedTooltip = Tooltip as jest.Mock;
 
 const mockTransactions: Array<PointOfSaleTransactionProcessedDTO> = [
   {
@@ -237,4 +256,289 @@ describe('MerchantTransactions', () => {
       expect(container.firstChild).toBeEmptyDOMElement();
     });
   });
+
+  describe('handleGtinChange validation', () => {
+  test('should prevent input with spaces', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    
+    // Prova a inserire uno spazio
+    await userEvent.type(gtinInput, '123 456');
+    
+    // Il valore non dovrebbe contenere spazi
+    expect(gtinInput).toHaveValue('123456');
+  });
+
+  test('should prevent input longer than 14 characters', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    
+    // Prova a inserire più di 14 caratteri
+    await userEvent.type(gtinInput, '123456789012345'); // 15 caratteri
+    
+    // Il valore dovrebbe essere troncato a 14 caratteri
+    expect(gtinInput).toHaveValue('12345678901234');
+  });
+
+  test('should show error message for special characters', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    
+    // Prova a inserire caratteri speciali
+    fireEvent.change(gtinInput, { target: { value: '123@#$' } });
+    
+    // Dovrebbe mostrare il messaggio di errore
+    expect(screen.getByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).toBeInTheDocument();
+    
+    // Il valore non dovrebbe essere aggiornato
+    expect(gtinInput).toHaveValue('');
+  });
+
+  test('should accept valid alphanumeric input', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    
+    // Inserisci un valore valido
+    await userEvent.type(gtinInput, 'ABC123xyz');
+    
+    // Il valore dovrebbe essere accettato
+    expect(gtinInput).toHaveValue('ABC123xyz');
+    
+    // Non dovrebbe esserci messaggio di errore
+    expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
+  });
+
+  test('should clear error message when valid input is entered after invalid', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    
+    // Prima inserisci un valore non valido
+    fireEvent.change(gtinInput, { target: { value: '123@' } });
+    expect(screen.getByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).toBeInTheDocument();
+    
+    // Poi inserisci un valore valido
+    fireEvent.change(gtinInput, { target: { value: '123456' } });
+    
+    // L'errore dovrebbe essere sparito
+    expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
+    expect(gtinInput).toHaveValue('123456');
+  });
+
+  test('should accept exactly 14 characters', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    
+    // Inserisci esattamente 14 caratteri
+    await userEvent.type(gtinInput, '12345678901234');
+    
+    expect(gtinInput).toHaveValue('12345678901234');
+    expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
+  });
+
+  test('should handle empty input', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    
+    // Input vuoto dovrebbe essere accettato
+    fireEvent.change(gtinInput, { target: { value: '' } });
+    
+    expect(gtinInput).toHaveValue('');
+    expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
+  });
+});
+
+ test('should render tooltip with value when value length meets threshold', () => {
+    const { container } = render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    // Verifica che la tabella sia renderizzata
+    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  });
+
+   test('should show "-" when value is empty', () => {
+    const emptyValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
+      trxId: '1',
+      updateDate: '',
+      fiscalCode: '',
+      effectiveAmountCents: 5000,
+      rewardAmountCents: 500,
+      status: 'REWARDED',
+      additionalProperties: { productName: '' },
+    }];
+
+    render(
+      <MerchantTransactions
+        transactions={emptyValueTransaction}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  });
+
+    test('should show "-" when value is null', () => {
+    const nullValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
+      trxId: '1',
+      updateDate: null as any,
+      fiscalCode: null as any,
+      effectiveAmountCents: 5000,
+      rewardAmountCents: 500,
+      status: 'REWARDED',
+      additionalProperties: { productName: null as any },
+    }];
+
+    render(
+      <MerchantTransactions
+        transactions={nullValueTransaction}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  });
+
+  test('should handle value with length equal to threshold', () => {
+    const exactThresholdTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
+      trxId: '1',
+      updateDate: '12345678901', // exactly 11 characters
+      fiscalCode: '12345678901',
+      effectiveAmountCents: 5000,
+      rewardAmountCents: 500,
+      status: 'REWARDED',
+      additionalProperties: { productName: '12345678901' },
+    }];
+
+    render(
+      <MerchantTransactions
+        transactions={exactThresholdTransaction}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  });
+
+   test('should handle value with length above threshold', () => {
+    const longValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
+      trxId: '1',
+      updateDate: 'VERYLONGVALUE123456789', // more than 11 characters
+      fiscalCode: 'VERYLONGFISCALCODE123',
+      effectiveAmountCents: 5000,
+      rewardAmountCents: 500,
+      status: 'REWARDED',
+      additionalProperties: { productName: 'VERYLONGPRODUCTNAME123' },
+    }];
+
+    render(
+      <MerchantTransactions
+        transactions={longValueTransaction}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  });
+
+  test('should handle value with length below threshold', () => {
+    const shortValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
+      trxId: '1',
+      updateDate: 'SHORT', // less than 11 characters
+      fiscalCode: 'ABC',
+      effectiveAmountCents: 5000,
+      rewardAmountCents: 500,
+      status: 'REWARDED',
+      additionalProperties: { productName: 'Test' },
+    }];
+
+    render(
+      <MerchantTransactions
+        transactions={shortValueTransaction}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  });
+
+   test('should handle undefined value', () => {
+    const undefinedValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
+      trxId: '1',
+      updateDate: undefined as any,
+      fiscalCode: undefined as any,
+      effectiveAmountCents: 5000,
+      rewardAmountCents: 500,
+      status: 'REWARDED',
+      additionalProperties: { productName: undefined as any },
+    }];
+
+    render(
+      <MerchantTransactions
+        transactions={undefinedValueTransaction}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  });
+
 });

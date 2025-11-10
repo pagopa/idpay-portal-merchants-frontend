@@ -225,6 +225,52 @@
       "contactEmail": "Indirizzo e-mail",
       "confirmContactEmail": "Conferma indirizzo e-mail"
     },
+    "reportedUsers": {
+      "title": "Segnalazione utenti",
+      "subtitle": "Comunica gli utenti che hanno beneficiato del bonus, ma non hanno consegnato un elettrodomestico obsoleto.",
+      "filterBtn": "Cerca",
+      "cancelBtn": "Cancella",
+      "reportUser": "Segnala utente",
+      "userCf": "Beneficiario",
+      "date": "Data e ora",
+      "discountCode": "Codice sconto",
+      "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
+      "cfPlaceholder": "Cerca per Codice Fiscale",
+      "cf": {
+        "invalid": "Codice fiscale non valido",
+        "noResultUser": "Codice fiscale assente",
+        "insertCf":"Campo obbligatorio",
+        "alreadyRegistered": "Il codice fiscale è già stato registrato"
+    },
+      "ModalReportedUser": {
+        "title": "Vuoi procedere con la cancellazione?",
+"description": "Stai per cancellare il soggetto <strong>{{cf}}</strong> dalla lista degli utenti segnalati.",
+        "descriptionTwo": "Questa operazione non comporta il blocco della relativa richiesta di rimborso.",
+        "cancelText": "Annulla",
+        "confirmText": "Conferma"
+      }
+    },
+    "insertReportedUser": {
+      "title": "Segnala utente",
+      "subtitle": "Segnala un utente che non ha presentato l'elettrodomestico obsoleto.",
+      "mtTitle":"La segnalazione servirà solo ai fini di controllo e monitoraggio e non influenza la richiesta di rimborso al suo acquisto.",
+      "searchTitle":"Qual è il codice fiscale?",
+      "searchDescription":"Inserire il codice fiscale dell'utente",
+      "filterBtn": "Continua",
+      "reportUser": "Segnala utente",
+      "userCf": "Beneficiario",
+      "date": "Data e ora",
+      "discountCode": "Codice sconto",
+      "cf": "Cerca per Codice Fiscale",
+      "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
+      "ModalReportedUser": {
+        "title": "Vuoi procedere con la segnalazione?",
+        "description": "Stai dichiarando che il soggetto <b>{{cf}}</b> non ha consegnato l'elettrodomestico obsoleto.",
+        "descriptionTwo": "Questa operazione non comporta il blocco della relativa richiesta di rimborso.",
+        "cancelText": "Annulla",
+        "confirmText": "Conferma"
+      }
+    },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
       "initiativeStatus": "Stato",

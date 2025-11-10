@@ -1,6 +1,8 @@
 /* eslint-disable functional/no-let */
 /* eslint-disable functional/immutable-data */
+import { matchPath } from 'react-router-dom';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
+
 
 export const copyTextToClipboard = (magicLink: string | undefined) => {
   if (typeof magicLink === 'string') {
@@ -134,8 +136,16 @@ export const generateUniqueId = () =>
   Date.now().toString() + Math.random().toString(36).substring(2, 9);
 
 export const handlePromptMessage = (location: { pathname: string }, targetPage: string) => {
-  if (location.pathname !== targetPage) {
+
+
+  const match = matchPath(location.pathname, {
+    path: targetPage, 
+    exact: true 
+});
+
+if (!match) { 
     sessionStorage.removeItem('storesPagination');
-  }
-  return true;
+}
+
+return true;
 };

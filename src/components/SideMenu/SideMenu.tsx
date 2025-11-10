@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import StoreIcon from '@mui/icons-material/Store';
+import ReportIcon from '@mui/icons-material/Report';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
@@ -44,7 +45,7 @@ export default function SideMenu() {
   });
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.STORES_DETAIL],
+    path: [ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS, ROUTES.STORES_DETAIL],
     exact: true,
     strict: false,
   });
@@ -70,6 +71,10 @@ export default function SideMenu() {
 
   const checkIsSelected = (item: any) => pathname.startsWith(
     `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
+  );
+
+  const checkIsReportedUsersPage = (item: any) => pathname.startsWith(
+    `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
   );
 
   return (
@@ -176,6 +181,32 @@ export default function SideMenu() {
                     icon={StoreIcon}
                     level={2}
                     data-testid="initiativeStoresTitle-click-test"
+                  />
+                  <SidenavItem
+                    title={t('pages.reportedUsers.title')}
+                    handleClick={() =>
+                      onExit(() => {
+                        dispatch(
+                          setSelectedInitative({
+                            spendingPeriod:
+                              `${item.startDate?.toLocaleDateString(
+                                'fr-FR'
+                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
+                            initiativeName: item.initiativeName,
+                          })
+                        );
+                        console.log(
+                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
+                        );
+                        history.replace(
+                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
+                        );
+                      })
+                    }
+                    isSelected={checkIsReportedUsersPage(item)}
+                    icon={ReportIcon}
+                    level={2}
+                    data-testid="reportedUsers-click-test"
                   />
                 </List>
               </AccordionDetails>
