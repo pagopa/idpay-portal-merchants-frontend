@@ -90,12 +90,17 @@ const InsertReportedUser: React.FC = () => {
         confirmText={t('pages.insertReportedUser.ModalReportedUser.confirmText')}
         onCancel={() => setShowConfirmModal(false)}
         onConfirm={async () => {
-          setShowConfirmModal(false);
           if (cfToReport) {
             try {
-              await createReportedUser(initiativeID, cfToReport);
+              const response = await createReportedUser(initiativeID, cfToReport);
+              setShowConfirmModal(false);
+              if (response?.status === 'KO') {
+                formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyPresent'));
+                return;
+              }
               history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
                 newCf: cfToReport,
+                showSuccessAlert: true,
               });
             } catch (e) {
               console.error('Error while creating reported user:', e);
