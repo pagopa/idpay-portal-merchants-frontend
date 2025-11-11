@@ -363,15 +363,24 @@ const InitiativeStoreDetail = () => {
       page,
     }));
 
-    const { field, sort } = sortModel[0];
-
-    void fetchStoreTransactions({
+    if(sortModel.length > 0){
+      const { field, sort } = sortModel[0];
+      void fetchStoreTransactions({
       ...transactionsFilters,
       page,
       sort: `${
           field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
         },${sort}`,
     });
+    }
+    else{
+      void fetchStoreTransactions({
+      ...transactionsFilters,
+      page,
+    });
+    }
+
+    
   };
 
     const handleSortModelChange = async (newSortModel: GridSortModel) => {
