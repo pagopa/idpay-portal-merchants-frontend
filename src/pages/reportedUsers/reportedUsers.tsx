@@ -8,7 +8,6 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import DataTable from '../../components/dataTable/DataTable';
 import { GetReportedUsersFilters } from '../../types/types';
-import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import routes from '../../routes';
 import { getReportedUser, deleteReportedUser } from '../../services/merchantService';
 import { parseJwt } from '../../utils/jwt-utils';
@@ -32,7 +31,7 @@ const initialValues: GetReportedUsersFilters = {
 };
 
 const ReportedUsers: React.FC = () => {
-  const location = useLocation<{ newCf?: string }>();
+  const location = useLocation<{ newCf?: string; showSuccessAlert?: boolean }>();
   const [user, setUser] = useState<
     Array<{
       cf: string;
@@ -67,8 +66,10 @@ const ReportedUsers: React.FC = () => {
   React.useEffect(() => {
     if (location.state && location.state.newCf) {
       void formik.setFieldValue('cf', location.state.newCf);
-      setShowSuccessAlert(true);
-      setTimeout(() => setShowSuccessAlert(false), 3000);
+      if (location.state.showSuccessAlert) {
+        setShowSuccessAlert(true);
+        setTimeout(() => setShowSuccessAlert(false), 3000);
+      }
       setTimeout(() => {
         void formik.handleSubmit();
       }, 0);
@@ -111,14 +112,7 @@ const ReportedUsers: React.FC = () => {
           if (e?.status === 404 || e?.response?.status === 404) {
             console.error('Reported user not found (404):', e);
           } else {
-            setUser([
-              {
-                cf: MISSING_DATA_PLACEHOLDER,
-                reportedDate: MISSING_DATA_PLACEHOLDER,
-                transactionDate: MISSING_DATA_PLACEHOLDER,
-                transactionId: MISSING_DATA_PLACEHOLDER,
-              },
-            ]);
+            setUser([]);
             setError('Errore durante il recupero dell’utente segnalato');
             console.error('Error while fetching reported user:', e);
           }
@@ -211,7 +205,11 @@ const ReportedUsers: React.FC = () => {
           }}
         />
         {showSuccessAlert && (
-          <MsgResult severity="success" message="La segnalazione è stata registrata" bottom={170} />
+          <MsgResult
+            severity="success"
+            message={t('pages.reportedUsers.cf.validCf')}
+            bottom={170}
+          />
         )}
         {user.length > 0 && (
           <Box
@@ -257,13 +255,16 @@ const ReportedUsers: React.FC = () => {
           cfModal={undefined}
         />
         {showDeleteSuccessAlert && (
-          <MsgResult severity="success" message="La segnalazione è stata rimossa" bottom={170} />
+          <MsgResult
+            severity="success"
+            message={t('pages.reportedUsers.cf.removedCf')}
+            bottom={170}
+          />
         )}
 
-        {error && <MsgResult severity="error" message={error} bottom={170} />}
         {user.length === 0 && !loading && !error && (
           <>
-            {showEmptyAlert ? (
+            {showEmptyAlert && !location.state?.newCf ? (
               <>
                 <MsgResult
                   severity="error"

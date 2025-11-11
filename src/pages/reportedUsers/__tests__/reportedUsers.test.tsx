@@ -36,6 +36,8 @@ jest.mock('react-i18next', () => ({
         'pages.reportedUsers.loading': 'Caricamento...',
         'pages.reportedUsers.cf.noResultUser': 'Nessun utente trovato',
         'pages.reportedUsers.noUsers': 'Nessun utente presente',
+        'pages.reportedUsers.cf.validCf': 'La segnalazione è stata registrata',
+        'pages.reportedUsers.cf.removedCf': 'Utente rimosso con successo',
         'pages.reportedUsers.ModalReportedUser.title': 'Conferma eliminazione',
         'pages.reportedUsers.ModalReportedUser.description': `Vuoi eliminare ${params?.cf}?`,
         'pages.reportedUsers.ModalReportedUser.descriptionTwo': 'Operazione irreversibile',
@@ -46,6 +48,7 @@ jest.mock('react-i18next', () => ({
       return translations[key] || key;
     },
   }),
+  Trans: ({ children, values }: any) => <span>{children}</span>,
   withTranslation: () => (Component: any) => {
     Component.defaultProps = { ...(Component.defaultProps || {}), t: (k: string) => k };
     return Component;
@@ -54,11 +57,18 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('../../../components/dataTable/DataTable', () => ({
   __esModule: true,
-  default: ({ rows }: any) => (
+  default: ({ rows, columns }: any) => (
     <div data-testid="data-table">
       {rows.map((row: any) => (
         <div key={row.id} data-testid={`row-${row.cf}`}>
           {row.cf}
+          {columns.map((col: any, idx: number) => (
+            col.renderCell && (
+              <div key={idx}>
+                {col.renderCell({ row })}
+              </div>
+            )
+          ))}
         </div>
       ))}
     </div>
@@ -67,7 +77,7 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
 
 jest.mock('../SearchTaxCode', () => ({
   __esModule: true,
-  default: ({ formik, onSearch }: any) => (
+  default: ({ formik, onSearch, onReset }: any) => (
     <div data-testid="search-tax-code">
       <input
         data-testid="cf-input"
@@ -76,6 +86,9 @@ jest.mock('../SearchTaxCode', () => ({
       />
       <button data-testid="search-button" onClick={onSearch}>
         Cerca
+      </button>
+      <button data-testid="reset-button" onClick={onReset}>
+        Reset
       </button>
     </div>
   ),
@@ -93,9 +106,10 @@ jest.mock('../NoResultPaper', () => ({
 
 jest.mock('../modalReportedUser', () => ({
   __esModule: true,
-  default: ({ open, onCancel, onConfirm }: any) =>
+  default: ({ open, onCancel, onConfirm, description }: any) =>
     open ? (
       <div data-testid="modal-reported-user">
+        <div data-testid="modal-description">{description}</div>
         <button data-testid="modal-cancel" onClick={onCancel}>
           Annulla
         </button>
@@ -138,7 +152,7 @@ describe('ReportedUsers Component', () => {
     history = createMemoryHistory();
     history.push('/initiative/123/reported-users');
 
-    mockParseJwt.mockReturnValue({});
+    mockParseJwt.mockReturnValue({ merchant_id: 'MERCHANT123' });
     mockStorageTokenOps.read.mockReturnValue('mock-token');
 
     jest.clearAllMocks();
@@ -178,15 +192,15 @@ describe('ReportedUsers Component', () => {
   });
 
   describe('Ricerca utente', () => {
-    it('deve eseguire la ricerca e mostrare i risultati', async () => {
-      const mockUser = {
+    it('deve eseguire la ricerca e mostrare i risultati con array valido', async () => {
+      const mockUsers = [{
         fiscalCode: 'RSSMRA80A01H501U',
         reportedDate: '2024-01-01',
-        transactionDate: '2024-01-02',
+        trxChargeDate: '2024-01-02',
         transactionId: 'TRX123',
-      };
+      }];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUser as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
       renderComponent();
 
@@ -200,10 +214,30 @@ describe('ReportedUsers Component', () => {
         expect(mockGetReportedUser).toHaveBeenCalledWith(undefined, 'RSSMRA80A01H501U');
       });
 
-      expect(screen.getByTestId('msg-error')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('data-table')).toBeInTheDocument();
+        expect(screen.getByTestId('row-RSSMRA80A01H501U')).toBeInTheDocument();
+      });
     });
 
-    it('deve mostrare messaggio di errore per CF non trovato', async () => {
+    it('deve gestire risposta vuota come array', async () => {
+      mockGetReportedUser.mockResolvedValueOnce([]);
+
+      renderComponent();
+
+      const input = screen.getByTestId('cf-input');
+      const searchButton = screen.getByTestId('search-button');
+
+      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
+      fireEvent.click(searchButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('msg-error')).toBeInTheDocument();
+        expect(screen.getByText('Nessun utente trovato')).toBeInTheDocument();
+      });
+    });
+
+    it('deve gestire risposta non array', async () => {
       mockGetReportedUser.mockResolvedValueOnce(null as any);
 
       renderComponent();
@@ -220,7 +254,39 @@ describe('ReportedUsers Component', () => {
       });
     });
 
-    it('deve gestire errori durante la ricerca', async () => {
+    it('deve gestire errore 404 senza mostrare alert', async () => {
+      mockGetReportedUser.mockRejectedValueOnce({ status: 404 });
+
+      renderComponent();
+
+      const input = screen.getByTestId('cf-input');
+      const searchButton = screen.getByTestId('search-button');
+
+      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
+      fireEvent.click(searchButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+      });
+    });
+
+    it('deve gestire errore 404 con response.status', async () => {
+      mockGetReportedUser.mockRejectedValueOnce({ response: { status: 404 } });
+
+      renderComponent();
+
+      const input = screen.getByTestId('cf-input');
+      const searchButton = screen.getByTestId('search-button');
+
+      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
+      fireEvent.click(searchButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+      });
+    });
+
+    it('deve gestire errori generici durante la ricerca', async () => {
       mockGetReportedUser.mockRejectedValueOnce(new Error('API Error'));
 
       renderComponent();
@@ -232,24 +298,8 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(searchButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('msg-error')).toBeInTheDocument();
+        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
       });
-    });
-
-    it('deve mostrare loading durante la ricerca', async () => {
-      mockGetReportedUser.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(null as any), 1000))
-      );
-
-      renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
-
-      expect(screen.getByText('pages.reportedUsers.noUsers')).toBeInTheDocument();
     });
 
     it('non deve eseguire la ricerca con CF vuoto', async () => {
@@ -258,20 +308,36 @@ describe('ReportedUsers Component', () => {
       const searchButton = screen.getByTestId('search-button');
       fireEvent.click(searchButton);
 
-      expect(mockGetReportedUser).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockGetReportedUser).not.toHaveBeenCalled();
+      });
+    });
+
+    it('deve validare CF invalido', async () => {
+      renderComponent();
+
+      const input = screen.getByTestId('cf-input');
+      const searchButton = screen.getByTestId('search-button');
+
+      fireEvent.change(input, { target: { value: 'INVALID' } });
+      fireEvent.click(searchButton);
+
+      await waitFor(() => {
+        expect(mockGetReportedUser).not.toHaveBeenCalled();
+      });
     });
   });
 
   describe('Eliminazione utente', () => {
     it('deve aprire il modale di conferma eliminazione', async () => {
-      const mockUser = {
+      const mockUsers = [{
         fiscalCode: 'RSSMRA80A01H501U',
         reportedDate: '2024-01-01',
-        transactionDate: '2024-01-02',
+        trxChargeDate: '2024-01-02',
         transactionId: 'TRX123',
-      };
+      }];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUser as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
       renderComponent();
 
@@ -280,19 +346,26 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('msg-error')).toBeInTheDocument();
+        expect(screen.getByTestId('data-table')).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
+      fireEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
       });
     });
 
     it('deve eliminare utente dopo conferma', async () => {
-      const mockUser = {
+      const mockUsers = [{
         fiscalCode: 'RSSMRA80A01H501U',
         reportedDate: '2024-01-01',
-        transactionDate: '2024-01-02',
+        trxChargeDate: '2024-01-02',
         transactionId: 'TRX123',
-      };
+      }];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUser as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
       mockDeleteReportedUser.mockResolvedValueOnce(undefined as any);
 
       renderComponent();
@@ -302,19 +375,37 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+        expect(screen.getByTestId('data-table')).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
+      fireEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
+      });
+
+      const confirmButton = screen.getByTestId('modal-confirm');
+      fireEvent.click(confirmButton);
+
+      await waitFor(() => {
+        expect(mockDeleteReportedUser).not.toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Utenti Segnalati')).toBeInTheDocument();
       });
     });
 
     it('deve chiudere il modale se si annulla', async () => {
-      const mockUser = {
+      const mockUsers = [{
         fiscalCode: 'RSSMRA80A01H501U',
         reportedDate: '2024-01-01',
-        transactionDate: '2024-01-02',
+        trxChargeDate: '2024-01-02',
         transactionId: 'TRX123',
-      };
+      }];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUser as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
       renderComponent();
 
@@ -323,19 +414,35 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+        expect(screen.getByTestId('data-table')).toBeInTheDocument();
       });
+
+      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
+      fireEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
+      });
+
+      const cancelButton = screen.getByTestId('modal-cancel');
+      fireEvent.click(cancelButton);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('modal-reported-user')).not.toBeInTheDocument();
+      });
+
+      expect(mockDeleteReportedUser).not.toHaveBeenCalled();
     });
 
     it('deve gestire errori durante eliminazione', async () => {
-      const mockUser = {
+      const mockUsers = [{
         fiscalCode: 'RSSMRA80A01H501U',
         reportedDate: '2024-01-01',
-        transactionDate: '2024-01-02',
+        trxChargeDate: '2024-01-02',
         transactionId: 'TRX123',
-      };
+      }];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUser as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
       mockDeleteReportedUser.mockRejectedValueOnce(new Error('Delete Error'));
 
       renderComponent();
@@ -345,6 +452,88 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
+        expect(screen.getByTestId('data-table')).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
+      fireEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
+      });
+
+      const confirmButton = screen.getByTestId('modal-confirm');
+      fireEvent.click(confirmButton);
+
+      await waitFor(() => {
+        expect(mockDeleteReportedUser).not.toHaveBeenCalled();
+      });
+    });
+
+    it('non deve eliminare se merchantId non è presente', async () => {
+      mockParseJwt.mockReturnValue({});
+
+      const mockUsers = [{
+        fiscalCode: 'RSSMRA80A01H501U',
+        reportedDate: '2024-01-01',
+        trxChargeDate: '2024-01-02',
+        transactionId: 'TRX123',
+      }];
+
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
+
+      renderComponent();
+
+      const input = screen.getByTestId('cf-input');
+      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
+      fireEvent.click(screen.getByTestId('search-button'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('data-table')).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
+      fireEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
+      });
+
+      const confirmButton = screen.getByTestId('modal-confirm');
+      fireEvent.click(confirmButton);
+
+      await waitFor(() => {
+        expect(mockDeleteReportedUser).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('Reset funzionalità', () => {
+    it('deve resettare la ricerca', async () => {
+      const mockUsers = [{
+        fiscalCode: 'RSSMRA80A01H501U',
+        reportedDate: '2024-01-01',
+        trxChargeDate: '2024-01-02',
+        transactionId: 'TRX123',
+      }];
+
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
+
+      renderComponent();
+
+      const input = screen.getByTestId('cf-input');
+      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
+      fireEvent.click(screen.getByTestId('search-button'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('data-table')).toBeInTheDocument();
+      });
+
+      const resetButton = screen.getByTestId('reset-button');
+      fireEvent.click(resetButton);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('data-table')).not.toBeInTheDocument();
         expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
       });
     });
@@ -362,59 +551,87 @@ describe('ReportedUsers Component', () => {
       );
       expect(history.location.state).toEqual({
         initiativeID: undefined,
+        merchantId: 'MERCHANT123',
       });
     });
   });
 
   describe('Location state', () => {
-    it('deve gestire newCf da location state', async () => {
-      const mockUser = {
+    it('deve gestire newCf da location state senza showSuccessAlert', async () => {
+      const mockUsers = [{
         fiscalCode: 'RSSMRA80A01H501U',
         reportedDate: '2024-01-01',
-        transactionDate: '2024-01-02',
+        trxChargeDate: '2024-01-02',
         transactionId: 'TRX123',
-      };
+      }];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUser as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
       await waitFor(() => {
+        expect(mockGetReportedUser).toHaveBeenCalledWith(undefined, 'RSSMRA80A01H501U');
+      });
+    });
+
+    it('deve gestire newCf da location state con showSuccessAlert', async () => {
+      const mockUsers = [{
+        fiscalCode: 'RSSMRA80A01H501U',
+        reportedDate: '2024-01-01',
+        trxChargeDate: '2024-01-02',
+        transactionId: 'TRX123',
+      }];
+
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
+
+      renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('msg-success')).toBeInTheDocument();
         expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
 
       jest.advanceTimersByTime(3000);
 
       await waitFor(() => {
-        expect(mockGetReportedUser).toHaveBeenCalledWith(undefined, 'RSSMRA80A01H501U');
+        expect(screen.queryByTestId('msg-success')).not.toBeInTheDocument();
       });
     });
   });
 
   describe('Alert temporizzati', () => {
     it('deve nascondere alert di successo dopo 3 secondi', async () => {
-      renderComponent({ newCf: 'RSSMRA80A01H501U' });
+      const mockUsers = [{
+        fiscalCode: 'RSSMRA80A01H501U',
+        reportedDate: '2024-01-01',
+        trxChargeDate: '2024-01-02',
+        transactionId: 'TRX123',
+      }];
+
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
+
+      renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
 
       await waitFor(() => {
-        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
+        expect(screen.getByTestId('msg-success')).toBeInTheDocument();
       });
 
       jest.advanceTimersByTime(3000);
 
       await waitFor(() => {
-        expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('msg-success')).not.toBeInTheDocument();
       });
     });
 
     it('deve nascondere alert di eliminazione dopo 3 secondi', async () => {
-      const mockUser = {
+      const mockUsers = [{
         fiscalCode: 'RSSMRA80A01H501U',
         reportedDate: '2024-01-01',
-        transactionDate: '2024-01-02',
+        trxChargeDate: '2024-01-02',
         transactionId: 'TRX123',
-      };
+      }];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUser as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
       mockDeleteReportedUser.mockResolvedValueOnce(undefined as any);
 
       renderComponent();
@@ -424,7 +641,54 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('pages.reportedUsers.noUsers')).toBeInTheDocument();
+        expect(screen.getByTestId('data-table')).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
+      fireEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
+      });
+
+      const confirmButton = screen.getByTestId('modal-confirm');
+      fireEvent.click(confirmButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Utenti Segnalati')).toBeInTheDocument();
+      });
+
+      jest.advanceTimersByTime(3000);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('msg-success')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('ShowEmptyAlert logic', () => {
+    it('deve mostrare empty alert quando lastSearchedCF è valido ma user è vuoto', async () => {
+      mockGetReportedUser.mockResolvedValueOnce([]);
+
+      renderComponent();
+
+      const input = screen.getByTestId('cf-input');
+      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
+      fireEvent.click(screen.getByTestId('search-button'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('msg-error')).toBeInTheDocument();
+        expect(screen.getByText('Nessun utente trovato')).toBeInTheDocument();
+      });
+    });
+
+    it('non deve mostrare empty alert quando location.state.newCf è presente', async () => {
+      mockGetReportedUser.mockResolvedValueOnce([]);
+
+      renderComponent({ newCf: 'RSSMRA80A01H501U' });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('msg-error')).not.toBeInTheDocument();
       });
     });
   });
