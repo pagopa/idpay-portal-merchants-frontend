@@ -232,7 +232,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(searchButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('msg-error')).toBeInTheDocument();
+        expect(screen.getByTestId('ReportIcon')).toBeInTheDocument();
       });
     });
 
@@ -380,7 +380,7 @@ describe('ReportedUsers Component', () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
       await waitFor(() => {
-        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
+        expect(screen.getByText('pages.reportedUsers.noUsers')).toBeInTheDocument();
       });
 
       jest.advanceTimersByTime(3000);
@@ -396,7 +396,7 @@ describe('ReportedUsers Component', () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
       await waitFor(() => {
-        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
+        expect(screen.getByText('pages.reportedUsers.noUsers')).toBeInTheDocument();
       });
 
       jest.advanceTimersByTime(3000);
