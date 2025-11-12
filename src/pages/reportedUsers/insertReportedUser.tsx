@@ -41,6 +41,7 @@ const InsertReportedUser: React.FC = () => {
       const res = await MerchantApi.getReportedUser(initiativeID, cf);
       return Array.isArray(res) && res.length > 0;
     } catch (e) {
+      setShowConfirmModal(false);
       console.error('Error while checking if user is already reported:', e);
       return false;
     }
@@ -72,6 +73,31 @@ const InsertReportedUser: React.FC = () => {
     },
   });
 
+  const handleKOError = (errorKey: string | undefined) => {
+    setShowConfirmModal(false);
+    switch (errorKey) {
+      case 'UserId not found':
+        formik.setFieldError('cf', t('pages.reportedUsers.cf.noResultUser'));
+        break;
+      case "CF doesn't match initiative or merchant":
+        formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyPresent'));
+        break;
+      case 'Service unavailable':
+        console.error('Service unavailable');
+        history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
+          newCf: undefined,
+          showSuccessAlert: false,
+        });
+        break;
+      case 'Already reported':
+        formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyRegistered'));
+        break;
+      default:
+        formik.setFieldError('cf', t('pages.reportedUsers.cf.insertCf'));
+        break;
+    }
+  };
+
   return (
     <>
       <ModalReportedUser
@@ -93,11 +119,13 @@ const InsertReportedUser: React.FC = () => {
           if (cfToReport) {
             try {
               const response = await createReportedUser(initiativeID, cfToReport);
-              setShowConfirmModal(false);
               if (response?.status === 'KO') {
-                formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyPresent'));
+                const errorKey = (response as any)?.errorKey;
+                handleKOError(errorKey);
                 return;
               }
+
+              setShowConfirmModal(false);
               history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
                 newCf: cfToReport,
                 showSuccessAlert: true,
