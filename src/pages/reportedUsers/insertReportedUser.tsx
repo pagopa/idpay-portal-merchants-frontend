@@ -41,6 +41,7 @@ const InsertReportedUser: React.FC = () => {
       const res = await MerchantApi.getReportedUser(initiativeID, cf);
       return Array.isArray(res) && res.length > 0;
     } catch (e) {
+      setShowConfirmModal(false);
       console.error('Error while checking if user is already reported:', e);
       return false;
     }
@@ -73,6 +74,7 @@ const InsertReportedUser: React.FC = () => {
   });
 
   const handleKOError = (errorKey: string | undefined) => {
+    setShowConfirmModal(false);
     switch (errorKey) {
       case 'UserId not found':
         formik.setFieldError('cf', t('pages.reportedUsers.cf.noResultUser'));
@@ -82,7 +84,6 @@ const InsertReportedUser: React.FC = () => {
         break;
       case 'Service unavailable':
         console.error('Service unavailable');
-        setShowConfirmModal(false);
         history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
           newCf: undefined,
           showSuccessAlert: false,
