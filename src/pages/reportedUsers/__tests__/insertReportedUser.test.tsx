@@ -202,4 +202,97 @@ describe('InsertReportedUser', () => {
       expect(mockCreateReportedUser).toHaveBeenCalled();
     });
   });
+
+  it('gestisce correttamente handleKOError per UserId not found', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([]);
+    mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: 'UserId not found' });
+
+    render(<InsertReportedUser />);
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+
+    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    fireEvent.click(screen.getByTestId('modal-confirm'));
+
+    await waitFor(() => {
+      expect(mockCreateReportedUser).toHaveBeenCalled();
+      expect(screen.getByLabelText('pages.reportedUsers.cfPlaceholder')).toBeInTheDocument();
+    });
+  });
+
+  it('gestisce correttamente handleKOError per CF già presente', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([]);
+    mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: "CF doesn't match initiative or merchant" });
+
+    render(<InsertReportedUser />);
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+
+    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    fireEvent.click(screen.getByTestId('modal-confirm'));
+
+    await waitFor(() => {
+      expect(mockCreateReportedUser).toHaveBeenCalled();
+    });
+  });
+
+  it('gestisce correttamente handleKOError per Service unavailable', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([]);
+    mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: 'Service unavailable' });
+
+    render(<InsertReportedUser />);
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+
+    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    fireEvent.click(screen.getByTestId('modal-confirm'));
+
+    await waitFor(() => {
+      expect(mockCreateReportedUser).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalled(); // redireziona dopo errore "Service unavailable"
+    });
+  });
+
+  it('gestisce correttamente handleKOError per Already reported', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([]);
+    mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: 'Already reported' });
+
+    render(<InsertReportedUser />);
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+
+    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    fireEvent.click(screen.getByTestId('modal-confirm'));
+
+    await waitFor(() => {
+      expect(mockCreateReportedUser).toHaveBeenCalled();
+    });
+  });
+
+  it('gestisce correttamente handleKOError per errori sconosciuti', async () => {
+    mockGetReportedUser.mockResolvedValueOnce([]);
+    mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: 'Some other error' });
+
+    render(<InsertReportedUser />);
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: 'RSSMRA80A01F205X' },
+    });
+    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+
+    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    fireEvent.click(screen.getByTestId('modal-confirm'));
+
+    await waitFor(() => {
+      expect(mockCreateReportedUser).toHaveBeenCalled();
+    });
+  });
+
 });
