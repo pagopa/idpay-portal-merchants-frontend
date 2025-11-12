@@ -63,6 +63,7 @@ const InitiativeStores: React.FC = () => {
   const [currentSort, setCurrentSort] = useState<string>('asc');
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<GetPointOfSalesFilters>(initialValues);
 
   const isGoingToDetail = useRef(false);
   const { t } = useTranslation();
@@ -114,7 +115,6 @@ const InitiativeStores: React.FC = () => {
     };
     
   }, []);
-
 
   const addError = useErrorDispatcher();
   const infoStyles = {
@@ -271,6 +271,7 @@ const InitiativeStores: React.FC = () => {
       sort: currentSort,
       page: 0,
     };
+    setAppliedFilters(values);
     setFiltersAppliedOnce(true);
     fetchStores(filtersWithSort).catch((error) => {
       console.error('Error fetching stores:', error);
@@ -280,6 +281,7 @@ const InitiativeStores: React.FC = () => {
   const handleFiltersReset = () => {
     console.log('Callback dopo reset filtri');
     setFiltersAppliedOnce(false);
+    setAppliedFilters(initialValues);
     void fetchStores(initialValues);
   };
 
@@ -313,7 +315,7 @@ const InitiativeStores: React.FC = () => {
       
       await fetchStores(
         {
-          ...formik.values,
+          ...appliedFilters,
           sort: sortKey,
           page: storesPagination.pageNo,
         },
@@ -331,7 +333,7 @@ const InitiativeStores: React.FC = () => {
     setStoresPagination(updatedPagination);
     sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
     void fetchStores({
-      ...formik.values,
+      ...appliedFilters,
       page,
       sort: currentSort,
     });
