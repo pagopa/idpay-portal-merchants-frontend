@@ -115,7 +115,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
                   fontWeight={theme.typography.fontWeightRegular}
                   color={theme.palette.text.secondary}
                 >
-                  Numero fattura
+                  {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
                 </Typography>
                 <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
                   {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
