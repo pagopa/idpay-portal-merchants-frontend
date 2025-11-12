@@ -86,6 +86,7 @@ const InitiativeStoreDetail = () => {
     }
   }, [storeDetail]);
 
+
   const fetchStoreDetail = async () => {
     try {
       const userJwt = parseJwt(storageTokenOps.read());
@@ -248,18 +249,7 @@ const InitiativeStoreDetail = () => {
   //   setContactNameModal('');
   // };
 
-  const handleSortModelChange = async (newSortModel: GridSortModel) => {
-    setSortModel(newSortModel);
-    if (newSortModel.length > 0) {
-      const { field, sort } = newSortModel[0];
-      void fetchStoreTransactions({
-        ...transactionsFilters,
-        sort: `${
-          field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
-        },${sort}`,
-      });
-    }
-  };
+
 
   const handleUpdateReferent = async () => {
     let newErrors: typeof fieldErrors = {};
@@ -373,18 +363,37 @@ const InitiativeStoreDetail = () => {
       page,
     }));
 
-    const sortParam =
-      sortModel.length > 0
-        ? `${sortModel[0].field !== 'fiscalCode' ? sortModel[0].field : 'userId'},${
-            sortModel[0].sort
-          }`
-        : undefined;
-
-    void fetchStoreTransactions({
+    if(sortModel.length > 0){
+      const { field, sort } = sortModel[0];
+      void fetchStoreTransactions({
       ...transactionsFilters,
       page,
-      ...(sortParam && { sort: sortParam }),
+      sort: `${
+          field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
+        },${sort}`,
     });
+    }
+    else{
+      void fetchStoreTransactions({
+      ...transactionsFilters,
+      page,
+    });
+    }
+
+    
+  };
+
+    const handleSortModelChange = async (newSortModel: GridSortModel) => {
+    setSortModel(newSortModel);
+    if (newSortModel.length > 0) {
+      const { field, sort } = newSortModel[0];
+      void fetchStoreTransactions({
+        ...transactionsFilters,
+        sort: `${
+          field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
+        },${sort}`,
+      });
+    }
   };
   return (
     <Box>
@@ -495,6 +504,7 @@ const InitiativeStoreDetail = () => {
           handlePaginationPageChange={handlePaginationPageChange}
           paginationModel={paginationModel}
           dataTableIsLoading={dataTableIsLoading}
+          sortModel={sortModel}
         />
       </Box>
 

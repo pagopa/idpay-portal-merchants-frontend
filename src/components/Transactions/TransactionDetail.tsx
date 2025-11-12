@@ -72,67 +72,88 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
   }
 
   return (
-    <Box sx={{ width: 375 }} p={"1.5rem"} pt={0} data-testid="product-detail">
+    <Box sx={{ width: 375 }} p={'1.5rem'} pt={0} data-testid="product-detail">
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Typography variant="h6">{title}</Typography>
         </Grid>
         {listItem.map((item, index) => (
-            <Grid item xs={12} key={index}>
-              <Box mt={1}>
-                <Typography variant="body2"
-                            fontWeight={theme.typography.fontWeightRegular}
-                            color={theme.palette.text.secondary}
-                >{item?.label}</Typography>
-                <Typography variant="body2" fontWeight="fontWeightMedium">
-                  {getValueText(item?.id, item?.type)}
-                </Typography>
-              </Box>
-            </Grid>
-          ))}
+          <Grid item xs={12} key={index}>
+            <Box mt={1}>
+              <Typography
+                variant="body2"
+                fontWeight={theme.typography.fontWeightRegular}
+                color={theme.palette.text.secondary}
+              >
+                {item?.label}
+              </Typography>
+              <Typography variant="body2" fontWeight="fontWeightMedium">
+                {getValueText(item?.id, item?.type)}
+              </Typography>
+            </Box>
+          </Grid>
+        ))}
 
         <Grid item xs={12}>
           <Box mt={1}>
-            <Typography variant="body2"
-                        fontWeight={theme.typography.fontWeightRegular}
-                        color={theme.palette.text.secondary}
-            >Stato</Typography>
+            <Typography
+              variant="body2"
+              fontWeight={theme.typography.fontWeightRegular}
+              color={theme.palette.text.secondary}
+            >
+              Stato
+            </Typography>
             {getStatusChip()}
           </Box>
         </Grid>
         {itemValues.status !== 'CANCELLED' && (
-        <Grid item xs={12}>
-          <Box mt={1}>
-            <Typography variant="body2"
-                        fontWeight={theme.typography.fontWeightRegular}
-                        color={theme.palette.text.secondary}
-            >
-              {itemValues.status === 'REFUNDED' ? 'Nota di credito'  : 'Fattura'}
-            </Typography>
-            <Button
-              data-testid="btn-test"
-              sx={{ padding: "0",
-                '&:hover': {
-                  backgroundColor: '#fff',
-                  color: '#0055AA',
-                }
-            }}
-              onClick={() => downloadFile(itemValues,storeId)}
-            >
-              {isLoading ? (
-                <CircularProgress
-                  color="inherit"
-                  size={20}
-                  data-testid="item-loader"
-                />
-              ) : (
-                <>
-                  <ReceiptLong /> {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
-                </>
-              )}
-            </Button>
-          </Box>
-        </Grid>
+          <>
+            <Grid item xs={12}>
+              <Box mt={1}>
+                <Typography
+                  variant="body2"
+                  fontWeight={theme.typography.fontWeightRegular}
+                  color={theme.palette.text.secondary}
+                >
+                  Numero fattura
+                </Typography>
+                <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
+                  {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Box mt={1}>
+                <Typography
+                  variant="body2"
+                  fontWeight={theme.typography.fontWeightRegular}
+                  color={theme.palette.text.secondary}
+                >
+                  {itemValues.status === 'REFUNDED' ? 'Nota di credito' : 'Fattura'}
+                </Typography>
+                <Button
+                  data-testid="btn-test"
+                  sx={{
+                    padding: '0',
+                    '&:hover': {
+                      backgroundColor: '#fff',
+                      color: '#0055AA',
+                    },
+                  }}
+                  onClick={() => downloadFile(itemValues, storeId)}
+                >
+                  {isLoading ? (
+                    <CircularProgress color="inherit" size={20} data-testid="item-loader" />
+                  ) : (
+                    <>
+                      <ReceiptLong />{' '}
+                      {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
+                    </>
+                  )}
+                </Button>
+              </Box>
+            </Grid>
+          </>
         )}
       </Grid>
     </Box>

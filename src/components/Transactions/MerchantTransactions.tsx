@@ -34,7 +34,7 @@ interface MerchantTransactionsProps {
   handleFiltersApplied: (filters: any) => void;
   handleFiltersReset: () => void;
   handleSortChange?: (sortModel: GridSortModel) => void;
-  sortModel?: GridSortModel;
+  sortModel: GridSortModel;
   handlePaginationPageChange?: (page: number) => void;
   paginationModel?: any;
   dataTableIsLoading?: boolean;
