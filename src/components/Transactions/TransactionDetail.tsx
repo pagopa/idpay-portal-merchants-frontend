@@ -117,7 +117,9 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
                 >
                   Numero fattura
                 </Typography>
-                {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
+                <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
+                  {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
+                </Typography>
               </Box>
             </Grid>
             <Grid item xs={12}>
