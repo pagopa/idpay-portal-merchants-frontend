@@ -17,6 +17,8 @@ const getStatus: any = (status: string) => {
             return { color: theme.palette.error.extraLight as string, label: 'Da rimborsare' };
         case 'AUTHORIZED':
             return { color: theme.palette.success.extraLight as string, label: 'Da autorizzare' };
+        case 'TO_SEND':
+            return { color: '#FFF5DA !important', textColor: '#614C15 !important', label: 'Da inviare' };
         default:
             return { color: theme.palette.action.disabled as string, label: MISSING_DATA_PLACEHOLDER };
     }

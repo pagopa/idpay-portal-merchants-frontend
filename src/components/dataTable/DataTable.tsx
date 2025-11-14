@@ -4,12 +4,13 @@ import { useCallback } from 'react';
 export interface DataTableProps {
   rows: any;
   columns: any;
-  pageSize: number;
   rowsPerPage: number;
   onSortModelChange?: (model: GridSortModel) => void;
   sortModel?: GridSortModel;
   onPaginationPageChange?: (page: number) => void;
   paginationModel?: any;
+  checkable?: boolean;
+  onRowSelectionChange?: (rows: Array<number>) => void;
 }
 
 const DataTable = ({
@@ -19,7 +20,9 @@ const DataTable = ({
   onSortModelChange,
   onPaginationPageChange,
   paginationModel,
+  checkable,
   sortModel = [],
+  onRowSelectionChange
 }: DataTableProps) => {
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
@@ -34,6 +37,10 @@ const DataTable = ({
     [sortModel]
   );
 
+  const handleRowSelectionChange = (rows: Array<any>) => {
+    onRowSelectionChange?.(rows);
+  };
+
   return (
     <>
       {rows?.length > 0 && columns?.length > 0 && (
@@ -41,6 +48,8 @@ const DataTable = ({
           rows={rows}
           columns={columns}
           rowsPerPageOptions={[rowsPerPage]}
+          checkboxSelection={checkable}
+          onSelectionModelChange={handleRowSelectionChange}
           disableSelectionOnClick
           autoHeight
           sortingOrder={['asc', 'desc']}
@@ -52,6 +61,7 @@ const DataTable = ({
           page={paginationModel?.pageNo}
           pageSize={paginationModel?.pageSize}
           rowCount={paginationModel?.totalElements}
+          hideFooterSelectedRowCount={true}
           localeText={{
             noRowsLabel: 'Nessun punto vendita da visualizzare.',
             MuiTablePagination: {

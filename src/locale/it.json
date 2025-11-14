@@ -325,6 +325,11 @@
     "pointOfSaleTransactions": {
       "searchByFiscalCode": "Cerca per Codice Fiscale",
       "searchByGtin": "Cerca per GTIN"
+    },
+    "refundRequests": {
+      "title": "Richieste di rimborso",
+      "subtitle": "Invia i rimborsi dei tuoi punti vendita.",
+      "sendRequests": "Invia"
     }
   },
   "roles": {
