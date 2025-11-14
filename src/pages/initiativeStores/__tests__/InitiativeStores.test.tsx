@@ -91,7 +91,7 @@ const mockStores = [
 ];
 const mockPagination = { pageNo: 0, pageSize: 5, totalElements: 3, totalPages: 1 };
 
-describe('<InitiativeStores />', () => {
+describe('<ReportedUsers />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });

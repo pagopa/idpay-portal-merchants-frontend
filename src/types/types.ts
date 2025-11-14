@@ -11,6 +11,15 @@ export interface GetPointOfSalesFilters {
     sort: string;
 }
 
+export interface GetReportedUsersFilters {
+  cf: string;
+  gtin?: string;
+  status?: string;
+  page?: number;
+  size?: number;
+  sort: string;
+}
+
 export interface GetPointOfSalesResponse {
     content: Array<PointOfSaleDTO>;
     number: number;
@@ -66,4 +75,3 @@ export interface SalePointFormDTO {
 
     zipCode?: string;
 }
-    

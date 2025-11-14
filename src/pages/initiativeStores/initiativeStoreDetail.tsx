@@ -19,12 +19,11 @@ import LabelValuePair from '../../components/labelValuePair/labelValuePair';
 import MerchantTransactions from '../../components/Transactions/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
-import { isValidEmail } from '../../helpers';
+import { isValidEmail, handlePromptMessage } from '../../helpers';
 import { formatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { POS_TYPE } from '../../utils/constants';
 import ROUTES from '../../routes';
-import { handlePromptMessage } from '../../helpers';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
@@ -45,6 +44,7 @@ const InitiativeStoreDetail = () => {
   const [contactSurnameModal, setContactSurnameModal] = useState<string>('');
   const [contactEmailModal, setContactEmailModal] = useState<string>('');
   const [contactEmailConfirmModal, setContactEmailConfirmModal] = useState<string>('');
+  const [dataTableIsLoading, setDataTableIsLoading] = useState<boolean>(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{
     contactEmailModal?: string;
@@ -86,6 +86,7 @@ const InitiativeStoreDetail = () => {
     }
   }, [storeDetail]);
 
+
   const fetchStoreDetail = async () => {
     try {
       const userJwt = parseJwt(storageTokenOps.read());
@@ -110,6 +111,7 @@ const InitiativeStoreDetail = () => {
   };
 
   const fetchStoreTransactions = async (filters?: any) => {
+    setDataTableIsLoading(true);
     try {
       const response = await getMerchantPointOfSaleTransactionsProcessed(id, store_id, {
         size: 10,
@@ -122,6 +124,7 @@ const InitiativeStoreDetail = () => {
           ...transaction,
           trxDate: formatDate(transaction.trxDate),
           updateDate: formatDate(transaction.updateDate),
+          trxChargeDate: formatDate(transaction.trxChargeDate),
         }));
         setStoreTransactions([...responseWIthFormattedDate]);
       }
@@ -138,6 +141,8 @@ const InitiativeStoreDetail = () => {
         component: 'Toast',
         showCloseIcon: true,
       });
+    } finally {
+      setDataTableIsLoading(false);
     }
   };
 
@@ -244,18 +249,7 @@ const InitiativeStoreDetail = () => {
   //   setContactNameModal('');
   // };
 
-  const handleSortModelChange = async (newSortModel: GridSortModel) => {
-    setSortModel(newSortModel);
-    if (newSortModel.length > 0) {
-      const { field, sort } = newSortModel[0];
-      void fetchStoreTransactions({
-        ...transactionsFilters,
-        sort: `${
-          field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
-        },${sort}`,
-      });
-    }
-  };
+
 
   const handleUpdateReferent = async () => {
     let newErrors: typeof fieldErrors = {};
@@ -369,18 +363,37 @@ const InitiativeStoreDetail = () => {
       page,
     }));
 
-    const sortParam =
-      sortModel.length > 0
-        ? `${sortModel[0].field !== 'fiscalCode' ? sortModel[0].field : 'userId'},${
-            sortModel[0].sort
-          }`
-        : undefined;
-
-    void fetchStoreTransactions({
+    if(sortModel.length > 0){
+      const { field, sort } = sortModel[0];
+      void fetchStoreTransactions({
       ...transactionsFilters,
       page,
-      ...(sortParam && { sort: sortParam }),
+      sort: `${
+          field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
+        },${sort}`,
     });
+    }
+    else{
+      void fetchStoreTransactions({
+      ...transactionsFilters,
+      page,
+    });
+    }
+
+    
+  };
+
+    const handleSortModelChange = async (newSortModel: GridSortModel) => {
+    setSortModel(newSortModel);
+    if (newSortModel.length > 0) {
+      const { field, sort } = newSortModel[0];
+      void fetchStoreTransactions({
+        ...transactionsFilters,
+        sort: `${
+          field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
+        },${sort}`,
+      });
+    }
   };
   return (
     <Box>
@@ -490,6 +503,8 @@ const InitiativeStoreDetail = () => {
           handleSortChange={handleSortModelChange}
           handlePaginationPageChange={handlePaginationPageChange}
           paginationModel={paginationModel}
+          dataTableIsLoading={dataTableIsLoading}
+          sortModel={sortModel}
         />
       </Box>
 

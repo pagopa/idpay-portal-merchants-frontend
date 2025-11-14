@@ -23,6 +23,8 @@ variables:
   react_app_pagopa_manual_link: https://developer.pagopa.it/pari/guides/bonuselettrodomestici-manuale-tecnico-venditore
   react_app_pagopa_help_link: https://developer.pagopa.it/pari/guides/bonuselettrodomestici-manuale-tecnico-venditore/contatti
   REACT_APP_ONE_TRUST_BASE_URL_GLOBAL: https://cdn.cookielaw.org
+  REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL_GLOBAL: https://privacyportalde-cdn.onetrust.com/privacy-notice-scripts/otnotice-1.0.min.js
+  REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS_GLOBAL: eyJjYWxsYmFja1VybCI6Imh0dHBzOi8vcHJpdmFjeXBvcnRhbC1kZS5vbmV0cnVzdC5jb20vcmVxdWVzdC92MS9wcml2YWN5Tm90aWNlcy9zdGF0cy92aWV3cyJ9
 
   ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/uat'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix')) }}:
     environment: 'UAT'
@@ -49,10 +51,10 @@ variables:
     react_app_analytics_enabled: '$(UAT_ANALYTICS_ENABLED)'
     react_app_analytics_mocked: '$(UAT_ANALYTICS_MOCKED)'
     react_app_mixpanel_token: '$(UAT_MIXPANEL_TOKEN)'
-    react_app_onetrust_domain_id: 019a15b5-bdb4-7d03-8046-deb3bed80d75
+    react_app_one_trust_domain_id: 019a15b5-bdb4-7d03-8046-deb3bed80d75
 
-    react_app_one_trust_otnotice_cdn_url: $(UAT_REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL)
-    react_app_one_trust_otnotice_cdn_settings: $(UAT_REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS)
+    react_app_one_trust_otnotice_cdn_url: $(REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL_GLOBAL)
+    react_app_one_trust_otnotice_cdn_settings: $(REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS_GLOBAL)
     # react_app_one_trust_privacy_policy_id: $(UAT_REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID_MERCHANTS)
     # react_app_one_trust_privacy_policy_json_url: $(UAT_REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL_MERCHANTS)
     # react_app_one_trust_tos_id: $(UAT_REACT_APP_ONE_TRUST_TOS_ID_MERCHANTS)
@@ -90,10 +92,10 @@ variables:
     react_app_analytics_enabled: '$(PROD_ANALYTICS_ENABLED)'
     react_app_analytics_mocked: '$(PROD_ANALYTICS_MOCKED)'
     react_app_mixpanel_token: '$(PROD_MIXPANEL_TOKEN)'
-    react_app_onetrust_domain_id: 019a15d0-8140-7fc9-9550-800aa9b1be13
+    react_app_one_trust_domain_id: 019a15d0-8140-7fc9-9550-800aa9b1be13
 
-    react_app_one_trust_otnotice_cdn_url: $(PROD_REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL)
-    react_app_one_trust_otnotice_cdn_settings: $(PROD_REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS)
+    react_app_one_trust_otnotice_cdn_url: $(REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL_GLOBAL)
+    react_app_one_trust_otnotice_cdn_settings: $(REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS_GLOBAL)
     # react_app_one_trust_privacy_policy_id: $(PROD_REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID_MERCHANTS)
     # react_app_one_trust_privacy_policy_json_url: $(PROD_REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL_MERCHANTS)
     # react_app_one_trust_tos_id: $(PROD_REACT_APP_ONE_TRUST_TOS_ID_MERCHANTS)
@@ -132,10 +134,10 @@ variables:
     react_app_analytics_enabled: '$(DEV_ANALYTICS_ENABLED)'
     react_app_analytics_mocked: '$(DEV_ANALYTICS_MOCKED)'
     react_app_mixpanel_token: '$(DEV_MIXPANEL_TOKEN)'
-    react_app_onetrust_domain_id: 019a15b5-bdb4-7d03-8046-deb3bed80d75
+    react_app_one_trust_domain_id: 019a15b5-bdb4-7d03-8046-deb3bed80d75
 
-    react_app_one_trust_otnotice_cdn_url: $(DEV_REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL)
-    react_app_one_trust_otnotice_cdn_settings: $(DEV_REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS)
+    react_app_one_trust_otnotice_cdn_url: $(REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL_GLOBAL)
+    react_app_one_trust_otnotice_cdn_settings: $(REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS_GLOBAL)
     # react_app_one_trust_privacy_policy_id: $(DEV_REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID_MERCHANTS)
     # react_app_one_trust_privacy_policy_json_url: $(DEV_REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL_MERCHANTS)
     # react_app_one_trust_tos_id: $(DEV_REACT_APP_ONE_TRUST_TOS_ID_MERCHANTS)
@@ -247,7 +249,7 @@ stages:
               REACT_APP_ANALYTICS_MOCK: '$(react_app_analytics_mocked)'
               REACT_APP_MIXPANEL_TOKEN: '$(react_app_mixpanel_token)'
               REACT_APP_ONE_TRUST_BASE_URL: '$(react_app_one_trust_base_url)'
-              REACT_APP_ONETRUST_DOMAIN_ID: '$(react_app_onetrust_domain_id)'
+              REACT_APP_ONE_TRUST_DOMAIN_ID: '$(react_app_one_trust_domain_id)'
 
               REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL: $(react_app_one_trust_otnotice_cdn_url)
               REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS: $(react_app_one_trust_otnotice_cdn_settings)

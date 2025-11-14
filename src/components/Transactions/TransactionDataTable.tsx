@@ -10,16 +10,15 @@ export interface DataTableProps {
   rowsPerPage: number;
   handleRowAction: (row: any) => void; 
   onSortModelChange?: (model: any) => void;
-  sortModel?: GridSortModel;
+  sortModel: GridSortModel;
   onPaginationPageChange?: (page: number) => void;
   paginationModel?: any;
 }
 
 
-const TransactionDataTable = ({ rows, columns, rowsPerPage, onSortModelChange, onPaginationPageChange, paginationModel }: DataTableProps) => {
+const TransactionDataTable = ({ rows, columns, rowsPerPage, onSortModelChange, onPaginationPageChange, paginationModel, sortModel }: DataTableProps) => {
   const [finalColumns, setFinalColumns] = useState(Array<any>);
-  const [sortModelState, setSortModelState] = useState<any>([]);
-
+  const [localSortModel, setLocalSortModel] = useState<GridSortModel>([]);
 
   useEffect(() => {
     if (columns && columns.length > 0) {
@@ -28,32 +27,15 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, onSortModelChange, o
         renderCell: col.renderCell ? col.renderCell : renderEmptyCell
       }));
 
-      setFinalColumns(
-        [
-          ...processedColumns,
-          // {
-          //   field: 'actions',
-          //   headerName: '',
-          //   sortable: false,
-          //   filterable: false,
-          //   disableColumnMenu: true,
-          //   flex: 0.1,
-          //   renderCell: (params: any) => (
-          //     <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
-          //       <IconButton
-          //         onClick={() => handleRowAction(params.row)}
-          //         size="small"
-          //       >
-          //         <ChevronRightIcon color='primary' fontSize='inherit' />
-          //       </IconButton>
-          //     </Box>
-          //   )
-          // }
-        ]
-      );
+      setFinalColumns([...processedColumns]);
     }
   }, [columns]);
 
+ useEffect(() => {
+    if (sortModel !== localSortModel) {
+      setLocalSortModel(sortModel);
+    }
+  }, [sortModel]);
 
   const renderEmptyCell = (params: any) => {
     if (params.value === null || params.value === undefined || params.value === '') {
@@ -65,23 +47,25 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, onSortModelChange, o
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
   };
-
-  const handleSortModelChange = useCallback((model: any) => {
+  const handleSortModelChange = useCallback((model: GridSortModel) => {
     if(model.length > 0){
-      setSortModelState(model);
+      setLocalSortModel(model);
       onSortModelChange?.(model);
-    }else{
-      setSortModelState((prevState: any) => {
-        const newSortModel = prevState?.[0].sort === 'asc'
+    } 
+    else{
+      setLocalSortModel((prevState: GridSortModel) => {
+        const newSortModel: GridSortModel = prevState?.[0]?.sort === 'asc'
           ? [{field: prevState?.[0].field, sort: 'desc'}]
           : [{field: prevState?.[0].field, sort: 'asc'}];
         
-        onSortModelChange?.(newSortModel);        
+        onSortModelChange?.(newSortModel);
+        
         return newSortModel;
       });
     }
-    
   }, [onSortModelChange]);
+
+
 
   return (
     <>
@@ -96,8 +80,8 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, onSortModelChange, o
             sortingMode='server'
             paginationMode='server'
             onSortModelChange={handleSortModelChange}
-            sortModel={sortModelState}
-            onPageChange={handlePageChange}
+            sortModel={localSortModel} 
+            onPageChange={handlePageChange} 
             page={paginationModel?.pageNo}
             pageSize={paginationModel?.pageSize}
             rowCount={paginationModel?.totalElements}
@@ -135,14 +119,11 @@ const TransactionDataTable = ({ rows, columns, rowsPerPage, onSortModelChange, o
               '& .MuiDataGrid-columnHeader:focus-within': {
                 outline: 'none'
               }
-              
-
             }}
           />
         )
       }
     </>
-
   );
 };
 

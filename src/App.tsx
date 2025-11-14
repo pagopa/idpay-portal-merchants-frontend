@@ -9,15 +9,11 @@ import withSelectedPartyProducts from './decorators/withSelectedPartyProducts';
 import withLogin from './decorators/withLogin';
 import Layout from './components/Layout/Layout';
 import Auth from './pages/auth/Auth';
-// import TOSWall from './components/TOS/TOSWall';
-// import TOSLayout from './components/TOSLayout/TOSLayout';
 import TOS from './pages/tos/TOS';
 import PrivacyPolicy from './pages/privacyPolicy/PrivacyPolicy';
 import routes from './routes';
-// import useTCAgreement from './hooks/useTCAgreement';
 import InitiativesList from './pages/initiativesList/initiativesList';
 import Assistance from './pages/assistance/assistance';
-// import InitiativeDiscounts from './pages/initiativeDiscounts/initiativeDiscounts';
 import NewDiscount from './pages/newDiscount/newDiscount';
 import AcceptNewDiscount from './pages/acceptNewDiscount/acceptNewDiscount';
 import InitiativeOverview from './pages/initiativeOverview/initiativeOverview';
@@ -25,34 +21,10 @@ import InitiativeStoresUpload from './pages/initiativeStores/initiativeStoresUpl
 import InitiativeStores from './pages/initiativeStores/InitiativeStores';
 import InitiativeStoreDetail from './pages/initiativeStores/initiativeStoreDetail';
 import { StoreProvider } from './pages/initiativeStores/StoreContext';
-
+import ReportedUsers from './pages/reportedUsers/reportedUsers';
+import InsertReportedUser from './pages/reportedUsers/insertReportedUser';
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => (
-    // const location = useLocation();
-    // const { isTOSAccepted, acceptTOS, firstAcceptance } = useTCAgreement();
-    // if (
-    //   isTOSAccepted === false &&
-    //   location.pathname !== routes.PRIVACY_POLICY &&
-    //   location.pathname !== routes.TOS
-    // ) {
-    //   return (
-    //     <TOSLayout>
-    //       <TOSWall
-    //         acceptTOS={acceptTOS}
-    //         privacyRoute={routes.PRIVACY_POLICY}
-    //         tosRoute={routes.TOS}
-    //         firstAcceptance={firstAcceptance}
-    //       />
-    //     </TOSLayout>
-    //   );
-    // } else if (
-    //   typeof isTOSAccepted === 'undefined' &&
-    //   location.pathname !== routes.PRIVACY_POLICY &&
-    //   location.pathname !== routes.TOS
-    // ) {
-    //   return <></>;
-    // }
-
     <Layout>
       <Switch>
         <Route path={routes.HOME} exact={true}>
@@ -61,16 +33,15 @@ const SecuredRoutes = withLogin(
         <Route path={routes.ASSISTANCE} exact={true}>
           <Assistance />
         </Route>
-        {
-          <Route path={routes.TOS} exact={true}>
-            <TOS />
-          </Route>
-        }
-        {
-          <Route path={routes.PRIVACY_POLICY} exact={true}>
-            <PrivacyPolicy />
-          </Route>
-        }
+
+        <Route path={routes.TOS} exact={true}>
+          <TOS />
+        </Route>
+
+        <Route path={routes.PRIVACY_POLICY} exact={true}>
+          <PrivacyPolicy />
+        </Route>
+
         {/* <Route path={routes.DISCOUNTS} exact={true}>
             <InitiativeDiscounts />
           </Route> */}
@@ -82,6 +53,12 @@ const SecuredRoutes = withLogin(
         </Route>
         <Route path={routes.STORES} exact={true}>
           <InitiativeStores />
+        </Route>
+        <Route path={routes.REPORTED_USERS} exact={true}>
+          <ReportedUsers />
+        </Route>
+        <Route path={routes.REPORTED_USERS_INSERT} exact={true}>
+          <InsertReportedUser />
         </Route>
         <Route path={routes.STORES_DETAIL} exact={true}>
           <StoreProvider>
