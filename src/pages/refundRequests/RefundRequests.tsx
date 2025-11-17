@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
-import { Box, Stack } from "@mui/material";
+import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridSortModel } from "@mui/x-data-grid";
+import { theme } from "@pagopa/mui-italia";
 import DataTable from "../../components/dataTable/DataTable";
-import { formatEuro } from "../../helpers";
 import CustomChip from "../../components/Chip/CustomChip";
 import getStatus from '../../components/Transactions/useStatus';    
+import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
 
 const RefundRequests = () => {
 
@@ -18,20 +19,23 @@ const RefundRequests = () => {
         {
             id: 1,
             name: '001-20251125 223',
+            tipology: 'FISICO',
             refundAmount: 10000,
-            status: 'TO_SEND',
+            status: 'CREATED',
         },
         {
             id: 2,
             name: '002-20251125 224',
+            tipology: 'ONLINE',
             refundAmount: 20000,
-            status: 'TO_SEND',
+            status: 'APPROVED',
         },
         {
             id: 3,
             name: '003-20251125 225',
+            tipology: 'ONLINE',
             refundAmount: 300000,
-            status: 'TO_SEND',
+            status: 'EVALUATING',
         },
     ];
 
@@ -48,20 +52,32 @@ const RefundRequests = () => {
             field: 'name',
             headerName: 'Lotto',
             disableColumnMenu: true,
-            flex: 2
+            flex: 2,
+            sortable: false,
+            renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+        },
+        {
+            field: 'tipology',
+            headerName: 'Tipologia',
+            disableColumnMenu: true,
+            flex: 2,
+            sortable: false,
+            renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
         },
         {
             field: 'refundAmount',
             headerName: 'Importo',
             disableColumnMenu: true,
             flex: 2,
-            renderCell: (params: any) => formatEuro(params.value),
+            sortable: false,
+            renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
         },
         {
             field: 'status',
             headerName: 'Stato',
             disableColumnMenu: true,
             flex: 2,
+            sortable: false,
             renderCell: (params: any) => <StatusChip status={params.value} />
         },
     ];
@@ -70,6 +86,23 @@ const RefundRequests = () => {
     useEffect(() => {
 
     }, []);
+
+    const infoStyles = {
+        fontWeight: theme.typography.fontWeightRegular,
+        fontSize: theme.typography.fontSize,
+    };
+
+    const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
+        <Tooltip
+          title={value && value.length >= tooltipThreshold ? value : ''}
+          placement="top"
+          arrow={true}
+        >
+          <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
+            {value && value !== '' ? value : '-'}
+          </Typography>
+        </Tooltip>
+      );
 
     const handleSortModelChange = async (newSortModel: GridSortModel) => {
         console.log(newSortModel);
@@ -95,6 +128,9 @@ const RefundRequests = () => {
             />
         );
     };
+
+    const isRowSelectable = (params: any) => params?.row?.status === 'CREATED';
+
 
     return (
         <Box p={1.5}>
@@ -135,6 +171,7 @@ const RefundRequests = () => {
                     onSortModelChange={handleSortModelChange}
                     onPaginationPageChange={handlePaginationPageChange}
                     onRowSelectionChange={handleRowSelectionChange}
+                    isRowSelectable={isRowSelectable}
                 />
             </Box>
         </Box>

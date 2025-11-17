@@ -11,6 +11,7 @@ export interface DataTableProps {
   paginationModel?: any;
   checkable?: boolean;
   onRowSelectionChange?: (rows: Array<number>) => void;
+  isRowSelectable?: (params: { row: any }) => boolean;
 }
 
 const DataTable = ({
@@ -22,7 +23,8 @@ const DataTable = ({
   paginationModel,
   checkable,
   sortModel = [],
-  onRowSelectionChange
+  onRowSelectionChange,
+  isRowSelectable
 }: DataTableProps) => {
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
@@ -49,6 +51,7 @@ const DataTable = ({
           columns={columns}
           rowsPerPageOptions={[rowsPerPage]}
           checkboxSelection={checkable}
+          isRowSelectable={isRowSelectable}
           onSelectionModelChange={handleRowSelectionChange}
           disableSelectionOnClick
           autoHeight
