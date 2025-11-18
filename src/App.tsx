@@ -25,6 +25,7 @@ import ReportedUsers from './pages/reportedUsers/reportedUsers';
 import InsertReportedUser from './pages/reportedUsers/insertReportedUser';
 import RefundRequests from './pages/refundRequests/RefundRequests';
 import RefundRequestDetail from './pages/refundRequests/detail/RefundRequestDetail';
+import ShopDetails from './pages/refundRequests/detail/ShopDetails';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => (
@@ -79,6 +80,9 @@ const SecuredRoutes = withLogin(
           </Route>
           <Route path={routes.REFUND_REQUESTS_DETAILS} exact={true}>
               <RefundRequestDetail />
+          </Route>
+          <Route path={routes.REFUND_REQUESTS_STORE} exact={true}>
+            <ShopDetails />
           </Route>
         <Route path="*">
           <Redirect to={routes.HOME} />

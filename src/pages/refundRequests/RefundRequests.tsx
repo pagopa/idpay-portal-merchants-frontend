@@ -101,7 +101,7 @@ const RefundRequests = () => {
               <IconButton 
                 onClick={() => {
                   history.push(routes.REFUND_REQUESTS_DETAILS.replace(':id', id).replace(':batch', params.row.name), {
-                    batchName: params.row.name,
+                    batch: params.row,
                   });
                 }} 
                 size="small">

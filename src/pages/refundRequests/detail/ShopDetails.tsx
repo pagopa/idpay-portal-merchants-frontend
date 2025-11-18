@@ -1,45 +1,17 @@
 import React from 'react';
-import { Box, Typography, Breadcrumbs, Button } from '@mui/material';
+import { Box, Typography, Breadcrumbs } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import routes from '../../../routes';
-import BatchDetail from './batchDetail';
 
-interface RouteParams {
-  id: string;
-}
-
-const RefundRequestDetail: React.FC = () => {
+const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
-  const location = useLocation<{ batch: any }>();
-  const batch = location.state?.batch;
+  const location = useLocation<{ store: any }>();
+  const store = location.state?.store;
 
   const history = useHistory();
-  const { id } = useParams<RouteParams>();
-  
-  const mockData = [
-    {
-      name: 'DE RISI SPA',
-      transactionsNumber: 1234,
-      refundAmount: "8.000,00 €",
-      status: 'CREATED',
-    },
-    {
-      name: 'ABCDC SPA',
-      transactionsNumber: 1234,
-      refundAmount: "8.000,00 €",
-      status: 'CREATED',
-    },
-    {
-      name: 'NOME SPA',
-      transactionsNumber: 1234,
-      refundAmount: "8.000,00 €",
-      status: 'CREATED',
-    },
-  ];
 
   return (
     <>
@@ -67,10 +39,10 @@ const RefundRequestDetail: React.FC = () => {
                 {'Bonus Elettrodomestici'}
               </Typography>
               <Typography color="text.primary" variant="body2" fontWeight="600">
-                {'Richieste di rimborso'}
+                {'...'}
               </Typography>
               <Typography color="text.disabled" variant="body2">
-                {batch?.name}
+                {store?.name}
               </Typography>
             </Breadcrumbs>
           </Box>
@@ -85,27 +57,17 @@ const RefundRequestDetail: React.FC = () => {
             }}
           >
             <TitleBox
-              title={batch?.name ?? '-'}
+              title={store?.name ?? '-'}
               mbTitle={2}
               variantTitle="h4"
               variantSubTitle="body1"
             />
           </Box>
         </Box>
-
-        <BatchDetail batch={batch} />
-
-        <Button sx={{ marginY: 3 }} onClick={() => {
-          history.push(routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(':store', mockData[0].name), {
-            store: mockData[0],
-          });
-        }}>
-          mock go to shop page
-        </Button>
-
+        Pagina punto vendita
       </Box>
     </>
   );
 };
 
-export default RefundRequestDetail;
+export default ShopDetails;
