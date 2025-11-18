@@ -329,7 +329,13 @@
     "refundRequests": {
       "title": "Richieste di rimborso",
       "subtitle": "Invia i rimborsi dei tuoi punti vendita.",
-      "sendRequests": "Invia"
+      "sendRequests": "Invia",
+      "batchTransactionsDetails" : {
+        "referencePeriod" : "Periodo di riferimento",
+        "state" : "Stato",
+        "requestedRefund" : "Rimborso richiesto"
+      },
+      "storeDetails" : {}
     }
   },
   "roles": {

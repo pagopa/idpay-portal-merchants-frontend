@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Stack, Tooltip, Typography } from '@mui/material';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
 
@@ -170,15 +169,7 @@ const InvoiceDataTable: React.FC = () => (
       spacing={{ xs: 2, md: 3 }}
       justifyContent="space-between"
       alignItems={{ xs: 'flex-start', md: 'center' }}
-    >
-      <TitleBox
-        title="Fatture"
-        subTitle="Elenco delle fatture da esaminare"
-        mbTitle={2}
-        variantTitle="h4"
-        variantSubTitle="body1"
-      />
-    </Stack>
+    ></Stack>
     <Box sx={{ height: '400px' }}>
       <DataTable columns={columns} rows={invoiceData} rowsPerPage={10} checkable={false} />
     </Box>

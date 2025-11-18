@@ -12,6 +12,7 @@ import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
 import getStatus from '../../components/Transactions/useStatus';
 import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
+import routes from '../../routes';
 
 interface RouteParams {
   id: string;
@@ -99,7 +100,15 @@ const RefundRequests = () => {
         <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
           <IconButton
             onClick={() => {
-              history.push(`/portale-esercenti/${id}/richieste-di-rimborso/${params.row.name}`);
+              history.push(
+                routes.REFUND_REQUESTS_DETAILS.replace(':id', id).replace(
+                  ':batch',
+                  params.row.name
+                ),
+                {
+                  batch: params.row,
+                }
+              );
             }}
             size="small"
           >
