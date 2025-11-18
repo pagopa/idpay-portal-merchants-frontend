@@ -5,6 +5,7 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useHistory, useParams } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import InvoiceDataTable from '../invoiceDataTable';
 
 interface RouteParams {
   batch: string;
@@ -58,16 +59,20 @@ const RefundRequestDetail: React.FC = () => {
               mt: 3,
             }}
           >
-            <TitleBox
-              title={batch}
-              mbTitle={2}
-              variantTitle="h4"
-              variantSubTitle="body1"
-            />
+            <TitleBox title={batch} mbTitle={2} variantTitle="h4" variantSubTitle="body1" />
           </Box>
         </Box>
+        <Box
+          sx={{
+            height: 'auto',
+            width: '100%',
+            mt: 2,
+            '& .MuiDataGrid-footerContainer': { display: 'none' },
+          }}
+        >
+          <InvoiceDataTable />
+        </Box>
       </Box>
-
     </>
   );
 };
