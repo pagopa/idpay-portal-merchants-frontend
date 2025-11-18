@@ -1,17 +1,26 @@
 import { useEffect, useState } from "react";
-import { Box, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridSortModel } from "@mui/x-data-grid";
 import { theme } from "@pagopa/mui-italia";
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { useHistory, useParams } from 'react-router-dom';
 import DataTable from "../../components/dataTable/DataTable";
 import CustomChip from "../../components/Chip/CustomChip";
 import getStatus from '../../components/Transactions/useStatus';    
 import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
+import routes from '../../routes';
+
+interface RouteParams {
+  id: string;
+}
 
 const RefundRequests = () => {
+    const history = useHistory();
+    const { id } = useParams<RouteParams>();
 
     const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
 
@@ -79,6 +88,27 @@ const RefundRequests = () => {
             flex: 2,
             sortable: false,
             renderCell: (params: any) => <StatusChip status={params.value} />
+        },
+        {
+          field: 'actions',
+          headerName: '',
+          sortable: false,
+          filterable: false,
+          disableColumnMenu: true,
+          flex: 0.3,
+          renderCell: (params: any) => (
+            <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+              <IconButton 
+                onClick={() => {
+                  history.push(routes.REFUND_REQUESTS_DETAILS.replace(':id', id).replace(':batch', params.row.name), {
+                    batchName: params.row.name,
+                  });
+                }} 
+                size="small">
+                <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
+              </IconButton>
+            </Box>
+          ),
         },
     ];
 

@@ -24,6 +24,7 @@ import { StoreProvider } from './pages/initiativeStores/StoreContext';
 import ReportedUsers from './pages/reportedUsers/reportedUsers';
 import InsertReportedUser from './pages/reportedUsers/insertReportedUser';
 import RefundRequests from './pages/refundRequests/RefundRequests';
+import RefundRequestDetail from './pages/refundRequests/detail/RefundRequestDetail';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => (
@@ -75,6 +76,9 @@ const SecuredRoutes = withLogin(
           </Route>
           <Route path={routes.REFUND_REQUESTS} exact={true}>
             <RefundRequests />
+          </Route>
+          <Route path={routes.REFUND_REQUESTS_DETAILS} exact={true}>
+              <RefundRequestDetail />
           </Route>
         <Route path="*">
           <Redirect to={routes.HOME} />
