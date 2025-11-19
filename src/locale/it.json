@@ -335,7 +335,14 @@
         "state" : "Stato",
         "requestedRefund" : "Rimborso richiesto"
       },
-      "storeDetails" : {}
+      "storeDetails" : {
+        "referredBatch" : "Lotto di riferimento",
+        "companyName" : "Ragione sociale",
+        "requestedRefund" : "Rimborso richiesto",
+        "holder" : "Intestatario",
+        "iban" : "IBAN",
+        "status" : "Status"
+      }
     }
   },
   "roles": {
