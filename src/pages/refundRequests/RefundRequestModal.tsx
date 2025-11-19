@@ -11,7 +11,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 type Props = {
     isOpen: boolean;
-    setIsOpen: (value: boolean) => void;
+    setIsOpen: () => void;
     title: string;
     description: string;
     descriptionTwo?: string;
@@ -24,7 +24,7 @@ type Props = {
 };
 
 export const RefundRequestsModal = ({ isOpen, setIsOpen, title, description, descriptionTwo, warning, cancelBtn, confirmBtn }: Props) => (
-    <Dialog data-testid="refund-requests-modal-test" open={isOpen} onClose={() => setIsOpen(false)} PaperProps={{ style: { minWidth: 600, minHeight: 354 } }}>
+    <Dialog data-testid="refund-requests-modal-test" open={isOpen} onClose={setIsOpen} PaperProps={{ style: { minWidth: 600, minHeight: 354 } }}>
         <DialogTitle
             sx={{
                 fontFamily: '"Titillium Web", sans-serif',
@@ -54,7 +54,7 @@ export const RefundRequestsModal = ({ isOpen, setIsOpen, title, description, des
             </Alert>}
         </DialogContent>
         <DialogActions sx={{ mb: 3, mr: 3 }}>
-            {cancelBtn && <Button variant="outlined" onClick={() => setIsOpen(false)}>
+            {cancelBtn && <Button variant="outlined" onClick={setIsOpen}>
                 {cancelBtn}
             </Button>}
             {confirmBtn && <Button variant="contained" color="primary" onClick={confirmBtn.onConfirm}>
