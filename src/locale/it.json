@@ -329,7 +329,12 @@
     "refundRequests": {
       "title": "Richieste di rimborso",
       "subtitle": "Invia i rimborsi dei tuoi punti vendita.",
-      "sendRequests": "Invia"
+      "sendRequests": "Invia",
+      "ModalRefundRequests": {
+        "title": "Invia richieste di rimborso",
+        "description": "Il lotto di transazioni verrà inviato a Invitalia S.p.A., che procederà alla verifica dei dati e al successivo rimborso all’IBAN da te indicato in fase di adesione.",
+        "warning": "Se una o più fatture richiedono ulteriori controlli da parte tua, escludile prima di procedere con l’invio dell’intero lotto."
+      }
     }
   },
   "roles": {

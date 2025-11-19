@@ -10,9 +10,10 @@ import DataTable from "../../components/dataTable/DataTable";
 import CustomChip from "../../components/Chip/CustomChip";
 import getStatus from '../../components/Transactions/useStatus';    
 import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
+import { RefundRequestsModal } from "./RefundRequestModal";
 
 const RefundRequests = () => {
-
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
 
     const mockData = [
@@ -134,6 +135,15 @@ const RefundRequests = () => {
 
     return (
         <Box p={1.5}>
+            <RefundRequestsModal
+                isOpen={isModalOpen}
+                setIsOpen={() => setIsModalOpen(false)}
+                title={t("pages.refundRequests.ModalRefundRequests.title")}
+                description={t("pages.refundRequests.ModalRefundRequests.description")}
+                warning={t("pages.refundRequests.ModalRefundRequests.warning")}
+                cancelBtn="Indietro"
+                confirmBtn={{text: `Invia (${selectedRows.length})`, onConfirm: () => setIsModalOpen(false)}}
+            />
             <Stack
                 direction={{ xs: 'column', md: 'row' }}
                 spacing={{ xs: 2, md: 3 }}
@@ -152,7 +162,7 @@ const RefundRequests = () => {
                         <Button
                             variant="contained"
                             size="small"
-                            onClick={() => { }}
+                            onClick={() => setIsModalOpen(true)}
                             startIcon={<SendIcon />}
                             sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', whiteSpace: 'nowrap', fontWeight: 'bold' } }}
                         >
