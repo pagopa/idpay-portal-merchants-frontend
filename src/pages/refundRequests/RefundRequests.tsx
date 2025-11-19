@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { GridSortModel } from "@mui/x-data-grid";
+import { GridSortModel, GridColDef } from "@mui/x-data-grid";
 import { theme } from "@pagopa/mui-italia";
 import DataTable from "../../components/dataTable/DataTable";
 import CustomChip from "../../components/Chip/CustomChip";
@@ -39,7 +39,7 @@ const RefundRequests = () => {
         },
     ];
 
-    const columns = [
+    const columns: Array<GridColDef> = [
         {
             field: 'spacer',
             headerName: '',
