@@ -13,24 +13,22 @@ import CustomChip from '../../components/Chip/CustomChip';
 import getStatus from '../../components/Transactions/useStatus';
 import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
 import routes from '../../routes';
-import { RefundRequestsModal } from "./RefundRequestModal";
+import { RefundRequestsModal } from './RefundRequestModal';
 
 interface RouteParams {
   id: string;
 }
 
 const RefundRequests = () => {
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
-    const { id } = useParams<RouteParams>();
-    const history = useHistory();
-
-    const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
+  const { id } = useParams<RouteParams>();
+  const history = useHistory();
 
   const mockData = [
     {
       id: 1,
-      insegna: "Euronics SPA",
+      insegna: 'Euronics SPA',
       name: '001-20251125 223',
       tipology: 'FISICO',
       refundAmount: 10000,
@@ -38,7 +36,7 @@ const RefundRequests = () => {
     },
     {
       id: 2,
-      insegna: "MEDIAWORLD",
+      insegna: 'MEDIAWORLD',
       name: '002-20251125 224',
       tipology: 'ONLINE',
       refundAmount: 20000,
@@ -46,7 +44,7 @@ const RefundRequests = () => {
     },
     {
       id: 3,
-      insegna: "EXPERT",
+      insegna: 'EXPERT',
       name: '003-20251125 225',
       tipology: 'ONLINE',
       refundAmount: 300000,
@@ -54,76 +52,76 @@ const RefundRequests = () => {
     },
   ];
 
-    const columns: Array<GridColDef> = [
-        {
-            field: 'spacer',
-            headerName: '',
-            width: 200,
-            sortable: false,
-            disableColumnMenu: true,
-            renderCell: () => '',
-        },
-        {
-            field: 'name',
-            headerName: 'Lotto',
-            disableColumnMenu: true,
-            flex: 2,
-            sortable: false,
-            renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
-        },
-        {
-            field: 'tipology',
-            headerName: 'Tipologia',
-            disableColumnMenu: true,
-            flex: 2,
-            sortable: false,
-            renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
-        },
-        {
-            field: 'refundAmount',
-            headerName: 'Importo',
-            disableColumnMenu: true,
-            flex: 2,
-            sortable: false,
-            renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
-        },
-        {
-            field: 'status',
-            headerName: 'Stato',
-            disableColumnMenu: true,
-            flex: 2,
-            sortable: false,
-            renderCell: (params: any) => <StatusChip status={params.value} />
-        },
-        {
-          field: 'actions',
-          headerName: '',
-          sortable: false,
-          filterable: false,
-          disableColumnMenu: true,
-          flex: 0.3,
-          renderCell: (params: any) => (
-            <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
-              <IconButton
-                onClick={() => {
-                  history.push(
-                    routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(
-                      ':store',
-                      params.row?.insegna
-                    ),
-                    {
-                      store: params.row,
-                    }
-                  );
-                }}
-                size="small"
-              >
-                <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
-              </IconButton>
-            </Box>
-          ),
-        },
-    ];
+  const columns: Array<GridColDef> = [
+    {
+      field: 'spacer',
+      headerName: '',
+      width: 200,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: () => '',
+    },
+    {
+      field: 'name',
+      headerName: 'Lotto',
+      disableColumnMenu: true,
+      flex: 2,
+      sortable: false,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+    },
+    {
+      field: 'tipology',
+      headerName: 'Tipologia',
+      disableColumnMenu: true,
+      flex: 2,
+      sortable: false,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+    },
+    {
+      field: 'refundAmount',
+      headerName: 'Importo',
+      disableColumnMenu: true,
+      flex: 2,
+      sortable: false,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+    },
+    {
+      field: 'status',
+      headerName: 'Stato',
+      disableColumnMenu: true,
+      flex: 2,
+      sortable: false,
+      renderCell: (params: any) => <StatusChip status={params.value} />,
+    },
+    {
+      field: 'actions',
+      headerName: '',
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      flex: 0.3,
+      renderCell: (params: any) => (
+        <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+          <IconButton
+            onClick={() => {
+              history.push(
+                routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(
+                  ':store',
+                  params.row?.insegna
+                ),
+                {
+                  store: params.row,
+                }
+              );
+            }}
+            size="small"
+          >
+            <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
+          </IconButton>
+        </Box>
+      ),
+    },
+  ];
 
   const { t } = useTranslation();
   useEffect(() => {}, []);
@@ -172,60 +170,69 @@ const RefundRequests = () => {
 
   const isRowSelectable = (params: any) => params?.row?.status === 'CREATED';
 
+  return (
+    <Box p={1.5}>
+      <RefundRequestsModal
+        isOpen={isModalOpen}
+        setIsOpen={() => setIsModalOpen(false)}
+        title={t('pages.refundRequests.ModalRefundRequests.title')}
+        description={t('pages.refundRequests.ModalRefundRequests.description')}
+        warning={t('pages.refundRequests.ModalRefundRequests.warning')}
+        cancelBtn="Indietro"
+        confirmBtn={{
+          text: `Invia (${selectedRows.length})`,
+          onConfirm: () => setIsModalOpen(false),
+        }}
+      />
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={{ xs: 2, md: 3 }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', md: 'center' }}
+      >
+        <TitleBox
+          title={t('pages.refundRequests.title')}
+          subTitle={t('pages.refundRequests.subtitle')}
+          mbTitle={2}
+          variantTitle="h4"
+          variantSubTitle="body1"
+        />
+        {selectedRows.length > 0 && (
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => setIsModalOpen(true)}
+            startIcon={<SendIcon />}
+            sx={{
+              width: {
+                xs: '100%',
+                md: 'auto',
+                alignSelf: 'start',
+                whiteSpace: 'nowrap',
+                fontWeight: 'bold',
+              },
+            }}
+          >
+            {t('pages.refundRequests.sendRequests')}
+            {selectedRows.length > 0 ? ` (${selectedRows.length})` : ''}
+          </Button>
+        )}
+      </Stack>
 
-    return (
-        <Box p={1.5}>
-            <RefundRequestsModal
-                isOpen={isModalOpen}
-                setIsOpen={() => setIsModalOpen(false)}
-                title={t("pages.refundRequests.ModalRefundRequests.title")}
-                description={t("pages.refundRequests.ModalRefundRequests.description")}
-                warning={t("pages.refundRequests.ModalRefundRequests.warning")}
-                cancelBtn="Indietro"
-                confirmBtn={{text: `Invia (${selectedRows.length})`, onConfirm: () => setIsModalOpen(false)}}
-            />
-            <Stack
-                direction={{ xs: 'column', md: 'row' }}
-                spacing={{ xs: 2, md: 3 }}
-                justifyContent="space-between"
-                alignItems={{ xs: 'flex-start', md: 'center' }}
-            >
-                <TitleBox
-                    title={t('pages.refundRequests.title')}
-                    subTitle={t('pages.refundRequests.subtitle')}
-                    mbTitle={2}
-                    variantTitle="h4"
-                    variantSubTitle="body1"
-                />
-                {
-                    selectedRows.length > 0 && (
-                        <Button
-                            variant="contained"
-                            size="small"
-                            onClick={() => setIsModalOpen(true)}
-                            startIcon={<SendIcon />}
-                            sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', whiteSpace: 'nowrap', fontWeight: 'bold' } }}
-                        >
-                            {t('pages.refundRequests.sendRequests')}{(selectedRows.length > 0) ? ` (${selectedRows.length})` : ''}
-                        </Button>
-                    )
-                }
-            </Stack>
-
-            <Box sx={{ height: '400px' }}>
-                <DataTable
-                    columns={columns}
-                    rows={mockData}
-                    rowsPerPage={5}
-                    checkable={true}
-                    onSortModelChange={handleSortModelChange}
-                    onPaginationPageChange={handlePaginationPageChange}
-                    onRowSelectionChange={handleRowSelectionChange}
-                    isRowSelectable={isRowSelectable}
-                />
-            </Box>
-        </Box>
-    );
+      <Box sx={{ height: '400px' }}>
+        <DataTable
+          columns={columns}
+          rows={mockData}
+          rowsPerPage={5}
+          checkable={true}
+          onSortModelChange={handleSortModelChange}
+          onPaginationPageChange={handlePaginationPageChange}
+          onRowSelectionChange={handleRowSelectionChange}
+          isRowSelectable={isRowSelectable}
+        />
+      </Box>
+    </Box>
+  );
 };
 
 export default RefundRequests;
