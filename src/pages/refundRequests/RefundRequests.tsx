@@ -27,6 +27,7 @@ const RefundRequests = () => {
   const mockData = [
     {
       id: 1,
+      insegna: "Euronics SPA",
       name: '001-20251125 223',
       tipology: 'FISICO',
       refundAmount: 10000,
@@ -34,6 +35,7 @@ const RefundRequests = () => {
     },
     {
       id: 2,
+      insegna: "MEDIAWORLD",
       name: '002-20251125 224',
       tipology: 'ONLINE',
       refundAmount: 20000,
@@ -41,6 +43,7 @@ const RefundRequests = () => {
     },
     {
       id: 3,
+      insegna: "EXPERT",
       name: '003-20251125 225',
       tipology: 'ONLINE',
       refundAmount: 300000,
@@ -101,12 +104,12 @@ const RefundRequests = () => {
           <IconButton
             onClick={() => {
               history.push(
-                routes.REFUND_REQUESTS_DETAILS.replace(':id', id).replace(
-                  ':batch',
-                  params.row.name
+                routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(
+                  ':store',
+                  params.row?.insegna
                 ),
                 {
-                  batch: params.row,
+                  store: params.row,
                 }
               );
             }}

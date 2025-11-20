@@ -170,7 +170,7 @@ const InvoiceDataTable: React.FC = () => (
       justifyContent="space-between"
       alignItems={{ xs: 'flex-start', md: 'center' }}
     ></Stack>
-    <Box sx={{ height: '400px' }}>
+    <Box>
       <DataTable columns={columns} rows={invoiceData} rowsPerPage={10} checkable={false} />
     </Box>
   </Box>

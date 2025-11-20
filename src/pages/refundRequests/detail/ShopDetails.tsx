@@ -1,103 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Breadcrumbs, Grid, Paper } from '@mui/material';
+import React from 'react';
+import { Box, Typography, Breadcrumbs } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useHistory, useLocation } from 'react-router-dom';
-import { ButtonNaked, theme } from '@pagopa/mui-italia';
+import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import getStatus from '../../../components/Transactions/useStatus';
-import CustomChip from '../../../components/Chip/CustomChip';
-import { getMerchantDetail } from '../../../services/merchantService';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-
-const ShopCard: React.FC = () => {
-  const { t } = useTranslation();
-  const boldStyle = { fontWeight: theme.typography.fontWeightBold };
-  const [iban, setIban] = useState<string | undefined>();
-  const [ibanHolder, setIbanHolder] = useState<string | undefined>();
-  const [businessName, setBusinessName] = useState<string | undefined>();
-  const [batch, setBatch] = useState<string | undefined>();
-  const [requestedRefund, setRequestedRefund] = useState<string | undefined>();
-
-  useEffect(() => {
-    getMerchantDetail('68dd003ccce8c534d1da22bc')
-      .then((response) => {
-        setIban(response?.iban);
-        setIbanHolder(response?.ibanHolder);
-        setBusinessName(response?.businessName);
-      })
-      .catch((error) =>
-        console.log(error)
-      );
-
-    setBatch(undefined);
-    setRequestedRefund(undefined);
-  }, []);
-
-  const getStatusChip = () => {
-    const chipItem = getStatus("status");
-    return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
-  };
-  
-  const details = [
-    {
-      label: t('pages.refundRequests.storeDetails.referredBatch'),
-      value: batch || MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.holder'),
-      value: ibanHolder || MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.companyName'),
-      value: businessName,
-      minWidth: '180px',
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.iban'),
-      value: iban || MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.requestedRefund'),
-      value: requestedRefund || MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-    },
-    {
-      label: t('pages.refundRequests.batchTransactionsDetails.state'),
-      value: getStatusChip(),
-      minWidth: '180px',
-    }
-  ];
-  
-  return(
-    <Paper sx={{ p: 3 }}>
-
-      <Grid container width="100%" justifyContent="center" alignItems="center" pl={8} ml={4}>
-        <Typography variant="overline">
-          dati rimborso
-        </Typography>
-      </Grid>
-
-      <Grid container spacing={2}>
-        {details.map((item, index) => (
-          <Grid item xs={12} sm={6} key={index}>
-            <Box width='50%' sx={{ display: 'flex', gap: 1 }}>
-              <Box sx={{ minWidth: item.minWidth, flexShrink: 0 }}>
-                <Typography variant="body1">{item.label}</Typography>
-              </Box>
-              <Typography variant="body1" sx={boldStyle} minWidth='100%'>
-                {item.value}
-              </Typography>
-            </Box>
-          </Grid>
-        ))}
-      </Grid>
-    </Paper>
-  );
-};
+import InvoiceDataTable from '../invoiceDataTable';
+import { ShopCard } from './ShopCard';
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
@@ -132,10 +42,10 @@ const ShopDetails: React.FC = () => {
                 {'Bonus Elettrodomestici'}
               </Typography>
               <Typography color="text.primary" variant="body2" fontWeight="600">
-                {'...'}
+                {'Rimborsi'}
               </Typography>
               <Typography color="text.disabled" variant="body2">
-                {store?.name}
+                {store?.insegna}
               </Typography>
             </Breadcrumbs>
           </Box>
@@ -150,7 +60,7 @@ const ShopDetails: React.FC = () => {
             }}
           >
             <TitleBox
-              title={store?.name ?? MISSING_DATA_PLACEHOLDER}
+              title={store?.insegna ?? MISSING_DATA_PLACEHOLDER}
               mbTitle={2}
               variantTitle="h4"
               variantSubTitle="body1"
@@ -158,7 +68,19 @@ const ShopDetails: React.FC = () => {
           </Box>
         </Box>
 
-        {<ShopCard />}
+        <ShopCard />
+
+        <Box
+          sx={{
+            height: 'auto',
+            width: '100%',
+            mt: 2,
+            '& .MuiDataGrid-footerContainer': { display: 'none' },
+          }}
+        >
+          <InvoiceDataTable />
+        </Box>
+
       </Box>
     </>
   );
