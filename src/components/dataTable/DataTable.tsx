@@ -1,16 +1,29 @@
-import { DataGrid, GridSortModel } from '@mui/x-data-grid';
+import { DataGrid, GridSortModel, GridColDef } from '@mui/x-data-grid';
 import { useCallback } from 'react';
 
+/**
+ * Props for the DataTable component
+ */
 export interface DataTableProps {
+  /** Array of data rows to be displayed in the table */
   rows: any;
-  columns: any;
+  /** Array of column definitions for the table */
+  columns: Array<GridColDef>;
+  /** Number of rows to display per page */
   rowsPerPage: number;
+  /** Callback function triggered when sorting changes */
   onSortModelChange?: (model: GridSortModel) => void;
+  /** Current sort model configuration */
   sortModel?: GridSortModel;
+  /** Callback function triggered when page changes */
   onPaginationPageChange?: (page: number) => void;
+  /** Current pagination model configuration */
   paginationModel?: any;
+  /** Whether rows are selectable with checkboxes */
   checkable?: boolean;
+  /** Callback function triggered when row selection changes */
   onRowSelectionChange?: (rows: Array<number>) => void;
+  /** Function to determine if a row is selectable */
   isRowSelectable?: (params: { row: any }) => boolean;
 }
 
