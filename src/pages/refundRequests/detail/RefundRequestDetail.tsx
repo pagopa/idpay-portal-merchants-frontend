@@ -6,6 +6,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import routes from '../../../routes';
+import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import InvoiceDataTable from '../invoiceDataTable';
 import BatchDetail from './batchDetail';
 
@@ -86,7 +87,7 @@ const RefundRequestDetail: React.FC = () => {
             }}
           >
             <TitleBox
-              title={batch?.name ?? ''}
+              title={batch?.name ?? MISSING_DATA_PLACEHOLDER}
               mbTitle={2}
               variantTitle="h4"
               variantSubTitle="body1"
