@@ -342,6 +342,7 @@
       },
       "storeDetails" : {
         "referredBatch" : "Lotto di riferimento",
+        "referencePeriod" : "Periodo di riferimento",
         "companyName" : "Ragione sociale",
         "requestedRefund" : "Rimborso richiesto",
         "holder" : "Intestatario",

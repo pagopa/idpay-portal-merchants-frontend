@@ -49,8 +49,8 @@ export const  ShopCard = ({ batchName, refundAmount, status }: Props) => {
       minWidth: '180px',
     },
     {
-      label: t('pages.refundRequests.storeDetails.companyName'),
-      value: businessName,
+      label: t('pages.refundRequests.storeDetails.referencePeriod'),
+      value: '-',
       minWidth: '180px',
     },
     {
@@ -58,6 +58,12 @@ export const  ShopCard = ({ batchName, refundAmount, status }: Props) => {
       value: iban || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
     },
+    {
+      label: t('pages.refundRequests.storeDetails.companyName'),
+      value: businessName,
+      minWidth: '180px',
+    },
+    {},
     {
       label: t('pages.refundRequests.storeDetails.requestedRefund'),
       value: refundAmount || MISSING_DATA_PLACEHOLDER,
