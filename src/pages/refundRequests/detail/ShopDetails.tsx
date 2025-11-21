@@ -68,7 +68,7 @@ const ShopDetails: React.FC = () => {
           </Box>
         </Box>
 
-        <ShopCard />
+        <ShopCard batchName={store?.name} refundAmount={store?.refundAmount} status={store?.status}/>
 
         <Box
           sx={{

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia';
 import { Box, Grid, Paper, Typography } from '@mui/material';
@@ -7,14 +7,18 @@ import getStatus from '../../../components/Transactions/useStatus';
 import CustomChip from '../../../components/Chip/CustomChip';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 
-export const ShopCard: React.FC = () => {
+type Props = {
+  batchName: string;
+  refundAmount: string;
+  status: string;
+};
+
+export const  ShopCard = ({ batchName, refundAmount, status }: Props) => {
   const { t } = useTranslation();
   const boldStyle = { fontWeight: theme.typography.fontWeightBold };
   const [iban, setIban] = useState<string | undefined>();
   const [ibanHolder, setIbanHolder] = useState<string | undefined>();
   const [businessName, setBusinessName] = useState<string | undefined>();
-  const [batch, setBatch] = useState<string | undefined>();
-  const [requestedRefund, setRequestedRefund] = useState<string | undefined>();
 
   useEffect(() => {
     getMerchantDetail('68dd003ccce8c534d1da22bc')
@@ -26,20 +30,17 @@ export const ShopCard: React.FC = () => {
       .catch((error) =>
         console.log(error)
       );
-
-    setBatch(undefined);
-    setRequestedRefund(undefined);
   }, []);
 
   const getStatusChip = () => {
-    const chipItem = getStatus("status");
+    const chipItem = getStatus(status);
     return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
   };
 
   const details = [
     {
       label: t('pages.refundRequests.storeDetails.referredBatch'),
-      value: batch || MISSING_DATA_PLACEHOLDER,
+      value: batchName || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
     },
     {
@@ -59,7 +60,7 @@ export const ShopCard: React.FC = () => {
     },
     {
       label: t('pages.refundRequests.storeDetails.requestedRefund'),
-      value: requestedRefund || MISSING_DATA_PLACEHOLDER,
+      value: refundAmount || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
     },
     {
