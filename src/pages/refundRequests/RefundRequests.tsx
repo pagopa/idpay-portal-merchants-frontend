@@ -1,44 +1,54 @@
 import { useEffect, useState } from "react";
-import { Box, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Stack, Tooltip, Typography, CircularProgress } from "@mui/material";
 import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridSortModel, GridColDef } from "@mui/x-data-grid";
 import { theme } from "@pagopa/mui-italia";
+import { useSelector } from "react-redux";
 import DataTable from "../../components/dataTable/DataTable";
 import CustomChip from "../../components/Chip/CustomChip";
-import getStatus from '../../components/Transactions/useStatus';    
+import { getRewardBatches } from "../../services/merchantService";
+import getStatus from '../../components/Transactions/useStatus';
 import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
+import { intiativesListSelector } from "../../redux/slices/initiativesSlice";
+import { RewardBatchDTO } from "../../api/generated/merchants/RewardBatchDTO";
+import NoResultPaper from "../reportedUsers/NoResultPaper";
 import { RefundRequestsModal } from "./RefundRequestModal";
+
+
 
 const RefundRequests = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
+    const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
+    const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
+    const initiativesList = useSelector(intiativesListSelector);
 
-    const mockData = [
-        {
-            id: 1,
-            name: '001-20251125 223',
-            posType: 'FISICO',
-            totalAmountCents: 10000,
-            status: 'CREATED',
-        },
-        {
-            id: 2,
-            name: '002-20251125 224',
-            posType: 'ONLINE',
-            totalAmountCents: 20000,
-            status: 'APPROVED',
-        },
-        {
-            id: 3,
-            name: '003-20251125 225',
-            posType: 'ONLINE',
-            totalAmountCents: 300000,
-            status: 'EVALUATING',
-        },
-    ];
+    // const mockData = [
+    //     {
+    //         id: 1,
+    //         name: '001-20251125 223',
+    //         posType: 'FISICO',
+    //         totalAmountCents: 10000,
+    //         status: 'CREATED',
+    //     },
+    //     {
+    //         id: 2,
+    //         name: '002-20251125 224',
+    //         posType: 'ONLINE',
+    //         totalAmountCents: 20000,
+    //         status: 'APPROVED',
+    //     },
+    //     {
+    //         id: 3,
+    //         name: '003-20251125 225',
+    //         posType: 'ONLINE',
+    //         totalAmountCents: 300000,
+    //         status: 'EVALUATING',
+    //     },
+    // ];
 
     const columns: Array<GridColDef> = [
         {
@@ -63,7 +73,7 @@ const RefundRequests = () => {
             disableColumnMenu: true,
             flex: 2,
             sortable: false,
-            renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+            renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value), 11),
         },
         {
             field: 'totalAmountCents',
@@ -85,7 +95,7 @@ const RefundRequests = () => {
 
     const { t } = useTranslation();
     useEffect(() => {
-
+        void fetchRewardBatches();
     }, []);
 
     const infoStyles = {
@@ -93,17 +103,33 @@ const RefundRequests = () => {
         fontSize: theme.typography.fontSize,
     };
 
+    const fetchRewardBatches = async (): Promise<void> => {
+        setRewardBatchesLoading(true);
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+            const initiativeId = initiativesList?.[0]?.initiativeId!;
+            const response = await getRewardBatches(initiativeId);
+            if (response?.content) {
+                setRewardBatches(response.content as Array<RewardBatchDTO>);
+            }
+        } catch (error) {
+            console.error('Error fetching reward batches:', error);
+        } finally { 
+            setRewardBatchesLoading(false);
+        }
+    };
+
     const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
         <Tooltip
-          title={value && value.length >= tooltipThreshold ? value : ''}
-          placement="top"
-          arrow={true}
+            title={value && value.length >= tooltipThreshold ? value : ''}
+            placement="top"
+            arrow={true}
         >
-          <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-            {value && value !== '' ? value : '-'}
-          </Typography>
+            <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
+                {value && value !== '' ? value : '-'}
+            </Typography>
         </Tooltip>
-      );
+    );
 
     const handleSortModelChange = async (newSortModel: GridSortModel) => {
         console.log(newSortModel);
@@ -114,7 +140,6 @@ const RefundRequests = () => {
     };
 
     const handleRowSelectionChange = (rows: Array<number>) => {
-        console.log(rows);
         setSelectedRows(rows);
     };
 
@@ -132,6 +157,13 @@ const RefundRequests = () => {
 
     const isRowSelectable = (params: any) => params?.row?.status === 'CREATED';
 
+    const posTypeMapper = (posType: string) => {
+        switch (posType) {
+            case 'PHYSICAL': return 'Fisico';
+            case 'ONLINE': return 'Online';
+            default: return posType;
+        }
+    };
 
     return (
         <Box p={1.5}>
@@ -142,7 +174,7 @@ const RefundRequests = () => {
                 description={t("pages.refundRequests.ModalRefundRequests.description")}
                 warning={t("pages.refundRequests.ModalRefundRequests.warning")}
                 cancelBtn="Indietro"
-                confirmBtn={{text: `Invia (${selectedRows.length})`, onConfirm: () => setIsModalOpen(false)}}
+                confirmBtn={{ text: `Invia (${selectedRows.length})`, onConfirm: () => setIsModalOpen(false) }}
             />
             <Stack
                 direction={{ xs: 'column', md: 'row' }}
@@ -172,17 +204,29 @@ const RefundRequests = () => {
                 }
             </Stack>
 
-            <Box sx={{ height: '400px' }}>
-                <DataTable
-                    columns={columns}
-                    rows={mockData}
-                    rowsPerPage={5}
-                    checkable={true}
-                    onSortModelChange={handleSortModelChange}
-                    onPaginationPageChange={handlePaginationPageChange}
-                    onRowSelectionChange={handleRowSelectionChange}
-                    isRowSelectable={isRowSelectable}
-                />
+            <Box>
+                {rewardBatchesLoading && (
+                    <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+                        <CircularProgress />
+                    </Box>
+                )}
+
+                {!rewardBatchesLoading && rewardBatches && rewardBatches.length > 0 && (
+                    <DataTable
+                        columns={columns}
+                        rows={rewardBatches}
+                        rowsPerPage={5}
+                        checkable={true}
+                        onSortModelChange={handleSortModelChange}
+                        onPaginationPageChange={handlePaginationPageChange}
+                        onRowSelectionChange={handleRowSelectionChange}
+                        isRowSelectable={isRowSelectable}
+                    />
+                )}
+
+                {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
+                    <NoResultPaper translationKey="pages.refundRequests.noData" />
+                )}
             </Box>
         </Box>
     );

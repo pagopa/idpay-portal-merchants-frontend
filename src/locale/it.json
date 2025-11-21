@@ -330,6 +330,7 @@
       "title": "Richieste di rimborso",
       "subtitle": "Invia i rimborsi dei tuoi punti vendita.",
       "sendRequests": "Invia",
+      "noData": "Nessun dato disponibile",
       "ModalRefundRequests": {
         "title": "Invia richieste di rimborso",
         "description": "Il lotto di transazioni verrà inviato a Invitalia S.p.A., che procederà alla verifica dei dati e al successivo rimborso all’IBAN da te indicato in fase di adesione.",

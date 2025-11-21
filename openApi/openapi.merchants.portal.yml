@@ -1903,6 +1903,15 @@ components:
         channelWebsite:
           type: string
           description: "ENG: Store contact via a web-based portal <br> IT: Contatto del punto vendita tramite portale web"
+        vatNumber:
+          type: string
+          description: "ENG: The vat number of the merchant <br> IT: La partita iva dell'esercente"
+        fiscalCode:
+          type: string
+          description: "ENG: The fiscal code/vat number of the merchant <br> IT: Il codice fiscale/partita iva dell'esercente"
+        businessName:
+          type: string
+          description: "ENG: The name of the merchant <br> IT: La ragione sociale dell'esercente"
     ListPointOfSaleDTO:
       type: object
       properties:
