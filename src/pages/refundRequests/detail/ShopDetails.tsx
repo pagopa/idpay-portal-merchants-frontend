@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Typography, Breadcrumbs } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Breadcrumbs, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -7,14 +7,49 @@ import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import InvoiceDataTable from '../invoiceDataTable';
+import DetailDrawer from '../../../components/Drawer/DetailDrawer';
+import TransactionDetail from '../../../components/Transactions/TransactionDetail';
+import getDetailFieldList from '../../../components/Transactions/useDetailList';
+import {
+  PointOfSaleTransactionProcessedDTO
+} from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { ShopCard } from './ShopCard';
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation<{ store: any }>();
   const store = location.state?.store;
-
   const history = useHistory();
+  const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
+  const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
+  const listItemDetail = getDetailFieldList();
+
+  useEffect(() => {
+    const mock: PointOfSaleTransactionProcessedDTO = {
+      "additionalProperties": {
+        "productName": "product",
+        "discountCode": "4T6Y7UIF"
+      },
+      "authorizedAmountCents": 40000 as any,
+      "effectiveAmountCents": 50000 as any,
+      "fiscalCode": "AAABBB11C22D345E",
+      "id": "e5348bee-e342-4bb0-a551-42750bdf8d88",
+      "rewardAmountCents": 10000 as any,
+      "status": undefined,
+      "trxChargeDate": undefined,
+    };
+
+    setRowDetail([mock]);
+  }, []);
+
+  const handleToggleDrawer = (newOpen: boolean) => {
+    setDrawerOpened(newOpen);
+  };
+
+  const handleListButtonClick = (row: any) => {
+    setRowDetail(row);
+    setDrawerOpened(true);
+  };
 
   return (
     <>
@@ -70,6 +105,10 @@ const ShopDetails: React.FC = () => {
 
         <ShopCard batchName={store?.name} refundAmount={store?.refundAmount} status={store?.status}/>
 
+        <Box width='100%' pt={2} sx={{ display: 'flex', justifyContent:'flex-end'}}>
+          <Button onClick={() => handleListButtonClick(rowDetail)}>mock drawer</Button>
+        </Box>
+
         <Box
           sx={{
             height: 'auto',
@@ -81,6 +120,17 @@ const ShopDetails: React.FC = () => {
           <InvoiceDataTable />
         </Box>
 
+        <DetailDrawer
+          data-testid="detail-drawer"
+          open={drawerOpened}
+          toggleDrawer={handleToggleDrawer}
+        >
+          <TransactionDetail
+            title={'Dettaglio transazione'}
+            itemValues={rowDetail[0]}
+            listItem={listItemDetail}
+          />
+        </DetailDrawer>
       </Box>
     </>
   );

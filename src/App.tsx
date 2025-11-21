@@ -78,7 +78,9 @@ const SecuredRoutes = withLogin(
             <RefundRequests />
           </Route>
           <Route path={routes.REFUND_REQUESTS_STORE} exact={true}>
+            <StoreProvider>
               <ShopDetails />
+            </StoreProvider>
           </Route>
         <Route path="*">
           <Redirect to={routes.HOME} />
