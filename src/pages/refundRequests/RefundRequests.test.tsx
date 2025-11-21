@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import RefundRequests from './RefundRequests';
-import * as merchantService from '../../services/merchantService';
 
 // Mock delle dipendenze
 jest.mock('react-i18next', () => ({

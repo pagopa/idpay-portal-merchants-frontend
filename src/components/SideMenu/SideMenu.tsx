@@ -170,9 +170,6 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        console.log(
-                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
-                        );
                         history.replace(
                           `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
                         );
@@ -220,9 +217,6 @@ export default function SideMenu() {
                               )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
                             initiativeName: item.initiativeName,
                           })
-                        );
-                        console.log(
-                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
                         );
                         history.replace(
                           `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`

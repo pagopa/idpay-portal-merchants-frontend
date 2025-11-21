@@ -7,6 +7,7 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridSortModel, GridColDef } from "@mui/x-data-grid";
 import { theme } from "@pagopa/mui-italia";
 import { useSelector } from "react-redux";
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import DataTable from "../../components/dataTable/DataTable";
 import CustomChip from "../../components/Chip/CustomChip";
 import { getRewardBatches } from "../../services/merchantService";
@@ -18,13 +19,13 @@ import NoResultPaper from "../reportedUsers/NoResultPaper";
 import { RefundRequestsModal } from "./RefundRequestModal";
 
 
-
 const RefundRequests = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
     const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
     const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
     const initiativesList = useSelector(intiativesListSelector);
+     const addError = useErrorDispatcher();
 
     // const mockData = [
     //     {
@@ -112,9 +113,20 @@ const RefundRequests = () => {
             if (response?.content) {
                 setRewardBatches(response.content as Array<RewardBatchDTO>);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching reward batches:', error);
-        } finally { 
+            addError({
+                id: 'GET_REWARD_BATCHES',
+                blocking: false,
+                error,
+                techDescription: 'An error occurred getting reward batches',
+                displayableTitle: t('errors.genericTitle'),
+                displayableDescription: t('errors.genericDescription'),
+                toNotify: true,
+                component: 'Toast',
+                showCloseIcon: true,
+            });
+        } finally {
             setRewardBatchesLoading(false);
         }
     };
