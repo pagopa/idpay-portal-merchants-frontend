@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Stack, Tooltip, Typography, Checkbox } from '@mui/material';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
 
@@ -10,6 +10,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
   {
     id: 2,
@@ -17,6 +18,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
   {
     id: 3,
@@ -24,6 +26,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
   {
     id: 4,
@@ -31,6 +34,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
   {
     id: 5,
@@ -38,6 +42,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
   {
     id: 6,
@@ -45,6 +50,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
   {
     id: 7,
@@ -52,6 +58,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
   {
     id: 8,
@@ -59,6 +66,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
   {
     id: 9,
@@ -66,6 +74,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
   {
     id: 10,
@@ -73,6 +82,7 @@ const invoiceData = [
     invoiceDate: '2021-03-24T14:12:00',
     amount: 100.0,
     status: 'TO_REVIEW',
+    puntoVendita: 'EURONICS DE RISI',
   },
 ];
 
@@ -115,9 +125,25 @@ const StatusChip = ({ status }: { status: string }) => {
 
 const columns = [
   {
+    field: 'checkbox',
+    headerName: '',
+    width: 58,
+    sortable: false,
+    disableColumnMenu: true,
+    renderHeader: () => <Checkbox disabled />,
+    renderCell: () => <Checkbox disabled />,
+  },
+  {
     field: 'invoiceNumber',
     headerName: 'Fattura',
     flex: 3,
+    sortable: false,
+    renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+  },
+  {
+    field: 'puntoVendita',
+    headerName: 'Punto vendita',
+    flex: 2,
     sortable: false,
     renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
   },
@@ -141,7 +167,7 @@ const columns = [
   },
   {
     field: 'amount',
-    headerName: 'Importo',
+    headerName: 'Rimborso richiesto',
     flex: 2,
     sortable: false,
     renderCell: (params: any) =>
@@ -162,6 +188,7 @@ const columns = [
     renderCell: (params: any) => <StatusChip status={params.value} />,
   },
 ];
+
 const InvoiceDataTable: React.FC = () => (
   <Box p={1.5}>
     <Stack

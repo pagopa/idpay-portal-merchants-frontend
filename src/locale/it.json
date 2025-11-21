@@ -136,6 +136,7 @@
       "emptyList": "Non ci sono buoni sconto in corso per questa iniziativa.",
       "emptyProcessedList": "Non ci sono buoni sconto contabilizzati per questa iniziativa",
       "filterByStatus": "Stato",
+      "filterByDate": "Data",
       "listTitle": "Buoni sconto emessi",
       "paymentConfirmed": "Pagamento confermato",
       "processedMerchantTransactions": "Buoni sconto contabilizzati",
