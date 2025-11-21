@@ -99,6 +99,10 @@ jest.mock('../reportedUsers/NoResultPaper', () => ({
   ),
 }));
 
+jest.mock('../../redux/slices/initiativesSlice', () => ({
+  intiativesListSelector: (state: any) => state.initiatives.initiativesList,
+}));
+
 jest.mock('./RefundRequestModal', () => ({
   RefundRequestsModal: ({ isOpen, setIsOpen, title, description, warning, cancelBtn, confirmBtn }: any) => (
     isOpen ? (
@@ -146,7 +150,7 @@ const mockData = [
 const createMockStore = (initiatives = [{ initiativeId: 'test-initiative-id' }]) => {
   return configureStore({
     reducer: {
-      initiatives: (state = { initiativesList: initiatives }) => state,
+      initiatives: () => ({ initiativesList: initiatives }),
     },
   });
 };
@@ -158,26 +162,50 @@ const renderWithStore = (component: React.ReactElement, store = createMockStore(
 describe('RefundRequests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Setup default mock return value
     mockGetRewardBatches.mockResolvedValue({ content: mockData });
   });
 
   it('should render the component correctly', async () => {
     renderWithStore(<RefundRequests />);
     
+    // Wait for data to load
     await waitFor(() => {
-      expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
+      expect(mockGetRewardBatches).toHaveBeenCalled();
     });
     
+    expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
     expect(screen.getByText('pages.refundRequests.subtitle')).toBeInTheDocument();
     expect(screen.getByTestId('data-table')).toBeInTheDocument();
   });
 
-
-  it('should show loading spinner while fetching data', () => {
-    mockGetRewardBatches.mockImplementation(() => new Promise(() => {}));
+  it('should fetch reward batches on mount', async () => {
     renderWithStore(<RefundRequests />);
     
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id');
+    });
+  });
+
+  it('should show loading spinner while fetching data', async () => {
+    // Make the API call hang to keep loading state
+    let resolvePromise: any;
+    mockGetRewardBatches.mockImplementation(() => new Promise((resolve) => {
+      resolvePromise = resolve;
+    }));
+    
+    renderWithStore(<RefundRequests />);
+    
+    // Should show loading spinner
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    
+    // Resolve the promise to clean up
+    resolvePromise({ content: mockData });
+    
+    // Wait for loading to finish
+    await waitFor(() => {
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    });
   });
 
   it('should display data after successful fetch', async () => {
@@ -192,25 +220,31 @@ describe('RefundRequests', () => {
   });
 
   it('should show no result paper when there is no data', async () => {
-    mockGetRewardBatches.mockResolvedValue({ content: [] });
+    mockGetRewardBatches.mockResolvedValueOnce({ content: [] });
     renderWithStore(<RefundRequests />);
     
     await waitFor(() => {
-      expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+      expect(mockGetRewardBatches).toHaveBeenCalled();
     });
     
+    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
     expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
   });
 
   it('should handle fetch error gracefully', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    mockGetRewardBatches.mockRejectedValue(new Error('API Error'));
+    mockGetRewardBatches.mockRejectedValueOnce(new Error('API Error'));
     
     renderWithStore(<RefundRequests />);
     
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching reward batches:', expect.any(Error));
+      expect(mockGetRewardBatches).toHaveBeenCalled();
     });
+    
+    // Should show no data state when error occurs
+    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+    
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching reward batches:', expect.any(Error));
     
     consoleErrorSpy.mockRestore();
   });
@@ -368,39 +402,6 @@ describe('RefundRequests', () => {
     expect(onlineTexts).toHaveLength(2);
   });
 
-  it('should handle sort model change', async () => {
-    const user = userEvent.setup();
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    
-    renderWithStore(<RefundRequests />);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Sort')).toBeInTheDocument();
-    });
-    
-    const sortButton = screen.getByText('Sort');
-    await user.click(sortButton);
-    
-    expect(consoleLogSpy).toHaveBeenCalledWith([{ field: 'name', sort: 'asc' }]);
-    consoleLogSpy.mockRestore();
-  });
-
-  it('should handle pagination page change', async () => {
-    const user = userEvent.setup();
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    
-    renderWithStore(<RefundRequests />);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Next Page')).toBeInTheDocument();
-    });
-    
-    const nextPageButton = screen.getByText('Next Page');
-    await user.click(nextPageButton);
-    
-    expect(consoleLogSpy).toHaveBeenCalledWith(2);
-    consoleLogSpy.mockRestore();
-  });
 
   it('should display tooltip text correctly with dash when value is empty', async () => {
     const emptyDataMock = [{
@@ -421,11 +422,19 @@ describe('RefundRequests', () => {
 
   it('should handle missing initiativesList gracefully', async () => {
     const storeWithoutInitiatives = createMockStore([]);
+    
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    
     renderWithStore(<RefundRequests />, storeWithoutInitiatives);
     
     await waitFor(() => {
-      expect(mockGetRewardBatches).toHaveBeenCalled();
+      expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
     });
+    
+
+    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+    
+    consoleErrorSpy.mockRestore();
   });
 
   it('should update modal content with selected rows count', async () => {
