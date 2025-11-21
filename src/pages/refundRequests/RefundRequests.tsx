@@ -4,19 +4,20 @@ import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { GridSortModel, GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "@mui/x-data-grid";
 import { theme } from "@pagopa/mui-italia";
-import { useSelector } from "react-redux";
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import { useSelector } from 'react-redux';
 import DataTable from "../../components/dataTable/DataTable";
 import CustomChip from "../../components/Chip/CustomChip";
 import { getRewardBatches } from "../../services/merchantService";
 import getStatus from '../../components/Transactions/useStatus';
 import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
-import { intiativesListSelector } from "../../redux/slices/initiativesSlice";
 import { RewardBatchDTO } from "../../api/generated/merchants/RewardBatchDTO";
 import NoResultPaper from "../reportedUsers/NoResultPaper";
+import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { RefundRequestsModal } from "./RefundRequestModal";
+
 
 
 const RefundRequests = () => {
@@ -24,8 +25,9 @@ const RefundRequests = () => {
     const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
     const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
     const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
+    // const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
+    const addError = useErrorDispatcher();
     const initiativesList = useSelector(intiativesListSelector);
-     const addError = useErrorDispatcher();
 
     // const mockData = [
     //     {
@@ -95,20 +97,21 @@ const RefundRequests = () => {
     ];
 
     const { t } = useTranslation();
+
     useEffect(() => {
-        void fetchRewardBatches();
-    }, []);
+        if (initiativesList && initiativesList.length > 0) {
+            void fetchRewardBatches(initiativesList[0].initiativeId!);
+        }
+    }, [initiativesList]);
 
     const infoStyles = {
         fontWeight: theme.typography.fontWeightRegular,
         fontSize: theme.typography.fontSize,
     };
 
-    const fetchRewardBatches = async (): Promise<void> => {
+    const fetchRewardBatches = async (initiativeId: string): Promise<void> => {
         setRewardBatchesLoading(true);
         try {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-            const initiativeId = initiativesList?.[0]?.initiativeId!;
             const response = await getRewardBatches(initiativeId);
             if (response?.content) {
                 setRewardBatches(response.content as Array<RewardBatchDTO>);
@@ -143,12 +146,16 @@ const RefundRequests = () => {
         </Tooltip>
     );
 
-    const handleSortModelChange = async (newSortModel: GridSortModel) => {
-        console.log(newSortModel);
-    };
-
     const handlePaginationPageChange = (page: number) => {
-        console.log(page);
+        console.log('Page changed:', page);
+        // const updatedPagination = { ...storesPagination, pageNo: page, initiativeId: id, sort: currentSort };
+        // setStoresPagination(updatedPagination);
+        // sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
+        // void fetchStores({
+        //   ...appliedFilters,
+        //   page,
+        //   sort: currentSort,
+        // });
     };
 
     const handleRowSelectionChange = (rows: Array<number>) => {
@@ -227,9 +234,9 @@ const RefundRequests = () => {
                     <DataTable
                         columns={columns}
                         rows={rewardBatches}
-                        rowsPerPage={5}
+                        rowsPerPage={1}
                         checkable={true}
-                        onSortModelChange={handleSortModelChange}
+                        // paginationModel={{ page: currentPagination.pageNo, pageSize: currentPagination.pageSize, totalElements:  }}
                         onPaginationPageChange={handlePaginationPageChange}
                         onRowSelectionChange={handleRowSelectionChange}
                         isRowSelectable={isRowSelectable}
