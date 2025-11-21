@@ -175,6 +175,7 @@ export default function Footer({
       href: ROUTES.PRIVACY_POLICY,
       ariaLabel: 'Vai al link: Privacy policy',
       linkType: 'internal',
+      onClick: () => onClickNavigate(ROUTES.PRIVACY_POLICY),  
     },
     {
       label: t('common.footer.postLoginLinks.protectionofpersonaldata'),
@@ -187,6 +188,7 @@ export default function Footer({
       label: t('common.footer.postLoginLinks.termsandconditions'),
       href: ROUTES.TOS,
       ariaLabel: 'Vai al link: Termini e condizioni',
+      onClick: () => onClickNavigate(ROUTES.TOS),
       linkType: 'internal',
     },
     {
