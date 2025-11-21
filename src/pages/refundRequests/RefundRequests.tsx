@@ -25,103 +25,103 @@ const RefundRequests = () => {
   const { id } = useParams<RouteParams>();
   const history = useHistory();
 
-  const mockData = [
-    {
-      id: 1,
-      insegna: 'Euronics SPA',
-      name: '001-20251125 223',
-      tipology: 'FISICO',
-      refundAmount: 10000,
-      status: 'CREATED',
-    },
-    {
-      id: 2,
-      insegna: 'MEDIAWORLD',
-      name: '002-20251125 224',
-      tipology: 'ONLINE',
-      refundAmount: 20000,
-      status: 'APPROVED',
-    },
-    {
-      id: 3,
-      insegna: 'EXPERT',
-      name: '003-20251125 225',
-      tipology: 'ONLINE',
-      refundAmount: 300000,
-      status: 'EVALUATING',
-    },
-  ];
+    const mockData = [
+        {
+            id: 1,
+            insegna: 'Euronics SPA',
+            name: '001-20251125 223',
+            posType: 'FISICO',
+            totalAmountCents: 10000,
+            status: 'CREATED',
+        },
+        {
+            id: 2,
+            insegna: 'MEDIAWORLD',
+            name: '002-20251125 224',
+            posType: 'ONLINE',
+            totalAmountCents: 20000,
+            status: 'APPROVED',
+        },
+        {
+            id: 3,
+            insegna: 'EXPERT',
+            name: '003-20251125 225',
+            posType: 'ONLINE',
+            totalAmountCents: 300000,
+            status: 'EVALUATING',
+        },
+    ];
 
-  const columns: Array<GridColDef> = [
-    {
-      field: 'spacer',
-      headerName: '',
-      width: 200,
-      sortable: false,
-      disableColumnMenu: true,
-      renderCell: () => '',
-    },
-    {
-      field: 'name',
-      headerName: 'Lotto',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
-    },
-    {
-      field: 'tipology',
-      headerName: 'Tipologia',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
-    },
-    {
-      field: 'refundAmount',
-      headerName: 'Importo',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
-    },
-    {
-      field: 'status',
-      headerName: 'Stato',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => <StatusChip status={params.value} />,
-    },
-    {
-      field: 'actions',
-      headerName: '',
-      sortable: false,
-      filterable: false,
-      disableColumnMenu: true,
-      flex: 0.3,
-      renderCell: (params: any) => (
-        <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
-          <IconButton
-            onClick={() => {
-              history.push(
-                routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(
-                  ':store',
-                  params.row?.insegna
-                ),
-                {
-                  store: params.row,
-                }
-              );
-            }}
-            size="small"
-          >
-            <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
-          </IconButton>
-        </Box>
-      ),
-    },
-  ];
+    const columns: Array<GridColDef> = [
+        {
+            field: 'spacer',
+            headerName: '',
+            width: 200,
+            sortable: false,
+            disableColumnMenu: true,
+            renderCell: () => '',
+        },
+        {
+            field: 'name',
+            headerName: 'Lotto',
+            disableColumnMenu: true,
+            flex: 2,
+            sortable: false,
+            renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+        },
+        {
+            field: 'posType',
+            headerName: 'Tipologia',
+            disableColumnMenu: true,
+            flex: 2,
+            sortable: false,
+            renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+        },
+        {
+            field: 'totalAmountCents',
+            headerName: 'Importo',
+            disableColumnMenu: true,
+            flex: 2,
+            sortable: false,
+            renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+        },
+        {
+            field: 'status',
+            headerName: 'Stato',
+            disableColumnMenu: true,
+            flex: 2,
+            sortable: false,
+            renderCell: (params: any) => <StatusChip status={params.value} />
+        },
+        {
+          field: 'actions',
+          headerName: '',
+          sortable: false,
+          filterable: false,
+          disableColumnMenu: true,
+          flex: 0.3,
+          renderCell: (params: any) => (
+            <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+              <IconButton
+                onClick={() => {
+                  history.push(
+                    routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(
+                      ':store',
+                      params.row?.insegna
+                    ),
+                    {
+                      store: params.row,
+                    }
+                  );
+                }}
+                size="small"
+              >
+                <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
+              </IconButton>
+            </Box>
+          ),
+        },
+    ];
 
   const { t } = useTranslation();
   useEffect(() => {}, []);
