@@ -20,22 +20,22 @@ const RefundRequests = () => {
         {
             id: 1,
             name: '001-20251125 223',
-            tipology: 'FISICO',
-            refundAmount: 10000,
+            posType: 'FISICO',
+            totalAmountCents: 10000,
             status: 'CREATED',
         },
         {
             id: 2,
             name: '002-20251125 224',
-            tipology: 'ONLINE',
-            refundAmount: 20000,
+            posType: 'ONLINE',
+            totalAmountCents: 20000,
             status: 'APPROVED',
         },
         {
             id: 3,
             name: '003-20251125 225',
-            tipology: 'ONLINE',
-            refundAmount: 300000,
+            posType: 'ONLINE',
+            totalAmountCents: 300000,
             status: 'EVALUATING',
         },
     ];
@@ -58,7 +58,7 @@ const RefundRequests = () => {
             renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
         },
         {
-            field: 'tipology',
+            field: 'posType',
             headerName: 'Tipologia',
             disableColumnMenu: true,
             flex: 2,
@@ -66,7 +66,7 @@ const RefundRequests = () => {
             renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
         },
         {
-            field: 'refundAmount',
+            field: 'totalAmountCents',
             headerName: 'Importo',
             disableColumnMenu: true,
             flex: 2,
