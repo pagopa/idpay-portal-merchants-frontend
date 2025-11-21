@@ -210,6 +210,7 @@ const InitiativeStoresUpload: React.FC = () => {
               <Link
                 fontWeight={theme.typography.fontWeightBold}
                 onClick={() => window.open(ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK, '_blank')}
+                sx={{cursor: 'pointer'}}
                 underline="hover"
               >
                 {t('pages.initiativeStores.manualLink')}

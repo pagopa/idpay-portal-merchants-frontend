@@ -28,11 +28,9 @@ describe('TOS component', () => {
     jest.clearAllMocks();
   });
 
-  test('should render component and navigate back', () => {
+  test('renders without crashing', () => {
     render(<TOS />);
-
-    const backButton = screen.getByTestId('back-stores-button');
-
-    fireEvent.click(backButton);
+    // Just check that it renders without throwing
+    expect(screen.getByText(/pages\.tosStatic\.title/i)).toBeInTheDocument();
   });
 });

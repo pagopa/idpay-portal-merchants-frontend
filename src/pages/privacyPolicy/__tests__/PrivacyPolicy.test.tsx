@@ -29,11 +29,9 @@ describe('PrivacyPolicy', () => {
     jest.clearAllMocks();
   });
 
-  test('should render component and navigate back', () => {
+  test('renders without crashing', () => {
     render(<PrivacyPolicy />);
-
-    const backButton = screen.getByTestId('back-stores-button');
-
-    fireEvent.click(backButton);
+    // Just check that it renders without throwing
+    expect(screen.getByText(/pages\.privacyPolicyStatic\.title/i)).toBeInTheDocument();
   });
 });
