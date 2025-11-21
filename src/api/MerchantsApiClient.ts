@@ -22,6 +22,7 @@ import { PointOfSaleTransactionsProcessedListDTO } from './generated/merchants/P
 import { DownloadInvoiceResponseDTO } from './generated/merchants/DownloadInvoiceResponseDTO';
 import { ReportedUserDTO } from './generated/merchants/ReportedUserDTO';
 import { ReportedUserCreateResponseDTO } from './generated/merchants/ReportedUserCreateResponseDTO';
+import { RewardBatchListDTO } from './generated/merchants/RewardBatchListDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -211,6 +212,15 @@ export const MerchantApi = {
     const result = await apiClient.deleteReportedUser({
       'initiative-id': initiativeId,
       userFiscalCode,
+    });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  getRewardBatches: async (
+    initiativeId: string
+  ): Promise<RewardBatchListDTO> => {
+    const result = await apiClient.getRewardBatches({
+      initiativeId
     });
     return extractResponse(result, 200, onRedirectToLogin);
   },

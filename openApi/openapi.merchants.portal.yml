@@ -554,6 +554,64 @@ paths:
               example:
                 code: STATISTICS_MANAGER_GENERIC_ERROR
                 message: Application error
+  /initiatives/{initiativeId}/reward-batches:
+    get:
+      tags:
+        - reward-batches
+      summary: "ENG: Merchant get reward batches - IT: Recupero dei lotti delle transazioni da parte dell'esercente"
+      operationId: getRewardBatches
+      parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response with reward batches
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchListDTO"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: PAYMENT_INVALID_REQUEST
+                message: Something went wrong handling the request
+        "401":
+          description: Authentication failed
+        "404":
+          description: The requested resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_NOT_FOUND
+                message: "Cannot find Reward Batch with initiative with id [%s]"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_TOO_MANY_REQUESTS
+                message: Too many requests
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_GENERIC_ERROR
+                message: Application error
   /transactions:
     post:
       tags:
@@ -2040,6 +2098,9 @@ components:
         filename:
           type: string
           description: 'ENG: The name of the invoice file <br> IT: Il nome del file della fattura'
+        docNumber:
+          type: string
+          maxLength: 255
     DownloadInvoiceResponseDTO:
       type: object
       properties:
@@ -2078,6 +2139,94 @@ components:
         reportedDate: { type: string, format: date-time, maxLength: 64, description: When the user was reported, example: '2025-10-30T09:15:12Z' }
         transactionId: { type: string, nullable: true, maxLength: 64, description: Related transaction ID (if any), example: TRX_001 }
         trxChargeDate: { type: string, format: date-time, nullable: true, maxLength: 64, description: Related transaction date (if any), example: '2025-10-30T09:14:50Z' }
+    RewardBatchListDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/RewardBatchDTO'
+          maxItems: 1000
+        pageNo:
+          type: integer
+          format: int32
+          description: 'ENG: The number of the page <br> IT: Il numero della pagina'
+          minimum: 0
+          maximum: 1000000
+        pageSize:
+          type: integer
+          format: int32
+          description: 'ENG: The element size for page <br> IT: Il numero di elementi per pagina'
+          minimum: 0
+          maximum: 1000000
+        totalElements:
+          type: integer
+          format: int32
+          description: 'ENG: The total number of the elements <br> IT: Il numero totale degli elementi'
+          minimum: 0
+          maximum: 1000000
+        totalPages:
+          type: integer
+          format: int32
+          description: 'ENG: The total number of the pages <br> IT: Il numero totale delle pagine'
+          minimum: 0
+          maximum: 1000000
+    RewardBatchDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'ENG: Reward Batch ID <br> IT: ID del lotto'
+          maxLength: 64
+          pattern: .*
+        name:
+          type: string
+          description: 'ENG: Reward Batch name - IT: Nome del lotto'
+          maxLength: 255
+          pattern: .*
+          example: 'novembre 2025 - fisico - rigettati'
+        status:
+          type: string
+          description: 'ENG: Reward Batch status - IT: Lo stato del lotto'
+          enum:
+            - CREATED
+            - EVALUATING
+            - APPROVED
+        posType:
+          type: string
+          description: 'ENG: Point of sales type - IT: Il tipo di punto vendita'
+          enum:
+            - PHYSICAL
+            - ONLINE
+        totalAmountCents:
+          type: integer
+          format: int64
+          example: 100
+    RewardBatchErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - REWARD_BATCH_NOT_FOUND
+            - REWARD_BATCH_INVALID_REQUEST
+            - REWARD_BATCH_TOO_MANY_REQUESTS
+            - REWARD_BATCH_GENERIC_ERROR
+          description: |-
+            "ENG: Error code: REWARD_BATCH_NOT_FOUND: Reward Batch not found,
+             REWARD_BATCH_INVALID_REQUEST: Something went wrong handling request,
+             REWARD_BATCH_TOO_MANY_REQUESTS: Too many requests,
+             REWARD_BATCH_GENERIC_ERROR: Application Error - IT: Codice di errore:
+             REWARD_BATCH_NOT_FOUND: lotto non trovato,
+             REWARD_BATCH_INVALID_REQUEST: Qualcosa è andato storto durante l'invio della richiesta,
+             REWARD_BATCH_TOO_MANY_REQUESTS: Troppe richieste,
+             REWARD_BATCH_GENERIC_ERROR: Errore generico"
+        message:
+          type: string
+          description: "ENG: Error message - IT: Messaggio di errore"
   securitySchemes:
     Bearer:
       type: apiKey

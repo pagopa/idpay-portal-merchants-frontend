@@ -17,6 +17,12 @@ const getStatus: any = (status: string) => {
             return { color: theme.palette.error.extraLight as string, label: 'Da rimborsare' };
         case 'AUTHORIZED':
             return { color: theme.palette.success.extraLight as string, label: 'Da autorizzare' };
+        case 'CREATED':
+            return { color: '#FFF5DA !important', textColor: '#614C15 !important', label: 'Da inviare' };
+        case 'EVALUATING':
+            return { color: '#EEEEEE', textColor: '#17324D !important', label: 'Preso in carico' };
+        case 'APPROVED':
+            return { color: '#E1F4E1', label: 'Rimborso approvato', textColor: '#224021' };
         default:
             return { color: theme.palette.action.disabled as string, label: MISSING_DATA_PLACEHOLDER };
     }

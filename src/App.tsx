@@ -23,6 +23,9 @@ import InitiativeStoreDetail from './pages/initiativeStores/initiativeStoreDetai
 import { StoreProvider } from './pages/initiativeStores/StoreContext';
 import ReportedUsers from './pages/reportedUsers/reportedUsers';
 import InsertReportedUser from './pages/reportedUsers/insertReportedUser';
+import RefundRequests from './pages/refundRequests/RefundRequests';
+import ShopDetails from './pages/refundRequests/detail/ShopDetails';
+
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => (
     <Layout>
@@ -68,9 +71,17 @@ const SecuredRoutes = withLogin(
         <Route path={routes.NEW_DISCOUNT} exact={true}>
           <NewDiscount />
         </Route>
-        <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
-          <AcceptNewDiscount />
-        </Route>
+          <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
+            <AcceptNewDiscount />
+          </Route>
+          <Route path={routes.REFUND_REQUESTS} exact={true}>
+            <RefundRequests />
+          </Route>
+          <Route path={routes.REFUND_REQUESTS_STORE} exact={true}>
+            <StoreProvider>
+              <ShopDetails />
+            </StoreProvider>
+          </Route>
         <Route path="*">
           <Redirect to={routes.HOME} />
         </Route>
