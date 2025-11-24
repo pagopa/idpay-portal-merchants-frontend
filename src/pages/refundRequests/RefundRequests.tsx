@@ -116,6 +116,7 @@ const RefundRequests = () => {
             const response = await getRewardBatches(initiativeId);
             if (response?.content) {
                 setRewardBatches(response.content as Array<RewardBatchDTO>);
+                setSelectedRows([]);
             }
         } catch (error: any) {
             console.error('Error fetching reward batches:', error);
@@ -176,14 +177,15 @@ const RefundRequests = () => {
 
     const handleSentBatches = async () => {
         setSendBatchIsLoading(true);
+        const initiativeId = initiativesList && initiativesList.length > 0 ? initiativesList[0].initiativeId : '';
         try {
-            const initiativeId = initiativesList && initiativesList.length > 0 ? initiativesList[0].initiativeId : '';
             const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0]?.id : '';
             if (!initiativeId || !batchId) {
                 console.error('Missing initiativeId or batchId');
                 return;
             }
             await sendRewardBatch(initiativeId, batchId.toString());
+            await fetchRewardBatches(initiativeId);
 
         } catch (e: any) {
             addError({
@@ -197,6 +199,9 @@ const RefundRequests = () => {
                 component: 'Toast',
                 showCloseIcon: true,
             });
+            if (initiativeId) {
+                await fetchRewardBatches(initiativeId.toString());
+            }
         } finally {
             setSendBatchIsLoading(false);
             setIsModalOpen(false);
