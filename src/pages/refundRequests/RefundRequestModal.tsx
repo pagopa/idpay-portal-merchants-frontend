@@ -6,6 +6,7 @@ import {
     Button,
     Typography,
     Alert,
+    CircularProgress
 } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
@@ -20,6 +21,7 @@ type Props = {
     confirmBtn?: {
         text: string;
         onConfirm: () => void;
+        loading?: boolean;
     };
 };
 
@@ -57,8 +59,8 @@ export const RefundRequestsModal = ({ isOpen, setIsOpen, title, description, des
             {cancelBtn && <Button variant="outlined" onClick={setIsOpen}>
                 {cancelBtn}
             </Button>}
-            {confirmBtn && <Button variant="contained" color="primary" onClick={confirmBtn.onConfirm}>
-                {confirmBtn.text}
+            {confirmBtn && <Button variant="contained" color="primary" onClick={confirmBtn.onConfirm} disabled={confirmBtn.loading}>
+                {confirmBtn.loading ? <CircularProgress size={20} /> : confirmBtn.text}
             </Button>}
         </DialogActions>
     </Dialog>
