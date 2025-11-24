@@ -37,29 +37,29 @@ const RefundRequests = () => {
     const addError = useErrorDispatcher();
     const initiativesList = useSelector(intiativesListSelector);
 
-    const mockData = [
-        {
-            id: 1,
-            name: '001-20251125 223',
-            posType: 'FISICO',
-            totalAmountCents: 10000,
-            status: 'CREATED',
-        },
-        {
-            id: 2,
-            name: '002-20251125 224',
-            posType: 'ONLINE',
-            totalAmountCents: 20000,
-            status: 'APPROVED',
-        },
-        {
-            id: 3,
-            name: '003-20251125 225',
-            posType: 'ONLINE',
-            totalAmountCents: 300000,
-             status: 'EVALUATING',
-        },
-    ];
+    // const mockData = [
+    //     {
+    //         id: 1,
+    //         name: '001-20251125 223',
+    //         posType: 'FISICO',
+    //         totalAmountCents: 10000,
+    //         status: 'CREATED',
+    //     },
+    //     {
+    //         id: 2,
+    //         name: '002-20251125 224',
+    //         posType: 'ONLINE',
+    //         totalAmountCents: 20000,
+    //         status: 'APPROVED',
+    //     },
+    //     {
+    //         id: 3,
+    //         name: '003-20251125 225',
+    //         posType: 'ONLINE',
+    //         totalAmountCents: 300000,
+    //         status: 'EVALUATING',
+    //     },
+    // ];
 
     const columns: Array<GridColDef> = [
         {
@@ -295,7 +295,7 @@ const RefundRequests = () => {
                 {!rewardBatchesLoading && rewardBatches && rewardBatches.length > 0 && (
                     <DataTable
                         columns={columns}
-                        rows={mockData}
+                        rows={rewardBatches}
                         rowsPerPage={1}
                         checkable={true}
                         // paginationModel={{ page: currentPagination.pageNo, pageSize: currentPagination.pageSize, totalElements:  }}
