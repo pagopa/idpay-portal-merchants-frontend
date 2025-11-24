@@ -1,90 +1,21 @@
-import React from 'react';
-import { Box, Stack, Tooltip, Typography, Checkbox } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Stack, Tooltip, Typography, Checkbox, IconButton } from '@mui/material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
+import DetailDrawer from '../../components/Drawer/DetailDrawer';
+import TransactionDetail from '../../components/Transactions/TransactionDetail';
+import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
+import { TYPE_TEXT } from '../../utils/constants';
 
-const invoiceData = [
-  {
-    id: 1,
-    invoiceNumber: 'INV-001',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-  {
-    id: 2,
-    invoiceNumber: 'INV-002',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-  {
-    id: 3,
-    invoiceNumber: 'INV-003',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-  {
-    id: 4,
-    invoiceNumber: 'INV-004',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-  {
-    id: 5,
-    invoiceNumber: 'INV-005',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-  {
-    id: 6,
-    invoiceNumber: 'INV-006',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-  {
-    id: 7,
-    invoiceNumber: 'INV-007',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-  {
-    id: 8,
-    invoiceNumber: 'INV-008',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-  {
-    id: 9,
-    invoiceNumber: 'INV-009',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-  {
-    id: 10,
-    invoiceNumber: 'INV-010',
-    invoiceDate: '2021-03-24T14:12:00',
-    amount: 100.0,
-    status: 'TO_REVIEW',
-    puntoVendita: 'EURONICS DE RISI',
-  },
-];
+const invoiceData = Array.from({ length: 10 }, (_, i) => ({
+  id: i + 1,
+  invoiceNumber: `INV-${String(i + 1).padStart(3, '0')}`,
+  invoiceDate: '-',
+  amount: 100.0,
+  status: 'TO_REVIEW',
+  puntoVendita: 'EURONICS DE RISI',
+}));
 
 const infoStyles = {
   fontWeight: 400,
@@ -123,7 +54,7 @@ const StatusChip = ({ status }: { status: string }) => {
   );
 };
 
-const columns = [
+const getColumns = (handleListButtonClick: (row: any) => void) => [
   {
     field: 'checkbox',
     headerName: '',
@@ -187,20 +118,148 @@ const columns = [
     sortable: false,
     renderCell: (params: any) => <StatusChip status={params.value} />,
   },
+  {
+    field: 'actions',
+    headerName: '',
+    sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
+    flex: 0.3,
+    renderCell: (params: any) => (
+      <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+        <IconButton onClick={() => handleListButtonClick(params.row)} size="small">
+          <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
+        </IconButton>
+      </Box>
+    ),
+  },
 ];
 
-const InvoiceDataTable: React.FC = () => (
-  <Box p={1.5}>
-    <Stack
-      direction={{ xs: 'column', md: 'row' }}
-      spacing={{ xs: 2, md: 3 }}
-      justifyContent="space-between"
-      alignItems={{ xs: 'flex-start', md: 'center' }}
-    ></Stack>
-    <Box>
-      <DataTable columns={columns} rows={invoiceData} rowsPerPage={10} checkable={false} />
+const InvoiceDataTable: React.FC = () => {
+  const [drawerOpened, setDrawerOpened] = useState(false);
+  const [rowDetail, setRowDetail] = useState<PointOfSaleTransactionProcessedDTO | null>(null);
+
+  // MOCK DETTAGLIO: disabilita/commenta la riga con "mockDetail" per usare il dato reale della riga
+  const mockDetail: PointOfSaleTransactionProcessedDTO = {
+    additionalProperties: {
+      productName: 'Lavatrice Electrolux EW7FEU492DP 914495009',
+      discountCode: '4T6Y7UIF',
+    },
+    authorizedAmountCents: 40000 as any,
+    effectiveAmountCents: 50000 as any,
+    fiscalCode: 'ASDFOG43RTGFDSA',
+    id: 'e5348bee-e342-4bb0-a551-42750bdf8d88',
+    rewardAmountCents: 10000 as any,
+    status: 'TO_REVIEW' as any,
+    trxChargeDate: new Date('2021-03-24T14:12:00'),
+    invoiceFile: {
+      docNumber: 'FPR 192/25',
+      filename: 'Nome fattura',
+    },
+  };
+
+  const handleListButtonClick = (row: any) => {
+    console.log(row);
+    // setRowDetail(row); // <-- usa questa riga per dettaglio reale
+    setRowDetail(mockDetail); // <-- mock abilitato per tutte le righe
+    setDrawerOpened(true);
+  };
+
+  const handleToggleDrawer = (open: boolean) => {
+    setDrawerOpened(open);
+    if (!open) {
+      setRowDetail(null);
+    }
+  };
+
+  const formatDateSafe = (val: any) => {
+    if (!val) {
+      return '-';
+    }
+    const d = val instanceof Date ? val : new Date(val);
+    if (isNaN(d.getTime())) {
+      return '-';
+    }
+    return d.toLocaleString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <Box p={1.5}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={{ xs: 2, md: 3 }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', md: 'center' }}
+      ></Stack>
+      <Box>
+        <DataTable
+          columns={getColumns(handleListButtonClick)}
+          rows={invoiceData}
+          rowsPerPage={10}
+          checkable={false}
+        />
+      </Box>
+      <DetailDrawer open={drawerOpened} toggleDrawer={handleToggleDrawer}>
+        {rowDetail && (
+          <TransactionDetail
+            title="Dettaglio transazione"
+            itemValues={rowDetail}
+            listItem={[
+              {
+                label: 'Data e ora',
+                id: 'trxChargeDate',
+                type: TYPE_TEXT.Text,
+                format: (val: any) => formatDateSafe(val),
+              },
+              {
+                label: 'Elettrodomestico',
+                id: 'additionalProperties.productName',
+                type: TYPE_TEXT.Text,
+              },
+              {
+                label: 'Codice Fiscale Beneficiario',
+                id: 'fiscalCode',
+                type: TYPE_TEXT.Text,
+              },
+              {
+                label: 'ID transazione',
+                id: 'id',
+                type: TYPE_TEXT.Text,
+                bold: true,
+              },
+              {
+                label: 'Codice sconto',
+                id: 'additionalProperties.discountCode',
+                type: TYPE_TEXT.Text,
+              },
+              {
+                label: 'Totale della spesa',
+                id: 'effectiveAmountCents',
+                type: TYPE_TEXT.Currency,
+                bold: true,
+              },
+              {
+                label: 'Sconto applicato',
+                id: 'rewardAmountCents',
+                type: TYPE_TEXT.Currency,
+              },
+              {
+                label: 'Importo autorizzato',
+                id: 'authorizedAmountCents',
+                type: TYPE_TEXT.Currency,
+              },
+            ]}
+          />
+        )}
+      </DetailDrawer>
     </Box>
-  </Box>
-);
+  );
+};
 
 export default InvoiceDataTable;

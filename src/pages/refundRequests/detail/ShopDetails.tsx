@@ -19,15 +19,15 @@ import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-import InvoiceDataTable from '../invoiceDataTable';
 import DetailDrawer from '../../../components/Drawer/DetailDrawer';
-import TransactionDetail from '../../../components/Transactions/TransactionDetail';
 import getDetailFieldList from '../../../components/Transactions/useDetailList';
 import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import getStatus from '../../../components/Transactions/useStatus';
 import CustomChip from '../../../components/Chip/CustomChip';
+import InvoiceDataTable from '../InvoiceDataTable';
 import { ShopCard } from './ShopCard';
+import InvoiceDetail from './InvoiceDetail';
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
@@ -245,7 +245,7 @@ const ShopDetails: React.FC = () => {
           open={drawerOpened}
           toggleDrawer={handleToggleDrawer}
         >
-          <TransactionDetail
+          <InvoiceDetail
             title={'Dettaglio transazione'}
             itemValues={rowDetail[0]}
             listItem={listItemDetail}
