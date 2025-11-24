@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
+import { useEffect, useState } from "react";
+import { Box, Stack, Tooltip, Typography, CircularProgress } from "@mui/material";
+import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -18,12 +21,34 @@ import { RefundRequestsModal } from './RefundRequestModal';
 interface RouteParams {
   id: string;
 }
+import { GridColDef } from "@mui/x-data-grid";
+import { theme } from "@pagopa/mui-italia";
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import { useSelector } from 'react-redux';
+import DataTable from "../../components/dataTable/DataTable";
+import CustomChip from "../../components/Chip/CustomChip";
+import { getRewardBatches } from "../../services/merchantService";
+import getStatus from '../../components/Transactions/useStatus';
+import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
+import { RewardBatchDTO } from "../../api/generated/merchants/RewardBatchDTO";
+import NoResultPaper from "../reportedUsers/NoResultPaper";
+import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
+import { RefundRequestsModal } from "./RefundRequestModal";
+
+
 
 const RefundRequests = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
   const { id } = useParams<RouteParams>();
   const history = useHistory();
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
+    const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
+    const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
+    // const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
+    const addError = useErrorDispatcher();
+    const initiativesList = useSelector(intiativesListSelector);
 
     const mockData = [
         {
@@ -75,7 +100,7 @@ const RefundRequests = () => {
             disableColumnMenu: true,
             flex: 2,
             sortable: false,
-            renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+            renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value), 11),
         },
         {
             field: 'totalAmountCents',
@@ -123,8 +148,13 @@ const RefundRequests = () => {
         },
     ];
 
-  const { t } = useTranslation();
-  useEffect(() => {}, []);
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        if (initiativesList && initiativesList.length > 0) {
+            void fetchRewardBatches(initiativesList[0].initiativeId!);
+        }
+    }, [initiativesList]);
 
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
@@ -142,6 +172,42 @@ const RefundRequests = () => {
       </Typography>
     </Tooltip>
   );
+    const fetchRewardBatches = async (initiativeId: string): Promise<void> => {
+        setRewardBatchesLoading(true);
+        try {
+            const response = await getRewardBatches(initiativeId);
+            if (response?.content) {
+                setRewardBatches(response.content as Array<RewardBatchDTO>);
+            }
+        } catch (error: any) {
+            console.error('Error fetching reward batches:', error);
+            addError({
+                id: 'GET_REWARD_BATCHES',
+                blocking: false,
+                error,
+                techDescription: 'An error occurred getting reward batches',
+                displayableTitle: t('errors.genericTitle'),
+                displayableDescription: t('errors.genericDescription'),
+                toNotify: true,
+                component: 'Toast',
+                showCloseIcon: true,
+            });
+        } finally {
+            setRewardBatchesLoading(false);
+        }
+    };
+
+    const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
+        <Tooltip
+            title={value && value.length >= tooltipThreshold ? value : ''}
+            placement="top"
+            arrow={true}
+        >
+            <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
+                {value && value !== '' ? value : '-'}
+            </Typography>
+        </Tooltip>
+    );
 
   const handleSortModelChange = async (newSortModel: GridSortModel) => {
     console.log(newSortModel);
@@ -150,11 +216,25 @@ const RefundRequests = () => {
   const handlePaginationPageChange = (page: number) => {
     console.log(page);
   };
+    const handlePaginationPageChange = (page: number) => {
+        console.log('Page changed:', page);
+        // const updatedPagination = { ...storesPagination, pageNo: page, initiativeId: id, sort: currentSort };
+        // setStoresPagination(updatedPagination);
+        // sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
+        // void fetchStores({
+        //   ...appliedFilters,
+        //   page,
+        //   sort: currentSort,
+        // });
+    };
 
   const handleRowSelectionChange = (rows: Array<number>) => {
     console.log(rows);
     setSelectedRows(rows);
   };
+    const handleRowSelectionChange = (rows: Array<number>) => {
+        setSelectedRows(rows);
+    };
 
   const StatusChip = ({ status }: any) => {
     const chipItem = getStatus(status);
@@ -170,6 +250,52 @@ const RefundRequests = () => {
 
   const isRowSelectable = (params: any) => params?.row?.status === 'CREATED';
 
+    const posTypeMapper = (posType: string) => {
+        switch (posType) {
+            case 'PHYSICAL': return 'Fisico';
+            case 'ONLINE': return 'Online';
+            default: return posType;
+        }
+    };
+
+    return (
+        <Box p={1.5}>
+            <RefundRequestsModal
+                isOpen={isModalOpen}
+                setIsOpen={() => setIsModalOpen(false)}
+                title={t("pages.refundRequests.ModalRefundRequests.title")}
+                description={t("pages.refundRequests.ModalRefundRequests.description")}
+                warning={t("pages.refundRequests.ModalRefundRequests.warning")}
+                cancelBtn="Indietro"
+                confirmBtn={{ text: `Invia (${selectedRows.length})`, onConfirm: () => setIsModalOpen(false) }}
+            />
+            <Stack
+                direction={{ xs: 'column', md: 'row' }}
+                spacing={{ xs: 2, md: 3 }}
+                justifyContent="space-between"
+                alignItems={{ xs: 'flex-start', md: 'center' }}
+            >
+                <TitleBox
+                    title={t('pages.refundRequests.title')}
+                    subTitle={t('pages.refundRequests.subtitle')}
+                    mbTitle={2}
+                    variantTitle="h4"
+                    variantSubTitle="body1"
+                />
+                {
+                    selectedRows.length > 0 && (
+                        <Button
+                            variant="contained"
+                            size="small"
+                            onClick={() => setIsModalOpen(true)}
+                            startIcon={<SendIcon />}
+                            sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', whiteSpace: 'nowrap', fontWeight: 'bold' } }}
+                        >
+                            {t('pages.refundRequests.sendRequests')}{(selectedRows.length > 0) ? ` (${selectedRows.length})` : ''}
+                        </Button>
+                    )
+                }
+            </Stack>
   return (
     <Box p={1.5}>
       <RefundRequestsModal
@@ -219,6 +345,32 @@ const RefundRequests = () => {
         )}
       </Stack>
 
+            <Box>
+                {rewardBatchesLoading && (
+                    <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+                        <CircularProgress />
+                    </Box>
+                )}
+
+                {!rewardBatchesLoading && rewardBatches && rewardBatches.length > 0 && (
+                    <DataTable
+                        columns={columns}
+                        rows={rewardBatches}
+                        rowsPerPage={1}
+                        checkable={true}
+                        // paginationModel={{ page: currentPagination.pageNo, pageSize: currentPagination.pageSize, totalElements:  }}
+                        onPaginationPageChange={handlePaginationPageChange}
+                        onRowSelectionChange={handleRowSelectionChange}
+                        isRowSelectable={isRowSelectable}
+                    />
+                )}
+
+                {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
+                    <NoResultPaper translationKey="pages.refundRequests.noData" />
+                )}
+            </Box>
+        </Box>
+    );
       <Box sx={{ height: '400px' }}>
         <DataTable
           columns={columns}
