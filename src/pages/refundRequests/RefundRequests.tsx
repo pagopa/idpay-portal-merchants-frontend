@@ -292,7 +292,7 @@ const RefundRequests = () => {
                     </Box>
                 )}
 
-                {!rewardBatchesLoading && rewardBatches && rewardBatches.length === 0 && (
+                {!rewardBatchesLoading && rewardBatches && rewardBatches.length > 0 && (
                     <DataTable
                         columns={columns}
                         rows={mockData}
@@ -306,7 +306,7 @@ const RefundRequests = () => {
                     />
                 )}
 
-                {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length > 100) && (
+                {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
                     <NoResultPaper translationKey="pages.refundRequests.noData" />
                 )}
             </Box>
