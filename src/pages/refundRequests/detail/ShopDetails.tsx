@@ -21,11 +21,13 @@ import { useFormik } from 'formik';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import DetailDrawer from '../../../components/Drawer/DetailDrawer';
 import getDetailFieldList from '../../../components/Transactions/useDetailList';
-import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
+import {
+  PointOfSaleTransactionProcessedDTO, StatusEnum,
+} from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import getStatus from '../../../components/Transactions/useStatus';
 import CustomChip from '../../../components/Chip/CustomChip';
-import InvoiceDataTable from '../InvoiceDataTable';
+import InvoiceDataTable from '../invoiceDataTable';
 import { ShopCard } from './ShopCard';
 import InvoiceDetail from './InvoiceDetail';
 
@@ -46,13 +48,13 @@ const ShopDetails: React.FC = () => {
         productName: 'product',
         discountCode: '4T6Y7UIF',
       },
-      authorizedAmountCents: 40000 as any,
-      effectiveAmountCents: 50000 as any,
-      fiscalCode: 'AAABBB11C22D345E',
-      id: 'e5348bee-e342-4bb0-a551-42750bdf8d88',
-      rewardAmountCents: 10000 as any,
-      status: undefined,
-      trxChargeDate: undefined,
+      "authorizedAmountCents": 40000 as any,
+      "effectiveAmountCents": 50000 as any,
+      "fiscalCode": "AAABBB11C22D345E",
+      "id": "e5348bee-e342-4bb0-a551-42750bdf8d88",
+      "rewardAmountCents": 10000 as any,
+      "status": "CANCELLED" as StatusEnum,
+      "trxChargeDate": undefined,
     };
 
     setRowDetail([mock]);

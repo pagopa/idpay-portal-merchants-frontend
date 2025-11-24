@@ -1,41 +1,29 @@
-import { useEffect, useState } from 'react';
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import Button from '@mui/material/Button';
+import { Box, CircularProgress, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useEffect, useState } from "react";
-import { Box, Stack, Tooltip, Typography, CircularProgress } from "@mui/material";
 import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { GridSortModel, GridColDef } from '@mui/x-data-grid';
-import { theme } from '@pagopa/mui-italia';
+import { GridColDef } from '@mui/x-data-grid';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useParams, useHistory } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import { theme } from '@pagopa/mui-italia';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
-import getStatus from '../../components/Transactions/useStatus';
 import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
 import routes from '../../routes';
+import { RewardBatchDTO } from '../../api/generated/merchants/RewardBatchDTO';
+import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
+import { getRewardBatches, sendRewardBatch } from '../../services/merchantService';
+import getStatus from '../../components/Transactions/useStatus';
+import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { RefundRequestsModal } from './RefundRequestModal';
 
 interface RouteParams {
   id: string;
 }
-import { GridColDef } from "@mui/x-data-grid";
-import { theme } from "@pagopa/mui-italia";
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
-import { useSelector } from 'react-redux';
-import DataTable from "../../components/dataTable/DataTable";
-import CustomChip from "../../components/Chip/CustomChip";
-import { getRewardBatches, sendRewardBatch } from "../../services/merchantService";
-import getStatus from '../../components/Transactions/useStatus';
-import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
-import { RewardBatchDTO } from "../../api/generated/merchants/RewardBatchDTO";
-import NoResultPaper from "../reportedUsers/NoResultPaper";
-import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
-import { RefundRequestsModal } from "./RefundRequestModal";
-
-
 
 const RefundRequests = () => {
     const { id } = useParams<RouteParams>();
@@ -49,29 +37,29 @@ const RefundRequests = () => {
     const addError = useErrorDispatcher();
     const initiativesList = useSelector(intiativesListSelector);
 
-    // const mockData = [
-    //     {
-    //         id: 1,
-    //         name: '001-20251125 223',
-    //         posType: 'FISICO',
-    //         totalAmountCents: 10000,
-    //         status: 'CREATED',
-    //     },
-    //     {
-    //         id: 2,
-    //         name: '002-20251125 224',
-    //         posType: 'ONLINE',
-    //         totalAmountCents: 20000,
-    //         status: 'APPROVED',
-    //     },
-    //     {
-    //         id: 3,
-    //         name: '003-20251125 225',
-    //         posType: 'ONLINE',
-    //         totalAmountCents: 300000,
-    //         status: 'EVALUATING',
-    //     },
-    // ];
+    const mockData = [
+        {
+            id: 1,
+            name: '001-20251125 223',
+            posType: 'FISICO',
+            totalAmountCents: 10000,
+            status: 'CREATED',
+        },
+        {
+            id: 2,
+            name: '002-20251125 224',
+            posType: 'ONLINE',
+            totalAmountCents: 20000,
+            status: 'APPROVED',
+        },
+        {
+            id: 3,
+            name: '003-20251125 225',
+            posType: 'ONLINE',
+            totalAmountCents: 300000,
+             status: 'EVALUATING',
+        },
+    ];
 
     const columns: Array<GridColDef> = [
         {
@@ -304,10 +292,10 @@ const RefundRequests = () => {
                     </Box>
                 )}
 
-                {!rewardBatchesLoading && rewardBatches && rewardBatches.length > 0 && (
+                {!rewardBatchesLoading && rewardBatches && rewardBatches.length === 0 && (
                     <DataTable
                         columns={columns}
-                        rows={rewardBatches}
+                        rows={mockData}
                         rowsPerPage={1}
                         checkable={true}
                         // paginationModel={{ page: currentPagination.pageNo, pageSize: currentPagination.pageSize, totalElements:  }}
@@ -318,7 +306,7 @@ const RefundRequests = () => {
                     />
                 )}
 
-                {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
+                {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length > 100) && (
                     <NoResultPaper translationKey="pages.refundRequests.noData" />
                 )}
             </Box>
