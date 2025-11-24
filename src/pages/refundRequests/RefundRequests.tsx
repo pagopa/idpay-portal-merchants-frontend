@@ -10,7 +10,7 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import { useSelector } from 'react-redux';
 import DataTable from "../../components/dataTable/DataTable";
 import CustomChip from "../../components/Chip/CustomChip";
-import { getRewardBatches } from "../../services/merchantService";
+import { getRewardBatches, sendRewardBatch } from "../../services/merchantService";
 import getStatus from '../../components/Transactions/useStatus';
 import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
 import { RewardBatchDTO } from "../../api/generated/merchants/RewardBatchDTO";
@@ -22,9 +22,10 @@ import { RefundRequestsModal } from "./RefundRequestModal";
 
 const RefundRequests = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
+    const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
     const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
     const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
+    const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
     // const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
     const addError = useErrorDispatcher();
     const initiativesList = useSelector(intiativesListSelector);
@@ -57,7 +58,7 @@ const RefundRequests = () => {
         {
             field: 'spacer',
             headerName: '',
-            width: 200,
+            width: 150,
             sortable: false,
             disableColumnMenu: true,
             renderCell: () => '',
@@ -118,17 +119,6 @@ const RefundRequests = () => {
             }
         } catch (error: any) {
             console.error('Error fetching reward batches:', error);
-            addError({
-                id: 'GET_REWARD_BATCHES',
-                blocking: false,
-                error,
-                techDescription: 'An error occurred getting reward batches',
-                displayableTitle: t('errors.genericTitle'),
-                displayableDescription: t('errors.genericDescription'),
-                toNotify: true,
-                component: 'Toast',
-                showCloseIcon: true,
-            });
         } finally {
             setRewardBatchesLoading(false);
         }
@@ -184,6 +174,35 @@ const RefundRequests = () => {
         }
     };
 
+    const handleSentBatches = async () => {
+        setSendBatchIsLoading(true);
+        try {
+            const initiativeId = initiativesList && initiativesList.length > 0 ? initiativesList[0].initiativeId : '';
+            const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0]?.id : '';
+            if (!initiativeId || !batchId) {
+                console.error('Missing initiativeId or batchId');
+                return;
+            }
+            await sendRewardBatch(initiativeId, batchId.toString());
+
+        } catch (e: any) {
+            addError({
+                id: 'SEND_REWARD_BATCHES',
+                blocking: false,
+                error: e,
+                techDescription: 'An error occurred sending reward batches',
+                displayableTitle: t('errors.genericTitle'),
+                displayableDescription: t('errors.genericDescription'),
+                toNotify: true,
+                component: 'Toast',
+                showCloseIcon: true,
+            });
+        } finally {
+            setSendBatchIsLoading(false);
+            setIsModalOpen(false);
+        }
+    };
+
     return (
         <Box p={1.5}>
             <RefundRequestsModal
@@ -193,7 +212,7 @@ const RefundRequests = () => {
                 description={t("pages.refundRequests.ModalRefundRequests.description")}
                 warning={t("pages.refundRequests.ModalRefundRequests.warning")}
                 cancelBtn="Indietro"
-                confirmBtn={{ text: `Invia (${selectedRows.length})`, onConfirm: () => setIsModalOpen(false) }}
+                confirmBtn={{ text: `Invia`, onConfirm: handleSentBatches, loading: sendBatchIsLoading }}
             />
             <Stack
                 direction={{ xs: 'column', md: 'row' }}
@@ -217,7 +236,7 @@ const RefundRequests = () => {
                             startIcon={<SendIcon />}
                             sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', whiteSpace: 'nowrap', fontWeight: 'bold' } }}
                         >
-                            {t('pages.refundRequests.sendRequests')}{(selectedRows.length > 0) ? ` (${selectedRows.length})` : ''}
+                            {t('pages.refundRequests.sendRequests')}
                         </Button>
                     )
                 }
@@ -240,6 +259,7 @@ const RefundRequests = () => {
                         onPaginationPageChange={handlePaginationPageChange}
                         onRowSelectionChange={handleRowSelectionChange}
                         isRowSelectable={isRowSelectable}
+                        singleSelect
                     />
                 )}
 

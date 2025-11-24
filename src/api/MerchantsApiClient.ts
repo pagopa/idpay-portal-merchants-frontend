@@ -222,6 +222,21 @@ export const MerchantApi = {
     const result = await apiClient.getRewardBatches({
       initiativeId
     });
+
     return extractResponse(result, 200, onRedirectToLogin);
   },
+
+
+  sendRewardBatches: async (
+    initiativeId: string,
+    batchId: string
+  ): Promise<void> => {
+    const result = await apiClient.sendRewardBatches({
+      initiativeId,
+      batchId
+    });
+
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+  
 };

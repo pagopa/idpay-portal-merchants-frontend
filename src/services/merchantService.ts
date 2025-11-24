@@ -110,3 +110,9 @@ export const deleteReportedUser = (
     initiativeId: string
   ): Promise<RewardBatchListDTO> =>
     MerchantApi.getRewardBatches(initiativeId);
+
+  export const sendRewardBatch = (
+    initiativeId: string,
+    batchId: string
+  ): Promise<void> =>
+    MerchantApi.sendRewardBatches(initiativeId, batchId);
