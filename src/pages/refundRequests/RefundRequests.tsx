@@ -165,7 +165,10 @@ const RefundRequests = () => {
         );
     };
 
-    const isRowSelectable = (params: any) => params?.row?.status === 'CREATED';
+    const isRowSelectable = (params: any) => {
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        return params?.row?.status === 'CREATED' && params?.row?.month !== currentMonth;
+    };
 
     const posTypeMapper = (posType: string) => {
         switch (posType) {
