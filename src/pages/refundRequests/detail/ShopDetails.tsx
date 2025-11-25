@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   Breadcrumbs,
-  Button,
   FormControl,
   Grid,
   InputLabel,
@@ -22,12 +21,13 @@ import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import DetailDrawer from '../../../components/Drawer/DetailDrawer';
 import getDetailFieldList from '../../../components/Transactions/useDetailList';
 import {
-  PointOfSaleTransactionProcessedDTO, StatusEnum,
+  PointOfSaleTransactionProcessedDTO,
+  StatusEnum,
 } from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import getStatus from '../../../components/Transactions/useStatus';
 import CustomChip from '../../../components/Chip/CustomChip';
-import InvoiceDataTable from '../invoiceDataTable';
+import InvoiceDataTable from '../InvoiceDataTable';
 import { ShopCard } from './ShopCard';
 import InvoiceDetail from './InvoiceDetail';
 
@@ -48,13 +48,13 @@ const ShopDetails: React.FC = () => {
         productName: 'product',
         discountCode: '4T6Y7UIF',
       },
-      "authorizedAmountCents": 40000 as any,
-      "effectiveAmountCents": 50000 as any,
-      "fiscalCode": "AAABBB11C22D345E",
-      "id": "e5348bee-e342-4bb0-a551-42750bdf8d88",
-      "rewardAmountCents": 10000 as any,
-      "status": "CANCELLED" as StatusEnum,
-      "trxChargeDate": undefined,
+      authorizedAmountCents: 40000 as any,
+      effectiveAmountCents: 50000 as any,
+      fiscalCode: 'AAABBB11C22D345E',
+      id: 'e5348bee-e342-4bb0-a551-42750bdf8d88',
+      rewardAmountCents: 10000 as any,
+      status: 'CANCELLED' as StatusEnum,
+      trxChargeDate: undefined,
     };
 
     setRowDetail([mock]);
@@ -62,11 +62,6 @@ const ShopDetails: React.FC = () => {
 
   const handleToggleDrawer = (newOpen: boolean) => {
     setDrawerOpened(newOpen);
-  };
-
-  const handleListButtonClick = (row: any) => {
-    setRowDetail(row);
-    setDrawerOpened(true);
   };
 
   const formik = useFormik<any>({
@@ -167,10 +162,6 @@ const ShopDetails: React.FC = () => {
           refundAmount={store?.refundAmount}
           status={store?.status}
         />
-
-        <Box width="100%" pt={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button onClick={() => handleListButtonClick(rowDetail)}>mock drawer</Button>
-        </Box>
 
         <Box
           sx={{

@@ -39,8 +39,10 @@ const StatusChip = ({ status }: { status: string }) => {
     string,
     { label: string; color: 'default' | 'success' | 'warning' | 'error'; textColor?: string }
   > = {
-    TO_REVIEW: { label: 'Da esaminare', color: 'warning' },
-    APPROVED: { label: 'Approvata', color: 'success' },
+    TO_CHECK: { label: 'Da esaminare', color: 'warning' },
+    CONSULTABLE: { label: 'Consultabile', color: 'warning' },
+    SUSPENDED: { label: 'Contrassegnata', color: 'warning' },
+    APPROVED: { label: 'Validata', color: 'success' },
     REJECTED: { label: 'Rifiutata', color: 'error' },
   };
   const chipItem = statusMap[status] || { label: status, color: 'default' };
@@ -151,7 +153,7 @@ const InvoiceDataTable: React.FC = () => {
     id: 'e5348bee-e342-4bb0-a551-42750bdf8d88',
     rewardAmountCents: 10000 as any,
     status: 'TO_REVIEW' as any,
-    trxChargeDate: new Date('2021-03-24T14:12:00'),
+    trxChargeDate: new Date('2021-03-24T14:12:00').toISOString() as any,
     invoiceFile: {
       docNumber: 'FPR 192/25',
       filename: 'Nome fattura',
@@ -253,6 +255,23 @@ const InvoiceDataTable: React.FC = () => {
                 label: 'Importo autorizzato',
                 id: 'authorizedAmountCents',
                 type: TYPE_TEXT.Currency,
+              },
+              {
+                label: 'Numero fattura',
+                id: 'invoiceFile.docNumber',
+                type: TYPE_TEXT.Text,
+                bold: true,
+              },
+              {
+                label: 'Fattura',
+                id: 'invoiceFile.filename',
+                type: TYPE_TEXT.Text,
+              },
+              {
+                label: 'Stato',
+                id: 'status',
+                type: TYPE_TEXT.Text,
+                render: (val: any) => <StatusChip status={val} />,
               },
             ]}
           />
