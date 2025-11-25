@@ -23,7 +23,6 @@ import { DownloadInvoiceResponseDTO } from './generated/merchants/DownloadInvoic
 import { ReportedUserDTO } from './generated/merchants/ReportedUserDTO';
 import { ReportedUserCreateResponseDTO } from './generated/merchants/ReportedUserCreateResponseDTO';
 import { RewardBatchListDTO } from './generated/merchants/RewardBatchListDTO';
-import { RewardBatchListDTO } from './generated/merchants/RewardBatchListDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
