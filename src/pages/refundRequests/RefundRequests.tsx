@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridColDef } from "@mui/x-data-grid";
 import { theme } from "@pagopa/mui-italia";
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { useSelector } from 'react-redux';
 import DataTable from "../../components/dataTable/DataTable";
 import CustomChip from "../../components/Chip/CustomChip";
@@ -16,18 +15,19 @@ import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
 import { RewardBatchDTO } from "../../api/generated/merchants/RewardBatchDTO";
 import NoResultPaper from "../reportedUsers/NoResultPaper";
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
+import { useAlert } from "../../hooks/useAlert";
 import { RefundRequestsModal } from "./RefundRequestModal";
 
 
 
 const RefundRequests = () => {
+    const { setAlert } = useAlert();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
     const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
     const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
     const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
     // const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
-    const addError = useErrorDispatcher();
     const initiativesList = useSelector(intiativesListSelector);
 
     // const mockData = [
@@ -191,17 +191,7 @@ const RefundRequests = () => {
             await fetchRewardBatches(initiativeId);
 
         } catch (e: any) {
-            addError({
-                id: 'SEND_REWARD_BATCHES',
-                blocking: false,
-                error: e,
-                techDescription: 'An error occurred sending reward batches',
-                displayableTitle: t('errors.genericTitle'),
-                displayableDescription: t('errors.genericDescription'),
-                toNotify: true,
-                component: 'Toast',
-                showCloseIcon: true,
-            });
+            setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
             if (initiativeId) {
                 await fetchRewardBatches(initiativeId.toString());
             }
