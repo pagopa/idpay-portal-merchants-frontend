@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react";
-import { Box, Stack, Tooltip, Typography, CircularProgress, Alert, Slide } from "@mui/material";
-import Button from "@mui/material/Button";
-import { Box, CircularProgress, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Alert, Box, CircularProgress, IconButton, Slide, Stack, Tooltip, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
-import { useTranslation } from "react-i18next";
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridColDef } from "@mui/x-data-grid";
 import { theme } from "@pagopa/mui-italia";
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { useSelector } from 'react-redux';
+import { useHistory, useParams } from 'react-router-dom';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DataTable from "../../components/dataTable/DataTable";
 import CustomChip from "../../components/Chip/CustomChip";
 import { getRewardBatches, sendRewardBatch } from "../../services/merchantService";
@@ -21,6 +19,7 @@ import CurrencyColumn from "../../components/Transactions/CurrencyColumn";
 import { RewardBatchDTO } from "../../api/generated/merchants/RewardBatchDTO";
 import NoResultPaper from "../reportedUsers/NoResultPaper";
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
+import routes from '../../routes';
 import { RefundRequestsModal } from "./RefundRequestModal";
 
 interface RouteParams {
