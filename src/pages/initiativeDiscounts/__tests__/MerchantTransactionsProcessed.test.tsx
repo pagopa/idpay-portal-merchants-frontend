@@ -3,7 +3,6 @@ import MerchantTransactionsProcessed from '../MerchantTransactionsProcessed';
 import * as service from '../../../services/merchantService';
 import * as helpers from '../../../helpers';
 import * as hooks from '@pagopa/selfcare-common-frontend/hooks/useLoading';
-import * as errorHooks from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { MerchantTransactionProcessedDTO } from '../../../api/generated/merchants/MerchantTransactionProcessedDTO';
 import { useFormik } from 'formik';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
@@ -30,7 +29,6 @@ jest.mock('../../../services/merchantService', () => ({
 
 describe('MerchantTransactionsProcessed', () => {
   let setLoadingMock: jest.Mock;
-  let addErrorMock: jest.Mock;
   const fakeId = '123';
 
   const fakeRows: MerchantTransactionProcessedDTO[] = [
@@ -45,10 +43,8 @@ describe('MerchantTransactionsProcessed', () => {
 
   beforeEach(() => {
     setLoadingMock = jest.fn();
-    addErrorMock = jest.fn();
 
     jest.spyOn(hooks, 'default').mockReturnValue(setLoadingMock);
-    jest.spyOn(errorHooks, 'default').mockReturnValue(addErrorMock);
     /*(useFormik as jest.Mock).mockReturnValue({
       values: { searchUser: '', filterStatus: '' },
       handleChange: jest.fn(),
@@ -95,10 +91,6 @@ describe('MerchantTransactionsProcessed', () => {
     (service.getMerchantTransactionsProcessed as jest.Mock).mockResolvedValue(error);
 
     render(<MerchantTransactionsProcessed id={fakeId} />);
-
-    /*await waitFor(() => {
-      expect(addErrorMock).toHaveBeenCalledWith(expect.objectContaining({ error }));
-    });*/
   });
 
   it('should call the API with correct filters when the form is submitted', async () => {
