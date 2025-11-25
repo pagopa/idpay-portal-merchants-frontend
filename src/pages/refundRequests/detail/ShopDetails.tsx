@@ -28,6 +28,7 @@ import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import getStatus from '../../../components/Transactions/useStatus';
 import CustomChip from '../../../components/Chip/CustomChip';
 import InvoiceDataTable from '../InvoiceDataTable';
+import { formatDate, formattedCurrency } from '../../../helpers';
 import { ShopCard } from './ShopCard';
 import InvoiceDetail from './InvoiceDetail';
 
@@ -131,10 +132,10 @@ const ShopDetails: React.FC = () => {
                 {'Bonus Elettrodomestici'}
               </Typography>
               <Typography color="text.primary" variant="body2" fontWeight="600">
-                {'Rimborsi'}
+                {'...'}
               </Typography>
               <Typography color="text.disabled" variant="body2">
-                {store?.insegna}
+                {store?.name}
               </Typography>
             </Breadcrumbs>
           </Box>
@@ -149,7 +150,7 @@ const ShopDetails: React.FC = () => {
             }}
           >
             <TitleBox
-              title={store?.insegna ?? MISSING_DATA_PLACEHOLDER}
+              title={store?.name ?? MISSING_DATA_PLACEHOLDER}
               mbTitle={2}
               variantTitle="h4"
               variantSubTitle="body1"
@@ -159,8 +160,11 @@ const ShopDetails: React.FC = () => {
 
         <ShopCard
           batchName={store?.name}
-          refundAmount={store?.refundAmount}
+          dateRange={`${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`}
+          companyName={store?.businessName}
+          refundAmount={formattedCurrency(store?.totalAmountCents)}
           status={store?.status}
+          approvedRefund={formattedCurrency(store?.approvedAmountCents)}
         />
 
         <Box
