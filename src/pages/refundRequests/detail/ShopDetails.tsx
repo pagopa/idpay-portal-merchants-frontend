@@ -27,7 +27,7 @@ import {
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import getStatus from '../../../components/Transactions/useStatus';
 import CustomChip from '../../../components/Chip/CustomChip';
-import InvoiceDataTable from '../InvoiceDataTable';
+import InvoiceDataTable from '../invoiceDataTable';
 import { formatDate, formattedCurrency } from '../../../helpers';
 import { ShopCard } from './ShopCard';
 import InvoiceDetail from './InvoiceDetail';
@@ -210,15 +210,8 @@ const ShopDetails: React.FC = () => {
                   value={formik.values.status}
                   sx={{
                     width: 165,
-                    height: 40,
-                    '& .MuiSelect-select': {
-                      display: 'flex',
-                      alignItems: 'center',
-                      paddingTop: 0,
-                      paddingBottom: 0,
-                      height: '100%',
-                    },
                   }}
+                  size="small"
                 >
                   {filterByStatusOptionsList.map((item) => (
                     <MenuItem key={item.value} value={item.value}>
