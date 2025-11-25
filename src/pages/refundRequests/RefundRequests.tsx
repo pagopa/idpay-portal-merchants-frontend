@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Box, Stack, Tooltip, Typography, CircularProgress } from "@mui/material";
+import { Box, Stack, Tooltip, Typography, CircularProgress, Alert, Slide } from "@mui/material";
 import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
+import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridColDef } from "@mui/x-data-grid";
@@ -26,33 +27,10 @@ const RefundRequests = () => {
     const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
     const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
     const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
+    const [showSuccessAlert, setShowSuccessAlert] = useState<boolean>(false);
     // const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
     const addError = useErrorDispatcher();
     const initiativesList = useSelector(intiativesListSelector);
-
-    // const mockData = [
-    //     {
-    //         id: 1,
-    //         name: '001-20251125 223',
-    //         posType: 'FISICO',
-    //         totalAmountCents: 10000,
-    //         status: 'CREATED',
-    //     },
-    //     {
-    //         id: 2,
-    //         name: '002-20251125 224',
-    //         posType: 'ONLINE',
-    //         totalAmountCents: 20000,
-    //         status: 'APPROVED',
-    //     },
-    //     {
-    //         id: 3,
-    //         name: '003-20251125 225',
-    //         posType: 'ONLINE',
-    //         totalAmountCents: 300000,
-    //         status: 'EVALUATING',
-    //     },
-    // ];
 
     const columns: Array<GridColDef> = [
         {
@@ -80,7 +58,7 @@ const RefundRequests = () => {
             renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value), 11),
         },
         {
-            field: 'totalAmountCents',
+            field: 'initialAmountCents',
             headerName: 'Importo',
             disableColumnMenu: true,
             flex: 2,
@@ -105,6 +83,12 @@ const RefundRequests = () => {
         }
     }, [initiativesList]);
 
+    useEffect(() => {
+        if (showSuccessAlert) {
+            setTimeout(() => setShowSuccessAlert(false), 3000);
+        }
+    }, [showSuccessAlert]);
+
     const infoStyles = {
         fontWeight: theme.typography.fontWeightRegular,
         fontSize: theme.typography.fontSize,
@@ -117,9 +101,20 @@ const RefundRequests = () => {
             if (response?.content) {
                 setRewardBatches(response.content as Array<RewardBatchDTO>);
                 setSelectedRows([]);
+
             }
         } catch (error: any) {
-            console.error('Error fetching reward batches:', error);
+             addError({
+                id: 'GET_REWARD_BATCHES',
+                blocking: false,
+                error,
+                techDescription: 'An error occurred getting reward batches',
+                displayableTitle: t('errors.genericTitle'),
+                displayableDescription: t('errors.genericDescription'),
+                toNotify: true,
+                component: 'Toast',
+                showCloseIcon: true,
+            });
         } finally {
             setRewardBatchesLoading(false);
         }
@@ -188,6 +183,7 @@ const RefundRequests = () => {
                 return;
             }
             await sendRewardBatch(initiativeId, batchId.toString());
+            setTimeout(() => setShowSuccessAlert(true), 1000);
             await fetchRewardBatches(initiativeId);
 
         } catch (e: any) {
@@ -270,6 +266,29 @@ const RefundRequests = () => {
                         singleSelect
                     />
                 )}
+                  <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
+                        <Alert
+                          severity="success"
+                          icon={<CheckCircleOutline />}
+                          sx={{
+                            position: 'fixed',
+                            bottom: 40,
+                            right: 20,
+                            backgroundColor: 'white',
+                            width: 'auto',
+                            maxWidth: '400px',
+                            minWidth: '300px',
+                            zIndex: 1300,
+                            boxShadow: 3,
+                            borderRadius: 1,
+                            '& .MuiAlert-icon': {
+                              color: '#6CC66A',
+                            },
+                          }}
+                        >
+                          {t('pages.refundRequests.rewardBatchSentSuccess')}
+                        </Alert>
+                      </Slide>
 
                 {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
                     <NoResultPaper translationKey="pages.refundRequests.noData" />
