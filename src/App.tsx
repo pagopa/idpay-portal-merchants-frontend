@@ -24,6 +24,8 @@ import { StoreProvider } from './pages/initiativeStores/StoreContext';
 import ReportedUsers from './pages/reportedUsers/reportedUsers';
 import InsertReportedUser from './pages/reportedUsers/insertReportedUser';
 import { AlertProvider } from './contexts/AlertContext';
+import RefundRequests from './pages/refundRequests/RefundRequests';
+
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => (
     <AlertProvider>
@@ -44,38 +46,41 @@ const SecuredRoutes = withLogin(
             <PrivacyPolicy />
           </Route>
 
-          {/* <Route path={routes.DISCOUNTS} exact={true}>
-              <InitiativeDiscounts />
-            </Route> */}
-          <Route path={routes.OVERVIEW} exact={true}>
-            <InitiativeOverview />
-          </Route>
-          <Route path={routes.STORES_UPLOAD} exact={true}>
-            <InitiativeStoresUpload />
-          </Route>
-          <Route path={routes.STORES} exact={true}>
-            <InitiativeStores />
-          </Route>
-          <Route path={routes.REPORTED_USERS} exact={true}>
-            <ReportedUsers />
-          </Route>
-          <Route path={routes.REPORTED_USERS_INSERT} exact={true}>
-            <InsertReportedUser />
-          </Route>
-          <Route path={routes.STORES_DETAIL} exact={true}>
-            <StoreProvider>
-              <InitiativeStoreDetail />
-            </StoreProvider>
-          </Route>
-          <Route path={routes.NEW_DISCOUNT} exact={true}>
-            <NewDiscount />
-          </Route>
+        {/* <Route path={routes.DISCOUNTS} exact={true}>
+            <InitiativeDiscounts />
+          </Route> */}
+        <Route path={routes.OVERVIEW} exact={true}>
+          <InitiativeOverview />
+        </Route>
+        <Route path={routes.STORES_UPLOAD} exact={true}>
+          <InitiativeStoresUpload />
+        </Route>
+        <Route path={routes.STORES} exact={true}>
+          <InitiativeStores />
+        </Route>
+        <Route path={routes.REPORTED_USERS} exact={true}>
+          <ReportedUsers />
+        </Route>
+        <Route path={routes.REPORTED_USERS_INSERT} exact={true}>
+          <InsertReportedUser />
+        </Route>
+        <Route path={routes.STORES_DETAIL} exact={true}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Route>
+        <Route path={routes.NEW_DISCOUNT} exact={true}>
+          <NewDiscount />
+        </Route>
           <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
             <AcceptNewDiscount />
           </Route>
-          <Route path="*">
-            <Redirect to={routes.HOME} />
+          <Route path={routes.REFUND_REQUESTS} exact={true}>
+            <RefundRequests />
           </Route>
+        <Route path="*">
+          <Redirect to={routes.HOME} />
+        </Route>
         </Switch>
       </Layout>
     </AlertProvider>

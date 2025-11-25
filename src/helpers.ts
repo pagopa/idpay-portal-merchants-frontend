@@ -149,3 +149,10 @@ if (!match) {
 
 return true;
 };
+
+export function formatEuro(value: number) {
+    return (value / 100).toLocaleString('it-IT', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + '€';
+}

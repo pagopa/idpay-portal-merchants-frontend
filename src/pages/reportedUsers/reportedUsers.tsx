@@ -223,7 +223,6 @@ const ReportedUsers: React.FC = () => {
             <DataTable
               rows={rowsWithId}
               columns={getReportedUsersColumns(handleOpenDeleteModal)}
-              pageSize={1}
               rowsPerPage={1}
               paginationModel={{
                 pageNo: 0,
