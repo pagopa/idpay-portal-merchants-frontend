@@ -3,7 +3,6 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, Prompt } from 'react-router-dom';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { theme } from '@pagopa/mui-italia/dist/theme/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { CheckCircleOutline, Edit } from '@mui/icons-material';
@@ -24,6 +23,7 @@ import { formatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { POS_TYPE } from '../../utils/constants';
 import ROUTES from '../../routes';
+import { useAlert } from '../../hooks/useAlert';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
@@ -33,6 +33,7 @@ interface RouteParams {
 }
 
 const InitiativeStoreDetail = () => {
+  const { setAlert } = useAlert();
   const [storeDetail, setStoreDetail] = useState<any>(null);
   const [transactionsFilters, setTransactionsFilters] = useState<any>({});
   const [storeTransactions, setStoreTransactions] = useState<
@@ -54,7 +55,6 @@ const InitiativeStoreDetail = () => {
   }>({});
   const { t } = useTranslation();
   const { id, store_id } = useParams<RouteParams>();
-  const addError = useErrorDispatcher();
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { setStoreId } = useStore();
 
@@ -96,17 +96,7 @@ const InitiativeStoreDetail = () => {
         setStoreDetail(response);
       }
     } catch (error: any) {
-      addError({
-        id: 'GET_MERCHANT_DETAIL',
-        blocking: false,
-        error,
-        techDescription: 'An error occurred getting merchant detail',
-        displayableTitle: t('errors.genericTitle'),
-        displayableDescription: t('errors.genericDescription'),
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
-      });
+      setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
     }
   };
 
@@ -130,17 +120,7 @@ const InitiativeStoreDetail = () => {
       }
     } catch (error: any) {
       console.log(error, 'error');
-      addError({
-        id: 'GET_MERCHANT_TRANSACTIONS',
-        blocking: false,
-        error,
-        techDescription: 'An error occurred getting merchant transactions',
-        displayableTitle: t('errors.genericTitle'),
-        displayableDescription: t('errors.genericDescription'),
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
-      });
+      setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
     } finally {
       setDataTableIsLoading(false);
     }
@@ -303,17 +283,7 @@ const InitiativeStoreDetail = () => {
       },
     ];
     if (storeDetail.contactEmail === contactEmailConfirmModal) {
-      addError({
-        id: 'UPDATE_STORES',
-        blocking: false,
-        error: new Error('Point of sale already registered'),
-        techDescription: 'Point of sale already registered',
-        displayableTitle: t('errors.duplicateEmailError'),
-        displayableDescription: `${storeDetail.contactEmail} è già associata ad altro punto vendita`,
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
-      });
+      setAlert(t('errors.duplicateEmailError'),`${storeDetail.contactEmail} è già associata ad altro punto vendita`, true);
       setModalIsOpen(false);
       return;
     }
@@ -321,31 +291,11 @@ const InitiativeStoreDetail = () => {
     const response = await updateMerchantPointOfSales(merchantId, obj);
     if (response) {
       if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
-        addError({
-          id: 'UPDATE_STORES',
-          blocking: false,
-          error: new Error('Point of sale already registered'),
-          techDescription: 'Point of sale already registered',
-          displayableTitle: t('errors.duplicateEmailError'),
-          displayableDescription: `${response?.message} è già associata ad altro punto vendita`,
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
+        setAlert(t('errors.duplicateEmailError'),`${response?.message} è già associata ad altro punto vendita`, true);
         setModalIsOpen(false);
         setFieldErrors({});
       } else {
-        addError({
-          id: 'UPDATE_STORES',
-          blocking: false,
-          error: new Error('error points of sale upload'),
-          techDescription: 'error points of sale upload',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
+        setAlert(t('errors.genericTitle'),t('errors.genericDescription'), true);
       }
     } else {
       setModalIsOpen(false);

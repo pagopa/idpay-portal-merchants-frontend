@@ -1,9 +1,9 @@
 import { Backdrop, Box, Button, Fade, Modal, Typography } from '@mui/material';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StatusEnum as TransactionStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { deleteTransaction } from '../../services/merchantService';
+import { useAlert } from '../../hooks/useAlert';
 
 type Props = {
   openCancelTrxModal: boolean;
@@ -19,26 +19,16 @@ const CancelTransactionModal = ({
   trxId,
   status,
 }: Props) => {
+  const {setAlert} = useAlert();
   const { t } = useTranslation();
-  const addError = useErrorDispatcher();
 
   const handleCancelTransaction = (trxId: string) => {
     deleteTransaction(trxId)
       .then((_res) => {
         window.location.reload();
       })
-      .catch((error) => {
-        addError({
-          id: 'DELETE_TRANSACTION_ERROR',
-          blocking: false,
-          error,
-          techDescription: 'An error occurred deleting a transaction',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
+      .catch(() => {
+        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
       });
   };
 

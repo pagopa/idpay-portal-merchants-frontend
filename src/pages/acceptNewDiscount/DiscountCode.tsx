@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useHistory } from 'react-router-dom';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { Toast } from '@pagopa/selfcare-common-frontend';
 import { authPaymentBarCode } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
+import { useAlert } from '../../hooks/useAlert';
 import WizardNavigation from './WizardNavigation';
 
 interface Props {
@@ -22,9 +22,9 @@ interface Props {
 }
 
 const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: Props) => {
+  const {setAlert} = useAlert();
   const { t } = useTranslation();
   const history = useHistory();
-  const addError = useErrorDispatcher();
   const [openDataSentToast, setOpenDataSentToast] = useState(false);
 
   const validationSchema = Yup.object().shape({
@@ -131,18 +131,8 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
             }, 3000);
           }
         })
-        .catch((error) => {
-          addError({
-            id: 'AUTHORIZE_PAYMENT_BAR_CODE_ERROR',
-            blocking: false,
-            error,
-            techDescription: 'An error occurred authorizing payment bar code',
-            displayableTitle: t('errors.genericTitle'),
-            displayableDescription: t('errors.validationDescription'),
-            toNotify: true,
-            component: 'Toast',
-            showCloseIcon: true,
-          });
+        .catch(() => {
+          setAlert(t('errors.genericTitle'), t('errors.validationDescription'), true);
         });
     }
   };

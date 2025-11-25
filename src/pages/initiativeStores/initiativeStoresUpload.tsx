@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { parseJwt } from '../../utils/jwt-utils';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
@@ -27,6 +26,7 @@ import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { POS_UPDATE } from '../../utils/constants';
 import { SalePointFormDTO } from '../../types/types';
 import { ENV } from '../../utils/env';
+import { useAlert } from '../../hooks/useAlert';
 
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
@@ -41,6 +41,7 @@ interface RouteParams {
 }
 
 const InitiativeStoresUpload: React.FC = () => {
+  const {setAlert} = useAlert();
   const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(
     POS_UPDATE.Manual
   );
@@ -51,7 +52,6 @@ const InitiativeStoresUpload: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams<RouteParams>();
   const history = useHistory();
-  const addError = useErrorDispatcher();
   const [submitAttempt, setSubmitAttempt] = useState(0);
 
   const onFormChange = useCallback(
@@ -110,17 +110,7 @@ const InitiativeStoresUpload: React.FC = () => {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
       if (!merchantId) {
-        addError({
-          id: 'UPLOAD_STORES',
-          blocking: false,
-          error: new Error('Merchant ID not found'),
-          techDescription: 'Merchant ID not found',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
+        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
         return;
       }
 
@@ -137,29 +127,9 @@ const InitiativeStoresUpload: React.FC = () => {
       const response = await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
       if (response) {
         if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
-          addError({
-            id: 'UPLOAD_STORE',
-            blocking: false,
-            error: new Error('Point of sale already registered'),
-            techDescription: 'Point of sale already registered',
-            displayableTitle: t('errors.duplicateEmailError'),
-            displayableDescription: `${response?.message} già associata ad altro punto vendita`,
-            toNotify: true,
-            component: 'Toast',
-            showCloseIcon: true,
-          });
+          setAlert(t('errors.duplicateEmailError'), `${response?.message} già associata ad altro punto vendita`, true);
         } else {
-          addError({
-            id: 'UPLOAD_STORES',
-            blocking: false,
-            error: new Error('error points of sale upload'),
-            techDescription: 'error points of sale upload',
-            displayableTitle: t('errors.genericTitle'),
-            displayableDescription: t('errors.genericDescription'),
-            toNotify: true,
-            component: 'Toast',
-            showCloseIcon: true,
-          });
+          setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
         }
       } else {
         setPointsOfSaleLoaded(true);
@@ -179,7 +149,7 @@ const InitiativeStoresUpload: React.FC = () => {
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ maxWidth: '75%', justifySelf: 'center' }}>
       <Box>
         <Box mt={2} sx={{ display: 'grid', gridColumn: 'span 8' }}>
           <BreadcrumbsBox backLabel={t('commons.backBtn')} items={[]} />

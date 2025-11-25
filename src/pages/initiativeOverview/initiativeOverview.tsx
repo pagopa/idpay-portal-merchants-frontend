@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, matchPath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { theme } from '@pagopa/mui-italia';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
 import { getMerchantDetail } from '../../services/merchantService';
 import { formatDate, formatIban } from '../../helpers';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { useAlert } from '../../hooks/useAlert';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
 
 interface MatchParams {
@@ -26,12 +26,12 @@ const InitiativeOverview = () => {
     strict: false,
   });
   const { id } = (match?.params as MatchParams) || {};
+  const {setAlert} = useAlert();
   // const [amount, setAmount] = useState<number | undefined>(undefined);
   // const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
   const [ibanHolder, setIbanHolder] = useState<string | undefined>();
   const [onboardingDate, setOnboardingDate] = useState<string | undefined>();
-  const addError = useErrorDispatcher();
 
   useEffect(() => {
     getMerchantDetail(id)
@@ -40,18 +40,8 @@ const InitiativeOverview = () => {
         setIbanHolder(response?.ibanHolder);
         setOnboardingDate(formatDate(response?.activationDate));
       })
-      .catch((error) =>
-        addError({
-          id: 'GET_MERCHANT_DETAIL',
-          blocking: false,
-          error,
-          techDescription: 'An error occurred getting merchant detail',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        })
+      .catch(() =>
+        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true)
       );
   }, [id]);
 

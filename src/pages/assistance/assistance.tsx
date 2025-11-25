@@ -4,7 +4,6 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Fragment, useState, useEffect } from 'react';
 import CheckIllustrationIcon from '@pagopa/selfcare-common-frontend/components/icons/CheckIllustrationIcon';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useHistory } from 'react-router-dom';
 import ROUTES from '../../routes';
@@ -12,8 +11,10 @@ import { getInstitutionProductUserInfo, sendEmail } from '../../services/emailNo
 import { ENV } from '../../utils/env';
 import { EmailMessageDTO } from '../../api/generated/email-notification/EmailMessageDTO';
 import ExitModal from '../../components/ExitModal/ExitModal';
+import { useAlert } from '../../hooks/useAlert';
 
 const Assistance = () => {
+  const {setAlert} = useAlert();
   const { t } = useTranslation();
   const [openExitModal, setOpenExitModal] = useState(false);
   const handleOpenExitModal = () => setOpenExitModal(true);
@@ -21,7 +22,6 @@ const Assistance = () => {
   const [viewThxPage, setThxPage] = useState(false);
   const [senderEmail, setSenderEmail] = useState<string | undefined>('');
   const history = useHistory();
-  const addError = useErrorDispatcher();
   const recipientEmail = ENV.ASSISTANCE.EMAIL;
   const setLoading = useLoading('GET_INSTITUTION_PROD_USER_INFO');
 
@@ -31,18 +31,8 @@ const Assistance = () => {
       .then((res) => {
         setSenderEmail(res.email);
       })
-      .catch((error) => {
-        addError({
-          id: 'GET_INSTITUTIONAL_USER_EMAIL',
-          blocking: false,
-          error,
-          techDescription: 'An error occurred getting institutional user email',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
+      .catch(() => {
+        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -72,25 +62,16 @@ const Assistance = () => {
       setLoading(true);
       sendEmail(body)
         .then(() => setThxPage(true))
-        .catch((error) => {
-          addError({
-            id: 'SEND_ASSISTENCE_EMAIL',
-            blocking: false,
-            error,
-            techDescription: 'An error occurred sending assistance email',
-            displayableTitle: t('errors.genericTitle'),
-            displayableDescription: t('errors.genericDescription'),
-            toNotify: true,
-            component: 'Toast',
-            showCloseIcon: true,
-          });
+        .catch(() => {
+          setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
         })
         .finally(() => setLoading(false));
     },
   });
 
   return (
-    <Fragment>
+    <Box maxWidth='75%' justifySelf='center'>
+      <Fragment>
       {!viewThxPage ? (
         <Box
           sx={{
@@ -254,6 +235,7 @@ const Assistance = () => {
         </Box>
       )}
     </Fragment>
+    </Box>
   );
 };
 

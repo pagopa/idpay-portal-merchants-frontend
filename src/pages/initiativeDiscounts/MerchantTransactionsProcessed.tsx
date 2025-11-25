@@ -1,5 +1,4 @@
 import { Box, Table, TableBody, TableCell, TableRow } from '@mui/material';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +8,7 @@ import { getMerchantTransactionsProcessed } from '../../services/merchantService
 import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
 import { MerchantTransactionProcessedDTO } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
+import { useAlert } from '../../hooks/useAlert';
 import {
   TransactionsComponentProps,
   renderTrasactionProcessedStatus,
@@ -22,6 +22,7 @@ import { useTableDataFiltered } from './useTableDataFiltered';
 import { useMemoInitTableData } from './useMemoInitTableData';
 
 const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
+  const {setAlert} = useAlert();
   const { t } = useTranslation();
   const [page, setPage] = useState<number>(0);
   const [rows, setRows] = useState<Array<MerchantTransactionProcessedDTO>>([]);
@@ -30,7 +31,6 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
   const [filterDataByUser, setFilterDataByUser] = useState<string | undefined>();
   const [filterDataByStatus, setFilterDataByStatus] = useState<string | undefined>();
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
-  const addError = useErrorDispatcher();
 
   const formik = useFormik({
     initialValues: {
@@ -72,18 +72,8 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
           setRows([]);
         }
       })
-      .catch((error) => {
-        addError({
-          id: 'GET_INITIATIVE_MERCHANT_DISCOUNTS_PROCESSED_LIST_ERROR',
-          blocking: false,
-          error,
-          techDescription: 'An error occurred getting initiative merchant discounts processed list',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
+      .catch(() => {
+        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
       })
       .finally(() => setLoading(false));
   };

@@ -10,12 +10,15 @@ import ROUTES from '../../routes';
 import { useInitiativesList } from '../../hooks/useInitiativesList';
 import Footer from '../Footer/Footer';
 import CustomHeader from '../Header/CustomHeader';
+import AlertComponent from '../Alert/AlertComponent';
+import { useAlert } from '../../hooks/useAlert';
 
 type Props = {
   children?: React.ReactNode;
 };
 
 const Layout = ({ children }: Props) => {
+  const { title, text, isOpen } = useAlert();
   const onExit = useUnloadEventOnExit();
   const loggedUser = useSelector(userSelectors.selectLoggedUser);
   const location = useLocation();
@@ -32,6 +35,8 @@ const Layout = ({ children }: Props) => {
     exact: true,
     strict: false,
   });
+
+  const matchNoAlert = matchPath(location.pathname, {path: [ROUTES.PRIVACY_POLICY, ROUTES.TOS], exact: true, strict: false});
 
   useEffect(() => {
     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
@@ -73,6 +78,7 @@ const Layout = ({ children }: Props) => {
             gridTemplateColumns="1fr"
           >
             {children}
+          { isOpen && <AlertComponent title={title} message={text} /> }
           </Box>
         </Box>
       ) : (
@@ -84,14 +90,12 @@ const Layout = ({ children }: Props) => {
         >
           <Box
             display="grid"
-            justifyContent="center"
             pb={16}
             pt={2}
             gridColumn="span 12"
-            maxWidth="75%"
-            justifySelf="center"
           >
             {children}
+          { isOpen && !matchNoAlert && <AlertComponent title={title} message={text} sx={{right: '20px'}} />}
           </Box>
         </Box>
       )}
