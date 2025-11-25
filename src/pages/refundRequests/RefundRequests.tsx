@@ -32,29 +32,6 @@ const RefundRequests = () => {
     const addError = useErrorDispatcher();
     const initiativesList = useSelector(intiativesListSelector);
 
-    //     {
-    //         id: 1,
-    //         name: '001-20251125 223',
-    //         posType: 'FISICO',
-    //         totalAmountCents: 10000,
-    //         status: 'CREATED',
-    //     },
-    //     {
-    //         id: 2,
-    //         name: '002-20251125 224',
-    //         posType: 'ONLINE',
-    //         totalAmountCents: 20000,
-    //         status: 'APPROVED',
-    //     },
-    //     {
-    //         id: 3,
-    //         name: '003-20251125 225',
-    //         posType: 'ONLINE',
-    //         totalAmountCents: 300000,
-    //         status: 'EVALUATING',
-    //     },
-    // ];
-
     const columns: Array<GridColDef> = [
         {
             field: 'spacer',
