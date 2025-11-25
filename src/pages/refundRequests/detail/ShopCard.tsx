@@ -9,23 +9,24 @@ import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 
 type Props = {
   batchName: string;
+  dateRange: string;
+  companyName: string;
   refundAmount: string;
   status: string;
+  approvedRefund: string;
 };
 
-export const  ShopCard = ({ batchName, refundAmount, status }: Props) => {
+export const  ShopCard = ({ batchName, dateRange, companyName, refundAmount, status, approvedRefund }: Props) => {
   const { t } = useTranslation();
   const boldStyle = { fontWeight: theme.typography.fontWeightBold };
   const [iban, setIban] = useState<string | undefined>();
   const [ibanHolder, setIbanHolder] = useState<string | undefined>();
-  const [businessName, setBusinessName] = useState<string | undefined>();
 
   useEffect(() => {
     getMerchantDetail('68dd003ccce8c534d1da22bc')
       .then((response) => {
         setIban(response?.iban);
         setIbanHolder(response?.ibanHolder);
-        setBusinessName(response?.businessName);
       })
       .catch((error) =>
         console.log(error)
@@ -50,7 +51,7 @@ export const  ShopCard = ({ batchName, refundAmount, status }: Props) => {
     },
     {
       label: t('pages.refundRequests.storeDetails.referencePeriod'),
-      value: '-',
+      value: dateRange || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
     },
     {
@@ -60,7 +61,7 @@ export const  ShopCard = ({ batchName, refundAmount, status }: Props) => {
     },
     {
       label: t('pages.refundRequests.storeDetails.companyName'),
-      value: businessName,
+      value: companyName,
       minWidth: '180px',
     },
     {},
@@ -72,6 +73,11 @@ export const  ShopCard = ({ batchName, refundAmount, status }: Props) => {
     {
       label: t('pages.refundRequests.batchTransactionsDetails.state'),
       value: getStatusChip(),
+      minWidth: '180px',
+    },
+    {
+      label: t('pages.refundRequests.storeDetails.approvedRefund'),
+      value: approvedRefund || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
     }
   ];

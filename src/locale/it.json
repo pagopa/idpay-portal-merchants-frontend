@@ -349,7 +349,8 @@
         "requestedRefund" : "Rimborso richiesto",
         "holder" : "Intestatario",
         "iban" : "IBAN",
-        "status" : "Status"
+        "status" : "Status",
+        "approvedRefund" : "Rimborso approvato"
       }
     }
   },
