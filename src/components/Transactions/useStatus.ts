@@ -22,7 +22,9 @@ const getStatus: any = (status: string) => {
         case 'EVALUATING':
             return { color: '#EEEEEE', textColor: '#17324D !important', label: 'Preso in carico' };
         case 'APPROVED':
-            return { color: '#E1F4E1', label: 'Rimborso approvato', textColor: '#224021' };
+            return { color: '#E1F4E1', textColor: '#224021', label: 'Approvato' };
+        case 'SENT':
+            return { color: '#EEEEEE', textColor: '#224021', label: 'Inviato' };
         default:
             return { color: theme.palette.action.disabled as string, label: MISSING_DATA_PLACEHOLDER };
     }

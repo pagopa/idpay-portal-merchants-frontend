@@ -236,7 +236,7 @@ export const MerchantApi = {
       batchId
     });
 
-    return extractResponse(result, 200, onRedirectToLogin);
+    return extractResponse(result, 204, onRedirectToLogin);
   },
   
 };
