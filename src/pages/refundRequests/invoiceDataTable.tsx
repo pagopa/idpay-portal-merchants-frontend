@@ -246,23 +246,6 @@ const invoiceDataTable: React.FC = () => {
                 id: 'authorizedAmountCents',
                 type: TYPE_TEXT.Currency,
               },
-              {
-                label: 'Numero fattura',
-                id: 'docNumber',
-                type: TYPE_TEXT.Text,
-                bold: true,
-              },
-              {
-                label: 'Fattura',
-                id: 'fileName',
-                type: TYPE_TEXT.Text,
-              },
-              {
-                label: 'Stato',
-                id: 'status',
-                type: TYPE_TEXT.Text,
-                render: (val: any) => <StatusChip status={val} />,
-              },
             ]}
           />
         )}
