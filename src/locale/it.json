@@ -352,7 +352,8 @@
         "iban" : "IBAN",
         "status" : "Status",
         "approvedRefund" : "Rimborso approvato",
-        "exportCSV" : "Esporta csv"
+        "exportCSV" : "Esporta csv",
+        "detailCardTitleDx" : "dati rimborso"
       }
     }
   },
