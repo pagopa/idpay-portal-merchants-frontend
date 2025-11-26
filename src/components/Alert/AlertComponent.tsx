@@ -9,7 +9,7 @@ interface AlertProps {
 }
 
 const AlertComponent = ({ isOpen, title, message, sx }: AlertProps) => (
-    <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit >
+    <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
         <Box sx={{
             display: 'flex',
             height: '100%',
@@ -36,8 +36,7 @@ const AlertComponent = ({ isOpen, title, message, sx }: AlertProps) => (
                     '& .MuiAlert-icon': {
                         color: '#FF5C5C',
                     },
-                }}
-            >
+                }}>
                 <AlertTitle>{title}</AlertTitle>
                 {message}
             </Alert>

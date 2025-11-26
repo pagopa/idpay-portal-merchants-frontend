@@ -69,7 +69,7 @@ const Layout = ({ children }: Props) => {
           </Box>
           <Box
             gridColumn="auto"
-            sx={{ backgroundColor: '#F5F5F5' }}
+            sx={{ backgroundColor: '#F5F5F5', overflowX: 'clip' }}
             display="grid"
             justifyContent="center"
             pb={16}
@@ -78,7 +78,7 @@ const Layout = ({ children }: Props) => {
             gridTemplateColumns="1fr"
           >
             {children}
-          <AlertComponent isOpen={isOpen} title={title} message={text} />
+            <AlertComponent isOpen={isOpen} title={title} message={text} />
           </Box>
         </Box>
       ) : (
@@ -89,6 +89,7 @@ const Layout = ({ children }: Props) => {
           justifyContent="center"
         >
           <Box
+            sx={{overflowX: 'clip'}}
             display="grid"
             pb={16}
             pt={2}
