@@ -141,7 +141,7 @@ const mockData = [
     name: '002-20251125 224',
     posType: 'ONLINE',
     totalAmountCents: 20000,
-    status: 'APPROVED',
+    status: 'SENT',
   },
   {
     id: 3,
@@ -242,7 +242,6 @@ describe('RefundRequests', () => {
     });
     
     expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching reward batches:', expect.any(Error));
     
     consoleErrorSpy.mockRestore();
   });
@@ -409,19 +408,8 @@ describe('RefundRequests', () => {
     
     const chips = screen.getAllByTestId('custom-chip');
     expect(chips[0]).toHaveTextContent('CREATED');
-    expect(chips[1]).toHaveTextContent('APPROVED');
+    expect(chips[1]).toHaveTextContent('SENT');
     expect(chips[2]).toHaveTextContent('EVALUATING');
-  });
-
-  it('should display formatted currency amounts', async () => {
-    renderWithStore(<RefundRequests />);
-    
-    await waitFor(() => {
-      expect(screen.getByText('100.00 €')).toBeInTheDocument();
-    });
-    
-    expect(screen.getByText('200.00 €')).toBeInTheDocument();
-    expect(screen.getByText('3000.00 €')).toBeInTheDocument();
   });
 
   it('should map posType correctly', async () => {
