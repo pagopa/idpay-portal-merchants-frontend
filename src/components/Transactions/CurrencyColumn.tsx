@@ -14,7 +14,7 @@ export default function CurrencyColumn({ value, type="body1" }: Props) {
               arrow={true}
             >
         <Typography variant={type} >
-            {currencyFormatter(Number(value)).toString()}
+            {value ? currencyFormatter(Number(value)).toString() : '-'}
         </Typography>
         </Tooltip>
     );

@@ -128,27 +128,38 @@ jest.mock('../../services/merchantService', () => ({
   sendRewardBatch: (initiativeId: string, batchId: string) => mockSendRewardBatch(initiativeId, batchId),
 }));
 
+const getPreviousMonth = () => {
+  const date = new Date();
+  date.setMonth(date.getMonth() - 1);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+};
+
 const mockData = [
   {
     id: 1,
     name: '001-20251125 223',
     posType: 'PHYSICAL',
-    totalAmountCents: 10000,
+    initialAmountCents: 10000,
     status: 'CREATED',
+    month: getPreviousMonth(), 
   },
   {
     id: 2,
     name: '002-20251125 224',
     posType: 'ONLINE',
-    totalAmountCents: 20000,
+    initialAmountCents: 20000,
     status: 'SENT',
+    month: getPreviousMonth(),
   },
   {
     id: 3,
     name: '003-20251125 225',
     posType: 'ONLINE',
-    totalAmountCents: 300000,
+    initialAmountCents: 300000,
     status: 'EVALUATING',
+    month: getPreviousMonth(),
   },
 ];
 
@@ -394,7 +405,7 @@ describe('RefundRequests', () => {
     });
     
     expect(screen.getByText('Tipologia')).toBeInTheDocument();
-    expect(screen.getByText('Importo')).toBeInTheDocument();
+    expect(screen.getByText('Rimborso richiesto')).toBeInTheDocument();
     expect(screen.getByText('Stato')).toBeInTheDocument();
   });
 
@@ -428,8 +439,9 @@ describe('RefundRequests', () => {
       id: 4,
       name: '',
       posType: 'PHYSICAL',
-      totalAmountCents: 10000,
+      initialAmountCents: 10000,
       status: 'CREATED',
+      month: getPreviousMonth(),
     }];
     
     mockGetRewardBatches.mockResolvedValue({ content: emptyDataMock });
@@ -514,9 +526,6 @@ describe('RefundRequests', () => {
     await waitFor(() => {
       expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
     });
-    
-    // Manually trigger the send action (simulating the flow)
-    // Since there's no data, we can't actually click the button, but we test the logic
     
     consoleErrorSpy.mockRestore();
   });
