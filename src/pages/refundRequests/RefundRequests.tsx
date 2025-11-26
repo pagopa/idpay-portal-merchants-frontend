@@ -59,7 +59,7 @@ const RefundRequests = () => {
         },
         {
             field: 'initialAmountCents',
-            headerName: 'Importo',
+            headerName: 'Rimborso richiesto',
             disableColumnMenu: true,
             flex: 2,
             sortable: false,
@@ -160,9 +160,24 @@ const RefundRequests = () => {
         );
     };
 
-    const isRowSelectable = (params: any) => {
-        const currentMonth = new Date().toISOString().slice(0, 7);
-        return params?.row?.status === 'CREATED' && params?.row?.month !== currentMonth;
+  const isRowSelectable = (params: any) => {
+        if (params?.row?.status !== 'CREATED') {
+            return false;
+        }
+
+        const yearMonth = new Date().toISOString().slice(0, 7);
+        const currentMonth = Number(yearMonth.split('-')[1]);
+        const currentYear = Number(yearMonth.split('-')[0]);
+        const batchMonth = Number(params?.row?.month?.split("-")[1]);
+        const batchYear = Number(params?.row?.month?.split("-")[0]);
+
+        if (batchYear < currentYear) {
+            return true;
+        }
+        
+        if (batchYear === currentYear && batchMonth < currentMonth) {return true;};
+
+        return false;
     };
 
     const posTypeMapper = (posType: string) => {
