@@ -4,9 +4,9 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
-import TransactionDetail from '../../components/Transactions/TransactionDetail';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { TYPE_TEXT } from '../../utils/constants';
+import InvoiceDetail from './detail/InvoiceDetail';
 
 const invoiceData = Array.from({ length: 10 }, (_, i) => ({
   id: i + 1,
@@ -209,7 +209,7 @@ const InvoiceDataTable: React.FC = () => {
       </Box>
       <DetailDrawer open={drawerOpened} toggleDrawer={handleToggleDrawer}>
         {rowDetail && (
-          <TransactionDetail
+          <InvoiceDetail
             title="Dettaglio transazione"
             itemValues={rowDetail}
             listItem={[

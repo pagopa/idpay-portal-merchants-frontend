@@ -16,7 +16,6 @@ type Props = {
   children?: ReactNode;
 };
 
-// StatusChip identico a quello usato in tabella
 const StatusChip = ({ status }: { status: string }) => {
   const statusMap: Record<
     string,
@@ -37,25 +36,16 @@ const StatusChip = ({ status }: { status: string }) => {
   );
 };
 
-export default function TransactionDetail({ title, itemValues, listItem }: Props) {
+export default function InvoiceDetail({ title, itemValues, listItem }: Props) {
   const addError = useErrorDispatcher();
   const { storeId } = useStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
+  const handlePreview = async (selectedTransaction: any, pointOfSaleId: string) => {
     setIsLoading(true);
     try {
-      const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
-      const { invoiceUrl } = response;
-      const filename = selectedTransaction?.invoiceFile?.filename || 'fattura.pdf';
-
-      const link = document.createElement('a');
-      // eslint-disable-next-line functional/immutable-data
-      link.href = invoiceUrl;
-      // eslint-disable-next-line functional/immutable-data
-      link.download = filename;
-      link.click();
-      setIsLoading(false);
+      const res = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
+      window.open(res.invoiceUrl, '_blank');
     } catch (error) {
       addError({
         id: 'FILE_DOWNLOAD',
@@ -150,7 +140,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
                       color: '#0055AA',
                     },
                   }}
-                  onClick={() => downloadFile(itemValues, storeId)}
+                  onClick={() => handlePreview(itemValues, storeId)}
                 >
                   {isLoading ? (
                     <CircularProgress color="inherit" size={20} data-testid="item-loader" />

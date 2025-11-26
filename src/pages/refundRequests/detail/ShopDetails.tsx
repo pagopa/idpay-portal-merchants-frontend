@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -9,7 +9,7 @@ import {
   MenuItem,
   Select,
   TextField,
-  CircularProgress,
+  CircularProgress, Button,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -17,53 +17,21 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-import DetailDrawer from '../../../components/Drawer/DetailDrawer';
-import getDetailFieldList from '../../../components/Transactions/useDetailList';
-import {
-  PointOfSaleTransactionProcessedDTO,
-  StatusEnum,
-} from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import getStatus from '../../../components/Transactions/useStatus';
 import CustomChip from '../../../components/Chip/CustomChip';
 import InvoiceDataTable from '../invoiceDataTable';
 import { formatDate, formattedCurrency } from '../../../helpers';
 import { ShopCard } from './ShopCard';
-import InvoiceDetail from './InvoiceDetail';
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation<{ store: any }>();
   const store = location.state?.store;
   const history = useHistory();
-  const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
-  const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
-  const listItemDetail = getDetailFieldList();
-
   const [dataTableIsLoading, setDataTableIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    const mock: PointOfSaleTransactionProcessedDTO = {
-      additionalProperties: {
-        productName: 'product',
-        discountCode: '4T6Y7UIF',
-      },
-      authorizedAmountCents: 40000 as any,
-      effectiveAmountCents: 50000 as any,
-      fiscalCode: 'AAABBB11C22D345E',
-      id: 'e5348bee-e342-4bb0-a551-42750bdf8d88',
-      rewardAmountCents: 10000 as any,
-      status: 'CANCELLED' as StatusEnum,
-      trxChargeDate: undefined,
-    };
-
-    setRowDetail([mock]);
-  }, []);
-
-  const handleToggleDrawer = (newOpen: boolean) => {
-    setDrawerOpened(newOpen);
-  };
 
   const formik = useFormik<any>({
     initialValues: {
@@ -109,7 +77,7 @@ const ShopDetails: React.FC = () => {
   return (
     <>
       <Box sx={{ width: '100%' }}>
-        <Box sx={{ display: 'grid', gridColumn: 'span 8' }}>
+        <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
           <Box sx={{ display: 'flex', gridColumn: 'span 12', alignItems: 'center', marginTop: 2 }}>
             <ButtonNaked
               component="button"
@@ -143,18 +111,36 @@ const ShopDetails: React.FC = () => {
           <Box
             sx={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'flex-start',
               width: '100%',
               mt: 3,
+              mb: 4,
+              gridColumn: 'span 12'
             }}
           >
-            <TitleBox
-              title={store?.name ?? MISSING_DATA_PLACEHOLDER}
-              mbTitle={2}
-              variantTitle="h4"
-              variantSubTitle="body1"
-            />
+            <Box sx={{ flexGrow: 1, minWidth: 0, pr: 2 }}>
+              <TitleBox
+                title={store?.name ?? MISSING_DATA_PLACEHOLDER}
+                mbTitle={0}
+                variantTitle="h4"
+                variantSubTitle="body1"
+              />
+            </Box>
+
+            <Button
+              startIcon={<FileDownloadIcon />}
+              size="small"
+              variant="contained"
+              sx={{
+                height: '43px',
+                ml: 'auto',
+              }}
+              onClick={() => {}}
+              data-testid="download-csv-button-test"
+              disabled
+            >
+              {t('pages.refundRequests.storeDetails.exportCSV')}
+            </Button>
           </Box>
         </Box>
 
@@ -171,7 +157,7 @@ const ShopDetails: React.FC = () => {
           sx={{
             height: 'auto',
             width: '100%',
-            mt: 2,
+            mt: 4,
             '& .MuiDataGrid-footerContainer': { display: 'none' },
           }}
         >
@@ -229,18 +215,6 @@ const ShopDetails: React.FC = () => {
           )}
           <InvoiceDataTable />
         </Box>
-
-        <DetailDrawer
-          data-testid="detail-drawer"
-          open={drawerOpened}
-          toggleDrawer={handleToggleDrawer}
-        >
-          <InvoiceDetail
-            title={'Dettaglio transazione'}
-            itemValues={rowDetail[0]}
-            listItem={listItemDetail}
-          />
-        </DetailDrawer>
       </Box>
     </>
   );
