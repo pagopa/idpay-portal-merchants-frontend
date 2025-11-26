@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { Box, Stack, Tooltip, Typography, CircularProgress, Alert, Slide } from "@mui/material";
-import { Box, Stack, Tooltip, Typography, CircularProgress, Alert, Slide } from "@mui/material";
 import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
-import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -29,7 +27,6 @@ const RefundRequests = () => {
     const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
     const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
     const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
-    const [showSuccessAlert, setShowSuccessAlert] = useState<boolean>(false);
     const [showSuccessAlert, setShowSuccessAlert] = useState<boolean>(false);
     // const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
     const addError = useErrorDispatcher();
@@ -85,12 +82,6 @@ const RefundRequests = () => {
             void fetchRewardBatches(initiativesList[0].initiativeId!);
         }
     }, [initiativesList]);
-
-    useEffect(() => {
-        if (showSuccessAlert) {
-            setTimeout(() => setShowSuccessAlert(false), 3000);
-        }
-    }, [showSuccessAlert]);
 
     useEffect(() => {
         if (showSuccessAlert) {
