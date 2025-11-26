@@ -104,17 +104,7 @@ const RefundRequests = () => {
 
             }
         } catch (error: any) {
-             addError({
-                id: 'GET_REWARD_BATCHES',
-                blocking: false,
-                error,
-                techDescription: 'An error occurred getting reward batches',
-                displayableTitle: t('errors.genericTitle'),
-                displayableDescription: t('errors.genericDescription'),
-                toNotify: true,
-                component: 'Toast',
-                showCloseIcon: true,
-            });
+            setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
         } finally {
             setRewardBatchesLoading(false);
         }
