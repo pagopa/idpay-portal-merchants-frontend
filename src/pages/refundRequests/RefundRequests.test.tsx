@@ -2,9 +2,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { MemoryRouter, Route } from 'react-router-dom';
 import RefundRequests from './RefundRequests';
 
-// Mock delle dipendenze
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
@@ -172,7 +172,15 @@ const createMockStore = (initiatives = [{ initiativeId: 'test-initiative-id' }])
 };
 
 const renderWithStore = (component: React.ReactElement, store = createMockStore()) => {
-  return render(<Provider store={store}>{component}</Provider>);
+  return render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={['/refund-requests']}>
+        <Route path="/refund-requests">
+          {component}
+        </Route>
+      </MemoryRouter>
+    </Provider>
+  );
 };
 
 describe('RefundRequests', () => {
