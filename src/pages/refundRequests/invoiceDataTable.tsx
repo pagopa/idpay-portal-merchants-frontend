@@ -5,17 +5,51 @@ import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
 import TransactionDetail from '../../components/Transactions/TransactionDetail';
-import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { TYPE_TEXT } from '../../utils/constants';
+import { safeFormatDate } from '../../utils/formatUtils';
 
-const invoiceData = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
-  invoiceNumber: `INV-${String(i + 1).padStart(3, '0')}`,
-  invoiceDate: '-',
-  amount: 100.0,
-  status: 'TO_REVIEW',
-  puntoVendita: 'EURONICS DE RISI',
-}));
+// MOCK conforme a MerchantTransactionsListDTO (swagger)
+const merchantTransactionsListMock = {
+  content: Array.from({ length: 10 }, (_, i) => {
+    const trxId = `TRXID${i + 1}`;
+    return {
+      id: trxId,
+      trxCode: `TRXCODE${i + 1}`,
+      trxId,
+      fiscalCode: `RSSMRA85T1${String(i + 1).padStart(2, '0')}A562S`,
+      effectiveAmountCents: 50000 + i * 1000,
+      rewardAmountCents: 10000 + i * 500,
+      status: i % 2 === 0 ? 'REWARDED' : 'CANCELLED',
+      trxDate: new Date(2025, 10, 10 + i, 14, 12).toISOString(),
+      updateDate: new Date(2025, 10, 10 + i, 15, 0).toISOString(),
+      docNumber: `FPR 19${i + 1}/25`,
+      fileName: `Fattura_${i + 1}.pdf`,
+      businessName: 'Euronics',
+      channel: 'INSTORE',
+      authorizedAmountCents: 40000 + i * 1000,
+      rewardBatchId: `BATCH${i + 1}`,
+      rewardBatchTrxStatus: i % 2 === 0 ? 'APPROVED' : 'TO_CHECK',
+      rewardBatchRejectionReason: i % 3 === 0 ? 'Motivo di test' : undefined,
+      rewardBatchInclusionDate: new Date(2025, 10, 10 + i, 16, 0).toISOString(),
+      franchiseName: 'EURONICS DE RISI',
+      pointOfSaleType: 'PHYSICAL',
+      splitPayment: false,
+      residualAmountCents: 0,
+      qrcodePngUrl: '',
+      qrcodeTxtUrl: '',
+      additionalProperties: {
+        productName: `Prodotto ${i + 1}`,
+        discountCode: `DISC${i + 1}`,
+      },
+      pointOfSaleId: `POS${i + 1}`,
+      trxChargeDate: new Date(2025, 10, 10 + i, 14, 30).toISOString(),
+    };
+  }),
+  pageNo: 0,
+  pageSize: 10,
+  totalElements: 10,
+  totalPages: 1,
+};
 
 const infoStyles = {
   fontWeight: 400,
@@ -34,16 +68,18 @@ const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
   </Tooltip>
 );
 
-const StatusChip = ({ status }: { status: string }) => {
+import { RewardBatchTrxStatusEnum } from '../../api/generated/merchants/RewardBatchTrxStatus';
+
+const StatusChip = ({ status }: { status: RewardBatchTrxStatusEnum }) => {
   const statusMap: Record<
-    string,
+    RewardBatchTrxStatusEnum,
     { label: string; color: 'default' | 'success' | 'warning' | 'error'; textColor?: string }
   > = {
-    TO_CHECK: { label: 'Da esaminare', color: 'warning' },
-    CONSULTABLE: { label: 'Consultabile', color: 'warning' },
-    SUSPENDED: { label: 'Contrassegnata', color: 'warning' },
-    APPROVED: { label: 'Validata', color: 'success' },
-    REJECTED: { label: 'Rifiutata', color: 'error' },
+    [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: 'warning' },
+    [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: 'warning' },
+    [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Contrassegnata', color: 'warning' },
+    [RewardBatchTrxStatusEnum.APPROVED]: { label: 'Validata', color: 'success' },
+    [RewardBatchTrxStatusEnum.REJECTED]: { label: 'Rifiutata', color: 'error' },
   };
   const chipItem = statusMap[status] || { label: status, color: 'default' };
   return (
@@ -67,45 +103,35 @@ const getColumns = (handleListButtonClick: (row: any) => void) => [
     renderCell: () => <Checkbox disabled />,
   },
   {
-    field: 'invoiceNumber',
+    field: 'fileName',
     headerName: 'Fattura',
     flex: 3,
     sortable: false,
     renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
   },
   {
-    field: 'puntoVendita',
+    field: 'franchiseName',
     headerName: 'Punto vendita',
     flex: 2,
     sortable: false,
     renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
   },
   {
-    field: 'invoiceDate',
+    field: 'trxChargeDate',
     headerName: 'Data e ora',
     flex: 2,
     sortable: false,
-    valueGetter: (params: any) => params.row.invoiceDate,
-    renderCell: (params: any) =>
-      renderCellWithTooltip(
-        new Date(params.value).toLocaleString('it-IT', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        11
-      ),
+    valueGetter: (params: any) => params.row.trxChargeDate,
+    renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
   },
   {
-    field: 'amount',
+    field: 'effectiveAmountCents',
     headerName: 'Rimborso richiesto',
     flex: 2,
     sortable: false,
     renderCell: (params: any) =>
       renderCellWithTooltip(
-        params.value.toLocaleString('it-IT', {
+        (params.value / 100).toLocaleString('it-IT', {
           style: 'currency',
           currency: 'EUR',
           minimumFractionDigits: 2,
@@ -114,7 +140,7 @@ const getColumns = (handleListButtonClick: (row: any) => void) => [
       ),
   },
   {
-    field: 'status',
+    field: 'rewardBatchTrxStatus',
     headerName: 'Stato',
     flex: 1.5,
     sortable: false,
@@ -130,40 +156,21 @@ const getColumns = (handleListButtonClick: (row: any) => void) => [
     renderCell: (params: any) => (
       <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
         <IconButton onClick={() => handleListButtonClick(params.row)} size="small">
-          <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
+          <ChevronRightIcon data-testid={params.row.trxId} color="primary" fontSize="inherit" />
         </IconButton>
       </Box>
     ),
   },
 ];
 
-const InvoiceDataTable: React.FC = () => {
+const invoiceDataTable: React.FC = () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [drawerOpened, setDrawerOpened] = useState(false);
-  const [rowDetail, setRowDetail] = useState<PointOfSaleTransactionProcessedDTO | null>(null);
-
-  // MOCK DETTAGLIO: disabilita/commenta la riga con "mockDetail" per usare il dato reale della riga
-  const mockDetail: PointOfSaleTransactionProcessedDTO = {
-    additionalProperties: {
-      productName: 'Lavatrice Electrolux EW7FEU492DP 914495009',
-      discountCode: '4T6Y7UIF',
-    },
-    authorizedAmountCents: 40000 as any,
-    effectiveAmountCents: 50000 as any,
-    fiscalCode: 'ASDFOG43RTGFDSA',
-    id: 'e5348bee-e342-4bb0-a551-42750bdf8d88',
-    rewardAmountCents: 10000 as any,
-    status: 'TO_REVIEW' as any,
-    trxChargeDate: new Date('2021-03-24T14:12:00').toISOString() as any,
-    invoiceFile: {
-      docNumber: 'FPR 192/25',
-      filename: 'Nome fattura',
-    },
-  };
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [rowDetail, setRowDetail] = useState<any | null>(null);
 
   const handleListButtonClick = (row: any) => {
-    console.log(row);
-    // setRowDetail(row); // <-- usa questa riga per dettaglio reale
-    setRowDetail(mockDetail); // <-- mock abilitato per tutte le righe
+    setRowDetail(row);
     setDrawerOpened(true);
   };
 
@@ -172,23 +179,6 @@ const InvoiceDataTable: React.FC = () => {
     if (!open) {
       setRowDetail(null);
     }
-  };
-
-  const formatDateSafe = (val: any) => {
-    if (!val) {
-      return '-';
-    }
-    const d = val instanceof Date ? val : new Date(val);
-    if (isNaN(d.getTime())) {
-      return '-';
-    }
-    return d.toLocaleString('it-IT', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   return (
@@ -202,7 +192,7 @@ const InvoiceDataTable: React.FC = () => {
       <Box>
         <DataTable
           columns={getColumns(handleListButtonClick)}
-          rows={invoiceData}
+          rows={merchantTransactionsListMock.content}
           rowsPerPage={10}
           checkable={false}
         />
@@ -217,7 +207,7 @@ const InvoiceDataTable: React.FC = () => {
                 label: 'Data e ora',
                 id: 'trxChargeDate',
                 type: TYPE_TEXT.Text,
-                format: (val: any) => formatDateSafe(val),
+                format: (val: any) => safeFormatDate(val),
               },
               {
                 label: 'Elettrodomestico',
@@ -231,7 +221,7 @@ const InvoiceDataTable: React.FC = () => {
               },
               {
                 label: 'ID transazione',
-                id: 'id',
+                id: 'trxId',
                 type: TYPE_TEXT.Text,
                 bold: true,
               },
@@ -258,13 +248,13 @@ const InvoiceDataTable: React.FC = () => {
               },
               {
                 label: 'Numero fattura',
-                id: 'invoiceFile.docNumber',
+                id: 'docNumber',
                 type: TYPE_TEXT.Text,
                 bold: true,
               },
               {
                 label: 'Fattura',
-                id: 'invoiceFile.filename',
+                id: 'fileName',
                 type: TYPE_TEXT.Text,
               },
               {
@@ -281,4 +271,4 @@ const InvoiceDataTable: React.FC = () => {
   );
 };
 
-export default InvoiceDataTable;
+export default invoiceDataTable;
