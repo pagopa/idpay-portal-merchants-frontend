@@ -1,9 +1,9 @@
-import { Alert, Box, CircularProgress, IconButton, Slide, Stack, Tooltip, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
-import Button from '@mui/material/Button';
+import { useEffect, useState } from "react";
+import { Box, Stack, Tooltip, Typography, CircularProgress, Alert, Slide, IconButton } from '@mui/material';
+import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridColDef } from "@mui/x-data-grid";
 import { theme } from "@pagopa/mui-italia";
@@ -66,7 +66,7 @@ const RefundRequests = () => {
         },
         {
             field: 'initialAmountCents',
-            headerName: 'Importo',
+            headerName: 'Rimborso richiesto',
             disableColumnMenu: true,
             flex: 2,
             sortable: false,
@@ -137,8 +137,20 @@ const RefundRequests = () => {
                 setRewardBatches(response.content as Array<RewardBatchDTO>);
                 setSelectedRows([]);
 
+
             }
         } catch (error: any) {
+             addError({
+                id: 'GET_REWARD_BATCHES',
+                blocking: false,
+                error,
+                techDescription: 'An error occurred getting reward batches',
+                displayableTitle: t('errors.genericTitle'),
+                displayableDescription: t('errors.genericDescription'),
+                toNotify: true,
+                component: 'Toast',
+                showCloseIcon: true,
+            });
              addError({
                 id: 'GET_REWARD_BATCHES',
                 blocking: false,
@@ -195,9 +207,24 @@ const RefundRequests = () => {
         );
     };
 
-    const isRowSelectable = (params: any) => {
-        const currentMonth = new Date().toISOString().slice(0, 7);
-        return params?.row?.status === 'CREATED' && params?.row?.month !== currentMonth;
+  const isRowSelectable = (params: any) => {
+        if (params?.row?.status !== 'CREATED') {
+            return false;
+        }
+
+        const yearMonth = new Date().toISOString().slice(0, 7);
+        const currentMonth = Number(yearMonth.split('-')[1]);
+        const currentYear = Number(yearMonth.split('-')[0]);
+        const batchMonth = Number(params?.row?.month?.split("-")[1]);
+        const batchYear = Number(params?.row?.month?.split("-")[0]);
+
+        if (batchYear < currentYear) {
+            return true;
+        }
+        
+        if (batchYear === currentYear && batchMonth < currentMonth) {return true;};
+
+        return false;
     };
 
     const posTypeMapper = (posType: string) => {
@@ -218,6 +245,7 @@ const RefundRequests = () => {
                 return;
             }
             await sendRewardBatch(initiativeId, batchId.toString());
+            setTimeout(() => setShowSuccessAlert(true), 1000);
             setTimeout(() => setShowSuccessAlert(true), 1000);
             await fetchRewardBatches(initiativeId);
 
@@ -324,6 +352,29 @@ const RefundRequests = () => {
                           {t('pages.refundRequests.rewardBatchSentSuccess')}
                         </Alert>
                       </Slide>
+                  <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
+                        <Alert
+                          severity="success"
+                          icon={<CheckCircleOutline />}
+                          sx={{
+                            position: 'fixed',
+                            bottom: 40,
+                            right: 20,
+                            backgroundColor: 'white',
+                            width: 'auto',
+                            maxWidth: '400px',
+                            minWidth: '300px',
+                            zIndex: 1300,
+                            boxShadow: 3,
+                            borderRadius: 1,
+                            '& .MuiAlert-icon': {
+                              color: '#6CC66A',
+                            },
+                          }}
+                        >
+                          {t('pages.refundRequests.rewardBatchSentSuccess')}
+                        </Alert>
+                      </Slide>
 
                 {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
                     <NoResultPaper translationKey="pages.refundRequests.noData" />
@@ -332,5 +383,6 @@ const RefundRequests = () => {
         </Box>
     );
 };
+
 
 export default RefundRequests;

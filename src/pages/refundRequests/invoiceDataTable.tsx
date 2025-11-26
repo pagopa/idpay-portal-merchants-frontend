@@ -4,7 +4,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
-import TransactionDetail from '../../components/Transactions/TransactionDetail';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 
@@ -69,6 +68,7 @@ const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
 );
 
 import { RewardBatchTrxStatusEnum } from '../../api/generated/merchants/RewardBatchTrxStatus';
+import InvoiceDetail from './detail/InvoiceDetail';
 
 const StatusChip = ({ status }: { status: RewardBatchTrxStatusEnum }) => {
   const statusMap: Record<
@@ -199,7 +199,7 @@ const invoiceDataTable: React.FC = () => {
       </Box>
       <DetailDrawer open={drawerOpened} toggleDrawer={handleToggleDrawer}>
         {rowDetail && (
-          <TransactionDetail
+          <InvoiceDetail
             title="Dettaglio transazione"
             itemValues={rowDetail}
             listItem={[
