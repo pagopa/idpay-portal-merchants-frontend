@@ -126,7 +126,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
               {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
             </Typography>
             <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
-              {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
+              {itemValues?.docNumber ?? MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>
         </Grid>
@@ -154,7 +154,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
                 <CircularProgress color="inherit" size={20} data-testid="item-loader" />
               ) : (
                 <>
-                  <ReceiptLong /> {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
+                  <ReceiptLong /> {itemValues?.fileName ?? MISSING_DATA_PLACEHOLDER}
                 </>
               )}
             </Button>

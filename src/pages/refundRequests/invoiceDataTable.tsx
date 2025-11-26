@@ -227,7 +227,7 @@ const invoiceDataTable: React.FC = () => {
               },
               {
                 label: 'Codice sconto',
-                id: 'additionalProperties.discountCode',
+                id: 'trxCode',
                 type: TYPE_TEXT.Text,
               },
               {
