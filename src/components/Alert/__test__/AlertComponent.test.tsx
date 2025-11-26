@@ -1,15 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import AlertComponent from '../AlertComponent';
 
-const errorSetup = (title: string, message: string) => {
-  render(<AlertComponent title={title} message={message} />);
+const errorSetup = (isOpen: boolean, title: string, message: string) => {
+  render(<AlertComponent isOpen={isOpen} title={title} message={message} />);
 };
 
 describe('ErrorAlert', () => {
   it('should render the component with the correct message', () => {
     const testTitle = 'This is a test error title.';
     const testMessage = 'This is a test error message.';
-    errorSetup(testTitle, testMessage);
+    errorSetup(true, testTitle, testMessage);
 
     const alertMessage = screen.getByText(testMessage);
     const alertTitle = screen.getByText(testTitle);

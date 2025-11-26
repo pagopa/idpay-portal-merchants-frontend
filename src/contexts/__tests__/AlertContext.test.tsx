@@ -17,7 +17,7 @@ const EmptyConsumer = () => {
         setAlert()
     }, [])
 
-    return <div>{ isOpen && <AlertComponent data-testid="alert-test" title={title} message={text} /> }</div>
+    return <div><AlertComponent data-testid="alert-test" isOpen={isOpen} title={title} message={text} /></div>
 }
 
 const Consumer = () => {
@@ -27,7 +27,7 @@ const Consumer = () => {
         setAlert('title', 'text', true)
     }, [])
 
-    return <div>{ isOpen && <AlertComponent data-testid="alert-test" title={title} message={text} /> }</div>
+    return <div><AlertComponent data-testid="alert-test" isOpen={isOpen} title={title} message={text} /></div>
 }
 
 describe('AlertContext', () => {
