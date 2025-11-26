@@ -132,7 +132,7 @@ const ShopDetails: React.FC = () => {
               size="small"
               variant="contained"
               sx={{
-                height: '43px',
+                height: '40px',
                 ml: 'auto',
               }}
               onClick={() => {}}
