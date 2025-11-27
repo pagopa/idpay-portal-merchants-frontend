@@ -244,7 +244,7 @@ const InitiativeStores: React.FC = () => {
       if (!fromSort) {
         setStoresLoading(false);
       }
-      setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
     }
   };
 

@@ -24,7 +24,7 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
           setIban(response?.iban);
         })
         .catch(() =>
-          setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true)
+          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'})
         );
     }
   }, [id]);
@@ -41,7 +41,7 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
         .catch(() => {
           setAmount(undefined);
           setRefunded(undefined);
-          setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
         });
     }
   }, [id]);

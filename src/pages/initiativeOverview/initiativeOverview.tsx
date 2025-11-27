@@ -41,7 +41,7 @@ const InitiativeOverview = () => {
         setOnboardingDate(formatDate(response?.activationDate));
       })
       .catch(() =>
-        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true)
+        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'})
       );
   }, [id]);
 

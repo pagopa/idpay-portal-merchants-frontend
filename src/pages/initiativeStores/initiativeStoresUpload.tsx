@@ -110,7 +110,7 @@ const InitiativeStoresUpload: React.FC = () => {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
       if (!merchantId) {
-        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
         return;
       }
 
@@ -127,9 +127,9 @@ const InitiativeStoresUpload: React.FC = () => {
       const response = await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
       if (response) {
         if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
-          setAlert(t('errors.duplicateEmailError'), `${response?.message} già associata ad altro punto vendita`, true);
+          setAlert({title: t('errors.duplicateEmailError'), text: `${response?.message} già associata ad altro punto vendita`, isOpen: true, severity: 'error'});
         } else {
-          setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
         }
       } else {
         setPointsOfSaleLoaded(true);

@@ -32,7 +32,7 @@ const Assistance = () => {
         setSenderEmail(res.email);
       })
       .catch(() => {
-        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
       })
       .finally(() => setLoading(false));
   }, []);
@@ -63,7 +63,7 @@ const Assistance = () => {
       sendEmail(body)
         .then(() => setThxPage(true))
         .catch(() => {
-          setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
         })
         .finally(() => setLoading(false));
     },

@@ -73,7 +73,7 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
         }
       })
       .catch(() => {
-        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
       })
       .finally(() => setLoading(false));
   };

@@ -28,7 +28,7 @@ const CancelTransactionModal = ({
         window.location.reload();
       })
       .catch(() => {
-        setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
       });
   };
 

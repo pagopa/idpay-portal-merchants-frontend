@@ -11,23 +11,23 @@ import UserNotifyHandle from "@pagopa/selfcare-common-frontend/components/UserNo
 import AlertComponent from "../../components/Alert/AlertComponent";
 
 const EmptyConsumer = () => {
-    const { title, text, isOpen, setAlert } = useAlert();
+    const { alert, setAlert } = useAlert();
 
     useEffect(() => {
         setAlert()
     }, [])
 
-    return <div><AlertComponent data-testid="alert-test" isOpen={isOpen} title={title} message={text} /></div>
+    return <div><AlertComponent data-testid="alert-test" /></div>
 }
 
 const Consumer = () => {
-    const { title, text, isOpen, setAlert } = useAlert();
+    const { alert, setAlert } = useAlert();
 
     useEffect(() => {
-        setAlert('title', 'text', true)
+        setAlert({title: 'title', text: 'text', isOpen: true})
     }, [])
 
-    return <div><AlertComponent data-testid="alert-test" isOpen={isOpen} title={title} message={text} /></div>
+    return <div><AlertComponent data-testid="alert-test"/></div>
 }
 
 describe('AlertContext', () => {

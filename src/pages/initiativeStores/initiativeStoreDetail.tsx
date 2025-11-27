@@ -96,7 +96,7 @@ const InitiativeStoreDetail = () => {
         setStoreDetail(response);
       }
     } catch (error: any) {
-      setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
     }
   };
 
@@ -120,7 +120,7 @@ const InitiativeStoreDetail = () => {
       }
     } catch (error: any) {
       console.log(error, 'error');
-      setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
     } finally {
       setDataTableIsLoading(false);
     }
@@ -283,7 +283,7 @@ const InitiativeStoreDetail = () => {
       },
     ];
     if (storeDetail.contactEmail === contactEmailConfirmModal) {
-      setAlert(t('errors.duplicateEmailError'),`${storeDetail.contactEmail} è già associata ad altro punto vendita`, true);
+      setAlert({title: t('errors.duplicateEmailError'), text: `${storeDetail.contactEmail} è già associata ad altro punto vendita`, isOpen: true, severity: 'error'});
       setModalIsOpen(false);
       return;
     }
@@ -291,11 +291,11 @@ const InitiativeStoreDetail = () => {
     const response = await updateMerchantPointOfSales(merchantId, obj);
     if (response) {
       if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
-        setAlert(t('errors.duplicateEmailError'),`${response?.message} è già associata ad altro punto vendita`, true);
+        setAlert({title: t('errors.duplicateEmailError'), text: `${response?.message} è già associata ad altro punto vendita`, isOpen: true, severity: 'error'});
         setModalIsOpen(false);
         setFieldErrors({});
       } else {
-        setAlert(t('errors.genericTitle'),t('errors.genericDescription'), true);
+        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
       }
     } else {
       setModalIsOpen(false);

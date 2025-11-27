@@ -41,7 +41,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
       link.click();
       setIsLoading(false);
     } catch (error) {
-      setAlert('Errore downloand file', 'Non è stato possibile scaricare il file', true);
+      setAlert({title: 'Errore downloand file', text: 'Non è stato possibile scaricare il file', isOpen: true, severity: 'error'});
       setIsLoading(false);
     }
   };

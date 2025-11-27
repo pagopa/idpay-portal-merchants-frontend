@@ -57,7 +57,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
             setDiscountCreated(true);
           })
           .catch(() => {
-            setAlert(t('errors.genericTitle'), t('errors.validationDescription'), true);
+            setAlert({title: t('errors.genericTitle'), text: t('errors.validationDescription'), isOpen: true, severity: 'error'});
           });
       }
     },

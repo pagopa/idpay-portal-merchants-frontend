@@ -105,7 +105,7 @@ const RefundRequests = () => {
 
             }
         } catch (error: any) {
-            setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+            setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
         } finally {
             setRewardBatchesLoading(false);
         }
@@ -194,7 +194,7 @@ const RefundRequests = () => {
             await fetchRewardBatches(initiativeId);
 
         } catch (e: any) {
-            setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+            setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
             if (initiativeId) {
                 await fetchRewardBatches(initiativeId.toString());
             }

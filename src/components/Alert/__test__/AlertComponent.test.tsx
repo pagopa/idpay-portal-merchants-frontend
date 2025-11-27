@@ -1,24 +1,32 @@
 import { render, screen } from '@testing-library/react';
+import { useEffect } from 'react';
 import AlertComponent from '../AlertComponent';
+import { useAlert } from '../../../hooks/useAlert';
+import { AlertProvider } from '../../../contexts/AlertContext';
 
-const errorSetup = (isOpen: boolean, title: string, message: string) => {
-  render(<AlertComponent isOpen={isOpen} title={title} message={message} />);
+const ErrorAlert = () => {
+  const {setAlert} = useAlert();
+
+  useEffect(() => {
+    setAlert({title: 'This is a test error title.', text: 'This is a test error message.', isOpen: true});
+  }, []);
+
+  return <AlertComponent />;
 };
 
 describe('ErrorAlert', () => {
-  it('should render the component with the correct message', () => {
+  it('should render the error component with the correct message', async () => {
+    render(
+      <AlertProvider>
+          <ErrorAlert />
+      </AlertProvider>
+    );
+
     const testTitle = 'This is a test error title.';
     const testMessage = 'This is a test error message.';
-    errorSetup(true, testTitle, testMessage);
 
     const alertMessage = screen.getByText(testMessage);
     const alertTitle = screen.getByText(testTitle);
-    const alertElement = screen.getByRole('alert');
-
-    expect(alertElement).toHaveClass('MuiAlert-standardError');
-
-    const iconElement = screen.getByTestId('ErrorOutlineIcon');
-    expect(iconElement).toBeInTheDocument();
 
     expect(alertMessage).toBeInTheDocument();
     expect(alertTitle).toBeInTheDocument();

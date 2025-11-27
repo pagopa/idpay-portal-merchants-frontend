@@ -22,7 +22,7 @@ export const useInitiativesList = (match: match | null) => {
           dispatch(setInitiativesList(resFiltered));
         })
         .catch(() => {
-          setAlert(t('errors.genericTitle'), t('errors.genericDescription'), true);
+          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
         });
     }
   }, [match]);

@@ -1,15 +1,20 @@
 import { Alert, AlertTitle, Box, Slide, SxProps, Theme } from '@mui/material';
 import ErrorOutline from '@mui/icons-material/ErrorOutline';
+import { CheckCircleOutline } from '@mui/icons-material';
+import { useAlert } from '../../hooks/useAlert';
 
-interface AlertProps {
-    isOpen?: boolean;
-    title: string;
-    message: string;
-    sx?: SxProps<Theme>;
-}
+const severityMap = {
+    error: {color: '#FF5C5C', icon: <ErrorOutline />},
+    warning: {color: undefined, icon: undefined},
+    info: {color: undefined, icon: undefined},
+    success: {color: '#6CC66A', icon: <CheckCircleOutline />}
+};
 
-const AlertComponent = ({ isOpen, title, message, sx }: AlertProps) => (
-    <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
+const AlertComponent = (sx: SxProps<Theme>) => {
+    const {alert} = useAlert();
+    const {title, text, isOpen, severity} = alert;
+
+    return <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
         <Box sx={{
             display: 'flex',
             height: '100%',
@@ -20,8 +25,8 @@ const AlertComponent = ({ isOpen, title, message, sx }: AlertProps) => (
             zIndex: '1300' }}>
             <Alert
                 data-testid="alert"
-                severity='error'
-                icon={<ErrorOutline />}
+                severity={severity}
+                icon={severity && severityMap[severity].icon}
                 sx={{
                     ...sx,
                     position: 'absolute',
@@ -34,14 +39,13 @@ const AlertComponent = ({ isOpen, title, message, sx }: AlertProps) => (
                     boxShadow: 3,
                     borderRadius: 1,
                     '& .MuiAlert-icon': {
-                        color: '#FF5C5C',
+                        color: severity && severityMap[severity].color,
                     },
                 }}>
                 <AlertTitle>{title}</AlertTitle>
-                {message}
+                {text}
             </Alert>
         </Box>
-    </Slide>
-);
-
+    </Slide>;
+};
 export default AlertComponent;
