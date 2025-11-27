@@ -182,7 +182,7 @@ const RefundRequests = () => {
             }
             await sendRewardBatch(initiativeId, batchId.toString());
             setTimeout(() => {
-                setAlert({title: '', text: t('pages.refundRequests.rewardBatchSentSuccess'), isOpen: true, severity: 'success'});
+                setAlert({text: t('pages.refundRequests.rewardBatchSentSuccess'), isOpen: true, severity: 'success'});
             }, 1000);
             await fetchRewardBatches(initiativeId);
 

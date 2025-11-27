@@ -70,7 +70,7 @@ const InitiativeStores: React.FC = () => {
   const location = useLocation<{ showSuccessAlert?: boolean }>();
   useEffect(() => {
     if (location.state?.showSuccessAlert) {
-      setAlert({title: '', text: t('pages.initiativeStores.pointOfSalesUploadSuccess'), isOpen: true, severity: 'success'});
+      setAlert({text: t('pages.initiativeStores.pointOfSalesUploadSuccess'), isOpen: true, severity: 'success'});
 
       history.replace({
         ...location,

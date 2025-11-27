@@ -1,7 +1,15 @@
-import { Alert, AlertTitle, Box, Slide, SxProps, Theme } from '@mui/material';
+import { Alert, AlertColor, AlertTitle, Box, Slide, SxProps, Theme } from '@mui/material';
 import ErrorOutline from '@mui/icons-material/ErrorOutline';
 import { CheckCircleOutline } from '@mui/icons-material';
-import { useAlert } from '../../hooks/useAlert';
+
+export type AlertComponentProps = {
+    title?: string;
+    text?: string;
+    isOpen?: boolean;
+    severity?: AlertColor;
+    containerStyle?: SxProps<Theme>;
+    contentStyle?: SxProps<Theme>;
+};
 
 const severityMap = {
     error: {color: '#FF5C5C', icon: <ErrorOutline />},
@@ -10,12 +18,10 @@ const severityMap = {
     success: {color: '#6CC66A', icon: <CheckCircleOutline />}
 };
 
-const AlertComponent = (sx: SxProps<Theme>) => {
-    const {alert} = useAlert();
-    const {title, text, isOpen, severity} = alert;
-
-    return <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
+const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentStyle}: AlertComponentProps) => 
+    <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
         <Box sx={{
+            ...containerStyle,
             display: 'flex',
             height: '100%',
             alignItems:'flex-end',
@@ -28,7 +34,7 @@ const AlertComponent = (sx: SxProps<Theme>) => {
                 severity={severity}
                 icon={severity && severityMap[severity].icon}
                 sx={{
-                    ...sx,
+                    ...contentStyle,
                     position: 'absolute',
                     bottom: '-108px',
                     backgroundColor: 'white',
@@ -47,5 +53,4 @@ const AlertComponent = (sx: SxProps<Theme>) => {
             </Alert>
         </Box>
     </Slide>;
-};
 export default AlertComponent;

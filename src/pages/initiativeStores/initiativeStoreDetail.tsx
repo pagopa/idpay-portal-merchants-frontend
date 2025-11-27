@@ -285,7 +285,7 @@ const InitiativeStoreDetail = () => {
       }
     } else {
       setModalIsOpen(false);
-      setAlert({title: '', text: t('pages.initiativeStores.referentChangeSuccess'), isOpen: true, severity: 'success'});
+      setAlert({text: t('pages.initiativeStores.referentChangeSuccess'), isOpen: true, severity: 'success'});
       void fetchStoreDetail();
     }
   };

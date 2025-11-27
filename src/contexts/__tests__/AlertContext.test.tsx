@@ -2,12 +2,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { AlertProvider } from "../AlertContext";
 import { useAlert } from "../../hooks/useAlert";
 import { useEffect } from "react";
-import Layout from '../../components/Layout/Layout'
-import UnloadEventHandler from "@pagopa/selfcare-common-frontend/components/UnloadEventHandler";
-import { Provider } from "react-redux";
-import { createStore } from "../../redux/store";
-import LoadingOverlay from "@pagopa/selfcare-common-frontend/components/Loading/LoadingOverlay";
-import UserNotifyHandle from "@pagopa/selfcare-common-frontend/components/UserNotifyHandle";
 import AlertComponent from "../../components/Alert/AlertComponent";
 
 const EmptyConsumer = () => {
@@ -17,7 +11,7 @@ const EmptyConsumer = () => {
         setAlert()
     }, [])
 
-    return <div><AlertComponent data-testid="alert-test" /></div>
+    return <div><AlertComponent data-testid="alert-test" { ...alert} /></div>
 }
 
 const Consumer = () => {
@@ -27,7 +21,7 @@ const Consumer = () => {
         setAlert({title: 'title', text: 'text', isOpen: true})
     }, [])
 
-    return <div><AlertComponent data-testid="alert-test"/></div>
+    return <div><AlertComponent data-testid="alert-test" { ...alert}/></div>
 }
 
 describe('AlertContext', () => {

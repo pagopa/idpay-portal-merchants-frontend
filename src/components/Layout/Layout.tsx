@@ -11,12 +11,14 @@ import { useInitiativesList } from '../../hooks/useInitiativesList';
 import Footer from '../Footer/Footer';
 import CustomHeader from '../Header/CustomHeader';
 import AlertComponent from '../Alert/AlertComponent';
+import { useAlert } from '../../hooks/useAlert';
 
 type Props = {
   children?: React.ReactNode;
 };
 
 const Layout = ({ children }: Props) => {
+  const {alert} = useAlert();
   const onExit = useUnloadEventOnExit();
   const loggedUser = useSelector(userSelectors.selectLoggedUser);
   const location = useLocation();
@@ -76,7 +78,7 @@ const Layout = ({ children }: Props) => {
             gridTemplateColumns="1fr"
           >
             {children}
-            <AlertComponent/>
+            <AlertComponent title={alert.title} text={alert.text} severity={alert.severity} isOpen={alert.isOpen} />
           </Box>
         </Box>
       ) : (
@@ -94,7 +96,7 @@ const Layout = ({ children }: Props) => {
             gridColumn="span 12"
           >
             {children}
-          { !matchNoAlert && <AlertComponent sx={{right: '20px'}} />}
+          { !matchNoAlert && <AlertComponent title={alert.title} text={alert.text} severity={alert.severity} isOpen={alert.isOpen} contentStyle={{right: '20px'}} />}
           </Box>
         </Box>
       )}
