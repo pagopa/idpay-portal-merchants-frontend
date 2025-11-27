@@ -8,6 +8,7 @@ import { downloadInvoiceFile } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { formatValues, currencyFormatter } from '../../../utils/formatUtils';
 import { useStore } from '../../initiativeStores/StoreContext';
+import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 
 type Props = {
   title?: string;
@@ -16,7 +17,6 @@ type Props = {
   children?: ReactNode;
 };
 
-// StatusChip identico a quello usato in tabella
 const StatusChip = ({ status }: { status: string }) => {
   const statusMap: Record<
     string,
@@ -46,15 +46,8 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
     setIsLoading(true);
     try {
       const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
-      const { invoiceUrl } = response;
-      const filename = selectedTransaction?.invoiceFile?.filename || 'fattura.pdf';
+      window.open(response.invoiceUrl, '_blank');
 
-      const link = document.createElement('a');
-      // eslint-disable-next-line functional/immutable-data
-      link.href = invoiceUrl;
-      // eslint-disable-next-line functional/immutable-data
-      link.download = filename;
-      link.click();
       setIsLoading(false);
     } catch (error) {
       addError({
@@ -170,9 +163,32 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
             >
               Stato
             </Typography>
-            <StatusChip status={itemValues.status} />
+            <StatusChip status={itemValues?.status} />
           </Box>
         </Grid>
+        {[RewardBatchTrxStatusEnum.SUSPENDED,RewardBatchTrxStatusEnum.REJECTED].includes(itemValues.status) &&
+          <Grid item xs={12}>
+            <Box mt={1}>
+              <Typography
+                variant="overline"
+                fontWeight={theme.typography.fontWeightBold}
+                color={theme.palette.text.primary}
+              >
+                nota ufficiale
+              </Typography>
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                sx={{
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {itemValues?.rewardBatchRejectionReason ?? MISSING_DATA_PLACEHOLDER}
+              </Typography>
+            </Box>
+          </Grid>
+        }
       </Grid>
     </Box>
   );

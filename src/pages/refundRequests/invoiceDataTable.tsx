@@ -18,7 +18,7 @@ const merchantTransactionsListMock = {
       fiscalCode: `RSSMRA85T1${String(i + 1).padStart(2, '0')}A562S`,
       effectiveAmountCents: 50000 + i * 1000,
       rewardAmountCents: 10000 + i * 500,
-      status: i % 2 === 0 ? 'REWARDED' : 'CANCELLED',
+      status: i % 2 === 0 ? 'SUSPENDED' : 'CANCELLED',
       trxDate: new Date(2025, 10, 10 + i, 14, 12).toISOString(),
       updateDate: new Date(2025, 10, 10 + i, 15, 0).toISOString(),
       docNumber: `FPR 19${i + 1}/25`,
