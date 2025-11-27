@@ -21,20 +21,20 @@ const severityMap = {
 const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentStyle}: AlertComponentProps) => 
     <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
         <Box sx={{
-            ...containerStyle,
             display: 'flex',
             height: '100%',
             alignItems:'flex-end',
             justifyContent: 'flex-end',
             position: 'sticky',
             bottom: '128px',
-            zIndex: '1300' }}>
+            zIndex: '1300',
+            ...containerStyle
+            }}>
             <Alert
                 data-testid="alert"
                 severity={severity}
                 icon={severity && severityMap[severity].icon}
                 sx={{
-                    ...contentStyle,
                     position: 'absolute',
                     bottom: '-108px',
                     backgroundColor: 'white',
@@ -47,6 +47,7 @@ const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentS
                     '& .MuiAlert-icon': {
                         color: severity && severityMap[severity].color,
                     },
+                    ...contentStyle,
                 }}>
                 <AlertTitle>{title}</AlertTitle>
                 {text}
