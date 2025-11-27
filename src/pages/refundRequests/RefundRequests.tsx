@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Box, Stack, Tooltip, Typography, CircularProgress, Alert, Slide } from "@mui/material";
+import { Box, Stack, Tooltip, Typography, CircularProgress } from "@mui/material";
 import Button from "@mui/material/Button";
 import SendIcon from '@mui/icons-material/Send';
-import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import { useTranslation } from "react-i18next";
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridColDef } from "@mui/x-data-grid";
@@ -28,7 +27,6 @@ const RefundRequests = () => {
     const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
     const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
     const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
-    const [showSuccessAlert, setShowSuccessAlert] = useState<boolean>(false);
     // const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
     const initiativesList = useSelector(intiativesListSelector);
 
@@ -82,12 +80,6 @@ const RefundRequests = () => {
             void fetchRewardBatches(initiativesList[0].initiativeId!);
         }
     }, [initiativesList]);
-
-    useEffect(() => {
-        if (showSuccessAlert) {
-            setTimeout(() => setShowSuccessAlert(false), 3000);
-        }
-    }, [showSuccessAlert]);
 
     const infoStyles = {
         fontWeight: theme.typography.fontWeightRegular,
@@ -189,8 +181,9 @@ const RefundRequests = () => {
                 return;
             }
             await sendRewardBatch(initiativeId, batchId.toString());
-            setTimeout(() => setShowSuccessAlert(true), 1000);
-            setTimeout(() => setShowSuccessAlert(true), 1000);
+            setTimeout(() => {
+                setAlert({title: '', text: t('pages.refundRequests.rewardBatchSentSuccess'), isOpen: true, severity: 'success'});
+            }, 1000);
             await fetchRewardBatches(initiativeId);
 
         } catch (e: any) {
@@ -263,53 +256,6 @@ const RefundRequests = () => {
                         singleSelect
                     />
                 )}
-                  <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
-                        <Alert
-                          severity="success"
-                          icon={<CheckCircleOutline />}
-                          sx={{
-                            position: 'fixed',
-                            bottom: 40,
-                            right: 20,
-                            backgroundColor: 'white',
-                            width: 'auto',
-                            maxWidth: '400px',
-                            minWidth: '300px',
-                            zIndex: 1300,
-                            boxShadow: 3,
-                            borderRadius: 1,
-                            '& .MuiAlert-icon': {
-                              color: '#6CC66A',
-                            },
-                          }}
-                        >
-                          {t('pages.refundRequests.rewardBatchSentSuccess')}
-                        </Alert>
-                      </Slide>
-                  <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
-                        <Alert
-                          severity="success"
-                          icon={<CheckCircleOutline />}
-                          sx={{
-                            position: 'fixed',
-                            bottom: 40,
-                            right: 20,
-                            backgroundColor: 'white',
-                            width: 'auto',
-                            maxWidth: '400px',
-                            minWidth: '300px',
-                            zIndex: 1300,
-                            boxShadow: 3,
-                            borderRadius: 1,
-                            '& .MuiAlert-icon': {
-                              color: '#6CC66A',
-                            },
-                          }}
-                        >
-                          {t('pages.refundRequests.rewardBatchSentSuccess')}
-                        </Alert>
-                      </Slide>
-
                 {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
                     <NoResultPaper translationKey="pages.refundRequests.noData" />
                 )}

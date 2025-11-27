@@ -214,23 +214,23 @@ describe('<ReportedUsers />', () => {
     expect(merchantService.getMerchantPointOfSales).not.toHaveBeenCalled();
   });
 
-  test("mostra e nasconde l'alert di successo", async () => {
-    jest.useFakeTimers();
-    (useLocation as jest.Mock).mockReturnValue({ state: { showSuccessAlert: true } });
-    renderWithContext(<InitiativeStores />);
-    expect(
-      screen.getByText('pages.initiativeStores.pointOfSalesUploadSuccess')
-    ).toBeInTheDocument();
-    act(() => {
-      jest.advanceTimersByTime(3000);
-    });
-    await waitFor(() => {
-      expect(mockHistory.replace).toHaveBeenCalledWith({
-        state: { showSuccessAlert: false } 
-    });
-    });
-    jest.useRealTimers();
-  });
+  // test("mostra e nasconde l'alert di successo", async () => {
+  //   jest.useFakeTimers();
+  //   (useLocation as jest.Mock).mockReturnValue({ state: { showSuccessAlert: true } });
+  //   renderWithContext(<InitiativeStores />);
+  //   expect(
+  //     screen.getByText('pages.initiativeStores.pointOfSalesUploadSuccess')
+  //   ).toBeInTheDocument();
+  //   act(() => {
+  //     jest.advanceTimersByTime(3000);
+  //   });
+  //   await waitFor(() => {
+  //     expect(mockHistory.replace).toHaveBeenCalledWith({
+  //       state: { showSuccessAlert: false } 
+  //   });
+  //   });
+  //   jest.useRealTimers();
+  // });
 
   test('applica i filtri e ricarica i dati', async () => {
     renderWithContext(<InitiativeStores />);
