@@ -71,7 +71,11 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
       case TransactionStatusEnum.AUTHORIZATION_REQUESTED:
       case TransactionStatusEnum.IDENTIFIED:
       case TransactionStatusEnum.CREATED:
+      case TransactionStatusEnum.REWARDED:
       case TransactionStatusEnum.REJECTED:
+      case TransactionStatusEnum.CANCELLED:
+      case TransactionStatusEnum.REFUNDED:
+      case TransactionStatusEnum.INVOICED:
         return (
           <>
             <MenuItem data-testid="cancel-trx-button" onClick={() => setOpenCancelTrxModal(true)}>

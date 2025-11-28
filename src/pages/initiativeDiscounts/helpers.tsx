@@ -46,6 +46,38 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
           color="error"
         />
       );
+    case TransactionCreatedStatusEnum.REWARDED:
+      return (
+        <Chip
+          sx={{ fontSize: '14px' }}
+          label={i18n.t('commons.discountStatusEnum.rewarded')}
+          color="success"
+        />
+      );
+    case TransactionCreatedStatusEnum.CANCELLED:
+      return (
+        <Chip
+          sx={{ fontSize: '14px' }}
+          label={i18n.t('commons.discountStatusEnum.cancelled')}
+          color="error"
+        />
+      );
+    case TransactionCreatedStatusEnum.REFUNDED:
+      return (
+        <Chip
+          sx={{ fontSize: '14px' }}
+          label={i18n.t('commons.discountStatusEnum.refunded')}
+          color="warning"
+        />
+      );
+    case TransactionCreatedStatusEnum.INVOICED:
+      return (
+        <Chip
+          sx={{ fontSize: '14px' }}
+          label={i18n.t('commons.discountStatusEnum.invoiced')}
+          color="primary"
+        />
+      );
   }
 };
 
