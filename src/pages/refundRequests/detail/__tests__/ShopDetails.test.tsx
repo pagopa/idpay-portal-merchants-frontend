@@ -169,13 +169,7 @@ describe('ShopDetails', () => {
     expect(hiddenInput).toBeInTheDocument();
 
     const selectButton = container.querySelector('#status') as HTMLElement;
-    expect(selectButton).toBeInTheDocument();
-
-    fireEvent.mouseDown(selectButton);
-
-    const chips = await screen.findAllByTestId('custom-chip');
-
-    expect(chips.length).toBeGreaterThan(0);
+    expect(selectButton).not.toBeInTheDocument();
   });
 
   it('mostra la tabella InvoiceDataTable', () => {

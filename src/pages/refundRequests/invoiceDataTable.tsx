@@ -11,13 +11,18 @@ import {
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useParams } from 'react-router-dom';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import DataTable from '../../components/dataTable/DataTable';
 import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
-import { getMerchantTransactionsProcessed } from '../../services/merchantService';
+import {
+  downloadInvoiceFile,
+  getMerchantTransactionsProcessed,
+} from '../../services/merchantService';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
+import { useStore } from '../initiativeStores/StoreContext';
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
@@ -73,6 +78,9 @@ const InvoiceDataTable = ({
     { field: 'trxChargeDate', sort: 'asc' },
   ]);
   const { id } = useParams<RouteParams>();
+  const [, setIsLoading] = useState(false);
+  const addError = useErrorDispatcher();
+  const { storeId } = useStore();
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -85,11 +93,6 @@ const InvoiceDataTable = ({
       setRowDetail(null);
     }
   };
-
-  const handlePaginationPageChange = (page: number) => {
-    setPagination((prev) => ({ ...prev, pageNo: page }));
-  };
-
   const handleSortModelChange = (model: GridSortModel) => {
     if (
       model.length === 0 ||
@@ -98,6 +101,32 @@ const InvoiceDataTable = ({
         (model[0].sort === 'asc' || model[0].sort === 'desc'))
     ) {
       setSortModel(model);
+    }
+  };
+  const handlePaginationPageChange = (page: number) => {
+    setPagination((prev) => ({ ...prev, pageNo: page }));
+  };
+
+  const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
+      window.open(response.invoiceUrl, '_blank');
+
+      setIsLoading(false);
+    } catch (error) {
+      addError({
+        id: 'FILE_DOWNLOAD',
+        blocking: false,
+        error: new Error('Merchant ID not found'),
+        techDescription: 'Merchant ID not found',
+        displayableTitle: 'Errore downloand file',
+        displayableDescription: 'Non è stato possibile scaricare il file',
+        toNotify: true,
+        component: 'Toast',
+        showCloseIcon: true,
+      });
+      setIsLoading(false);
     }
   };
 
@@ -148,15 +177,45 @@ const InvoiceDataTable = ({
     {
       field: 'invoiceFileName',
       headerName: 'Fattura',
-      flex: 3,
+      flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      disableColumnMenu: true,
+      renderCell: (params: any) => (
+        <Tooltip
+          title={params.value && params.value.length >= 11 ? params.value : ''}
+          placement="top"
+          arrow
+        >
+          <Typography
+            color="primary"
+            sx={{
+              ...infoStyles,
+              maxWidth: '100% !important',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+            className="ShowDots"
+            onClick={() => downloadFile(params.row, storeId)}
+          >
+            {params.value && params.value !== '' ? params.value : '-'}
+          </Typography>
+        </Tooltip>
+      ),
+    },
+    {
+      field: 'franchiseName',
+      headerName: 'Punto vendita',
+      flex: 2,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || '-', 11),
     },
     {
       field: 'additionalProperties.productName',
       headerName: 'Prodotto',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) =>
         renderCellWithTooltip(params.row.additionalProperties?.productName || '-', 11),
     },
@@ -165,6 +224,7 @@ const InvoiceDataTable = ({
       headerName: 'Data e ora',
       flex: 2,
       sortable: true,
+      disableColumnMenu: true,
       valueGetter: (params: any) => params.row.trxChargeDate,
       renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
     },
@@ -173,6 +233,7 @@ const InvoiceDataTable = ({
       headerName: 'Rimborso richiesto',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) =>
         renderCellWithTooltip(
           (params.value / 100).toLocaleString('it-IT', {
@@ -188,6 +249,7 @@ const InvoiceDataTable = ({
       headerName: 'Stato',
       flex: 1.5,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <StatusChipInvoice status={params.value} />,
     },
     {
@@ -229,7 +291,6 @@ const InvoiceDataTable = ({
             rows={tableRows}
             columns={columns}
             rowsPerPage={pagination.pageSize}
-            paginationModel={pagination}
             onPaginationPageChange={handlePaginationPageChange}
             sortModel={sortModel}
             onSortModelChange={handleSortModelChange}
