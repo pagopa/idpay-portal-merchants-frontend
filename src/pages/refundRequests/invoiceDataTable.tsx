@@ -11,15 +11,17 @@ import {
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { GridColDef } from '@mui/x-data-grid';
 import { useParams } from 'react-router-dom';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import DataTable from '../../components/dataTable/DataTable';
 // import CustomChip from '../../components/Chip/CustomChip';
 import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
-import { getMerchantTransactionsProcessed } from '../../services/merchantService';
+import { downloadInvoiceFile, getMerchantTransactionsProcessed } from '../../services/merchantService';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 // import { RewardBatchTrxStatusEnum } from '../../api/generated/merchants/RewardBatchTrxStatus';
+import { useStore } from '../initiativeStores/StoreContext';
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
@@ -70,6 +72,9 @@ const InvoiceDataTable = ({
   const [rowDetail, setRowDetail] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const { id } = useParams<RouteParams>();
+  const [, setIsLoading] = useState(false);
+  const addError = useErrorDispatcher();
+  const { storeId } = useStore();
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -85,6 +90,29 @@ const InvoiceDataTable = ({
 
   const handlePaginationPageChange = (page: number) => {
     setPagination((prev) => ({ ...prev, pageNo: page }));
+  };
+
+  const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
+      window.open(response.invoiceUrl, '_blank');
+
+      setIsLoading(false);
+    } catch (error) {
+      addError({
+        id: 'FILE_DOWNLOAD',
+        blocking: false,
+        error: new Error('Merchant ID not found'),
+        techDescription: 'Merchant ID not found',
+        displayableTitle: 'Errore downloand file',
+        displayableDescription: 'Non è stato possibile scaricare il file',
+        toNotify: true,
+        component: 'Toast',
+        showCloseIcon: true,
+      });
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -112,9 +140,29 @@ const InvoiceDataTable = ({
     {
       field: 'invoiceFileName',
       headerName: 'Fattura',
-      flex: 3,
+      flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => (
+        <Tooltip
+          title={params.value && params.value.length >= 11 ? params.value : ''}
+          placement="top"
+          arrow
+        >
+          <Typography
+            color="primary"
+            sx={{
+              ...infoStyles,
+              maxWidth: '100% !important',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+            className="ShowDots"
+            onClick={() => downloadFile(params.row, storeId)}
+          >
+            {params.value && params.value !== '' ? params.value : '-'}
+          </Typography>
+        </Tooltip>
+      ),
     },
     {
       field: 'additionalProperties.productName',
