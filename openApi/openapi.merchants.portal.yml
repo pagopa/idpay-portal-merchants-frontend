@@ -1686,7 +1686,11 @@ components:
             - IDENTIFIED
             - AUTHORIZATION_REQUESTED
             - AUTHORIZED
+            - REWARDED
             - REJECTED
+            - CANCELLED
+            - REFUNDED
+            - INVOICED
           description: "ENG: Status of the transaction - IT: Stato della transazione"
         splitPayment:
           type: boolean
@@ -1720,10 +1724,10 @@ components:
           type: integer
           format: int64
           description: "ENG: Authorized amount - IT: Importo autorizzato"
-        docNumber:
+        invoiceDocNumber:
           type: string
           description: "ENG: Document number - IT: Numero documento"
-        fileName:
+        invoiceFileName:
           type: string
           description: "ENG: Associated file name - IT: Nome del file associato"
     MerchantTransactionsProcessedListDTO:
