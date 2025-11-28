@@ -136,6 +136,7 @@
       "emptyList": "Non ci sono buoni sconto in corso per questa iniziativa.",
       "emptyProcessedList": "Non ci sono buoni sconto contabilizzati per questa iniziativa",
       "filterByStatus": "Stato",
+      "filterByDate": "Data",
       "listTitle": "Buoni sconto emessi",
       "paymentConfirmed": "Pagamento confermato",
       "processedMerchantTransactions": "Buoni sconto contabilizzati",
@@ -336,6 +337,23 @@
         "title": "Invia richieste di rimborso",
         "description": "Il lotto di transazioni verrà inviato a Invitalia S.p.A., che procederà alla verifica dei dati e al successivo rimborso all’IBAN da te indicato in fase di adesione.",
         "warning": "Se una o più fatture richiedono ulteriori controlli da parte tua, escludile prima di procedere con l’invio dell’intero lotto."
+      },
+      "batchTransactionsDetails" : {
+        "referencePeriod" : "Periodo di riferimento",
+        "state" : "Stato",
+        "requestedRefund" : "Rimborso richiesto"
+      },
+      "storeDetails" : {
+        "referredBatch" : "Lotto di riferimento",
+        "referencePeriod" : "Periodo di riferimento",
+        "companyName" : "Ragione sociale",
+        "requestedRefund" : "Rimborso richiesto",
+        "holder" : "Intestatario",
+        "iban" : "IBAN",
+        "status" : "Status",
+        "approvedRefund" : "Rimborso approvato",
+        "exportCSV" : "Esporta csv",
+        "detailCardTitleDx" : "dati rimborso"
       }
     }
   },
