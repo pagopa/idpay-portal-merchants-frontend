@@ -142,6 +142,7 @@ const InvoiceDataTable = ({
       headerName: 'Fattura',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => (
         <Tooltip
           title={params.value && params.value.length >= 11 ? params.value : ''}
@@ -169,6 +170,7 @@ const InvoiceDataTable = ({
       headerName: 'Prodotto',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) =>
         renderCellWithTooltip(params.row.additionalProperties?.productName || '-', 11),
     },
@@ -177,6 +179,7 @@ const InvoiceDataTable = ({
       headerName: 'Data e ora',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       valueGetter: (params: any) => params.row.trxChargeDate,
       renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
     },
@@ -185,6 +188,7 @@ const InvoiceDataTable = ({
       headerName: 'Rimborso richiesto',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) =>
         renderCellWithTooltip(
           (params.value / 100).toLocaleString('it-IT', {
@@ -200,6 +204,7 @@ const InvoiceDataTable = ({
       headerName: 'Stato',
       flex: 1.5,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <StatusChipInvoice status={params.value} />,
     },
     {
@@ -241,9 +246,7 @@ const InvoiceDataTable = ({
             rows={tableRows}
             columns={columns}
             rowsPerPage={pagination.pageSize}
-            paginationModel={pagination}
             onPaginationPageChange={handlePaginationPageChange}
-            checkable={false}
           />
         </Box>
       )}
