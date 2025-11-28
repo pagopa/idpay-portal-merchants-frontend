@@ -206,9 +206,6 @@ const ShopDetails: React.FC = () => {
                   onChange={formik.handleChange}
                   size="small"
                 >
-                  <MenuItem value="">
-                    <em>{t('commons.all')}</em>
-                  </MenuItem>
                   {stores.map((store) => (
                     <MenuItem key={store.id} value={store.id}>
                       {store.franchiseName || MISSING_DATA_PLACEHOLDER}
@@ -217,7 +214,7 @@ const ShopDetails: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item lg={3}>
+            <Grid item>
               <FormControl size="small" fullWidth>
                 <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
                 <Select
