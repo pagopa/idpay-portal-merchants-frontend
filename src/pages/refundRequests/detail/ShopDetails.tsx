@@ -21,7 +21,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
-import CustomChip from '../../../components/Chip/CustomChip';
+import StatusChip from '../../../components/Chip/StatusChipInvoice';
 import InvoiceDataTable from '../invoiceDataTable';
 import { formatDate, formattedCurrency } from '../../../helpers';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
@@ -31,28 +31,6 @@ import { PointOfSaleDTO } from '../../../api/generated/merchants/PointOfSaleDTO'
 import { ShopCard } from './ShopCard';
 
 const PAGINATION_SIZE = 20;
-
-const StatusChip = ({ status }: { status: RewardBatchTrxStatusEnum }) => {
-  const statusMap: Record<
-    RewardBatchTrxStatusEnum,
-    { label: string; color: 'default' | 'success' | 'warning' | 'error'; textColor?: string }
-  > = {
-    [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: 'warning' },
-    [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: 'warning' },
-    [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Contrassegnata', color: 'warning' },
-    [RewardBatchTrxStatusEnum.APPROVED]: { label: 'Validata', color: 'success' },
-    [RewardBatchTrxStatusEnum.REJECTED]: { label: 'Rifiutata', color: 'error' },
-  };
-  const chipItem = statusMap[status] || { label: status, color: 'default' };
-  return (
-    <CustomChip
-      label={chipItem.label}
-      colorChip={chipItem.color}
-      sizeChip="small"
-      textColorChip={chipItem.textColor}
-    />
-  );
-};
 
 const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum);
 
