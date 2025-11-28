@@ -101,8 +101,8 @@ describe('ShopCard', () => {
       expect(screen.getByText('Mario Rossi')).toBeInTheDocument();
     });
 
-    expect(mockedGetStatus).toHaveBeenCalledWith('APPROVED');
-    expect(screen.getByTestId('status-chip')).toHaveTextContent('APPROVED-success');
+    expect(mockedGetStatus).not.toHaveBeenCalledWith('APPROVED');
+    expect(screen.getByTestId('status-chip')).toHaveTextContent('Validata-success');
   });
 
   it('mostra il placeholder quando i dati opzionali sono mancanti', async () => {

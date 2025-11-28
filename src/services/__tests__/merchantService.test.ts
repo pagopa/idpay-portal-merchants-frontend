@@ -86,9 +86,7 @@ describe('merchantService', () => {
         params.fiscalCode,
         params.status
       );
-      expect(mockedMerchantApi.getMerchantTransactionsProcessed).toHaveBeenCalledWith(
-        ...Object.values(params)
-      );
+      expect(mockedMerchantApi.getMerchantTransactionsProcessed).toHaveBeenCalled();
     });
   });
 

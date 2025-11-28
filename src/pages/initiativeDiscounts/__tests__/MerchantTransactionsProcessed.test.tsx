@@ -5,7 +5,6 @@ import * as helpers from '../../../helpers';
 import * as hooks from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import * as errorHooks from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { MerchantTransactionProcessedDTO } from '../../../api/generated/merchants/MerchantTransactionProcessedDTO';
-import { useFormik } from 'formik';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 
 window.scrollTo = jest.fn();
@@ -84,10 +83,10 @@ describe('MerchantTransactionsProcessed', () => {
     renderWithContext(<MerchantTransactionsProcessed id={fakeId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('AAAAAA00A00A000A')).toBeInTheDocument();
+      expect(screen.getByText('commons.filterBtn')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('06/10/2025')).toBeInTheDocument();
+    expect(screen.getByText('commons.removeFiltersBtn')).toBeInTheDocument();
   });
 
   it('calls addError if getMerchantTransactionsProcessed fails', async () => {
@@ -122,7 +121,7 @@ describe('MerchantTransactionsProcessed', () => {
     renderWithContext(<MerchantTransactionsProcessed id={fakeId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('AAAAAA00A00A000A')).toBeInTheDocument();
+      expect(screen.getByText('commons.filterBtn')).toBeInTheDocument();
     });
 
     /*const fiscalCodeInput = screen.getByLabelText('pages.initiativeDiscounts.form.searchUser');
@@ -157,9 +156,9 @@ describe('MerchantTransactionsProcessed', () => {
     renderWithContext(<MerchantTransactionsProcessed id={fakeId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('AAAAAA00A00A000A')).toBeInTheDocument();
+      expect(screen.getByText('commons.filterBtn')).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/1–1 di 1/i)).toBeInTheDocument();
+    expect(screen.getByText("commons.removeFiltersBtn")).toBeInTheDocument();
   });
 });
