@@ -1,4 +1,4 @@
-import { AlertColor } from '@mui/material';
+import { AlertColor, SxProps, Theme } from '@mui/material';
 import { createContext, useState, ReactNode, useMemo, useCallback } from 'react';
 
 const ALERT_TIME = 5000;
@@ -8,6 +8,8 @@ type AlertProps = {
   text?: string;
   isOpen?: boolean;
   severity?: AlertColor;
+  containerStyle?: SxProps<Theme>;
+  contentStyle?: SxProps<Theme>;
 };
 
 type AlertContextType = {
@@ -19,16 +21,19 @@ const initialState: AlertProps = {
   title: '',
   text: '',
   isOpen: false,
-  severity: 'error'
+  severity: 'error',
+  containerStyle: {},
+  contentStyle: {}
 };
 
 export const AlertContext = createContext<AlertContextType>({alert: { ...initialState}, setAlert: () => {}});
 
 export const AlertProvider = ({children}: {children: ReactNode}) => {
-  const [error, setError] = useState<AlertProps>(initialState);
+  const [error, setError] = useState<AlertProps | undefined>(initialState);
 
   const setAlert = useCallback((alert?: AlertProps) => {
-    setError({...alert});
+
+    setError(alert);
 
     setTimeout(() => {
       setError(prev => ({ ...prev, isOpen: false}));

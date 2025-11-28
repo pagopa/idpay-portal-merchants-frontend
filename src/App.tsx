@@ -4,7 +4,7 @@ import {
   UnloadEventHandler,
   UserNotifyHandle,
 } from '@pagopa/selfcare-common-frontend';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { matchPath, Redirect, Route, Switch } from 'react-router-dom';
 import withSelectedPartyProducts from './decorators/withSelectedPartyProducts';
 import withLogin from './decorators/withLogin';
 import Layout from './components/Layout/Layout';
@@ -25,9 +25,20 @@ import ReportedUsers from './pages/reportedUsers/reportedUsers';
 import InsertReportedUser from './pages/reportedUsers/insertReportedUser';
 import { AlertProvider } from './contexts/AlertContext';
 import RefundRequests from './pages/refundRequests/RefundRequests';
+import ROUTES from './routes';
+import { useInitiativesList } from './hooks/useInitiativesList';
 
 const SecuredRoutes = withLogin(
-  withSelectedPartyProducts(() => (
+  withSelectedPartyProducts(() => {
+   const match = matchPath(location.pathname, {
+    path: [ROUTES.HOME, ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS, ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS],
+    exact: true,
+    strict: false,
+  });
+  
+    useInitiativesList(match);
+    
+    return(
     <AlertProvider>
       <Layout>
         <Switch>
@@ -84,7 +95,7 @@ const SecuredRoutes = withLogin(
         </Switch>
       </Layout>
     </AlertProvider>
-  ))
+  );})
 );
 
 const App = () => (

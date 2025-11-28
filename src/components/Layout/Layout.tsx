@@ -7,7 +7,6 @@ import { useLocation } from 'react-router-dom';
 import { matchPath } from 'react-router';
 import SideMenu from '../SideMenu/SideMenu';
 import ROUTES from '../../routes';
-import { useInitiativesList } from '../../hooks/useInitiativesList';
 import Footer from '../Footer/Footer';
 import CustomHeader from '../Header/CustomHeader';
 import AlertComponent from '../Alert/AlertComponent';
@@ -42,7 +41,6 @@ const Layout = ({ children }: Props) => {
     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
   }, [location.pathname]);
 
-  useInitiativesList(match);
 
   return (
     <Box
@@ -78,7 +76,7 @@ const Layout = ({ children }: Props) => {
             gridTemplateColumns="1fr"
           >
             {children}
-            <AlertComponent title={alert.title} text={alert.text} severity={alert.severity} isOpen={alert.isOpen} />
+            <AlertComponent title={alert.title} text={alert.text} severity={alert.severity} isOpen={alert.isOpen} containerStyle={{ ...alert.containerStyle}} contentStyle={{ ...alert.contentStyle}} />
           </Box>
         </Box>
       ) : (
@@ -96,7 +94,7 @@ const Layout = ({ children }: Props) => {
             gridColumn="span 12"
           >
             {children}
-          { !matchNoAlert && <AlertComponent title={alert.title} text={alert.text} severity={alert.severity} isOpen={alert.isOpen} contentStyle={{right: '20px'}} />}
+          { !matchNoAlert && <AlertComponent title={alert.title} text={alert.text} severity={alert.severity} isOpen={alert.isOpen} contentStyle={{right: '20px', ...alert.contentStyle}} containerStyle={{ ...alert.containerStyle}} />}
           </Box>
         </Box>
       )}

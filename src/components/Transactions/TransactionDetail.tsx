@@ -1,5 +1,5 @@
 import { Box, Grid, Typography,Button, CircularProgress } from '@mui/material';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';
@@ -7,7 +7,7 @@ import CustomChip from '../Chip/CustomChip';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { downloadInvoiceFile } from '../../services/merchantService';
 import { useStore } from '../../pages/initiativeStores/StoreContext';
-import AlertComponent, { AlertComponentProps } from '../Alert/AlertComponent';
+import { useAlert } from '../../hooks/useAlert';
 import getStatus from './useStatus';
 
 type Props = {
@@ -17,31 +17,16 @@ type Props = {
   children?: ReactNode;
 };
 
-const alert: AlertComponentProps = {
-  title: 'Errore downloand file',
-  text: 'Non è stato possibile scaricare il file',
-  severity: 'error'
-};
-
 export default function TransactionDetail({ title, itemValues, listItem }: Props) {
-  const [error, setError] = useState(false);
+  const {setAlert} = useAlert();
   const { storeId } = useStore();
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (error) {
-      setTimeout(() => {
-      setError(false);
-    }, 5000);
-    }
-  }, [error]);
 
   const getStatusChip = () => {
     const chipItem = getStatus(itemValues.status);
     return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
   };
   const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
-    setError(true);
     setIsLoading(true);
     try {
       const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
@@ -56,7 +41,14 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
       link.click();
       setIsLoading(false);
     } catch (error) {
-      setError(true);
+      setAlert({
+        title: 'Errore downloand file',
+        text: 'Non è stato possibile scaricare il file',
+        isOpen: true,
+        severity: 'error',
+        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px'},
+        contentStyle: {position: 'unset', bottom: '0', right: '0'}
+      });
       setIsLoading(false);
     }
   };
@@ -161,9 +153,6 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
           </>
         )}
       </Grid>
-      <Box sx={{overflowX: 'clip'}}>
-        <AlertComponent { ...alert} isOpen={error} containerStyle={{bottom: '0'}} contentStyle={{bottom: '20px'}} />
-      </Box>
     </Box>
   );
 }
