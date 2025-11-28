@@ -1,8 +1,6 @@
 import { createContext, useState, ReactNode, useMemo, useCallback } from 'react';
 import { AlertComponentProps } from '../components/Alert/AlertComponent';
 
-const ALERT_TIME = 5000;
-
 type AlertContextType = {
   alert: AlertComponentProps;
   setAlert: (alert?: AlertComponentProps) => void;
@@ -24,12 +22,7 @@ export const AlertProvider = ({children}: {children: ReactNode}) => {
 
   const onClose = useCallback(() => setError(prev => ({ ...prev, isOpen: false})), []);
 
-  const setAlert = useCallback((alert?: AlertComponentProps) => {
-
-    setError(alert);
-
-    setTimeout(() => setError(prev => ({ ...prev, isOpen: false})), ALERT_TIME);
-  }, []);
+  const setAlert = useCallback((alert?: AlertComponentProps) => setError(alert), []);
 
   const value = useMemo(() => ({ alert: {...error, onClose}, setAlert}), [error]);
 
