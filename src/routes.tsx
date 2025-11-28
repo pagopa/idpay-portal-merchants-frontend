@@ -21,6 +21,8 @@ const ROUTES = {
   SIDE_MENU_DISCOUNTS: `${BASE_ROUTE}/sconti-iniziativa`,
   NEW_DISCOUNT: `${BASE_ROUTE}/crea-sconto/:id`,
   ACCEPT_NEW_DISCOUNT: `${BASE_ROUTE}/accetta-sconto/:id`,
+  REFUND_REQUESTS: `${BASE_ROUTE}/:id/richieste-di-rimborso`,
+  SIDE_MENU_REFUND_REQUESTS: `richieste-di-rimborso`,
 };
 
 export default ROUTES;

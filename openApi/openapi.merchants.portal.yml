@@ -554,6 +554,150 @@ paths:
               example:
                 code: STATISTICS_MANAGER_GENERIC_ERROR
                 message: Application error
+  /initiatives/{initiativeId}/reward-batches:
+    get:
+      tags:
+        - reward-batches
+      summary: "ENG: Merchant get reward batches - IT: Recupero dei lotti delle transazioni da parte dell'esercente"
+      operationId: getRewardBatches
+      parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 10000
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 1000
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - name, desc
+              - name, asc
+      responses:
+        "200":
+          description: Successful response with reward batches
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchListDTO"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_INVALID_REQUEST
+                message: Something went wrong handling the request
+        "401":
+          description: Authentication failed
+        "404":
+          description: The requested resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_NOT_FOUND
+                message: "Cannot find Reward Batch with initiative with id [%s]"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_TOO_MANY_REQUESTS
+                message: Too many requests
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_GENERIC_ERROR
+                message: Application error
+  /initiatives/{initiativeId}/reward-batches/{batchId}/send:
+    post:
+      tags:
+        - reward-batches
+      summary: "ENG: Send a reward batch - IT: Invia un lotto di transazioni"
+      operationId: sendRewardBatches
+      parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
+        - name: batchId
+          in: path
+          description: The reward batch ID
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+      responses:
+        "204":
+          description: No content, batch sended
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_INVALID_REQUEST
+                message: Something went wrong handling the request
+        "401":
+          description: Authentication failed
+        "404":
+          description: The requested resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_NOT_FOUND
+                message: "Cannot find Reward Batch with initiative with id [%s]"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_TOO_MANY_REQUESTS
+                message: Too many requests
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_GENERIC_ERROR
+                message: Application error
+
   /transactions:
     post:
       tags:
@@ -762,7 +906,14 @@ paths:
       tags:
         - merchant-transactions
       summary: "ENG: Returns the list of processed transactions associated to a merchant - IT: Ritorna la lista delle transazioni processate associate ad un esercente"
-      description: "ENG: Returns the list of processed transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni processate associate ad un esercente"
+      description: >
+        ENG: Returns the list of processed transactions associated to a merchant.
+        Supports filtering by fiscalCode, status, rewardBatchId, rewardBatchTrxStatus
+        and sorting by elaborationDateTime (via pageable sort parameter).
+        <br>
+        IT: Ritorna la lista delle transazioni processate associate ad un esercente.
+        Supporta filtri per fiscalCode, status, rewardBatchId, rewardBatchTrxStatus
+        e ordinamento per elaborationDateTime (tramite parametro sort di pageable).
       operationId: getMerchantTransactionsProcessed
       parameters:
         - name: initiativeId
@@ -774,15 +925,29 @@ paths:
         - name: page
           in: query
           required: false
+          description: Page number (0-based)
           schema:
             type: integer
             format: int32
+            minimum: 0
         - name: size
           in: query
           required: false
+          description: Page size
           schema:
             type: integer
             format: int32
+            minimum: 1
+        - name: sort
+          in: query
+          required: false
+          description: >
+            Sorting criteria in the format: property,(asc|desc).
+            Default is elaborationDateTime,desc.
+            Example: sort=elaborationDateTime,asc
+          schema:
+            type: string
+          example: elaborationDateTime,desc
         - name: fiscalCode
           in: query
           description: Fiscal Code
@@ -795,15 +960,27 @@ paths:
           required: false
           schema:
             type: string
+        - name: rewardBatchId
+          in: query
+          description: Filter by reward batch ID
+          required: false
+          schema:
+            type: string
+        - name: rewardBatchTrxStatus
+          in: query
+          description: Filter by reward batch transaction status
+          required: false
+          schema:
+            $ref: "#/components/schemas/RewardBatchTrxStatus"
       responses:
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MerchantTransactionsProcessedListDTO"
+                $ref: "#/components/schemas/MerchantTransactionsListDTO"
         "401":
-          description: Autentication failed
+          description: Authentication failed
         "404":
           description: The requested resource was not found
         "429":
@@ -1231,42 +1408,42 @@ paths:
               schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
 components:
   headers:
-      X-RateLimit-Limit:
-        description: The maximum number of requests allowed in the current period
-        schema:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 1000000
-      X-RateLimit-Remaining:
-        description: The number of requests remaining in the current period
-        schema:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 1000000
-      X-RateLimit-Reset:
-        description: The time at which the rate limit resets (in UTC epoch seconds)
-        schema:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 9999999999
-      Access-Control-Allow-Origin:
-        description: CORS header to allow cross-origin requests
-        schema:
-          type: string
-          maxLength: 255
-          pattern: .*
-      Retry-After:
-        description:
-          Indicates how long the user agent should wait before making a follow-up
-          request
-        schema:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 86400
+    X-RateLimit-Limit:
+      description: The maximum number of requests allowed in the current period
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 1000000
+    X-RateLimit-Remaining:
+      description: The number of requests remaining in the current period
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 1000000
+    X-RateLimit-Reset:
+      description: The time at which the rate limit resets (in UTC epoch seconds)
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 9999999999
+    Access-Control-Allow-Origin:
+      description: CORS header to allow cross-origin requests
+      schema:
+        type: string
+        maxLength: 255
+        pattern: .*
+    Retry-After:
+      description:
+        Indicates how long the user agent should wait before making a follow-up
+        request
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 86400
   parameters:
     MerchantIdHeader:
       name: merchant-id
@@ -1357,9 +1534,12 @@ components:
       required:
         - trxCode
         - trxId
+        - fiscalCode
         - effectiveAmountCents
-        - trxExpirationSeconds
+        - rewardAmountCents
         - status
+        - trxDate
+        - updateDate
       properties:
         trxCode:
           type: string
@@ -1380,6 +1560,24 @@ components:
           format: int64
           description: "ENG: Reward amount - IT: Premio generato"
           example: 100
+        rewardBatchId:
+          type: string
+          description: Identifier of the reward batch the transaction belongs to
+        rewardBatchTrxStatus:
+           $ref: "#/components/schemas/RewardBatchTrxStatus"
+        rewardBatchRejectionReason:
+           type: string
+           description: Reason why the transaction was rejected from the reward batch, if any
+        rewardBatchInclusionDate:
+           type: string
+           format: date-time
+           description: Date and time when the transaction was included in the reward batch
+        franchiseName:
+            type: string
+        pointOfSaleType:
+            type: string
+        businessName:
+            type: string
         trxDate:
           type: string
           format: date-time
@@ -1450,6 +1648,15 @@ components:
           type: integer
           format: int32
           description: "ENG: The total number of the pages - IT: Il numero totale delle pagine"
+    RewardBatchTrxStatus:
+      type: string
+      description: Status of the transaction within the reward batch
+      enum:
+        - TO_CHECK
+        - CONSULTABLE
+        - SUSPENDED
+        - APPROVED
+        - REJECTED
     MerchantTransactionProcessedDTO:
       type: object
       required:
@@ -1845,6 +2052,15 @@ components:
         channelWebsite:
           type: string
           description: "ENG: Store contact via a web-based portal <br> IT: Contatto del punto vendita tramite portale web"
+        vatNumber:
+          type: string
+          description: "ENG: The vat number of the merchant <br> IT: La partita iva dell'esercente"
+        fiscalCode:
+          type: string
+          description: "ENG: The fiscal code/vat number of the merchant <br> IT: Il codice fiscale/partita iva dell'esercente"
+        businessName:
+          type: string
+          description: "ENG: The name of the merchant <br> IT: La ragione sociale dell'esercente"
     ListPointOfSaleDTO:
       type: object
       properties:
@@ -2040,6 +2256,9 @@ components:
         filename:
           type: string
           description: 'ENG: The name of the invoice file <br> IT: Il nome del file della fattura'
+        docNumber:
+          type: string
+          maxLength: 255
     DownloadInvoiceResponseDTO:
       type: object
       properties:
@@ -2078,6 +2297,160 @@ components:
         reportedDate: { type: string, format: date-time, maxLength: 64, description: When the user was reported, example: '2025-10-30T09:15:12Z' }
         transactionId: { type: string, nullable: true, maxLength: 64, description: Related transaction ID (if any), example: TRX_001 }
         trxChargeDate: { type: string, format: date-time, nullable: true, maxLength: 64, description: Related transaction date (if any), example: '2025-10-30T09:14:50Z' }
+    RewardBatchListDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/RewardBatchDTO'
+          maxItems: 1000
+        pageNo:
+          type: integer
+          format: int32
+          description: 'ENG: The number of the page <br> IT: Il numero della pagina'
+          minimum: 0
+          maximum: 1000000
+        pageSize:
+          type: integer
+          format: int32
+          description: 'ENG: The element size for page <br> IT: Il numero di elementi per pagina'
+          minimum: 0
+          maximum: 1000000
+        totalElements:
+          type: integer
+          format: int32
+          description: 'ENG: The total number of the elements <br> IT: Il numero totale degli elementi'
+          minimum: 0
+          maximum: 1000000
+        totalPages:
+          type: integer
+          format: int32
+          description: 'ENG: The total number of the pages <br> IT: Il numero totale delle pagine'
+          minimum: 0
+          maximum: 1000000
+    RewardBatchDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'ENG: Reward Batch ID <br> IT: ID del lotto'
+          maxLength: 64
+          pattern: .*
+        merchantId:
+          type: string
+          description: "ENG: Merchant ID <br> IT: ID dell'esercente"
+          example: "MERCHANT_12345"
+        businessName:
+          type: string
+          description: "ENG: Business name <br> IT: Nome esercente padre"
+          example: "Euronics"
+        month:
+          type: string
+          description: "ENG: Batch reference month (format yyyy-MM) <br> IT: Mese di riferimento del lotto (formato yyyy-MM)"
+          example: "2025-11"
+        posType:
+          type: string
+          description: 'ENG: Point of sales type - IT: Il tipo di punto vendita'
+          enum:
+            - PHYSICAL
+            - ONLINE
+        status:
+          type: string
+          description: 'ENG: Reward Batch status - IT: Lo stato del lotto'
+          enum:
+            - CREATED
+            - SENT
+            - EVALUATING
+            - APPROVED
+        partial:
+          type: boolean
+          description: "ENG: Indicates whether the batch is partial <br> IT: Indica se il lotto è parziale"
+          example: false
+        name:
+          type: string
+          description: 'ENG: Reward Batch name - IT: Nome del lotto'
+          maxLength: 255
+          pattern: .*
+          example: 'novembre 2025'
+        startDate:
+          type: string
+          format: date-time
+          description: "ENG: Start date of the batch period <br> IT: Data di inizio del periodo del lotto"
+          example: "2025-11-01T00:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          description: "ENG: End date of the batch period <br> IT: Data di fine del periodo del lotto"
+          example: "2025-11-30T23:59:59Z"
+        approvedAmountCents:
+          type: integer
+          format: int64
+          description: "ENG: Approved transaction amount in cents <br> IT: Importo approvato delle transazioni in centesimi"
+          example: 95000
+        initialAmountCents:
+          type: integer
+          format: int64
+          example: 100
+        numberOfTransactions:
+          type: integer
+          format: int64
+          description: "ENG: Total number of transactions in the batch <br> IT: Numero totale di transazioni nel lotto"
+          example: 120
+        numberOfTransactionsElaborated:
+          type: integer
+          format: int64
+          description: "ENG: Number of processed transactions <br> IT: Numero di transazioni elaborate"
+          example: 115
+        reportPath:
+          type: string
+          nullable: true
+          description: "ENG: Path or URL to the report file <br> IT: Percorso o URL del file di report"
+          example: "/reports/2025-11/merchant123_report.pdf"
+        assigneeLevel:
+          type: string
+          description: "ENG: Current assignee level <br> IT: Livello di assegnazione corrente dell'operatore INVITALIA"
+          enum:
+            - L1
+            - L2
+            - L3
+          example: "L1"
+        numberOfTransactionsSuspended:
+          type: integer
+          format: int64
+          description: "ENG: Number of suspended transactions <br> IT: Numero di transazioni sospese"
+          example: 3
+        numberOfTransactionsRejected:
+          type: integer
+          format: int64
+          description: "ENG: Number of rejected transactions <br> IT: Numero di transazioni rigettate"
+          example: 2
+    RewardBatchErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - REWARD_BATCH_NOT_FOUND
+            - REWARD_BATCH_INVALID_REQUEST
+            - REWARD_BATCH_MONTH_TOO_EARLY
+            - REWARD_BATCH_TOO_MANY_REQUESTS
+            - REWARD_BATCH_GENERIC_ERROR
+          description: |-
+            "ENG: Error code: REWARD_BATCH_NOT_FOUND: Reward Batch not found,
+             REWARD_BATCH_INVALID_REQUEST: Something went wrong handling request,
+             REWARD_BATCH_TOO_MANY_REQUESTS: Too many requests,
+             REWARD_BATCH_GENERIC_ERROR: Application Error - IT: Codice di errore:
+             REWARD_BATCH_NOT_FOUND: lotto non trovato,
+             REWARD_BATCH_INVALID_REQUEST: Qualcosa è andato storto durante l'invio della richiesta,
+             REWARD_BATCH_TOO_MANY_REQUESTS: Troppe richieste,
+             REWARD_BATCH_GENERIC_ERROR: Errore generico"
+        message:
+          type: string
+          description: "ENG: Error message - IT: Messaggio di errore"
   securitySchemes:
     Bearer:
       type: apiKey

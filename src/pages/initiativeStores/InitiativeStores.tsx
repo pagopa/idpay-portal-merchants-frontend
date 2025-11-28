@@ -446,7 +446,6 @@ const InitiativeStores: React.FC = () => {
                 <DataTable
                   rows={stores}
                   columns={columns}
-                  pageSize={PAGINATION_SIZE}
                   rowsPerPage={PAGINATION_SIZE}
                   onSortModelChange={handleSortModelChange}
                   paginationModel={storesPagination}

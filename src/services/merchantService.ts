@@ -92,6 +92,7 @@ export const getReportedUser = (
 ): Promise<ReportedUserDTO> => MerchantApi.getReportedUser(initiativeId, userFiscalCode);
 
 import { ReportedUserCreateResponseDTO } from '../api/generated/merchants/ReportedUserCreateResponseDTO';
+import { RewardBatchListDTO } from '../api/generated/merchants/RewardBatchListDTO';
 
 export const createReportedUser = (
   initiativeId: string,
@@ -104,3 +105,14 @@ export const deleteReportedUser = (
   userFiscalCode: string
 ): Promise<ReportedUserCreateResponseDTO> =>
   MerchantApi.deleteReportedUser(initiativeId, userFiscalCode);
+
+  export const getRewardBatches = (
+    initiativeId: string
+  ): Promise<RewardBatchListDTO> =>
+    MerchantApi.getRewardBatches(initiativeId);
+
+  export const sendRewardBatch = (
+    initiativeId: string,
+    batchId: string
+  ): Promise<void> =>
+    MerchantApi.sendRewardBatches(initiativeId, batchId);

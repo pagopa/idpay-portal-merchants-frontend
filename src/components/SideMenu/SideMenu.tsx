@@ -14,6 +14,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import StoreIcon from '@mui/icons-material/Store';
 import ReportIcon from '@mui/icons-material/Report';
+import EuroIcon from '@mui/icons-material/Euro';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
@@ -45,7 +46,7 @@ export default function SideMenu() {
   });
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS, ROUTES.STORES_DETAIL],
+    path: [ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS, ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS],
     exact: true,
     strict: false,
   });
@@ -169,9 +170,6 @@ export default function SideMenu() {
                             initiativeName: item.initiativeName,
                           })
                         );
-                        console.log(
-                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
-                        );
                         history.replace(
                           `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
                         );
@@ -181,6 +179,31 @@ export default function SideMenu() {
                     icon={StoreIcon}
                     level={2}
                     data-testid="initiativeStoresTitle-click-test"
+                  />
+                  <SidenavItem
+                    title={t('pages.refundRequests.title')}
+                    handleClick={() =>
+                      onExit(() => {
+                        dispatch(
+                          setSelectedInitative({
+                            spendingPeriod:
+                              `${item.startDate?.toLocaleDateString(
+                                'fr-FR'
+                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
+                            initiativeName: item.initiativeName,
+                          })
+                        );
+                        history.replace(
+                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REFUND_REQUESTS}`
+                        );
+                      })
+                    }
+                    isSelected={pathname.startsWith(
+                      `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REFUND_REQUESTS}`
+                    )}
+                    icon={EuroIcon}
+                    level={2}
+                    data-testid="refundRequestsTitle-click-test"
                   />
                   <SidenavItem
                     title={t('pages.reportedUsers.title')}
@@ -194,9 +217,6 @@ export default function SideMenu() {
                               )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
                             initiativeName: item.initiativeName,
                           })
-                        );
-                        console.log(
-                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
                         );
                         history.replace(
                           `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
