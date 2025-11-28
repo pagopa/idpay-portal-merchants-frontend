@@ -36,13 +36,18 @@ const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum);
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
-  const location = useLocation<{ store: any }>();
+  const location = useLocation<{ store: any; batchId?: string }>();
   const store = location.state?.store;
+  const batchId = location.state?.batchId;
   const history = useHistory();
   const [dataTableIsLoading, setDataTableIsLoading] = useState<boolean>(false);
 
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesLoading, setStoresLoading] = useState(false);
+
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [selectedPointOfSaleId, setSelectedPointOfSaleId] = useState<string>('');
+
   const formik = useFormik<any>({
     initialValues: {
       status: '',
@@ -50,6 +55,8 @@ const ShopDetails: React.FC = () => {
       page: 0,
     },
     onSubmit: () => {
+      setSelectedStatus(formik.values.status);
+      setSelectedPointOfSaleId(formik.values.pointOfSaleId);
       setDataTableIsLoading(true);
       setTimeout(() => {
         setDataTableIsLoading(false);
@@ -99,6 +106,8 @@ const ShopDetails: React.FC = () => {
 
   const handleOnFiltersReset = () => {
     formik.resetForm();
+    setSelectedStatus('');
+    setSelectedPointOfSaleId('');
   };
 
   return (
@@ -199,7 +208,7 @@ const ShopDetails: React.FC = () => {
                 <InputLabel id="point-of-sale-label">Punto vendita</InputLabel>
                 <Select
                   labelId="point-of-sale-label"
-                  id="point-of-sale-select"
+                  id="pointOfSaleId"
                   name="pointOfSaleId"
                   label={t('pages.initiativeStores.pointOfSale')}
                   value={formik.values.pointOfSaleId}
@@ -218,7 +227,7 @@ const ShopDetails: React.FC = () => {
               <FormControl size="small" fullWidth>
                 <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
                 <Select
-                  id="status"
+                  id="rewardBatchTrxStatus"
                   inputProps={{
                     'data-testid': 'filterStatus-select',
                   }}
@@ -247,7 +256,11 @@ const ShopDetails: React.FC = () => {
               <CircularProgress />
             </Box>
           )}
-          <InvoiceDataTable />
+          <InvoiceDataTable
+            batchId={batchId}
+            rewardBatchTrxStatus={selectedStatus}
+            pointOfSaleId={selectedPointOfSaleId}
+          />
         </Box>
       </Box>
     </>

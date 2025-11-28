@@ -25,6 +25,12 @@ interface RouteParams {
   id: string;
 }
 
+interface InvoiceDataTableProps {
+  batchId?: string;
+  rewardBatchTrxStatus?: string;
+  pointOfSaleId?: string;
+}
+
 const infoStyles = {
   fontWeight: 400,
   fontSize: 14,
@@ -42,7 +48,11 @@ const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
   </Tooltip>
 );
 
-const InvoiceDataTable = () => {
+const InvoiceDataTable = ({
+  batchId,
+  rewardBatchTrxStatus,
+  pointOfSaleId,
+}: InvoiceDataTableProps) => {
   const [transactions, setTransactions] = useState<MerchantTransactionsListDTO>({
     content: [],
     pageNo: 0,
@@ -82,6 +92,9 @@ const InvoiceDataTable = () => {
       initiativeId: id,
       page: pagination.pageNo,
       size: pagination.pageSize,
+      rewardBatchId: batchId,
+      rewardBatchTrxStatus,
+      pointOfSaleId,
     })
       .then((data) => {
         setTransactions(data);
@@ -92,7 +105,7 @@ const InvoiceDataTable = () => {
         });
       })
       .finally(() => setLoading(false));
-  }, [pagination.pageNo, pagination.pageSize]);
+  }, [pagination.pageNo, pagination.pageSize, batchId, rewardBatchTrxStatus, pointOfSaleId]);
 
   const columns: Array<GridColDef> = [
     {
