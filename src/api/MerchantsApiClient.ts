@@ -124,16 +124,15 @@ export const MerchantApi = {
     trxCode: string,
     amountCents: number,
     idTrxAcquirer: string
-  ): Promise<any> =>
-    // const result = await apiClient.authPaymentBarCode({ trxCode, body: { amountCents } });
-    // return extractResponse(result, 200, onRedirectToLogin);
-    await apiClient.authPaymentBarCode({ trxCode, body: { amountCents, idTrxAcquirer } }),
-
+  ): Promise<any> => {
+    const result = await apiClient.authPaymentBarCode({ trxCode, body: {  amountCents, idTrxAcquirer  } });
+     return extractResponse(result, 200, onRedirectToLogin);
+  },
   updateMerchantPointOfSales: async (
     merchantId: string,
     pointOfSales: Array<PointOfSaleDTO>
   ): Promise<{ code: string; message: string }> => {
-    const result = await apiClient.putPointOfSales({ merchantId, body: pointOfSales });
+    const result = await apiClient.putPointOfSales({ merchantId, body: pointOfSales } as any);
     if (!isRight(result)) {
       return {
         code: (result.left as any)?.at?.(0)?.value ?? (result.left as any)?.at?.(0)?.actual,

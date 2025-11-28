@@ -38,6 +38,7 @@ paths:
           application/json:
             schema:
               type: array
+              maxItems: 1000000
               items:
                 $ref: "#/components/schemas/PointOfSaleDTO"
       responses:
@@ -114,6 +115,8 @@ paths:
               $ref: "#/components/headers/X-RateLimit-Remaining"
             X-RateLimit-Reset:
               $ref: "#/components/headers/X-RateLimit-Reset"
+            Retry-After:
+              $ref: "#/components/headers/Retry-After"
           content:
             application/json:
               schema:
@@ -202,12 +205,30 @@ paths:
       responses:
         "200":
           description: Successful response with a paginated list of points of sale
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListPointOfSaleDTO"
         "400":
           description: Bad request - Invalid query parameters
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
           content:
             application/json:
               schema:
@@ -217,8 +238,33 @@ paths:
                 message: Something went wrong handling request
         "401":
           description: Unauthorized - Authentication Failed
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_UNAUTHORIZED
+                message: Authentication Failed
         "404":
           description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
           content:
             application/json:
               schema:
@@ -228,6 +274,17 @@ paths:
                 message: Point of sale with id 123 not found.
         "429":
           description: Too many Request - Rate limit exceeded
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+            Retry-After:
+              $ref: '#/components/headers/Retry-After'
           content:
             application/json:
               schema:
@@ -999,7 +1056,27 @@ paths:
           description: Too many requests
         '500':
           description: Server error
-
+  /initiatives/transactions/processed/statuses:
+    get:
+      tags:
+        - merchant-transactions
+      summary: "ENG: Returns the list of available processed transaction statuses - IT: Ritorna la lista degli stati disponibili per le transazioni processate"
+      operationId: getProcessedTransactionStatuses
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Authentication failed
+        "429":
+          description: Too many requests
+        "500":
+          description: Server error
   /transactions/bar-code/{trxCode}/authorize:
     put:
       tags:
