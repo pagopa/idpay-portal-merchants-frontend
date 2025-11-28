@@ -13,6 +13,7 @@ import { GridColDef } from '@mui/x-data-grid';
 import { useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 // import CustomChip from '../../components/Chip/CustomChip';
+import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
 import { getMerchantTransactionsProcessed } from '../../services/merchantService';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
@@ -151,7 +152,7 @@ const InvoiceDataTable = ({
       headerName: 'Stato',
       flex: 1.5,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => <StatusChipInvoice status={params.value} />,
     },
     {
       field: 'actions',
