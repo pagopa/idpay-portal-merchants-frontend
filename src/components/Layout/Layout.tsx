@@ -76,7 +76,7 @@ const Layout = ({ children }: Props) => {
             gridTemplateColumns="1fr"
           >
             {children}
-            <AlertComponent title={alert.title} text={alert.text} severity={alert.severity} isOpen={alert.isOpen} containerStyle={{ ...alert.containerStyle}} contentStyle={{ ...alert.contentStyle}} />
+            <AlertComponent { ...alert} />
           </Box>
         </Box>
       ) : (
@@ -94,7 +94,7 @@ const Layout = ({ children }: Props) => {
             gridColumn="span 12"
           >
             {children}
-          { !matchNoAlert && <AlertComponent title={alert.title} text={alert.text} severity={alert.severity} isOpen={alert.isOpen} contentStyle={{right: '20px', ...alert.contentStyle}} containerStyle={{ ...alert.containerStyle}} />}
+          { !matchNoAlert && <AlertComponent { ...alert} contentStyle={{right: '20px', ...alert.contentStyle }} />}
           </Box>
         </Box>
       )}

@@ -9,6 +9,7 @@ export type AlertComponentProps = {
     severity?: AlertColor;
     containerStyle?: SxProps<Theme>;
     contentStyle?: SxProps<Theme>;
+    onClose?: () => void;
 };
 
 const severityMap = {
@@ -18,7 +19,8 @@ const severityMap = {
     success: {color: '#6CC66A', icon: <CheckCircleOutline />}
 };
 
-const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentStyle}: AlertComponentProps) => 
+const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentStyle, onClose}: AlertComponentProps) => 
+    
     <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
         <Box sx={{
             display: 'flex',
@@ -31,6 +33,7 @@ const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentS
             ...containerStyle
             }}>
             <Alert
+                onClose={onClose}
                 data-testid="alert"
                 severity={severity}
                 icon={severity && severityMap[severity].icon}

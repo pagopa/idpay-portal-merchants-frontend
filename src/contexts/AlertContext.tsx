@@ -1,23 +1,14 @@
-import { AlertColor, SxProps, Theme } from '@mui/material';
 import { createContext, useState, ReactNode, useMemo, useCallback } from 'react';
+import { AlertComponentProps } from '../components/Alert/AlertComponent';
 
 const ALERT_TIME = 5000;
 
-type AlertProps = {
-  title?: string;
-  text?: string;
-  isOpen?: boolean;
-  severity?: AlertColor;
-  containerStyle?: SxProps<Theme>;
-  contentStyle?: SxProps<Theme>;
-};
-
 type AlertContextType = {
-  alert: AlertProps;
-  setAlert: (alert?: AlertProps) => void;
+  alert: AlertComponentProps;
+  setAlert: (alert?: AlertComponentProps) => void;
 };
 
-const initialState: AlertProps = {
+const initialState: AlertComponentProps = {
   title: '',
   text: '',
   isOpen: false,
@@ -29,18 +20,18 @@ const initialState: AlertProps = {
 export const AlertContext = createContext<AlertContextType>({alert: { ...initialState}, setAlert: () => {}});
 
 export const AlertProvider = ({children}: {children: ReactNode}) => {
-  const [error, setError] = useState<AlertProps | undefined>(initialState);
+  const [error, setError] = useState<AlertComponentProps | undefined>(initialState);
 
-  const setAlert = useCallback((alert?: AlertProps) => {
+  const onClose = useCallback(() => setError(prev => ({ ...prev, isOpen: false})), []);
+
+  const setAlert = useCallback((alert?: AlertComponentProps) => {
 
     setError(alert);
 
-    setTimeout(() => {
-      setError(prev => ({ ...prev, isOpen: false}));
-    }, ALERT_TIME);
+    setTimeout(() => setError(prev => ({ ...prev, isOpen: false})), ALERT_TIME);
   }, []);
 
-  const value = useMemo(() => ({ alert: {...error}, setAlert}), [error]);
+  const value = useMemo(() => ({ alert: {...error, onClose}, setAlert}), [error]);
 
   return (
     <AlertContext.Provider value={value}>

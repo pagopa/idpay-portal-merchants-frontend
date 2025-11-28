@@ -261,12 +261,14 @@ const ReportedUsers: React.FC = () => {
           isOpen={showEmptyAlert}
           severity="error"
           text={t('pages.reportedUsers.cf.noResultUser')}
+          onClose={() => setShowEmptyAlert(false)}
         />)}
       <AlertComponent
-          data-testid='msg-success'
+        data-testid='msg-success'
         severity="success"
         text={t(successAlertMap[success.variant])}
         isOpen={success.isOpen}
+        onClose={() => setSuccess(prev => ({ ...prev, isOpen: false}))}
       />
     </>
   );
