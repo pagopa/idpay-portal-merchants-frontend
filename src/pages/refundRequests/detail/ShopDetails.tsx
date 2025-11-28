@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -8,8 +8,8 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  TextField,
-  CircularProgress, Button,
+  CircularProgress,
+  Button,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -18,13 +18,43 @@ import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
-import getStatus from '../../../components/Transactions/useStatus';
 import CustomChip from '../../../components/Chip/CustomChip';
 import InvoiceDataTable from '../invoiceDataTable';
 import { formatDate, formattedCurrency } from '../../../helpers';
+import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
+import { parseJwt } from '../../../utils/jwt-utils';
+import { getMerchantPointOfSales } from '../../../services/merchantService';
+import { PointOfSaleDTO } from '../../../api/generated/merchants/PointOfSaleDTO';
 import { ShopCard } from './ShopCard';
+
+const PAGINATION_SIZE = 20;
+
+const StatusChip = ({ status }: { status: RewardBatchTrxStatusEnum }) => {
+  const statusMap: Record<
+    RewardBatchTrxStatusEnum,
+    { label: string; color: 'default' | 'success' | 'warning' | 'error'; textColor?: string }
+  > = {
+    [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: 'warning' },
+    [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: 'warning' },
+    [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Contrassegnata', color: 'warning' },
+    [RewardBatchTrxStatusEnum.APPROVED]: { label: 'Validata', color: 'success' },
+    [RewardBatchTrxStatusEnum.REJECTED]: { label: 'Rifiutata', color: 'error' },
+  };
+  const chipItem = statusMap[status] || { label: status, color: 'default' };
+  return (
+    <CustomChip
+      label={chipItem.label}
+      colorChip={chipItem.color}
+      sizeChip="small"
+      textColorChip={chipItem.textColor}
+    />
+  );
+};
+
+const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum);
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
@@ -33,10 +63,12 @@ const ShopDetails: React.FC = () => {
   const history = useHistory();
   const [dataTableIsLoading, setDataTableIsLoading] = useState<boolean>(false);
 
+  const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
+  const [storesLoading, setStoresLoading] = useState(false);
   const formik = useFormik<any>({
     initialValues: {
       status: '',
-      date: '',
+      pointOfSaleId: '',
       page: 0,
     },
     onSubmit: () => {
@@ -47,24 +79,41 @@ const ShopDetails: React.FC = () => {
     },
   });
 
-  const filterByStatusOptionsList = [
-    { value: 'REFUNDED', label: t('commons.discountStatusEnum.refunded') },
-    { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
-    { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded') },
-    { value: 'INVOICED', label: t('commons.discountStatusEnum.invoiced') },
-  ];
-
-  const StatusChip = ({ status }: any) => {
-    const chipItem = getStatus(status);
-    return (
-      <CustomChip
-        label={chipItem?.label}
-        colorChip={chipItem?.color}
-        sizeChip="small"
-        textColorChip={chipItem?.textColor}
-      />
-    );
+  const fetchStores = async (filters: any, fromSort?: boolean) => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
+    if (!merchantId) {
+      return;
+    }
+    try {
+      if (!fromSort) {
+        setStoresLoading(true);
+      }
+      const response = await getMerchantPointOfSales(merchantId, {
+        type: filters.type,
+        city: filters.city,
+        address: filters.address,
+        contactName: filters.contactName,
+        sort: filters.sort,
+        page: filters.page ?? 0,
+        size: PAGINATION_SIZE,
+      });
+      const { content } = response;
+      setStores(content);
+      if (!fromSort) {
+        setStoresLoading(false);
+      }
+    } catch (error: any) {
+      if (!fromSort) {
+        setStoresLoading(false);
+      }
+    }
   };
+
+  useEffect(() => {
+    void fetchStores({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleOnFiltersApplied = () => {
     formik.handleSubmit();
@@ -115,7 +164,7 @@ const ShopDetails: React.FC = () => {
               width: '100%',
               mt: 3,
               mb: 4,
-              gridColumn: 'span 12'
+              gridColumn: 'span 12',
             }}
           >
             <Box sx={{ flexGrow: 1, minWidth: 0, pr: 2 }}>
@@ -167,21 +216,30 @@ const ShopDetails: React.FC = () => {
             onFiltersReset={handleOnFiltersReset}
             filtersAppliedOnce={false}
           >
-            <Grid item xs={12} sm={6} md={3} lg={3}>
-              <FormControl fullWidth size="small">
-                <TextField
-                  label={t('pages.initiativeDiscounts.filterByDate')}
-                  placeholder={t('pages.initiativeDiscounts.filterByDate')}
-                  name="date"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  value={formik.values.date}
+            <Grid item lg={3}>
+              <FormControl fullWidth size="small" disabled={storesLoading}>
+                <InputLabel id="point-of-sale-label">Punto vendita</InputLabel>
+                <Select
+                  labelId="point-of-sale-label"
+                  id="point-of-sale-select"
+                  name="pointOfSaleId"
+                  label={t('pages.initiativeStores.pointOfSale')}
+                  value={formik.values.pointOfSaleId}
                   onChange={formik.handleChange}
                   size="small"
-                />
+                >
+                  <MenuItem value="">
+                    <em>{t('commons.all')}</em>
+                  </MenuItem>
+                  {stores.map((store) => (
+                    <MenuItem key={store.id} value={store.id}>
+                      {store.franchiseName || MISSING_DATA_PLACEHOLDER}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={3} lg={3}>
+            <Grid item lg={3}>
               <FormControl size="small" fullWidth>
                 <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
                 <Select
@@ -198,10 +256,11 @@ const ShopDetails: React.FC = () => {
                     width: 165,
                   }}
                   size="small"
+                  renderValue={(selected) => (selected ? <StatusChip status={selected} /> : '')}
                 >
                   {filterByStatusOptionsList.map((item) => (
-                    <MenuItem key={item.value} value={item.value}>
-                      <StatusChip status={item.value} />
+                    <MenuItem key={item} value={item}>
+                      <StatusChip status={item} />
                     </MenuItem>
                   ))}
                 </Select>

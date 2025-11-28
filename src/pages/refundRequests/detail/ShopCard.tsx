@@ -4,8 +4,8 @@ import { theme } from '@pagopa/mui-italia';
 import { Box, Grid, Paper, Typography } from '@mui/material';
 import { getMerchantDetail } from '../../../services/merchantService';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-import getStatus from '../../../components/Transactions/useStatus';
 import CustomChip from '../../../components/Chip/CustomChip';
+import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 
 type Props = {
   batchName: string;
@@ -16,7 +16,39 @@ type Props = {
   approvedRefund: string;
 };
 
-export const  ShopCard = ({ batchName, dateRange, companyName, refundAmount, status, approvedRefund }: Props) => {
+const StatusChip = ({ status }: { status: RewardBatchTrxStatusEnum }) => {
+  const statusMap: Record<
+    RewardBatchTrxStatusEnum,
+    { label: string; color: 'default' | 'success' | 'warning' | 'error'; textColor?: string }
+  > = {
+    [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: 'warning' },
+    [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: 'warning' },
+    [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Contrassegnata', color: 'warning' },
+    [RewardBatchTrxStatusEnum.APPROVED]: { label: 'Validata', color: 'success' },
+    [RewardBatchTrxStatusEnum.REJECTED]: { label: 'Rifiutata', color: 'error' },
+  };
+  const chipItem = statusMap[status as RewardBatchTrxStatusEnum] || {
+    label: status,
+    color: 'default',
+  };
+  return (
+    <CustomChip
+      label={chipItem.label}
+      colorChip={chipItem.color}
+      sizeChip="small"
+      textColorChip={chipItem.textColor}
+    />
+  );
+};
+
+export const ShopCard = ({
+  batchName,
+  dateRange,
+  companyName,
+  refundAmount,
+  status,
+  approvedRefund,
+}: Props) => {
   const { t } = useTranslation();
   const boldStyle = { fontWeight: theme.typography.fontWeightBold };
   const [iban, setIban] = useState<string | undefined>();
@@ -28,15 +60,8 @@ export const  ShopCard = ({ batchName, dateRange, companyName, refundAmount, sta
         setIban(response?.iban);
         setIbanHolder(response?.ibanHolder);
       })
-      .catch((error) =>
-        console.log(error)
-      );
+      .catch((error) => console.log(error));
   }, []);
-
-  const getStatusChip = () => {
-    const chipItem = getStatus(status);
-    return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
-  };
 
   const detailsSx = [
     {
@@ -68,7 +93,7 @@ export const  ShopCard = ({ batchName, dateRange, companyName, refundAmount, sta
       label: t('pages.refundRequests.storeDetails.approvedRefund'),
       value: approvedRefund || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
-    }
+    },
   ];
 
   const detailsDx = [
@@ -76,26 +101,25 @@ export const  ShopCard = ({ batchName, dateRange, companyName, refundAmount, sta
       label: t('pages.refundRequests.storeDetails.holder'),
       value: ibanHolder || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
-      marginTop: 1
+      marginTop: 1,
     },
     {
       label: t('pages.refundRequests.storeDetails.iban'),
       value: iban || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
-      marginBottom: 6
+      marginBottom: 6,
     },
     {
       label: t('pages.refundRequests.batchTransactionsDetails.state'),
-      value: getStatusChip(),
+      value: <StatusChip status={status as RewardBatchTrxStatusEnum} />,
       minWidth: '180px',
     },
   ];
 
-
-  return(
+  return (
     <Paper sx={{ p: 3 }}>
       <Grid container width="100%" spacing={2}>
-        <Grid item xs={6} >
+        <Grid item xs={6}>
           {detailsSx.map((item, index) => (
             <Box key={index} sx={{ display: 'flex' }}>
               <Box sx={{ minWidth: item.minWidth, marginBottom: item.marginBottom }}>
@@ -109,11 +133,19 @@ export const  ShopCard = ({ batchName, dateRange, companyName, refundAmount, sta
         </Grid>
 
         <Grid item xs={6}>
-          <Typography variant="overline">{t('pages.refundRequests.storeDetails.detailCardTitleDx')}</Typography>
+          <Typography variant="overline">
+            {t('pages.refundRequests.storeDetails.detailCardTitleDx')}
+          </Typography>
           {/* eslint-disable-next-line sonarjs/no-identical-functions */}
           {detailsDx.map((item, index) => (
             <Box key={index} sx={{ display: 'flex' }}>
-              <Box sx={{ minWidth: item.minWidth, marginBottom: item.marginBottom, marginTop: item.marginTop }}>
+              <Box
+                sx={{
+                  minWidth: item.minWidth,
+                  marginBottom: item.marginBottom,
+                  marginTop: item.marginTop,
+                }}
+              >
                 <Typography variant="body1">{item.label}</Typography>
               </Box>
               <Typography variant="body1" sx={boldStyle} minWidth="100%">
@@ -124,6 +156,5 @@ export const  ShopCard = ({ batchName, dateRange, companyName, refundAmount, sta
         </Grid>
       </Grid>
     </Paper>
-
   );
 };

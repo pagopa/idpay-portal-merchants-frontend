@@ -16,7 +16,6 @@ import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsD
 import { MerchantDetailDTO } from './generated/merchants/MerchantDetailDTO';
 import { TransactionResponse } from './generated/merchants/TransactionResponse';
 import { InitiativeDTOArray } from './generated/merchants/InitiativeDTOArray';
-import { MerchantTransactionsProcessedListDTO } from './generated/merchants/MerchantTransactionsProcessedListDTO';
 import { PointOfSaleDTO } from './generated/merchants/PointOfSaleDTO';
 import { PointOfSaleTransactionsProcessedListDTO } from './generated/merchants/PointOfSaleTransactionsProcessedListDTO';
 import { DownloadInvoiceResponseDTO } from './generated/merchants/DownloadInvoiceResponseDTO';
@@ -76,18 +75,22 @@ export const MerchantApi = {
   },
 
   getMerchantTransactionsProcessed: async (
-    initiativeId: string,
-    page: number,
-    fiscalCode?: string,
-    status?: string
-  ): Promise<MerchantTransactionsProcessedListDTO> => {
+    params: {
+      initiativeId: string;
+      page?: number;
+      size?: number;
+      sort?: string;
+      fiscalCode?: string;
+      status?: string;
+      rewardBatchId?: string;
+      rewardBatchTrxStatus?: string;
+      pointOfSaleId?: string;
+    }
+  ): Promise<MerchantTransactionsListDTO> => {
     const result = await apiClient.getMerchantTransactionsProcessed({
-      initiativeId,
-      page,
-      size: 10,
-      fiscalCode,
-      status,
+      ...params
     });
+    console.log("[DEBUG] getMerchantTransactionsProcessed:", result);
     return extractResponse(result, 200, onRedirectToLogin);
   },
 

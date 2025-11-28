@@ -1,54 +1,29 @@
-import React, { useState } from 'react';
-import { Box, Stack, Tooltip, Typography, Checkbox, IconButton } from '@mui/material';
+import { useState, useEffect } from 'react';
+import {
+  Box,
+  Stack,
+  Tooltip,
+  Typography,
+  IconButton,
+  CircularProgress,
+  Paper,
+} from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { GridColDef } from '@mui/x-data-grid';
+import { useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
-import CustomChip from '../../components/Chip/CustomChip';
+// import CustomChip from '../../components/Chip/CustomChip';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
+import { getMerchantTransactionsProcessed } from '../../services/merchantService';
+import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
+// import { RewardBatchTrxStatusEnum } from '../../api/generated/merchants/RewardBatchTrxStatus';
+import InvoiceDetail from './detail/InvoiceDetail';
 
-// MOCK conforme a MerchantTransactionsListDTO (swagger)
-const merchantTransactionsListMock = {
-  content: Array.from({ length: 10 }, (_, i) => {
-    const trxId = `TRXID${i + 1}`;
-    return {
-      id: trxId,
-      trxCode: `TRXCODE${i + 1}`,
-      trxId,
-      fiscalCode: `RSSMRA85T1${String(i + 1).padStart(2, '0')}A562S`,
-      effectiveAmountCents: 50000 + i * 1000,
-      rewardAmountCents: 10000 + i * 500,
-      status: i % 2 === 0 ? 'REWARDED' : 'CANCELLED',
-      trxDate: new Date(2025, 10, 10 + i, 14, 12).toISOString(),
-      updateDate: new Date(2025, 10, 10 + i, 15, 0).toISOString(),
-      docNumber: `FPR 19${i + 1}/25`,
-      fileName: `Fattura_${i + 1}.pdf`,
-      businessName: 'Euronics',
-      channel: 'INSTORE',
-      authorizedAmountCents: 40000 + i * 1000,
-      rewardBatchId: `BATCH${i + 1}`,
-      rewardBatchTrxStatus: i % 2 === 0 ? 'APPROVED' : 'TO_CHECK',
-      rewardBatchRejectionReason: i % 3 === 0 ? 'Motivo di test' : undefined,
-      rewardBatchInclusionDate: new Date(2025, 10, 10 + i, 16, 0).toISOString(),
-      franchiseName: 'EURONICS DE RISI',
-      pointOfSaleType: 'PHYSICAL',
-      splitPayment: false,
-      residualAmountCents: 0,
-      qrcodePngUrl: '',
-      qrcodeTxtUrl: '',
-      additionalProperties: {
-        productName: `Prodotto ${i + 1}`,
-        discountCode: `DISC${i + 1}`,
-      },
-      pointOfSaleId: `POS${i + 1}`,
-      trxChargeDate: new Date(2025, 10, 10 + i, 14, 30).toISOString(),
-    };
-  }),
-  pageNo: 0,
-  pageSize: 10,
-  totalElements: 10,
-  totalPages: 1,
-};
+interface RouteParams {
+  id: string;
+}
 
 const infoStyles = {
   fontWeight: 400,
@@ -67,107 +42,23 @@ const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
   </Tooltip>
 );
 
-import { RewardBatchTrxStatusEnum } from '../../api/generated/merchants/RewardBatchTrxStatus';
-import InvoiceDetail from './detail/InvoiceDetail';
-
-const StatusChip = ({ status }: { status: RewardBatchTrxStatusEnum }) => {
-  const statusMap: Record<
-    RewardBatchTrxStatusEnum,
-    { label: string; color: 'default' | 'success' | 'warning' | 'error'; textColor?: string }
-  > = {
-    [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: 'warning' },
-    [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: 'warning' },
-    [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Contrassegnata', color: 'warning' },
-    [RewardBatchTrxStatusEnum.APPROVED]: { label: 'Validata', color: 'success' },
-    [RewardBatchTrxStatusEnum.REJECTED]: { label: 'Rifiutata', color: 'error' },
-  };
-  const chipItem = statusMap[status] || { label: status, color: 'default' };
-  return (
-    <CustomChip
-      label={chipItem.label}
-      colorChip={chipItem.color}
-      sizeChip="small"
-      textColorChip={chipItem.textColor}
-    />
-  );
-};
-
-const getColumns = (handleListButtonClick: (row: any) => void) => [
-  {
-    field: 'checkbox',
-    headerName: '',
-    width: 58,
-    sortable: false,
-    disableColumnMenu: true,
-    renderHeader: () => <Checkbox disabled />,
-    renderCell: () => <Checkbox disabled />,
-  },
-  {
-    field: 'fileName',
-    headerName: 'Fattura',
-    flex: 3,
-    sortable: false,
-    renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
-  },
-  {
-    field: 'franchiseName',
-    headerName: 'Punto vendita',
-    flex: 2,
-    sortable: false,
-    renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
-  },
-  {
-    field: 'trxChargeDate',
-    headerName: 'Data e ora',
-    flex: 2,
-    sortable: false,
-    valueGetter: (params: any) => params.row.trxChargeDate,
-    renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
-  },
-  {
-    field: 'effectiveAmountCents',
-    headerName: 'Rimborso richiesto',
-    flex: 2,
-    sortable: false,
-    renderCell: (params: any) =>
-      renderCellWithTooltip(
-        (params.value / 100).toLocaleString('it-IT', {
-          style: 'currency',
-          currency: 'EUR',
-          minimumFractionDigits: 2,
-        }),
-        11
-      ),
-  },
-  {
-    field: 'rewardBatchTrxStatus',
-    headerName: 'Stato',
-    flex: 1.5,
-    sortable: false,
-    renderCell: (params: any) => <StatusChip status={params.value} />,
-  },
-  {
-    field: 'actions',
-    headerName: '',
-    sortable: false,
-    filterable: false,
-    disableColumnMenu: true,
-    flex: 0.3,
-    renderCell: (params: any) => (
-      <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
-        <IconButton onClick={() => handleListButtonClick(params.row)} size="small">
-          <ChevronRightIcon data-testid={params.row.trxId} color="primary" fontSize="inherit" />
-        </IconButton>
-      </Box>
-    ),
-  },
-];
-
-const invoiceDataTable: React.FC = () => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+const InvoiceDataTable = () => {
+  const [transactions, setTransactions] = useState<MerchantTransactionsListDTO>({
+    content: [],
+    pageNo: 0,
+    pageSize: 10,
+    totalElements: 0,
+    totalPages: 0,
+  });
+  const [pagination, setPagination] = useState({
+    pageNo: 0,
+    pageSize: 10,
+    totalElements: 0,
+  });
   const [drawerOpened, setDrawerOpened] = useState(false);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [rowDetail, setRowDetail] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { id } = useParams<RouteParams>();
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -181,22 +72,133 @@ const invoiceDataTable: React.FC = () => {
     }
   };
 
+  const handlePaginationPageChange = (page: number) => {
+    setPagination((prev) => ({ ...prev, pageNo: page }));
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    getMerchantTransactionsProcessed({
+      initiativeId: id,
+      page: pagination.pageNo,
+      size: pagination.pageSize,
+    })
+      .then((data) => {
+        setTransactions(data);
+        setPagination({
+          pageNo: data.pageNo,
+          pageSize: data.pageSize,
+          totalElements: data.totalElements,
+        });
+      })
+      .finally(() => setLoading(false));
+  }, [pagination.pageNo, pagination.pageSize]);
+
+  const columns: Array<GridColDef> = [
+    {
+      field: 'fileName',
+      headerName: 'Fattura',
+      flex: 3,
+      sortable: false,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+    },
+    {
+      field: 'additionalProperties.productName',
+      headerName: 'Prodotto',
+      flex: 2,
+      sortable: false,
+      renderCell: (params: any) =>
+        renderCellWithTooltip(params.row.additionalProperties?.productName || '-', 11),
+    },
+    {
+      field: 'trxChargeDate',
+      headerName: 'Data e ora',
+      flex: 2,
+      sortable: false,
+      valueGetter: (params: any) => params.row.trxChargeDate,
+      renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
+    },
+    {
+      field: 'effectiveAmountCents',
+      headerName: 'Rimborso richiesto',
+      flex: 2,
+      sortable: false,
+      renderCell: (params: any) =>
+        renderCellWithTooltip(
+          (params.value / 100).toLocaleString('it-IT', {
+            style: 'currency',
+            currency: 'EUR',
+            minimumFractionDigits: 2,
+          }),
+          11
+        ),
+    },
+    {
+      field: 'status',
+      headerName: 'Stato',
+      flex: 1.5,
+      sortable: false,
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+    },
+    {
+      field: 'actions',
+      headerName: '',
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      flex: 0.3,
+      renderCell: (params: any) => (
+        <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+          <IconButton onClick={() => handleListButtonClick(params.row)} size="small">
+            <ChevronRightIcon data-testid={params.row.trxId} color="primary" fontSize="inherit" />
+          </IconButton>
+        </Box>
+      ),
+    },
+  ];
+
+  const tableRows = transactions.content.map((row) => ({ ...row, id: row.trxId }));
+
   return (
-    <Box p={1.5}>
+    <Box sx={{ my: 2 }}>
       <Stack
         direction={{ xs: 'column', md: 'row' }}
         spacing={{ xs: 2, md: 3 }}
         justifyContent="space-between"
         alignItems={{ xs: 'flex-start', md: 'center' }}
-      ></Stack>
-      <Box>
-        <DataTable
-          columns={getColumns(handleListButtonClick)}
-          rows={merchantTransactionsListMock.content}
-          rowsPerPage={10}
-          checkable={false}
-        />
-      </Box>
+      />
+      {loading ? (
+        <Box
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Box sx={{ height: 'auto', width: '100%' }}>
+          <DataTable
+            rows={tableRows}
+            columns={columns}
+            rowsPerPage={pagination.pageSize}
+            paginationModel={pagination}
+            onPaginationPageChange={handlePaginationPageChange}
+            checkable={false}
+          />
+        </Box>
+      )}
+      {!loading && transactions.content.length === 0 && (
+        <Paper
+          sx={{
+            my: 4,
+            p: 3,
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography variant="body2">Nessuna richiesta di rimborso trovata.</Typography>
+        </Paper>
+      )}
       <DetailDrawer open={drawerOpened} toggleDrawer={handleToggleDrawer}>
         {rowDetail && (
           <InvoiceDetail
@@ -254,4 +256,4 @@ const invoiceDataTable: React.FC = () => {
   );
 };
 
-export default invoiceDataTable;
+export default InvoiceDataTable;
