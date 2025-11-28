@@ -102,8 +102,8 @@ const RefundRequests = () => {
             onClick={() => {
               history.push(
                 routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(
-                  ':store',
-                  params.row?.insegna
+                  ':batch',
+                  params.row?.name
                 ),
                 {
                   store: params.row,

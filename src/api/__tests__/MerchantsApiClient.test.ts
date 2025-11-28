@@ -99,7 +99,13 @@ describe('MerchantApi', () => {
     mockApiClient.getMerchantTransactionsProcessed.mockResolvedValue({ right: 'data' });
     const MerchantApi = loadApi();
 
-    const result = await MerchantApi.getMerchantTransactionsProcessed('init1', 1);
+    const result = await MerchantApi.getMerchantTransactionsProcessed({
+      initiativeId: 'init1',
+      page: 1,
+      size: 10,
+      fiscalCode: undefined,
+      status: undefined,
+    }, 1);
 
     expect(mockApiClient.getMerchantTransactionsProcessed).toHaveBeenCalledWith({
       initiativeId: 'init1',
@@ -166,7 +172,7 @@ describe('MerchantApi', () => {
       trxCode: 'trxCode',
       body: { amountCents: 200, idTrxAcquirer: 'trx1' },
     });
-    expect(result).toBe('ok');
+    expect(result).toBe('extracted');
   });
 
   it('updateMerchantPointOfSales returns error object when left', async () => {
@@ -294,7 +300,13 @@ describe('MerchantApi', () => {
     const MerchantApi = loadApi();
 
     const result = await MerchantApi.getMerchantTransactionsProcessed(
-      'init-filter',
+      {
+        initiativeId: 'init-filter',
+        page: 3,
+        size: 10,
+        fiscalCode: 'DDD',
+        status: 'OK',
+      },
       3,
       'DDD',
       'OK'

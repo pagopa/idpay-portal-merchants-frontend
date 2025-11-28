@@ -22,7 +22,7 @@ const ROUTES = {
   NEW_DISCOUNT: `${BASE_ROUTE}/crea-sconto/:id`,
   ACCEPT_NEW_DISCOUNT: `${BASE_ROUTE}/accetta-sconto/:id`,
   REFUND_REQUESTS: `${BASE_ROUTE}/:id/richieste-di-rimborso`,
-  REFUND_REQUESTS_STORE: `${BASE_ROUTE}/:id/richieste-di-rimborso/punto-vendita/:store`,
+  REFUND_REQUESTS_STORE: `${BASE_ROUTE}/:id/richieste-di-rimborso/punto-vendita/:batch`,
   SIDE_MENU_REFUND_REQUESTS: `richieste-di-rimborso`,
 };
 

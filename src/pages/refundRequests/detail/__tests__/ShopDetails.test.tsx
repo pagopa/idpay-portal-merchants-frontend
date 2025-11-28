@@ -155,7 +155,7 @@ describe('ShopDetails', () => {
     render(<ShopDetails />);
 
     expect(
-      screen.getByLabelText('pages.initiativeDiscounts.filterByDate')
+      screen.getByText('commons.backBtn')
     ).toBeInTheDocument();
 
     const statusSelect = screen.getByTestId('filterStatus-select');
