@@ -4,7 +4,8 @@ import {
   UnloadEventHandler,
   UserNotifyHandle,
 } from '@pagopa/selfcare-common-frontend';
-import { matchPath, Redirect, Route, Switch } from 'react-router-dom';
+import { matchPath, Redirect, Route, Switch, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import withSelectedPartyProducts from './decorators/withSelectedPartyProducts';
 import withLogin from './decorators/withLogin';
 import Layout from './components/Layout/Layout';
@@ -30,14 +31,20 @@ import { useInitiativesList } from './hooks/useInitiativesList';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
-   const match = matchPath(location.pathname, {
-    path: [ROUTES.HOME, ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS, ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS],
-    exact: true,
-    strict: false,
-  });
-  
-    useInitiativesList(match);
-    
+    const [match, setMatch] = useState<any>(null);
+    const location = useLocation();
+
+    useEffect(() => {
+      setMatch(
+        matchPath(location.pathname, {
+          path: [ROUTES.HOME, ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS, ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS],
+          exact: true,
+          strict: false,
+      }));
+    }, [location]);
+
+  useInitiativesList(match);
+
     return(
     <AlertProvider>
       <Layout>
