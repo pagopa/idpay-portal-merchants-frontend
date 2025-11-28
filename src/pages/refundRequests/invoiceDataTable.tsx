@@ -9,17 +9,15 @@ import {
   Paper,
 } from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { GridColDef } from '@mui/x-data-grid';
+import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
-// import CustomChip from '../../components/Chip/CustomChip';
 import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
 import { getMerchantTransactionsProcessed } from '../../services/merchantService';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
-// import { RewardBatchTrxStatusEnum } from '../../api/generated/merchants/RewardBatchTrxStatus';
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
@@ -30,6 +28,7 @@ interface InvoiceDataTableProps {
   batchId?: string;
   rewardBatchTrxStatus?: string;
   pointOfSaleId?: string;
+  fiscalCode?: string;
 }
 
 const infoStyles = {
@@ -53,6 +52,7 @@ const InvoiceDataTable = ({
   batchId,
   rewardBatchTrxStatus,
   pointOfSaleId,
+  fiscalCode,
 }: InvoiceDataTableProps) => {
   const [transactions, setTransactions] = useState<MerchantTransactionsListDTO>({
     content: [],
@@ -69,6 +69,9 @@ const InvoiceDataTable = ({
   const [drawerOpened, setDrawerOpened] = useState(false);
   const [rowDetail, setRowDetail] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sortModel, setSortModel] = useState<GridSortModel>([
+    { field: 'trxChargeDate', sort: 'asc' },
+  ]);
   const { id } = useParams<RouteParams>();
 
   const handleListButtonClick = (row: any) => {
@@ -87,16 +90,41 @@ const InvoiceDataTable = ({
     setPagination((prev) => ({ ...prev, pageNo: page }));
   };
 
+  const handleSortModelChange = (model: GridSortModel) => {
+    if (
+      model.length === 0 ||
+      (model.length === 1 &&
+        model[0].field === 'trxChargeDate' &&
+        (model[0].sort === 'asc' || model[0].sort === 'desc'))
+    ) {
+      setSortModel(model);
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
-    getMerchantTransactionsProcessed({
+
+    let sortParam: string | undefined;
+    if (
+      sortModel.length === 1 &&
+      sortModel[0].field === 'trxChargeDate' &&
+      (sortModel[0].sort === 'asc' || sortModel[0].sort === 'desc')
+    ) {
+      sortParam = `trxChargeDate,${sortModel[0].sort}`;
+    }
+
+    const params = {
       initiativeId: id,
       page: pagination.pageNo,
       size: pagination.pageSize,
-      rewardBatchId: batchId,
-      rewardBatchTrxStatus,
-      pointOfSaleId,
-    })
+      ...(sortParam ? { sort: sortParam } : {}),
+      ...(fiscalCode ? { fiscalCode } : {}),
+      ...(batchId ? { rewardBatchId: batchId } : {}),
+      ...(rewardBatchTrxStatus ? { rewardBatchTrxStatus } : {}),
+      ...(pointOfSaleId ? { pointOfSaleId } : {}),
+    };
+
+    getMerchantTransactionsProcessed(params)
       .then((data) => {
         setTransactions(data);
         setPagination({
@@ -106,7 +134,15 @@ const InvoiceDataTable = ({
         });
       })
       .finally(() => setLoading(false));
-  }, [pagination.pageNo, pagination.pageSize, batchId, rewardBatchTrxStatus, pointOfSaleId]);
+  }, [
+    pagination.pageNo,
+    pagination.pageSize,
+    batchId,
+    rewardBatchTrxStatus,
+    pointOfSaleId,
+    sortModel,
+    fiscalCode,
+  ]);
 
   const columns: Array<GridColDef> = [
     {
@@ -128,7 +164,7 @@ const InvoiceDataTable = ({
       field: 'trxChargeDate',
       headerName: 'Data e ora',
       flex: 2,
-      sortable: false,
+      sortable: true,
       valueGetter: (params: any) => params.row.trxChargeDate,
       renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
     },
@@ -195,7 +231,8 @@ const InvoiceDataTable = ({
             rowsPerPage={pagination.pageSize}
             paginationModel={pagination}
             onPaginationPageChange={handlePaginationPageChange}
-            checkable={false}
+            sortModel={sortModel}
+            onSortModelChange={handleSortModelChange}
           />
         </Box>
       )}
