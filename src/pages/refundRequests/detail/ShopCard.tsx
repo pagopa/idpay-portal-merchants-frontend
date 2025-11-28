@@ -6,6 +6,7 @@ import { getMerchantDetail } from '../../../services/merchantService';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import CustomChip from '../../../components/Chip/CustomChip';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
+import getStatus from '../../../components/Transactions/useStatus';
 
 type Props = {
   batchName: string;
@@ -16,27 +17,14 @@ type Props = {
   approvedRefund: string;
 };
 
-const StatusChip = ({ status }: { status: RewardBatchTrxStatusEnum }) => {
-  const statusMap: Record<
-    RewardBatchTrxStatusEnum,
-    { label: string; color: 'default' | 'success' | 'warning' | 'error'; textColor?: string }
-  > = {
-    [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: 'warning' },
-    [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: 'warning' },
-    [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Contrassegnata', color: 'warning' },
-    [RewardBatchTrxStatusEnum.APPROVED]: { label: 'Validata', color: 'success' },
-    [RewardBatchTrxStatusEnum.REJECTED]: { label: 'Rifiutata', color: 'error' },
-  };
-  const chipItem = statusMap[status as RewardBatchTrxStatusEnum] || {
-    label: status,
-    color: 'default',
-  };
+const StatusChip = ({ status }: any) => {
+  const chipItem = getStatus(status);
   return (
     <CustomChip
-      label={chipItem.label}
-      colorChip={chipItem.color}
+      label={chipItem?.label}
+      colorChip={chipItem?.color}
       sizeChip="small"
-      textColorChip={chipItem.textColor}
+      textColorChip={chipItem?.textColor}
     />
   );
 };
