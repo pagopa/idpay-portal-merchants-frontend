@@ -3,11 +3,11 @@ import { ReactNode, useState } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { ReceiptLong } from '@mui/icons-material';
-import CustomChip from '../../../components/Chip/CustomChip';
 import { downloadInvoiceFile } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { formatValues, currencyFormatter } from '../../../utils/formatUtils';
 import { useStore } from '../../initiativeStores/StoreContext';
+import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 
 type Props = {
@@ -15,26 +15,6 @@ type Props = {
   itemValues: any;
   listItem: Array<any>;
   children?: ReactNode;
-};
-
-const StatusChip = ({ status }: { status: string }) => {
-  const statusMap: Record<
-    string,
-    { label: string; color: 'default' | 'success' | 'warning' | 'error'; textColor?: string }
-  > = {
-    TO_REVIEW: { label: 'Da esaminare', color: 'warning' },
-    APPROVED: { label: 'Approvata', color: 'success' },
-    REJECTED: { label: 'Rifiutata', color: 'error' },
-  };
-  const chipItem = statusMap[status] || { label: status, color: 'default' };
-  return (
-    <CustomChip
-      label={chipItem.label}
-      colorChip={chipItem.color}
-      sizeChip="small"
-      textColorChip={chipItem.textColor}
-    />
-  );
 };
 
 export default function TransactionDetail({ title, itemValues, listItem }: Props) {
@@ -119,7 +99,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
               {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
             </Typography>
             <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
-              {itemValues?.docNumber ?? MISSING_DATA_PLACEHOLDER}
+              {itemValues?.invoiceDocNumber ?? MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>
         </Grid>
@@ -147,7 +127,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
                 <CircularProgress color="inherit" size={20} data-testid="item-loader" />
               ) : (
                 <>
-                  <ReceiptLong /> {itemValues?.fileName ?? MISSING_DATA_PLACEHOLDER}
+                  <ReceiptLong /> {itemValues?.invoiceFileName ?? MISSING_DATA_PLACEHOLDER}
                 </>
               )}
             </Button>
@@ -163,10 +143,10 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
             >
               Stato
             </Typography>
-            <StatusChip status={itemValues?.status} />
+            <StatusChipInvoice status={itemValues?.rewardBatchTrxStatus} />
           </Box>
         </Grid>
-        {[RewardBatchTrxStatusEnum.SUSPENDED,RewardBatchTrxStatusEnum.REJECTED].includes(itemValues.status) &&
+        {[RewardBatchTrxStatusEnum.SUSPENDED,RewardBatchTrxStatusEnum.REJECTED].includes(itemValues.rewardBatchTrxStatus) &&
           <Grid item xs={12}>
             <Box mt={1}>
               <Typography

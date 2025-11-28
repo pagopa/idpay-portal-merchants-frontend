@@ -109,7 +109,7 @@ const InvoiceDataTable = ({
 
   const columns: Array<GridColDef> = [
     {
-      field: 'fileName',
+      field: 'invoiceFileName',
       headerName: 'Fattura',
       flex: 3,
       sortable: false,
@@ -147,7 +147,7 @@ const InvoiceDataTable = ({
         ),
     },
     {
-      field: 'status',
+      field: 'rewardBatchTrxStatus',
       headerName: 'Stato',
       flex: 1.5,
       sortable: false,

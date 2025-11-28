@@ -28,6 +28,7 @@ import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/Rewar
 import { parseJwt } from '../../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../../services/merchantService';
 import { PointOfSaleDTO } from '../../../api/generated/merchants/PointOfSaleDTO';
+import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { ShopCard } from './ShopCard';
 
 const PAGINATION_SIZE = 20;
@@ -240,7 +241,7 @@ const ShopDetails: React.FC = () => {
                     width: 165,
                   }}
                   size="small"
-                  renderValue={(selected) => (selected ? <StatusChip status={selected} /> : '')}
+                  renderValue={(selected) => (selected ? <StatusChipInvoice status={selected} /> : '')}
                 >
                   {filterByStatusOptionsList.map((item) => (
                     <MenuItem key={item} value={item}>
