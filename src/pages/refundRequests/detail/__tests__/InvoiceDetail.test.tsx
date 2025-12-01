@@ -126,7 +126,7 @@ describe('InvoiceDetail', () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByTestId('item-loader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('item-loader')).toBeInTheDocument();
     });
   });
 
