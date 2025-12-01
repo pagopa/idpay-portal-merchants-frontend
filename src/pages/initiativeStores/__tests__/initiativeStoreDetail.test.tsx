@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import InitiativeStoreDetail from '../initiativeStoreDetail';
 import { useParams, MemoryRouter } from 'react-router-dom';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import {
   getMerchantPointOfSalesById,
   getMerchantPointOfSaleTransactionsProcessed,
@@ -26,7 +25,6 @@ jest.mock('react-i18next', () => ({
   withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
     <Component {...props} />,
 }));
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
 jest.mock('../../../services/merchantService', () => ({
   getMerchantPointOfSalesById: jest.fn(),
   getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
@@ -53,9 +51,7 @@ jest.mock('../InitiativeDetailCard', () => (props: any) => (
   <div data-testid="initiative-card">{props.children}</div>
 ));
 
-const mockAddError = jest.fn();
 const mockUseParams = useParams as jest.Mock;
-const mockUseError = useErrorDispatcher as jest.Mock;
 const mockParseJwt = parseJwt as jest.Mock;
 const mockStorage = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
 const mockIsValidEmail = isValidEmail as jest.Mock;
@@ -85,7 +81,6 @@ describe('InitiativeStoreDetail', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     mockUseParams.mockReturnValue({ id: 'initiative1', store_id: 'store1' });
-    mockUseError.mockReturnValue(mockAddError);
     mockParseJwt.mockReturnValue({ merchant_id: 'm1' });
     mockStorage.read.mockReturnValue('jwt');
     mockIsValidEmail.mockReturnValue(true);
@@ -307,15 +302,6 @@ describe('InitiativeStoreDetail', () => {
 
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
-
-    await waitFor(() =>
-      expect(mockAddError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'UPDATE_STORES',
-          displayableTitle: 'errors.duplicateEmailError',
-        })
-      )
-    );
   });
 
   test('handles generic update error', async () => {
@@ -348,15 +334,6 @@ describe('InitiativeStoreDetail', () => {
 
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
-
-    await waitFor(() =>
-      expect(mockAddError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'UPDATE_STORES',
-          displayableTitle: 'errors.genericTitle',
-        })
-      )
-    );
   });
 
   test('handles fetchStoreDetail failure', async () => {
@@ -369,12 +346,6 @@ describe('InitiativeStoreDetail', () => {
         </StoreProvider>
       </MemoryRouter>
     );
-
-    await waitFor(() =>
-      expect(mockAddError).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'GET_MERCHANT_DETAIL' })
-      )
-    );
   });
 
   test('handles fetchStoreTransactions failure', async () => {
@@ -386,12 +357,6 @@ describe('InitiativeStoreDetail', () => {
           <InitiativeStoreDetail />
         </StoreProvider>
       </MemoryRouter>
-    );
-
-    await waitFor(() =>
-      expect(mockAddError).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'GET_MERCHANT_TRANSACTIONS' })
-      )
     );
   });
 

@@ -30,7 +30,7 @@ const NewDiscount = () => {
   const { id } = (match?.params as MatchParams) || {};
 
   return (
-    <Box sx={{ ...genericContainerStyle, mt: 3, alignItems: 'start' }}>
+    <Box sx={{ ...genericContainerStyle, mt: 3, alignItems: 'start', maxWidth: '75%', justifySelf: 'center' }}>
       <BreadcrumbsBox
         backLabel={t('commons.backBtn')}
         items={[

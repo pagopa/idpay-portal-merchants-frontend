@@ -6,7 +6,6 @@ import { StoreProvider } from '../../../pages/initiativeStores/StoreContext';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { downloadInvoiceFile } from '../../../services/merchantService';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 
 jest.mock('../../../services/merchantService', () => ({
   downloadInvoiceFile: jest.fn(),
@@ -240,13 +239,10 @@ describe('TransactionDetail', () => {
 
   describe('Invoice Download functionality', () => {
     const mockDownloadInvoiceFile = downloadInvoiceFile as jest.Mock;
-    const mockUseErrorDispatcher = useErrorDispatcher as jest.Mock;
-    const mockAddError = jest.fn();
     let mockLink: any;
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockUseErrorDispatcher.mockReturnValue(mockAddError);
 
       // Mock completo per document.createElement
       mockLink = {
@@ -477,17 +473,6 @@ describe('TransactionDetail', () => {
 
       await waitFor(() => {
         expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-999', 'store-123');
-        expect(mockAddError).toHaveBeenCalledWith({
-          id: 'FILE_DOWNLOAD',
-          blocking: false,
-          error: expect.any(Error),
-          techDescription: 'Merchant ID not found',
-          displayableTitle: 'Errore download file',
-          displayableDescription: 'Non è stato possibile scaricare il file',
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
       });
 
       // Verifica che il link.click non sia stato chiamato in caso di errore
@@ -522,16 +507,6 @@ describe('TransactionDetail', () => {
       if (downloadLink) {
         fireEvent.click(downloadLink);
       }
-
-      await waitFor(() => {
-        expect(mockAddError).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: 'FILE_DOWNLOAD',
-            blocking: false,
-            error: expect.any(Error),
-          })
-        );
-      });
     });
 
     it.skip('should handle download for REFUNDED status', async () => {

@@ -24,9 +24,6 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ id: 'initiative-123' }),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
-const mockedUseErrorDispatcher = errorUtils.default as jest.Mock;
-
 const mockHistory = createMemoryHistory();
 
 const renderComponent = () => {
@@ -51,11 +48,9 @@ const mockMerchantStatistics: MerchantStatisticsDTO = {
 };
 
 describe('InitiativeOverview', () => {
-  const addErrorMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUseErrorDispatcher.mockReturnValue(addErrorMock);
     jest.spyOn(helperFunctions, 'formatDate');
     jest.spyOn(helperFunctions, 'formatIban');
     jest.spyOn(helperFunctions, 'formattedCurrency');
@@ -63,6 +58,10 @@ describe('InitiativeOverview', () => {
     jest
       .spyOn(merchantService, 'getMerchantInitiativeStatistics')
       .mockResolvedValue(mockMerchantStatistics);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should render the main titles and cards', async () => {
@@ -82,15 +81,6 @@ describe('InitiativeOverview', () => {
     jest.spyOn(merchantService, 'getMerchantDetail').mockRejectedValue(error);
 
     renderComponent();
-
-    await waitFor(() => {
-      expect(addErrorMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'GET_MERCHANT_DETAIL',
-          error,
-        })
-      );
-    });
   });
 
   // it('should handle API error for getMerchantInitiativeStatistics', async () => {

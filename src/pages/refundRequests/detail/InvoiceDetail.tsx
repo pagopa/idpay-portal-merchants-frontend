@@ -1,13 +1,13 @@
 import { Box, Grid, Typography, Button, CircularProgress } from '@mui/material';
 import { ReactNode, useState } from 'react';
 import { theme } from '@pagopa/mui-italia';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { ReceiptLong } from '@mui/icons-material';
 import { downloadInvoiceFile } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { formatValues, currencyFormatter } from '../../../utils/formatUtils';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
+import { useAlert } from '../../../hooks/useAlert';
 
 type Props = {
   title?: string;
@@ -18,7 +18,7 @@ type Props = {
 };
 
 export default function InvoiceDetail({ title, itemValues, listItem, storeId }: Props) {
-  const addError = useErrorDispatcher();
+  const {setAlert} = useAlert();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDownloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
@@ -37,16 +37,13 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
 
       setIsLoading(false);
     } catch (error) {
-      addError({
-        id: 'FILE_DOWNLOAD',
-        blocking: false,
-        error: new Error('Merchant ID not found'),
-        techDescription: 'Merchant ID not found',
-        displayableTitle: 'Errore download file',
-        displayableDescription: 'Non è stato possibile scaricare il file',
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
+      setAlert({
+        title: 'Errore downloand file',
+        text: 'Non è stato possibile scaricare il file',
+        isOpen: true,
+        severity: 'error',
+        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px'},
+        contentStyle: {position: 'unset', bottom: '0', right: '0'}
       });
       setIsLoading(false);
     }

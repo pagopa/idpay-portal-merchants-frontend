@@ -11,7 +11,7 @@ import { GetReportedUsersFilters } from '../../types/types';
 import routes from '../../routes';
 import { getReportedUser, deleteReportedUser } from '../../services/merchantService';
 import { parseJwt } from '../../utils/jwt-utils';
-import MsgResult from './MsgResult';
+import AlertComponent from '../../components/Alert/AlertComponent';
 import { isValidCF, normalizeValue } from './helpersReportedUsers';
 import SearchTaxCode from './SearchTaxCode';
 import NoResultPaper from './NoResultPaper';
@@ -30,7 +30,13 @@ const initialValues: GetReportedUsersFilters = {
   sort: 'asc',
 };
 
+const successAlertMap: Record<string, string> = {
+  valid: 'pages.reportedUsers.cf.validCf',
+  removed: 'pages.reportedUsers.cf.removedCf'
+};
+
 const ReportedUsers: React.FC = () => {
+  const [success, setSuccess] = useState({variant: '', isOpen: false});
   const location = useLocation<{ newCf?: string; showSuccessAlert?: boolean }>();
   const [user, setUser] = useState<
     Array<{
@@ -42,12 +48,10 @@ const ReportedUsers: React.FC = () => {
   >([]);
   const [lastSearchedCF, setLastSearchedCF] = useState<string | undefined>(undefined);
   const [showEmptyAlert, setShowEmptyAlert] = useState(false);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedCf, setSelectedCf] = useState<string | null>(null);
-  const [showDeleteSuccessAlert, setShowDeleteSuccessAlert] = useState(false);
   const history = useHistory();
 
   const { id } = useParams<RouteParams>();
@@ -67,8 +71,8 @@ const ReportedUsers: React.FC = () => {
     if (location.state && location.state.newCf) {
       void formik.setFieldValue('cf', location.state.newCf);
       if (location.state.showSuccessAlert) {
-        setShowSuccessAlert(true);
-        setTimeout(() => setShowSuccessAlert(false), 3000);
+        setSuccess({variant: 'valid', isOpen: true});
+        setTimeout(() => setSuccess(prev => ({ ...prev, isOpen: false})), 3000);
       }
       setTimeout(() => {
         void formik.handleSubmit();
@@ -133,8 +137,8 @@ const ReportedUsers: React.FC = () => {
       await deleteReportedUser(id, cf);
       setUser([]);
       setLastSearchedCF(undefined);
-      setShowDeleteSuccessAlert(true);
-      setTimeout(() => setShowDeleteSuccessAlert(false), 3000);
+      setSuccess({variant: 'removed', isOpen: true});
+      setTimeout(() => setSuccess(prev => ({ ...prev, isOpen: false})), 3000);
     } catch (e) {
       console.error('Error while deleting reported user:', e);
     }
@@ -204,13 +208,6 @@ const ReportedUsers: React.FC = () => {
             void formik.setFieldValue('cf', '');
           }}
         />
-        {showSuccessAlert && (
-          <MsgResult
-            severity="success"
-            message={t('pages.reportedUsers.cf.validCf')}
-            bottom={170}
-          />
-        )}
         {user.length > 0 && (
           <Box
             sx={{
@@ -253,31 +250,26 @@ const ReportedUsers: React.FC = () => {
           onConfirm={handleConfirmDelete}
           cfModal={undefined}
         />
-        {showDeleteSuccessAlert && (
-          <MsgResult
-            severity="success"
-            message={t('pages.reportedUsers.cf.removedCf')}
-            bottom={170}
-          />
-        )}
 
         {user.length === 0 && !loading && !error && (
-          <>
-            {showEmptyAlert && !location.state?.newCf ? (
-              <>
-                <MsgResult
-                  severity="error"
-                  message={t('pages.reportedUsers.cf.noResultUser')}
-                  bottom={170}
-                />
-                <NoResultPaper translationKey="pages.reportedUsers.noUsers" />
-              </>
-            ) : (
-              <NoResultPaper translationKey="pages.reportedUsers.noUsers" />
-            )}
-          </>
+          <NoResultPaper translationKey="pages.reportedUsers.noUsers" />
         )}
       </Box>
+      {user.length === 0 && !loading && !error && !location.state?.newCf && (
+        <AlertComponent
+          data-testid='msg-error'
+          isOpen={showEmptyAlert}
+          severity="error"
+          text={t('pages.reportedUsers.cf.noResultUser')}
+          onClose={() => setShowEmptyAlert(false)}
+        />)}
+      <AlertComponent
+        data-testid='msg-success'
+        severity="success"
+        text={t(successAlertMap[success.variant])}
+        isOpen={success.isOpen}
+        onClose={() => setSuccess(prev => ({ ...prev, isOpen: false}))}
+      />
     </>
   );
 };

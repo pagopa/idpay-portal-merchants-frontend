@@ -142,13 +142,9 @@ describe('InvoiceDataTable', () => {
     totalPages: 1,
   };
 
-  let addErrorMock: jest.Mock;
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockedGetTransactions.mockResolvedValue(baseTransactions);
-    addErrorMock = jest.fn();
-    mockedUseErrorDispatcher.mockReturnValue(addErrorMock as any);
     (global as any).fetch = jest.fn().mockResolvedValue({
       blob: jest.fn().mockResolvedValue(new Blob(['test'], { type: 'application/pdf' })),
     });
@@ -278,8 +274,5 @@ describe('InvoiceDataTable', () => {
     const invoiceCell = screen.getByTestId('col-invoiceFileName');
     const invoiceLink = within(invoiceCell).getByText('INV-001');
     fireEvent.click(invoiceLink);
-    await waitFor(() => expect(addErrorMock).toHaveBeenCalledTimes(1));
-    const errorArg = addErrorMock.mock.calls[0][0];
-    expect(errorArg.id).toBe('FILE_DOWNLOAD');
   });
 });

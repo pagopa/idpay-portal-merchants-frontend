@@ -7,15 +7,17 @@ import { useLocation } from 'react-router-dom';
 import { matchPath } from 'react-router';
 import SideMenu from '../SideMenu/SideMenu';
 import ROUTES from '../../routes';
-import { useInitiativesList } from '../../hooks/useInitiativesList';
 import Footer from '../Footer/Footer';
 import CustomHeader from '../Header/CustomHeader';
+import AlertComponent from '../Alert/AlertComponent';
+import { useAlert } from '../../hooks/useAlert';
 
 type Props = {
   children?: React.ReactNode;
 };
 
 const Layout = ({ children }: Props) => {
+  const {alert} = useAlert();
   const onExit = useUnloadEventOnExit();
   const loggedUser = useSelector(userSelectors.selectLoggedUser);
   const location = useLocation();
@@ -33,11 +35,12 @@ const Layout = ({ children }: Props) => {
     strict: false,
   });
 
+  const matchNoAlert = matchPath(location.pathname, {path: [ROUTES.PRIVACY_POLICY, ROUTES.TOS], exact: true, strict: false});
+
   useEffect(() => {
     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
   }, [location.pathname]);
 
-  useInitiativesList(match);
 
   return (
     <Box
@@ -64,7 +67,7 @@ const Layout = ({ children }: Props) => {
           </Box>
           <Box
             gridColumn="auto"
-            sx={{ backgroundColor: '#F5F5F5' }}
+            sx={{ backgroundColor: '#F5F5F5', overflowX: 'clip' }}
             display="grid"
             justifyContent="center"
             pb={16}
@@ -73,6 +76,7 @@ const Layout = ({ children }: Props) => {
             gridTemplateColumns="1fr"
           >
             {children}
+            <AlertComponent { ...alert} />
           </Box>
         </Box>
       ) : (
@@ -83,15 +87,14 @@ const Layout = ({ children }: Props) => {
           justifyContent="center"
         >
           <Box
+            sx={{overflowX: 'clip'}}
             display="grid"
-            justifyContent="center"
             pb={16}
             pt={2}
             gridColumn="span 12"
-            maxWidth="75%"
-            justifySelf="center"
           >
             {children}
+          { !matchNoAlert && <AlertComponent { ...alert} contentStyle={{right: '20px', ...alert.contentStyle }} />}
           </Box>
         </Box>
       )}
