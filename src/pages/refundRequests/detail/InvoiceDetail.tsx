@@ -6,7 +6,6 @@ import { ReceiptLong } from '@mui/icons-material';
 import { downloadInvoiceFile } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { formatValues, currencyFormatter } from '../../../utils/formatUtils';
-import { useStore } from '../../initiativeStores/StoreContext';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 
@@ -14,19 +13,27 @@ type Props = {
   title?: string;
   itemValues: any;
   listItem: Array<any>;
+  storeId: string;
   children?: ReactNode;
 };
 
-export default function TransactionDetail({ title, itemValues, listItem }: Props) {
+export default function InvoiceDetail({ title, itemValues, listItem, storeId }: Props) {
   const addError = useErrorDispatcher();
-  const { storeId } = useStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
+  const handleDownloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
     setIsLoading(true);
     try {
       const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
-      window.open(response.invoiceUrl, '_blank');
+      const invoiceUrl = response.invoiceUrl;
+
+      const res = await fetch(invoiceUrl, {
+        method: "GET",
+      });
+
+      const blob = await res.blob();
+      const pdfUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+      window.open(pdfUrl, "_blank")?.focus();
 
       setIsLoading(false);
     } catch (error) {
@@ -121,7 +128,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
                   color: '#0055AA',
                 },
               }}
-              onClick={() => downloadFile(itemValues, storeId)}
+              onClick={() => handleDownloadFile(itemValues, storeId)}
             >
               {isLoading ? (
                 <CircularProgress color="inherit" size={20} data-testid="item-loader" />

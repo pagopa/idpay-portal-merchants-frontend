@@ -1011,6 +1011,9 @@ paths:
           description: "Sorting criteria in the format: property,(asc|desc). Default: elaborationDateTime,desc"
           schema:
             type: string
+            enum:
+              - trxChargeDate, desc
+              - trxChargeDate, asc 
         - name: fiscalCode
           in: query
           description: Fiscal Code
