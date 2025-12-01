@@ -73,9 +73,7 @@ const InvoiceDataTable = ({
   const [drawerOpened, setDrawerOpened] = useState(false);
   const [rowDetail, setRowDetail] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
-  const [sortModel, setSortModel] = useState<GridSortModel>([
-    { field: 'trxChargeDate', sort: 'asc' },
-  ]);
+  const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { id } = useParams<RouteParams>();
   const [, setIsLoading] = useState(false);
   const addError = useErrorDispatcher();
@@ -108,16 +106,19 @@ const InvoiceDataTable = ({
   const downloadFile = async (selectedTransaction: any) => {
     setIsLoading(true);
     try {
-      const response = await downloadInvoiceFile(selectedTransaction?.id, selectedTransaction?.pointOfSaleId);
+      const response = await downloadInvoiceFile(
+        selectedTransaction?.id,
+        selectedTransaction?.pointOfSaleId
+      );
       const invoiceUrl = response.invoiceUrl;
 
       const res = await fetch(invoiceUrl, {
-        method: "GET",
+        method: 'GET',
       });
 
       const blob = await res.blob();
-      const pdfUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
-      window.open(pdfUrl, "_blank")?.focus();
+      const pdfUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+      window.open(pdfUrl, '_blank')?.focus();
 
       setIsLoading(false);
     } catch (error) {
