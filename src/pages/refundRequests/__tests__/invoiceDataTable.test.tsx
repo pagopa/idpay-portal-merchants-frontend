@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import InvoiceDataTable from '../InvoiceDataTable';
+import InvoiceDataTable from '../invoiceDataTable';
 import { getMerchantTransactionsProcessed, downloadInvoiceFile } from '../../../services/merchantService';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 
