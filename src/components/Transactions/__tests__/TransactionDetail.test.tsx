@@ -482,7 +482,7 @@ describe('TransactionDetail', () => {
           blocking: false,
           error: expect.any(Error),
           techDescription: 'Merchant ID not found',
-          displayableTitle: 'Errore downloand file',
+          displayableTitle: 'Errore download file',
           displayableDescription: 'Non è stato possibile scaricare il file',
           toNotify: true,
           component: 'Toast',

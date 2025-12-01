@@ -42,7 +42,7 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
         blocking: false,
         error: new Error('Merchant ID not found'),
         techDescription: 'Merchant ID not found',
-        displayableTitle: 'Errore downloand file',
+        displayableTitle: 'Errore download file',
         displayableDescription: 'Non è stato possibile scaricare il file',
         toNotify: true,
         component: 'Toast',
