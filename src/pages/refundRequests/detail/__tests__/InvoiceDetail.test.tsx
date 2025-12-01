@@ -152,7 +152,7 @@ describe('InvoiceDetail', () => {
     expect(addErrorMock).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'FILE_DOWNLOAD',
-        displayableTitle: 'Errore downloand file',
+        displayableTitle: 'Errore download file',
       })
     );
 

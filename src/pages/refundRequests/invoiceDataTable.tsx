@@ -126,7 +126,7 @@ const InvoiceDataTable = ({
         blocking: false,
         error: new Error('Merchant ID not found'),
         techDescription: 'Merchant ID not found',
-        displayableTitle: 'Errore downloand file',
+        displayableTitle: 'Errore download file',
         displayableDescription: 'Non è stato possibile scaricare il file',
         toNotify: true,
         component: 'Toast',
@@ -235,7 +235,7 @@ const InvoiceDataTable = ({
       renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
     },
     {
-      field: 'effectiveAmountCents',
+      field: 'rewardAmountCents',
       headerName: 'Rimborso richiesto',
       flex: 2,
       sortable: false,

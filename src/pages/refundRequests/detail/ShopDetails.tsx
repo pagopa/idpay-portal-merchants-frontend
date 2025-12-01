@@ -33,7 +33,7 @@ import { ShopCard } from './ShopCard';
 
 const PAGINATION_SIZE = 20;
 
-const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum);
+const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(el=> el!== "TO_CHECK");
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
@@ -185,9 +185,9 @@ const ShopDetails: React.FC = () => {
           batchName={store?.name}
           dateRange={`${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`}
           companyName={store?.businessName}
-          refundAmount={formattedCurrency(store?.totalAmountCents)}
+          refundAmount={formattedCurrency(store?.initialAmountCents,'-', true)}
           status={store?.status}
-          approvedRefund={formattedCurrency(store?.approvedAmountCents)}
+          approvedRefund={formattedCurrency(store?.approvedAmountCents,'-', true)}
         />
 
         <Box
