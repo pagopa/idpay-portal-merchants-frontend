@@ -38,6 +38,7 @@ paths:
           application/json:
             schema:
               type: array
+              maxItems: 1000000
               items:
                 $ref: "#/components/schemas/PointOfSaleDTO"
       responses:
@@ -114,6 +115,8 @@ paths:
               $ref: "#/components/headers/X-RateLimit-Remaining"
             X-RateLimit-Reset:
               $ref: "#/components/headers/X-RateLimit-Reset"
+            Retry-After:
+              $ref: "#/components/headers/Retry-After"
           content:
             application/json:
               schema:
@@ -202,12 +205,30 @@ paths:
       responses:
         "200":
           description: Successful response with a paginated list of points of sale
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListPointOfSaleDTO"
         "400":
           description: Bad request - Invalid query parameters
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
           content:
             application/json:
               schema:
@@ -217,8 +238,33 @@ paths:
                 message: Something went wrong handling request
         "401":
           description: Unauthorized - Authentication Failed
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_UNAUTHORIZED
+                message: Authentication Failed
         "404":
           description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
           content:
             application/json:
               schema:
@@ -228,6 +274,17 @@ paths:
                 message: Point of sale with id 123 not found.
         "429":
           description: Too many Request - Rate limit exceeded
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+            Retry-After:
+              $ref: '#/components/headers/Retry-After'
           content:
             application/json:
               schema:
@@ -567,6 +624,27 @@ paths:
           required: true
           schema:
             type: string
+        - name: status
+          in: query
+          description: "ENG: Filter reward batches by status - IT: Filtra lotti per stato"
+          required: false
+          schema:
+            type: string
+            enum:
+              - CREATED
+              - SENT
+              - EVALUATING
+              - APPROVED
+        - name: assigneeLevel
+          in: query
+          description: "ENG: Filter reward batches by assigned operator - IT: Filtra lotti in base all'operatore assegnato al lotto"
+          required: false
+          schema:
+            type: string
+            enum:
+             - L1
+             - L2
+             - L3
         - name: page
           in: query
           required: false
@@ -905,15 +983,8 @@ paths:
     get:
       tags:
         - merchant-transactions
-      summary: "ENG: Returns the list of processed transactions associated to a merchant - IT: Ritorna la lista delle transazioni processate associate ad un esercente"
-      description: >
-        ENG: Returns the list of processed transactions associated to a merchant.
-        Supports filtering by fiscalCode, status, rewardBatchId, rewardBatchTrxStatus
-        and sorting by elaborationDateTime (via pageable sort parameter).
-        <br>
-        IT: Ritorna la lista delle transazioni processate associate ad un esercente.
-        Supporta filtri per fiscalCode, status, rewardBatchId, rewardBatchTrxStatus
-        e ordinamento per elaborationDateTime (tramite parametro sort di pageable).
+      summary: Returns the list of processed transactions associated to a merchant
+      description: "ENG: Returns the list of processed transactions associated to a merchant <br> IT: Ritorna la lista delle transazioni processate associate ad un esercente"
       operationId: getMerchantTransactionsProcessed
       parameters:
         - name: initiativeId
@@ -925,29 +996,21 @@ paths:
         - name: page
           in: query
           required: false
-          description: Page number (0-based)
           schema:
             type: integer
             format: int32
-            minimum: 0
         - name: size
           in: query
           required: false
-          description: Page size
           schema:
             type: integer
             format: int32
-            minimum: 1
         - name: sort
           in: query
           required: false
-          description: >
-            Sorting criteria in the format: property,(asc|desc).
-            Default is elaborationDateTime,desc.
-            Example: sort=elaborationDateTime,asc
+          description: "Sorting criteria in the format: property,(asc|desc). Default: elaborationDateTime,desc"
           schema:
             type: string
-          example: elaborationDateTime,desc
         - name: fiscalCode
           in: query
           description: Fiscal Code
@@ -962,31 +1025,58 @@ paths:
             type: string
         - name: rewardBatchId
           in: query
-          description: Filter by reward batch ID
+          description: Reward batch identifier
           required: false
           schema:
             type: string
         - name: rewardBatchTrxStatus
           in: query
-          description: Filter by reward batch transaction status
+          description: Reward batch transaction status
           required: false
           schema:
-            $ref: "#/components/schemas/RewardBatchTrxStatus"
+            type: string
+        - name: pointOfSaleId
+          in: query
+          description: The point of sale ID
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantTransactionsListDTO'
+        '401':
+          description: Authentication failed
+        '404':
+          description: Merchant not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Server error
+  /initiatives/transactions/processed/statuses:
+    get:
+      tags:
+        - merchant-transactions
+      summary: "ENG: Returns the list of available processed transaction statuses - IT: Ritorna la lista degli stati disponibili per le transazioni processate"
+      operationId: getProcessedTransactionStatuses
       responses:
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MerchantTransactionsListDTO"
+                type: array
+                items:
+                  type: string
         "401":
           description: Authentication failed
-        "404":
-          description: The requested resource was not found
         "429":
           description: Too many requests
         "500":
-          description: Generic error
+          description: Server error
   /transactions/bar-code/{trxCode}/authorize:
     put:
       tags:
@@ -1564,20 +1654,20 @@ components:
           type: string
           description: Identifier of the reward batch the transaction belongs to
         rewardBatchTrxStatus:
-           $ref: "#/components/schemas/RewardBatchTrxStatus"
+          $ref: "#/components/schemas/RewardBatchTrxStatus"
         rewardBatchRejectionReason:
-           type: string
-           description: Reason why the transaction was rejected from the reward batch, if any
+          type: string
+          description: Reason why the transaction was rejected from the reward batch, if any
         rewardBatchInclusionDate:
-           type: string
-           format: date-time
-           description: Date and time when the transaction was included in the reward batch
+          type: string
+          format: date-time
+          description: Date and time when the transaction was included in the reward batch
         franchiseName:
-            type: string
+          type: string
         pointOfSaleType:
-            type: string
+          type: string
         businessName:
-            type: string
+          type: string
         trxDate:
           type: string
           format: date-time
@@ -1596,7 +1686,11 @@ components:
             - IDENTIFIED
             - AUTHORIZATION_REQUESTED
             - AUTHORIZED
+            - REWARDED
             - REJECTED
+            - CANCELLED
+            - REFUNDED
+            - INVOICED
           description: "ENG: Status of the transaction - IT: Stato della transazione"
         splitPayment:
           type: boolean
@@ -1619,6 +1713,23 @@ components:
           additionalProperties:
             type: string
           description: "ENG: Additional properties of the transaction - IT: Proprietà aggiuntive della transazione"
+        pointOfSaleId:
+          type: string
+          description: "ENG: Point of sale identifier - IT: Identificativo del punto vendita"
+        trxChargeDate:
+          type: string
+          format: date-time
+          description: "ENG: Transaction charge date - IT: Data di addebito della transazione"
+        authorizedAmountCents:
+          type: integer
+          format: int64
+          description: "ENG: Authorized amount - IT: Importo autorizzato"
+        invoiceDocNumber:
+          type: string
+          description: "ENG: Document number - IT: Numero documento"
+        invoiceFileName:
+          type: string
+          description: "ENG: Associated file name - IT: Nome del file associato"
     MerchantTransactionsProcessedListDTO:
       type: object
       required:

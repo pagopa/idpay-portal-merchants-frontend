@@ -28,6 +28,7 @@ import { AlertProvider } from './contexts/AlertContext';
 import RefundRequests from './pages/refundRequests/RefundRequests';
 import ROUTES from './routes';
 import { useInitiativesList } from './hooks/useInitiativesList';
+import ShopDetails from './pages/refundRequests/detail/ShopDetails';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -95,6 +96,11 @@ const SecuredRoutes = withLogin(
           </Route>
           <Route path={routes.REFUND_REQUESTS} exact={true}>
             <RefundRequests />
+          </Route>
+          <Route path={routes.REFUND_REQUESTS_STORE} exact={true}>
+            <StoreProvider>
+              <ShopDetails />
+            </StoreProvider>
           </Route>
         <Route path="*">
           <Redirect to={routes.HOME} />
