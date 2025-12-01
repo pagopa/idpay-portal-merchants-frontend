@@ -75,7 +75,6 @@ const InvoiceDataTable = ({
   const [loading, setLoading] = useState(false);
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { id } = useParams<RouteParams>();
-  const [, setIsLoading] = useState(false);
   const addError = useErrorDispatcher();
 
   const handleListButtonClick = (row: any) => {
@@ -104,7 +103,7 @@ const InvoiceDataTable = ({
   };
 
   const downloadFile = async (selectedTransaction: any) => {
-    setIsLoading(true);
+    setLoading(true);
     try {
       const response = await downloadInvoiceFile(
         selectedTransaction?.id,
@@ -120,7 +119,7 @@ const InvoiceDataTable = ({
       const pdfUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
       window.open(pdfUrl, '_blank')?.focus();
 
-      setIsLoading(false);
+      setLoading(false);
     } catch (error) {
       addError({
         id: 'FILE_DOWNLOAD',
@@ -133,7 +132,7 @@ const InvoiceDataTable = ({
         component: 'Toast',
         showCloseIcon: true,
       });
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -276,7 +275,7 @@ const InvoiceDataTable = ({
     },
   ];
 
-  const tableRows = transactions.content.map((row) => ({ ...row, id: row.trxId }));
+  const tableRows = transactions.content.map((row: { trxId: any; }) => ({ ...row, id: row.trxId }));
 
   return (
     <Box sx={{ my: 2 }}>
