@@ -21,7 +21,6 @@ import {
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
-import { useStore } from '../initiativeStores/StoreContext';
 import { useAlert } from '../../hooks/useAlert';
 import InvoiceDetail from './detail/InvoiceDetail';
 
@@ -74,13 +73,9 @@ const InvoiceDataTable = ({
   const [drawerOpened, setDrawerOpened] = useState(false);
   const [rowDetail, setRowDetail] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
-  const [sortModel, setSortModel] = useState<GridSortModel>([
-    { field: 'trxChargeDate', sort: 'asc' },
-  ]);
+  const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { id } = useParams<RouteParams>();
-  const [, setIsLoading] = useState(false);
   const {alert, setAlert} = useAlert();
-  const { storeId } = useStore();
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -108,13 +103,24 @@ const InvoiceDataTable = ({
     setPagination((prev) => ({ ...prev, pageNo: page }));
   };
 
-  const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
-    setIsLoading(true);
+  const downloadFile = async (selectedTransaction: any) => {
+    setLoading(true);
     try {
-      const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
-      window.open(response.invoiceUrl, '_blank');
+      const response = await downloadInvoiceFile(
+        selectedTransaction?.id,
+        selectedTransaction?.pointOfSaleId
+      );
+      const invoiceUrl = response.invoiceUrl;
 
-      setIsLoading(false);
+      const res = await fetch(invoiceUrl, {
+        method: 'GET',
+      });
+
+      const blob = await res.blob();
+      const pdfUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+      window.open(pdfUrl, '_blank')?.focus();
+
+      setLoading(false);
     } catch (error) {
       setAlert({
         title: 'Errore downloand file',
@@ -124,7 +130,7 @@ const InvoiceDataTable = ({
         containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px'},
         contentStyle: {position: 'unset', bottom: '0', right: '0'}
       });
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -193,7 +199,7 @@ const InvoiceDataTable = ({
               cursor: 'pointer',
             }}
             className="ShowDots"
-            onClick={() => downloadFile(params.row, storeId)}
+            onClick={() => downloadFile(params.row)}
           >
             {params.value && params.value !== '' ? params.value : '-'}
           </Typography>
@@ -267,7 +273,7 @@ const InvoiceDataTable = ({
     },
   ];
 
-  const tableRows = transactions.content.map((row) => ({ ...row, id: row.trxId }));
+  const tableRows = transactions.content.map((row: { trxId: string }) => ({ ...row, id: row.trxId }));
 
   return (
     <Box sx={{ my: 2 }}>
@@ -314,6 +320,7 @@ const InvoiceDataTable = ({
           <InvoiceDetail
             title="Dettaglio transazione"
             itemValues={rowDetail}
+            storeId={rowDetail?.pointOfSaleId || ''}
             listItem={[
               {
                 label: 'Data e ora',

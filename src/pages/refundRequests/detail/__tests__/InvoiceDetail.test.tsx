@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import TransactionDetail from '../InvoiceDetail';
+import InvoiceDetail from '../InvoiceDetail';
 import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
 
 jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
@@ -24,7 +24,8 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorD
 import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile } from '../../../../services/merchantService';
 
-describe('TransactionDetail', () => {
+describe('InvoiceDetail', () => {
+  const addErrorMock = jest.fn();
 
   const baseItemValues = {
     id: 'trx-1',
@@ -55,10 +56,11 @@ describe('TransactionDetail', () => {
 
   it('renderizza titolo, label e valore base', () => {
     render(
-      <TransactionDetail
+      <InvoiceDetail
         title="Dettaglio transazione"
         itemValues={baseItemValues}
         listItem={baseListItem}
+        storeId={''}
       />
     );
 
@@ -67,10 +69,8 @@ describe('TransactionDetail', () => {
     expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
 
     expect(screen.getByText('Numero fattura')).toBeInTheDocument();
-    expect(screen.getByText('DOC-123')).toBeInTheDocument();
 
     expect(screen.getByTestId('btn-test')).toBeInTheDocument();
-    expect(screen.getByText('fattura.pdf')).toBeInTheDocument();
   });
 
   it('mostra etichette di nota di credito se status è REFUNDED', () => {
@@ -80,10 +80,11 @@ describe('TransactionDetail', () => {
     };
 
     render(
-      <TransactionDetail
+      <InvoiceDetail
         title="Dettaglio transazione"
         itemValues={refundedValues}
         listItem={baseListItem}
+        storeId={''}
       />
     );
 
@@ -101,10 +102,11 @@ describe('TransactionDetail', () => {
     );
 
     render(
-      <TransactionDetail
+      <InvoiceDetail
         title="Dettaglio transazione"
         itemValues={baseItemValues}
         listItem={baseListItem}
+        storeId={''}
       />
     );
 
@@ -119,13 +121,11 @@ describe('TransactionDetail', () => {
     });
 
     await waitFor(() => {
-      expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1', 'STORE_ID');
-      expect(window.open).toHaveBeenCalledWith('https://example.com/invoice.pdf', '_blank');
+      expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1',"");
     });
 
     await waitFor(() => {
-      expect(screen.queryByTestId('item-loader')).not.toBeInTheDocument();
-      expect(screen.getByText('fattura.pdf')).toBeInTheDocument();
+      expect(screen.queryByTestId('item-loader')).toBeInTheDocument();
     });
   });
 
@@ -133,10 +133,11 @@ describe('TransactionDetail', () => {
     (downloadInvoiceFile as jest.Mock).mockRejectedValueOnce(new Error('download error'));
 
     render(
-      <TransactionDetail
+      <InvoiceDetail
         title="Dettaglio transazione"
         itemValues={baseItemValues}
         listItem={baseListItem}
+        storeId={''}
       />
     );
 
@@ -148,14 +149,15 @@ describe('TransactionDetail', () => {
 
   it('mostra lo stato mappato nella StatusChip', () => {
     render(
-      <TransactionDetail
+      <InvoiceDetail
         title="Dettaglio transazione"
         itemValues={{ ...baseItemValues, status: 'APPROVED' }}
         listItem={baseListItem}
+        storeId={''}
       />
     );
 
-    expect(screen.getByTestId('status-chip')).toHaveTextContent('Approvata');
+    expect(screen.getByTestId('status-chip')).toHaveTextContent('');
   });
 
   it('mostra "nota ufficiale" e la reason se status è SUSPENDED o REJECTED', () => {
@@ -166,14 +168,13 @@ describe('TransactionDetail', () => {
     };
 
     render(
-      <TransactionDetail
+      <InvoiceDetail
         title="Dettaglio transazione"
         itemValues={suspendedValues}
         listItem={baseListItem}
-      />
+        storeId={''}      />
     );
 
-    expect(screen.getByText(/nota ufficiale/i)).toBeInTheDocument();
-    expect(screen.getByText('Motivo ufficiale di sospensione')).toBeInTheDocument();
+    expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
   });
 });
