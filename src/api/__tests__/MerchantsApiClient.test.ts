@@ -39,6 +39,8 @@ describe('MerchantApi', () => {
       downloadInvoiceFile: jest.fn(),
       getReportedUser: jest.fn(),
       deleteReportedUser: jest.fn(),
+      getRewardBatches: jest.fn(),
+      sendRewardBatches: jest.fn(),
     };
 
     (createClient as jest.Mock).mockReturnValue(mockApiClient);
@@ -97,7 +99,13 @@ describe('MerchantApi', () => {
     mockApiClient.getMerchantTransactionsProcessed.mockResolvedValue({ right: 'data' });
     const MerchantApi = loadApi();
 
-    const result = await MerchantApi.getMerchantTransactionsProcessed('init1', 1);
+    const result = await MerchantApi.getMerchantTransactionsProcessed({
+      initiativeId: 'init1',
+      page: 1,
+      size: 10,
+      fiscalCode: undefined,
+      status: undefined,
+    }, 1);
 
     expect(mockApiClient.getMerchantTransactionsProcessed).toHaveBeenCalledWith({
       initiativeId: 'init1',
@@ -164,7 +172,7 @@ describe('MerchantApi', () => {
       trxCode: 'trxCode',
       body: { amountCents: 200, idTrxAcquirer: 'trx1' },
     });
-    expect(result).toBe('ok');
+    expect(result).toBe('extracted');
   });
 
   it('updateMerchantPointOfSales returns error object when left', async () => {
@@ -292,7 +300,13 @@ describe('MerchantApi', () => {
     const MerchantApi = loadApi();
 
     const result = await MerchantApi.getMerchantTransactionsProcessed(
-      'init-filter',
+      {
+        initiativeId: 'init-filter',
+        page: 3,
+        size: 10,
+        fiscalCode: 'DDD',
+        status: 'OK',
+      },
       3,
       'DDD',
       'OK'
@@ -308,4 +322,100 @@ describe('MerchantApi', () => {
     expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
     expect(result).toBe('extracted');
   });
+
+  it('getRewardBatches - success', async () => {
+    mockApiClient.getRewardBatches.mockResolvedValue({ right: 'data' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.getRewardBatches('init1');
+
+    expect(mockApiClient.getRewardBatches).toHaveBeenCalledWith({
+      initiativeId: 'init1',
+    });
+    expect(extractResponse).toHaveBeenCalledWith(
+      { right: 'data' },
+      200,
+      expect.any(Function)
+    );
+    expect(result).toBe('extracted');
+  });
+
+  it('getRewardBatches - error path logs and returns empty object', async () => {
+    const error = {
+      message: 'Boom',
+      name: 'Error',
+      stack: 'stack-trace',
+      response: {
+        data: {
+          errorKey: 'ERR_KEY_TEST',
+        },
+      },
+    };
+
+    mockApiClient.getRewardBatches.mockRejectedValue(error);
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleGroupSpy = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
+    const consoleGroupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
+
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.getRewardBatches('init1');
+
+    // non deve chiamare extractResponse
+    expect(extractResponse).not.toHaveBeenCalled();
+
+    // log dell’errorKey
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error Key: ERR_KEY_TEST');
+
+    // log del groupCollapsed con label della API
+    expect(consoleGroupSpy).toHaveBeenCalledWith('[API ERROR] MerchantsApi.userPermission');
+    expect(consoleGroupEndSpy).toHaveBeenCalled();
+
+    // ritorna un oggetto vuoto
+    expect(result).toEqual({});
+
+    consoleErrorSpy.mockRestore();
+    consoleGroupSpy.mockRestore();
+    consoleGroupEndSpy.mockRestore();
+  });
+
+  it('sendRewardBatches', async () => {
+    mockApiClient.sendRewardBatches.mockResolvedValue({ right: 'ok' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.sendRewardBatches('init1', 'batch1');
+
+    expect(mockApiClient.sendRewardBatches).toHaveBeenCalledWith({
+      initiativeId: 'init1',
+      batchId: 'batch1',
+    });
+    expect(extractResponse).toHaveBeenCalledWith(
+      { right: 'ok' },
+      204,
+      expect.any(Function)
+    );
+    expect(result).toBe('extracted');
+  });
+
+  it('updateMerchantPointOfSales uses actual when value is missing', async () => {
+    mockApiClient.putPointOfSales.mockResolvedValue({
+      left: [
+        {
+          actual: 'ERR_ACTUAL',
+          context: [{}, { actual: { message: 'Actual error msg' } }],
+        },
+      ],
+    });
+
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.updateMerchantPointOfSales('m1', []);
+
+    expect(result).toEqual({
+      code: 'ERR_ACTUAL',
+      message: 'Actual error msg',
+    });
+  });
+
 });
