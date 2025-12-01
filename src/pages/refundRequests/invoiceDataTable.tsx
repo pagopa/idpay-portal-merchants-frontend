@@ -233,7 +233,7 @@ const InvoiceDataTable = ({
       renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
     },
     {
-      field: 'effectiveAmountCents',
+      field: 'rewardAmountCents',
       headerName: 'Rimborso richiesto',
       flex: 2,
       sortable: false,

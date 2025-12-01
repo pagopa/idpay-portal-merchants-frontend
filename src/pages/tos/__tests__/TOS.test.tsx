@@ -1,10 +1,5 @@
-import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import TOS from '../TOS';
-import { useOneTrustNotice } from '../../../hooks/useOneTrustNotice';
-import { ENV } from '../../../utils/env';
-import routes from '../../../routes';
 
 jest.mock('../../../hooks/useOneTrustNotice');
 jest.mock('../../components/OneTrustContentWrapper', () => (props: { idSelector: string }) => (
@@ -28,9 +23,33 @@ describe('TOS component', () => {
     jest.clearAllMocks();
   });
 
-  test('renders without crashing', () => {
+  test('renders without crashing', async () => {
+    jest.doMock('../tosHTML.json', () => ({
+      __esModule: true,
+      default: { html: '<p>Some TOS content</p>' },
+      html: '<p>Some TOS content</p>',
+    }));
+
+    const { default: TOS } = await import('../TOS');
+
     render(<TOS />);
-    // Just check that it renders without throwing
+
     expect(screen.getByText(/pages\.tosStatic\.title/i)).toBeInTheDocument();
+
+    expect(document.querySelector('.content')).toBeInTheDocument();
+  });
+
+  test('renders fallback Typography when html is empty (branch 2)', async () => {
+    jest.doMock('../tosHTML.json', () => ({
+      __esModule: true,
+      default: { html: '' },
+      html: '',
+    }));
+
+    const { default: TOS } = await import('../TOS');
+
+    render(<TOS />);
+
+    expect(screen.getByText("Some TOS content")).toBeInTheDocument();
   });
 });
