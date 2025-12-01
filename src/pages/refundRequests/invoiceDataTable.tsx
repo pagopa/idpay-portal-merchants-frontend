@@ -275,7 +275,7 @@ const InvoiceDataTable = ({
     },
   ];
 
-  const tableRows = transactions.content.map((row: { trxId: any; }) => ({ ...row, id: row.trxId }));
+  const tableRows = transactions.content.map((row: { trxId: string }) => ({ ...row, id: row.trxId }));
 
   return (
     <Box sx={{ my: 2 }}>
