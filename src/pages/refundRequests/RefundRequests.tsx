@@ -18,8 +18,8 @@ import { RewardBatchDTO } from '../../api/generated/merchants/RewardBatchDTO';
 import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAlert } from "../../hooks/useAlert";
-import { RefundRequestsModal } from "./RefundRequestModal";
 import routes from "../../routes";
+import { RefundRequestsModal } from "./RefundRequestModal";
 
 interface RouteParams {
   id: string;
