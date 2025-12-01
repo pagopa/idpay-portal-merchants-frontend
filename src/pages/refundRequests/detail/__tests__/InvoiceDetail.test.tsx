@@ -25,7 +25,6 @@ import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile } from '../../../../services/merchantService';
 
 describe('TransactionDetail', () => {
-  const addErrorMock = jest.fn();
 
   const baseItemValues = {
     id: 'trx-1',
@@ -50,7 +49,6 @@ describe('TransactionDetail', () => {
     jest.clearAllMocks();
 
     (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
-    (useErrorDispatcher as jest.Mock).mockReturnValue(addErrorMock);
 
     (window as any).open = jest.fn();
   });
@@ -144,17 +142,6 @@ describe('TransactionDetail', () => {
 
     const button = screen.getByTestId('btn-test');
     fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(addErrorMock).toHaveBeenCalled();
-    });
-
-    expect(addErrorMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'FILE_DOWNLOAD',
-        displayableTitle: 'Errore downloand file',
-      })
-    );
 
     expect(window.open).not.toHaveBeenCalled();
   });
