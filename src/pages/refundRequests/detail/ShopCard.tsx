@@ -136,7 +136,7 @@ export const ShopCard = ({
               >
                 <Typography variant="body1">{item.label}</Typography>
               </Box>
-              <Typography variant="body1" sx={boldStyle} minWidth="100%">
+              <Typography variant="body1" sx={boldStyle}>
                 {item.value}
               </Typography>
             </Box>
