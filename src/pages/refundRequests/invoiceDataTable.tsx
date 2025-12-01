@@ -22,7 +22,6 @@ import {
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
-import { useStore } from '../initiativeStores/StoreContext';
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
@@ -80,7 +79,6 @@ const InvoiceDataTable = ({
   const { id } = useParams<RouteParams>();
   const [, setIsLoading] = useState(false);
   const addError = useErrorDispatcher();
-  const { storeId } = useStore();
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -107,11 +105,19 @@ const InvoiceDataTable = ({
     setPagination((prev) => ({ ...prev, pageNo: page }));
   };
 
-  const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
+  const downloadFile = async (selectedTransaction: any) => {
     setIsLoading(true);
     try {
-      const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
-      window.open(response.invoiceUrl, '_blank');
+      const response = await downloadInvoiceFile(selectedTransaction?.id, selectedTransaction?.pointOfSaleId);
+      const invoiceUrl = response.invoiceUrl;
+
+      const res = await fetch(invoiceUrl, {
+        method: "GET",
+      });
+
+      const blob = await res.blob();
+      const pdfUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+      window.open(pdfUrl, "_blank")?.focus();
 
       setIsLoading(false);
     } catch (error) {
@@ -195,7 +201,7 @@ const InvoiceDataTable = ({
               cursor: 'pointer',
             }}
             className="ShowDots"
-            onClick={() => downloadFile(params.row, storeId)}
+            onClick={() => downloadFile(params.row)}
           >
             {params.value && params.value !== '' ? params.value : '-'}
           </Typography>
@@ -316,6 +322,7 @@ const InvoiceDataTable = ({
           <InvoiceDetail
             title="Dettaglio transazione"
             itemValues={rowDetail}
+            storeId={rowDetail?.pointOfSaleId || ''}
             listItem={[
               {
                 label: 'Data e ora',
