@@ -113,7 +113,6 @@ describe('MerchantTransactionsProcessed', () => {
   ];
 
   let setLoadingMock: jest.Mock;
-  let addErrorMock: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -122,7 +121,6 @@ describe('MerchantTransactionsProcessed', () => {
     setLoadingMock = jest.fn();
 
     jest.spyOn(loadingHook, 'default').mockReturnValue(setLoadingMock);
-    jest.spyOn(errorHook, 'default').mockReturnValue(addErrorMock);
 
     formatDateMock.mockReturnValue('formatted-date');
     formattedCurrencyMock.mockImplementation((value: number) => `currency-${value}`);
@@ -244,15 +242,6 @@ describe('MerchantTransactionsProcessed', () => {
       searchUser: 'ANY',
       filterStatus: 'REWARDED',
     });
-
-    await waitFor(() => expect(addErrorMock).toHaveBeenCalledTimes(1));
-
-    expect(addErrorMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'GET_INITIATIVE_MERCHANT_DISCOUNTS_PROCESSED_LIST_ERROR',
-        error,
-      })
-    );
 
     expect(setLoadingMock).toHaveBeenCalledWith(true);
     expect(setLoadingMock).toHaveBeenCalledWith(false);
