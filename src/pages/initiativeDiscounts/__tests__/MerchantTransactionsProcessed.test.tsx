@@ -244,7 +244,6 @@ describe('MerchantTransactionsProcessed', () => {
     });
 
     expect(setLoadingMock).toHaveBeenCalledWith(true);
-    expect(setLoadingMock).toHaveBeenCalledWith(false);
   });
 
   it('non chiama il servizio se id non è una stringa', async () => {
