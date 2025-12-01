@@ -195,7 +195,6 @@ const ShopDetails: React.FC = () => {
             height: 'auto',
             width: '100%',
             mt: 4,
-            '& .MuiDataGrid-footerContainer': { display: 'none' },
           }}
         >
           <FiltersForm
