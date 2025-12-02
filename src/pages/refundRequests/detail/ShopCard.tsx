@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid, Paper, Tooltip, Typography } from '@mui/material';
 import { getMerchantDetail } from '../../../services/merchantService';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import CustomChip from '../../../components/Chip/CustomChip';
@@ -70,7 +70,6 @@ export const ShopCard = ({
       minWidth: '180px',
       marginBottom: 2,
     },
-    {},
     {
       label: t('pages.refundRequests.storeDetails.requestedRefund'),
       value: refundAmount || MISSING_DATA_PLACEHOLDER,
@@ -113,9 +112,18 @@ export const ShopCard = ({
               <Box sx={{ minWidth: item.minWidth, marginBottom: item.marginBottom }}>
                 <Typography variant="body1">{item.label}</Typography>
               </Box>
-              <Typography variant="body1" sx={boldStyle} minWidth="100%">
-                {item.value}
-              </Typography>
+              <Tooltip
+                title={item?.value?.trim() === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                placement='top-start'
+              >
+                <Typography
+                  variant="body1"
+                  sx={boldStyle}
+                  minWidth="100%"
+                >
+                  {item.value?.trim() === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                </Typography>
+              </Tooltip>
             </Box>
           ))}
         </Grid>
@@ -136,9 +144,18 @@ export const ShopCard = ({
               >
                 <Typography variant="body1">{item.label}</Typography>
               </Box>
-              <Typography variant="body1" sx={boldStyle}>
-                {item.value}
-              </Typography>
+              <Tooltip
+                title={item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                placement='top-start'
+              >
+                <Typography
+                  variant="body1"
+                  sx={boldStyle}
+                  minWidth="100%"
+                >
+                  {item.value === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                </Typography>
+              </Tooltip>
             </Box>
           ))}
         </Grid>

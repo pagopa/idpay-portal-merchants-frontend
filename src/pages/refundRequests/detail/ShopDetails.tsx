@@ -8,8 +8,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  CircularProgress,
-  Button,
+  Button, Tooltip,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -23,7 +22,7 @@ import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
 import InvoiceDataTable from '../invoiceDataTable';
-import { formatDate, formattedCurrency } from '../../../helpers';
+import { formatDate, formattedCurrency, truncateString } from '../../../helpers';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 import { parseJwt } from '../../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../../services/merchantService';
@@ -41,7 +40,6 @@ const ShopDetails: React.FC = () => {
   const store = location.state?.store;
   const batchId = location.state?.batchId;
   const history = useHistory();
-  const [dataTableIsLoading, setDataTableIsLoading] = useState<boolean>(false);
 
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesLoading, setStoresLoading] = useState(false);
@@ -58,10 +56,6 @@ const ShopDetails: React.FC = () => {
     onSubmit: () => {
       setSelectedStatus(formik.values.status);
       setSelectedPointOfSaleId(formik.values.pointOfSaleId);
-      setDataTableIsLoading(true);
-      setTimeout(() => {
-        setDataTableIsLoading(false);
-      }, 1000);
     },
   });
 
@@ -217,7 +211,9 @@ const ShopDetails: React.FC = () => {
                 >
                   {stores.map((store) => (
                     <MenuItem key={store.id} value={store.id}>
-                      {store.franchiseName || MISSING_DATA_PLACEHOLDER}
+                      <Tooltip title={store?.franchiseName || MISSING_DATA_PLACEHOLDER}>
+                        <span>{truncateString(store?.franchiseName || MISSING_DATA_PLACEHOLDER, 40)}</span>
+                      </Tooltip>
                     </MenuItem>
                   ))}
                 </Select>
@@ -251,11 +247,6 @@ const ShopDetails: React.FC = () => {
               </FormControl>
             </Grid>
           </FiltersForm>
-          {dataTableIsLoading && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <CircularProgress />
-            </Box>
-          )}
           <InvoiceDataTable
             batchId={batchId}
             rewardBatchTrxStatus={selectedStatus}
