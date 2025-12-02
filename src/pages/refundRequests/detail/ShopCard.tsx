@@ -79,7 +79,7 @@ export const ShopCard = ({
     },
     {
       label: t('pages.refundRequests.storeDetails.approvedRefund'),
-      value: approvedRefund || MISSING_DATA_PLACEHOLDER,
+      value: status === RewardBatchTrxStatusEnum.APPROVED && approvedRefund ? approvedRefund : MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
     },
   ];

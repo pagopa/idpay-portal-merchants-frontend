@@ -31,7 +31,7 @@ import { PointOfSaleDTO } from '../../../api/generated/merchants/PointOfSaleDTO'
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { ShopCard } from './ShopCard';
 
-const PAGINATION_SIZE = 20;
+const PAGINATION_SIZE = 200;
 
 const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(el=> el!== "TO_CHECK");
 
@@ -80,7 +80,7 @@ const ShopDetails: React.FC = () => {
         city: filters.city,
         address: filters.address,
         contactName: filters.contactName,
-        sort: filters.sort,
+        sort: "franchiseName,asc",
         page: filters.page ?? 0,
         size: PAGINATION_SIZE,
       });
