@@ -27,24 +27,12 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
       const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
       const invoiceUrl = response.invoiceUrl;
 
-      const res = await fetch(invoiceUrl, {
-        method: "GET",
-      });
-
-      const blob = await res.blob();
-
-      const contentType =
-        blob.type ||
-        res.headers.get("Content-Type") ||
-        "application/octet-stream";
-
-      const fileUrl = URL.createObjectURL(new Blob([blob], { type: contentType }));
-      window.open(fileUrl, "_blank")?.focus();
+      window.open(invoiceUrl, '_blank')?.focus();
 
       setIsLoading(false);
     } catch (error) {
       setAlert({
-        title: 'Errore downloand file',
+        title: 'Errore download file',
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
         severity: 'error',
