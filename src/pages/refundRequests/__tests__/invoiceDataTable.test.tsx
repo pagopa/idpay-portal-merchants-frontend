@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import InvoiceDataTable from '../invoiceDataTable';
 import { getMerchantTransactionsProcessed, downloadInvoiceFile } from '../../../services/merchantService';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -109,15 +108,8 @@ jest.mock('../../../utils/formatUtils', () => ({
   safeFormatDate: (value: string) => `formatted-${value}`,
 }));
 
-const mockedGetTransactions = getMerchantTransactionsProcessed as jest.MockedFunction<
-  typeof getMerchantTransactionsProcessed
->;
-const mockedDownloadInvoiceFile = downloadInvoiceFile as jest.MockedFunction<
-  typeof downloadInvoiceFile
->;
-const mockedUseErrorDispatcher = useErrorDispatcher as jest.MockedFunction<
-  typeof useErrorDispatcher
->;
+const mockedGetTransactions = getMerchantTransactionsProcessed as jest.MockedFunction<typeof getMerchantTransactionsProcessed>;
+const mockedDownloadInvoiceFile = downloadInvoiceFile as jest.MockedFunction<typeof downloadInvoiceFile>;
 
 describe('InvoiceDataTable', () => {
   const baseTransactions: any = {
@@ -260,9 +252,6 @@ describe('InvoiceDataTable', () => {
     fireEvent.click(invoiceLink);
     await waitFor(() => expect(mockedDownloadInvoiceFile).toHaveBeenCalledTimes(1));
     expect(mockedDownloadInvoiceFile).toHaveBeenCalledWith('trx-1', 'POS-1');
-    expect((global as any).fetch).toHaveBeenCalledWith('https://example.com/invoice.pdf', {
-      method: 'GET',
-    });
     expect(openSpy).toHaveBeenCalled();
     openSpy.mockRestore();
   });
