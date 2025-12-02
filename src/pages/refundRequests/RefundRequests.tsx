@@ -41,7 +41,7 @@ const RefundRequests = () => {
     {
       field: 'spacer',
       headerName: '',
-      width: 150,
+      flex: 1,
       sortable: false,
       disableColumnMenu: true,
       renderCell: () => '',
@@ -60,11 +60,19 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value), 11),
+      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value), 6),
     },
     {
       field: 'initialAmountCents',
       headerName: 'Rimborso richiesto',
+      disableColumnMenu: true,
+      flex: 2,
+      sortable: false,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+    },
+    {
+      field: 'approvedAmountCents',
+      headerName: 'Rimborso approvato',
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
@@ -127,10 +135,9 @@ const RefundRequests = () => {
         try {
             const response = await getRewardBatches(initiativeId);
             if (response?.content) {
-                setRewardBatches(response.content as Array<RewardBatchDTO>);
+                const mappedResponse = response.content.map((value) => ({ ...value, approvedAmountCents: value.status !== 'APPROVED' ? undefined : value.approvedAmountCents}));
+                setRewardBatches(mappedResponse);
                 setSelectedRows([]);
-
-
             }
         } catch (error: any) {
             setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
