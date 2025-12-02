@@ -301,6 +301,7 @@ const InvoiceDataTable = ({
             rows={tableRows}
             columns={columns}
             rowsPerPage={pagination.pageSize}
+            paginationModel={{ page: pagination.pageNo, pageSize: pagination.pageSize, totalElements: pagination.totalElements }}
             onPaginationPageChange={handlePaginationPageChange}
             sortModel={sortModel}
             onSortModelChange={handleSortModelChange}
