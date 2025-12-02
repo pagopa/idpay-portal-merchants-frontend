@@ -117,7 +117,13 @@ const InvoiceDataTable = ({
       });
 
       const blob = await res.blob();
-      const pdfUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+
+      const contentType =
+        blob.type ||
+        res.headers.get("Content-Type") ||
+        "application/octet-stream";
+
+      const pdfUrl = URL.createObjectURL(new Blob([blob], { type: contentType }));
       window.open(pdfUrl, '_blank')?.focus();
 
       setLoading(false);
@@ -295,6 +301,7 @@ const InvoiceDataTable = ({
             rows={tableRows}
             columns={columns}
             rowsPerPage={pagination.pageSize}
+            paginationModel={{ page: pagination.pageNo, pageSize: pagination.pageSize, totalElements: pagination.totalElements }}
             onPaginationPageChange={handlePaginationPageChange}
             sortModel={sortModel}
             onSortModelChange={handleSortModelChange}

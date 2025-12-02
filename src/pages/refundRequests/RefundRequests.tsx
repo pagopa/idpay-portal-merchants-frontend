@@ -180,7 +180,7 @@ const RefundRequests = () => {
   };
 
   const isRowSelectable = (params: any) => {
-    if (params?.row?.status !== 'CREATED') {
+    if (params?.row?.status !== 'CREATED' || params?.row?.numberOfTransactions === 0) {
       return false;
     }
 
