@@ -163,16 +163,13 @@ const mockData = [
   },
 ];
 
-const createMockStore = (initiatives = [{ initiativeId: 'test-initiative-id' }]) => {
-  return configureStore({
+const createMockStore = (initiatives = [{ initiativeId: 'test-initiative-id' }]) => configureStore({
     reducer: {
       initiatives: () => ({ initiativesList: initiatives }),
     },
   });
-};
 
-const renderWithStore = (component: React.ReactElement, store = createMockStore()) => {
-  return render(
+const renderWithStore = (component: React.ReactElement, store = createMockStore()) => render(
     <Provider store={store}>
       <MemoryRouter initialEntries={['/refund-requests']}>
         <Route path="/refund-requests">
@@ -181,7 +178,6 @@ const renderWithStore = (component: React.ReactElement, store = createMockStore(
       </MemoryRouter>
     </Provider>
   );
-};
 
 describe('RefundRequests', () => {
   beforeEach(() => {
