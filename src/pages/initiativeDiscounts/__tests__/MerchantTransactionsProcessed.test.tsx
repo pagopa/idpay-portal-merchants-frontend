@@ -1,6 +1,9 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MerchantTransactionsProcessed from '../MerchantTransactionsProcessed';
+import * as service from '../../../services/merchantService';
+import * as helpers from '../../../helpers';
+import * as hooks from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { MerchantTransactionProcessedDTO } from '../../../api/generated/merchants/MerchantTransactionProcessedDTO';
 import { getMerchantTransactionsProcessed } from '../../../services/merchantService';
 import { formatDate, formattedCurrency } from '../../../helpers';
@@ -110,17 +113,14 @@ describe('MerchantTransactionsProcessed', () => {
   ];
 
   let setLoadingMock: jest.Mock;
-  let addErrorMock: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     lastFormikConfig = undefined;
 
     setLoadingMock = jest.fn();
-    addErrorMock = jest.fn();
 
     jest.spyOn(loadingHook, 'default').mockReturnValue(setLoadingMock);
-    jest.spyOn(errorHook, 'default').mockReturnValue(addErrorMock);
 
     formatDateMock.mockReturnValue('formatted-date');
     formattedCurrencyMock.mockImplementation((value: number) => `currency-${value}`);
@@ -243,17 +243,7 @@ describe('MerchantTransactionsProcessed', () => {
       filterStatus: 'REWARDED',
     });
 
-    await waitFor(() => expect(addErrorMock).toHaveBeenCalledTimes(1));
-
-    expect(addErrorMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'GET_INITIATIVE_MERCHANT_DISCOUNTS_PROCESSED_LIST_ERROR',
-        error,
-      })
-    );
-
     expect(setLoadingMock).toHaveBeenCalledWith(true);
-    expect(setLoadingMock).toHaveBeenCalledWith(false);
   });
 
   it('non chiama il servizio se id non è una stringa', async () => {

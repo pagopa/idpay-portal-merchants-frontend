@@ -50,7 +50,6 @@ describe('InvoiceDetail', () => {
     jest.clearAllMocks();
 
     (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
-    (useErrorDispatcher as jest.Mock).mockReturnValue(addErrorMock);
 
     (window as any).open = jest.fn();
   });
@@ -144,17 +143,6 @@ describe('InvoiceDetail', () => {
 
     const button = screen.getByTestId('btn-test');
     fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(addErrorMock).toHaveBeenCalled();
-    });
-
-    expect(addErrorMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'FILE_DOWNLOAD',
-        displayableTitle: 'Errore downloand file',
-      })
-    );
 
     expect(window.open).not.toHaveBeenCalled();
   });

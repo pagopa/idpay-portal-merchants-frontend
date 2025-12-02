@@ -12,7 +12,7 @@ const statusMap: Record<
 > = {
   [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: '#EEEEEE' }, // warning
   [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: '#EEEEEE' }, // warning
-  [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Contrassegnata', color: '#EEEEEE' }, // warning
+  [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Contrassegnata', color: '#FFF5DA' }, // warning
   [RewardBatchTrxStatusEnum.APPROVED]: {
     label: 'Validata',
     color: '#E1F4E1',

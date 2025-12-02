@@ -69,6 +69,8 @@ const AcceptNewDiscount = () => {
         ...genericContainerStyle,
         mt: 3,
         minWidth: 920,
+        maxWidth: '75%',
+        justifySelf: 'center'
       }}
     >
       <BreadcrumbsBox

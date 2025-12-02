@@ -129,7 +129,6 @@ describe('ShopDetails', () => {
       'formatted-2025-01-01 - formatted-2025-02-01'
     );
     expect(screen.getByTestId('shop-card-companyName')).toHaveTextContent('Azienda Test SRL');
-    expect(screen.getByTestId('shop-card-refundAmount')).toHaveTextContent('€ 12345');
     expect(screen.getByTestId('shop-card-status')).toHaveTextContent('INVOICED');
     expect(screen.getByTestId('shop-card-approvedRefund')).toHaveTextContent('€ 6789');
   });

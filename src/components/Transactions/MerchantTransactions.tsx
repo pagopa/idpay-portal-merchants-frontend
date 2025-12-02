@@ -23,6 +23,7 @@ import DetailDrawer from '../Drawer/DetailDrawer';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import CustomChip from '../Chip/CustomChip';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
+import { useAlert } from '../../hooks/useAlert';
 import TransactionDataTable from './TransactionDataTable';
 import TransactionDetail from './TransactionDetail';
 import getStatus from './useStatus';
@@ -50,6 +51,7 @@ const MerchantTransactions = ({
   paginationModel,
   dataTableIsLoading,
 }: MerchantTransactionsProps) => {
+  const { alert, setAlert } = useAlert();
   const { t } = useTranslation();
   const [rows, setRows] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
@@ -212,6 +214,7 @@ const MerchantTransactions = ({
   };
 
   const handleToggleDrawer = (newOpen: boolean) => {
+    setAlert({ ...alert, isOpen: newOpen});
     setDrawerOpened(newOpen);
   };
 

@@ -11,7 +11,7 @@ const TOS = () => {
 
   return (
 
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', padding: '0 20px' }}>
       <Box>
         <Box mt={2} sx={{ display: 'grid', gridColumn: 'span 8' }}>
           <TitleBox

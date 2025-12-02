@@ -1,20 +1,20 @@
 import { Box, Card, CardContent, Typography } from '@mui/material';
-import { useErrorDispatcher } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
 import { formatIban, formattedCurrency } from '../../helpers';
+import { useAlert } from '../../hooks/useAlert';
 
 type Props = {
   id: string;
 };
 
 const InitiativeDiscountsSummary = ({ id }: Props) => {
+  const {setAlert} = useAlert();
   const { t } = useTranslation();
   const [amount, setAmount] = useState<number | undefined>(undefined);
   const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
-  const addError = useErrorDispatcher();
 
   useEffect(() => {
     if (typeof id === 'string') {
@@ -23,18 +23,8 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
         .then((response) => {
           setIban(response?.iban);
         })
-        .catch((error) =>
-          addError({
-            id: 'GET_MERCHANT_DETAIL',
-            blocking: false,
-            error,
-            techDescription: 'An error occurred getting merchant detail',
-            displayableTitle: t('errors.genericTitle'),
-            displayableDescription: t('errors.genericDescription'),
-            toNotify: true,
-            component: 'Toast',
-            showCloseIcon: true,
-          })
+        .catch(() =>
+          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'})
         );
     }
   }, [id]);
@@ -48,20 +38,10 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
           setAmount(response?.amountCents);
           setRefunded(response?.refundedCents);
         })
-        .catch((error) => {
+        .catch(() => {
           setAmount(undefined);
           setRefunded(undefined);
-          addError({
-            id: 'GET_MERCHANT_STATISTICS',
-            blocking: false,
-            error,
-            techDescription: 'An error occurred getting merchant statistics',
-            displayableTitle: t('errors.genericTitle'),
-            displayableDescription: t('errors.genericDescription'),
-            toNotify: true,
-            component: 'Toast',
-            showCloseIcon: true,
-          });
+          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
         });
     }
   }, [id]);

@@ -11,7 +11,6 @@ import {
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useParams } from 'react-router-dom';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import DataTable from '../../components/dataTable/DataTable';
 import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
@@ -22,6 +21,7 @@ import {
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
+import { useAlert } from '../../hooks/useAlert';
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
@@ -75,7 +75,7 @@ const InvoiceDataTable = ({
   const [loading, setLoading] = useState(false);
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { id } = useParams<RouteParams>();
-  const addError = useErrorDispatcher();
+  const {alert, setAlert} = useAlert();
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -83,6 +83,7 @@ const InvoiceDataTable = ({
   };
 
   const handleToggleDrawer = (open: boolean) => {
+    setAlert({ ...alert, isOpen: open});
     setDrawerOpened(open);
     if (!open) {
       setRowDetail(null);
@@ -121,16 +122,13 @@ const InvoiceDataTable = ({
 
       setLoading(false);
     } catch (error) {
-      addError({
-        id: 'FILE_DOWNLOAD',
-        blocking: false,
-        error: new Error('Merchant ID not found'),
-        techDescription: 'Merchant ID not found',
-        displayableTitle: 'Errore downloand file',
-        displayableDescription: 'Non è stato possibile scaricare il file',
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
+      setAlert({
+        title: 'Errore downloand file',
+        text: 'Non è stato possibile scaricare il file',
+        isOpen: true,
+        severity: 'error',
+        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px'},
+        contentStyle: {position: 'unset', bottom: '0', right: '0'}
       });
       setLoading(false);
     }
@@ -235,7 +233,7 @@ const InvoiceDataTable = ({
       renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
     },
     {
-      field: 'effectiveAmountCents',
+      field: 'rewardAmountCents',
       headerName: 'Rimborso richiesto',
       flex: 2,
       sortable: false,

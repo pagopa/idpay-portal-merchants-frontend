@@ -3,7 +3,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { useHistory, useParams } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
@@ -39,7 +38,6 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../../../hooks/useAutocomplete');
 const mockUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
 
-const addErrorMock = jest.fn();
 const pushMock = jest.fn();
 const readTokenMock = storageTokenOps.read as jest.Mock;
 const updateMerchantPointOfSalesMock = merchantService.updateMerchantPointOfSales as jest.Mock;
@@ -250,7 +248,6 @@ const optionsAutocomplete = [
 describe('InitiativeStoresUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useErrorDispatcher as jest.Mock).mockReturnValue(addErrorMock);
     (useParams as jest.Mock).mockReturnValue({ id: 'test-initiative' });
     (useHistory as jest.Mock).mockReturnValue({ push: pushMock });
     mockUsePlacesAutocomplete.mockReturnValue({

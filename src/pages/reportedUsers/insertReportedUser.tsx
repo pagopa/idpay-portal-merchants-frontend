@@ -99,7 +99,7 @@ const InsertReportedUser: React.FC = () => {
   };
 
   return (
-    <>
+    <Box maxWidth='75%' justifySelf='center'>
       <ModalReportedUser
         open={showConfirmModal}
         title={t('pages.insertReportedUser.ModalReportedUser.title')}
@@ -240,7 +240,7 @@ const InsertReportedUser: React.FC = () => {
           {t('commons.confirmBtn')}
         </Button>
       </Box>
-    </>
+    </Box>
   );
 };
 

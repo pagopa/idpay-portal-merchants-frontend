@@ -1,12 +1,11 @@
-import { Box, Button, Grid, Typography, TextField, Alert, Slide } from '@mui/material';
+import { Box, Button, Grid, Typography, TextField } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, Prompt } from 'react-router-dom';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { theme } from '@pagopa/mui-italia/dist/theme/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { CheckCircleOutline, Edit } from '@mui/icons-material';
+import { Edit } from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import {
@@ -24,6 +23,7 @@ import { formatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { POS_TYPE } from '../../utils/constants';
 import ROUTES from '../../routes';
+import { useAlert } from '../../hooks/useAlert';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
@@ -33,6 +33,7 @@ interface RouteParams {
 }
 
 const InitiativeStoreDetail = () => {
+  const { setAlert } = useAlert();
   const [storeDetail, setStoreDetail] = useState<any>(null);
   const [transactionsFilters, setTransactionsFilters] = useState<any>({});
   const [storeTransactions, setStoreTransactions] = useState<
@@ -45,7 +46,6 @@ const InitiativeStoreDetail = () => {
   const [contactEmailModal, setContactEmailModal] = useState<string>('');
   const [contactEmailConfirmModal, setContactEmailConfirmModal] = useState<string>('');
   const [dataTableIsLoading, setDataTableIsLoading] = useState<boolean>(false);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{
     contactEmailModal?: string;
     contactEmailConfirmModal?: string;
@@ -54,7 +54,6 @@ const InitiativeStoreDetail = () => {
   }>({});
   const { t } = useTranslation();
   const { id, store_id } = useParams<RouteParams>();
-  const addError = useErrorDispatcher();
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { setStoreId } = useStore();
 
@@ -64,19 +63,6 @@ const InitiativeStoreDetail = () => {
     setStoreId(store_id);
   }, [id, store_id]);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout | undefined;
-
-    if (showSuccessAlert) {
-      timer = setTimeout(() => {
-        setShowSuccessAlert(false);
-      }, 4000);
-    }
-
-    if (timer) {
-      clearTimeout(timer);
-    }
-  }, [showSuccessAlert]);
   useEffect(() => {
     if (storeDetail) {
       setContactNameModal(storeDetail.contactName || '');
@@ -96,17 +82,7 @@ const InitiativeStoreDetail = () => {
         setStoreDetail(response);
       }
     } catch (error: any) {
-      addError({
-        id: 'GET_MERCHANT_DETAIL',
-        blocking: false,
-        error,
-        techDescription: 'An error occurred getting merchant detail',
-        displayableTitle: t('errors.genericTitle'),
-        displayableDescription: t('errors.genericDescription'),
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
-      });
+      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
     }
   };
 
@@ -130,17 +106,7 @@ const InitiativeStoreDetail = () => {
       }
     } catch (error: any) {
       console.log(error, 'error');
-      addError({
-        id: 'GET_MERCHANT_TRANSACTIONS',
-        blocking: false,
-        error,
-        techDescription: 'An error occurred getting merchant transactions',
-        displayableTitle: t('errors.genericTitle'),
-        displayableDescription: t('errors.genericDescription'),
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
-      });
+      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
     } finally {
       setDataTableIsLoading(false);
     }
@@ -303,17 +269,7 @@ const InitiativeStoreDetail = () => {
       },
     ];
     if (storeDetail.contactEmail === contactEmailConfirmModal) {
-      addError({
-        id: 'UPDATE_STORES',
-        blocking: false,
-        error: new Error('Point of sale already registered'),
-        techDescription: 'Point of sale already registered',
-        displayableTitle: t('errors.duplicateEmailError'),
-        displayableDescription: `${storeDetail.contactEmail} è già associata ad altro punto vendita`,
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
-      });
+      setAlert({title: t('errors.duplicateEmailError'), text: `${storeDetail.contactEmail} è già associata ad altro punto vendita`, isOpen: true, severity: 'error'});
       setModalIsOpen(false);
       return;
     }
@@ -321,39 +277,16 @@ const InitiativeStoreDetail = () => {
     const response = await updateMerchantPointOfSales(merchantId, obj);
     if (response) {
       if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
-        addError({
-          id: 'UPDATE_STORES',
-          blocking: false,
-          error: new Error('Point of sale already registered'),
-          techDescription: 'Point of sale already registered',
-          displayableTitle: t('errors.duplicateEmailError'),
-          displayableDescription: `${response?.message} è già associata ad altro punto vendita`,
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
+        setAlert({title: t('errors.duplicateEmailError'), text: `${response?.message} è già associata ad altro punto vendita`, isOpen: true, severity: 'error'});
         setModalIsOpen(false);
         setFieldErrors({});
       } else {
-        addError({
-          id: 'UPDATE_STORES',
-          blocking: false,
-          error: new Error('error points of sale upload'),
-          techDescription: 'error points of sale upload',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
+        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
       }
     } else {
       setModalIsOpen(false);
-      setShowSuccessAlert(true);
+      setAlert({text: t('pages.initiativeStores.referentChangeSuccess'), isOpen: true, severity: 'success'});
       void fetchStoreDetail();
-      setTimeout(() => {
-        setShowSuccessAlert(false);
-      }, 4000);
     }
   };
 
@@ -612,29 +545,6 @@ const InitiativeStoreDetail = () => {
           </Button>
         </Box>
       </ModalComponent>
-      <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
-        <Alert
-          severity="success"
-          icon={<CheckCircleOutline />}
-          sx={{
-            position: 'fixed',
-            bottom: 40,
-            right: 20,
-            backgroundColor: 'white',
-            width: 'auto',
-            maxWidth: '400px',
-            minWidth: '300px',
-            zIndex: 1300,
-            boxShadow: 3,
-            borderRadius: 1,
-            '& .MuiAlert-icon': {
-              color: '#6CC66A',
-            },
-          }}
-        >
-          {t('pages.initiativeStores.referentChangeSuccess')}
-        </Alert>
-      </Slide>
     </Box>
   );
 };
