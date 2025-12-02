@@ -42,7 +42,7 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
       setIsLoading(false);
     } catch (error) {
       setAlert({
-        title: 'Errore downloand file',
+        title: 'Errore download file',
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
         severity: 'error',
