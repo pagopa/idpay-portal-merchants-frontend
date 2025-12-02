@@ -99,6 +99,7 @@ const InvoiceDataTable = ({
       setSortModel(model);
     }
   };
+
   const handlePaginationPageChange = (page: number) => {
     setPagination((prev) => ({ ...prev, pageNo: page }));
   };
@@ -167,9 +168,9 @@ const InvoiceDataTable = ({
       .then((data) => {
         setTransactions(data);
         setPagination({
-          pageNo: data.pageNo,
-          pageSize: data.pageSize,
-          totalElements: data.totalElements,
+            pageNo: data.pageNo,
+            pageSize: data.pageSize,
+            totalElements: data.totalElements,
         });
       })
       .finally(() => setLoading(false));
@@ -301,7 +302,11 @@ const InvoiceDataTable = ({
             rows={tableRows}
             columns={columns}
             rowsPerPage={pagination.pageSize}
-            paginationModel={{ page: pagination.pageNo, pageSize: pagination.pageSize, totalElements: pagination.totalElements }}
+            paginationModel={{
+              pageNo: pagination.pageNo,
+              pageSize: pagination.pageSize,
+              totalElements: pagination.totalElements,
+            }}
             onPaginationPageChange={handlePaginationPageChange}
             sortModel={sortModel}
             onSortModelChange={handleSortModelChange}
