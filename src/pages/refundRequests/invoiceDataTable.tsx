@@ -113,24 +113,12 @@ const InvoiceDataTable = ({
       );
       const invoiceUrl = response.invoiceUrl;
 
-      const res = await fetch(invoiceUrl, {
-        method: 'GET',
-      });
-
-      const blob = await res.blob();
-
-      const contentType =
-        blob.type ||
-        res.headers.get("Content-Type") ||
-        "application/octet-stream";
-
-      const pdfUrl = URL.createObjectURL(new Blob([blob], { type: contentType }));
-      window.open(pdfUrl, '_blank')?.focus();
+      window.open(invoiceUrl, '_blank')?.focus();
 
       setLoading(false);
     } catch (error) {
       setAlert({
-        title: 'Errore downloand file',
+        title: 'Errore download file',
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
         severity: 'error',
