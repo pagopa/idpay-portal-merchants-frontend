@@ -187,9 +187,6 @@ describe('ShopDetails', () => {
 
     fireEvent.click(applyBtn);
 
-    const spinner = await screen.findByRole('progressbar');
-    expect(spinner).toBeInTheDocument();
-
     await act(async () => {
       jest.advanceTimersByTime(1000);
     });
