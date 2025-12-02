@@ -202,8 +202,8 @@ const InvoiceDataTable = ({
             sx={{
               ...infoStyles,
               maxWidth: '100% !important',
-              textDecoration: 'underline',
               cursor: 'pointer',
+              fontWeight: 'bold',
             }}
             className="ShowDots"
             onClick={() => downloadFile(params.row)}
