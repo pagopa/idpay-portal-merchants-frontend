@@ -32,8 +32,14 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
       });
 
       const blob = await res.blob();
-      const pdfUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
-      window.open(pdfUrl, "_blank")?.focus();
+
+      const contentType =
+        blob.type ||
+        res.headers.get("Content-Type") ||
+        "application/octet-stream";
+
+      const fileUrl = URL.createObjectURL(new Blob([blob], { type: contentType }));
+      window.open(fileUrl, "_blank")?.focus();
 
       setIsLoading(false);
     } catch (error) {
