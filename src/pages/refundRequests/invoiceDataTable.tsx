@@ -301,6 +301,14 @@ const InvoiceDataTable = ({
     },
   ];
 
+  const handleRowsPerPageChange = (newPageSize: number) => {
+    setPagination(prev => ({
+      ...prev,
+      pageNo: 0,
+      pageSize: newPageSize,
+    }));
+  };
+
   const tableRows = transactions.content.map((row: any) => ({
     ...row,
     id: row.trxId,
@@ -335,6 +343,8 @@ const InvoiceDataTable = ({
             onPaginationPageChange={handlePaginationPageChange}
             sortModel={sortModel}
             onSortModelChange={handleSortModelChange}
+            isTransactionsPage={true}
+            onRowsPerPageChange={handleRowsPerPageChange}
           />
         </Box>
       )}
