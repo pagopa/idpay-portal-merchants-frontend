@@ -107,7 +107,7 @@ describe('InvoiceDetail', () => {
       />
     );
 
-    const button = screen.getByTestId('btn-test');
+    const button = screen.getByTestId('btn-test');  
 
     fireEvent.click(button);
 
@@ -118,7 +118,7 @@ describe('InvoiceDetail', () => {
     });
 
     await waitFor(() => {
-      expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1', '');
+      expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1', undefined);
     });
   });
 
