@@ -148,13 +148,21 @@ export const ShopCard = ({
                 title={item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
                 placement='top-start'
               >
-                <Typography
-                  variant="body1"
-                  sx={boldStyle}
-                  minWidth="100%"
+                <Box
+                  sx={{
+                    minWidth: item.minWidth,
+                    marginBottom: item.marginBottom,
+                    marginTop: item.marginTop,
+                  }}
                 >
-                  {item.value === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
-                </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={boldStyle}
+                    minWidth="100%"
+                  >
+                    {item.value === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                  </Typography>
+                </Box>
               </Tooltip>
             </Box>
           ))}
