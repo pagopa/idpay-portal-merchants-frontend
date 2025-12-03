@@ -19,27 +19,65 @@ type Props = {
 
 export default function InvoiceDetail({ title, itemValues, listItem, storeId }: Props) {
   const { setAlert } = useAlert();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   const handleDownloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
-    setIsLoading(true);
+    setLoading(true);
     try {
-      const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
+      const response = await downloadInvoiceFile(
+        selectedTransaction?.id,
+        selectedTransaction?.pointOfSaleId
+      );
       const invoiceUrl = response.invoiceUrl;
 
-      window.open(invoiceUrl, '_blank')?.focus();
+      const res = await fetch(invoiceUrl, {
+        method: 'GET',
+      });
 
-      setIsLoading(false);
+      if (!res.ok) {
+        throw new Error('Errore nel recupero del file');
+      }
+
+      const ext = selectedTransaction?.invoiceData?.filename?.split('.').pop()?.toLowerCase() || '';
+
+      let mimeFromExt = '';
+      if (ext === 'pdf') {
+        mimeFromExt = 'application/pdf';
+      } else if (ext === 'xml') {
+        mimeFromExt = 'application/xml';
+      } else {
+        throw new Error('Errore nel recupero del file');
+      }
+
+      const blob = await res.blob();
+      const file = new Blob([blob], { type: mimeFromExt });
+
+      const url = URL.createObjectURL(file);
+
+      const pdfWindow = window.open(url, '_blank');
+      if (pdfWindow) {
+        setTimeout(() => {
+          // eslint-disable-next-line functional/immutable-data
+          pdfWindow.document.title = selectedTransaction?.invoiceData?.filename;
+        }, 100);
+      }
+
+      setLoading(false);
     } catch (error) {
       setAlert({
         title: 'Errore download file',
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
         severity: 'error',
-        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px' },
+        containerStyle: {
+          height: 'fit-content',
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+        },
         contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
