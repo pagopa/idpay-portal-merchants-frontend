@@ -103,7 +103,7 @@ describe('InvoiceDetail', () => {
         title="Dettaglio transazione"
         itemValues={baseItemValues}
         listItem={baseListItem}
-        storeId={'fef45'}
+        storeId={''}
       />
     );
 
@@ -118,7 +118,7 @@ describe('InvoiceDetail', () => {
     });
 
     await waitFor(() => {
-      expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1', "fef45");
+      expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1', undefined);
     });
   });
 
