@@ -141,7 +141,7 @@ const DataTable = ({
               outline: 'none',
             },
             '& .MuiDataGrid-columnHeaderCheckbox': {
-              '& svg': {
+              '& span ': {
                 display: 'none',
               },
             },
