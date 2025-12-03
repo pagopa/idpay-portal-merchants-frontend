@@ -114,7 +114,9 @@ describe('InvoiceDataTable', () => {
     content: [
       {
         trxId: 'trx-1',
-        invoiceFilename: 'INV-001',
+        invoiceData: {
+          filename: 'INV-001',
+        },
         franchiseName: 'My Franchise',
         additionalProperties: { productName: 'Washing Machine' },
         trxChargeDate: '2024-01-01T10:00:00Z',
