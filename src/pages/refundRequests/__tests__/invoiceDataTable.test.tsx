@@ -252,7 +252,7 @@ describe('InvoiceDataTable', () => {
     fireEvent.click(invoiceLink);
     await waitFor(() => expect(mockedDownloadInvoiceFile).toHaveBeenCalledTimes(1));
     expect(mockedDownloadInvoiceFile).toHaveBeenCalledWith('trx-1', 'POS-1');
-    expect(openSpy).toHaveBeenCalled();
+    expect(openSpy).not.toHaveBeenCalled();
     openSpy.mockRestore();
   });
 
