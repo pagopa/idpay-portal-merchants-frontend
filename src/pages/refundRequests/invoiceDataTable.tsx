@@ -18,10 +18,10 @@ import {
   downloadInvoiceFile,
   getMerchantTransactionsProcessed,
 } from '../../services/merchantService';
-import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
+import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
@@ -40,9 +40,9 @@ const infoStyles = {
   fontSize: 14,
 };
 
-const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
+const renderCellWithTooltip = (value: string | JSX.Element) => (
   <Tooltip
-    title={value && value.length >= tooltipThreshold ? value : ''}
+    title={value ? value : ''}
     placement="top"
     arrow={true}
   >
@@ -242,7 +242,7 @@ const InvoiceDataTable = ({
       flex: 2,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || '-', 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || '-'),
     },
     {
       field: 'additionalProperties.productName',
@@ -251,7 +251,7 @@ const InvoiceDataTable = ({
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
-        renderCellWithTooltip(params.row.additionalProperties?.productName || '-', 11),
+        renderCellWithTooltip(params.row.additionalProperties?.productName || '-'),
     },
     {
       field: 'trxChargeDate',
@@ -260,7 +260,7 @@ const InvoiceDataTable = ({
       sortable: true,
       disableColumnMenu: true,
       valueGetter: (params: any) => params.row.trxChargeDate,
-      renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
+      renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value)),
     },
     {
       field: 'rewardAmountCents',
@@ -274,8 +274,7 @@ const InvoiceDataTable = ({
             style: 'currency',
             currency: 'EUR',
             minimumFractionDigits: 2,
-          }),
-          11
+          })
         ),
     },
     {
@@ -284,7 +283,8 @@ const InvoiceDataTable = ({
       flex: 1.5,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => <StatusChipInvoice status={params.value} />,
+      renderCell: (params: any) =>
+        renderCellWithTooltip(<StatusChipInvoice status={params.value} />),
     },
     {
       field: 'actions',
