@@ -38,7 +38,6 @@ paths:
           application/json:
             schema:
               type: array
-              maxItems: 100000
               items:
                 $ref: "#/components/schemas/PointOfSaleDTO"
       responses:
@@ -1037,8 +1036,9 @@ paths:
           schema:
             type: string
             enum:
-              - trxChargeDate, desc
-              - trxChargeDate, asc
+              - rewardBatchTrxStatus,desc
+              - trxChargeDate,desc
+              - trxChargeDate,asc
         - name: fiscalCode
           in: query
           description: Fiscal Code
@@ -1752,12 +1752,15 @@ components:
           type: integer
           format: int64
           description: "ENG: Authorized amount - IT: Importo autorizzato"
-        invoiceDocNumber:
-          type: string
-          description: "ENG: Document number - IT: Numero documento"
-        invoiceFileName:
-          type: string
-          description: "ENG: Associated file name - IT: Nome del file associato"
+        invoiceData:
+          type: object
+          properties:
+            docNumber:
+              type: string
+              description: "ENG: Document number - IT: Numero documento"
+            fileName:
+              type: string
+              description: "ENG: Associated file name - IT: Nome del file associato"
     MerchantTransactionsProcessedListDTO:
       type: object
       required:

@@ -18,7 +18,7 @@ type Props = {
 };
 
 export default function InvoiceDetail({ title, itemValues, listItem, storeId }: Props) {
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDownloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
@@ -36,8 +36,8 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
         severity: 'error',
-        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px'},
-        contentStyle: {position: 'unset', bottom: '0', right: '0'}
+        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px' },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setIsLoading(false);
     }
@@ -97,7 +97,7 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
               {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
             </Typography>
             <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
-              {itemValues?.invoiceDocNumber ?? MISSING_DATA_PLACEHOLDER}
+              {itemValues?.invoiceData?.docNumber ?? MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>
         </Grid>
@@ -125,7 +125,7 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
                 <CircularProgress color="inherit" size={20} data-testid="item-loader" />
               ) : (
                 <>
-                  <ReceiptLong /> {itemValues?.invoiceFileName ?? MISSING_DATA_PLACEHOLDER}
+                  <ReceiptLong /> {itemValues?.invoiceData?.filename ?? MISSING_DATA_PLACEHOLDER}
                 </>
               )}
             </Button>
@@ -144,7 +144,9 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
             <StatusChipInvoice status={itemValues?.rewardBatchTrxStatus} />
           </Box>
         </Grid>
-        {[RewardBatchTrxStatusEnum.SUSPENDED,RewardBatchTrxStatusEnum.REJECTED].includes(itemValues.rewardBatchTrxStatus) &&
+        {[RewardBatchTrxStatusEnum.SUSPENDED, RewardBatchTrxStatusEnum.REJECTED].includes(
+          itemValues.rewardBatchTrxStatus
+        ) && (
           <Grid item xs={12}>
             <Box mt={1}>
               <Typography
@@ -166,7 +168,7 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
               </Typography>
             </Box>
           </Grid>
-        }
+        )}
       </Grid>
     </Box>
   );

@@ -24,12 +24,11 @@ import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile } from '../../../../services/merchantService';
 
 describe('InvoiceDetail', () => {
-
   const baseItemValues = {
     id: 'trx-1',
     status: 'APPROVED',
     docNumber: 'DOC-123',
-    fileName: 'fattura.pdf',
+    filename: 'fattura.pdf',
     rewardBatchRejectionReason: 'Motivo di rifiuto',
     additionalProperties: {
       productName: 'Prodotto di test',
@@ -119,11 +118,11 @@ describe('InvoiceDetail', () => {
     });
 
     await waitFor(() => {
-      expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1',"");
+      expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1', '');
     });
   });
 
-  it('gestisce l\'errore di download mostrando l\'errore tramite useErrorDispatcher', async () => {
+  it("gestisce l'errore di download mostrando l'errore tramite useErrorDispatcher", async () => {
     (downloadInvoiceFile as jest.Mock).mockRejectedValueOnce(new Error('download error'));
 
     render(
@@ -166,7 +165,8 @@ describe('InvoiceDetail', () => {
         title="Dettaglio transazione"
         itemValues={suspendedValues}
         listItem={baseListItem}
-        storeId={''}      />
+        storeId={''}
+      />
     );
 
     expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();

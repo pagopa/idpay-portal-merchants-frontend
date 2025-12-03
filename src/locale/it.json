@@ -219,7 +219,8 @@
       "website": "Sito web",
       "modalDescription": "Qui puoi modificare i dati del referente di questo punto vendita. Se procedi, il nuovo referente riceverà un’email di conferma all’indirizzo indicato. Le credenziali di accesso del vecchio referente non saranno più valide.",
       "referentChangeSuccess": "Dati modificati con successo",
-      "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati"
+      "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati",
+      "pointOfSale": "Punto vendita"
     },
     "initiativeStoreDetail": {
       "transactionHistory": "Storico transazioni",
@@ -353,7 +354,8 @@
         "status" : "Status",
         "approvedRefund" : "Rimborso approvato",
         "exportCSV" : "Esporta csv",
-        "detailCardTitleDx" : "dati rimborso"
+        "detailCardTitleDx" : "dati rimborso",
+        "posType": "Tipologia di riferimento"
       }
     }
   },

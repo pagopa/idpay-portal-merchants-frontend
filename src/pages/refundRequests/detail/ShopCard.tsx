@@ -15,6 +15,18 @@ type Props = {
   refundAmount: string;
   status: string;
   approvedRefund: string;
+  posType: string;
+};
+
+const posTypeMapper = (posType: string) => {
+  switch (posType) {
+    case 'PHYSICAL':
+      return 'Fisico';
+    case 'ONLINE':
+      return 'Online';
+    default:
+      return posType;
+  }
 };
 
 const StatusChip = ({ status }: any) => {
@@ -36,6 +48,7 @@ export const ShopCard = ({
   refundAmount,
   status,
   approvedRefund,
+  posType
 }: Props) => {
   const { t } = useTranslation();
   const boldStyle = { fontWeight: theme.typography.fontWeightBold };
@@ -61,6 +74,12 @@ export const ShopCard = ({
     {
       label: t('pages.refundRequests.storeDetails.referencePeriod'),
       value: dateRange || MISSING_DATA_PLACEHOLDER,
+      minWidth: '180px',
+      marginBottom: 2,
+    },
+    {
+      label: t('pages.refundRequests.storeDetails.posType'),
+      value: posTypeMapper(posType) || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
       marginBottom: 2,
     },
@@ -148,13 +167,21 @@ export const ShopCard = ({
                 title={item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
                 placement='top-start'
               >
-                <Typography
-                  variant="body1"
-                  sx={boldStyle}
-                  minWidth="100%"
+                <Box
+                  sx={{
+                    minWidth: item.minWidth,
+                    marginBottom: item.marginBottom,
+                    marginTop: item.marginTop,
+                  }}
                 >
-                  {item.value === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
-                </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={boldStyle}
+                    minWidth="100%"
+                  >
+                    {item.value === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                  </Typography>
+                </Box>
               </Tooltip>
             </Box>
           ))}
