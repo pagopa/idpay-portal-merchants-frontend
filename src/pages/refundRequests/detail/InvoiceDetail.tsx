@@ -17,11 +17,11 @@ type Props = {
   children?: ReactNode;
 };
 
-export default function InvoiceDetail({ title, itemValues, listItem, storeId }: Props) {
+export default function InvoiceDetail({ title, itemValues, listItem }: Props) {
   const { setAlert } = useAlert();
   const [isLoading, setLoading] = useState(false);
 
-  const handleDownloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
+  const handleDownloadFile = async (selectedTransaction: any) => {
     setLoading(true);
     try {
       const response = await downloadInvoiceFile(
@@ -157,7 +157,7 @@ export default function InvoiceDetail({ title, itemValues, listItem, storeId }: 
                   color: '#0055AA',
                 },
               }}
-              onClick={() => handleDownloadFile(itemValues, storeId)}
+              onClick={() => handleDownloadFile(itemValues)}
             >
               {isLoading ? (
                 <CircularProgress color="inherit" size={20} data-testid="item-loader" />
