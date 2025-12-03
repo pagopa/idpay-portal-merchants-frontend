@@ -182,6 +182,7 @@ const ShopDetails: React.FC = () => {
           refundAmount={formattedCurrency(store?.initialAmountCents,'-', true)}
           status={store?.status}
           approvedRefund={formattedCurrency(store?.approvedAmountCents,'-', true)}
+          posType={store?.posType}
         />
 
         <Box
