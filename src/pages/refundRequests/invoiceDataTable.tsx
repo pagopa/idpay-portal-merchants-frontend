@@ -113,17 +113,56 @@ const InvoiceDataTable = ({
       );
       const invoiceUrl = response.invoiceUrl;
 
-      window.open(invoiceUrl, '_blank')?.focus();
+      const res = await fetch(invoiceUrl, {
+        method: "GET",
+      });
+
+      const ext = selectedTransaction?.invoiceFileName.split(".").pop()?.toLowerCase() || "";
+
+      let mimeFromExt = "";
+      if(ext === "pdf"){
+        mimeFromExt = "application/pdf";
+      }else if(ext === "xml") {
+        mimeFromExt = "application/xml";
+      }else {
+        setAlert({
+          title: 'Preview non disponibile',
+          text: 'La preview è disponibile solo per file PDF o XML.',
+          isOpen: true,
+          severity: 'warning',
+          containerStyle: {
+            height: 'fit-content',
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+          },
+          contentStyle: { position: 'unset', bottom: '0', right: '0' },
+        });
+        return ;
+      }
+
+      const blob = await res.blob();
+      const file = new Blob([blob], { type: mimeFromExt });
+
+      const url = URL.createObjectURL(file);
+
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 15000);
 
       setLoading(false);
     } catch (error) {
       setAlert({
-        title: 'Errore download file',
-        text: 'Non è stato possibile scaricare il file',
+        title: "Errore download file",
+        text: "Non è stato possibile scaricare il file",
         isOpen: true,
-        severity: 'error',
-        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px'},
-        contentStyle: {position: 'unset', bottom: '0', right: '0'}
+        severity: "error",
+        containerStyle: {
+          height: "fit-content",
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+        },
+        contentStyle: { position: "unset", bottom: "0", right: "0" },
       });
       setLoading(false);
     }

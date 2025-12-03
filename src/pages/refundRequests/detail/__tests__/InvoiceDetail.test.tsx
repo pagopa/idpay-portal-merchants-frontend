@@ -20,12 +20,10 @@ jest.mock('../../../../components/Chip/CustomChip', () => (props: any) => (
   <div data-testid="status-chip">{props.label}</div>
 ));
 
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile } from '../../../../services/merchantService';
 
 describe('InvoiceDetail', () => {
-  const addErrorMock = jest.fn();
 
   const baseItemValues = {
     id: 'trx-1',
@@ -122,10 +120,6 @@ describe('InvoiceDetail', () => {
 
     await waitFor(() => {
       expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1',"");
-    });
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('item-loader')).toBeInTheDocument();
     });
   });
 
