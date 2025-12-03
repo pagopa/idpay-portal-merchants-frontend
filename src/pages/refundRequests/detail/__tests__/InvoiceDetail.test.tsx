@@ -107,7 +107,7 @@ describe('InvoiceDetail', () => {
       />
     );
 
-    const button = screen.getByTestId('btn-test');
+    const button = screen.getByTestId('btn-test');  
 
     fireEvent.click(button);
 
