@@ -114,21 +114,21 @@ const InvoiceDataTable = ({
       const invoiceUrl = response.invoiceUrl;
 
       const res = await fetch(invoiceUrl, {
-        method: "GET",
+        method: 'GET',
       });
 
       if (!res.ok) {
         throw new Error('Errore nel recupero del file');
       }
 
-      const ext = selectedTransaction?.invoiceFileName.split(".").pop()?.toLowerCase() || "";
+      const ext = selectedTransaction?.invoiceData?.filename?.split('.').pop()?.toLowerCase() || '';
 
-      let mimeFromExt = "";
-      if(ext === "pdf"){
-        mimeFromExt = "application/pdf";
-      }else if(ext === "xml") {
-        mimeFromExt = "application/xml";
-      }else {
+      let mimeFromExt = '';
+      if (ext === 'pdf') {
+        mimeFromExt = 'application/pdf';
+      } else if (ext === 'xml') {
+        mimeFromExt = 'application/xml';
+      } else {
         throw new Error('Errore nel recupero del file');
       }
 
@@ -137,28 +137,28 @@ const InvoiceDataTable = ({
 
       const url = URL.createObjectURL(file);
 
-      const pdfWindow = window.open(url, "_blank");
+      const pdfWindow = window.open(url, '_blank');
       if (pdfWindow) {
         setTimeout(() => {
           // eslint-disable-next-line functional/immutable-data
-          pdfWindow.document.title = selectedTransaction?.invoiceFileName;
+          pdfWindow.document.title = selectedTransaction?.invoiceData?.filename;
         }, 100);
       }
 
       setLoading(false);
     } catch (error) {
       setAlert({
-        title: "Errore download file",
-        text: "Non è stato possibile scaricare il file",
+        title: 'Errore download file',
+        text: 'Non è stato possibile scaricare il file',
         isOpen: true,
-        severity: "error",
+        severity: 'error',
         containerStyle: {
-          height: "fit-content",
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
+          height: 'fit-content',
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
         },
-        contentStyle: { position: "unset", bottom: "0", right: "0" },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setLoading(false);
     }
@@ -191,9 +191,9 @@ const InvoiceDataTable = ({
       .then((data) => {
         setTransactions(data);
         setPagination({
-            pageNo: data.pageNo,
-            pageSize: data.pageSize,
-            totalElements: data.totalElements,
+          pageNo: data.pageNo,
+          pageSize: data.pageSize,
+          totalElements: data.totalElements,
         });
       })
       .finally(() => setLoading(false));
@@ -209,7 +209,7 @@ const InvoiceDataTable = ({
 
   const columns: Array<GridColDef> = [
     {
-      field: 'invoiceFileName',
+      field: 'invoiceFilename',
       headerName: 'Fattura',
       flex: 2,
       sortable: false,
@@ -303,7 +303,11 @@ const InvoiceDataTable = ({
     },
   ];
 
-  const tableRows = transactions.content.map((row: { trxId: string }) => ({ ...row, id: row.trxId }));
+  const tableRows = transactions.content.map((row: any) => ({
+    ...row,
+    id: row.trxId,
+    invoiceFilename: row.invoiceData?.filename || '',
+  }));
 
   return (
     <Box sx={{ my: 2 }}>
