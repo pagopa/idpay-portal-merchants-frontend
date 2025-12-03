@@ -18,10 +18,10 @@ import {
   downloadInvoiceFile,
   getMerchantTransactionsProcessed,
 } from '../../services/merchantService';
-import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import { TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
+import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
@@ -40,12 +40,8 @@ const infoStyles = {
   fontSize: 14,
 };
 
-const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
-  <Tooltip
-    title={value && value.length >= tooltipThreshold ? value : ''}
-    placement="top"
-    arrow={true}
-  >
+const renderCellWithTooltip = (value: string | JSX.Element) => (
+  <Tooltip title={value ? value : ''} placement="top" arrow={true}>
     <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
       {value && value !== '' ? value : '-'}
     </Typography>
@@ -73,9 +69,11 @@ const InvoiceDataTable = ({
   const [drawerOpened, setDrawerOpened] = useState(false);
   const [rowDetail, setRowDetail] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
-  const [sortModel, setSortModel] = useState<GridSortModel>([]);
+  const [sortModel, setSortModel] = useState<GridSortModel>([
+    { field: 'trxChargeDate', sort: 'asc' },
+  ]);
   const { id } = useParams<RouteParams>();
-  const {alert, setAlert} = useAlert();
+  const { alert, setAlert } = useAlert();
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -83,7 +81,7 @@ const InvoiceDataTable = ({
   };
 
   const handleToggleDrawer = (open: boolean) => {
-    setAlert({ ...alert, isOpen: open});
+    setAlert({ ...alert, isOpen: open });
     setDrawerOpened(open);
     if (!open) {
       setRowDetail(null);
@@ -114,31 +112,22 @@ const InvoiceDataTable = ({
       const invoiceUrl = response.invoiceUrl;
 
       const res = await fetch(invoiceUrl, {
-        method: "GET",
+        method: 'GET',
       });
 
-      const ext = selectedTransaction?.invoiceFileName.split(".").pop()?.toLowerCase() || "";
+      if (!res.ok) {
+        throw new Error('Errore nel recupero del file');
+      }
 
-      let mimeFromExt = "";
-      if(ext === "pdf"){
-        mimeFromExt = "application/pdf";
-      }else if(ext === "xml") {
-        mimeFromExt = "application/xml";
-      }else {
-        setAlert({
-          title: 'Preview non disponibile',
-          text: 'La preview è disponibile solo per file PDF o XML.',
-          isOpen: true,
-          severity: 'warning',
-          containerStyle: {
-            height: 'fit-content',
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-          },
-          contentStyle: { position: 'unset', bottom: '0', right: '0' },
-        });
-        return ;
+      const ext = selectedTransaction?.invoiceData?.filename?.split('.').pop()?.toLowerCase() || '';
+
+      let mimeFromExt = '';
+      if (ext === 'pdf') {
+        mimeFromExt = 'application/pdf';
+      } else if (ext === 'xml') {
+        mimeFromExt = 'application/xml';
+      } else {
+        throw new Error('Errore nel recupero del file');
       }
 
       const blob = await res.blob();
@@ -146,23 +135,28 @@ const InvoiceDataTable = ({
 
       const url = URL.createObjectURL(file);
 
-      window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 15000);
+      const pdfWindow = window.open(url, '_blank');
+      if (pdfWindow) {
+        setTimeout(() => {
+          // eslint-disable-next-line functional/immutable-data
+          pdfWindow.document.title = selectedTransaction?.invoiceData?.filename;
+        }, 100);
+      }
 
       setLoading(false);
     } catch (error) {
       setAlert({
-        title: "Errore download file",
-        text: "Non è stato possibile scaricare il file",
+        title: 'Errore download file',
+        text: 'Non è stato possibile scaricare il file',
         isOpen: true,
-        severity: "error",
+        severity: 'error',
         containerStyle: {
-          height: "fit-content",
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
+          height: 'fit-content',
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
         },
-        contentStyle: { position: "unset", bottom: "0", right: "0" },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setLoading(false);
     }
@@ -195,9 +189,9 @@ const InvoiceDataTable = ({
       .then((data) => {
         setTransactions(data);
         setPagination({
-            pageNo: data.pageNo,
-            pageSize: data.pageSize,
-            totalElements: data.totalElements,
+          pageNo: data.pageNo,
+          pageSize: data.pageSize,
+          totalElements: data.totalElements,
         });
       })
       .finally(() => setLoading(false));
@@ -213,7 +207,7 @@ const InvoiceDataTable = ({
 
   const columns: Array<GridColDef> = [
     {
-      field: 'invoiceFileName',
+      field: 'invoiceFilename',
       headerName: 'Fattura',
       flex: 2,
       sortable: false,
@@ -246,7 +240,7 @@ const InvoiceDataTable = ({
       flex: 2,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || '-', 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || '-'),
     },
     {
       field: 'additionalProperties.productName',
@@ -255,7 +249,7 @@ const InvoiceDataTable = ({
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
-        renderCellWithTooltip(params.row.additionalProperties?.productName || '-', 11),
+        renderCellWithTooltip(params.row.additionalProperties?.productName || '-'),
     },
     {
       field: 'trxChargeDate',
@@ -264,7 +258,7 @@ const InvoiceDataTable = ({
       sortable: true,
       disableColumnMenu: true,
       valueGetter: (params: any) => params.row.trxChargeDate,
-      renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value), 11),
+      renderCell: (params: any) => renderCellWithTooltip(safeFormatDate(params.value)),
     },
     {
       field: 'rewardAmountCents',
@@ -278,8 +272,7 @@ const InvoiceDataTable = ({
             style: 'currency',
             currency: 'EUR',
             minimumFractionDigits: 2,
-          }),
-          11
+          })
         ),
     },
     {
@@ -288,7 +281,8 @@ const InvoiceDataTable = ({
       flex: 1.5,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => <StatusChipInvoice status={params.value} />,
+      renderCell: (params: any) =>
+        renderCellWithTooltip(<StatusChipInvoice status={params.value} />),
     },
     {
       field: 'actions',
@@ -307,7 +301,11 @@ const InvoiceDataTable = ({
     },
   ];
 
-  const tableRows = transactions.content.map((row: { trxId: string }) => ({ ...row, id: row.trxId }));
+  const tableRows = transactions.content.map((row: any) => ({
+    ...row,
+    id: row.trxId,
+    invoiceFilename: row.invoiceData?.filename || '',
+  }));
 
   return (
     <Box sx={{ my: 2 }}>
