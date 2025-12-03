@@ -1,6 +1,9 @@
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import InvoiceDataTable from '../invoiceDataTable';
-import { getMerchantTransactionsProcessed, downloadInvoiceFile } from '../../../services/merchantService';
+import {
+  getMerchantTransactionsProcessed,
+  downloadInvoiceFile,
+} from '../../../services/merchantService';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -34,25 +37,20 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
       <button
         type="button"
         data-testid="clear-sort"
-        onClick={() =>
-          props.onSortModelChange &&
-          props.onSortModelChange([])
-        }
+        onClick={() => props.onSortModelChange && props.onSortModelChange([])}
       >
         clear-sort
       </button>
       <button
         type="button"
         data-testid="page-change"
-        onClick={() =>
-          props.onPaginationPageChange && props.onPaginationPageChange(1)
-        }
+        onClick={() => props.onPaginationPageChange && props.onPaginationPageChange(1)}
       >
         page
       </button>
       <div data-testid="rows-container">
         {props.rows.map((row: any) => (
-          <div key={row.id}>{row.invoiceFileName}</div>
+          <div key={row.id}>{row.invoiceFilename}</div>
         ))}
       </div>
       {props.columns.map((col: any) => {
@@ -83,11 +81,7 @@ jest.mock('../../../components/Chip/StatusChipInvoice', () => (props: any) => (
 jest.mock('../../../components/Drawer/DetailDrawer', () => (props: any) => (
   <div data-testid="detail-drawer" data-open={props.open}>
     {props.open && props.children}
-    <button
-      type="button"
-      data-testid="close-drawer"
-      onClick={() => props.toggleDrawer(false)}
-    >
+    <button type="button" data-testid="close-drawer" onClick={() => props.toggleDrawer(false)}>
       close
     </button>
   </div>
@@ -108,15 +102,19 @@ jest.mock('../../../utils/formatUtils', () => ({
   safeFormatDate: (value: string) => `formatted-${value}`,
 }));
 
-const mockedGetTransactions = getMerchantTransactionsProcessed as jest.MockedFunction<typeof getMerchantTransactionsProcessed>;
-const mockedDownloadInvoiceFile = downloadInvoiceFile as jest.MockedFunction<typeof downloadInvoiceFile>;
+const mockedGetTransactions = getMerchantTransactionsProcessed as jest.MockedFunction<
+  typeof getMerchantTransactionsProcessed
+>;
+const mockedDownloadInvoiceFile = downloadInvoiceFile as jest.MockedFunction<
+  typeof downloadInvoiceFile
+>;
 
 describe('InvoiceDataTable', () => {
   const baseTransactions: any = {
     content: [
       {
         trxId: 'trx-1',
-        invoiceFileName: 'INV-001',
+        invoiceFilename: 'INV-001',
         franchiseName: 'My Franchise',
         additionalProperties: { productName: 'Washing Machine' },
         trxChargeDate: '2024-01-01T10:00:00Z',
@@ -242,12 +240,15 @@ describe('InvoiceDataTable', () => {
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
-    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => ({
-      focus: jest.fn(),
-    }) as any);
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(
+      () =>
+        ({
+          focus: jest.fn(),
+        } as any)
+    );
     render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
-    const invoiceCell = screen.getByTestId('col-invoiceFileName');
+    const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001');
     fireEvent.click(invoiceLink);
     await waitFor(() => expect(mockedDownloadInvoiceFile).toHaveBeenCalledTimes(1));
@@ -260,7 +261,7 @@ describe('InvoiceDataTable', () => {
     mockedDownloadInvoiceFile.mockRejectedValueOnce(new Error('download error'));
     render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
-    const invoiceCell = screen.getByTestId('col-invoiceFileName');
+    const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001');
     fireEvent.click(invoiceLink);
   });
