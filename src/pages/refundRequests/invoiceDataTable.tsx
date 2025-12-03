@@ -75,7 +75,7 @@ const InvoiceDataTable = ({
   const [loading, setLoading] = useState(false);
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { id } = useParams<RouteParams>();
-  const {alert, setAlert} = useAlert();
+  const { alert, setAlert } = useAlert();
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -83,7 +83,7 @@ const InvoiceDataTable = ({
   };
 
   const handleToggleDrawer = (open: boolean) => {
-    setAlert({ ...alert, isOpen: open});
+    setAlert({ ...alert, isOpen: open });
     setDrawerOpened(open);
     if (!open) {
       setRowDetail(null);
@@ -117,6 +117,10 @@ const InvoiceDataTable = ({
         method: "GET",
       });
 
+      if (!res.ok) {
+        throw new Error('Errore nel recupero del file');
+      }
+
       const ext = selectedTransaction?.invoiceFileName.split(".").pop()?.toLowerCase() || "";
 
       let mimeFromExt = "";
@@ -125,20 +129,7 @@ const InvoiceDataTable = ({
       }else if(ext === "xml") {
         mimeFromExt = "application/xml";
       }else {
-        setAlert({
-          title: 'Preview non disponibile',
-          text: 'La preview è disponibile solo per file PDF o XML.',
-          isOpen: true,
-          severity: 'warning',
-          containerStyle: {
-            height: 'fit-content',
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-          },
-          contentStyle: { position: 'unset', bottom: '0', right: '0' },
-        });
-        return ;
+        throw new Error('Errore nel recupero del file');
       }
 
       const blob = await res.blob();
@@ -146,8 +137,13 @@ const InvoiceDataTable = ({
 
       const url = URL.createObjectURL(file);
 
-      window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 15000);
+      const pdfWindow = window.open(url, "_blank");
+      if (pdfWindow) {
+        setTimeout(() => {
+          // eslint-disable-next-line functional/immutable-data
+          pdfWindow.document.title = selectedTransaction?.invoiceFileName;
+        }, 100);
+      }
 
       setLoading(false);
     } catch (error) {
