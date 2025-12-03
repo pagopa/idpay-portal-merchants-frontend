@@ -41,11 +41,7 @@ const infoStyles = {
 };
 
 const renderCellWithTooltip = (value: string | JSX.Element) => (
-  <Tooltip
-    title={value ? value : ''}
-    placement="top"
-    arrow={true}
-  >
+  <Tooltip title={value ? value : ''} placement="top" arrow={true}>
     <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
       {value && value !== '' ? value : '-'}
     </Typography>
@@ -73,7 +69,9 @@ const InvoiceDataTable = ({
   const [drawerOpened, setDrawerOpened] = useState(false);
   const [rowDetail, setRowDetail] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
-  const [sortModel, setSortModel] = useState<GridSortModel>([]);
+  const [sortModel, setSortModel] = useState<GridSortModel>([
+    { field: 'trxChargeDate', sort: 'asc' },
+  ]);
   const { id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
 
