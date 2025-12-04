@@ -355,7 +355,7 @@
         "approvedRefund" : "Rimborso approvato",
         "exportCSV" : "Esporta csv",
         "detailCardTitleDx" : "dati rimborso",
-        "posType": "Tipologia di riferimento"
+        "posType": "Tipologia lotto"
       }
     }
   },
