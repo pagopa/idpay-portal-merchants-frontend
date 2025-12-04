@@ -248,7 +248,6 @@ const RefundRequests = () => {
         setIsOpen={() => setIsModalOpen(false)}
         title={t('pages.refundRequests.ModalRefundRequests.title')}
         description={t('pages.refundRequests.ModalRefundRequests.description')}
-        warning={t('pages.refundRequests.ModalRefundRequests.warning')}
         cancelBtn="Indietro"
         confirmBtn={{ text: `Invia`, onConfirm: handleSentBatches, loading: sendBatchIsLoading }}
       />
