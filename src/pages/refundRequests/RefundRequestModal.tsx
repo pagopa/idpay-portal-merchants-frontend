@@ -26,7 +26,7 @@ type Props = {
 };
 
 export const RefundRequestsModal = ({ isOpen, setIsOpen, title, description, descriptionTwo, warning, cancelBtn, confirmBtn }: Props) => (
-    <Dialog data-testid="refund-requests-modal-test" open={isOpen} onClose={setIsOpen} PaperProps={{ style: { minWidth: 600, minHeight: 354 } }}>
+    <Dialog data-testid="refund-requests-modal-test" open={isOpen} onClose={setIsOpen} PaperProps={{ style: { minWidth: 600 } }}>
         <DialogTitle
             sx={{
                 fontFamily: '"Titillium Web", sans-serif',
