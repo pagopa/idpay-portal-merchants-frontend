@@ -119,6 +119,7 @@ export const ShopCard = ({
       label: t('pages.refundRequests.batchTransactionsDetails.state'),
       value: <StatusChip status={status as RewardBatchTrxStatusEnum} />,
       minWidth: '180px',
+      isStatus: true,
     },
   ];
 
@@ -163,26 +164,38 @@ export const ShopCard = ({
               >
                 <Typography variant="body1">{item.label}</Typography>
               </Box>
-              <Tooltip
-                title={item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
-                placement='top-start'
-              >
-                <Box
-                  sx={{
-                    minWidth: item.minWidth,
-                    marginBottom: item.marginBottom,
-                    marginTop: item.marginTop,
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={boldStyle}
-                    minWidth="100%"
+              {
+                !item?.isStatus ?
+                  <Tooltip
+                    title={item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                    placement='top-start'
                   >
-                    {item.value === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
-                  </Typography>
-                </Box>
-              </Tooltip>
+                    <Box
+                      sx={{
+                        minWidth: item.minWidth,
+                        marginBottom: item.marginBottom,
+                        marginTop: item.marginTop,
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        sx={boldStyle}
+                        minWidth="100%"
+                      >
+                        {item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                      </Typography>
+                    </Box>
+                  </Tooltip> :
+                  <Box
+                    sx={{
+                      minWidth: item.minWidth,
+                      marginBottom: item.marginBottom,
+                      marginTop: item.marginTop,
+                    }}
+                  >
+                    {item?.value}
+                  </Box>
+              }
             </Box>
           ))}
         </Grid>

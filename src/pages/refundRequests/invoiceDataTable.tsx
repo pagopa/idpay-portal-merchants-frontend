@@ -281,8 +281,7 @@ const InvoiceDataTable = ({
       flex: 1.5,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) =>
-        renderCellWithTooltip(<StatusChipInvoice status={params.value} />),
+      renderCell: (params: any) => <StatusChipInvoice status={params.value} />,
     },
     {
       field: 'actions',
