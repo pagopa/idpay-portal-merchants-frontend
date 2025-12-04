@@ -70,7 +70,7 @@ const InvoiceDataTable = ({
   const [rowDetail, setRowDetail] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [sortModel, setSortModel] = useState<GridSortModel>([
-    { field: 'trxChargeDate', sort: 'asc' },
+    { field: 'trxChargeDate', sort: 'desc' },
   ]);
   const { id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
