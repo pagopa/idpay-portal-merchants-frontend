@@ -1,5 +1,6 @@
 import { DataGrid, GridSortModel, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
 import { useCallback, useState } from 'react';
+import { PAGINATION_ROWS_PRODUCTS } from '../../utils/constants';
 
 /**
  * Props for the DataTable component
@@ -27,6 +28,8 @@ export interface DataTableProps {
   onRowSelectionChange?: (rows: Array<any>) => void;
   /** Function to determine if a row is selectable */
   isRowSelectable?: (params: { row: any }) => boolean;
+  isTransactionsPage?: boolean;
+  onRowsPerPageChange?: (pageSize: number) => void;
 }
 
 const DataTable = ({
@@ -37,12 +40,13 @@ const DataTable = ({
   onPaginationPageChange,
   paginationModel,
   checkable,
-  singleSelect, // Nuova prop
+  singleSelect,
   sortModel = [],
   onRowSelectionChange,
-  isRowSelectable
+  isRowSelectable,
+  isTransactionsPage = false,
+  onRowsPerPageChange
 }: DataTableProps) => {
-  // Stato per la selezione singola. Viene usato solo se checkable e singleSelect sono veri.
   const [singleSelectionModel, setSingleSelectionModel] = useState<GridSelectionModel>([]);
 
   const handlePageChange = (page: number) => {
@@ -90,7 +94,7 @@ const DataTable = ({
         <DataGrid
           rows={rows}
           columns={columns}
-          rowsPerPageOptions={[rowsPerPage]}
+          rowsPerPageOptions={isTransactionsPage ? PAGINATION_ROWS_PRODUCTS :[rowsPerPage]}
 
           {...selectionProps}
 
@@ -106,9 +110,11 @@ const DataTable = ({
           pageSize={paginationModel?.pageSize}
           rowCount={paginationModel?.totalElements}
           hideFooterSelectedRowCount={true}
+          onPageSizeChange={(newPageSize) => onRowsPerPageChange?.(newPageSize)}
           localeText={{
             noRowsLabel: 'Nessun punto vendita da visualizzare.',
             MuiTablePagination: {
+              labelRowsPerPage: 'Elementi per pagina',
               labelDisplayedRows(paginationInfo) {
                 return `${paginationInfo.from}-${paginationInfo.to} di ${paginationInfo.count}`;
               },
