@@ -70,7 +70,7 @@ const InvoiceDataTable = ({
   const [rowDetail, setRowDetail] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [sortModel, setSortModel] = useState<GridSortModel>([
-    { field: 'trxChargeDate', sort: 'asc' },
+    { field: 'trxChargeDate', sort: 'desc' },
   ]);
   const { id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
@@ -281,8 +281,7 @@ const InvoiceDataTable = ({
       flex: 1.5,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) =>
-        renderCellWithTooltip(<StatusChipInvoice status={params.value} />),
+      renderCell: (params: any) => <StatusChipInvoice status={params.value} />,
     },
     {
       field: 'actions',
@@ -300,6 +299,14 @@ const InvoiceDataTable = ({
       ),
     },
   ];
+
+  const handleRowsPerPageChange = (newPageSize: number) => {
+    setPagination(prev => ({
+      ...prev,
+      pageNo: 0,
+      pageSize: newPageSize,
+    }));
+  };
 
   const tableRows = transactions.content.map((row: any) => ({
     ...row,
@@ -335,6 +342,8 @@ const InvoiceDataTable = ({
             onPaginationPageChange={handlePaginationPageChange}
             sortModel={sortModel}
             onSortModelChange={handleSortModelChange}
+            isTransactionsPage={true}
+            onRowsPerPageChange={handleRowsPerPageChange}
           />
         </Box>
       )}
