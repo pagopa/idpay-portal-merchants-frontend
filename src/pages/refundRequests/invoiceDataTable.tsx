@@ -244,7 +244,7 @@ const InvoiceDataTable = ({
     },
     {
       field: 'additionalProperties.productName',
-      headerName: 'Prodotto',
+      headerName: 'Elettrodomestico',
       flex: 2,
       sortable: false,
       disableColumnMenu: true,
@@ -301,7 +301,7 @@ const InvoiceDataTable = ({
   ];
 
   const handleRowsPerPageChange = (newPageSize: number) => {
-    setPagination(prev => ({
+    setPagination((prev) => ({
       ...prev,
       pageNo: 0,
       pageSize: newPageSize,

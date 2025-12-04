@@ -38,7 +38,7 @@ describe('InvoiceDetail', () => {
   const baseListItem = [
     {
       id: 'additionalProperties.productName',
-      label: 'Prodotto',
+      label: 'Elettrodomestico',
       format: (value: string) => `formatted-${value}`,
     },
   ];
@@ -62,7 +62,7 @@ describe('InvoiceDetail', () => {
     );
 
     expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
-    expect(screen.getByText('Prodotto')).toBeInTheDocument();
+    expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
     expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
 
     expect(screen.getByText('Numero fattura')).toBeInTheDocument();
@@ -107,7 +107,7 @@ describe('InvoiceDetail', () => {
       />
     );
 
-    const button = screen.getByTestId('btn-test');  
+    const button = screen.getByTestId('btn-test');
 
     fireEvent.click(button);
 
