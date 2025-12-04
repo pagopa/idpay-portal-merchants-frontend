@@ -1,6 +1,6 @@
 import { DataGrid, GridSortModel, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
 import { useCallback, useState } from 'react';
-import { PAGINATION_ROWS_PRODUCTS } from '../../utils/constants';
+import { ELEMENT_PER_PAGE } from '../../utils/constants';
 
 /**
  * Props for the DataTable component
@@ -94,7 +94,7 @@ const DataTable = ({
         <DataGrid
           rows={rows}
           columns={columns}
-          rowsPerPageOptions={isTransactionsPage ? PAGINATION_ROWS_PRODUCTS :[rowsPerPage]}
+          rowsPerPageOptions={isTransactionsPage ? ELEMENT_PER_PAGE :[rowsPerPage]}
 
           {...selectionProps}
 
