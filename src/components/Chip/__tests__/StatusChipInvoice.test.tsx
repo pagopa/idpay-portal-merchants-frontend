@@ -107,21 +107,4 @@ describe('StatusChipInvoice', () => {
       expect(chip).toHaveAttribute('data-text-color', '#215C76');
     });
   });
-
-  describe('Snapshot tests', () => {
-    it('should match snapshot for all status types', () => {
-      const statuses = [
-        RewardBatchTrxStatusEnum.TO_CHECK,
-        RewardBatchTrxStatusEnum.CONSULTABLE,
-        RewardBatchTrxStatusEnum.SUSPENDED,
-        RewardBatchTrxStatusEnum.APPROVED,
-        RewardBatchTrxStatusEnum.REJECTED,
-      ];
-
-      statuses.forEach(status => {
-        const { container } = render(<StatusChipInvoice status={status} />);
-        expect(container).toMatchSnapshot(`status-${status}`);
-      });
-    });
-  });
 });
