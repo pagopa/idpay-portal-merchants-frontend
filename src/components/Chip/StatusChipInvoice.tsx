@@ -10,19 +10,19 @@ const statusMap: Record<
   RewardBatchTrxStatusEnum,
   { label: string; color: string; textColor?: string }
 > = {
-  [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: '#EEEEEE' }, // warning
-  [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: '#EEEEEE' }, // warning
-  [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Contrassegnata', color: '#FFF5DA' }, // warning
+  [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: '#EEEEEE' },
+  [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: '#EEEEEE' },
+  [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Da controllare', color: '#FFF5DA' },
   [RewardBatchTrxStatusEnum.APPROVED]: {
-    label: 'Validata',
-    color: '#E1F4E1',
+    label: 'Approvata',
+    color: '#E1F5FE',
     textColor: '#224021',
-  }, // success
+  },
   [RewardBatchTrxStatusEnum.REJECTED]: {
-    label: 'Rifiutata',
+    label: 'Esclusa',
     color: '#FFE0E0',
-    textColor: '#761F1F',
-  }, // error
+    textColor: '#215C76',
+  },
 };
 
 const StatusChipInvoice: React.FC<StatusChipProps> = ({ status }) => {
