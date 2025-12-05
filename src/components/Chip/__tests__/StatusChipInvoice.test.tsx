@@ -59,7 +59,7 @@ describe('StatusChipInvoice', () => {
       const chip = screen.getByTestId('custom-chip');
       expect(chip).toHaveTextContent('Approvata');
       expect(chip).toHaveAttribute('data-color', '#E1F5FE');
-      expect(chip).toHaveAttribute('data-text-color', '#224021');
+      expect(chip).toHaveAttribute('data-text-color', '#215C76');
       expect(chip).toHaveAttribute('data-size', 'small');
     });
 
@@ -69,7 +69,7 @@ describe('StatusChipInvoice', () => {
       const chip = screen.getByTestId('custom-chip');
       expect(chip).toHaveTextContent('Esclusa');
       expect(chip).toHaveAttribute('data-color', '#FFE0E0');
-      expect(chip).toHaveAttribute('data-text-color', '#215C76');
+      expect(chip).toHaveAttribute('data-text-color', '#761F1F');
       expect(chip).toHaveAttribute('data-size', 'small');
     });
   });
@@ -104,7 +104,7 @@ describe('StatusChipInvoice', () => {
 
       rerender(<StatusChipInvoice status={RewardBatchTrxStatusEnum.APPROVED} />);
       chip = screen.getByTestId('custom-chip');
-      expect(chip).toHaveAttribute('data-text-color', '#224021');
+      expect(chip).toHaveAttribute('data-text-color', '#215C76');
     });
   });
 
