@@ -16,12 +16,12 @@ const statusMap: Record<
   [RewardBatchTrxStatusEnum.APPROVED]: {
     label: 'Approvata',
     color: '#E1F5FE',
-    textColor: '#224021',
+    textColor: '#215C76',
   },
   [RewardBatchTrxStatusEnum.REJECTED]: {
     label: 'Esclusa',
     color: '#FFE0E0',
-    textColor: '#215C76',
+    textColor: '#761F1F',
   },
 };
 
