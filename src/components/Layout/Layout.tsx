@@ -17,7 +17,7 @@ type Props = {
 };
 
 const Layout = ({ children }: Props) => {
-  const {alert} = useAlert();
+  const {alert, setAlert} = useAlert();
   const onExit = useUnloadEventOnExit();
   const loggedUser = useSelector(userSelectors.selectLoggedUser);
   const location = useLocation();
@@ -39,6 +39,7 @@ const Layout = ({ children }: Props) => {
 
   useEffect(() => {
     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
+    setAlert(alert.isOpen ? { ...alert, isOpen: false} : alert);
   }, [location.pathname]);
 
 
