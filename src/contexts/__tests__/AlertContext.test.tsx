@@ -56,7 +56,7 @@ describe('AlertContext', () => {
     await waitFor(() => {
       setTimeout(() => {
         expect(alert).not.toBeInTheDocument()
-      }, 5000)
+      }, 3000)
     })
 
   });
