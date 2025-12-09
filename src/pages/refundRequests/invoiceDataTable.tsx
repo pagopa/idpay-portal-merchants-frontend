@@ -149,14 +149,7 @@ const InvoiceDataTable = ({
         title: 'Errore download file',
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
-        severity: 'error',
-        containerStyle: {
-          height: 'fit-content',
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-        },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' },
+        severity: 'error'
       });
       setLoading(false);
     }
