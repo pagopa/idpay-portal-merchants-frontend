@@ -62,6 +62,7 @@ const ReportedUsers: React.FC = () => {
   React.useEffect(() => {
     if (user.length === 0 && lastSearchedCF && isValidCF(lastSearchedCF)) {
       setShowEmptyAlert(true);
+      setTimeout(() => setShowEmptyAlert(false), 3000);
     } else {
       setShowEmptyAlert(false);
     }
