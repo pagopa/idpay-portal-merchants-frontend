@@ -13,8 +13,6 @@ import {
   Paper,
   Typography,
   Link,
-  Alert,
-  Slide,
   Tooltip,
   IconButton,
 } from '@mui/material';
@@ -27,8 +25,6 @@ import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
-import { CheckCircleOutline } from '@mui/icons-material';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
 import { GetPointOfSalesFilters } from '../../types/types';
@@ -37,6 +33,7 @@ import { parseJwt } from '../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
+import { useAlert } from '../../hooks/useAlert';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -52,7 +49,7 @@ interface RouteParams {
 }
 
 const InitiativeStores: React.FC = () => {
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const {setAlert} = useAlert();
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesPagination, setStoresPagination] = useState({
     pageNo: 0,
@@ -73,11 +70,7 @@ const InitiativeStores: React.FC = () => {
   const location = useLocation<{ showSuccessAlert?: boolean }>();
   useEffect(() => {
     if (location.state?.showSuccessAlert) {
-      setShowSuccessAlert(true);
-
-      setTimeout(() => {
-        setShowSuccessAlert(false);
-      }, 3000);
+      setAlert({text: t('pages.initiativeStores.pointOfSalesUploadSuccess'), isOpen: true, severity: 'success'});
 
       history.replace({
         ...location,
@@ -116,7 +109,6 @@ const InitiativeStores: React.FC = () => {
     
   }, []);
 
-  const addError = useErrorDispatcher();
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
     fontSize: theme.typography.fontSize,
@@ -244,17 +236,7 @@ const InitiativeStores: React.FC = () => {
       if (!fromSort) {
         setStoresLoading(false);
       }
-      addError({
-        id: 'GET_MERCHANT_POINT_OF_SALES',
-        blocking: false,
-        error,
-        techDescription: 'An error occurred getting merchant point of sales',
-        displayableTitle: t('errors.genericTitle'),
-        displayableDescription: t('errors.genericDescription'),
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
-      });
+      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
     }
   };
 
@@ -446,7 +428,6 @@ const InitiativeStores: React.FC = () => {
                 <DataTable
                   rows={stores}
                   columns={columns}
-                  pageSize={PAGINATION_SIZE}
                   rowsPerPage={PAGINATION_SIZE}
                   onSortModelChange={handleSortModelChange}
                   paginationModel={storesPagination}
@@ -459,29 +440,6 @@ const InitiativeStores: React.FC = () => {
           }
         </>
       )}
-      <Slide direction="left" in={showSuccessAlert} mountOnEnter unmountOnExit>
-        <Alert
-          severity="success"
-          icon={<CheckCircleOutline />}
-          sx={{
-            position: 'fixed',
-            bottom: 40,
-            right: 20,
-            backgroundColor: 'white',
-            width: 'auto',
-            maxWidth: '400px',
-            minWidth: '300px',
-            zIndex: 1300,
-            boxShadow: 3,
-            borderRadius: 1,
-            '& .MuiAlert-icon': {
-              color: '#6CC66A',
-            },
-          }}
-        >
-          {t('pages.initiativeStores.pointOfSalesUploadSuccess')}
-        </Alert>
-      </Slide>
       {
         !storesLoading && stores?.length === 0 && (
           <Paper

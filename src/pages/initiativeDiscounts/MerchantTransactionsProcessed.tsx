@@ -1,5 +1,4 @@
 import { Box, Table, TableBody, TableCell, TableRow } from '@mui/material';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +8,7 @@ import { getMerchantTransactionsProcessed } from '../../services/merchantService
 import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
 import { MerchantTransactionProcessedDTO } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
+import { useAlert } from '../../hooks/useAlert';
 import {
   TransactionsComponentProps,
   renderTrasactionProcessedStatus,
@@ -22,6 +22,7 @@ import { useTableDataFiltered } from './useTableDataFiltered';
 import { useMemoInitTableData } from './useMemoInitTableData';
 
 const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
+  const {setAlert} = useAlert();
   const { t } = useTranslation();
   const [page, setPage] = useState<number>(0);
   const [rows, setRows] = useState<Array<MerchantTransactionProcessedDTO>>([]);
@@ -30,7 +31,6 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
   const [filterDataByUser, setFilterDataByUser] = useState<string | undefined>();
   const [filterDataByStatus, setFilterDataByStatus] = useState<string | undefined>();
   const setLoading = useLoading('GET_INITIATIVE_MERCHANT_DISCOUNTS_LIST');
-  const addError = useErrorDispatcher();
 
   const formik = useFormik({
     initialValues: {
@@ -38,7 +38,7 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
       filterStatus: '',
     },
     onSubmit: (values: any) => {
-      //TODO: check if still needed, delete otherwhise
+      // TODO: check if still needed, delete otherwhise
       if (typeof id === 'string') {
         const fU = values.searchUser.length > 0 ? values.searchUser : undefined;
         const fS = values.filterStatus.length > 0 ? values.filterStatus : undefined;
@@ -61,29 +61,19 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
     status: string | undefined
   ) => {
     setLoading(true);
-    getMerchantTransactionsProcessed(initiativeId, page, fiscalCode, status)
+    getMerchantTransactionsProcessed({ initiativeId, page, fiscalCode, status })
       .then((response) => {
         setPage(response.pageNo);
         setRowsPerPage(response.pageSize);
         setTotalElements(response.totalElements);
         if (response.content.length > 0) {
-          setRows([...response.content]);
+          // setRows([...response.content]);
         } else {
           setRows([]);
         }
       })
-      .catch((error) => {
-        addError({
-          id: 'GET_INITIATIVE_MERCHANT_DISCOUNTS_PROCESSED_LIST_ERROR',
-          blocking: false,
-          error,
-          techDescription: 'An error occurred getting initiative merchant discounts processed list',
-          displayableTitle: t('errors.genericTitle'),
-          displayableDescription: t('errors.genericDescription'),
-          toNotify: true,
-          component: 'Toast',
-          showCloseIcon: true,
-        });
+      .catch(() => {
+        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
       })
       .finally(() => setLoading(false));
   };

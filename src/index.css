@@ -24,3 +24,16 @@
     cursor: pointer;
   }
 }
+
+.invoice-detail-textarea {
+  width: 374px;
+  border: none;
+  resize: none;
+  font-weight: 600;
+  font-style: SemiBold;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 0;
+  background: transparent;
+  color: inherit;
+}

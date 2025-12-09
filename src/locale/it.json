@@ -136,6 +136,7 @@
       "emptyList": "Non ci sono buoni sconto in corso per questa iniziativa.",
       "emptyProcessedList": "Non ci sono buoni sconto contabilizzati per questa iniziativa",
       "filterByStatus": "Stato",
+      "filterByDate": "Data",
       "listTitle": "Buoni sconto emessi",
       "paymentConfirmed": "Pagamento confermato",
       "processedMerchantTransactions": "Buoni sconto contabilizzati",
@@ -218,7 +219,8 @@
       "website": "Sito web",
       "modalDescription": "Qui puoi modificare i dati del referente di questo punto vendita. Se procedi, il nuovo referente riceverà un’email di conferma all’indirizzo indicato. Le credenziali di accesso del vecchio referente non saranno più valide.",
       "referentChangeSuccess": "Dati modificati con successo",
-      "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati"
+      "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati",
+      "pointOfSale": "Punto vendita"
     },
     "initiativeStoreDetail": {
       "transactionHistory": "Storico transazioni",
@@ -325,6 +327,36 @@
     "pointOfSaleTransactions": {
       "searchByFiscalCode": "Cerca per Codice Fiscale",
       "searchByGtin": "Cerca per GTIN"
+    },
+    "refundRequests": {
+      "title": "Richieste di rimborso",
+      "subtitle": "Invia i rimborsi dei tuoi punti vendita.",
+      "sendRequests": "Invia",
+      "noData": "Nessun dato disponibile",
+      "rewardBatchSentSuccess": "Lotto inviato con successo",
+      "ModalRefundRequests": {
+        "title": "Invia richieste di rimborso",
+        "description": "Il lotto di transazioni verrà inviato a Invitalia S.p.A., che procederà alla verifica dei dati e al successivo rimborso all’IBAN da te indicato in fase di adesione.",
+        "warning": "Se una o più fatture richiedono ulteriori controlli da parte tua, escludile prima di procedere con l’invio dell’intero lotto."
+      },
+      "batchTransactionsDetails" : {
+        "referencePeriod" : "Periodo di riferimento",
+        "state" : "Stato",
+        "requestedRefund" : "Rimborso richiesto"
+      },
+      "storeDetails" : {
+        "referredBatch" : "Lotto di riferimento",
+        "referencePeriod" : "Periodo di riferimento",
+        "companyName" : "Ragione sociale",
+        "requestedRefund" : "Rimborso richiesto",
+        "holder" : "Intestatario",
+        "iban" : "IBAN",
+        "status" : "Status",
+        "approvedRefund" : "Rimborso approvato",
+        "exportCSV" : "Esporta csv",
+        "detailCardTitleDx" : "dati rimborso",
+        "posType": "Tipo"
+      }
     }
   },
   "roles": {

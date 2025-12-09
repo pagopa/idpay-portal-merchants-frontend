@@ -1,13 +1,13 @@
 import { Box, Grid, Typography,Button, CircularProgress } from '@mui/material';
 import { ReactNode, useState } from 'react';
 import { theme } from '@pagopa/mui-italia';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
 import { ReceiptLong } from '@mui/icons-material';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';
 import CustomChip from '../Chip/CustomChip';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { downloadInvoiceFile } from '../../services/merchantService';
 import { useStore } from '../../pages/initiativeStores/StoreContext';
+import { useAlert } from '../../hooks/useAlert';
 import getStatus from './useStatus';
 
 type Props = {
@@ -18,7 +18,7 @@ type Props = {
 };
 
 export default function TransactionDetail({ title, itemValues, listItem }: Props) {
-  const addError = useErrorDispatcher();
+  const {setAlert} = useAlert();
   const { storeId } = useStore();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,16 +41,13 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
       link.click();
       setIsLoading(false);
     } catch (error) {
-      addError({
-        id: 'FILE_DOWNLOAD',
-        blocking: false,
-        error: new Error('Merchant ID not found'),
-        techDescription: 'Merchant ID not found',
-        displayableTitle: 'Errore downloand file',
-        displayableDescription: 'Non è stato possibile scaricare il file',
-        toNotify: true,
-        component: 'Toast',
-        showCloseIcon: true,
+      setAlert({
+        title: 'Errore download file',
+        text: 'Non è stato possibile scaricare il file',
+        isOpen: true,
+        severity: 'error',
+        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px'},
+        contentStyle: {position: 'unset', bottom: '0', right: '0'}
       });
       setIsLoading(false);
     }

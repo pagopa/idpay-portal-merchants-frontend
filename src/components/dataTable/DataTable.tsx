@@ -1,15 +1,35 @@
-import { DataGrid, GridSortModel } from '@mui/x-data-grid';
-import { useCallback } from 'react';
+import { DataGrid, GridSortModel, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
+import { useCallback, useState } from 'react';
+import { ELEMENT_PER_PAGE } from '../../utils/constants';
 
+/**
+ * Props for the DataTable component
+ */
 export interface DataTableProps {
+  /** Array of data rows to be displayed in the table */
   rows: any;
-  columns: any;
-  pageSize: number;
-  rowsPerPage: number;
+  /** Array of column definitions for the table */
+  columns: Array<GridColDef>;
+  /** Number of rows to display per page */
+  rowsPerPage: number; // This prop is used for rowsPerPageOptions
+  /** Callback function triggered when sorting changes */
   onSortModelChange?: (model: GridSortModel) => void;
+  /** Current sort model configuration */
   sortModel?: GridSortModel;
+  /** Callback function triggered when page changes */
   onPaginationPageChange?: (page: number) => void;
+  /** Current pagination model configuration */
   paginationModel?: any;
+  /** Whether rows are selectable with checkboxes */
+  checkable?: boolean;
+  /** If true, only one row can be selected at a time */
+  singleSelect?: boolean;
+  /** Callback function triggered when row selection changes */
+  onRowSelectionChange?: (rows: Array<any>) => void;
+  /** Function to determine if a row is selectable */
+  isRowSelectable?: (params: { row: any }) => boolean;
+  isTransactionsPage?: boolean;
+  onRowsPerPageChange?: (pageSize: number) => void;
 }
 
 const DataTable = ({
@@ -19,20 +39,54 @@ const DataTable = ({
   onSortModelChange,
   onPaginationPageChange,
   paginationModel,
+  checkable,
+  singleSelect,
   sortModel = [],
+  onRowSelectionChange,
+  isRowSelectable,
+  isTransactionsPage = false,
+  onRowsPerPageChange
 }: DataTableProps) => {
+  const [singleSelectionModel, setSingleSelectionModel] = useState<GridSelectionModel>([]);
+
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
   };
 
   const handleSortModelChange = useCallback(
     (model: GridSortModel) => {
-      if (model.length > 0) {
-        onSortModelChange?.(model);
-      }
+      onSortModelChange?.(model);
     },
-    [sortModel]
+    [onSortModelChange]
   );
+
+  const handleRowSelectionChange = (newSelectionModel: GridSelectionModel) => {
+    let finalModel = newSelectionModel;
+
+    if (checkable && singleSelect) {
+      if (newSelectionModel.length > 0) {
+        finalModel = [newSelectionModel[newSelectionModel.length - 1]];
+      } else {
+        finalModel = [];
+      }
+
+      setSingleSelectionModel(finalModel);
+    }
+
+    const modelToMap = checkable && singleSelect ? finalModel : newSelectionModel;
+    const selectedRowObjects = rows.filter((row: any) => modelToMap.includes(row.id));
+
+    onRowSelectionChange?.(selectedRowObjects);
+
+  };
+
+  const selectionProps = {
+    checkboxSelection: checkable,
+    isRowSelectable,
+    selectionModel: singleSelect ? singleSelectionModel : undefined,
+    onSelectionModelChange: handleRowSelectionChange,
+  };
+
 
   return (
     <>
@@ -40,7 +94,10 @@ const DataTable = ({
         <DataGrid
           rows={rows}
           columns={columns}
-          rowsPerPageOptions={[rowsPerPage]}
+          rowsPerPageOptions={isTransactionsPage ? ELEMENT_PER_PAGE :[rowsPerPage]}
+
+          {...selectionProps}
+
           disableSelectionOnClick
           autoHeight
           sortingOrder={['asc', 'desc']}
@@ -52,9 +109,12 @@ const DataTable = ({
           page={paginationModel?.pageNo}
           pageSize={paginationModel?.pageSize}
           rowCount={paginationModel?.totalElements}
+          hideFooterSelectedRowCount={true}
+          onPageSizeChange={(newPageSize) => onRowsPerPageChange?.(newPageSize)}
           localeText={{
             noRowsLabel: 'Nessun punto vendita da visualizzare.',
             MuiTablePagination: {
+              labelRowsPerPage: 'Elementi per pagina',
               labelDisplayedRows(paginationInfo) {
                 return `${paginationInfo.from}-${paginationInfo.to} di ${paginationInfo.count}`;
               },
@@ -85,6 +145,11 @@ const DataTable = ({
             },
             '& .MuiDataGrid-cell:focus-within': {
               outline: 'none',
+            },
+            '& .MuiDataGrid-columnHeaderCheckbox': {
+              '& span ': {
+                display: 'none',
+              },
             },
           }}
         />

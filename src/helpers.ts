@@ -149,3 +149,18 @@ if (!match) {
 
 return true;
 };
+
+export function formatEuro(value: number) {
+    return (value / 100).toLocaleString('it-IT', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + '€';
+}
+
+export const truncateString = (str?: string, maxLength: number = 40): string => {
+  if (!str) {
+    return "-";
+  } else {
+    return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
+  }
+};

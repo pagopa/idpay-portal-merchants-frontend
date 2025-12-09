@@ -3,7 +3,6 @@ import { InitiativeDTOArray } from '../api/generated/merchants/InitiativeDTOArra
 import { MerchantDetailDTO } from '../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../api/generated/merchants/MerchantStatisticsDTO';
 import { MerchantTransactionsListDTO } from '../api/generated/merchants/MerchantTransactionsListDTO';
-import { MerchantTransactionsProcessedListDTO } from '../api/generated/merchants/MerchantTransactionsProcessedListDTO';
 import { PointOfSaleDTO } from '../api/generated/merchants/PointOfSaleDTO';
 import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
 import {
@@ -14,6 +13,18 @@ import {
 import { PointOfSaleTransactionsProcessedListDTO } from '../api/generated/merchants/PointOfSaleTransactionsProcessedListDTO';
 import { DownloadInvoiceResponseDTO } from '../api/generated/merchants/DownloadInvoiceResponseDTO';
 import { ReportedUserDTO } from '../api/generated/merchants/ReportedUserDTO';
+
+export type GetMerchantTransactionsProcessedParams = {
+  initiativeId: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+  fiscalCode?: string;
+  status?: string;
+  rewardBatchId?: string;
+  rewardBatchTrxStatus?: string;
+  pointOfSaleId?: string;
+};
 
 export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> =>
   MerchantApi.getMerchantInitiativeList();
@@ -27,12 +38,10 @@ export const getMerchantTransactions = (
   MerchantApi.getMerchantTransactions(initiativeId, page, fiscalCode, status);
 
 export const getMerchantTransactionsProcessed = (
-  initiativeId: string,
-  page: number,
-  fiscalCode?: string,
-  status?: string
-): Promise<MerchantTransactionsProcessedListDTO> =>
-  MerchantApi.getMerchantTransactionsProcessed(initiativeId, page, fiscalCode, status);
+  params: GetMerchantTransactionsProcessedParams
+): Promise<MerchantTransactionsListDTO> => 
+  MerchantApi.getMerchantTransactionsProcessed(params);
+
 
 export const getMerchantInitiativeStatistics = (
   initiativeId: string
@@ -92,6 +101,7 @@ export const getReportedUser = (
 ): Promise<ReportedUserDTO> => MerchantApi.getReportedUser(initiativeId, userFiscalCode);
 
 import { ReportedUserCreateResponseDTO } from '../api/generated/merchants/ReportedUserCreateResponseDTO';
+import { RewardBatchListDTO } from '../api/generated/merchants/RewardBatchListDTO';
 
 export const createReportedUser = (
   initiativeId: string,
@@ -104,3 +114,14 @@ export const deleteReportedUser = (
   userFiscalCode: string
 ): Promise<ReportedUserCreateResponseDTO> =>
   MerchantApi.deleteReportedUser(initiativeId, userFiscalCode);
+
+export const getRewardBatches = (
+  initiativeId: string
+): Promise<RewardBatchListDTO> =>
+  MerchantApi.getRewardBatches(initiativeId);
+
+export const sendRewardBatch = (
+  initiativeId: string,
+  batchId: string
+): Promise<void> =>
+  MerchantApi.sendRewardBatches(initiativeId, batchId);

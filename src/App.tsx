@@ -4,7 +4,8 @@ import {
   UnloadEventHandler,
   UserNotifyHandle,
 } from '@pagopa/selfcare-common-frontend';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { matchPath, Redirect, Route, Switch, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import withSelectedPartyProducts from './decorators/withSelectedPartyProducts';
 import withLogin from './decorators/withLogin';
 import Layout from './components/Layout/Layout';
@@ -23,24 +24,46 @@ import InitiativeStoreDetail from './pages/initiativeStores/initiativeStoreDetai
 import { StoreProvider } from './pages/initiativeStores/StoreContext';
 import ReportedUsers from './pages/reportedUsers/reportedUsers';
 import InsertReportedUser from './pages/reportedUsers/insertReportedUser';
+import { AlertProvider } from './contexts/AlertContext';
+import RefundRequests from './pages/refundRequests/RefundRequests';
+import ROUTES from './routes';
+import { useInitiativesList } from './hooks/useInitiativesList';
+import ShopDetails from './pages/refundRequests/detail/ShopDetails';
+
 const SecuredRoutes = withLogin(
-  withSelectedPartyProducts(() => (
-    <Layout>
-      <Switch>
-        <Route path={routes.HOME} exact={true}>
-          <InitiativesList />
-        </Route>
-        <Route path={routes.ASSISTANCE} exact={true}>
-          <Assistance />
-        </Route>
+  withSelectedPartyProducts(() => {
+    const [match, setMatch] = useState<any>(null);
+    const location = useLocation();
 
-        <Route path={routes.TOS} exact={true}>
-          <TOS />
-        </Route>
+    useEffect(() => {
+      setMatch(
+        matchPath(location.pathname, {
+          path: [ROUTES.HOME, ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS, ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS, ROUTES.REFUND_REQUESTS_STORE],
+          exact: true,
+          strict: false,
+      }));
+    }, [location]);
 
-        <Route path={routes.PRIVACY_POLICY} exact={true}>
-          <PrivacyPolicy />
-        </Route>
+  useInitiativesList(match);
+
+    return(
+    <AlertProvider>
+      <Layout>
+        <Switch>
+          <Route path={routes.HOME} exact={true}>
+            <InitiativesList />
+          </Route>
+          <Route path={routes.ASSISTANCE} exact={true}>
+            <Assistance />
+          </Route>
+
+          <Route path={routes.TOS} exact={true}>
+            <TOS />
+          </Route>
+
+          <Route path={routes.PRIVACY_POLICY} exact={true}>
+            <PrivacyPolicy />
+          </Route>
 
         {/* <Route path={routes.DISCOUNTS} exact={true}>
             <InitiativeDiscounts />
@@ -68,15 +91,24 @@ const SecuredRoutes = withLogin(
         <Route path={routes.NEW_DISCOUNT} exact={true}>
           <NewDiscount />
         </Route>
-        <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
-          <AcceptNewDiscount />
-        </Route>
+          <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
+            <AcceptNewDiscount />
+          </Route>
+          <Route path={routes.REFUND_REQUESTS} exact={true}>
+            <RefundRequests />
+          </Route>
+          <Route path={routes.REFUND_REQUESTS_STORE} exact={true}>
+            <StoreProvider>
+              <ShopDetails />
+            </StoreProvider>
+          </Route>
         <Route path="*">
           <Redirect to={routes.HOME} />
         </Route>
-      </Switch>
-    </Layout>
-  ))
+        </Switch>
+      </Layout>
+    </AlertProvider>
+  );})
 );
 
 const App = () => (

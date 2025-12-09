@@ -94,9 +94,9 @@ jest.mock('../SearchTaxCode', () => ({
   ),
 }));
 
-jest.mock('../MsgResult', () => ({
+jest.mock('../../../components/Alert/AlertComponent', () => ({
   __esModule: true,
-  default: ({ severity, message }: any) => <div data-testid={`msg-${severity}`}>{message}</div>,
+  default: ({ severity, text, isOpen }: any) => isOpen && <div data-testid={`msg-${severity}`}>{text}</div>,
 }));
 
 jest.mock('../NoResultPaper', () => ({
@@ -591,7 +591,7 @@ describe('ReportedUsers Component', () => {
         expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
 
-      jest.advanceTimersByTime(3000);
+      jest.advanceTimersByTime(5000);
 
       await waitFor(() => {
         expect(screen.queryByTestId('msg-success')).not.toBeInTheDocument();
@@ -616,7 +616,7 @@ describe('ReportedUsers Component', () => {
         expect(screen.getByTestId('msg-success')).toBeInTheDocument();
       });
 
-      jest.advanceTimersByTime(3000);
+      jest.advanceTimersByTime(5000);
 
       await waitFor(() => {
         expect(screen.queryByTestId('msg-success')).not.toBeInTheDocument();
@@ -658,7 +658,7 @@ describe('ReportedUsers Component', () => {
         expect(screen.getByText('Utenti Segnalati')).toBeInTheDocument();
       });
 
-      jest.advanceTimersByTime(3000);
+      jest.advanceTimersByTime(5000);
 
       await waitFor(() => {
         expect(screen.queryByTestId('msg-success')).not.toBeInTheDocument();
