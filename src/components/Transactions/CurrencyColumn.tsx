@@ -9,7 +9,7 @@ export interface Props {
 export default function CurrencyColumn({ value, type="body1" }: Props) {
     return (
          <Tooltip
-              title={value ? currencyFormatter(Number(value)).toString() : ''}
+              title={value ? currencyFormatter(Number(value)).toString() : '-'}
               placement="top"
               arrow={true}
             >

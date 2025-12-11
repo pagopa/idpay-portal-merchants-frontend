@@ -52,7 +52,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.value),
     },
     {
       field: 'posType',
@@ -60,7 +60,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value), 6),
+      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value)),
     },
     {
       field: 'initialAmountCents',
@@ -146,9 +146,9 @@ const RefundRequests = () => {
         }
     };
 
-  const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
+  const renderCellWithTooltip = (value: string) => (
     <Tooltip
-      title={value && value.length >= tooltipThreshold ? value : ''}
+      title={value ? value : '-'}
       placement="top"
       arrow={true}
     >
