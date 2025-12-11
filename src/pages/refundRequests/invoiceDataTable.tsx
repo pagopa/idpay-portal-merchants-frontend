@@ -18,7 +18,7 @@ import {
   downloadInvoiceFile,
   getMerchantTransactionsProcessed,
 } from '../../services/merchantService';
-import { TYPE_TEXT } from '../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
@@ -41,9 +41,9 @@ const infoStyles = {
 };
 
 const renderCellWithTooltip = (value: string | JSX.Element) => (
-  <Tooltip title={value} placement="top" arrow={true}>
+  <Tooltip title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}>
     <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-      {value && value !== '' ? value : '-'}
+      {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
     </Typography>
   </Tooltip>
 );
@@ -209,9 +209,7 @@ const InvoiceDataTable = ({
       disableColumnMenu: true,
       renderCell: (params: any) => (
         <Tooltip
-          title={params.value ? params.value : '-'}
-          placement="top"
-          arrow
+          title={params.value && params.value !== '' ? params.value : MISSING_DATA_PLACEHOLDER}
         >
           <Typography
             color="primary"
@@ -224,7 +222,7 @@ const InvoiceDataTable = ({
             className="ShowDots"
             onClick={() => downloadFile(params.row)}
           >
-            {params.value && params.value !== '' ? params.value : '-'}
+            {params.value && params.value !== '' ? params.value : MISSING_DATA_PLACEHOLDER}
           </Typography>
         </Tooltip>
       ),
@@ -235,7 +233,7 @@ const InvoiceDataTable = ({
       flex: 2,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || '-'),
+      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || MISSING_DATA_PLACEHOLDER),
     },
     {
       field: 'additionalProperties.productName',
@@ -244,7 +242,7 @@ const InvoiceDataTable = ({
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
-        renderCellWithTooltip(params.row.additionalProperties?.productName || '-'),
+        renderCellWithTooltip(params.row.additionalProperties?.productName || MISSING_DATA_PLACEHOLDER),
     },
     {
       field: 'trxChargeDate',
