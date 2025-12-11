@@ -41,7 +41,7 @@ const infoStyles = {
 };
 
 const renderCellWithTooltip = (value: string | JSX.Element) => (
-  <Tooltip title={value ? value : ''} placement="top" arrow={true}>
+  <Tooltip title={value} placement="top" arrow={true}>
     <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
       {value && value !== '' ? value : '-'}
     </Typography>
@@ -207,7 +207,7 @@ const InvoiceDataTable = ({
       disableColumnMenu: true,
       renderCell: (params: any) => (
         <Tooltip
-          title={params.value && params.value.length >= 11 ? params.value : ''}
+          title={params.value ? params.value : '-'}
           placement="top"
           arrow
         >
