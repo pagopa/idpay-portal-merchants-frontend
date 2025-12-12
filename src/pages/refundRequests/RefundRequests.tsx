@@ -105,7 +105,7 @@ const RefundRequests = () => {
                 ),
                 {
                   store: params.row,
-                  batchId: params.row?.id?.toString(),
+                  batchId: params.row?.id?.toString() as string,
                 }
               );
             }}

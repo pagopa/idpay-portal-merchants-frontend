@@ -38,6 +38,7 @@ paths:
           application/json:
             schema:
               type: array
+              maxItems: 100000
               items:
                 $ref: "#/components/schemas/PointOfSaleDTO"
       responses:
@@ -1236,6 +1237,35 @@ paths:
               example:
                 code: GENERIC_ERROR
                 message: An error occurred during file reading
+  /initiatives/{initiativeId}/reward-batches/{rewardBatchId}/approved/download:
+    get:
+      tags:
+        - reward-batches
+      summary: "ENG: Download the approved reward batch file containing both approved and rejected transactions. IT: Scarica il file del lotto approvato contenente le transazioni approvate e quelle respinte."
+      description: "ENG: This service allows you to download a detailed file with all approved and rejected transactions related to a specific approved reward batch. IT: Questo servizio consente di scaricare un file dettagliato contenente tutte le transazioni approvate e respinte relative a uno specifico lotto approvato."
+      operationId: approveDownloadRewardBatch
+      parameters:
+        - name: initiativeId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rewardBatchId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/GET_download_reward_batch_file_200_Response"
+        "400":
+          $ref: "#/components/responses/GET_download_reward_batch_file_400_Response"
+        "401":
+          $ref: "#/components/responses/GET_download_reward_batch_file_401_Response"
+        "429":
+          $ref: "#/components/responses/GET_download_reward_batch_file_429_Response"
+        "500":
+          $ref: "#/components/responses/GET_download_reward_batch_file_500_Response"
   /initiatives/{initiativeId}:
     get:
       tags:
@@ -1525,6 +1555,87 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/MerchantErrorDTO' }
 components:
+  responses:
+    GET_download_reward_batch_file_200_Response:
+      description: Ok
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DownloadRewardBatchResponseDTO"
+    GET_download_reward_batch_file_400_Response:
+      description: Bad request
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RewardBatchErrorDTO"
+          example:
+            code: REWARD_BATCH_INVALID_REQUEST
+            message: Something went wrong handling request
+    GET_download_reward_batch_file_401_Response:
+      description: Authentication failed
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RewardBatchErrorDTO"
+    GET_download_reward_batch_file_429_Response:
+      description: Too many Request
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        Retry-After:
+          $ref: "#/components/headers/Retry-After"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RewardBatchErrorDTO"
+          example:
+            code: REWARD_BATCH_TOO_MANY_REQUESTS
+            message: Too many requests
+    GET_download_reward_batch_file_500_Response:
+      description: Server ERROR
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RewardBatchErrorDTO"
+          example:
+            code: REWARD_BATCH_GENERIC_ERROR
+            message: An error occurred during file reading
   headers:
     X-RateLimit-Limit:
       description: The maximum number of requests allowed in the current period
@@ -1758,7 +1869,7 @@ components:
             docNumber:
               type: string
               description: "ENG: Document number - IT: Numero documento"
-            fileName:
+            filename:
               type: string
               description: "ENG: Associated file name - IT: Nome del file associato"
     MerchantTransactionsProcessedListDTO:
@@ -2568,6 +2679,15 @@ components:
           format: int64
           description: "ENG: Number of rejected transactions <br> IT: Numero di transazioni rigettate"
           example: 2
+    DownloadRewardBatchResponseDTO:
+      type: object
+      properties:
+        approvedBatchUrl:
+          type: string
+          maxLength: 10000
+          description: "ENG: URL to download the approved batch file - IT: URL per scaricare il file del lotto approvato"
+      required:
+        - approvedBatchUrl
     RewardBatchErrorDTO:
       type: object
       required:
@@ -2582,14 +2702,17 @@ components:
             - REWARD_BATCH_MONTH_TOO_EARLY
             - REWARD_BATCH_TOO_MANY_REQUESTS
             - REWARD_BATCH_GENERIC_ERROR
+            - REWARD_BATCH_INVALID_MERCHANT
           description: |-
             "ENG: Error code: REWARD_BATCH_NOT_FOUND: Reward Batch not found,
              REWARD_BATCH_INVALID_REQUEST: Something went wrong handling request,
              REWARD_BATCH_TOO_MANY_REQUESTS: Too many requests,
+             REWARD_BATCH_INVALID_MERCHANT: The merchant is not associated with the reward batch - IT: Codice di errore:
              REWARD_BATCH_GENERIC_ERROR: Application Error - IT: Codice di errore:
              REWARD_BATCH_NOT_FOUND: lotto non trovato,
              REWARD_BATCH_INVALID_REQUEST: Qualcosa è andato storto durante l'invio della richiesta,
              REWARD_BATCH_TOO_MANY_REQUESTS: Troppe richieste,
+             REWARD_BATCH_INVALID_MERCHANT: Il merchant non è associato al lotto"
              REWARD_BATCH_GENERIC_ERROR: Errore generico"
         message:
           type: string
