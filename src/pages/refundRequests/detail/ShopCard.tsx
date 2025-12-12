@@ -167,7 +167,6 @@ export const ShopCard = ({
                 !item?.isStatus ?
                   <Tooltip
                     title={item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
-                    placement='top-start'
                   >
                     <Box
                       sx={{
