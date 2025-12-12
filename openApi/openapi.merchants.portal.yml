@@ -2682,7 +2682,7 @@ components:
     DownloadRewardBatchResponseDTO:
       type: object
       properties:
-        invoiceUrl:
+        approvedBatchUrl:
           type: string
           maxLength: 10000
           description: "ENG: URL to download the approved batch file - IT: URL per scaricare il file del lotto approvato"

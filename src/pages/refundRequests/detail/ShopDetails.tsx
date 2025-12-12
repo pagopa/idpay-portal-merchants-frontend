@@ -31,6 +31,7 @@ import { downloadBatchCsv, getMerchantPointOfSales } from '../../../services/mer
 import { PointOfSaleDTO } from '../../../api/generated/merchants/PointOfSaleDTO';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
+import { useAlert } from '../../../hooks/useAlert';
 import { ShopCard } from './ShopCard';
 
 const PAGINATION_SIZE = 200;
@@ -53,10 +54,7 @@ const ShopDetails: React.FC = () => {
   const [selectedPointOfSaleId, setSelectedPointOfSaleId] = useState<string>('');
   const initiativesList = useSelector(intiativesListSelector);
 
-  useEffect(() => {
-    console.log(location);
-    console.log(batchDownloadIsLoading);
-  }, [location]);
+  const {setAlert} = useAlert();
 
   const formik = useFormik<any>({
     initialValues: {
@@ -121,17 +119,18 @@ const ShopDetails: React.FC = () => {
       try {
         setBatchDownloadIsLoading(true);
         const response = await downloadBatchCsv(initiativesList[0].initiativeId, batchId as string, );
-        const { invoiceUrl } = response;
+        const { approvedBatchUrl } = response;
         const filename = 'lotto.csv';
 
         const link = document.createElement('a');
         // eslint-disable-next-line functional/immutable-data
-        link.href = invoiceUrl as string;
+        link.href = approvedBatchUrl as string;
         // eslint-disable-next-line functional/immutable-data
         link.download = filename;
         link.click();
       } catch (e) {
         console.log(e);
+         setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
       } finally {
         setBatchDownloadIsLoading(false);
       }
@@ -201,9 +200,10 @@ const ShopDetails: React.FC = () => {
             }}
             onClick={handleDownloadCsv}
             data-testid="download-csv-button-test"
-
+            disabled={(store?.status !== 'APPROVED') || batchDownloadIsLoading}
           >
-            {batchDownloadIsLoading ? <CircularProgress size={20} /> : t('pages.refundRequests.storeDetails.exportCSV')}
+            {t('pages.refundRequests.storeDetails.exportCSV')}
+            <span style={{marginLeft: '10px'}}>{batchDownloadIsLoading && <CircularProgress size={20} />}</span>
           </Button>
         </Box>
       </Box>
