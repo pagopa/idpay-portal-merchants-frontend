@@ -19,6 +19,7 @@ import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAlert } from "../../hooks/useAlert";
 import routes from "../../routes";
+import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RefundRequestsModal } from "./RefundRequestModal";
 
 interface RouteParams {
@@ -52,7 +53,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.value),
     },
     {
       field: 'posType',
@@ -60,7 +61,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value), 6),
+      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value)),
     },
     {
       field: 'initialAmountCents',
@@ -146,14 +147,12 @@ const RefundRequests = () => {
         }
     };
 
-  const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
+  const renderCellWithTooltip = (value: string) => (
     <Tooltip
-      title={value && value.length >= tooltipThreshold ? value : ''}
-      placement="top"
-      arrow={true}
+      title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
     >
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-        {value && value !== '' ? value : '-'}
+        {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
       </Typography>
     </Tooltip>
   );
