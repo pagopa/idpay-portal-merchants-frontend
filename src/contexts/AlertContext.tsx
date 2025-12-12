@@ -21,14 +21,14 @@ export const AlertProvider = ({children}: {children: ReactNode}) => {
   const [error, setError] = useState<AlertComponentProps | undefined>(initialState);
 
   const onClose = useCallback(() => setError(prev => ({ ...prev, isOpen: false})), []);
-
-  const setAlert = useCallback((alert?: AlertComponentProps) => setError(alert), []);
+  const setAlert = useCallback((alert?: AlertComponentProps) => {
+    onClose();
+    setError(alert);
+  }, []);
 
   useEffect(() => {
     if(error?.isOpen) {
-      setTimeout(() => {
-        onClose();
-      }, 3000);
+      setTimeout(onClose, 3000);
     };
   }, [error]);
 

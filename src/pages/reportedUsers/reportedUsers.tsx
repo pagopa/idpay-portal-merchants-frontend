@@ -11,7 +11,7 @@ import { GetReportedUsersFilters } from '../../types/types';
 import routes from '../../routes';
 import { getReportedUser, deleteReportedUser } from '../../services/merchantService';
 import { parseJwt } from '../../utils/jwt-utils';
-import AlertComponent from '../../components/Alert/AlertComponent';
+import { useAlert } from '../../hooks/useAlert';
 import { isValidCF, normalizeValue } from './helpersReportedUsers';
 import SearchTaxCode from './SearchTaxCode';
 import NoResultPaper from './NoResultPaper';
@@ -30,13 +30,9 @@ const initialValues: GetReportedUsersFilters = {
   sort: 'asc',
 };
 
-const successAlertMap: Record<string, string> = {
-  valid: 'pages.reportedUsers.cf.validCf',
-  removed: 'pages.reportedUsers.cf.removedCf'
-};
-
 const ReportedUsers: React.FC = () => {
-  const [success, setSuccess] = useState({variant: '', isOpen: false});
+  const { t } = useTranslation();
+  const { setAlert } = useAlert();
   const location = useLocation<{ newCf?: string; showSuccessAlert?: boolean }>();
   const [user, setUser] = useState<
     Array<{
@@ -46,8 +42,6 @@ const ReportedUsers: React.FC = () => {
       transactionId: string;
     }>
   >([]);
-  const [lastSearchedCF, setLastSearchedCF] = useState<string | undefined>(undefined);
-  const [showEmptyAlert, setShowEmptyAlert] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -60,20 +54,10 @@ const ReportedUsers: React.FC = () => {
   const merchantId = userJwt?.merchant_id;
 
   React.useEffect(() => {
-    if (user.length === 0 && lastSearchedCF && isValidCF(lastSearchedCF)) {
-      setShowEmptyAlert(true);
-      setTimeout(() => setShowEmptyAlert(false), 3000);
-    } else {
-      setShowEmptyAlert(false);
-    }
-  }, [user, lastSearchedCF]);
-
-  React.useEffect(() => {
     if (location.state && location.state.newCf) {
       void formik.setFieldValue('cf', location.state.newCf);
       if (location.state.showSuccessAlert) {
-        setSuccess({variant: 'valid', isOpen: true});
-        setTimeout(() => setSuccess(prev => ({ ...prev, isOpen: false})), 3000);
+        setAlert({text: t('pages.reportedUsers.cf.validCf'), isOpen: true, severity: 'success'});
       }
       setTimeout(() => {
         void formik.handleSubmit();
@@ -93,8 +77,6 @@ const ReportedUsers: React.FC = () => {
       return errors;
     },
     onSubmit: async (values: GetReportedUsersFilters) => {
-      setShowEmptyAlert(false);
-      setLastSearchedCF(values.cf);
       setError(null);
       setUser([]);
       if (values.cf && isValidCF(values.cf)) {
@@ -103,6 +85,7 @@ const ReportedUsers: React.FC = () => {
           const res = await getReportedUser(id, values.cf);
           if (!Array.isArray(res) || res.length === 0) {
             setUser([]);
+            setAlert({text: t('pages.reportedUsers.cf.noResultUser'), isOpen: true, severity: 'error'});
           } else {
             setUser(
               res.map((item) => ({
@@ -137,9 +120,7 @@ const ReportedUsers: React.FC = () => {
     try {
       await deleteReportedUser(id, cf);
       setUser([]);
-      setLastSearchedCF(undefined);
-      setSuccess({variant: 'removed', isOpen: true});
-      setTimeout(() => setSuccess(prev => ({ ...prev, isOpen: false})), 3000);
+      setAlert({text: t('pages.reportedUsers.cf.removedCf'), isOpen: true, severity: 'success'});
     } catch (e) {
       console.error('Error while deleting reported user:', e);
     }
@@ -168,7 +149,6 @@ const ReportedUsers: React.FC = () => {
   const handleFiltersApplied = () => {
     formik.handleSubmit();
   };
-  const { t } = useTranslation();
   return (
     <>
       <Box sx={{ my: 2 }}>
@@ -205,7 +185,6 @@ const ReportedUsers: React.FC = () => {
           onSearch={handleFiltersApplied}
           onReset={() => {
             setUser([]);
-            setLastSearchedCF(undefined);
             void formik.setFieldValue('cf', '');
           }}
         />
@@ -256,21 +235,6 @@ const ReportedUsers: React.FC = () => {
           <NoResultPaper translationKey="pages.reportedUsers.noUsers" />
         )}
       </Box>
-      {user.length === 0 && !loading && !error && !location.state?.newCf && (
-        <AlertComponent
-          data-testid='msg-error'
-          isOpen={showEmptyAlert}
-          severity="error"
-          text={t('pages.reportedUsers.cf.noResultUser')}
-          onClose={() => setShowEmptyAlert(false)}
-        />)}
-      <AlertComponent
-        data-testid='msg-success'
-        severity="success"
-        text={t(successAlertMap[success.variant])}
-        isOpen={success.isOpen}
-        onClose={() => setSuccess(prev => ({ ...prev, isOpen: false}))}
-      />
     </>
   );
 };
