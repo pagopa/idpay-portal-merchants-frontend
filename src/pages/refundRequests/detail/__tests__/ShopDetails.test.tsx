@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { useSelector } from 'react-redux';
 
 let mockLocationState: any;
 const mockGoBack = jest.fn();
@@ -15,6 +16,10 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
+}));
+
+jest.mock('react-redux', () => ({
+  useSelector: jest.fn(),
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend', () => ({
@@ -129,7 +134,7 @@ describe('ShopDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
-
+    const mockedUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
     mockLocationState = {
       state: {
         store: storeMock,
@@ -138,6 +143,9 @@ describe('ShopDetails', () => {
 
     mockedStorageRead.mockReturnValue('fake-jwt');
     mockedParseJwt.mockReturnValue({ merchant_id: 'MERCHANT-123' } as any);
+    mockedUseSelector.mockReturnValue([
+      { initiativeId: 'INITIATIVE-123', initiativeName: 'Test Initiative' }
+    ]);
     mockedGetMerchantPointOfSales.mockResolvedValue({
       content: [
         {
