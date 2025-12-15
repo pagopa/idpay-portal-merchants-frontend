@@ -18,7 +18,7 @@ import {
   downloadInvoiceFile,
   getMerchantTransactionsProcessed,
 } from '../../services/merchantService';
-import { TYPE_TEXT } from '../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
@@ -41,9 +41,9 @@ const infoStyles = {
 };
 
 const renderCellWithTooltip = (value: string | JSX.Element) => (
-  <Tooltip title={value} placement="top" arrow={true}>
+  <Tooltip title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}>
     <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-      {value && value !== '' ? value : '-'}
+      {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
     </Typography>
   </Tooltip>
 );
@@ -74,6 +74,7 @@ const InvoiceDataTable = ({
   ]);
   const { id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -103,8 +104,9 @@ const InvoiceDataTable = ({
   };
 
   const downloadFile = async (selectedTransaction: any) => {
-    setLoading(true);
     try {
+      setIsDownloading(true);
+
       const response = await downloadInvoiceFile(
         selectedTransaction?.id,
         selectedTransaction?.pointOfSaleId
@@ -143,7 +145,6 @@ const InvoiceDataTable = ({
         }, 100);
       }
 
-      setLoading(false);
     } catch (error) {
       setAlert({
         title: 'Errore download file',
@@ -151,7 +152,8 @@ const InvoiceDataTable = ({
         isOpen: true,
         severity: 'error'
       });
-      setLoading(false);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -207,9 +209,7 @@ const InvoiceDataTable = ({
       disableColumnMenu: true,
       renderCell: (params: any) => (
         <Tooltip
-          title={params.value ? params.value : '-'}
-          placement="top"
-          arrow
+          title={params.value && params.value !== '' ? params.value : MISSING_DATA_PLACEHOLDER}
         >
           <Typography
             color="primary"
@@ -222,7 +222,7 @@ const InvoiceDataTable = ({
             className="ShowDots"
             onClick={() => downloadFile(params.row)}
           >
-            {params.value && params.value !== '' ? params.value : '-'}
+            {params.value && params.value !== '' ? params.value : MISSING_DATA_PLACEHOLDER}
           </Typography>
         </Tooltip>
       ),
@@ -233,7 +233,7 @@ const InvoiceDataTable = ({
       flex: 2,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || '-'),
+      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || MISSING_DATA_PLACEHOLDER),
     },
     {
       field: 'additionalProperties.productName',
@@ -242,7 +242,7 @@ const InvoiceDataTable = ({
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
-        renderCellWithTooltip(params.row.additionalProperties?.productName || '-'),
+        renderCellWithTooltip(params.row.additionalProperties?.productName || MISSING_DATA_PLACEHOLDER),
     },
     {
       field: 'trxChargeDate',
@@ -308,7 +308,9 @@ const InvoiceDataTable = ({
   }));
 
   return (
-    <Box sx={{ my: 2 }}>
+    <Box
+      sx={{ my: 2,  position: 'relative'}}
+    >
       <Stack
         direction={{ xs: 'column', md: 'row' }}
         spacing={{ xs: 2, md: 3 }}
@@ -322,7 +324,9 @@ const InvoiceDataTable = ({
           <CircularProgress />
         </Box>
       ) : (
-        <Box sx={{ height: 'auto', width: '100%' }}>
+        <Box
+          sx={{ height: 'auto', width: '100%' }}
+        >
           <DataTable
             rows={tableRows}
             columns={columns}
@@ -339,6 +343,17 @@ const InvoiceDataTable = ({
             onRowsPerPageChange={handleRowsPerPageChange}
           />
         </Box>
+      )}
+      {isDownloading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.4)',
+            zIndex: (theme) => theme.zIndex.modal + 1,
+            pointerEvents: 'all',
+          }}
+        />
       )}
       {!loading && transactions.content.length === 0 && (
         <Paper
