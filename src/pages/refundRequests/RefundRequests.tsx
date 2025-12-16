@@ -223,7 +223,11 @@ const RefundRequests = () => {
                 console.error('Missing initiativeId or batchId');
                 return;
             }
-            await sendRewardBatch(initiativeId, batchId.toString());
+            const result = await sendRewardBatch(initiativeId, batchId.toString()) as any;
+            if(('code' in result ) && (result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT')){
+              setAlert({title: t('errors.genericTitle'), text: t('errors.sendTheBatchForPreviousMonth'), isOpen: true, severity: 'error'});
+              return;
+            }
             setTimeout(() => {
                 setAlert({text: t('pages.refundRequests.rewardBatchSentSuccess'), isOpen: true, severity: 'success'});
             }, 1000);
