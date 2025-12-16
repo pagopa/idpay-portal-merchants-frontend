@@ -245,7 +245,7 @@ const ShopDetails: React.FC = () => {
               >
                 {stores.map((store) => (
                   <MenuItem key={store.id} value={store.id}>
-                    <Tooltip title={store?.franchiseName || MISSING_DATA_PLACEHOLDER} placement="top">
+                    <Tooltip title={store?.franchiseName || MISSING_DATA_PLACEHOLDER}>
                       <span>{truncateString(store?.franchiseName || MISSING_DATA_PLACEHOLDER, 40)}</span>
                     </Tooltip>
                   </MenuItem>
