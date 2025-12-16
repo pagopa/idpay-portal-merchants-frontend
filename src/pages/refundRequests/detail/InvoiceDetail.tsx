@@ -74,6 +74,7 @@ export default function InvoiceDetail({ title, itemValues, listItem }: Props) {
           position: 'fixed',
           bottom: '20px',
           right: '20px',
+          zIndex: '1300'
         },
         contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
