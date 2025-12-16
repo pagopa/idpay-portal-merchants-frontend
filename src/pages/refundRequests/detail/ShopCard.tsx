@@ -137,7 +137,7 @@ export const ShopCard = ({
               >
                 <Typography
                   variant="body1"
-                  sx={boldStyle}
+                  sx={{ ...boldStyle, height: "fit-content"}}
                 >
                   {item.value?.trim() === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
                 </Typography>
@@ -169,7 +169,7 @@ export const ShopCard = ({
                   >
                       <Typography
                         variant="body1"
-                        sx={{ ...boldStyle, marginTop: item.marginTop}}
+                        sx={{ ...boldStyle, marginTop: item.marginTop, height: "fit-content"}}
                       >
                         {item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
                       </Typography>
