@@ -800,7 +800,81 @@ paths:
               example:
                 code: REWARD_BATCH_GENERIC_ERROR
                 message: Application error
-
+  /initiatives/{initiativeId}/reward-batches/{rewardBatchId}/transactions/{transactionId}/postpone:
+    post:
+      tags:
+        - reward-batches
+      summary: "ENG: Postpone a transaction to the next reward batch - IT: Sposta una transazione al lotto successivo"
+      operationId: postponeTransaction
+      parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
+        - name: rewardBatchId
+          in: path
+          description: The reward batch ID
+          required: true
+          schema:
+            type: string
+            maxLength: 64
+        - name: transactionId
+          in: path
+          description: The transaction ID
+          required: true
+          schema:
+            type: string
+        - name: initiativeEndDate
+          in: query
+          description: Initiative end date (ISO format yyyy-MM-dd)
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2026-01-01"
+      responses:
+        "204":
+          description: No content, transaction postponed successfully
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_INVALID_REQUEST
+                message: Something went wrong handling the request
+        "401":
+          description: Authentication failed
+        "404":
+          description: The requested resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_NOT_FOUND
+                message: "Cannot find Reward Batch with initiative with id [%s]"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_TOO_MANY_REQUESTS
+                message: Too many requests
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardBatchErrorDTO"
+              example:
+                code: REWARD_BATCH_GENERIC_ERROR
+                message: Application error
   /transactions:
     post:
       tags:
@@ -2682,7 +2756,7 @@ components:
     DownloadRewardBatchResponseDTO:
       type: object
       properties:
-        approvedBatchUrl:
+        invoiceUrl:
           type: string
           maxLength: 10000
           description: "ENG: URL to download the approved batch file - IT: URL per scaricare il file del lotto approvato"
@@ -2703,17 +2777,22 @@ components:
             - REWARD_BATCH_TOO_MANY_REQUESTS
             - REWARD_BATCH_GENERIC_ERROR
             - REWARD_BATCH_INVALID_MERCHANT
+            - REWARD_BATCH_PREVIOUS_NOT_SENT
+            - REWARD_BATCH_TRANSACTION_POSTPONE_LIMIT_EXCEEDED
           description: |-
             "ENG: Error code: REWARD_BATCH_NOT_FOUND: Reward Batch not found,
              REWARD_BATCH_INVALID_REQUEST: Something went wrong handling request,
              REWARD_BATCH_TOO_MANY_REQUESTS: Too many requests,
-             REWARD_BATCH_INVALID_MERCHANT: The merchant is not associated with the reward batch - IT: Codice di errore:
+             REWARD_BATCH_TRANSACTION_POSTPONE_LIMIT_EXCEEDED: Transaction can be postponed only until the end of the month following the initiative end date,
+             REWARD_BATCH_INVALID_MERCHANT: The merchant is not associated with the reward batch,
              REWARD_BATCH_GENERIC_ERROR: Application Error - IT: Codice di errore:
              REWARD_BATCH_NOT_FOUND: lotto non trovato,
              REWARD_BATCH_INVALID_REQUEST: Qualcosa è andato storto durante l'invio della richiesta,
              REWARD_BATCH_TOO_MANY_REQUESTS: Troppe richieste,
-             REWARD_BATCH_INVALID_MERCHANT: Il merchant non è associato al lotto"
-             REWARD_BATCH_GENERIC_ERROR: Errore generico"
+             REWARD_BATCH_INVALID_MERCHANT: Il merchant non è associato al lotto,
+             REWARD_BATCH_PREVIOUS_NOT_SENT: I lotti precedenti non sono stati ancora inviati,
+             REWARD_BATCH_TRANSACTION_POSTPONE_LIMIT_EXCEEDED: La transazione può essere posticipata solo fino alla fine del mese successivo alla data di fine dell'iniziativa,
+             REWARD_BATCH_GENERIC_ERROR: Errore generico
         message:
           type: string
           description: "ENG: Error message - IT: Messaggio di errore"
