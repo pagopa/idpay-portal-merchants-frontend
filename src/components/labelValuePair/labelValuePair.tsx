@@ -47,7 +47,7 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, isLink }) => (
             wordBreak: 'break-word'
           }}
         >
-          <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value} placement="top">
+          <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}>
             <Link
               fontWeight={theme.typography.fontWeightMedium}
               href={`${value}`}

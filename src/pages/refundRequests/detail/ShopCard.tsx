@@ -134,7 +134,6 @@ export const ShopCard = ({
               </Box>
               <Tooltip
                 title={item?.value?.trim() === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
-                placement="top"
               >
                 <Typography
                   variant="body1"
@@ -167,7 +166,6 @@ export const ShopCard = ({
                 !item?.isStatus ?
                   <Tooltip
                     title={item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
-                    placement="top"
                   >
                       <Typography
                         variant="body1"
