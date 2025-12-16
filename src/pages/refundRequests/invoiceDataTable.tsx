@@ -41,7 +41,7 @@ const infoStyles = {
 };
 
 const renderCellWithTooltip = (value: string | JSX.Element) => (
-  <Tooltip title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER} placement="top">
+  <Tooltip title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}>
     <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
       {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
     </Typography>
@@ -210,7 +210,6 @@ const InvoiceDataTable = ({
       renderCell: (params: any) => (
         <Tooltip
           title={params.value && params.value !== '' ? params.value : MISSING_DATA_PLACEHOLDER}
-          placement="top"
         >
           <Typography
             color="primary"

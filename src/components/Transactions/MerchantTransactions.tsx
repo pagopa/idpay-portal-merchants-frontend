@@ -239,7 +239,6 @@ const MerchantTransactions = ({
   const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
     <Tooltip
       title={value && value.length >= tooltipThreshold ? value : ''}
-      placement="top"
     >
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
         {value && value !== '' ? value : '-'}

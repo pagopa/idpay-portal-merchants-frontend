@@ -150,7 +150,6 @@ const RefundRequests = () => {
   const renderCellWithTooltip = (value: string) => (
     <Tooltip
       title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
-      placement="top"
     >
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
         {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
