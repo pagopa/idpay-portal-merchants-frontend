@@ -59,7 +59,8 @@
     "tcSave": "Non siamo riusciti a salvare l'accettazione dei Termini e condizioni d’uso. Riprova",
     "validationDescription": "Verifica che i dati inseriti siano corretti",
     "pointOfSaleError": "Errore punto vendita",
-    "duplicateEmailError": "Errore email referente"
+    "duplicateEmailError": "Errore email referente",
+    "sendTheBatchForPreviousMonth": "Inviare prima i lotti relativi ai mesi precedenti"
   },
   "pages": {
     "acceptNewDiscount": {
