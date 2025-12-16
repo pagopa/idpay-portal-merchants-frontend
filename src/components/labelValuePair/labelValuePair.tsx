@@ -22,8 +22,8 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, isLink }) => (
     </Grid>
     {!isLink ?
       <Grid item xs={7}>
-        <Box mb={1}>
-          <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}>
+        <Box display='flex' mb={1}>
+          <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value} placement="top">
             <Typography
               fontWeight={theme.typography.fontWeightMedium}
               variant="body2"
@@ -47,7 +47,7 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, isLink }) => (
             wordBreak: 'break-word'
           }}
         >
-          <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}>
+          <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value} placement="top">
             <Link
               fontWeight={theme.typography.fontWeightMedium}
               href={`${value}`}
