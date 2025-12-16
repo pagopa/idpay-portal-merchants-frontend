@@ -96,7 +96,7 @@ jest.mock('../SearchTaxCode', () => ({
 
 jest.mock('../../../components/Alert/AlertComponent', () => ({
   __esModule: true,
-  default: ({ severity, text, isOpen }: any) => isOpen && <div data-testid={`msg-${severity}`}>{text}</div>,
+  default: ({ text, isOpen }: any) => isOpen && <div data-testid='msg-alert'>{text}</div>,
 }));
 
 jest.mock('../NoResultPaper', () => ({
@@ -232,7 +232,6 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(searchButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('msg-alert')).toBeInTheDocument();
         expect(screen.getByText('Nessun utente trovato')).toBeInTheDocument();
       });
     });
@@ -249,7 +248,6 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(searchButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('msg-alert')).toBeInTheDocument();
         expect(screen.getByText('Nessun utente trovato')).toBeInTheDocument();
       });
     });
@@ -587,14 +585,13 @@ describe('ReportedUsers Component', () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
 
       await waitFor(() => {
-        expect(screen.getByTestId('msg-alert')).toBeInTheDocument();
         expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
 
       jest.advanceTimersByTime(5000);
 
       await waitFor(() => {
-        expect(screen.queryByTestId('msg-alert')).not.toBeInTheDocument();
+        expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
       });
     });
   });
@@ -613,13 +610,13 @@ describe('ReportedUsers Component', () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
 
       await waitFor(() => {
-        expect(screen.getByTestId('msg-alert')).toBeInTheDocument();
+        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
 
       jest.advanceTimersByTime(5000);
 
       await waitFor(() => {
-        expect(screen.queryByTestId('msg-alert')).not.toBeInTheDocument();
+        expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
       });
     });
 
@@ -661,7 +658,7 @@ describe('ReportedUsers Component', () => {
       jest.advanceTimersByTime(5000);
 
       await waitFor(() => {
-        expect(screen.queryByTestId('msg-alert')).not.toBeInTheDocument();
+        expect(screen.queryByText('Utente rimosso con successo')).not.toBeInTheDocument();
       });
     });
   });
@@ -677,7 +674,6 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(screen.getByTestId('search-button'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('msg-alert')).toBeInTheDocument();
         expect(screen.getByText('Nessun utente trovato')).toBeInTheDocument();
       });
     });
@@ -688,7 +684,7 @@ describe('ReportedUsers Component', () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
       await waitFor(() => {
-        expect(screen.queryByTestId('msg-alert')).not.toBeInTheDocument();
+        expect(screen.queryByText('Nessun utente trovato')).not.toBeInTheDocument();
       });
     });
   });

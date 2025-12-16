@@ -25,7 +25,7 @@ const severityMap = {
 
 const AlertsCmp = (alertList: Array<AlertProps>) => alertList.map(({title, text, isOpen, severity, onClose}, index) => <Slide key={`${title}-${index}`} direction="left" in={isOpen} mountOnEnter unmountOnExit>
             <Alert
-                onClose={() => onClose && onClose()}
+                onClose={onClose}
                 data-testid="alert"
                 severity={severity}
                 icon={severity && severityMap[severity].icon}
