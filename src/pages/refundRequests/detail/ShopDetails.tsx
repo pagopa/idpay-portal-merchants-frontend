@@ -79,7 +79,6 @@ const ShopDetails: React.FC = () => {
         const match = response.content.find((e: any) => e.id === staticStore.id);
         setStore(match);
       }
-      console.log(response);
     } catch (error: any) {
       setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
     }
