@@ -35,6 +35,7 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
   const [invoiceTransactionModal, setInvoiceTransactionModal] = useState(false);
   const location = useLocation<{ store: any}>();
   const batchMonth = location.state?.store?.month;
+  const statusBatch = location.state?.store?.status;
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
 
@@ -281,9 +282,7 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
             </Box>
           </Grid>
         )}
-        { RewardBatchTrxStatusEnum.CONSULTABLE.includes(
-          itemValues.rewardBatchTrxStatus
-        ) && (
+        { statusBatch === 'CREATED' && (
           <Grid item xs={12}>
             <Box
               mt={1}
