@@ -125,7 +125,7 @@ export const ShopCard = ({
 
   return (
     <Paper sx={{ p: 3 }}>
-      <Grid container width="100%" spacing={2}>
+      <Grid container width="100%" spacing={2} >
         <Grid item xs={6}>
           {detailsSx.map((item, index) => (
             <Box key={index} sx={{ display: 'flex' }}>
@@ -137,8 +137,7 @@ export const ShopCard = ({
               >
                 <Typography
                   variant="body1"
-                  sx={boldStyle}
-                  minWidth="100%"
+                  sx={{ ...boldStyle, height: "fit-content"}}
                 >
                   {item.value?.trim() === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
                 </Typography>
@@ -168,21 +167,12 @@ export const ShopCard = ({
                   <Tooltip
                     title={item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
                   >
-                    <Box
-                      sx={{
-                        minWidth: item.minWidth,
-                        marginBottom: item.marginBottom,
-                        marginTop: item.marginTop,
-                      }}
-                    >
                       <Typography
                         variant="body1"
-                        sx={boldStyle}
-                        minWidth="100%"
+                        sx={{ ...boldStyle, marginTop: item.marginTop, height: "fit-content"}}
                       >
                         {item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
                       </Typography>
-                    </Box>
                   </Tooltip> :
                   <Box
                     sx={{

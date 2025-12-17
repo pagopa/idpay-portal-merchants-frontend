@@ -234,15 +234,35 @@ export const MerchantApi = {
     }
   },
 
+  getAllRewardBatches: async (
+    initiativeId: string
+  ): Promise<RewardBatchListDTO> => {
+    try {
+      const result = await apiClient.getRewardBatches({
+        initiativeId,
+        size: 1000
+      });
+
+      return extractResponse(result, 200, onRedirectToLogin);
+    } catch (error) {
+      logApiError(error, "userPermission");
+      return {} as RewardBatchListDTO;
+    }
+  },
 
   sendRewardBatches: async (
     initiativeId: string,
     batchId: string
-  ): Promise<void> => {
+  ): Promise<any> => {
     const result = await apiClient.sendRewardBatches({
       initiativeId,
       batchId
     });
+    if(('left' in result) && (result?.left[0]?.value === 'REWARD_BATCH_PREVIOUS_NOT_SENT')){
+      return {
+        code: 'REWARD_BATCH_PREVIOUS_NOT_SENT'
+      };
+    }
 
     return extractResponse(result, 204, onRedirectToLogin);
   },

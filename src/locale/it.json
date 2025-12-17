@@ -59,7 +59,8 @@
     "tcSave": "Non siamo riusciti a salvare l'accettazione dei Termini e condizioni d’uso. Riprova",
     "validationDescription": "Verifica che i dati inseriti siano corretti",
     "pointOfSaleError": "Errore punto vendita",
-    "duplicateEmailError": "Errore email referente"
+    "duplicateEmailError": "Errore email referente",
+    "sendTheBatchForPreviousMonth": "Inviare prima i lotti relativi ai mesi precedenti"
   },
   "pages": {
     "acceptNewDiscount": {
@@ -355,7 +356,10 @@
         "approvedRefund" : "Rimborso approvato",
         "exportCSV" : "Esporta csv",
         "detailCardTitleDx" : "dati rimborso",
-        "posType": "Tipo"
+        "posType": "Tipo",
+        "csv" : {
+          "alert": "Stiamo elaborando il lotto. Quando sarà pronto, potrai esportare il file .csv"
+        }
       }
     }
   },

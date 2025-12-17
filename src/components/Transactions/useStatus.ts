@@ -23,6 +23,8 @@ const getStatus: any = (status: string) => {
             return { color: '#EEEEEE', textColor: '#17324D !important', label: 'Preso in carico' };
         case 'APPROVED':
             return { color: '#E1F4E1', textColor: '#224021', label: 'Rimborso approvato' };
+        case 'APPROVING':
+            return { color: '#E1F4E1', textColor: '#E1F5FE', label: 'In approvazione' };
         case 'SENT':
             return { color: '#EEEEEE', textColor: '#224021', label: 'Inviato' };
         default:

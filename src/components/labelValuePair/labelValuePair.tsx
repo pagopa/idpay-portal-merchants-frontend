@@ -22,7 +22,7 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, isLink }) => (
     </Grid>
     {!isLink ?
       <Grid item xs={7}>
-        <Box mb={1}>
+        <Box display='flex' mb={1}>
           <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}>
             <Typography
               fontWeight={theme.typography.fontWeightMedium}
