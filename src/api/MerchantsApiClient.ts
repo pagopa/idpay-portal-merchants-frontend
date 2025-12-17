@@ -260,7 +260,7 @@ export const MerchantApi = {
       batchId
     });
 
-    if(result.right.value.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
+    if(result?.right?.value?.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
       return result.right.value.code;
     }
 
