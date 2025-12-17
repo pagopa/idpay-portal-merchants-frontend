@@ -1,25 +1,98 @@
 import { Box, Grid, Typography, Button, CircularProgress } from '@mui/material';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState} from 'react';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
-import { downloadInvoiceFile } from '../../../services/merchantService';
+import { useTranslation } from 'react-i18next';
+import {  useLocation } from 'react-router-dom';
+import { downloadInvoiceFile,postponeTransaction } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-import { formatValues, currencyFormatter } from '../../../utils/formatUtils';
+import { formatValues, currencyFormatter,getEndOfNextMonth} from '../../../utils/formatUtils';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 import { useAlert } from '../../../hooks/useAlert';
+import ModalComponent from '../../../components/modal/ModalComponent';
+import { intiativesListSelector} from '../../../redux/slices/initiativesSlice';
+import { useAppSelector } from '../../../redux/hooks';
+
 
 type Props = {
   title?: string;
   itemValues: any;
   listItem: Array<any>;
+  batchId: string ;
   storeId: string;
   children?: ReactNode;
+  onCloseDrawer?: () => void;
+  onSuccess?: () => void;
 };
 
-export default function InvoiceDetail({ title, itemValues, listItem }: Props) {
+export default function InvoiceDetail({ title, itemValues, listItem ,batchId, onCloseDrawer, onSuccess}: Props) {
   const { setAlert } = useAlert();
   const [isLoading, setLoading] = useState(false);
+  const [initiativeEndDate, setInitiativeEndDate] = useState<string>('');
+  const [nextMonthInitiativeEndDate, setNextMonthInitiativeEndDate] = useState<Date | undefined>();
+  const [initiativeId, setInitiativeId] = useState<string >('');
+  const [invoiceTransactionModal, setInvoiceTransactionModal] = useState(false);
+  const location = useLocation<{ store: any}>();
+  const batchMonth = location.state?.store?.month;
+  const statusBatch = location.state?.store?.status;
+  const { t } = useTranslation();
+  const initiativesListSel = useAppSelector(intiativesListSelector);
+
+  useEffect(() => {
+    if (initiativesListSel?.[0]?.endDate && initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]) {
+      const endOfNextMonth = getEndOfNextMonth(initiativesListSel?.[0]?.endDate);
+      setNextMonthInitiativeEndDate(endOfNextMonth);
+      setInitiativeEndDate(initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]);
+    }
+    if (initiativesListSel?.[0]?.initiativeId) {
+      setInitiativeId(initiativesListSel?.[0]?.initiativeId);
+    }
+  }, [initiativesListSel]);
+
+  const endOfNextBatchMonth = batchMonth
+    ? getEndOfNextMonth(batchMonth)
+    : undefined;
+
+  const isNextMonthDisabled =
+    !endOfNextBatchMonth || !nextMonthInitiativeEndDate
+      ? true
+      : endOfNextBatchMonth > nextMonthInitiativeEndDate;
+
+  const handlePostponeTransaction = async () => {
+    if (!initiativeEndDate) {return;}
+
+    setLoading(true);
+    try {
+      await postponeTransaction(
+        initiativeId,
+        batchId ?? '',
+        itemValues.id,
+        initiativeEndDate
+      );
+      setAlert({
+        title: 'Successo',
+        text: 'Transazione spostata al mese successivo',
+        isOpen: true,
+        severity: 'success',
+      });
+      setInvoiceTransactionModal(false);
+      onCloseDrawer?.();
+      onSuccess?.();
+    } catch (error) {
+      setAlert({
+        title: 'Errore',
+        text: 'Non è stato possibile spostare la transazione',
+        isOpen: true,
+        severity: 'error',
+      });
+      setInvoiceTransactionModal(false);
+      onCloseDrawer?.();
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const handleDownloadFile = async (selectedTransaction: any) => {
     setLoading(true);
@@ -208,7 +281,48 @@ export default function InvoiceDetail({ title, itemValues, listItem }: Props) {
             </Box>
           </Grid>
         )}
+        { statusBatch === 'CREATED' && (
+          <Grid item xs={12}>
+            <Box
+              mt={1}
+              sx={{
+                bottom: 0,
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '1.5rem',
+              }}
+            >
+              <Button
+                data-testid='next-month-btn'
+                onClick={() => setInvoiceTransactionModal(true)}
+                disabled={isNextMonthDisabled}
+                variant={'contained'}>
+                {'Sposta al mese successivo'}
+              </Button>
+            </Box>
+          </Grid>
+        )}
+        <ModalComponent data-testid="modal-component" open={invoiceTransactionModal} onClose={() => setInvoiceTransactionModal(false)}>
+          <Box display={'flex'} flexDirection={'column'} gap={2}>
+            <Typography variant="h6">{t('pages.refundRequests.invoiceDetailConfirmModal.title')}</Typography>
+            <Typography variant="body1">{t('pages.refundRequests.invoiceDetailConfirmModal.description')}</Typography>
+          </Box>
+          <Box display={'flex'} justifyContent={'flex-end'} gap={2} mt={4}>
+            <Button variant="outlined" onClick={() => {
+              setInvoiceTransactionModal(false);
+            }}>
+              Indietro
+            </Button>
+            <Button
+              onClick={handlePostponeTransaction}
+              variant="contained">
+              {'Conferma'}
+            </Button>
+          </Box>
+        </ModalComponent>
       </Grid>
     </Box>
+
   );
 }
