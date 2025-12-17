@@ -659,6 +659,7 @@ paths:
               - CREATED
               - SENT
               - EVALUATING
+              - APPROVING
               - APPROVED
         - name: assigneeLevel
           in: query
@@ -2690,6 +2691,7 @@ components:
             - CREATED
             - SENT
             - EVALUATING
+            - APPROVING
             - APPROVED
         partial:
           type: boolean
@@ -2783,6 +2785,7 @@ components:
             "ENG: Error code: REWARD_BATCH_NOT_FOUND: Reward Batch not found,
              REWARD_BATCH_INVALID_REQUEST: Something went wrong handling request,
              REWARD_BATCH_TOO_MANY_REQUESTS: Too many requests,
+             REWARD_BATCH_PREVIOUS_NOT_SENT: Previous batches have not yet been sent,
              REWARD_BATCH_TRANSACTION_POSTPONE_LIMIT_EXCEEDED: Transaction can be postponed only until the end of the month following the initiative end date,
              REWARD_BATCH_INVALID_MERCHANT: The merchant is not associated with the reward batch,
              REWARD_BATCH_GENERIC_ERROR: Application Error - IT: Codice di errore:
