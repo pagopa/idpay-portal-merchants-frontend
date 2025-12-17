@@ -9,7 +9,7 @@ import {
   MenuItem,
   Select,
   Button, Tooltip,
-  CircularProgress,
+  CircularProgress, Alert,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -20,6 +20,7 @@ import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { useSelector } from 'react-redux';
+import { Sync } from '@mui/icons-material';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
@@ -227,6 +228,10 @@ const ShopDetails: React.FC = () => {
           </Button>
         </Box>
       </Box>
+
+      {store?.status === 'APPROVING' &&
+        <Alert sx={{ mb: 3 }} variant="outlined" color="info" icon={<Sync sx={{ color: "#6BCFFB" }} />} >{t('pages.refundRequests.storeDetails.csv.alert')}</Alert>
+      }
 
       <ShopCard
         batchName={store?.name}
