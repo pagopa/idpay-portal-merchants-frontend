@@ -46,6 +46,15 @@ describe('getStatus', () => {
     });
   });
 
+  it('should return correct configuration for APPROVING status', () => {
+    const result = getStatus('APPROVING');
+    expect(result).toEqual({
+      color: '#E1F4E1',
+      label: 'In approvazione',
+      textColor: '#E1F5FE',
+    });
+  });
+
   it('should return MISSING_DATA_PLACEHOLDER configuration for an unknown status (default case)', () => {
     const result = getStatus('UNKNOWN_STATUS');
     expect(result).toEqual({
