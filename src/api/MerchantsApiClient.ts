@@ -254,14 +254,14 @@ export const MerchantApi = {
     initiativeId: string,
     batchId: string
   ): Promise<any> => {
-    const result = await apiClient.sendRewardBatches({
+
+    const result: any = await apiClient.sendRewardBatches({
       initiativeId,
       batchId
     });
-    if(('left' in result) && (result?.left[0]?.value === 'REWARD_BATCH_PREVIOUS_NOT_SENT')){
-      return {
-        code: 'REWARD_BATCH_PREVIOUS_NOT_SENT'
-      };
+
+    if(result.right.value.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
+      return result.right.value.code;
     }
 
     return extractResponse(result, 204, onRedirectToLogin);
