@@ -121,6 +121,11 @@ export const getRewardBatches = (
 ): Promise<RewardBatchListDTO> =>
   MerchantApi.getRewardBatches(initiativeId);
 
+export const getAllRewardBatches = (
+  initiativeId: string
+): Promise<RewardBatchListDTO> =>
+  MerchantApi.getAllRewardBatches(initiativeId);
+
 export const sendRewardBatch = (
   initiativeId: string,
   batchId: string

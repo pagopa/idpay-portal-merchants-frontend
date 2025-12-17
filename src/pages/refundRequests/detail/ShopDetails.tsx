@@ -9,7 +9,7 @@ import {
   MenuItem,
   Select,
   Button, Tooltip,
-  CircularProgress,
+  CircularProgress, Alert,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -20,6 +20,7 @@ import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { useSelector } from 'react-redux';
+import { Sync } from '@mui/icons-material';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
@@ -27,11 +28,12 @@ import InvoiceDataTable from '../invoiceDataTable';
 import { formatDate, formattedCurrency, truncateString } from '../../../helpers';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 import { parseJwt } from '../../../utils/jwt-utils';
-import { downloadBatchCsv, getMerchantPointOfSales } from '../../../services/merchantService';
+import { downloadBatchCsv, getAllRewardBatches, getMerchantPointOfSales } from '../../../services/merchantService';
 import { PointOfSaleDTO } from '../../../api/generated/merchants/PointOfSaleDTO';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
 import { useAlert } from '../../../hooks/useAlert';
+import { RewardBatchDTO } from '../../../api/generated/merchants/RewardBatchDTO';
 import { ShopCard } from './ShopCard';
 
 const PAGINATION_SIZE = 200;
@@ -41,7 +43,8 @@ const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation<{ store: any; batchId?: string }>();
-  const store = location.state?.store;
+  const staticStore = location.state?.store;
+  const [store, setStore] = useState({} as RewardBatchDTO);
   const batchId = location.state?.batchId;
   const history = useHistory();
 
@@ -67,6 +70,24 @@ const ShopDetails: React.FC = () => {
       setSelectedPointOfSaleId(formik.values.pointOfSaleId);
     },
   });
+
+  const fetchAll = async () => {
+    try {
+      let response : any;
+      if (initiativesList){
+        response = await getAllRewardBatches(initiativesList[0].initiativeId!);
+
+        const match = response.content.find((e: any) => e.id === staticStore.id);
+        setStore(match);
+      }
+    } catch (error: any) {
+      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+    }
+  };
+
+  useEffect(() => {
+    void fetchAll();
+  }, [initiativesList, batchId, selectedStatus, selectedPointOfSaleId]);
 
   const fetchStores = async (filters: any, fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
@@ -208,14 +229,18 @@ const ShopDetails: React.FC = () => {
         </Box>
       </Box>
 
+      {store?.status === 'APPROVING' &&
+        <Alert sx={{ mb: 3 }} variant="outlined" color="info" icon={<Sync sx={{ color: "#6BCFFB" }} />} >{t('pages.refundRequests.storeDetails.csv.alert')}</Alert>
+      }
+
       <ShopCard
         batchName={store?.name}
         dateRange={`${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`}
-        companyName={store?.businessName}
+        companyName={store?.businessName || ''}
         refundAmount={formattedCurrency(store?.initialAmountCents, '-', true)}
-        status={store?.status}
+        status={store?.status || ''}
         approvedRefund={formattedCurrency(store?.approvedAmountCents, '-', true)}
-        posType={store?.posType}
+        posType={store?.posType || ''}
       />
 
       <Box

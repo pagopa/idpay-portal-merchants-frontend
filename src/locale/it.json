@@ -356,7 +356,10 @@
         "approvedRefund" : "Rimborso approvato",
         "exportCSV" : "Esporta csv",
         "detailCardTitleDx" : "dati rimborso",
-        "posType": "Tipo"
+        "posType": "Tipo",
+        "csv" : {
+          "alert": "Stiamo elaborando il lotto. Quando sarà pronto, potrai esportare il file .csv"
+        }
       },
       "invoiceDetailConfirmModal" : {
         "title": "Conferma spostamento",
