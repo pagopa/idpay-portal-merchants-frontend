@@ -39,7 +39,6 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
 
-
   useEffect(() => {
     if (initiativesListSel?.[0]?.endDate && initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]) {
       const endOfNextMonth = getEndOfNextMonth(initiativesListSel?.[0]?.endDate);
@@ -295,6 +294,7 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
               }}
             >
               <Button
+                data-testid='next-month-btn'
                 onClick={() => setInvoiceTransactionModal(true)}
                 disabled={isNextMonthDisabled}
                 variant={'contained'}>
@@ -303,7 +303,7 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
             </Box>
           </Grid>
         )}
-        <ModalComponent open={invoiceTransactionModal} onClose={() => setInvoiceTransactionModal(false)}>
+        <ModalComponent data-testid="modal-component" open={invoiceTransactionModal} onClose={() => setInvoiceTransactionModal(false)}>
           <Box display={'flex'} flexDirection={'column'} gap={2}>
             <Typography variant="h6">{t('pages.refundRequests.invoiceDetailConfirmModal.title')}</Typography>
             <Typography variant="body1">{t('pages.refundRequests.invoiceDetailConfirmModal.description')}</Typography>
