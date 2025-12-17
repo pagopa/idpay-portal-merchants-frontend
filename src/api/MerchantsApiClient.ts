@@ -234,6 +234,21 @@ export const MerchantApi = {
     }
   },
 
+  getAllRewardBatches: async (
+    initiativeId: string
+  ): Promise<RewardBatchListDTO> => {
+    try {
+      const result = await apiClient.getRewardBatches({
+        initiativeId,
+        size: 1000
+      });
+
+      return extractResponse(result, 200, onRedirectToLogin);
+    } catch (error) {
+      logApiError(error, "userPermission");
+      return {} as RewardBatchListDTO;
+    }
+  },
 
   sendRewardBatches: async (
     initiativeId: string,
