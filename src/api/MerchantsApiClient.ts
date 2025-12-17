@@ -252,6 +252,23 @@ export const MerchantApi = {
     return extractResponse(result, 204, onRedirectToLogin);
   },
 
+  postponeTransaction: async (
+    initiativeId: string,
+    rewardBatchId: string,
+    transactionId: string,
+    initiativeEndDate: string
+  ): Promise<void> => {
+    const result = await apiClient.postponeTransaction({
+      initiativeId,
+      rewardBatchId,
+      transactionId,
+      initiativeEndDate
+    });
+    return extractResponse(result, 204, onRedirectToLogin);
+  },
+
+
+
   downloadBatchCsv: async (
     initiativeId: string,
     rewardBatchId: string

@@ -357,6 +357,10 @@
         "exportCSV" : "Esporta csv",
         "detailCardTitleDx" : "dati rimborso",
         "posType": "Tipo"
+      },
+      "invoiceDetailConfirmModal" : {
+        "title": "Conferma spostamento",
+        "description": "Confermi di voler spostare la transazione al mese successivo?"
       }
     }
   },
