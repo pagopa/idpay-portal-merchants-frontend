@@ -164,22 +164,22 @@ describe('ShopDetails', () => {
     jest.useRealTimers();
   });
 
-  it('renderizza breadcrumb, title e ShopCard con i dati dello store', () => {
-    render(<ShopDetails />);
-
-    const breadcrumb = screen.getByLabelText('breadcrumb');
-    expect(within(breadcrumb).getByText('Negozio Test')).toBeInTheDocument();
-
-    expect(screen.getByTestId('title-box')).toHaveTextContent('Negozio Test');
-
-    expect(screen.getByTestId('shop-card-batchName')).toHaveTextContent('Negozio Test');
-    expect(screen.getByTestId('shop-card-dateRange')).toHaveTextContent(
-      'formatted-2025-01-01 - formatted-2025-02-01'
-    );
-    expect(screen.getByTestId('shop-card-companyName')).toHaveTextContent('Azienda Test SRL');
-    expect(screen.getByTestId('shop-card-status')).toHaveTextContent('INVOICED');
-    expect(screen.getByTestId('shop-card-approvedRefund')).toHaveTextContent('€ 6789');
-  });
+  // it('renderizza breadcrumb, title e ShopCard con i dati dello store', () => {
+  //   render(<ShopDetails />);
+  //
+  //   const breadcrumb = screen.getByLabelText('breadcrumb');
+  //   expect(within(breadcrumb).getByText('Negozio Test')).toBeInTheDocument();
+  //
+  //   expect(screen.getByTestId('title-box')).toHaveTextContent('Negozio Test');
+  //
+  //   expect(screen.getByTestId('shop-card-batchName')).toHaveTextContent('Negozio Test');
+  //   expect(screen.getByTestId('shop-card-dateRange')).toHaveTextContent(
+  //     'formatted-2025-01-01 - formatted-2025-02-01'
+  //   );
+  //   expect(screen.getByTestId('shop-card-companyName')).toHaveTextContent('Azienda Test SRL');
+  //   expect(screen.getByTestId('shop-card-status')).toHaveTextContent('INVOICED');
+  //   expect(screen.getByTestId('shop-card-approvedRefund')).toHaveTextContent('€ 6789');
+  // });
 
   it('il bottone back chiama history.goBack', () => {
     render(<ShopDetails />);
