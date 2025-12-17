@@ -223,18 +223,18 @@ const RefundRequests = () => {
                 console.error('Missing initiativeId or batchId');
                 return;
             }
-            const result = await sendRewardBatch(initiativeId, batchId.toString()) as any;
-            if(('code' in result ) && (result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT')){
-              setAlert({title: t('errors.genericTitle'), text: t('errors.sendTheBatchForPreviousMonth'), isOpen: true, severity: 'error'});
-              return;
+            const sendResult = await sendRewardBatch(initiativeId, batchId.toString()) as any;
+            if(sendResult.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+              throw new Error('REWARD_BATCH_PREVIOUS_NOT_SENT');
             }
             setTimeout(() => {
                 setAlert({text: t('pages.refundRequests.rewardBatchSentSuccess'), isOpen: true, severity: 'success'});
             }, 1000);
             await fetchRewardBatches(initiativeId);
 
-        } catch (e: any) {
-            setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+        } catch (error: any) {
+            const errorMessage = error.message === 'REWARD_BATCH_PREVIOUS_NOT_SENT' ? t('errors.sendTheBatchForPreviousMonth') : t('errors.genericDescription');
+            setAlert({title: t('errors.genericTitle'), text: errorMessage, isOpen: true, severity: 'error'});
             if (initiativeId) {
                 await fetchRewardBatches(initiativeId.toString());
             }
