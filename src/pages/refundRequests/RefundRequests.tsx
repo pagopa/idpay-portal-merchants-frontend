@@ -224,7 +224,7 @@ const RefundRequests = () => {
                 return;
             }
             const sendResult = await sendRewardBatch(initiativeId, batchId.toString()) as any;
-            if(sendResult === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+            if(sendResult.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
               throw new Error('REWARD_BATCH_PREVIOUS_NOT_SENT');
             }
             setTimeout(() => {

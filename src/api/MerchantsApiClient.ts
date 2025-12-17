@@ -261,7 +261,7 @@ export const MerchantApi = {
     });
 
     if(result?.right?.value?.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
-      return result.right.value.code;
+      return extractResponse(result, 400, onRedirectToLogin);
     }
 
     return extractResponse(result, 204, onRedirectToLogin);
