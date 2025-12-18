@@ -47,7 +47,7 @@ const ShopDetails: React.FC = () => {
   const [store, setStore] = useState({} as RewardBatchDTO);
   const batchId = location.state?.batchId;
   const history = useHistory();
-
+  const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesLoading, setStoresLoading] = useState(false);
 
@@ -87,7 +87,7 @@ const ShopDetails: React.FC = () => {
 
   useEffect(() => {
     void fetchAll();
-  }, [initiativesList, batchId, selectedStatus, selectedPointOfSaleId]);
+  }, [initiativesList, batchId, selectedStatus, selectedPointOfSaleId,drawerRefreshKey]);
 
   const fetchStores = async (filters: any, fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
@@ -308,6 +308,7 @@ const ShopDetails: React.FC = () => {
         </FiltersForm>
         <InvoiceDataTable
           batchId={batchId}
+          onDrawerClosed={() => setDrawerRefreshKey(prev => prev + 1)}
           rewardBatchTrxStatus={selectedStatus}
           pointOfSaleId={selectedPointOfSaleId}
         />
