@@ -259,12 +259,11 @@ export const MerchantApi = {
       initiativeId,
       batchId
     });
-
-    if(result?.right?.value?.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
-      return extractResponse(result, 400, onRedirectToLogin);
+    if(result?.right?.status === 400 && result?.right?.value?.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
+      return "REWARD_BATCH_PREVIOUS_NOT_SENT";
     }
+      return extractResponse(result, 204, onRedirectToLogin);
 
-    return extractResponse(result, 204, onRedirectToLogin);
   },
 
   postponeTransaction: async (
