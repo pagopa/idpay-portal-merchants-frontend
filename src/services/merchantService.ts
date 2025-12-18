@@ -137,3 +137,16 @@ export const downloadBatchCsv = (
   rewardBatchId: string
 ): Promise<DownloadRewardBatchResponseDTO> =>
   MerchantApi.downloadBatchCsv(initiativeId, rewardBatchId);
+
+export const postponeTransaction = (
+  initiativeId: string,
+  rewardBatchId: string,
+  transactionId: string,
+  initiativeEndDate: string
+): Promise<void> =>
+  MerchantApi.postponeTransaction(
+    initiativeId,
+    rewardBatchId,
+    transactionId,
+    initiativeEndDate
+  );

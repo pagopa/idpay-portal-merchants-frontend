@@ -73,7 +73,7 @@ const InvoiceDataTable = ({
     { field: 'trxChargeDate', sort: 'desc' },
   ]);
   const { id } = useParams<RouteParams>();
-  const { alert, setAlert } = useAlert();
+  const { setAlert } = useAlert();
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleListButtonClick = (row: any) => {
@@ -82,7 +82,6 @@ const InvoiceDataTable = ({
   };
 
   const handleToggleDrawer = (open: boolean) => {
-    setAlert({ ...alert, isOpen: open });
     setDrawerOpened(open);
     if (!open) {
       setRowDetail(null);
@@ -157,7 +156,7 @@ const InvoiceDataTable = ({
     }
   };
 
-  useEffect(() => {
+  const loadTransactions = () => {
     setLoading(true);
 
     let sortParam: string | undefined;
@@ -190,6 +189,11 @@ const InvoiceDataTable = ({
         });
       })
       .finally(() => setLoading(false));
+  };
+
+
+  useEffect(() => {
+    loadTransactions();
   }, [
     pagination.pageNo,
     pagination.pageSize,
@@ -372,6 +376,9 @@ const InvoiceDataTable = ({
       <DetailDrawer open={drawerOpened} toggleDrawer={handleToggleDrawer}>
         {rowDetail && (
           <InvoiceDetail
+            batchId={batchId ?? ''}
+            onSuccess={loadTransactions}
+            onCloseDrawer={() => handleToggleDrawer(false)}
             title="Dettaglio transazione"
             itemValues={rowDetail}
             storeId={rowDetail?.pointOfSaleId || ''}

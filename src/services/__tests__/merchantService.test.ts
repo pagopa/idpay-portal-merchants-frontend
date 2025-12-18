@@ -16,6 +16,10 @@ import {
   getReportedUser,
   createReportedUser,
   deleteReportedUser,
+  getRewardBatches,
+  sendRewardBatch,
+  downloadBatchCsv,
+  postponeTransaction,
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
@@ -36,18 +40,14 @@ jest.mock('../../api/MerchantsApiClient', () => ({
     getReportedUser: jest.fn(),
     createReportedUser: jest.fn(),
     deleteReportedUser: jest.fn(),
+    getRewardBatches: jest.fn(),
+    sendRewardBatches: jest.fn(),
+    downloadBatchCsv: jest.fn(),
+    postponeTransaction: jest.fn(),
   },
 }));
 
 const mockedMerchantApi = MerchantApi as jest.Mocked<typeof MerchantApi>;
-
-describe('downloadInvoiceFile', () => {
-  test('should call MerchantApi.downloadInvoiceFile with correct params', async () => {
-    const params = { transactionId: 'trx-1', pointOfSaleId: 'pos-1' };
-    await downloadInvoiceFile(params.transactionId, params.pointOfSaleId);
-    expect(mockedMerchantApi.downloadInvoiceFile).toHaveBeenCalledWith(...Object.values(params));
-  });
-});
 
 describe('merchantService', () => {
   beforeEach(() => {
@@ -80,13 +80,8 @@ describe('merchantService', () => {
   describe('getMerchantTransactionsProcessed', () => {
     test('should call MerchantApi.getMerchantTransactionsProcessed with correct params', async () => {
       const params = { initiativeId: '1', page: 0, fiscalCode: 'CODE', status: 'OK' };
-      await getMerchantTransactionsProcessed(
-        params.initiativeId,
-        params.page,
-        params.fiscalCode,
-        params.status
-      );
-      expect(mockedMerchantApi.getMerchantTransactionsProcessed).toHaveBeenCalled();
+      await getMerchantTransactionsProcessed(params);
+      expect(mockedMerchantApi.getMerchantTransactionsProcessed).toHaveBeenCalledWith(params);
     });
   });
 
@@ -184,12 +179,16 @@ describe('merchantService', () => {
     });
   });
 
-  describe('merchantService reported users', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
+  describe('downloadInvoiceFile', () => {
+    test('should call MerchantApi.downloadInvoiceFile with correct params', async () => {
+      const params = { transactionId: 'trx-1', pointOfSaleId: 'pos-1' };
+      await downloadInvoiceFile(params.transactionId, params.pointOfSaleId);
+      expect(mockedMerchantApi.downloadInvoiceFile).toHaveBeenCalledWith(...Object.values(params));
     });
+  });
 
-    it('should call MerchantApi.getReportedUser with correct params', async () => {
+  describe('getReportedUser', () => {
+    test('should call MerchantApi.getReportedUser with correct params', async () => {
       const params = {
         initiativeId: 'init-1',
         userFiscalCode: 'AAAAAA00A00A000A',
@@ -200,8 +199,10 @@ describe('merchantService', () => {
         params.userFiscalCode
       );
     });
+  });
 
-    it('should call MerchantApi.createReportedUser with correct params', async () => {
+  describe('createReportedUser', () => {
+    test('should call MerchantApi.createReportedUser with correct params', async () => {
       const params = {
         initiativeId: 'init-2',
         fiscalCode: 'BBBBBB00B00B000B',
@@ -212,8 +213,10 @@ describe('merchantService', () => {
         params.fiscalCode
       );
     });
+  });
 
-    it('should call MerchantApi.deleteReportedUser with correct params', async () => {
+  describe('deleteReportedUser', () => {
+    test('should call MerchantApi.deleteReportedUser with correct params', async () => {
       const params = {
         initiativeId: 'init-3',
         userFiscalCode: 'CCCCCC00C00C000C',
@@ -222,6 +225,59 @@ describe('merchantService', () => {
       expect(mockedMerchantApi.deleteReportedUser).toHaveBeenCalledWith(
         params.initiativeId,
         params.userFiscalCode
+      );
+    });
+  });
+
+  describe('getRewardBatches', () => {
+    test('should call MerchantApi.getRewardBatches with correct initiativeId', async () => {
+      const initiativeId = 'init-1';
+      await getRewardBatches(initiativeId);
+      expect(mockedMerchantApi.getRewardBatches).toHaveBeenCalledWith(initiativeId);
+    });
+  });
+
+  describe('sendRewardBatch', () => {
+    test('should call MerchantApi.sendRewardBatches with correct params', async () => {
+      const params = { initiativeId: 'init-1', batchId: 'batch-1' };
+      await sendRewardBatch(params.initiativeId, params.batchId);
+      expect(mockedMerchantApi.sendRewardBatches).toHaveBeenCalledWith(
+        params.initiativeId,
+        params.batchId
+      );
+    });
+  });
+
+  describe('downloadBatchCsv', () => {
+    test('should call MerchantApi.downloadBatchCsv with correct params', async () => {
+      const params = { initiativeId: 'init-1', rewardBatchId: 'batch-1' };
+      await downloadBatchCsv(params.initiativeId, params.rewardBatchId);
+      expect(mockedMerchantApi.downloadBatchCsv).toHaveBeenCalledWith(
+        params.initiativeId,
+        params.rewardBatchId
+      );
+    });
+  });
+
+  describe('postponeTransaction', () => {
+    test('should call MerchantApi.postponeTransaction with correct params', async () => {
+      const params = {
+        initiativeId: 'init-1',
+        rewardBatchId: 'batch-1',
+        transactionId: 'trx-1',
+        initiativeEndDate: '2024-12-31',
+      };
+      await postponeTransaction(
+        params.initiativeId,
+        params.rewardBatchId,
+        params.transactionId,
+        params.initiativeEndDate
+      );
+      expect(mockedMerchantApi.postponeTransaction).toHaveBeenCalledWith(
+        params.initiativeId,
+        params.rewardBatchId,
+        params.transactionId,
+        params.initiativeEndDate
       );
     });
   });

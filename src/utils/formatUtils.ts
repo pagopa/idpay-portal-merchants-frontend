@@ -5,6 +5,12 @@ export function formatDate(value: any) {
   return format(value, 'dd/MM/yyyy HH:mm');
 }
 
+export const getEndOfNextMonth = (date?: string | Date): Date | undefined => {
+  if (!date) {return undefined;}
+  const d = new Date(date);
+  return new Date(d.getFullYear(), d.getMonth() + 2, 0);
+};
+
 export function safeFormatDate(value: any) {
   try {
     const date = value instanceof Date ? value : new Date(value);
