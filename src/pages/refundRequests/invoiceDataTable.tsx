@@ -33,6 +33,7 @@ interface InvoiceDataTableProps {
   rewardBatchTrxStatus?: string;
   pointOfSaleId?: string;
   fiscalCode?: string;
+  onDrawerClosed?: () => void;
 }
 
 const infoStyles = {
@@ -53,6 +54,7 @@ const InvoiceDataTable = ({
   rewardBatchTrxStatus,
   pointOfSaleId,
   fiscalCode,
+  onDrawerClosed,
 }: InvoiceDataTableProps) => {
   const [transactions, setTransactions] = useState<MerchantTransactionsListDTO>({
     content: [],
@@ -85,6 +87,7 @@ const InvoiceDataTable = ({
     setDrawerOpened(open);
     if (!open) {
       setRowDetail(null);
+      onDrawerClosed?.();
     }
   };
   const handleSortModelChange = (model: GridSortModel) => {
