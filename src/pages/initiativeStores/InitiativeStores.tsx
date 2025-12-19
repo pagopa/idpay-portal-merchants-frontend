@@ -116,12 +116,10 @@ const InitiativeStores: React.FC = () => {
 
   const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
     <Tooltip
-      title={value && value.length >= tooltipThreshold ? value : ''}
-      placement="top"
-      arrow={true}
+      title={value && value.length >= tooltipThreshold ? value : MISSING_DATA_PLACEHOLDER}
     >
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-        {value && value !== '' ? value : '-'}
+        {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
       </Typography>
     </Tooltip>
   );
@@ -133,7 +131,7 @@ const InitiativeStores: React.FC = () => {
       flex: 1,
       editable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
     },
     {
       field: 'type',
@@ -142,7 +140,7 @@ const InitiativeStores: React.FC = () => {
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
-        params.value === 'PHYSICAL' ? 'Fisico' : params.value === 'ONLINE' ? 'Online' : '-',
+        renderCellWithTooltip(params.value === 'PHYSICAL' ? 'Fisico' : params.value === 'ONLINE' ? 'Online' : MISSING_DATA_PLACEHOLDER,1)
     },
     {
       field: 'address',
@@ -150,7 +148,7 @@ const InitiativeStores: React.FC = () => {
       flex: 1,
       editable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
     },
     {
       field: 'website',
@@ -158,7 +156,7 @@ const InitiativeStores: React.FC = () => {
       flex: 1.2,
       editable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
     },
     {
       field: 'city',
@@ -166,7 +164,7 @@ const InitiativeStores: React.FC = () => {
       flex: 1,
       editable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
     },
     {
       field: 'contactName',
@@ -178,7 +176,7 @@ const InitiativeStores: React.FC = () => {
         renderCellWithTooltip(
           `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
           }`,
-          11
+          1
         ),
     },
     {
@@ -187,7 +185,7 @@ const InitiativeStores: React.FC = () => {
       flex: 1.5,
       editable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
     },
     {
       field: 'actions',

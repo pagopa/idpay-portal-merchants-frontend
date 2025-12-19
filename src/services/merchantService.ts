@@ -102,6 +102,7 @@ export const getReportedUser = (
 
 import { ReportedUserCreateResponseDTO } from '../api/generated/merchants/ReportedUserCreateResponseDTO';
 import { RewardBatchListDTO } from '../api/generated/merchants/RewardBatchListDTO';
+import { DownloadRewardBatchResponseDTO } from '../api/generated/merchants/DownloadRewardBatchResponseDTO';
 
 export const createReportedUser = (
   initiativeId: string,
@@ -120,8 +121,32 @@ export const getRewardBatches = (
 ): Promise<RewardBatchListDTO> =>
   MerchantApi.getRewardBatches(initiativeId);
 
+export const getAllRewardBatches = (
+  initiativeId: string
+): Promise<RewardBatchListDTO> =>
+  MerchantApi.getAllRewardBatches(initiativeId);
+
 export const sendRewardBatch = (
   initiativeId: string,
   batchId: string
 ): Promise<void> =>
   MerchantApi.sendRewardBatches(initiativeId, batchId);
+
+export const downloadBatchCsv = (
+  initiativeId: string,
+  rewardBatchId: string
+): Promise<DownloadRewardBatchResponseDTO> =>
+  MerchantApi.downloadBatchCsv(initiativeId, rewardBatchId);
+
+export const postponeTransaction = (
+  initiativeId: string,
+  rewardBatchId: string,
+  transactionId: string,
+  initiativeEndDate: string
+): Promise<void> =>
+  MerchantApi.postponeTransaction(
+    initiativeId,
+    rewardBatchId,
+    transactionId,
+    initiativeEndDate
+  );

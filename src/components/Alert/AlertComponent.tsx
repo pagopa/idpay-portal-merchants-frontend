@@ -19,8 +19,8 @@ const severityMap = {
     success: {color: '#6CC66A', icon: <CheckCircleOutline />}
 };
 
-const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentStyle, onClose}: AlertComponentProps) => 
-    
+const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentStyle, onClose}: AlertComponentProps) =>
+
     <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
         <Box sx={{
             display: 'flex',
@@ -29,7 +29,7 @@ const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentS
             justifyContent: 'flex-end',
             position: 'sticky',
             bottom: '128px',
-            zIndex: '1300',
+            zIndex: '1150',
             ...containerStyle
             }}>
             <Alert
@@ -44,7 +44,6 @@ const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentS
                     width: 'auto',
                     maxWidth: '400px',
                     minWidth: '300px',
-                    zIndex: 1300,
                     boxShadow: 3,
                     borderRadius: 1,
                     '& .MuiAlert-icon': {

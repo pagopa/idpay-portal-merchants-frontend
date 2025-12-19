@@ -22,6 +22,7 @@ import { DownloadInvoiceResponseDTO } from './generated/merchants/DownloadInvoic
 import { ReportedUserDTO } from './generated/merchants/ReportedUserDTO';
 import { ReportedUserCreateResponseDTO } from './generated/merchants/ReportedUserCreateResponseDTO';
 import { RewardBatchListDTO } from './generated/merchants/RewardBatchListDTO';
+import { DownloadRewardBatchResponseDTO } from './generated/merchants/DownloadRewardBatchResponseDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -233,20 +234,70 @@ export const MerchantApi = {
     }
   },
 
+  getAllRewardBatches: async (
+    initiativeId: string
+  ): Promise<RewardBatchListDTO> => {
+    try {
+      const result = await apiClient.getRewardBatches({
+        initiativeId,
+        size: 1000
+      });
+
+      return extractResponse(result, 200, onRedirectToLogin);
+    } catch (error) {
+      logApiError(error, "userPermission");
+      return {} as RewardBatchListDTO;
+    }
+  },
 
   sendRewardBatches: async (
     initiativeId: string,
     batchId: string
-  ): Promise<void> => {
-    const result = await apiClient.sendRewardBatches({
+  ): Promise<any> => {
+
+    const result: any = await apiClient.sendRewardBatches({
       initiativeId,
       batchId
     });
+    if(result?.right?.status === 400 && result?.right?.value?.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
+      return "REWARD_BATCH_PREVIOUS_NOT_SENT";
+    }
+      return extractResponse(result, 204, onRedirectToLogin);
 
+  },
+
+  postponeTransaction: async (
+    initiativeId: string,
+    rewardBatchId: string,
+    transactionId: string,
+    initiativeEndDate: string
+  ): Promise<void> => {
+    const result = await apiClient.postponeTransaction({
+      initiativeId,
+      rewardBatchId,
+      transactionId,
+      initiativeEndDate
+    });
     return extractResponse(result, 204, onRedirectToLogin);
+  },
+
+
+
+  downloadBatchCsv: async (
+    initiativeId: string,
+    rewardBatchId: string
+  ): Promise<DownloadRewardBatchResponseDTO> => {
+    const result = await apiClient.approveDownloadRewardBatch({
+      initiativeId,
+      rewardBatchId
+    });
+
+    return extractResponse(result, 200, onRedirectToLogin);
   },
   
 };
+
+
 
 function logApiError(error: any, apiName?: string) {
  

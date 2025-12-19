@@ -9,6 +9,7 @@ import {
   MenuItem,
   Select,
   Button, Tooltip,
+  CircularProgress, Alert,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -18,6 +19,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { useSelector } from 'react-redux';
+import { Sync } from '@mui/icons-material';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
@@ -25,27 +28,36 @@ import InvoiceDataTable from '../invoiceDataTable';
 import { formatDate, formattedCurrency, truncateString } from '../../../helpers';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 import { parseJwt } from '../../../utils/jwt-utils';
-import { getMerchantPointOfSales } from '../../../services/merchantService';
+import { downloadBatchCsv, getAllRewardBatches, getMerchantPointOfSales } from '../../../services/merchantService';
 import { PointOfSaleDTO } from '../../../api/generated/merchants/PointOfSaleDTO';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
+import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
+import { useAlert } from '../../../hooks/useAlert';
+import { RewardBatchDTO } from '../../../api/generated/merchants/RewardBatchDTO';
 import { ShopCard } from './ShopCard';
 
 const PAGINATION_SIZE = 200;
 
-const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(el=> el!== "TO_CHECK");
+const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(el => el !== "TO_CHECK");
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation<{ store: any; batchId?: string }>();
-  const store = location.state?.store;
+  const staticStore = location.state?.store;
+  const [store, setStore] = useState({} as RewardBatchDTO);
   const batchId = location.state?.batchId;
   const history = useHistory();
-
+  const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesLoading, setStoresLoading] = useState(false);
 
+  const [batchDownloadIsLoading, setBatchDownloadIsLoading] = useState(false);
+
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [selectedPointOfSaleId, setSelectedPointOfSaleId] = useState<string>('');
+  const initiativesList = useSelector(intiativesListSelector);
+
+  const {setAlert} = useAlert();
 
   const formik = useFormik<any>({
     initialValues: {
@@ -58,6 +70,24 @@ const ShopDetails: React.FC = () => {
       setSelectedPointOfSaleId(formik.values.pointOfSaleId);
     },
   });
+
+  const fetchAll = async () => {
+    try {
+      let response : any;
+      if (initiativesList){
+        response = await getAllRewardBatches(initiativesList[0].initiativeId!);
+
+        const match = response.content.find((e: any) => e.id === staticStore.id);
+        setStore(match);
+      }
+    } catch (error: any) {
+      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+    }
+  };
+
+  useEffect(() => {
+    void fetchAll();
+  }, [initiativesList, batchId, selectedStatus, selectedPointOfSaleId,drawerRefreshKey]);
 
   const fetchStores = async (filters: any, fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
@@ -105,157 +135,185 @@ const ShopDetails: React.FC = () => {
     setSelectedPointOfSaleId('');
   };
 
+  const handleDownloadCsv = async () => {
+    if (batchId && initiativesList?.[0].initiativeId) {
+      try {
+        setBatchDownloadIsLoading(true);
+        const response = await downloadBatchCsv(initiativesList[0].initiativeId, batchId as string, );
+        const { approvedBatchUrl } = response;
+        const filename = 'lotto.csv';
+
+        const link = document.createElement('a');
+        // eslint-disable-next-line functional/immutable-data
+        link.href = approvedBatchUrl as string;
+        // eslint-disable-next-line functional/immutable-data
+        link.download = filename;
+        link.click();
+      } catch (e) {
+        console.log(e);
+         setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+      } finally {
+        setBatchDownloadIsLoading(false);
+      }
+    }
+
+  };
+
   return (
-    <>
-      <Box sx={{ width: '100%' }}>
-        <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
-          <Box sx={{ display: 'flex', gridColumn: 'span 12', alignItems: 'center', marginTop: 2 }}>
-            <ButtonNaked
-              component="button"
-              onClick={() => history.goBack()}
-              startIcon={<ArrowBackIcon />}
-              sx={{
-                color: 'primary.main',
-                fontSize: '1rem',
-                marginBottom: '3px',
-                marginRight: '8px',
-                fontWeight: 700,
-              }}
-              weight="default"
-              data-testid="back-button-test"
-            >
-              {t('commons.backBtn')}
-            </ButtonNaked>
-            <Breadcrumbs aria-label="breadcrumb" sx={{ marginBottom: '3px', marginRight: '8px' }}>
-              <Typography color="text.primary" variant="body2">
-                {'Bonus Elettrodomestici'}
-              </Typography>
-              <Typography color="text.primary" variant="body2" fontWeight="600">
-                {'...'}
-              </Typography>
-              <Typography color="text.disabled" variant="body2">
-                {store?.name}
-              </Typography>
-            </Breadcrumbs>
-          </Box>
-
-          <Box
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
+        <Box sx={{ display: 'flex', gridColumn: 'span 12', alignItems: 'center', marginTop: 2 }}>
+          <ButtonNaked
+            component="button"
+            onClick={() => history.goBack()}
+            startIcon={<ArrowBackIcon />}
             sx={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              width: '100%',
-              mt: 3,
-              mb: 4,
-              gridColumn: 'span 12',
+              color: 'primary.main',
+              fontSize: '1rem',
+              marginBottom: '3px',
+              marginRight: '8px',
+              fontWeight: 700,
             }}
+            weight="default"
+            data-testid="back-button-test"
           >
-            <Box sx={{ flexGrow: 1, minWidth: 0, pr: 2 }}>
-              <TitleBox
-                title={store?.name ?? MISSING_DATA_PLACEHOLDER}
-                mbTitle={0}
-                variantTitle="h4"
-                variantSubTitle="body1"
-              />
-            </Box>
-
-            <Button
-              startIcon={<FileDownloadIcon />}
-              size="small"
-              variant="contained"
-              sx={{
-                height: '40px',
-                ml: 'auto',
-              }}
-              onClick={() => {}}
-              data-testid="download-csv-button-test"
-              disabled
-            >
-              {t('pages.refundRequests.storeDetails.exportCSV')}
-            </Button>
-          </Box>
+            {t('commons.backBtn')}
+          </ButtonNaked>
+          <Breadcrumbs aria-label="breadcrumb" sx={{ marginBottom: '3px', marginRight: '8px' }}>
+            <Typography color="text.primary" variant="body2">
+              {'Bonus Elettrodomestici'}
+            </Typography>
+            <Typography color="text.primary" variant="body2" fontWeight="600">
+              {'...'}
+            </Typography>
+            <Typography color="text.disabled" variant="body2">
+              {store?.name}
+            </Typography>
+          </Breadcrumbs>
         </Box>
-
-        <ShopCard
-          batchName={store?.name}
-          dateRange={`${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`}
-          companyName={store?.businessName}
-          refundAmount={formattedCurrency(store?.initialAmountCents,'-', true)}
-          status={store?.status}
-          approvedRefund={formattedCurrency(store?.approvedAmountCents,'-', true)}
-          posType={store?.posType}
-        />
 
         <Box
           sx={{
-            height: 'auto',
+            display: 'flex',
+            alignItems: 'flex-start',
             width: '100%',
-            mt: 4,
+            mt: 3,
+            mb: 4,
+            gridColumn: 'span 12',
           }}
         >
-          <FiltersForm
-            formik={formik}
-            onFiltersApplied={handleOnFiltersApplied}
-            onFiltersReset={handleOnFiltersReset}
-            filtersAppliedOnce={false}
+          <Box sx={{ flexGrow: 1, minWidth: 0, pr: 2 }}>
+            <TitleBox
+              title={store?.name ?? MISSING_DATA_PLACEHOLDER}
+              mbTitle={0}
+              variantTitle="h4"
+              variantSubTitle="body1"
+            />
+          </Box>
+
+          <Button
+            startIcon={<FileDownloadIcon />}
+            size="small"
+            variant="contained"
+            sx={{
+              height: '40px',
+              ml: 'auto',
+            }}
+            onClick={handleDownloadCsv}
+            data-testid="download-csv-button-test"
+            disabled={(store?.status !== 'APPROVED') || batchDownloadIsLoading}
           >
-            <Grid item lg={3}>
-              <FormControl fullWidth size="small" disabled={storesLoading}>
-                <InputLabel id="point-of-sale-label">Punto vendita</InputLabel>
-                <Select
-                  labelId="point-of-sale-label"
-                  id="pointOfSaleId"
-                  name="pointOfSaleId"
-                  label={t('pages.initiativeStores.pointOfSale')}
-                  value={formik.values.pointOfSaleId}
-                  onChange={formik.handleChange}
-                  size="small"
-                >
-                  {stores.map((store) => (
-                    <MenuItem key={store.id} value={store.id}>
-                      <Tooltip title={store?.franchiseName || MISSING_DATA_PLACEHOLDER}>
-                        <span>{truncateString(store?.franchiseName || MISSING_DATA_PLACEHOLDER, 40)}</span>
-                      </Tooltip>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item>
-              <FormControl size="small" fullWidth>
-                <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
-                <Select
-                  id="rewardBatchTrxStatus"
-                  inputProps={{
-                    'data-testid': 'filterStatus-select',
-                  }}
-                  name="status"
-                  label={t('pages.initiativeDiscounts.filterByStatus')}
-                  placeholder={t('pages.initiativeDiscounts/filterByStatus')}
-                  onChange={formik.handleChange}
-                  value={formik.values.status}
-                  sx={{
-                    width: 165,
-                  }}
-                  size="small"
-                  renderValue={(selected) => (selected ? <StatusChipInvoice status={selected} /> : '')}
-                >
-                  {filterByStatusOptionsList.map((item) => (
-                    <MenuItem key={item} value={item}>
-                      <StatusChip status={item} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </FiltersForm>
-          <InvoiceDataTable
-            batchId={batchId}
-            rewardBatchTrxStatus={selectedStatus}
-            pointOfSaleId={selectedPointOfSaleId}
-          />
+            {t('pages.refundRequests.storeDetails.exportCSV')}
+            <span style={{marginLeft: '10px'}}>{batchDownloadIsLoading && <CircularProgress size={20} />}</span>
+          </Button>
         </Box>
       </Box>
-    </>
+
+      {store?.status === 'APPROVING' &&
+        <Alert sx={{ mb: 3 }} variant="outlined" color="info" icon={<Sync sx={{ color: "#6BCFFB" }} />} >{t('pages.refundRequests.storeDetails.csv.alert')}</Alert>
+      }
+
+      <ShopCard
+        batchName={store?.name}
+        dateRange={`${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`}
+        companyName={store?.businessName || ''}
+        refundAmount={formattedCurrency(store?.initialAmountCents, '-', true)}
+        status={store?.status || ''}
+        approvedRefund={formattedCurrency(store?.approvedAmountCents, '-', true)}
+        posType={store?.posType || ''}
+      />
+
+      <Box
+        sx={{
+          height: 'auto',
+          width: '100%',
+          mt: 4,
+        }}
+      >
+        <FiltersForm
+          formik={formik}
+          onFiltersApplied={handleOnFiltersApplied}
+          onFiltersReset={handleOnFiltersReset}
+          filtersAppliedOnce={false}
+        >
+          <Grid item lg={3}>
+            <FormControl fullWidth size="small" disabled={storesLoading}>
+              <InputLabel id="point-of-sale-label">Punto vendita</InputLabel>
+              <Select
+                labelId="point-of-sale-label"
+                id="pointOfSaleId"
+                name="pointOfSaleId"
+                label={t('pages.initiativeStores.pointOfSale')}
+                value={formik.values.pointOfSaleId}
+                onChange={formik.handleChange}
+                size="small"
+              >
+                {stores.map((store) => (
+                  <MenuItem key={store.id} value={store.id}>
+                    <Tooltip title={store?.franchiseName || MISSING_DATA_PLACEHOLDER}>
+                      <span>{truncateString(store?.franchiseName || MISSING_DATA_PLACEHOLDER, 40)}</span>
+                    </Tooltip>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item>
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
+              <Select
+                id="rewardBatchTrxStatus"
+                inputProps={{
+                  'data-testid': 'filterStatus-select',
+                }}
+                name="status"
+                label={t('pages.initiativeDiscounts.filterByStatus')}
+                placeholder={t('pages.initiativeDiscounts/filterByStatus')}
+                onChange={formik.handleChange}
+                value={formik.values.status}
+                sx={{
+                  width: 165,
+                }}
+                size="small"
+                renderValue={(selected) => (selected ? <StatusChipInvoice status={selected} /> : '')}
+              >
+                {filterByStatusOptionsList.map((item) => (
+                  <MenuItem key={item} value={item}>
+                    <StatusChip status={item} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+        </FiltersForm>
+        <InvoiceDataTable
+          batchId={batchId}
+          onDrawerClosed={() => setDrawerRefreshKey(prev => prev + 1)}
+          rewardBatchTrxStatus={selectedStatus}
+          pointOfSaleId={selectedPointOfSaleId}
+        />
+      </Box>
+    </Box>
   );
 };
 

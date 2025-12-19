@@ -19,6 +19,7 @@ import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAlert } from "../../hooks/useAlert";
 import routes from "../../routes";
+import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RefundRequestsModal } from "./RefundRequestModal";
 
 interface RouteParams {
@@ -52,7 +53,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
+      renderCell: (params: any) => renderCellWithTooltip(params.value),
     },
     {
       field: 'posType',
@@ -60,7 +61,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value), 6),
+      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value)),
     },
     {
       field: 'initialAmountCents',
@@ -104,7 +105,7 @@ const RefundRequests = () => {
                 ),
                 {
                   store: params.row,
-                  batchId: params.row?.id?.toString(),
+                  batchId: params.row?.id?.toString() as string,
                 }
               );
             }}
@@ -146,14 +147,12 @@ const RefundRequests = () => {
         }
     };
 
-  const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
+  const renderCellWithTooltip = (value: string) => (
     <Tooltip
-      title={value && value.length >= tooltipThreshold ? value : ''}
-      placement="top"
-      arrow={true}
+      title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
     >
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-        {value && value !== '' ? value : '-'}
+        {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
       </Typography>
     </Tooltip>
   );
@@ -224,14 +223,18 @@ const RefundRequests = () => {
                 console.error('Missing initiativeId or batchId');
                 return;
             }
-            await sendRewardBatch(initiativeId, batchId.toString());
+            const sendResult = await sendRewardBatch(initiativeId, batchId.toString()) as any;
+            if(sendResult === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+              throw new Error('REWARD_BATCH_PREVIOUS_NOT_SENT');
+            }
             setTimeout(() => {
                 setAlert({text: t('pages.refundRequests.rewardBatchSentSuccess'), isOpen: true, severity: 'success'});
             }, 1000);
             await fetchRewardBatches(initiativeId);
 
-        } catch (e: any) {
-            setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+        } catch (error: any) {
+            const errorMessage = error.message === 'REWARD_BATCH_PREVIOUS_NOT_SENT' ? t('errors.sendTheBatchForPreviousMonth') : t('errors.genericDescription');
+            setAlert({title: t('errors.genericTitle'), text: errorMessage, isOpen: true, severity: 'error'});
             if (initiativeId) {
                 await fetchRewardBatches(initiativeId.toString());
             }

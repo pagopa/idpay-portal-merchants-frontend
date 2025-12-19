@@ -18,7 +18,7 @@ import {
   downloadInvoiceFile,
   getMerchantTransactionsProcessed,
 } from '../../services/merchantService';
-import { TYPE_TEXT } from '../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
@@ -33,6 +33,7 @@ interface InvoiceDataTableProps {
   rewardBatchTrxStatus?: string;
   pointOfSaleId?: string;
   fiscalCode?: string;
+  onDrawerClosed?: () => void;
 }
 
 const infoStyles = {
@@ -41,9 +42,9 @@ const infoStyles = {
 };
 
 const renderCellWithTooltip = (value: string | JSX.Element) => (
-  <Tooltip title={value ? value : ''} placement="top" arrow={true}>
+  <Tooltip title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}>
     <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-      {value && value !== '' ? value : '-'}
+      {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
     </Typography>
   </Tooltip>
 );
@@ -53,6 +54,7 @@ const InvoiceDataTable = ({
   rewardBatchTrxStatus,
   pointOfSaleId,
   fiscalCode,
+  onDrawerClosed,
 }: InvoiceDataTableProps) => {
   const [transactions, setTransactions] = useState<MerchantTransactionsListDTO>({
     content: [],
@@ -73,7 +75,8 @@ const InvoiceDataTable = ({
     { field: 'trxChargeDate', sort: 'desc' },
   ]);
   const { id } = useParams<RouteParams>();
-  const { alert, setAlert } = useAlert();
+  const { setAlert } = useAlert();
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -81,10 +84,10 @@ const InvoiceDataTable = ({
   };
 
   const handleToggleDrawer = (open: boolean) => {
-    setAlert({ ...alert, isOpen: open });
     setDrawerOpened(open);
     if (!open) {
       setRowDetail(null);
+      onDrawerClosed?.();
     }
   };
   const handleSortModelChange = (model: GridSortModel) => {
@@ -103,8 +106,9 @@ const InvoiceDataTable = ({
   };
 
   const downloadFile = async (selectedTransaction: any) => {
-    setLoading(true);
     try {
+      setIsDownloading(true);
+
       const response = await downloadInvoiceFile(
         selectedTransaction?.id,
         selectedTransaction?.pointOfSaleId
@@ -143,26 +147,19 @@ const InvoiceDataTable = ({
         }, 100);
       }
 
-      setLoading(false);
     } catch (error) {
       setAlert({
         title: 'Errore download file',
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
-        severity: 'error',
-        containerStyle: {
-          height: 'fit-content',
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-        },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' },
+        severity: 'error'
       });
-      setLoading(false);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
-  useEffect(() => {
+  const loadTransactions = () => {
     setLoading(true);
 
     let sortParam: string | undefined;
@@ -195,6 +192,11 @@ const InvoiceDataTable = ({
         });
       })
       .finally(() => setLoading(false));
+  };
+
+
+  useEffect(() => {
+    loadTransactions();
   }, [
     pagination.pageNo,
     pagination.pageSize,
@@ -214,9 +216,7 @@ const InvoiceDataTable = ({
       disableColumnMenu: true,
       renderCell: (params: any) => (
         <Tooltip
-          title={params.value && params.value.length >= 11 ? params.value : ''}
-          placement="top"
-          arrow
+          title={params.value && params.value !== '' ? params.value : MISSING_DATA_PLACEHOLDER}
         >
           <Typography
             color="primary"
@@ -229,7 +229,7 @@ const InvoiceDataTable = ({
             className="ShowDots"
             onClick={() => downloadFile(params.row)}
           >
-            {params.value && params.value !== '' ? params.value : '-'}
+            {params.value && params.value !== '' ? params.value : MISSING_DATA_PLACEHOLDER}
           </Typography>
         </Tooltip>
       ),
@@ -240,7 +240,7 @@ const InvoiceDataTable = ({
       flex: 2,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || '-'),
+      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || MISSING_DATA_PLACEHOLDER),
     },
     {
       field: 'additionalProperties.productName',
@@ -249,7 +249,7 @@ const InvoiceDataTable = ({
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
-        renderCellWithTooltip(params.row.additionalProperties?.productName || '-'),
+        renderCellWithTooltip(params.row.additionalProperties?.productName || MISSING_DATA_PLACEHOLDER),
     },
     {
       field: 'trxChargeDate',
@@ -315,7 +315,9 @@ const InvoiceDataTable = ({
   }));
 
   return (
-    <Box sx={{ my: 2 }}>
+    <Box
+      sx={{ my: 2,  position: 'relative'}}
+    >
       <Stack
         direction={{ xs: 'column', md: 'row' }}
         spacing={{ xs: 2, md: 3 }}
@@ -329,7 +331,9 @@ const InvoiceDataTable = ({
           <CircularProgress />
         </Box>
       ) : (
-        <Box sx={{ height: 'auto', width: '100%' }}>
+        <Box
+          sx={{ height: 'auto', width: '100%' }}
+        >
           <DataTable
             rows={tableRows}
             columns={columns}
@@ -346,6 +350,17 @@ const InvoiceDataTable = ({
             onRowsPerPageChange={handleRowsPerPageChange}
           />
         </Box>
+      )}
+      {isDownloading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.4)',
+            zIndex: (theme) => theme.zIndex.modal + 1,
+            pointerEvents: 'all',
+          }}
+        />
       )}
       {!loading && transactions.content.length === 0 && (
         <Paper
@@ -364,6 +379,9 @@ const InvoiceDataTable = ({
       <DetailDrawer open={drawerOpened} toggleDrawer={handleToggleDrawer}>
         {rowDetail && (
           <InvoiceDetail
+            batchId={batchId ?? ''}
+            onSuccess={loadTransactions}
+            onCloseDrawer={() => handleToggleDrawer(false)}
             title="Dettaglio transazione"
             itemValues={rowDetail}
             storeId={rowDetail?.pointOfSaleId || ''}
