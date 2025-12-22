@@ -55,7 +55,7 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
     : undefined;
 
   const isNextMonthDisabled =
-    !endOfNextBatchMonth || !nextMonthInitiativeEndDate
+    !endOfNextBatchMonth || !nextMonthInitiativeEndDate || statusBatch !== 'CREATED'
       ? true
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
@@ -281,7 +281,6 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
             </Box>
           </Grid>
         )}
-        { statusBatch === 'CREATED' && (
           <Grid item xs={12}>
             <Box
               mt={1}
@@ -302,7 +301,6 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
               </Button>
             </Box>
           </Grid>
-        )}
         <ModalComponent data-testid="modal-component" open={invoiceTransactionModal} onClose={() => setInvoiceTransactionModal(false)}>
           <Box display={'flex'} flexDirection={'column'} gap={2}>
             <Typography variant="h6">{t('pages.refundRequests.invoiceDetailConfirmModal.title')}</Typography>
