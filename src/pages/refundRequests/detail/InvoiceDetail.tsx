@@ -208,7 +208,7 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
             >
               {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
             </Typography>
-            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
+            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{overflowWrap: "break-word"}}>
               {itemValues?.invoiceData?.docNumber ?? MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>
