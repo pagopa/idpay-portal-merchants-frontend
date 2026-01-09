@@ -13,6 +13,9 @@ import {
 import { PointOfSaleTransactionsProcessedListDTO } from '../api/generated/merchants/PointOfSaleTransactionsProcessedListDTO';
 import { DownloadInvoiceResponseDTO } from '../api/generated/merchants/DownloadInvoiceResponseDTO';
 import { ReportedUserDTO } from '../api/generated/merchants/ReportedUserDTO';
+import { ReportedUserCreateResponseDTO } from '../api/generated/merchants/ReportedUserCreateResponseDTO';
+import { RewardBatchListDTO } from '../api/generated/merchants/RewardBatchListDTO';
+import { DownloadRewardBatchResponseDTO } from '../api/generated/merchants/DownloadRewardBatchResponseDTO';
 
 export type GetMerchantTransactionsProcessedParams = {
   initiativeId: string;
@@ -77,6 +80,10 @@ export const getMerchantPointOfSales = (
   filters: GetPointOfSalesFilters
 ): Promise<GetPointOfSalesResponse> => MerchantApi.getMerchantPointOfSales(merchantId, filters);
 
+export const getMerchantPointOfSalesWithTransactions = async (
+  rewardBatchId: string
+) => await MerchantApi.getMerchantPointOfSalesWithTransactions(rewardBatchId);
+
 export const getMerchantPointOfSalesById = (
   merchantId: string,
   pointOfSaleId: string
@@ -99,10 +106,6 @@ export const getReportedUser = (
   initiativeId: string,
   userFiscalCode: string
 ): Promise<ReportedUserDTO> => MerchantApi.getReportedUser(initiativeId, userFiscalCode);
-
-import { ReportedUserCreateResponseDTO } from '../api/generated/merchants/ReportedUserCreateResponseDTO';
-import { RewardBatchListDTO } from '../api/generated/merchants/RewardBatchListDTO';
-import { DownloadRewardBatchResponseDTO } from '../api/generated/merchants/DownloadRewardBatchResponseDTO';
 
 export const createReportedUser = (
   initiativeId: string,
