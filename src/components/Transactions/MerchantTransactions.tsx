@@ -214,7 +214,7 @@ const MerchantTransactions = ({
   };
 
   const handleToggleDrawer = (newOpen: boolean) => {
-    setAlert({ ...alert, isOpen: newOpen});
+    setAlert({ ...alert, isOpen: newOpen });
     setDrawerOpened(newOpen);
   };
 
@@ -237,9 +237,7 @@ const MerchantTransactions = ({
   };
 
   const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
-    <Tooltip
-      title={value && value.length >= tooltipThreshold ? value : ''}
-    >
+    <Tooltip title={value && value.length >= tooltipThreshold ? value : ''}>
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
         {value && value !== '' ? value : '-'}
       </Typography>
