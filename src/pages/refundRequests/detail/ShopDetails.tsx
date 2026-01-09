@@ -28,15 +28,17 @@ import InvoiceDataTable from '../invoiceDataTable';
 import { formatDate, formattedCurrency, truncateString } from '../../../helpers';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 import { parseJwt } from '../../../utils/jwt-utils';
-import { downloadBatchCsv, getAllRewardBatches, getMerchantPointOfSales } from '../../../services/merchantService';
-import { PointOfSaleDTO } from '../../../api/generated/merchants/PointOfSaleDTO';
+import {
+  downloadBatchCsv,
+  getAllRewardBatches,
+  getMerchantPointOfSalesWithTransactions,
+} from '../../../services/merchantService';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
 import { useAlert } from '../../../hooks/useAlert';
 import { RewardBatchDTO } from '../../../api/generated/merchants/RewardBatchDTO';
+import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/FranchisePointOfSaleDTO';
 import { ShopCard } from './ShopCard';
-
-const PAGINATION_SIZE = 200;
 
 const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(el => el !== "TO_CHECK");
 
@@ -48,7 +50,7 @@ const ShopDetails: React.FC = () => {
   const batchId = location.state?.batchId;
   const history = useHistory();
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
-  const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
+  const [stores, setStores] = useState<Array<FranchisePointOfSaleDTO>>([]);
   const [storesLoading, setStoresLoading] = useState(false);
 
   const [batchDownloadIsLoading, setBatchDownloadIsLoading] = useState(false);
@@ -89,7 +91,7 @@ const ShopDetails: React.FC = () => {
     void fetchAll();
   }, [initiativesList, batchId, selectedStatus, selectedPointOfSaleId,drawerRefreshKey]);
 
-  const fetchStores = async (filters: any, fromSort?: boolean) => {
+  const fetchStores = async (fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     if (!merchantId) {
@@ -99,17 +101,8 @@ const ShopDetails: React.FC = () => {
       if (!fromSort) {
         setStoresLoading(true);
       }
-      const response = await getMerchantPointOfSales(merchantId, {
-        type: filters.type,
-        city: filters.city,
-        address: filters.address,
-        contactName: filters.contactName,
-        sort: "franchiseName,asc",
-        page: filters.page ?? 0,
-        size: PAGINATION_SIZE,
-      });
-      const { content } = response;
-      setStores(content);
+      const response = await getMerchantPointOfSalesWithTransactions(batchId || '');
+      setStores(response as any);
       if (!fromSort) {
         setStoresLoading(false);
       }
@@ -121,7 +114,7 @@ const ShopDetails: React.FC = () => {
   };
 
   useEffect(() => {
-    void fetchStores({});
+    void fetchStores();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -269,7 +262,7 @@ const ShopDetails: React.FC = () => {
                 size="small"
               >
                 {stores.map((store) => (
-                  <MenuItem key={store.id} value={store.id}>
+                  <MenuItem key={store?.pointOfSaleId} value={store?.pointOfSaleId}>
                     <Tooltip title={store?.franchiseName || MISSING_DATA_PLACEHOLDER}>
                       <span>{truncateString(store?.franchiseName || MISSING_DATA_PLACEHOLDER, 40)}</span>
                     </Tooltip>

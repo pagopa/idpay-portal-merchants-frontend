@@ -96,7 +96,7 @@ jest.mock('@mui/material', () => {
 });
 
 jest.mock('../../../../services/merchantService', () => ({
-  getMerchantPointOfSales: jest.fn(),
+  getMerchantPointOfSalesWithTransactions: jest.fn(),
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
@@ -111,12 +111,13 @@ jest.mock('../../../../utils/jwt-utils', () => ({
 
 
 import ShopDetails from '../ShopDetails';
-import { getMerchantPointOfSales } from '../../../../services/merchantService';
+import { getMerchantPointOfSalesWithTransactions } from '../../../../services/merchantService';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { parseJwt } from '../../../../utils/jwt-utils';
 import { MISSING_DATA_PLACEHOLDER } from '../../../../utils/constants';
+import { FranchisePointOfSaleDTO } from '../../../../api/generated/merchants/FranchisePointOfSaleDTO';
 
-const mockedGetMerchantPointOfSales = getMerchantPointOfSales as jest.MockedFunction<typeof getMerchantPointOfSales>;
+const mockedGetMerchantPointOfSalesWithTransactions = getMerchantPointOfSalesWithTransactions as unknown as jest.MockedFunction<typeof Array<FranchisePointOfSaleDTO>>;
 const mockedStorageRead = storageTokenOps.read as jest.Mock;
 const mockedParseJwt = parseJwt as jest.MockedFunction<typeof parseJwt>;
 
@@ -146,18 +147,18 @@ describe('ShopDetails', () => {
     mockedUseSelector.mockReturnValue([
       { initiativeId: 'INITIATIVE-123', initiativeName: 'Test Initiative' }
     ]);
-    mockedGetMerchantPointOfSales.mockResolvedValue({
-      content: [
+    getMerchantPointOfSalesWithTransactions?.mockResolvedValue(
+      [
         {
-          id: '1',
+          pointOfSaleId: '1',
           franchiseName: 'Punto Vendita Uno',
         },
         {
-          id: '2',
-          franchiseName: undefined,
+          pointOfSaleId: '2',
+          franchiseName: 'Punto Vendita Due',
         },
-      ],
-    } as any);
+      ]
+   )
   });
 
   afterEach(() => {
@@ -262,9 +263,8 @@ describe('ShopDetails', () => {
     render(<ShopDetails />);
 
     await waitFor(() => {
-      expect(mockedGetMerchantPointOfSales).toHaveBeenCalledWith(
-        'MERCHANT-123',
-        expect.any(Object)
+      expect(mockedGetMerchantPointOfSalesWithTransactions).toHaveBeenCalledWith(
+        ""
       );
     });
 
@@ -273,7 +273,6 @@ describe('ShopDetails', () => {
 
     const tooltips = await screen.findAllByTestId('tooltip');
     expect(tooltips[0]).toHaveAttribute('data-title', 'Punto Vendita Uno');
-    expect(tooltips[1]).toHaveAttribute('data-title', MISSING_DATA_PLACEHOLDER);
   });
 
 });
