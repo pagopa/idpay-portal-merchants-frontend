@@ -23,6 +23,7 @@ import { ReportedUserDTO } from './generated/merchants/ReportedUserDTO';
 import { ReportedUserCreateResponseDTO } from './generated/merchants/ReportedUserCreateResponseDTO';
 import { RewardBatchListDTO } from './generated/merchants/RewardBatchListDTO';
 import { DownloadRewardBatchResponseDTO } from './generated/merchants/DownloadRewardBatchResponseDTO';
+import { FranchisePointOfSaleDTO } from './generated/merchants/FranchisePointOfSaleDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -150,6 +151,25 @@ export const MerchantApi = {
   ): Promise<GetPointOfSalesResponse> => {
     const result = await apiClient.getPointOfSales({ merchantId, ...filters });
     return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  getMerchantPointOfSalesWithTransactions: async (
+    rewardBatchId: string
+  ): Promise<Array<FranchisePointOfSaleDTO>> => {
+      const token = storageTokenOps.read();
+      const res = await fetch(`${ENV.URL_API.MERCHANTS_PORTAL}/point-of-sales/${rewardBatchId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      });
+      if (!res.ok) {
+        onRedirectToLogin();
+        return [];
+      }
+
+      return (await res.json()) as Array<FranchisePointOfSaleDTO>;
   },
 
   getMerchantPointOfSalesById: async (
