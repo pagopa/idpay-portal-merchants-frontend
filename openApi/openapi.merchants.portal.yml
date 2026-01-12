@@ -2694,6 +2694,11 @@ components:
           format: date-time
           description: "ENG: Payment authorization date - IT: La data di autorizzazione del pagamento"
           maxLength: 255
+        trxCode:
+          type: string
+          description: "ENG: Transaction code - IT: Il codice della transazione"
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9]+$"
         updateDate:
           type: string
           format: date-time
