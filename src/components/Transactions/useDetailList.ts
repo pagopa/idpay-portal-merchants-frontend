@@ -9,6 +9,7 @@ const getDetailFieldList: any = () => [
     { label: "Sconto applicato", id: "rewardAmountCents", type: TYPE_TEXT.Currency },
     { label: "Importo autorizzato", id: "authorizedAmountCents", type: TYPE_TEXT.Currency },
     { label: "ID transazione", id: "id", type: TYPE_TEXT.Text },
+    { label: "Codice sconto", id: "trxCode", type: TYPE_TEXT.Text },
 
 ];
 
