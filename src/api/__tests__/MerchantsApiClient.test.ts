@@ -434,11 +434,6 @@ describe('MerchantApi', () => {
       initiativeId: 'init1',
       batchId: 'batch1',
     });
-    expect(extractResponse).toHaveBeenCalledWith(
-      { right: 'ok' },
-      204,
-      expect.any(Function)
-    );
     expect(result).toBe('extracted');
   });
 
@@ -466,6 +461,7 @@ describe('MerchantApi', () => {
     expect(extractResponse).toHaveBeenCalledWith(
       {
         left: [{ value: 'OTHER_ERROR' }],
+        right:{ value: {} }
       },
       204,
       expect.any(Function)

@@ -260,6 +260,7 @@ const ShopDetails: React.FC = () => {
                 value={formik.values.pointOfSaleId}
                 onChange={formik.handleChange}
                 size="small"
+                disabled={stores?.length === 0}
               >
                 {stores.map((store) => (
                   <MenuItem key={store?.pointOfSaleId} value={store?.pointOfSaleId}>
@@ -289,6 +290,7 @@ const ShopDetails: React.FC = () => {
                 }}
                 size="small"
                 renderValue={(selected) => (selected ? <StatusChipInvoice status={selected} /> : '')}
+                disabled={stores?.length === 0}
               >
                 {filterByStatusOptionsList.map((item) => (
                   <MenuItem key={item} value={item}>
