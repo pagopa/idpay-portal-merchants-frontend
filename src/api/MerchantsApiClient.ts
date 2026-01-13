@@ -275,15 +275,18 @@ export const MerchantApi = {
     batchId: string
   ): Promise<any> => {
 
-    const result: any = await apiClient.sendRewardBatches({
+    let result: any = await apiClient.sendRewardBatches({
       initiativeId,
       batchId
     });
     if(result?.right?.status === 400 && result?.right?.value?.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
       return "REWARD_BATCH_PREVIOUS_NOT_SENT";
     }
-      return extractResponse(result, 204, onRedirectToLogin);
-
+    if (result?.right?.value === undefined) {
+      const right = {...result.right, value: {}};
+      result = { ...result, right };
+    }
+    return extractResponse(result, 204, onRedirectToLogin);
   },
 
   postponeTransaction: async (
