@@ -23,6 +23,7 @@ import { ReportedUserDTO } from './generated/merchants/ReportedUserDTO';
 import { ReportedUserCreateResponseDTO } from './generated/merchants/ReportedUserCreateResponseDTO';
 import { RewardBatchListDTO } from './generated/merchants/RewardBatchListDTO';
 import { DownloadRewardBatchResponseDTO } from './generated/merchants/DownloadRewardBatchResponseDTO';
+import { FranchisePointOfSaleDTO } from './generated/merchants/FranchisePointOfSaleDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -152,6 +153,25 @@ export const MerchantApi = {
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
+  getMerchantPointOfSalesWithTransactions: async (
+    rewardBatchId: string
+  ): Promise<Array<FranchisePointOfSaleDTO>> => {
+      const token = storageTokenOps.read();
+      const res = await fetch(`${ENV.URL_API.MERCHANTS_PORTAL}/point-of-sales/${rewardBatchId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      });
+      if (!res.ok) {
+        onRedirectToLogin();
+        return [];
+      }
+
+      return (await res.json()) as Array<FranchisePointOfSaleDTO>;
+  },
+
   getMerchantPointOfSalesById: async (
     merchantId: string,
     pointOfSaleId: string
@@ -255,15 +275,18 @@ export const MerchantApi = {
     batchId: string
   ): Promise<any> => {
 
-    const result: any = await apiClient.sendRewardBatches({
+    let result: any = await apiClient.sendRewardBatches({
       initiativeId,
       batchId
     });
     if(result?.right?.status === 400 && result?.right?.value?.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
       return "REWARD_BATCH_PREVIOUS_NOT_SENT";
     }
-      return extractResponse(result, 204, onRedirectToLogin);
-
+    if (result?.right?.value === undefined) {
+      const right = {...result.right, value: {}};
+      result = { ...result, right };
+    }
+    return extractResponse(result, 204, onRedirectToLogin);
   },
 
   postponeTransaction: async (

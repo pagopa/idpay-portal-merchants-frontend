@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { Box, Stack, Tooltip, Typography, CircularProgress, IconButton } from "@mui/material";
-import Button from "@mui/material/Button";
+import { useEffect, useState } from 'react';
+import { Box, Stack, Tooltip, Typography, CircularProgress, IconButton } from '@mui/material';
+import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { GridColDef } from "@mui/x-data-grid";
-import { theme } from "@pagopa/mui-italia";
+import { GridColDef } from '@mui/x-data-grid';
+import { theme } from '@pagopa/mui-italia';
 import { useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -17,17 +17,17 @@ import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
 import { RewardBatchDTO } from '../../api/generated/merchants/RewardBatchDTO';
 import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
-import { useAlert } from "../../hooks/useAlert";
-import routes from "../../routes";
+import { useAlert } from '../../hooks/useAlert';
+import routes from '../../routes';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
-import { RefundRequestsModal } from "./RefundRequestModal";
+import { RefundRequestsModal } from './RefundRequestModal';
 
 interface RouteParams {
   id: string;
 }
 
 const RefundRequests = () => {
-    const { setAlert } = useAlert();
+  const { setAlert } = useAlert();
   const { id } = useParams<RouteParams>();
   const history = useHistory();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -99,10 +99,7 @@ const RefundRequests = () => {
           <IconButton
             onClick={() => {
               history.push(
-                routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(
-                  ':batch',
-                  params.row?.name
-                ),
+                routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(':batch', params.row?.name),
                 {
                   store: params.row,
                   batchId: params.row?.id?.toString() as string,
@@ -120,37 +117,43 @@ const RefundRequests = () => {
 
   const { t } = useTranslation();
 
-    useEffect(() => {
-        if (initiativesList && initiativesList.length > 0) {
-            void fetchRewardBatches(initiativesList[0].initiativeId!);
-        }
-    }, [initiativesList]);
+  useEffect(() => {
+    if (initiativesList && initiativesList.length > 0) {
+      void fetchRewardBatches(initiativesList[0].initiativeId!);
+    }
+  }, [initiativesList]);
 
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
     fontSize: theme.typography.fontSize,
   };
 
-    const fetchRewardBatches = async (initiativeId: string): Promise<void> => {
-        setRewardBatchesLoading(true);
-        try {
-            const response = await getRewardBatches(initiativeId);
-            if (response?.content) {
-                const mappedResponse = response.content.map((value) => ({ ...value, approvedAmountCents: value.status !== 'APPROVED' ? undefined : value.approvedAmountCents}));
-                setRewardBatches(mappedResponse);
-                setSelectedRows([]);
-            }
-        } catch (error: any) {
-            setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
-        } finally {
-            setRewardBatchesLoading(false);
-        }
-    };
+  const fetchRewardBatches = async (initiativeId: string): Promise<void> => {
+    setRewardBatchesLoading(true);
+    try {
+      const response = await getRewardBatches(initiativeId);
+      if (response?.content) {
+        const mappedResponse = response.content.map((value) => ({
+          ...value,
+          approvedAmountCents: value.status !== 'APPROVED' ? undefined : value.approvedAmountCents,
+        }));
+        setRewardBatches(mappedResponse);
+        setSelectedRows([]);
+      }
+    } catch (error: any) {
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
+    } finally {
+      setRewardBatchesLoading(false);
+    }
+  };
 
   const renderCellWithTooltip = (value: string) => (
-    <Tooltip
-      title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
-    >
+    <Tooltip title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}>
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
         {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
       </Typography>
@@ -214,35 +217,49 @@ const RefundRequests = () => {
     }
   };
 
-    const handleSentBatches = async () => {
-        setSendBatchIsLoading(true);
-        const initiativeId = initiativesList && initiativesList.length > 0 ? initiativesList[0].initiativeId : '';
-        try {
-            const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0]?.id : '';
-            if (!initiativeId || !batchId) {
-                console.error('Missing initiativeId or batchId');
-                return;
-            }
-            const sendResult = await sendRewardBatch(initiativeId, batchId.toString()) as any;
-            if(sendResult === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
-              throw new Error('REWARD_BATCH_PREVIOUS_NOT_SENT');
-            }
-            setTimeout(() => {
-                setAlert({text: t('pages.refundRequests.rewardBatchSentSuccess'), isOpen: true, severity: 'success'});
-            }, 1000);
-            await fetchRewardBatches(initiativeId);
-
-        } catch (error: any) {
-            const errorMessage = error.message === 'REWARD_BATCH_PREVIOUS_NOT_SENT' ? t('errors.sendTheBatchForPreviousMonth') : t('errors.genericDescription');
-            setAlert({title: t('errors.genericTitle'), text: errorMessage, isOpen: true, severity: 'error'});
-            if (initiativeId) {
-                await fetchRewardBatches(initiativeId.toString());
-            }
-        } finally {
-            setSendBatchIsLoading(false);
-            setIsModalOpen(false);
-        }
-    };
+  const handleSentBatches = async () => {
+    setSendBatchIsLoading(true);
+    const initiativeId =
+      initiativesList && initiativesList.length > 0 ? initiativesList[0].initiativeId : '';
+    try {
+      const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0]?.id : '';
+      if (!initiativeId || !batchId) {
+        console.error('Missing initiativeId or batchId');
+        return;
+      }
+      const result = (await sendRewardBatch(initiativeId, batchId.toString())) as any;
+      if ('code' in result && result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.sendTheBatchForPreviousMonth'),
+          isOpen: true,
+          severity: 'error',
+        });
+        return;
+      }
+      setTimeout(() => {
+        setAlert({
+          text: t('pages.refundRequests.rewardBatchSentSuccess'),
+          isOpen: true,
+          severity: 'success',
+        });
+      }, 1000);
+      await fetchRewardBatches(initiativeId);
+    } catch (e: any) {
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
+      if (initiativeId) {
+        await fetchRewardBatches(initiativeId.toString());
+      }
+    } finally {
+      setSendBatchIsLoading(false);
+      setIsModalOpen(false);
+    }
+  };
 
   return (
     <Box p={1.5}>
@@ -295,25 +312,25 @@ const RefundRequests = () => {
           </Box>
         )}
 
-                {!rewardBatchesLoading && rewardBatches && rewardBatches.length > 0 && (
-                    <DataTable
-                        columns={columns}
-                        rows={rewardBatches}
-                        rowsPerPage={1}
-                        checkable={true}
-                        // paginationModel={{ page: currentPagination.pageNo, pageSize: currentPagination.pageSize, totalElements:  }}
-                        onPaginationPageChange={handlePaginationPageChange}
-                        onRowSelectionChange={handleRowSelectionChange}
-                        isRowSelectable={isRowSelectable}
-                        singleSelect
-                    />
-                )}
-                {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
-                    <NoResultPaper translationKey="pages.refundRequests.noData" />
-                )}
-            </Box>
-        </Box>
-    );
+        {!rewardBatchesLoading && rewardBatches && rewardBatches.length > 0 && (
+          <DataTable
+            columns={columns}
+            rows={rewardBatches}
+            rowsPerPage={1}
+            checkable={true}
+            // paginationModel={{ page: currentPagination.pageNo, pageSize: currentPagination.pageSize, totalElements:  }}
+            onPaginationPageChange={handlePaginationPageChange}
+            onRowSelectionChange={handleRowSelectionChange}
+            isRowSelectable={isRowSelectable}
+            singleSelect
+          />
+        )}
+        {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
+          <NoResultPaper translationKey="pages.refundRequests.noData" />
+        )}
+      </Box>
+    </Box>
+  );
 };
 
 export default RefundRequests;
