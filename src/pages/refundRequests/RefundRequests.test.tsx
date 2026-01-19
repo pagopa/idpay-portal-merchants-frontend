@@ -145,7 +145,6 @@ const mockData = [
     initialAmountCents: 10000,
     status: 'CREATED',
     month: getPreviousMonth(),
-    suspendedAmountCents: 2000,
   },
   {
     id: 2,
@@ -154,7 +153,6 @@ const mockData = [
     initialAmountCents: 20000,
     status: 'SENT',
     month: getPreviousMonth(),
-    suspendedAmountCents: null,
   },
   {
     id: 3,
@@ -163,7 +161,6 @@ const mockData = [
     initialAmountCents: 300000,
     status: 'EVALUATING',
     month: getPreviousMonth(),
-    suspendedAmountCents: 5000,
   },
 ];
 
