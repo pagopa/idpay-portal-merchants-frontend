@@ -2689,16 +2689,16 @@ components:
           format: date-time
           description: 'ENG: The date of the transaction - IT: La data della transazione'
           maxLength: 255
-        trxChargeDate:
-          type: string
-          format: date-time
-          description: "ENG: Payment authorization date - IT: La data di autorizzazione del pagamento"
-          maxLength: 255
         trxCode:
           type: string
           description: "ENG: Transaction code - IT: Il codice della transazione"
           maxLength: 100
           pattern: "^[a-zA-Z0-9]+$"
+        trxChargeDate:
+          type: string
+          format: date-time
+          description: "ENG: Payment authorization date - IT: La data di autorizzazione del pagamento"
+          maxLength: 255
         updateDate:
           type: string
           format: date-time
@@ -2860,6 +2860,11 @@ components:
           type: integer
           format: int64
           description: "ENG: Approved transaction amount in cents <br> IT: Importo approvato delle transazioni in centesimi"
+          example: 95000
+        suspendedAmountCents:
+          type: integer
+          format: int64
+          description: "ENG: Suspended transaction amount in cents <br> IT: Importo sospeso delle transazioni in centesimi"
           example: 95000
         initialAmountCents:
           type: integer

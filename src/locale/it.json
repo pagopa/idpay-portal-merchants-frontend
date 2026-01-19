@@ -354,6 +354,7 @@
         "iban" : "IBAN",
         "status" : "Status",
         "approvedRefund" : "Rimborso approvato",
+        "suspendedRefund" : "Rimborso sospeso",
         "exportCSV" : "Esporta csv",
         "detailCardTitleDx" : "dati rimborso",
         "posType": "Tipo",
