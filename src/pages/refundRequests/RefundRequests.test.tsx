@@ -187,5 +187,396 @@ describe('RefundRequests', () => {
     mockSendRewardBatch.mockResolvedValue({});
   });
 
-  // ... rest of the tests unchanged ...
+  it('should render the component correctly', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalled();
+    });
+
+    expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
+    expect(screen.getByText('pages.refundRequests.subtitle')).toBeInTheDocument();
+    expect(screen.getByTestId('data-table')).toBeInTheDocument();
+  });
+
+  it('should fetch reward batches on mount', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id');
+    });
+  });
+
+  it('should show loading spinner while fetching data', async () => {
+    let resolvePromise: any;
+    mockGetRewardBatches.mockImplementation(() => new Promise((resolve) => {
+      resolvePromise = resolve;
+    }));
+
+    renderWithStore(<RefundRequests />);
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+
+    resolvePromise({ content: mockData });
+
+    await waitFor(() => {
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should display data after successful fetch', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByText('001-20251125 223')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('002-20251125 224')).toBeInTheDocument();
+    expect(screen.getByText('003-20251125 225')).toBeInTheDocument();
+  });
+
+  it('should show no result paper when there is no data', async () => {
+    mockGetRewardBatches.mockResolvedValueOnce({ content: [] });
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalled();
+    });
+
+    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+  });
+
+  it('should handle fetch error gracefully', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    mockGetRewardBatches.mockRejectedValueOnce(new Error('API Error'));
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalled();
+    });
+
+    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should not show send button when no rows are selected', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole('button', { name: /pages.refundRequests.sendRequests/i })).not.toBeInTheDocument();
+  });
+
+  it('should show send button when rows are selected', async () => {
+    const user = userEvent.setup();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('checkbox-1')).toBeInTheDocument();
+    });
+
+    const checkbox = screen.getByTestId('checkbox-1');
+    await user.click(checkbox);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /pages.refundRequests.sendRequests/i })).toBeInTheDocument();
+    });
+  });
+
+  it('should open modal when send button is clicked', async () => {
+    const user = userEvent.setup();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('checkbox-1')).toBeInTheDocument();
+    });
+
+    const checkbox = screen.getByTestId('checkbox-1');
+    await user.click(checkbox);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /pages.refundRequests.sendRequests/i })).toBeInTheDocument();
+    });
+
+    const sendButton = screen.getByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('refund-modal')).toBeInTheDocument();
+    });
+  });
+
+  it('should close modal when cancel button is clicked', async () => {
+    const user = userEvent.setup();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('checkbox-1')).toBeInTheDocument();
+    });
+
+    const checkbox = screen.getByTestId('checkbox-1');
+    await user.click(checkbox);
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const cancelButton = await screen.findByText('Indietro');
+    await user.click(cancelButton);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should call sendRewardBatch and close modal when confirm button is clicked', async () => {
+    const user = userEvent.setup();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('checkbox-1')).toBeInTheDocument();
+    });
+
+    const checkbox = screen.getByTestId('checkbox-1');
+    await user.click(checkbox);
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const confirmButton = await screen.findByText('Invia');
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '1');
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should handle sendRewardBatch error and show error notification', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    mockSendRewardBatch.mockRejectedValueOnce(new Error('Send Error'));
+
+    const user = userEvent.setup();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('checkbox-1')).toBeInTheDocument();
+    });
+
+    const checkbox = screen.getByTestId('checkbox-1');
+    await user.click(checkbox);
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const confirmButton = await screen.findByText('Invia');
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockSendRewardBatch).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should only allow selection of rows with CREATED status', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('checkbox-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('checkbox-2')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('checkbox-3')).not.toBeInTheDocument();
+  });
+
+  it('should render table columns correctly', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Lotto')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Tipologia')).toBeInTheDocument();
+    expect(screen.getByText('Rimborso richiesto')).toBeInTheDocument();
+    expect(screen.getByText('Stato')).toBeInTheDocument();
+  });
+
+  it('should display status chips for each row', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      const chips = screen.getAllByTestId('custom-chip');
+      expect(chips).toHaveLength(3);
+    });
+
+    const chips = screen.getAllByTestId('custom-chip');
+    expect(chips[0]).toHaveTextContent('CREATED');
+    expect(chips[1]).toHaveTextContent('SENT');
+    expect(chips[2]).toHaveTextContent('EVALUATING');
+  });
+
+  it('should map posType correctly', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Fisico')).toBeInTheDocument();
+    });
+
+    const onlineTexts = screen.getAllByText('Online');
+    expect(onlineTexts).toHaveLength(2);
+  });
+
+  it('should display tooltip text correctly with dash when value is empty', async () => {
+    const emptyDataMock = [{
+      id: 4,
+      name: '',
+      posType: 'PHYSICAL',
+      initialAmountCents: 10000,
+      status: 'CREATED',
+      month: getPreviousMonth(),
+    }];
+
+    mockGetRewardBatches.mockResolvedValue({ content: emptyDataMock });
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByText('-')).toBeInTheDocument();
+    });
+  });
+
+  it('should handle missing initiativesList gracefully', async () => {
+    const storeWithoutInitiatives = createMockStore([]);
+
+    renderWithStore(<RefundRequests />, storeWithoutInitiatives);
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+    expect(mockGetRewardBatches).not.toHaveBeenCalled();
+  });
+
+  it('should handle pagination page change', async () => {
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    const user = userEvent.setup();
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+    });
+
+    const nextPageButton = screen.getByText('Next Page');
+    await user.click(nextPageButton);
+
+    expect(consoleLogSpy).toHaveBeenCalledWith('Page changed:', 2);
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it('should show loading state in modal when sending batch', async () => {
+    let resolvePromise: any;
+    mockSendRewardBatch.mockImplementation(() => new Promise((resolve) => {
+      resolvePromise = resolve;
+    }));
+
+    const user = userEvent.setup();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('checkbox-1')).toBeInTheDocument();
+    });
+
+    const checkbox = screen.getByTestId('checkbox-1');
+    await user.click(checkbox);
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const confirmButton = await screen.findByText('Invia');
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      const disabledButton = screen.getByRole('button', { name: /Invia/i });
+      expect(disabledButton).toBeDisabled();
+    });
+
+    resolvePromise({});
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should handle missing initiativeId when sending batch', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const storeWithoutInitiatives = createMockStore([]);
+
+    renderWithStore(<RefundRequests />, storeWithoutInitiatives);
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should handle missing batchId when sending batch', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should handle null response from getRewardBatches', async () => {
+    mockGetRewardBatches.mockResolvedValueOnce(null);
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalled();
+    });
+
+    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+  });
+
+  it('should handle response without content property', async () => {
+    mockGetRewardBatches.mockResolvedValueOnce({});
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalled();
+    });
+
+    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+  });
+
+  it('should render spacer column', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      const headers = screen.getAllByRole('columnheader');
+      expect(headers[0]).toHaveTextContent('');
+    });
+  });
 });
