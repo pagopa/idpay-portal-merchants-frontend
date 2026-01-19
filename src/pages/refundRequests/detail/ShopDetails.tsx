@@ -8,8 +8,10 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Button, Tooltip,
-  CircularProgress, Alert,
+  Button,
+  Tooltip,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -40,7 +42,9 @@ import { RewardBatchDTO } from '../../../api/generated/merchants/RewardBatchDTO'
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/FranchisePointOfSaleDTO';
 import { ShopCard } from './ShopCard';
 
-const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(el => el !== "TO_CHECK");
+const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(
+  (el) => el !== 'TO_CHECK'
+);
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
@@ -59,7 +63,7 @@ const ShopDetails: React.FC = () => {
   const [selectedPointOfSaleId, setSelectedPointOfSaleId] = useState<string>('');
   const initiativesList = useSelector(intiativesListSelector);
 
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
 
   const formik = useFormik<any>({
     initialValues: {
@@ -75,21 +79,26 @@ const ShopDetails: React.FC = () => {
 
   const fetchAll = async () => {
     try {
-      let response : any;
-      if (initiativesList){
+      let response: any;
+      if (initiativesList) {
         response = await getAllRewardBatches(initiativesList[0].initiativeId!);
 
         const match = response.content.find((e: any) => e.id === staticStore.id);
         setStore(match);
       }
     } catch (error: any) {
-      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
     }
   };
 
   useEffect(() => {
     void fetchAll();
-  }, [initiativesList, batchId, selectedStatus, selectedPointOfSaleId,drawerRefreshKey]);
+  }, [initiativesList, batchId, selectedStatus, selectedPointOfSaleId, drawerRefreshKey]);
 
   const fetchStores = async (fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
@@ -132,7 +141,7 @@ const ShopDetails: React.FC = () => {
     if (batchId && initiativesList?.[0].initiativeId) {
       try {
         setBatchDownloadIsLoading(true);
-        const response = await downloadBatchCsv(initiativesList[0].initiativeId, batchId as string, );
+        const response = await downloadBatchCsv(initiativesList[0].initiativeId, batchId as string);
         const { approvedBatchUrl } = response;
         const filename = 'lotto.csv';
 
@@ -144,12 +153,16 @@ const ShopDetails: React.FC = () => {
         link.click();
       } catch (e) {
         console.log(e);
-         setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
       } finally {
         setBatchDownloadIsLoading(false);
       }
     }
-
   };
 
   return (
@@ -214,17 +227,26 @@ const ShopDetails: React.FC = () => {
             }}
             onClick={handleDownloadCsv}
             data-testid="download-csv-button-test"
-            disabled={(store?.status !== 'APPROVED') || batchDownloadIsLoading}
+            disabled={store?.status !== 'APPROVED' || batchDownloadIsLoading}
           >
             {t('pages.refundRequests.storeDetails.exportCSV')}
-            <span style={{marginLeft: '10px'}}>{batchDownloadIsLoading && <CircularProgress size={20} />}</span>
+            <span style={{ marginLeft: '10px' }}>
+              {batchDownloadIsLoading && <CircularProgress size={20} />}
+            </span>
           </Button>
         </Box>
       </Box>
 
-      {store?.status === 'APPROVING' &&
-        <Alert sx={{ mb: 3 }} variant="outlined" color="info" icon={<Sync sx={{ color: "#6BCFFB" }} />} >{t('pages.refundRequests.storeDetails.csv.alert')}</Alert>
-      }
+      {store?.status === 'APPROVING' && (
+        <Alert
+          sx={{ mb: 3 }}
+          variant="outlined"
+          color="info"
+          icon={<Sync sx={{ color: '#6BCFFB' }} />}
+        >
+          {t('pages.refundRequests.storeDetails.csv.alert')}
+        </Alert>
+      )}
 
       <ShopCard
         batchName={store?.name}
@@ -234,6 +256,7 @@ const ShopDetails: React.FC = () => {
         status={store?.status || ''}
         approvedRefund={formattedCurrency(store?.approvedAmountCents, '-', true)}
         posType={store?.posType || ''}
+        suspendedAmountCents={formattedCurrency(store?.suspendedAmountCents, '-', true)}
       />
 
       <Box
@@ -265,7 +288,9 @@ const ShopDetails: React.FC = () => {
                 {stores.map((store) => (
                   <MenuItem key={store?.pointOfSaleId} value={store?.pointOfSaleId}>
                     <Tooltip title={store?.franchiseName || MISSING_DATA_PLACEHOLDER}>
-                      <span>{truncateString(store?.franchiseName || MISSING_DATA_PLACEHOLDER, 40)}</span>
+                      <span>
+                        {truncateString(store?.franchiseName || MISSING_DATA_PLACEHOLDER, 40)}
+                      </span>
                     </Tooltip>
                   </MenuItem>
                 ))}
@@ -289,7 +314,9 @@ const ShopDetails: React.FC = () => {
                   width: 165,
                 }}
                 size="small"
-                renderValue={(selected) => (selected ? <StatusChipInvoice status={selected} /> : '')}
+                renderValue={(selected) =>
+                  selected ? <StatusChipInvoice status={selected} /> : ''
+                }
                 disabled={stores?.length === 0}
               >
                 {filterByStatusOptionsList.map((item) => (
@@ -303,7 +330,7 @@ const ShopDetails: React.FC = () => {
         </FiltersForm>
         <InvoiceDataTable
           batchId={batchId}
-          onDrawerClosed={() => setDrawerRefreshKey(prev => prev + 1)}
+          onDrawerClosed={() => setDrawerRefreshKey((prev) => prev + 1)}
           rewardBatchTrxStatus={selectedStatus}
           pointOfSaleId={selectedPointOfSaleId}
         />
