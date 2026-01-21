@@ -80,6 +80,14 @@ const RefundRequests = () => {
       renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
     },
     {
+      field: 'suspendedAmountCents',
+      headerName: 'Rimborso sospeso',
+      disableColumnMenu: true,
+      flex: 2,
+      sortable: false,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+    },
+    {
       field: 'status',
       headerName: 'Stato',
       disableColumnMenu: true,

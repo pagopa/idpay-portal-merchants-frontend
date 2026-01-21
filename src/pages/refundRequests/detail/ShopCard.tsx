@@ -16,6 +16,7 @@ type Props = {
   status: string;
   approvedRefund: string;
   posType: string;
+  suspendedAmountCents?: string;
 };
 
 const posTypeMapper = (posType: string) => {
@@ -48,7 +49,8 @@ export const ShopCard = ({
   refundAmount,
   status,
   approvedRefund,
-  posType
+  posType,
+  suspendedAmountCents,
 }: Props) => {
   const { t } = useTranslation();
   const boldStyle = { fontWeight: theme.typography.fontWeightBold };
@@ -97,7 +99,16 @@ export const ShopCard = ({
     },
     {
       label: t('pages.refundRequests.storeDetails.approvedRefund'),
-      value: status === RewardBatchTrxStatusEnum.APPROVED && approvedRefund ? approvedRefund : MISSING_DATA_PLACEHOLDER,
+      value:
+        status === RewardBatchTrxStatusEnum.APPROVED && approvedRefund
+          ? approvedRefund
+          : MISSING_DATA_PLACEHOLDER,
+      minWidth: '180px',
+      marginBottom: 2,
+    },
+    {
+      label: t('pages.refundRequests.storeDetails.suspendedRefund'),
+      value: suspendedAmountCents || MISSING_DATA_PLACEHOLDER,
       minWidth: '180px',
     },
   ];
@@ -125,7 +136,7 @@ export const ShopCard = ({
 
   return (
     <Paper sx={{ p: 3 }}>
-      <Grid container width="100%" spacing={2} >
+      <Grid container width="100%" spacing={2}>
         <Grid item xs={6}>
           {detailsSx.map((item, index) => (
             <Box key={index} sx={{ display: 'flex' }}>
@@ -133,13 +144,16 @@ export const ShopCard = ({
                 <Typography variant="body1">{item.label}</Typography>
               </Box>
               <Tooltip
-                title={item?.value?.trim() === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                title={
+                  item?.value?.trim() === '' || !item?.value
+                    ? MISSING_DATA_PLACEHOLDER
+                    : item?.value
+                }
               >
-                <Typography
-                  variant="body1"
-                  sx={{ ...boldStyle, height: "fit-content"}}
-                >
-                  {item.value?.trim() === '' || !item.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                <Typography variant="body1" sx={{ ...boldStyle, height: 'fit-content' }}>
+                  {item.value?.trim() === '' || !item.value
+                    ? MISSING_DATA_PLACEHOLDER
+                    : item?.value}
                 </Typography>
               </Tooltip>
             </Box>
@@ -162,28 +176,30 @@ export const ShopCard = ({
               >
                 <Typography variant="body1">{item.label}</Typography>
               </Box>
-              {
-                !item?.isStatus ?
-                  <Tooltip
-                    title={item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+              {!item?.isStatus ? (
+                <Tooltip
+                  title={
+                    item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value
+                  }
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{ ...boldStyle, marginTop: item.marginTop, height: 'fit-content' }}
                   >
-                      <Typography
-                        variant="body1"
-                        sx={{ ...boldStyle, marginTop: item.marginTop, height: "fit-content"}}
-                      >
-                        {item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
-                      </Typography>
-                  </Tooltip> :
-                  <Box
-                    sx={{
-                      minWidth: item.minWidth,
-                      marginBottom: item.marginBottom,
-                      marginTop: item.marginTop,
-                    }}
-                  >
-                    {item?.value}
-                  </Box>
-              }
+                    {item?.value === '' || !item?.value ? MISSING_DATA_PLACEHOLDER : item?.value}
+                  </Typography>
+                </Tooltip>
+              ) : (
+                <Box
+                  sx={{
+                    minWidth: item.minWidth,
+                    marginBottom: item.marginBottom,
+                    marginTop: item.marginTop,
+                  }}
+                >
+                  {item?.value}
+                </Box>
+              )}
             </Box>
           ))}
         </Grid>
