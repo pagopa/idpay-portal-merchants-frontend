@@ -327,7 +327,8 @@
     },
     "pointOfSaleTransactions": {
       "searchByFiscalCode": "Cerca per Codice Fiscale",
-      "searchByGtin": "Cerca per GTIN"
+      "searchByGtin": "Cerca per GTIN",
+      "searchByTrxCode": "Cerca per Codice sconto"
     },
     "refundRequests": {
       "title": "Richieste di rimborso",

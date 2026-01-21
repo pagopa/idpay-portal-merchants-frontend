@@ -58,6 +58,7 @@ const MerchantTransactions = ({
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState<boolean>(false);
   const [gtinError, setGtinError] = useState<string>('');
+  const [trxCodeError, setTrxCodeError] = useState<string>('');
   // const [gtinValue, setGtinValue] = useState<string>('');
   const listItemDetail = getDetailFieldList();
 
@@ -74,6 +75,7 @@ const MerchantTransactions = ({
     initialValues: {
       fiscalCode: '',
       productGtin: '',
+      trxCode: '',
       status: '',
       page: 0,
     },
@@ -236,6 +238,24 @@ const MerchantTransactions = ({
     formik.handleChange(event);
   };
 
+  const handleTrxCodeChange = (event: any) => {
+    const value = event.target.value;
+
+    if (value.includes(' ') || value.length > 8) {
+      return;
+    }
+
+    const alphanumericRegex = /^[a-zA-Z0-9]*$/;
+
+    if (!alphanumericRegex.test(value)) {
+      setTrxCodeError('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.');
+      return;
+    }
+
+    setTrxCodeError('');
+    formik.handleChange(event);
+  };
+
   const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
     <Tooltip title={value && value.length >= tooltipThreshold ? value : ''}>
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
@@ -252,7 +272,7 @@ const MerchantTransactions = ({
         onFiltersReset={handleOnFiltersReset}
         filtersAppliedOnce={filtersAppliedOnce}
       >
-        <Grid item xs={12} sm={6} md={3} lg={3}>
+        <Grid item xs={12} sm={6} md={3} lg={2.5}>
           <FormControl fullWidth size="small">
             <TextField
               label={t('pages.pointOfSaleTransactions.searchByFiscalCode')}
@@ -268,7 +288,7 @@ const MerchantTransactions = ({
             />
           </FormControl>
         </Grid>
-        <Grid item xs={12} sm={6} md={3} lg={3}>
+        <Grid item xs={12} sm={6} md={3} lg={2.5}>
           <FormControl fullWidth size="small">
             <TextField
               label={t('pages.pointOfSaleTransactions.searchByGtin')}
@@ -284,6 +304,26 @@ const MerchantTransactions = ({
               inputProps={{ maxLength: 14 }}
               error={!!gtinError}
               helperText={gtinError}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3} lg={2.5}>
+          <FormControl fullWidth size="small">
+            <TextField
+              label={t('pages.pointOfSaleTransactions.searchByTrxCode')}
+              placeholder={t('pages.pointOfSaleTransactions.searchByTrxCode')}
+              name="trxCode"
+              aria-label="searchTrxCode"
+              role="input"
+              InputLabelProps={{ required: false }}
+              value={formik.values.trxCode}
+              onChange={(e) => handleTrxCodeChange(e)}
+              onBlur={() => setTrxCodeError('')}
+              size="small"
+              data-testid="searchTrxCode-test"
+              inputProps={{ maxLength: 8 }}
+              error={!!trxCodeError}
+              helperText={trxCodeError}
             />
           </FormControl>
         </Grid>
