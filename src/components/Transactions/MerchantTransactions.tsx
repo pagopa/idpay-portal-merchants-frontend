@@ -11,7 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia';
 import { useFormik } from 'formik';
@@ -57,8 +57,7 @@ const MerchantTransactions = ({
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState<boolean>(false);
-  const [gtinError, setGtinError] = useState<string>('');
-  const [trxCodeError, setTrxCodeError] = useState<string>('');
+  const [codeError, setCodeError] = useState<Record<string, string>>({gtinError: "", trxCodeError: ""});
   // const [gtinValue, setGtinValue] = useState<string>('');
   const listItemDetail = getDetailFieldList();
 
@@ -220,41 +219,27 @@ const MerchantTransactions = ({
     setDrawerOpened(newOpen);
   };
 
-  const handleGtinChange = (event: any) => {
+  const handleCodeChange = useCallback((event: any, length: number, code: string) => {
     const value = event.target.value;
+    const codeMap: Record<string, string> = {
+      gtinError: "GTIN/EAN",
+      trxCodeError: "sconto"
+    };
 
-    if (value.includes(' ') || value.length > 14) {
+    if (value.includes(' ') || value.length > length) {
       return;
     }
 
     const alphanumericRegex = /^[a-zA-Z0-9]*$/;
 
     if (!alphanumericRegex.test(value)) {
-      setGtinError('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.');
+      setCodeError(prev => ({ ...prev, [code]: `Il codice ${codeMap[code]} deve contenere al massimo ${length} caratteri alfanumerici.`}));
       return;
     }
 
-    setGtinError('');
+    setCodeError(prev => ({ ...prev, [code]: ""}));
     formik.handleChange(event);
-  };
-
-  const handleTrxCodeChange = (event: any) => {
-    const value = event.target.value;
-
-    if (value.includes(' ') || value.length > 8) {
-      return;
-    }
-
-    const alphanumericRegex = /^[a-zA-Z0-9]*$/;
-
-    if (!alphanumericRegex.test(value)) {
-      setTrxCodeError('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.');
-      return;
-    }
-
-    setTrxCodeError('');
-    formik.handleChange(event);
-  };
+  }, []);
 
   const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
     <Tooltip title={value && value.length >= tooltipThreshold ? value : ''}>
@@ -298,12 +283,12 @@ const MerchantTransactions = ({
               role="input"
               InputLabelProps={{ required: false }}
               value={formik.values.productGtin}
-              onChange={(e) => handleGtinChange(e)}
-              onBlur={() => setGtinError('')}
+              onChange={(e) => handleCodeChange(e, 14, "gtinError")}
+              onBlur={() => setCodeError(prev => ({ ...prev, gtinError: ""}))}
               size="small"
               inputProps={{ maxLength: 14 }}
-              error={!!gtinError}
-              helperText={gtinError}
+              error={!!codeError.gtinError}
+              helperText={codeError.gtinError}
             />
           </FormControl>
         </Grid>
@@ -317,13 +302,12 @@ const MerchantTransactions = ({
               role="input"
               InputLabelProps={{ required: false }}
               value={formik.values.trxCode}
-              onChange={(e) => handleTrxCodeChange(e)}
-              onBlur={() => setTrxCodeError('')}
+              onChange={(e) => handleCodeChange(e, 8, "trxCodeError")}
+              onBlur={() => setCodeError(prev => ({ ...prev, trxCodeError: ""}))}
               size="small"
-              data-testid="searchTrxCode-test"
               inputProps={{ maxLength: 8 }}
-              error={!!trxCodeError}
-              helperText={trxCodeError}
+              error={!!codeError.trxCodeError}
+              helperText={codeError.trxCodeError}
             />
           </FormControl>
         </Grid>
