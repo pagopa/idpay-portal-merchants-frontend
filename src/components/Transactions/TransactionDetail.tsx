@@ -131,7 +131,14 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
                 <Button
                   data-testid="btn-test"
                   sx={{
-                    padding: '0',
+                    padding: 0,
+                    width: '100%',
+                    display: 'block',
+                    textAlign: 'left',
+                    minWidth: 0,
+                    maxWidth: '100%',
+                    minHeight: 'fit-content',
+                    height: 'auto',
                     '&:hover': {
                       backgroundColor: '#fff',
                       color: '#0055AA',
@@ -142,10 +149,32 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
                   {isLoading ? (
                     <CircularProgress color="inherit" size={20} data-testid="item-loader" />
                   ) : (
-                    <>
-                      <ReceiptLong />{' '}
-                      {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
-                    </>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: '6px',
+                        width: "100%",
+                        mt: '2px',
+                        textAlign: "left"
+                      }}
+                    >
+                      <ReceiptLong sx={{ flexShrink: 0, mt: 2 }} />
+                      <Typography
+                        component="span"
+                        variant="inherit"
+                        sx={{
+                          whiteSpace: 'pre-wrap',
+                          overflowWrap: 'anywhere',
+                          wordBreak: 'break-word',
+                          minWidth: 0,
+                          flex: 1,
+                          marginTop:2
+                        }}
+                      >
+                        {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Box>
                   )}
                 </Button>
               </Box>
