@@ -190,7 +190,14 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
               >
                 {item?.label}
               </Typography>
-              <Typography variant="body2" fontWeight="fontWeightMedium">
+              <Typography
+                variant="body2"
+                fontWeight="fontWeightMedium"
+                sx={{
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'anywhere',
+                }}
+              >
                 {item.format
                   ? item.format(getNestedValue(itemValues, item?.id))
                   : getValueText(item?.id, item?.type)}
@@ -213,7 +220,7 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
             </Typography>
           </Box>
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} sx={{ minWidth: 0}}>
           <Box mt={1}>
             <Typography
               variant="body2"
@@ -225,7 +232,14 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
             <Button
               data-testid="btn-test"
               sx={{
-                padding: '0',
+                padding: 0,
+                width: '100%',
+                display: 'block',
+                textAlign: 'left',
+                minWidth: 0,
+                maxWidth: '100%',
+                minHeight: 'fit-content',
+                height: 'auto',
                 '&:hover': {
                   backgroundColor: '#fff',
                   color: '#0055AA',
@@ -236,15 +250,37 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
               {isLoading ? (
                 <CircularProgress color="inherit" size={20} data-testid="item-loader" />
               ) : (
-                <>
-                  <ReceiptLong /> {itemValues?.invoiceData?.filename ?? MISSING_DATA_PLACEHOLDER}
-                </>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: '6px',
+                    width: "100%",
+                    mt: '2px',
+                    minWidth: 0,
+                  }}
+                >
+                  <ReceiptLong sx={{ flexShrink: 0, mt: '2px' }} />
+                  <Typography
+                    component="span"
+                    variant="inherit"
+                    sx={{
+                      whiteSpace: 'pre-wrap',
+                      overflowWrap: 'anywhere',
+                      wordBreak: 'break-word',
+                      minWidth: 0,
+                      flex: 1,
+                    }}
+                  >
+                    {itemValues?.invoiceData?.filename ?? MISSING_DATA_PLACEHOLDER}
+                  </Typography>
+                </Box>
               )}
             </Button>
           </Box>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} minWidth={0}>
           <Box mt={1}>
             <Typography
               variant="body2"
@@ -259,8 +295,8 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
         {[RewardBatchTrxStatusEnum.SUSPENDED, RewardBatchTrxStatusEnum.REJECTED].includes(
           itemValues.rewardBatchTrxStatus
         ) && (
-          <Grid item xs={12}>
-            <Box mt={1}>
+          <Grid item xs={12} sx={{ minWidth: 0 }}>
+            <Box mt={1} sx={{ minWidth: 0 }}>
               <Typography
                 variant="overline"
                 fontWeight={theme.typography.fontWeightBold}
@@ -268,12 +304,13 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
               >
                 nota ufficiale
               </Typography>
+
               <Typography
                 variant="body2"
                 fontWeight={600}
                 sx={{
                   whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
+                  overflowWrap: 'anywhere',
                 }}
               >
                 {itemValues?.rewardBatchRejectionReason ?? MISSING_DATA_PLACEHOLDER}
