@@ -3,17 +3,18 @@ import { currencyFormatter } from "../../utils/formatUtils";
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 
 export interface Props {
-  value:string|number;
+  value: number;
   type?:"body1"|"body2";
+  isValueVisible?: boolean;
 }
 
-export default function CurrencyColumn({ value, type="body1" }: Props) {
+export default function CurrencyColumn({ value, type="body1", isValueVisible }: Props) {
     return (
          <Tooltip
-              title={value ? currencyFormatter(Number(value)).toString() : MISSING_DATA_PLACEHOLDER}
+              title={isNaN(value) || (!isValueVisible && !value) ? MISSING_DATA_PLACEHOLDER : currencyFormatter(Number(value)).toString()}
             >
         <Typography variant={type} >
-            {value ? currencyFormatter(Number(value)).toString() : MISSING_DATA_PLACEHOLDER}
+            {isNaN(value) || (!isValueVisible && !value) ? MISSING_DATA_PLACEHOLDER : currencyFormatter(Number(value)).toString()}
         </Typography>
         </Tooltip>
     );

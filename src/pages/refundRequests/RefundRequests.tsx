@@ -77,7 +77,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
     },
     {
       field: 'suspendedAmountCents',
@@ -85,7 +85,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible/>,
     },
     {
       field: 'status',
@@ -143,7 +143,8 @@ const RefundRequests = () => {
       if (response?.content) {
         const mappedResponse = response.content.map((value) => ({
           ...value,
-          approvedAmountCents: value.status !== 'APPROVED' ? undefined : value.approvedAmountCents,
+          approvedAmountCents: value.status === 'APPROVED' ? value.approvedAmountCents : undefined,
+          suspendedAmountCents: value.status === 'APPROVED' ? value.suspendedAmountCents : undefined
         }));
         setRewardBatches(mappedResponse);
         setSelectedRows([]);
