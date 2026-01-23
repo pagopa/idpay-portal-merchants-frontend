@@ -327,6 +327,7 @@ const ShopDetails: React.FC = () => {
                 inputProps={{ maxLength: 8 }}
                 error={!!trxCodeError}
                 helperText={trxCodeError}
+                data-testid="trxCodeFilter"
               />
             </FormControl>
           </Grid>

@@ -296,7 +296,7 @@ describe('MerchantTransactions', () => {
     expect(fiscalCodeInput).toHaveValue('TESTCF');
   });
 
-  it('accepts valid alphanumeric GTIN input', async () => {
+  it('accepts valid alphanumeric GTIN and trxCode input', async () => {
     render(
       <MerchantTransactions
         transactions={mockTransactions}
@@ -306,13 +306,17 @@ describe('MerchantTransactions', () => {
     );
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
     await userEvent.type(gtinInput, 'ABC123xyz');
+    await userEvent.type(trxCodeInput, 'ABC123xy');
 
     expect(gtinInput).toHaveValue('ABC123xyz');
+    expect(trxCodeInput).toHaveValue('ABC123xy');
     expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
   });
 
-  it('prevents GTIN input with spaces', async () => {
+  it('prevents GTIN and trxCodeInput input with spaces', async () => {
     render(
       <MerchantTransactions
         transactions={mockTransactions}
@@ -322,12 +326,15 @@ describe('MerchantTransactions', () => {
     );
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin') as HTMLInputElement;
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '123 456' } });
+    fireEvent.change(trxCodeInput, { target: { value: '123 456' } });
 
     expect(gtinInput.value).not.toContain(' ');
+    expect(trxCodeInput.value).not.toContain(' ');
   });
 
-  it('prevents GTIN input longer than 14 characters', async () => {
+  it('prevents GTIN and trxCodeInput input longer than 14/8 characters', async () => {
     render(
       <MerchantTransactions
         transactions={mockTransactions}
@@ -337,12 +344,15 @@ describe('MerchantTransactions', () => {
     );
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin') as HTMLInputElement;
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode') as HTMLInputElement;
     fireEvent.change(gtinInput, { target: { value: '123456789012345' } });
+    fireEvent.change(trxCodeInput, { target: { value: '123456789012345' } });
 
     expect(gtinInput.value.length).toBeLessThanOrEqual(14);
+    expect(trxCodeInput.value.length).toBeLessThanOrEqual(8);
   });
 
-  it('shows error message for special characters in GTIN', () => {
+  it('shows error message for special characters in GTIN and trxCode', () => {
     render(
       <MerchantTransactions
         transactions={mockTransactions}
@@ -352,12 +362,15 @@ describe('MerchantTransactions', () => {
     );
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '123@#$' } });
+    fireEvent.change(trxCodeInput, { target: { value: '123@#$' } });
 
     expect(screen.getByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).toBeInTheDocument();
+    expect(screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).toBeInTheDocument();
   });
 
-  it('accepts exactly 14 characters in GTIN', async () => {
+  it('accepts exactly 14 characters in GTIN and trxCode', async () => {
     render(
       <MerchantTransactions
         transactions={mockTransactions}
@@ -367,9 +380,12 @@ describe('MerchantTransactions', () => {
     );
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
     await userEvent.type(gtinInput, '12345678901234');
+    await userEvent.type(trxCodeInput, '12345678');
 
     expect(gtinInput).toHaveValue('12345678901234');
+    expect(trxCodeInput).toHaveValue('12345678');
   });
 
   it('clears error message when valid input is entered after invalid', () => {
@@ -382,12 +398,17 @@ describe('MerchantTransactions', () => {
     );
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
 
     fireEvent.change(gtinInput, { target: { value: '123@' } });
+    fireEvent.change(trxCodeInput, { target: { value: '123@' } });
     expect(screen.getByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).toBeInTheDocument();
+    expect(screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).toBeInTheDocument();
 
     fireEvent.change(gtinInput, { target: { value: '123456' } });
+    fireEvent.change(trxCodeInput, { target: { value: '123456' } });
     expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
   });
 
   it('clears error message on blur', () => {
@@ -400,14 +421,18 @@ describe('MerchantTransactions', () => {
     );
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
 
     fireEvent.change(gtinInput, { target: { value: '123@' } });
     fireEvent.blur(gtinInput);
+    fireEvent.change(trxCodeInput, { target: { value: '123@' } });
+    fireEvent.blur(trxCodeInput);
 
     expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
   });
 
-  it('accepts empty GTIN input', () => {
+  it('accepts empty GTIN and trxCode input', () => {
     render(
       <MerchantTransactions
         transactions={mockTransactions}
@@ -417,10 +442,14 @@ describe('MerchantTransactions', () => {
     );
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '' } });
+    fireEvent.change(trxCodeInput, { target: { value: '' } });
 
     expect(gtinInput).toHaveValue('');
+    expect(trxCodeInput).toHaveValue('');
     expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
   });
 
   it('renders form with all filter fields', () => {
@@ -433,6 +462,7 @@ describe('MerchantTransactions', () => {
     );
 
     expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode')).toBeInTheDocument();
+    expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode')).toBeInTheDocument();
     expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin')).toBeInTheDocument();
   });
 
