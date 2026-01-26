@@ -11,26 +11,20 @@ import { currencyFormatter } from '../../../utils/formatUtils';
 
 type Props = {
   store: {
-  batchName: string;
-  dateRange: string;
-  companyName: string;
-  refundAmount: number;
-  status: string;
-  approvedRefund: number;
-  posType: string;
-  suspendedAmountCents: number;
-};
+    batchName: string;
+    dateRange: string;
+    companyName: string;
+    refundAmount: number;
+    status: string;
+    approvedRefund: number;
+    posType: string;
+    suspendedAmountCents: number;
+  };
 };
 
-const posTypeMapper = (posType: string) => {
-  switch (posType) {
-    case 'PHYSICAL':
-      return 'Fisico';
-    case 'ONLINE':
-      return 'Online';
-    default:
-      return posType;
-  }
+const posTypeMapper: Record<string, string> = {
+  'PHYSICAL': 'Fisico',
+  'ONLINE': 'Online'
 };
 
 const StatusChip = ({ status }: any) => {
@@ -45,7 +39,7 @@ const StatusChip = ({ status }: any) => {
   );
 };
 
-export const ShopCard = ({store}: Props) => {
+export const ShopCard = ({ store }: Props) => {
   const { t } = useTranslation();
   const boldStyle = { fontWeight: theme.typography.fontWeightBold };
   const [iban, setIban] = useState<string | undefined>();
@@ -74,69 +68,69 @@ export const ShopCard = ({store}: Props) => {
 
   const details = useMemo(() => ({
     detailsSx: [
-    {
-      label: t('pages.refundRequests.storeDetails.referredBatch'),
-      value: batchName || MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-      marginBottom: 2,
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.referencePeriod'),
-      value: dateRange || MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-      marginBottom: 2,
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.posType'),
-      value: posTypeMapper(posType) || MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-      marginBottom: 2,
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.companyName'),
-      value: companyName,
-      minWidth: '180px',
-      marginBottom: 2,
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.requestedRefund'),
-      value: formatCurrency(refundAmount / 100),
-      minWidth: '180px',
-      marginBottom: 2,
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.approvedRefund'),
-      value: status === 'APPROVED' ? formatCurrency(approvedRefund / 100) : MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-      marginBottom: 2,
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.suspendedRefund'),
-      value: status === 'APPROVED' ? formatCurrency(suspendedAmountCents / 100) : MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-    },
-  ],
-  detailsDx: [
-    {
-      label: t('pages.refundRequests.storeDetails.holder'),
-      value: ibanHolder || MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-      marginTop: 1,
-    },
-    {
-      label: t('pages.refundRequests.storeDetails.iban'),
-      value: iban || MISSING_DATA_PLACEHOLDER,
-      minWidth: '180px',
-      marginBottom: 6,
-    },
-    {
-      label: t('pages.refundRequests.batchTransactionsDetails.state'),
-      value: <StatusChip status={status as RewardBatchTrxStatusEnum} />,
-      minWidth: '180px',
-      isStatus: true,
-    },
-  ]
-}), [store]);
+      {
+        label: t('pages.refundRequests.storeDetails.referredBatch'),
+        value: batchName || MISSING_DATA_PLACEHOLDER,
+        minWidth: '180px',
+        marginBottom: 2,
+      },
+      {
+        label: t('pages.refundRequests.storeDetails.referencePeriod'),
+        value: dateRange || MISSING_DATA_PLACEHOLDER,
+        minWidth: '180px',
+        marginBottom: 2,
+      },
+      {
+        label: t('pages.refundRequests.storeDetails.posType'),
+        value: posTypeMapper[posType] || MISSING_DATA_PLACEHOLDER,
+        minWidth: '180px',
+        marginBottom: 2,
+      },
+      {
+        label: t('pages.refundRequests.storeDetails.companyName'),
+        value: companyName,
+        minWidth: '180px',
+        marginBottom: 2,
+      },
+      {
+        label: t('pages.refundRequests.storeDetails.requestedRefund'),
+        value: formatCurrency(refundAmount / 100),
+        minWidth: '180px',
+        marginBottom: 2,
+      },
+      {
+        label: t('pages.refundRequests.storeDetails.approvedRefund'),
+        value: status === 'APPROVED' ? formatCurrency(approvedRefund / 100) : MISSING_DATA_PLACEHOLDER,
+        minWidth: '180px',
+        marginBottom: 2,
+      },
+      {
+        label: t('pages.refundRequests.storeDetails.suspendedRefund'),
+        value: status === 'APPROVED' ? formatCurrency(suspendedAmountCents / 100) : MISSING_DATA_PLACEHOLDER,
+        minWidth: '180px',
+      },
+    ],
+    detailsDx: [
+      {
+        label: t('pages.refundRequests.storeDetails.holder'),
+        value: ibanHolder || MISSING_DATA_PLACEHOLDER,
+        minWidth: '180px',
+        marginTop: 1,
+      },
+      {
+        label: t('pages.refundRequests.storeDetails.iban'),
+        value: iban || MISSING_DATA_PLACEHOLDER,
+        minWidth: '180px',
+        marginBottom: 6,
+      },
+      {
+        label: t('pages.refundRequests.batchTransactionsDetails.state'),
+        value: <StatusChip status={status as RewardBatchTrxStatusEnum} />,
+        minWidth: '180px',
+        isStatus: true,
+      },
+    ]
+  }), [store]);
 
   return (
     <Paper sx={{ p: 3 }}>
