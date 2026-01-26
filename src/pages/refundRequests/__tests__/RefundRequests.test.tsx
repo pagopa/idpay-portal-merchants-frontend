@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Route } from 'react-router-dom';
-import RefundRequests from './RefundRequests';
+import RefundRequests from '../RefundRequests';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -25,7 +25,7 @@ jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
   default: () => jest.fn(),
 }));
 
-jest.mock('../../components/dataTable/DataTable', () => ({
+jest.mock('../../../components/dataTable/DataTable', () => ({
   __esModule: true,
   default: ({
     columns,
@@ -69,12 +69,12 @@ jest.mock('../../components/dataTable/DataTable', () => ({
   ),
 }));
 
-jest.mock('../../components/Chip/CustomChip', () => ({
+jest.mock('../../../components/Chip/CustomChip', () => ({
   __esModule: true,
   default: ({ label }: any) => <span data-testid="custom-chip">{label}</span>,
 }));
 
-jest.mock('../../components/Transactions/useStatus', () => ({
+jest.mock('../../../components/Transactions/useStatus', () => ({
   __esModule: true,
   default: (status: string) => ({
     label: status,
@@ -83,21 +83,21 @@ jest.mock('../../components/Transactions/useStatus', () => ({
   }),
 }));
 
-jest.mock('../../components/Transactions/CurrencyColumn', () => ({
+jest.mock('../../../components/Transactions/CurrencyColumn', () => ({
   __esModule: true,
   default: ({ value }: any) => <span>{value.toFixed(2)} €</span>,
 }));
 
-jest.mock('../reportedUsers/NoResultPaper', () => ({
+jest.mock('../../reportedUsers/NoResultPaper', () => ({
   __esModule: true,
   default: ({ translationKey }: any) => <div data-testid="no-result-paper">{translationKey}</div>,
 }));
 
-jest.mock('../../redux/slices/initiativesSlice', () => ({
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
   intiativesListSelector: (state: any) => state.initiatives.initiativesList,
 }));
 
-jest.mock('./RefundRequestModal', () => ({
+jest.mock('../RefundRequestModal', () => ({
   RefundRequestsModal: ({
     isOpen,
     setIsOpen,
@@ -123,7 +123,7 @@ jest.mock('./RefundRequestModal', () => ({
 const mockGetRewardBatches = jest.fn();
 const mockSendRewardBatch = jest.fn();
 
-jest.mock('../../services/merchantService', () => ({
+jest.mock('../../../services/merchantService', () => ({
   getRewardBatches: (initiativeId: string) => mockGetRewardBatches(initiativeId),
   sendRewardBatch: (initiativeId: string, batchId: string) =>
     mockSendRewardBatch(initiativeId, batchId),
