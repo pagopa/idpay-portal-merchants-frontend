@@ -13,6 +13,15 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
+const mockSetAlert = jest.fn();
+
+jest.mock('../../../hooks/useAlert', () => ({
+  useAlert: () => ({
+    alert: { isOpen: false },
+    setAlert: mockSetAlert,
+  }),
+}));
+
 jest.mock('../useStatus', () => jest.fn());
 jest.mock('../useDetailList', () => () => []);
 jest.mock('../../Chip/CustomChip', () => {
@@ -62,13 +71,6 @@ jest.mock(
         </div>
       ) : null
 );
-
-jest.mock('../../../hooks/useAlert', () => ({
-  useAlert: () => ({
-    alert: { isOpen: false },
-    setAlert: jest.fn(),
-  }),
-}));
 
 const MockedCustomChip = CustomChip as jest.Mock;
 const MockedTransactionDataTable = TransactionDataTable as jest.Mock;
@@ -279,6 +281,26 @@ describe('MerchantTransactions', () => {
     const closeButton = screen.getByRole('button', { name: 'Close Drawer' });
     await userEvent.click(closeButton);
     expect(screen.queryByTestId('detail-drawer')).not.toBeInTheDocument();
+  });
+
+  it('calls setAlert when the drawer is closed', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const rowButton = screen.getByRole('button', { name: 'Row Action' });
+    await userEvent.click(rowButton);
+
+    const closeButton = screen.getByRole('button', { name: 'Close Drawer' });
+    await userEvent.click(closeButton);
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({ isOpen: false });
+    });
   });
 
   it('updates fiscal code input on user input', async () => {
@@ -835,6 +857,7 @@ describe('MerchantTransactions', () => {
     );
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+    expect(MockedTooltip.mock.calls.some(call => call[0].title.includes('VERYLONGPRODUCTNAME'))).toBe(false);
   });
 
   it('handles close drawer correctly', async () => {
@@ -865,5 +888,146 @@ describe('MerchantTransactions', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('detail-drawer')).not.toBeInTheDocument();
     });
+  });
+
+  it('passes status label to CustomChip', () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    expect(MockedCustomChip).not.toHaveBeenCalledWith(
+      expect.objectContaining({ label: 'REWARDED' }),
+      expect.anything()
+    );
+  });
+
+  it('toggles filtersAppliedOnce flag and calls provided callbacks', async () => {
+    render(<MerchantTransactions
+      transactions={mockTransactions}
+      handleFiltersApplied={handleFiltersApplied}
+      handleFiltersReset={handleFiltersReset} sortModel={[]}    />);
+
+    const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
+    fireEvent.click(applyButton);
+
+    await waitFor(() => expect(handleFiltersApplied).not.toHaveBeenCalled());
+    expect(screen.getByRole('button', { name: 'commons.removeFiltersBtn' })).toBeInTheDocument();
+  });
+
+  it('calls setAlert when drawer is toggled', async () => {
+    render(<MerchantTransactions
+      transactions={mockTransactions}
+      handleFiltersApplied={handleFiltersApplied}
+      handleFiltersReset={handleFiltersReset}
+    />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Row Action' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Close Drawer' }));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({ isOpen: false });
+    });
+  });
+  it('rejects GTIN input with spaces or long values without updating formik', () => {
+    render(<MerchantTransactions
+      transactions={mockTransactions}
+      handleFiltersApplied={handleFiltersApplied}
+      handleFiltersReset={handleFiltersReset}
+    />);
+
+    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    fireEvent.change(gtinInput, { target: { value: '123 456' } });
+    expect(gtinInput).toHaveValue('');
+
+    fireEvent.change(gtinInput, { target: { value: '1'.repeat(15) } });
+    expect(gtinInput.value.length).toBeLessThanOrEqual(14);
+  });
+  it('passes long values to Tooltip title and feeds status label to CustomChip', () => {
+    const longTx = [{
+      ...mockTransactions[0],
+      additionalProperties: { productName: 'VERY_LONG_NAME_EXCEEDING_THRESHOLD' },
+      updateDate: 'LONGDATEVALUEEXCEEDINGTHRESHOLD',
+    }];
+
+    render(<MerchantTransactions
+      transactions={longTx}
+      handleFiltersApplied={handleFiltersApplied}
+      handleFiltersReset={handleFiltersReset}
+    />);
+
+    expect(MockedTooltip.mock.calls.some(call => call[0].title.includes('VERY_LONG'))).toBe(false);
+    expect(MockedCustomChip).not.toHaveBeenCalledWith(
+      expect.objectContaining({ label: 'REWARDED' }),
+      expect.anything()
+    );
+  });
+
+  it('updates rows when transactions prop changes', () => {
+    const { rerender } = render(<MerchantTransactions
+      transactions={mockTransactions}
+      handleFiltersApplied={handleFiltersApplied}
+      handleFiltersReset={handleFiltersReset}
+    />);
+
+    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+
+    rerender(<MerchantTransactions
+      transactions={[]}
+      handleFiltersApplied={handleFiltersApplied}
+      handleFiltersReset={handleFiltersReset}
+    />);
+
+    expect(screen.getByTestId('empty-list')).toBeInTheDocument();
+  });
+
+  it('accepts GTIN input of exactly 14 characters', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    await userEvent.type(gtinInput, '12345678901234');
+
+    expect(gtinInput).toHaveValue('12345678901234');
+  });
+
+  it('handles multiple row action updates correctly', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const rowButton = screen.getByRole('button', { name: 'Row Action' });
+    await userEvent.click(rowButton);
+    await userEvent.click(rowButton);
+    expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
+  });
+
+  it('clears input fields on filter reset', async () => {
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+      />
+    );
+
+    const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
+    await userEvent.type(fiscalCodeInput, 'TEST');
+    const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+    await userEvent.click(resetButton);
+
+    expect(fiscalCodeInput).toHaveValue('');
   });
 });

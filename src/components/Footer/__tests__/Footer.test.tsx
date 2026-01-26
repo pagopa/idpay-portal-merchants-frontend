@@ -1,15 +1,48 @@
 import React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import Footer from '../Footer';
 import { LangCode } from '@pagopa/mui-italia';
 import { pagoPALink } from '../FooterConfig';
+import { ReactI18NextChild } from 'react-i18next';
 
 let mockedMuiFooterProps: any;
 
 const mockedPagoPALink = { ...pagoPALink };
 
 jest.mock('@pagopa/mui-italia/dist/components/Footer/Footer', () => ({
-  Footer: (props) => {
+  Footer: (props: {
+    loggedUser: {
+      toString: () =>
+        | boolean
+        | React.ReactChild
+        | React.ReactFragment
+        | React.ReactPortal
+        | Iterable<ReactI18NextChild>
+        | null
+        | undefined;
+    };
+    preLoginLinks: any;
+    postLoginLinks: any;
+    companyLink: any;
+    onLanguageChanged: (arg0: string) => void;
+    onExit: (arg0: () => void) => void;
+    currentLangCode:
+      | boolean
+      | React.ReactChild
+      | React.ReactFragment
+      | React.ReactPortal
+      | Iterable<ReactI18NextChild>
+      | null
+      | undefined;
+    productsJsonUrl:
+      | boolean
+      | React.ReactChild
+      | React.ReactFragment
+      | React.ReactPortal
+      | Iterable<ReactI18NextChild>
+      | null
+      | undefined;
+  }) => {
     mockedMuiFooterProps = props;
     return (
       <div data-testid="mui-italia-footer-mock">
@@ -39,7 +72,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
-  Trans: ({ i18nKey, children }: { i18nKey: string; children: React.ReactNode }) => (
+  Trans: ({ children }: { i18nKey: string; children: React.ReactNode }) => (
     <div data-testid="trans-component">{children}</div>
   ),
 }));
