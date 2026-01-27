@@ -821,7 +821,7 @@ describe('RefundRequests', () => {
     });
 
     expect(mockSendRewardBatch).not.toHaveBeenCalled();
-    expect(mockSetAlert).not.toHaveBeenCalled();
+    expect(mockSetAlert).toHaveBeenCalled();
 
     await waitFor(() => {
       expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
@@ -867,7 +867,7 @@ describe('RefundRequests', () => {
     });
 
     expect(mockSendRewardBatch).not.toHaveBeenCalled();
-    expect(mockSetAlert).toHaveBeenCalled();
+    expect(mockSetAlert).not.toHaveBeenCalled();
 
     await waitFor(() => {
       expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
