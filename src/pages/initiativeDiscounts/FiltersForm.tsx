@@ -65,7 +65,7 @@ const FiltersForm = <T extends Record<string, any>>({
       >
         {/* Bottone "Applica Filtri" */}
         <Button
-          sx={{ height: '44.5px', gridColumn: 'span 1' }} 
+          sx={{ height: '44.5px', gridColumn: 'span 1', width: "100%" }} 
             variant="outlined"
             size="small"
             onClick={handleApplyFilters}

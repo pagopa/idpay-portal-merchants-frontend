@@ -286,7 +286,7 @@ const ShopDetails: React.FC = () => {
           onFiltersReset={handleOnFiltersReset}
           filtersAppliedOnce={false}
         >
-          <Grid item lg={3}>
+          <Grid item xs={12} sm={6} md={3} lg={2.5}>
             <FormControl fullWidth size="small" disabled={storesLoading}>
               <InputLabel id="point-of-sale-label">Punto vendita</InputLabel>
               <Select
