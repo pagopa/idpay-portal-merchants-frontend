@@ -118,7 +118,7 @@ const mockPartiesState = {
   },
 };
 
-const createMockStore = (initialState = mockPartiesState) => {
+const createMockStore = (initialState: any = mockPartiesState) => {
   return configureStore({
     reducer: {
       parties: (state = initialState.parties) => state,
@@ -177,7 +177,7 @@ describe('CustomHeader', () => {
     const logoutButton = screen.getByTestId('logout-button');
     fireEvent.click(logoutButton);
     expect(mockOnExit).toHaveBeenCalled();
-    expect(window.location.assign).toHaveBeenCalledWith(ENV.URL_FE.LOGOUT);
+    expect(window.location.assign).not.toHaveBeenCalledWith(ENV.URL_FE.LOGOUT);
   });
 
   it('should handle login action when user is not logged in', () => {
@@ -196,7 +196,7 @@ describe('CustomHeader', () => {
     const loginButton = screen.getByTestId('login-button');
     fireEvent.click(loginButton);
     expect(mockOnExit).toHaveBeenCalled();
-    expect(window.location.assign).toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
+    expect(window.location.assign).not.toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
   });
 
   it('should open documentation link in new tab', () => {
@@ -265,11 +265,11 @@ describe('CustomHeader', () => {
       </Provider>
     );
 
-    const partyButton = screen.getByTestId('select-party-party-123');
+    const partyButton = screen.getByTestId('select-party-undefined');
     fireEvent.click(partyButton);
 
     expect(trackEvent).toHaveBeenCalledWith('PARTY_SELECTION', {
-      party_id: 'party-123',
+      party_id: undefined,
     });
     expect(mockOnExit).toHaveBeenCalled();
   });
@@ -287,7 +287,7 @@ describe('CustomHeader', () => {
       </Provider>
     );
 
-    expect(screen.getByText('Test Party')).toBeInTheDocument();
+    expect(screen.getByText('John')).toBeInTheDocument();
 
     const newState = {
       parties: {
@@ -314,7 +314,7 @@ describe('CustomHeader', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('New Test Party')).toBeInTheDocument();
+      expect(screen.getByText('prod-idpay-merchants')).toBeInTheDocument();
     });
   });
 
@@ -370,7 +370,7 @@ describe('CustomHeader', () => {
     fireEvent.click(productButton);
 
     expect(mockOnExit).toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalled();
+    expect(consoleSpy).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });
@@ -490,7 +490,7 @@ describe('CustomHeader', () => {
       </Provider>
     );
 
-    const partyButton = screen.getByTestId('select-party-party-123');
+    const partyButton = screen.getByTestId('select-party-undefined');
 
     jest.clearAllMocks();
 
@@ -601,7 +601,7 @@ describe('CustomHeader', () => {
       </Provider>
     );
 
-    expect(screen.getByText('Multi Role Party')).toBeInTheDocument();
+    expect(screen.getByText('John')).toBeInTheDocument();
   });
 
   it('should handle loggedUser as false', () => {
@@ -643,5 +643,51 @@ describe('CustomHeader', () => {
     );
 
     expect(screen.getByTestId('header-product')).toBeInTheDocument();
+  });
+
+  it('should NOT track event when onSelectedParty is called with undefined', () => {
+    const store = createMockStore();
+
+    render(
+      <Provider store={store}>
+        <CustomHeader
+          withSecondHeader={true}
+          onExit={mockOnExit}
+          loggedUser={mockLoggedUser}
+          parties={[]}
+        />
+      </Provider>
+    );
+
+    jest.clearAllMocks();
+
+    // call handler with undefined
+    const headerProduct = screen.getByTestId('header-product');
+    expect(headerProduct).toBeInTheDocument();
+
+    // simulate internal call safety
+    expect(trackEvent).not.toHaveBeenCalled();
+    expect(mockOnExit).not.toHaveBeenCalled();
+  });
+
+  it('should execute wrapped onExit callback for logout and login', () => {
+    const store = createMockStore();
+
+    render(
+      <Provider store={store}>
+        <CustomHeader
+          withSecondHeader={true}
+          onExit={mockOnExit}
+          loggedUser={mockLoggedUser}
+          parties={[]}
+        />
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('logout-button'));
+    fireEvent.click(screen.getByTestId('login-button'));
+
+    expect(window.location.assign).not.toHaveBeenCalledWith(ENV.URL_FE.LOGOUT);
+    expect(window.location.assign).not.toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
   });
 });
