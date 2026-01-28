@@ -1,15 +1,48 @@
 import React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import Footer from '../Footer';
 import { LangCode } from '@pagopa/mui-italia';
 import { pagoPALink } from '../FooterConfig';
+import { ReactI18NextChild } from 'react-i18next';
 
 let mockedMuiFooterProps: any;
 
 const mockedPagoPALink = { ...pagoPALink };
 
 jest.mock('@pagopa/mui-italia/dist/components/Footer/Footer', () => ({
-  Footer: (props) => {
+  Footer: (props: {
+    loggedUser: {
+      toString: () =>
+        | boolean
+        | React.ReactChild
+        | React.ReactFragment
+        | React.ReactPortal
+        | Iterable<ReactI18NextChild>
+        | null
+        | undefined;
+    };
+    preLoginLinks: any;
+    postLoginLinks: any;
+    companyLink: any;
+    onLanguageChanged: (arg0: string) => void;
+    onExit: (arg0: () => void) => void;
+    currentLangCode:
+      | boolean
+      | React.ReactChild
+      | React.ReactFragment
+      | React.ReactPortal
+      | Iterable<ReactI18NextChild>
+      | null
+      | undefined;
+    productsJsonUrl:
+      | boolean
+      | React.ReactChild
+      | React.ReactFragment
+      | React.ReactPortal
+      | Iterable<ReactI18NextChild>
+      | null
+      | undefined;
+  }) => {
     mockedMuiFooterProps = props;
     return (
       <div data-testid="mui-italia-footer-mock">
@@ -39,7 +72,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
-  Trans: ({ i18nKey, children }: { i18nKey: string; children: React.ReactNode }) => (
+  Trans: ({ children }: { i18nKey: string; children: React.ReactNode }) => (
     <div data-testid="trans-component">{children}</div>
   ),
 }));
@@ -271,6 +304,30 @@ describe('<Footer />', () => {
     expect(window.open).toHaveBeenCalledWith('#workwithus');
   });
 
+  test('should call onClickNavigate when certifications link is clicked', () => {
+    jest.spyOn(window, 'open');
+    render(<Footer loggedUser={false} />);
+
+    const certificationsLink = mockedMuiFooterProps.preLoginLinks.resources.links.find(
+      (link: any) => link.label === 'common.footer.preLoginLinks.resources.links.certifications'
+    );
+    certificationsLink?.onClick();
+
+    expect(window.open).toHaveBeenCalledWith('#certifications');
+  });
+
+  test('should call onClickNavigate when information security link is clicked', () => {
+    jest.spyOn(window, 'open');
+    render(<Footer loggedUser={false} />);
+
+    const infoSecurityLink = mockedMuiFooterProps.preLoginLinks.resources.links.find(
+      (link: any) => link.label === 'common.footer.preLoginLinks.resources.links.informationsecurity'
+    );
+    infoSecurityLink?.onClick();
+
+    expect(window.open).toHaveBeenCalledWith('#infosecurity');
+  });
+
   test('should have correct aria labels for all pre-login links', () => {
     render(<Footer loggedUser={false} />);
 
@@ -298,9 +355,7 @@ describe('<Footer />', () => {
 
   test('should render legal info with Trans component', () => {
     render(<Footer loggedUser={false} />);
-    // Verify legalInfo contains the expected content structure
     expect(mockedMuiFooterProps.legalInfo).toBeDefined();
-    // The Trans component wraps the legal info content
     expect(mockedMuiFooterProps.legalInfo.props.i18nKey).toBe('common.footer.legalInfoText');
   });
 
@@ -343,6 +398,26 @@ describe('<Footer />', () => {
     expect(postLoginLinks[1].label).toBe('common.footer.postLoginLinks.protectionofpersonaldata');
     expect(postLoginLinks[2].label).toBe('common.footer.postLoginLinks.termsandconditions');
     expect(postLoginLinks[3].label).toBe('common.footer.postLoginLinks.accessibility');
+  });
+
+  test('should call onClickNavigate for post-login privacy link', () => {
+    jest.spyOn(window, 'open');
+    render(<Footer loggedUser={true} />);
+
+    const privacyLink = mockedMuiFooterProps.postLoginLinks[0];
+    privacyLink.onClick();
+
+    expect(window.open).toHaveBeenCalledWith(undefined);
+  });
+
+  test('should call onClickNavigate for post-login terms link', () => {
+    jest.spyOn(window, 'open');
+    render(<Footer loggedUser={true} />);
+
+    const termsLink = mockedMuiFooterProps.postLoginLinks[2];
+    termsLink.onClick();
+
+    expect(window.open).toHaveBeenCalledWith(undefined);
   });
 
   test('should call onClickNavigate for post-login protection link', () => {
@@ -423,5 +498,12 @@ describe('<Footer />', () => {
       expect(social.href).toBeDefined();
       expect(social.ariaLabel).toBeDefined();
     });
+  });
+
+  test('should apply pagoPALink href to logo button', () => {
+    render(<Footer loggedUser={false} />);
+
+    const logoButton = screen.getByTestId('logo-btn');
+    expect(logoButton).toHaveAttribute('href', 'https://www.pagopa.it');
   });
 });
