@@ -26,6 +26,11 @@ interface RouteParams {
   id: string;
 }
 
+const posTypeMapper: Record<string, string> = {
+  'PHYSICAL': 'Fisico',
+  'ONLINE': 'Online'
+};
+
 const RefundRequests = () => {
   const { setAlert } = useAlert();
   const { id } = useParams<RouteParams>();
@@ -61,7 +66,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper(params.value)),
+      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper[params.value]),
     },
     {
       field: 'initialAmountCents',
@@ -77,7 +82,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
     },
     {
       field: 'suspendedAmountCents',
@@ -85,7 +90,7 @@ const RefundRequests = () => {
       disableColumnMenu: true,
       flex: 2,
       sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
     },
     {
       field: 'status',
@@ -143,7 +148,8 @@ const RefundRequests = () => {
       if (response?.content) {
         const mappedResponse = response.content.map((value) => ({
           ...value,
-          approvedAmountCents: value.status !== 'APPROVED' ? undefined : value.approvedAmountCents,
+          approvedAmountCents: value.status === 'APPROVED' ? value.approvedAmountCents : undefined,
+          suspendedAmountCents: value.status === 'APPROVED' ? value.suspendedAmountCents : undefined
         }));
         setRewardBatches(mappedResponse);
         setSelectedRows([]);
@@ -212,17 +218,6 @@ const RefundRequests = () => {
     }
 
     return !!(batchYear === currentYear && batchMonth < currentMonth);
-  };
-
-  const posTypeMapper = (posType: string) => {
-    switch (posType) {
-      case 'PHYSICAL':
-        return 'Fisico';
-      case 'ONLINE':
-        return 'Online';
-      default:
-        return posType;
-    }
   };
 
   const handleSentBatches = async () => {

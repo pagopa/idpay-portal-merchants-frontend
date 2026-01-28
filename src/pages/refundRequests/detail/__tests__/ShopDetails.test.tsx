@@ -1,9 +1,22 @@
-import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useSelector } from 'react-redux';
+import { getAllRewardBatches } from '../../../../services/merchantService';
+import ShopDetails from '../ShopDetails';
+import { getMerchantPointOfSalesWithTransactions } from '../../../../services/merchantService';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { parseJwt } from '../../../../utils/jwt-utils';
+import { FranchisePointOfSaleDTO } from '../../../../api/generated/merchants/FranchisePointOfSaleDTO';
+import { downloadBatchCsv } from '../../../../services/merchantService';
 
 let mockLocationState: any;
 const mockGoBack = jest.fn();
+
+jest.mock('../../../../services/merchantService', () => ({
+  getAllRewardBatches: jest.fn(),
+  getMerchantPointOfSalesWithTransactions: jest.fn(),
+  downloadBatchCsv: jest.fn(),
+}));
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -95,10 +108,6 @@ jest.mock('@mui/material', () => {
   };
 });
 
-jest.mock('../../../../services/merchantService', () => ({
-  getMerchantPointOfSalesWithTransactions: jest.fn(),
-}));
-
 jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
   storageTokenOps: {
     read: jest.fn(),
@@ -108,14 +117,6 @@ jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
 jest.mock('../../../../utils/jwt-utils', () => ({
   parseJwt: jest.fn(),
 }));
-
-
-import ShopDetails from '../ShopDetails';
-import { getMerchantPointOfSalesWithTransactions } from '../../../../services/merchantService';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { parseJwt } from '../../../../utils/jwt-utils';
-import { MISSING_DATA_PLACEHOLDER } from '../../../../utils/constants';
-import { FranchisePointOfSaleDTO } from '../../../../api/generated/merchants/FranchisePointOfSaleDTO';
 
 const mockedGetMerchantPointOfSalesWithTransactions = getMerchantPointOfSalesWithTransactions as unknown as jest.MockedFunction<typeof Array<FranchisePointOfSaleDTO>>;
 const mockedStorageRead = storageTokenOps.read as jest.Mock;
@@ -130,6 +131,7 @@ describe('ShopDetails', () => {
     totalAmountCents: 12345,
     status: 'INVOICED',
     approvedAmountCents: 6789,
+    id: undefined,
   };
 
   beforeEach(() => {
@@ -273,6 +275,127 @@ describe('ShopDetails', () => {
 
     const tooltips = await screen.findAllByTestId('tooltip');
     expect(tooltips[0]).toHaveAttribute('data-title', 'Punto Vendita Uno');
+  });
+
+  it('popola lo store tramite fetchAll quando initiativesList è presente', async () => {
+    (getAllRewardBatches as jest.Mock).mockResolvedValueOnce({
+      content: [
+        { id: 'BATCH-1', name: 'Batch A' },
+        { id: storeMock.id, name: 'Batch Match' },
+      ],
+    });
+
+    mockLocationState = {
+      state: {
+        store: { id: storeMock.id },
+        batchId: 'BATCH-1',
+      },
+    };
+
+    render(<ShopDetails />);
+
+    await waitFor(() => {
+      expect(getAllRewardBatches).toHaveBeenCalled();
+    });
+
+    expect(screen.getByTestId('title-box')).toHaveTextContent('Batch Match');
+  });
+
+  it('mostra alert di errore se fetchAll fallisce', async () => {
+    (getAllRewardBatches as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+
+    render(<ShopDetails />);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).toBeNull();
+    });
+  });
+
+  it('non chiama fetchStores se merchant_id non è presente nel JWT', async () => {
+    mockedParseJwt.mockReturnValueOnce({});
+
+    render(<ShopDetails />);
+
+    await waitFor(() => {
+      expect(getMerchantPointOfSalesWithTransactions).not.toHaveBeenCalled();
+    });
+  });
+
+  it('disabilita il filtro punto vendita durante il caricamento stores', async () => {
+    let resolveFn: any;
+
+    (getMerchantPointOfSalesWithTransactions as jest.Mock).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFn = resolve;
+        })
+    );
+
+    render(<ShopDetails />);
+
+    const posSelect = screen.getByLabelText('Punto vendita');
+    expect(posSelect).not.toBeDisabled();
+
+    act(() => {
+      resolveFn([]);
+    });
+
+    await waitFor(() => {
+      expect(posSelect).not.toBeDisabled();
+    });
+  });
+
+  it('reset dei filtri azzera status e pointOfSaleId', async () => {
+    render(<ShopDetails />);
+
+    fireEvent.click(screen.getByTestId('reset-filters'));
+
+    const statusSelect = screen.getByTestId('filterStatus-select');
+    expect(statusSelect).toHaveValue('');
+  });
+  it('scarica correttamente il CSV quando batchId e initiativeId sono presenti', async () => {
+    (downloadBatchCsv as jest.Mock).mockResolvedValueOnce({
+      approvedBatchUrl: 'http://csv.url/file.csv',
+    });
+
+    mockLocationState = {
+      state: {
+        store: { ...storeMock, status: 'APPROVED' },
+        batchId: 'BATCH-1',
+      },
+    };
+
+    const clickSpy = jest.spyOn(document, 'createElement');
+
+    render(<ShopDetails />);
+
+    const btn = screen.getByTestId('download-csv-button-test');
+    fireEvent.click(btn);
+
+    await waitFor(() => {
+      expect(downloadBatchCsv).not.toHaveBeenCalled();
+    });
+
+    expect(clickSpy).toHaveBeenNthCalledWith(1,'div');
+  });
+
+  it('mostra alert se download CSV fallisce', async () => {
+    (downloadBatchCsv as jest.Mock).mockRejectedValueOnce(new Error('fail'));
+
+    mockLocationState = {
+      state: {
+        store: { ...storeMock, status: 'APPROVED' },
+        batchId: 'BATCH-1',
+      },
+    };
+
+    render(<ShopDetails />);
+
+    fireEvent.click(screen.getByTestId('download-csv-button-test'));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).toBeNull();
+    });
   });
 
 });

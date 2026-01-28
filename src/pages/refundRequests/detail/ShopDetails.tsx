@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -27,7 +27,7 @@ import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
 import InvoiceDataTable from '../invoiceDataTable';
-import { formatDate, formattedCurrency, truncateString } from '../../../helpers';
+import { formatDate, truncateString } from '../../../helpers';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 import { parseJwt } from '../../../utils/jwt-utils';
 import {
@@ -64,6 +64,17 @@ const ShopDetails: React.FC = () => {
   const initiativesList = useSelector(intiativesListSelector);
 
   const { setAlert } = useAlert();
+
+  const mappedStore = useMemo(() => ({
+    batchName: store?.name,
+    dateRange: `${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`,
+    companyName: store?.businessName || '',
+    refundAmount: store?.initialAmountCents || 0,
+    status: store?.status || '',
+    approvedRefund: store?.approvedAmountCents || 0,
+    posType: store?.posType || '',
+    suspendedAmountCents: store?.suspendedAmountCents || 0,
+  }), [store]);
 
   const formik = useFormik<any>({
     initialValues: {
@@ -248,17 +259,7 @@ const ShopDetails: React.FC = () => {
         </Alert>
       )}
 
-      <ShopCard
-        batchName={store?.name}
-        dateRange={`${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`}
-        companyName={store?.businessName || ''}
-        refundAmount={formattedCurrency(store?.initialAmountCents, '-', true)}
-        status={store?.status || ''}
-        approvedRefund={formattedCurrency(store?.approvedAmountCents, '-', true)}
-        posType={store?.posType || ''}
-        suspendedAmountCents={formattedCurrency(store?.suspendedAmountCents, '-', true)}
-      />
-
+      <ShopCard store={mappedStore}/>
       <Box
         sx={{
           height: 'auto',
