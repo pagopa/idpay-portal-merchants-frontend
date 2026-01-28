@@ -76,7 +76,12 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
         </Grid>
         {listItem.map((item, index) => (
           <Grid item xs={12} key={index}>
-            <Box mt={1}>
+            <Box
+              mt={1}
+              sx={{
+                wordBreak: 'break-word'
+              }}
+            >
               <Typography
                 variant="body2"
                 fontWeight={theme.typography.fontWeightRegular}
