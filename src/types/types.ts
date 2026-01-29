@@ -35,6 +35,8 @@ export interface GetPointOfSaleTransactionsFilters {
     sort?: string;
     fiscalCode?: string;
     status?: string;
+    productGtin?: string;
+    trxCode?: string;
 }
 
 export interface SalePointFormDTO {

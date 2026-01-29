@@ -87,6 +87,7 @@ export const MerchantApi = {
       rewardBatchId?: string;
       rewardBatchTrxStatus?: string;
       pointOfSaleId?: string;
+      trxCode?: string;
     }
   ): Promise<MerchantTransactionsListDTO> => {
     const result = await apiClient.getMerchantTransactionsProcessed({

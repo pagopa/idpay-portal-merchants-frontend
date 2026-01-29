@@ -181,6 +181,7 @@ describe('InvoiceDataTable', () => {
         rewardBatchTrxStatus="ELIGIBLE"
         pointOfSaleId="POS-2"
         fiscalCode="BBBBBB00B00B000B"
+        trxCode='TRX-CODE-001'
       />
     );
     await screen.findByTestId('data-table');
@@ -192,6 +193,7 @@ describe('InvoiceDataTable', () => {
         rewardBatchId: 'batch-1',
         rewardBatchTrxStatus: 'ELIGIBLE',
         pointOfSaleId: 'POS-2',
+        trxCode: 'TRX-CODE-001',
         fiscalCode: 'BBBBBB00B00B000B',
       })
     );

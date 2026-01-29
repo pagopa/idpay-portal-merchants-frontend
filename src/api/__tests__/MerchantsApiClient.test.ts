@@ -1,5 +1,6 @@
 import { extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
 import { createClient } from '../generated/merchants/client';
+import { store } from '../../redux/store';
 
 jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
   storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
@@ -7,7 +8,10 @@ jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
 
 jest.mock('@pagopa/selfcare-common-frontend/redux/slices/appStateSlice', () => ({
   appStateActions: { addError: jest.fn((e) => e) },
-  appStateReducer: (state = {}, action: any) => state,
+}));
+
+jest.mock('../../redux/store', () => ({
+  store: { dispatch: jest.fn() },
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend/utils/api-utils', () => ({
@@ -20,6 +24,8 @@ jest.mock('../generated/merchants/client', () => ({
 }));
 
 let mockApiClient: any;
+
+store.dispatch = jest.fn();
 
 describe('MerchantApi', () => {
   beforeEach(() => {
@@ -35,6 +41,7 @@ describe('MerchantApi', () => {
       putPointOfSales: jest.fn(),
       getPointOfSales: jest.fn(),
       getPointOfSale: jest.fn(),
+      getPointOfSalesWithTransactions: jest.fn(),
       getPointOfSaleTransactionsProcessed: jest.fn(),
       downloadInvoiceFile: jest.fn(),
       getReportedUser: jest.fn(),
@@ -43,6 +50,7 @@ describe('MerchantApi', () => {
       sendRewardBatches: jest.fn(),
       postponeTransaction: jest.fn(),
       approveDownloadRewardBatch: jest.fn(),
+      getAllRewardBatches: jest.fn()
     };
 
     (createClient as jest.Mock).mockReturnValue(mockApiClient);
@@ -272,6 +280,42 @@ describe('MerchantApi', () => {
     expect(result).toBe('extracted');
   });
 
+  it('getMerchantPointOfSalesWithTransactions resolved', async () => {
+    const json = jest.fn().mockResolvedValue("test");
+    global.fetch = jest.fn().mockResolvedValue({ok: true, json});
+
+    const MerchantApi = loadApi();
+
+    const resolvedResult = await MerchantApi.getMerchantPointOfSalesWithTransactions('batch-id');
+
+    expect(global.fetch).toHaveBeenCalledWith(expect.any(String), {
+      method: 'GET',
+        headers: {
+          Authorization: `Bearer mocked-token`,
+          Accept: 'application/json',
+        },
+    });
+    expect(json).toHaveBeenCalled()
+    expect(resolvedResult).toBe("test")
+  });
+
+  it('getMerchantPointOfSalesWithTransactions rejected', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ok: false});
+
+    const MerchantApi = loadApi();
+
+    const rejectedResult = await MerchantApi.getMerchantPointOfSalesWithTransactions('batch-id');
+
+    expect(global.fetch).toHaveBeenCalledWith(expect.any(String), {
+      method: 'GET',
+        headers: {
+          Authorization: `Bearer mocked-token`,
+          Accept: 'application/json',
+        },
+    });
+    expect(rejectedResult).toStrictEqual([])
+  });
+
   it('getMerchantPointOfSaleTransactionsProcessed', async () => {
     mockApiClient.getPointOfSaleTransactionsProcessed.mockResolvedValue({ right: 'data' });
     const MerchantApi = loadApi();
@@ -437,17 +481,15 @@ describe('MerchantApi', () => {
     expect(result).toBe('extracted');
   });
 
-  it.skip('sendRewardBatches - error with REWARD_BATCH_PREVIOUS_NOT_SENT', async () => {
+  it('sendRewardBatches - error with REWARD_BATCH_PREVIOUS_NOT_SENT', async () => {
     mockApiClient.sendRewardBatches.mockResolvedValue({
-      left: [{ value: 'REWARD_BATCH_PREVIOUS_NOT_SENT' }],
+      right: { value: {code: 'REWARD_BATCH_PREVIOUS_NOT_SENT'}, status: 400 },
     });
     const MerchantApi = loadApi();
 
     const result = await MerchantApi.sendRewardBatches('init1', 'batch1');
 
-    expect(result).toEqual({
-      code: 'REWARD_BATCH_PREVIOUS_NOT_SENT',
-    });
+    expect(result).toBe('REWARD_BATCH_PREVIOUS_NOT_SENT');
   });
 
   it('sendRewardBatches - error with other code', async () => {

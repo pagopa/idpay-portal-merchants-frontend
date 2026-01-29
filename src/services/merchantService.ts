@@ -28,6 +28,7 @@ export type GetMerchantTransactionsProcessedParams = {
   rewardBatchId?: string;
   rewardBatchTrxStatus?: string;
   pointOfSaleId?: string;
+  trxCode?: string;
 };
 
 export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> =>

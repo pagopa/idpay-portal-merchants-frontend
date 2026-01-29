@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { useSelector } from 'react-redux';
 import { getAllRewardBatches } from '../../../../services/merchantService';
@@ -201,13 +202,15 @@ describe('ShopDetails', () => {
     expect(exportBtn).toHaveTextContent('pages.refundRequests.storeDetails.exportCSV');
   });
 
-  it('renderizza il filtro per data e per stato', () => {
+  it('renderizza il filtro per data, per stato e per trxCode', () => {
     render(<ShopDetails />);
 
     expect(screen.getByText('commons.backBtn')).toBeInTheDocument();
 
     const statusSelect = screen.getByTestId('filterStatus-select');
+    const trxCodeFilter = screen.getByTestId('trxCodeFilter');
     expect(statusSelect).toBeInTheDocument();
+    expect(trxCodeFilter).toBeInTheDocument();
   });
 
   it('i MenuItem dello stato mostrano le label restituite da StatusChip/getStatus (placeholder test minimale)', () => {
@@ -275,6 +278,85 @@ describe('ShopDetails', () => {
 
     const tooltips = await screen.findAllByTestId('tooltip');
     expect(tooltips[0]).toHaveAttribute('data-title', 'Punto Vendita Uno');
+  });
+
+  it('accepts valid alphanumeric trxCode input', async () => {
+    render(<ShopDetails />);
+
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    fireEvent.change(trxCodeInput, { target: { value: 'ABC123xy' } });
+
+    expect(trxCodeInput).toHaveValue('ABC123xy');
+    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
+  });
+
+  it('prevents trxCodeInput input with spaces', async () => {
+    render(<ShopDetails />);
+
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    fireEvent.change(trxCodeInput, { target: { value: '123 456' } });
+
+    expect(trxCodeInput.value).not.toContain(' ');
+  });
+
+  it('prevents trxCodeInput input longer than 14/8 characters', async () => {
+    render(<ShopDetails />);
+
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode') as HTMLInputElement;
+    fireEvent.change(trxCodeInput, { target: { value: '123456789012345' } });
+
+    expect(trxCodeInput.value.length).toBeLessThanOrEqual(8);
+  });
+
+  it('shows error message for special characters in  trxCode', () => {
+    render(<ShopDetails />);
+
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    fireEvent.change(trxCodeInput, { target: { value: '123@#$' } });
+
+    expect(screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).toBeInTheDocument();
+  });
+
+  it('accepts exactly 8 characters in trxCode', async () => {
+    render(<ShopDetails />);
+
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    fireEvent.change(trxCodeInput, { target: { value: '12345678' } });
+
+    expect(trxCodeInput).toHaveValue('12345678');
+  });
+
+  it('clears error message when valid input is entered after invalid', () => {
+    render(<ShopDetails />);
+
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+
+    fireEvent.change(trxCodeInput, { target: { value: '123@' } });
+    expect(screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).toBeInTheDocument();
+
+    fireEvent.change(trxCodeInput, { target: { value: '123456' } });
+    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
+  });
+
+  it('clears error message on blur', () => {
+    render(<ShopDetails />);
+
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+
+    fireEvent.change(trxCodeInput, { target: { value: '123@' } });
+    fireEvent.blur(trxCodeInput);
+
+    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
+  });
+
+  it('accepts empty trxCode input', () => {
+    render(<ShopDetails />);
+
+    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    fireEvent.change(trxCodeInput, { target: { value: '' } });
+
+    expect(trxCodeInput).toHaveValue('');
+    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
   });
 
   it('popola lo store tramite fetchAll quando initiativesList è presente', async () => {

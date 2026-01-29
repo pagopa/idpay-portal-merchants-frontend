@@ -32,6 +32,7 @@ interface InvoiceDataTableProps {
   batchId?: string;
   rewardBatchTrxStatus?: string;
   pointOfSaleId?: string;
+  trxCode?: string;
   fiscalCode?: string;
   onDrawerClosed?: () => void;
 }
@@ -53,6 +54,7 @@ const InvoiceDataTable = ({
   batchId,
   rewardBatchTrxStatus,
   pointOfSaleId,
+  trxCode,
   fiscalCode,
   onDrawerClosed,
 }: InvoiceDataTableProps) => {
@@ -180,6 +182,7 @@ const InvoiceDataTable = ({
       ...(batchId ? { rewardBatchId: batchId } : {}),
       ...(rewardBatchTrxStatus ? { rewardBatchTrxStatus } : {}),
       ...(pointOfSaleId ? { pointOfSaleId } : {}),
+      ...(trxCode ? { trxCode } : {}),
     };
 
     getMerchantTransactionsProcessed(params)
@@ -203,6 +206,7 @@ const InvoiceDataTable = ({
     batchId,
     rewardBatchTrxStatus,
     pointOfSaleId,
+    trxCode,
     sortModel,
     fiscalCode,
   ]);
@@ -316,7 +320,7 @@ const InvoiceDataTable = ({
 
   return (
     <Box
-      sx={{ my: 2,  position: 'relative'}}
+      sx={{ my: 2, position: 'relative' }}
     >
       <Stack
         direction={{ xs: 'column', md: 'row' }}
