@@ -580,7 +580,7 @@ describe('RefundRequests', () => {
 
     consoleErrorSpy.mockRestore();
   });
-  it('should log error and not call sendRewardBatch when batchId is missing', async () => {
+  it('should log error and not call sendRewardBatch when initiativeId is missing', async () => {
     const user = userEvent.setup();
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
@@ -620,7 +620,7 @@ describe('RefundRequests', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it('should log error and not call sendRewardBatch when initiativeId is missing', async () => {
+  it('should log error and not call sendRewardBatch when batchId is missing', async () => {
     const user = userEvent.setup();
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
