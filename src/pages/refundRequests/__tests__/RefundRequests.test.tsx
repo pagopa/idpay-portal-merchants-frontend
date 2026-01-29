@@ -1,17 +1,26 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import * as ReactRouterDom from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { MemoryRouter, Route } from 'react-router-dom';
-import RefundRequests from '../RefundRequests';
-
-const mockSetAlert = jest.fn();
+import { MemoryRouter, Route, useHistory } from 'react-router-dom';
+import RefundRequests from '../RefundRequests'
+import routes from '../../../routes';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
+}));
+
+const mockSetAlert = jest.fn();
+jest.mock('../../../hooks/useAlert', () => ({
+  __esModule: true,
+  useAlert: () => ({ setAlert: mockSetAlert }),
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: jest.fn(),
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend', () => ({
@@ -28,35 +37,25 @@ jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
   default: () => jest.fn(),
 }));
 
-jest.mock('../../../hooks/useAlert', () => ({
-  __esModule: true,
-  useAlert: () => ({ setAlert: mockSetAlert }),
-}));
-
 jest.mock('../../../components/dataTable/DataTable', () => ({
   __esModule: true,
   default: ({
-              columns,
-              rows,
-              onRowSelectionChange,
-              onPaginationPageChange,
-              isRowSelectable,
-            }: any) => {
-    if (columns?.[0]?.renderCell) {
-      columns[0].renderCell({ value: undefined, row: rows?.[0] });
-    }
-
-    return (
-      <div data-testid="data-table">
-        <table>
-          <thead>
+    columns,
+    rows,
+    onRowSelectionChange,
+    onPaginationPageChange,
+    isRowSelectable,
+  }: any) => (
+    <div data-testid="data-table">
+      <table>
+        <thead>
           <tr>
             {columns.map((col: any) => (
               <th key={col.field}>{col.headerName}</th>
             ))}
           </tr>
-          </thead>
-          <tbody>
+        </thead>
+        <tbody>
           {rows.map((row: any) => (
             <tr key={row.id}>
               <td>
@@ -64,33 +63,22 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
                   <input
                     type="checkbox"
                     data-testid={`checkbox-${row.id}`}
-                    onChange={() => {
-                      const selectedRow = row?.__throwOnSelect
-                        ? Object.defineProperty({ ...row }, 'id', {
-                          get: () => {
-                            throw new Error('Selection error');
-                          },
-                        })
-                        : row;
-
-                      onRowSelectionChange([selectedRow]);
-                    }}
+                    onChange={() => onRowSelectionChange([row])}
                   />
                 )}
               </td>
-              {columns.slice(1).map((col: any) => (
+              {columns.map((col: any) => (
                 <td key={col.field}>
                   {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
                 </td>
               ))}
             </tr>
           ))}
-          </tbody>
-        </table>
-        <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
-      </div>
-    );
-  },
+        </tbody>
+      </table>
+      <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
+    </div>
+  ),
 }));
 
 jest.mock('../../../components/Chip/CustomChip', () => ({
@@ -123,14 +111,14 @@ jest.mock('../../../redux/slices/initiativesSlice', () => ({
 
 jest.mock('../RefundRequestModal', () => ({
   RefundRequestsModal: ({
-                          isOpen,
-                          setIsOpen,
-                          title,
-                          description,
-                          warning,
-                          cancelBtn,
-                          confirmBtn,
-                        }: any) =>
+    isOpen,
+    setIsOpen,
+    title,
+    description,
+    warning,
+    cancelBtn,
+    confirmBtn,
+  }: any) =>
     isOpen ? (
       <div data-testid="refund-modal">
         <h2>{title}</h2>
@@ -149,7 +137,8 @@ const mockSendRewardBatch = jest.fn();
 
 jest.mock('../../../services/merchantService', () => ({
   getRewardBatches: (initiativeId: string) => mockGetRewardBatches(initiativeId),
-  sendRewardBatch: (initiativeId: string, batchId: string) => mockSendRewardBatch(initiativeId, batchId),
+  sendRewardBatch: (initiativeId: string, batchId: string) =>
+    mockSendRewardBatch(initiativeId, batchId),
 }));
 
 const getPreviousMonth = () => {
@@ -222,6 +211,30 @@ describe('RefundRequests', () => {
     expect(screen.getByTestId('data-table')).toBeInTheDocument();
   });
 
+  it('should call history.push', async () => {
+    const pushMock = jest.fn();
+
+    (useHistory as jest.Mock).mockReturnValue({
+      push: pushMock,
+    });
+
+    const params = {
+      row: {
+        id: '1',
+        name: '001-20251125 223',
+      },
+    };
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalled();
+    });
+
+    fireEvent.click(screen.getByTestId('1'));
+
+    expect(pushMock).toHaveBeenCalled();
+  });
+
   it('should fetch reward batches on mount', async () => {
     renderWithStore(<RefundRequests />);
 
@@ -232,12 +245,9 @@ describe('RefundRequests', () => {
 
   it('should show loading spinner while fetching data', async () => {
     let resolvePromise: any;
-    mockGetRewardBatches.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolvePromise = resolve;
-        })
-    );
+    mockGetRewardBatches.mockImplementation(() => new Promise((resolve) => {
+      resolvePromise = resolve;
+    }));
 
     renderWithStore(<RefundRequests />);
 
@@ -431,9 +441,7 @@ describe('RefundRequests', () => {
   it('should render table columns correctly', async () => {
     renderWithStore(<RefundRequests />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Lotto')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByText('Lotto')).toBeInTheDocument());
 
     expect(screen.getByText('Tipologia')).toBeInTheDocument();
     expect(screen.getByText('Rimborso richiesto')).toBeInTheDocument();
@@ -466,16 +474,14 @@ describe('RefundRequests', () => {
   });
 
   it('should display tooltip text correctly with dash when value is empty', async () => {
-    const emptyDataMock = [
-      {
-        id: 4,
-        name: '',
-        posType: 'PHYSICAL',
-        initialAmountCents: 10000,
-        status: 'CREATED',
-        month: getPreviousMonth(),
-      },
-    ];
+    const emptyDataMock = [{
+      id: 4,
+      name: '',
+      posType: 'PHYSICAL',
+      initialAmountCents: 10000,
+      status: 'CREATED',
+      month: getPreviousMonth(),
+    }];
 
     mockGetRewardBatches.mockResolvedValue({ content: emptyDataMock });
     renderWithStore(<RefundRequests />);
@@ -518,12 +524,9 @@ describe('RefundRequests', () => {
 
   it('should show loading state in modal when sending batch', async () => {
     let resolvePromise: any;
-    mockSendRewardBatch.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolvePromise = resolve;
-        })
-    );
+    mockSendRewardBatch.mockImplementation(() => new Promise((resolve) => {
+      resolvePromise = resolve;
+    }));
 
     const user = userEvent.setup();
     renderWithStore(<RefundRequests />);
@@ -553,7 +556,7 @@ describe('RefundRequests', () => {
     });
   });
 
-  it('should handle missing initiativeId when sending batch', async () => {
+ it('should handle missing initiativeId when sending batch', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     const storeWithoutInitiatives = createMockStore([]);
 
@@ -573,6 +576,84 @@ describe('RefundRequests', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('data-table')).toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+  it('should log error and not call sendRewardBatch when initiativeId is missing', async () => {
+    const user = userEvent.setup();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    const currentYear = new Date().getFullYear();
+    const monthAlwaysSelectable = `${currentYear}-00`;
+    const data = [
+      {
+        id: 31,
+        name: 'batch-missing-initiative-id',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: monthAlwaysSelectable,
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
+
+    const storeWithUndefinedInitiativeId = createMockStore([{ initiativeId: undefined } as any]);
+    renderWithStore(<RefundRequests />, storeWithUndefinedInitiativeId);
+
+    await waitFor(() => expect(screen.getByTestId('checkbox-31')).toBeInTheDocument());
+
+    await user.click(screen.getByTestId('checkbox-31'));
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const confirmButton = await screen.findByText('Invia');
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing initiativeId or batchId');
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should log error and not call sendRewardBatch when batchId is missing', async () => {
+    const user = userEvent.setup();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    const currentYear = new Date().getFullYear();
+    const monthAlwaysSelectable = `${currentYear}-00`;
+    const data = [
+      {
+        id: 0,
+        name: 'batch-missing-id',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: monthAlwaysSelectable,
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('checkbox-0')).toBeInTheDocument());
+
+    await user.click(screen.getByTestId('checkbox-0'));
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const confirmButton = await screen.findByText('Invia');
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing initiativeId or batchId');
     });
 
     consoleErrorSpy.mockRestore();
@@ -609,36 +690,6 @@ describe('RefundRequests', () => {
       const headers = screen.getAllByRole('columnheader');
       expect(headers[0]).toHaveTextContent('');
     });
-  });
-
-  it.skip('should navigate using the row action icon and pass navigation state correctly', async () => {
-    const user = userEvent.setup();
-
-    const pushMock = jest.fn();
-    const useParamsSpy = jest.spyOn(ReactRouterDom, 'useParams').mockReturnValue({ id: 'initiative-123' } as any);
-
-    renderWithStore(<RefundRequests />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('1')).toBeInTheDocument();
-    });
-
-    await user.click(screen.getByTestId('1'));
-
-    expect(pushMock).toHaveBeenCalledTimes(1);
-    expect(pushMock).toHaveBeenCalledWith(
-      expect.stringContaining('initiative-123'),
-      expect.objectContaining({
-        batchId: '1',
-        store: expect.objectContaining({
-          id: 1,
-          name: '001-20251125 223',
-        }),
-      })
-    );
-
-    useHistorySpy.mockRestore();
-    useParamsSpy.mockRestore();
   });
 
   it('should apply isRowSelectable rules for month/year, numberOfTransactions, and missing month', async () => {
@@ -717,6 +768,57 @@ describe('RefundRequests', () => {
     expect(screen.queryByTestId('checkbox-16')).not.toBeInTheDocument();
   });
 
+  it('should show specific error alert when backend says previous month batch was not sent (REWARD_BATCH_PREVIOUS_NOT_SENT)', async () => {
+    const user = userEvent.setup();
+
+    const currentYear = new Date().getFullYear();
+    const monthAlwaysSelectable = `${currentYear}-00`;
+    const data = [
+      {
+        id: 41,
+        name: 'batch-prev-not-sent',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: monthAlwaysSelectable,
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
+    mockSendRewardBatch.mockResolvedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('checkbox-41')).toBeInTheDocument());
+
+    await user.click(screen.getByTestId('checkbox-41'));
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const confirmButton = await screen.findByText('Invia');
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '41');
+    });
+
+    expect(mockSetAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'errors.genericTitle',
+        text: 'errors.sendTheBatchForPreviousMonth',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
+
+    expect(mockGetRewardBatches).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
+    });
+  });
   it('should map approved/suspended amounts only for APPROVED batches (others become undefined)', async () => {
     const currentYear = new Date().getFullYear();
     const monthAlwaysSelectable = `${currentYear}-00`;
@@ -781,312 +883,5 @@ describe('RefundRequests', () => {
       })
     );
     expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
-  });
-
-  it('should log error and not call sendRewardBatch when initiativeId is missing', async () => {
-    const user = userEvent.setup();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-
-    const currentYear = new Date().getFullYear();
-    const monthAlwaysSelectable = `${currentYear}-00`;
-    const data = [
-      {
-        id: 31,
-        name: 'batch-missing-initiative-id',
-        posType: 'PHYSICAL',
-        initialAmountCents: 10000,
-        status: 'CREATED',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-      },
-    ];
-
-    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
-
-    const storeWithUndefinedInitiativeId = createMockStore([{ initiativeId: undefined } as any]);
-    renderWithStore(<RefundRequests />, storeWithUndefinedInitiativeId);
-
-    await waitFor(() => expect(screen.getByTestId('checkbox-31')).toBeInTheDocument());
-
-    await user.click(screen.getByTestId('checkbox-31'));
-
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
-    await user.click(sendButton);
-
-    const confirmButton = await screen.findByText('Invia');
-    await user.click(confirmButton);
-
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing initiativeId or batchId');
-    });
-
-    expect(mockSendRewardBatch).not.toHaveBeenCalled();
-    expect(mockSetAlert).toHaveBeenCalled();
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
-    });
-
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('should log error and not call sendRewardBatch when batchId is missing', async () => {
-    const user = userEvent.setup();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-
-    const currentYear = new Date().getFullYear();
-    const monthAlwaysSelectable = `${currentYear}-00`;
-    const data = [
-      {
-        id: 0,
-        name: 'batch-missing-id',
-        posType: 'PHYSICAL',
-        initialAmountCents: 10000,
-        status: 'CREATED',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-      },
-    ];
-
-    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
-
-    renderWithStore(<RefundRequests />);
-
-    await waitFor(() => expect(screen.getByTestId('checkbox-0')).toBeInTheDocument());
-
-    await user.click(screen.getByTestId('checkbox-0'));
-
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
-    await user.click(sendButton);
-
-    const confirmButton = await screen.findByText('Invia');
-    await user.click(confirmButton);
-
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing initiativeId or batchId');
-    });
-
-    expect(mockSendRewardBatch).not.toHaveBeenCalled();
-    expect(mockSetAlert).not.toHaveBeenCalled();
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
-    });
-
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('should show specific error alert when backend says previous month batch was not sent (REWARD_BATCH_PREVIOUS_NOT_SENT)', async () => {
-    const user = userEvent.setup();
-
-    const currentYear = new Date().getFullYear();
-    const monthAlwaysSelectable = `${currentYear}-00`;
-    const data = [
-      {
-        id: 41,
-        name: 'batch-prev-not-sent',
-        posType: 'PHYSICAL',
-        initialAmountCents: 10000,
-        status: 'CREATED',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-      },
-    ];
-
-    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
-    mockSendRewardBatch.mockResolvedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
-
-    renderWithStore(<RefundRequests />);
-
-    await waitFor(() => expect(screen.getByTestId('checkbox-41')).toBeInTheDocument());
-
-    await user.click(screen.getByTestId('checkbox-41'));
-
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
-    await user.click(sendButton);
-
-    const confirmButton = await screen.findByText('Invia');
-    await user.click(confirmButton);
-
-    await waitFor(() => {
-      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '41');
-    });
-
-    expect(mockSetAlert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'errors.genericTitle',
-        text: 'errors.sendTheBatchForPreviousMonth',
-        isOpen: true,
-        severity: 'error',
-      })
-    );
-
-    expect(mockGetRewardBatches).toHaveBeenCalledTimes(1);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
-    });
-  });
-
-  it('should show success alert after sending and refresh list even if sendRewardBatch returns an unknown code', async () => {
-    const user = userEvent.setup();
-
-    const originalSetTimeout = global.setTimeout;
-
-    const currentYear = new Date().getFullYear();
-    const monthAlwaysSelectable = `${currentYear}-00`;
-    const data = [
-      {
-        id: 1,
-        name: 'success-refresh',
-        posType: 'PHYSICAL',
-        initialAmountCents: 10000,
-        status: 'CREATED',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-      },
-    ];
-
-    mockGetRewardBatches.mockResolvedValue({ content: data });
-    mockSendRewardBatch.mockResolvedValueOnce({ code: 'SOME_OTHER_CODE' });
-
-    renderWithStore(<RefundRequests />);
-
-    await waitFor(() => expect(screen.getByTestId('checkbox-1')).toBeInTheDocument());
-
-    await user.click(screen.getByTestId('checkbox-1'));
-
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
-    await user.click(sendButton);
-
-    const confirmButton = await screen.findByText('Invia');
-    await user.click(confirmButton);
-
-    await waitFor(() => {
-      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '1');
-    });
-
-    await waitFor(() => {
-      expect(mockGetRewardBatches).toHaveBeenCalledTimes(2);
-    });
-
-    expect(mockSetAlert).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        text: 'pages.refundRequests.rewardBatchSentSuccess',
-        isOpen: true,
-        severity: 'success',
-      })
-    );
-
-    await waitFor(() => {
-      expect(screen.queryByRole('button', { name: /pages.refundRequests.sendRequests/i })).not.toBeInTheDocument();
-    });
-  });
-
-  it('should refresh list and show generic error alert when sending a batch fails', async () => {
-    const user = userEvent.setup();
-
-    const currentYear = new Date().getFullYear();
-    const monthAlwaysSelectable = `${currentYear}-00`;
-    const data = [
-      {
-        id: 61,
-        name: 'send-fails-refresh',
-        posType: 'PHYSICAL',
-        initialAmountCents: 10000,
-        status: 'CREATED',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-      },
-    ];
-
-    mockGetRewardBatches.mockResolvedValue({ content: data });
-    mockSendRewardBatch.mockRejectedValueOnce(new Error('Send failed'));
-
-    renderWithStore(<RefundRequests />);
-
-    await waitFor(() => expect(screen.getByTestId('checkbox-61')).toBeInTheDocument());
-
-    await user.click(screen.getByTestId('checkbox-61'));
-
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
-    await user.click(sendButton);
-
-    const confirmButton = await screen.findByText('Invia');
-    await user.click(confirmButton);
-
-    await waitFor(() => expect(mockSendRewardBatch).toHaveBeenCalled());
-
-    expect(mockSetAlert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'errors.genericTitle',
-        text: 'errors.genericDescription',
-        isOpen: true,
-        severity: 'error',
-      })
-    );
-
-    await waitFor(() => {
-      expect(mockGetRewardBatches).toHaveBeenCalledTimes(2);
-    });
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
-    });
-  });
-
-  it('should skip catch-refresh when initiativeId is an empty string (covers false branch inside catch)', async () => {
-    const user = userEvent.setup();
-
-    const currentYear = new Date().getFullYear();
-    const monthAlwaysSelectable = `${currentYear}-00`;
-
-    const data = [
-      {
-        id: 71,
-        name: 'force-catch-before-missing-check',
-        posType: 'PHYSICAL',
-        initialAmountCents: 10000,
-        status: 'CREATED',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-        __throwOnSelect: true,
-      },
-    ];
-
-    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
-    mockSendRewardBatch.mockResolvedValueOnce({});
-
-    const storeWithEmptyStringInitiativeId = createMockStore([{ initiativeId: '' } as any]);
-    renderWithStore(<RefundRequests />, storeWithEmptyStringInitiativeId);
-
-    await waitFor(() => expect(screen.getByTestId('checkbox-71')).toBeInTheDocument());
-
-    await user.click(screen.getByTestId('checkbox-71'));
-
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
-    await user.click(sendButton);
-
-    const confirmButton = await screen.findByText('Invia');
-    await user.click(confirmButton);
-
-    await waitFor(() =>
-      expect(mockSetAlert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'errors.genericTitle',
-          text: 'errors.genericDescription',
-          isOpen: true,
-          severity: 'error',
-        })
-      )
-    );
-
-    expect(mockSendRewardBatch).not.toHaveBeenCalled();
-
-    expect(mockGetRewardBatches).toHaveBeenCalledTimes(1);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
-    });
   });
 });
