@@ -55,7 +55,7 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
                   />
                 )}
               </td>
-              {columns.slice(1).map((col: any) => (
+              {columns.map((col: any) => (
                 <td key={col.field}>
                   {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
                 </td>
@@ -405,9 +405,7 @@ describe('RefundRequests', () => {
   it('should render table columns correctly', async () => {
     renderWithStore(<RefundRequests />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Lotto')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByText('Lotto')).toBeInTheDocument());
 
     expect(screen.getByText('Tipologia')).toBeInTheDocument();
     expect(screen.getByText('Rimborso richiesto')).toBeInTheDocument();

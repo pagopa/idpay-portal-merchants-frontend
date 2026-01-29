@@ -1153,6 +1153,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: trxCode
+          in: query
+          description: "ENG: The transaction's code - IT: Codice della transazione"
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+            pattern: '^[A-Z0-9]+$'
       responses:
         '200':
           description: Ok
