@@ -1,14 +1,26 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter, Route, useHistory } from 'react-router-dom';
 import RefundRequests from '../RefundRequests'
+import routes from '../../../routes';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
+}));
+
+const mockSetAlert = jest.fn();
+jest.mock('../../../hooks/useAlert', () => ({
+  __esModule: true,
+  useAlert: () => ({ setAlert: mockSetAlert }),
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: jest.fn(),
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend', () => ({
@@ -197,6 +209,30 @@ describe('RefundRequests', () => {
     expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
     expect(screen.getByText('pages.refundRequests.subtitle')).toBeInTheDocument();
     expect(screen.getByTestId('data-table')).toBeInTheDocument();
+  });
+
+  it('should call history.push', async () => {
+    const pushMock = jest.fn();
+
+    (useHistory as jest.Mock).mockReturnValue({
+      push: pushMock,
+    });
+
+    const params = {
+      row: {
+        id: '1',
+        name: '001-20251125 223',
+      },
+    };
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalled();
+    });
+
+    fireEvent.click(screen.getByTestId('1'));
+
+    expect(pushMock).toHaveBeenCalled();
   });
 
   it('should fetch reward batches on mount', async () => {
@@ -521,25 +557,79 @@ describe('RefundRequests', () => {
   });
 
   it('should handle missing initiativeId when sending batch', async () => {
+    const user = userEvent.setup();
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    const storeWithoutInitiatives = createMockStore([]);
 
-    renderWithStore(<RefundRequests />, storeWithoutInitiatives);
+    const currentYear = new Date().getFullYear();
+    const monthAlwaysSelectable = `${currentYear}-00`;
+    const data = [
+      {
+        id: 31,
+        name: 'batch-missing-initiative-id',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: monthAlwaysSelectable,
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
+
+    const storeWithUndefinedInitiativeId = createMockStore([{ initiativeId: undefined } as any]);
+    renderWithStore(<RefundRequests />, storeWithUndefinedInitiativeId);
+
+    await waitFor(() => expect(screen.getByTestId('checkbox-31')).toBeInTheDocument());
+
+    await user.click(screen.getByTestId('checkbox-31'));
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const confirmButton = await screen.findByText('Invia');
+    await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing initiativeId or batchId');
     });
 
     consoleErrorSpy.mockRestore();
   });
 
   it('should handle missing batchId when sending batch', async () => {
+    const user = userEvent.setup();
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    const currentYear = new Date().getFullYear();
+    const monthAlwaysSelectable = `${currentYear}-00`;
+    const data = [
+      {
+        id: 0,
+        name: 'batch-missing-id',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: monthAlwaysSelectable,
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
 
     renderWithStore(<RefundRequests />);
 
+    await waitFor(() => expect(screen.getByTestId('checkbox-0')).toBeInTheDocument());
+
+    await user.click(screen.getByTestId('checkbox-0'));
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const confirmButton = await screen.findByText('Invia');
+    await user.click(confirmButton);
+
     await waitFor(() => {
-      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing initiativeId or batchId');
     });
 
     consoleErrorSpy.mockRestore();
@@ -576,5 +666,180 @@ describe('RefundRequests', () => {
       const headers = screen.getAllByRole('columnheader');
       expect(headers[0]).toHaveTextContent('');
     });
+  });
+
+  it('should apply isRowSelectable rules for month/year, numberOfTransactions, and missing month', async () => {
+    const currentYear = new Date().getFullYear();
+    const selectableSameYearPastMonth = `${currentYear}-00`;
+    const selectablePreviousYear = `${currentYear - 1}-12`;
+    const notSelectableSameYearFutureMonth = `${currentYear}-13`;
+    const customData = [
+      {
+        id: 11,
+        name: 'same-year-past',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: selectableSameYearPastMonth,
+        numberOfTransactions: 1,
+      },
+      {
+        id: 12,
+        name: 'same-year-future',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: notSelectableSameYearFutureMonth,
+        numberOfTransactions: 1,
+      },
+      {
+        id: 13,
+        name: 'missing-month',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        numberOfTransactions: 1,
+      },
+      {
+        id: 14,
+        name: 'previous-year',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: selectablePreviousYear,
+        numberOfTransactions: 1,
+      },
+      {
+        id: 15,
+        name: 'zero-transactions',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: selectableSameYearPastMonth,
+        numberOfTransactions: 0,
+      },
+      {
+        id: 16,
+        name: 'not-created',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'SENT',
+        month: selectableSameYearPastMonth,
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({ content: customData });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    expect(screen.getByTestId('checkbox-11')).toBeInTheDocument();
+    expect(screen.getByTestId('checkbox-14')).toBeInTheDocument();
+
+    expect(screen.queryByTestId('checkbox-12')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('checkbox-13')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('checkbox-15')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('checkbox-16')).not.toBeInTheDocument();
+  });
+
+  it('should show specific error alert when backend says previous month batch was not sent (REWARD_BATCH_PREVIOUS_NOT_SENT)', async () => {
+    const user = userEvent.setup();
+
+    const currentYear = new Date().getFullYear();
+    const monthAlwaysSelectable = `${currentYear}-00`;
+    const data = [
+      {
+        id: 41,
+        name: 'batch-prev-not-sent',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: monthAlwaysSelectable,
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
+    mockSendRewardBatch.mockResolvedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('checkbox-41')).toBeInTheDocument());
+
+    await user.click(screen.getByTestId('checkbox-41'));
+
+    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    await user.click(sendButton);
+
+    const confirmButton = await screen.findByText('Invia');
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '41');
+    });
+
+    expect(mockSetAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'errors.genericTitle',
+        text: 'errors.sendTheBatchForPreviousMonth',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
+
+    expect(mockGetRewardBatches).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
+    });
+  });
+  it('should map approved/suspended amounts only for APPROVED batches (others become undefined)', async () => {
+    const currentYear = new Date().getFullYear();
+    const monthAlwaysSelectable = `${currentYear}-00`;
+
+    const dataWithApprovedAmounts = [
+      {
+        id: 21,
+        name: 'approved-batch',
+        posType: 'ONLINE',
+        initialAmountCents: 5000,
+        approvedAmountCents: 12345,
+        suspendedAmountCents: 200,
+        status: 'APPROVED',
+        month: monthAlwaysSelectable,
+        numberOfTransactions: 1,
+      },
+      {
+        id: 22,
+        name: 'created-but-has-amounts-in-response',
+        posType: 'ONLINE',
+        initialAmountCents: 7000,
+        approvedAmountCents: 9999,
+        suspendedAmountCents: 8888,
+        status: 'CREATED',
+        month: monthAlwaysSelectable,
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({ content: dataWithApprovedAmounts });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    expect(screen.getByText('Rimborso approvato')).toBeInTheDocument();
+    expect(screen.getByText('Rimborso sospeso')).toBeInTheDocument();
+
+    expect(screen.getByText('123.45 €')).toBeInTheDocument();
+    expect(screen.getByText('2.00 €')).toBeInTheDocument();
+
+    expect(screen.queryByText('99.99 €')).not.toBeInTheDocument();
+    expect(screen.queryByText('88.88 €')).not.toBeInTheDocument();
+
+    const nanValues = screen.getAllByText('NaN €');
+    expect(nanValues.length).toBeGreaterThanOrEqual(2);
   });
 });
