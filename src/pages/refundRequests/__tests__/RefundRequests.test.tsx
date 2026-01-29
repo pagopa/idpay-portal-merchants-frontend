@@ -556,7 +556,31 @@ describe('RefundRequests', () => {
     });
   });
 
-  it('should handle missing initiativeId when sending batch', async () => {
+ it('should handle missing initiativeId when sending batch', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const storeWithoutInitiatives = createMockStore([]);
+
+    renderWithStore(<RefundRequests />, storeWithoutInitiatives);
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should handle missing batchId when sending batch', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+  it('should log error and not call sendRewardBatch when batchId is missing', async () => {
     const user = userEvent.setup();
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
@@ -596,7 +620,7 @@ describe('RefundRequests', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it('should handle missing batchId when sending batch', async () => {
+  it('should log error and not call sendRewardBatch when initiativeId is missing', async () => {
     const user = userEvent.setup();
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
@@ -841,5 +865,23 @@ describe('RefundRequests', () => {
 
     const nanValues = screen.getAllByText('NaN €');
     expect(nanValues.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('should dispatch an error alert when getRewardBatches fails', async () => {
+    mockGetRewardBatches.mockRejectedValueOnce(new Error('API Error'));
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    expect(mockSetAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
+    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
   });
 });
