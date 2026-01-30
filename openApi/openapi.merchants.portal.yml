@@ -2132,6 +2132,7 @@ components:
           description: "ENG: The total number of the pages - IT: Il numero totale delle pagine"
     RewardBatchTrxStatus:
       type: string
+      nullable: true
       description: Status of the transaction within the reward batch
       enum:
         - TO_CHECK
