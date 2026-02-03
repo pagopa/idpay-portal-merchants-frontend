@@ -83,7 +83,7 @@ describe('InvoiceDetail', () => {
       docNumber: 'DOC-123',
       filename: 'fattura.pdf',
     },
-    rewardBatchRejectionReason: 'Motivo di rifiuto',
+    rewardBatchRejectionReason: [{date: new Date('2026-02-03'), reason: 'Motivo di rifiuto'}],
     additionalProperties: {
       productName: 'Prodotto di test',
     },
@@ -716,7 +716,7 @@ describe('Additional coverage for missing branches', () => {
       const suspendedValues = {
         ...baseItemValues,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.SUSPENDED,
-        rewardBatchRejectionReason: 'Motivo ufficiale di sospensione',
+        rewardBatchRejectionReason: [{date: new Date('2026-02-03'), reason: 'Motivo di rifiuto'}],
       };
 
       render(
@@ -730,14 +730,15 @@ describe('Additional coverage for missing branches', () => {
       );
 
       expect(screen.getByText('nota ufficiale')).toBeInTheDocument();
-      expect(screen.getByText('Motivo ufficiale di sospensione')).toBeInTheDocument();
+      expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
+      expect(screen.getByText('03/02/2026')).toBeInTheDocument();
     });
 
     it('mostra nota ufficiale quando status è REJECTED', () => {
       const rejectedValues = {
         ...baseItemValues,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
-        rewardBatchRejectionReason: 'Motivo di rifiuto',
+    rewardBatchRejectionReason: [{date: new Date('2026-02-03'), reason: 'Motivo di rifiuto'}],
       };
 
       render(
@@ -752,6 +753,7 @@ describe('Additional coverage for missing branches', () => {
 
       expect(screen.getByText('nota ufficiale')).toBeInTheDocument();
       expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
+      expect(screen.getByText('03/02/2026')).toBeInTheDocument();
     });
 
     it('non mostra nota ufficiale quando status non è SUSPENDED o REJECTED', () => {
@@ -772,6 +774,7 @@ describe('Additional coverage for missing branches', () => {
       const noReasonValues = {
         ...baseItemValues,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+        rewardBatchRejectionReason: []
       };
 
       render(
