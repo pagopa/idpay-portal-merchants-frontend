@@ -1,39 +1,40 @@
 import { Box, Grid, Typography, Button, CircularProgress } from '@mui/material';
-import { ReactNode, useEffect, useState} from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import {  useLocation } from 'react-router-dom';
-import { downloadInvoiceFile,postponeTransaction } from '../../../services/merchantService';
+import { useLocation } from 'react-router-dom';
+import { downloadInvoiceFile, postponeTransaction } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-import { formatValues, currencyFormatter,getEndOfNextMonth} from '../../../utils/formatUtils';
+import { formatValues, currencyFormatter, getEndOfNextMonth } from '../../../utils/formatUtils';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 import { useAlert } from '../../../hooks/useAlert';
 import ModalComponent from '../../../components/modal/ModalComponent';
-import { intiativesListSelector} from '../../../redux/slices/initiativesSlice';
+import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-
+import { formatDate } from '../../../helpers';
+import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
 
 type Props = {
   title?: string;
-  itemValues: any;
+  itemValues: Record<string, any>;
   listItem: Array<any>;
-  batchId: string ;
+  batchId: string;
   storeId: string;
   children?: ReactNode;
   onCloseDrawer?: () => void;
   onSuccess?: () => void;
 };
 
-export default function InvoiceDetail({ title, itemValues, listItem ,batchId, onCloseDrawer, onSuccess}: Props) {
+export default function InvoiceDetail({ title, itemValues, listItem, batchId, onCloseDrawer, onSuccess }: Props) {
   const { setAlert } = useAlert();
   const [isLoading, setLoading] = useState(false);
   const [initiativeEndDate, setInitiativeEndDate] = useState<string>('');
   const [nextMonthInitiativeEndDate, setNextMonthInitiativeEndDate] = useState<Date | undefined>();
-  const [initiativeId, setInitiativeId] = useState<string >('');
+  const [initiativeId, setInitiativeId] = useState<string>('');
   const [invoiceTransactionModal, setInvoiceTransactionModal] = useState(false);
-  const location = useLocation<{ store: any}>();
+  const location = useLocation<{ store: any }>();
   const batchMonth = location.state?.store?.month;
   const statusBatch = location.state?.store?.status;
   const { t } = useTranslation();
@@ -60,7 +61,7 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
   const handlePostponeTransaction = async () => {
-    if (!initiativeEndDate) {return;}
+    if (!initiativeEndDate) { return; }
 
     setLoading(true);
     try {
@@ -215,12 +216,12 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
             >
               {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
             </Typography>
-            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{overflowWrap: "break-word"}}>
+            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
               {itemValues?.invoiceData?.docNumber ?? MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>
         </Grid>
-        <Grid item xs={12} sx={{ minWidth: 0}}>
+        <Grid item xs={12} sx={{ minWidth: 0 }}>
           <Box mt={1}>
             <Typography
               variant="body2"
@@ -295,49 +296,65 @@ export default function InvoiceDetail({ title, itemValues, listItem ,batchId, on
         {[RewardBatchTrxStatusEnum.SUSPENDED, RewardBatchTrxStatusEnum.REJECTED].includes(
           itemValues.rewardBatchTrxStatus
         ) && (
-          <Grid item xs={12} sx={{ minWidth: 0 }}>
-            <Box mt={1} sx={{ minWidth: 0 }}>
-              <Typography
-                variant="overline"
-                fontWeight={theme.typography.fontWeightBold}
-                color={theme.palette.text.primary}
-              >
-                nota ufficiale
-              </Typography>
-
-              <Typography
-                variant="body2"
-                fontWeight={600}
-                sx={{
-                  whiteSpace: 'pre-wrap',
-                  overflowWrap: 'anywhere',
-                }}
-              >
-                {itemValues?.rewardBatchRejectionReason ?? MISSING_DATA_PLACEHOLDER}
-              </Typography>
-            </Box>
-          </Grid>
-        )}
-          <Grid item xs={12}>
-            <Box
-              mt={1}
-              sx={{
-                bottom: 0,
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '1.5rem',
-              }}
-            >
-              <Button
-                data-testid='next-month-btn'
-                onClick={() => setInvoiceTransactionModal(true)}
-                disabled={isNextMonthDisabled}
-                variant={'contained'}>
-                {'Sposta al mese successivo'}
-              </Button>
-            </Box>
-          </Grid>
+            <Grid item xs={12} sx={{ minWidth: 0 }}>
+              <Box mt={1} sx={{ minWidth: 0 }}>
+                <Typography
+                  variant="overline"
+                  fontWeight={theme.typography.fontWeightBold}
+                  color={theme.palette.text.primary}
+                >
+                  nota ufficiale
+                </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  sx={{
+                    whiteSpace: 'pre-wrap',
+                    overflowWrap: 'anywhere',
+                  }}
+                >
+                  {itemValues?.rewardBatchRejectionReason && itemValues?.rewardBatchRejectionReason.length ? itemValues?.rewardBatchRejectionReason.map(({ date, reason }: ReasonDTO, index: number) =>
+                    <Grid item xs={12} key={`${date}-${index}`}>
+                      <Box mt={1}>
+                        <Typography
+                          variant="body2"
+                          fontWeight={theme.typography.fontWeightRegular}
+                          color={theme.palette.text.secondary}
+                        >
+                          {date ? formatDate(date) : MISSING_DATA_PLACEHOLDER}
+                        </Typography>
+                        <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
+                          {reason ?? MISSING_DATA_PLACEHOLDER}
+                        </Typography>
+                      </Box>
+                    </Grid>) :
+                    <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
+                      {MISSING_DATA_PLACEHOLDER}
+                    </Typography>}
+                </Typography>
+              </Box>
+            </Grid>
+          )}
+        <Grid item xs={12}>
+          <Box
+            mt={1}
+            sx={{
+              bottom: 0,
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '1.5rem',
+            }}
+          >
+            <Button
+              data-testid='next-month-btn'
+              onClick={() => setInvoiceTransactionModal(true)}
+              disabled={isNextMonthDisabled}
+              variant={'contained'}>
+              {'Sposta al mese successivo'}
+            </Button>
+          </Box>
+        </Grid>
         <ModalComponent data-testid="modal-component" open={invoiceTransactionModal} onClose={() => setInvoiceTransactionModal(false)}>
           <Box display={'flex'} flexDirection={'column'} gap={2}>
             <Typography variant="h6">{t('pages.refundRequests.invoiceDetailConfirmModal.title')}</Typography>
