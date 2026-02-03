@@ -2024,8 +2024,11 @@ components:
         rewardBatchTrxStatus:
           $ref: "#/components/schemas/RewardBatchTrxStatus"
         rewardBatchRejectionReason:
-          type: string
-          description: Reason why the transaction was rejected from the reward batch, if any
+          type: array
+          items:
+            type:
+            $ref: "#/components/schemas/ReasonDTO"
+          description: "ENG: Reason associated with TRX status - IT: Motivo associato allo stato della trx"
         rewardBatchInclusionDate:
           type: string
           format: date-time
@@ -2132,7 +2135,6 @@ components:
           description: "ENG: The total number of the pages - IT: Il numero totale delle pagine"
     RewardBatchTrxStatus:
       type: string
-      nullable: true
       description: Status of the transaction within the reward batch
       enum:
         - TO_CHECK
@@ -2983,6 +2985,16 @@ components:
       required:
         - franchiseName
         - pointOfSaleId
+    ReasonDTO:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+          example: "2026-01-30T10:00:00Z"
+        reason:
+          type: string
+          example: "Invoice error"
   securitySchemes:
     Bearer:
       type: apiKey
