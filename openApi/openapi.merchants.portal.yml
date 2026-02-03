@@ -2026,7 +2026,6 @@ components:
         rewardBatchRejectionReason:
           type: array
           items:
-            type:
             $ref: "#/components/schemas/ReasonDTO"
           description: "ENG: Reason associated with TRX status - IT: Motivo associato allo stato della trx"
         rewardBatchInclusionDate:
