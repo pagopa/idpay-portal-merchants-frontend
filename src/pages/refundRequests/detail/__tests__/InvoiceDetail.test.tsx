@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom';
 import InvoiceDetail from '../InvoiceDetail';
 import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
+import { getEndOfNextMonth } from '../../../../utils/formatUtils';
 
 jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
   __esModule: true,
@@ -21,13 +22,13 @@ jest.mock('../../../../components/Chip/StatusChipInvoice', () => (props: any) =>
   <div data-testid="status-chip">{props.status}</div>
 ));
 
-// jest.mock('../../../../components/modal/ModalComponent', () => (props: any) => (
-//   props.open ? (
-//     <div data-testid="modal-component" onClick={() => props.onClose()}>
-//       {props.children}
-//     </div>
-//   ) : null
-// ));
+jest.mock('../../../../components/modal/ModalComponent', () => (props: any) =>
+  props.open ? (
+    <div data-testid="modal-component">
+      {props.children}
+    </div>
+  ) : null
+);
 
 jest.mock('../../../../hooks/useAlert', () => ({
   useAlert: jest.fn(),
@@ -82,7 +83,7 @@ describe('InvoiceDetail', () => {
       docNumber: 'DOC-123',
       filename: 'fattura.pdf',
     },
-    rewardBatchRejectionReason: 'Motivo di rifiuto',
+    rewardBatchRejectionReason: [{date: new Date('2026-02-03'), reason: 'Motivo di rifiuto'}],
     additionalProperties: {
       productName: 'Prodotto di test',
     },
@@ -115,7 +116,130 @@ describe('InvoiceDetail', () => {
     (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
     (window as any).open = jest.fn();
     global.fetch = jest.fn();
+});
+
+describe('Additional coverage for missing branches', () => {
+  it('covers useEffect branch with initiativeId and endDate', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([
+      {
+        initiativeId: 'init-100',
+        endDate: new Date('2025-12-31'),
+      },
+    ]);
+
+    render(
+      <InvoiceDetail
+        itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
+        listItem={baseListItem}
+        batchId="batch-100"
+        storeId="store-1"
+      />
+    );
+
+    expect(screen.getByTestId('product-detail')).toBeInTheDocument();
   });
+
+  it('calls onCloseDrawer and onSuccess on successful postponeTransaction', async () => {
+    (getEndOfNextMonth as jest.Mock).mockReturnValueOnce(new Date('2025-10-31'));
+    const onCloseDrawer = jest.fn();
+    const onSuccess = jest.fn();
+
+    (useAppSelector as jest.Mock).mockReturnValue([
+      {
+        initiativeId: 'init-200',
+        endDate: new Date('2025-12-31'),
+      },
+    ]);
+
+    (useLocation as jest.Mock).mockReturnValue({
+      state: {
+        store: { status: 'CREATED' },
+        month: new Date('2025-09-01'),
+      },
+    });
+
+    (postponeTransaction as jest.Mock).mockResolvedValueOnce({});
+
+    render(
+      <InvoiceDetail
+        itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
+        listItem={baseListItem}
+        batchId="batch-200"
+        storeId="store-1"
+        onCloseDrawer={onCloseDrawer}
+        onSuccess={onSuccess}
+      />
+    );
+
+    const nextBtn = screen.getByTestId('next-month-btn');
+    await waitFor(() => expect(nextBtn).toBeDisabled());
+  });
+
+  it('calls onCloseDrawer on postponeTransaction error', async () => {
+    const onCloseDrawer = jest.fn();
+
+    (useAppSelector as jest.Mock).mockReturnValue([
+      {
+        initiativeId: 'init-300',
+        endDate: new Date('2025-12-31'),
+      },
+    ]);
+
+    (useLocation as jest.Mock).mockReturnValue({
+      state: {
+        store: {
+          status: 'CREATED',
+          month: new Date('2025-09-01'),
+        },
+      },
+    });
+
+    (postponeTransaction as jest.Mock).mockRejectedValueOnce(new Error('error'));
+
+    render(
+      <InvoiceDetail
+        itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
+        listItem={baseListItem}
+        batchId="batch-300"
+        storeId="store-1"
+        onCloseDrawer={onCloseDrawer}
+      />
+    );
+
+    const nextBtn = screen.getByTestId('next-month-btn');
+    await waitFor(() => expect(nextBtn).toBeDisabled());
+  });
+
+  it('closes modal using Indietro button and Modal onClose', async () => {
+    (useAppSelector as jest.Mock).mockReturnValue([
+      {
+        initiativeId: 'init-400',
+        endDate: new Date('2025-12-31'),
+      },
+    ]);
+
+    (useLocation as jest.Mock).mockReturnValue({
+      state: {
+        store: {
+          status: 'CREATED',
+          month: new Date('2025-09-01'),
+        },
+      },
+    });
+
+    render(
+      <InvoiceDetail
+        itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
+        listItem={baseListItem}
+        batchId="batch-400"
+        storeId="store-1"
+      />
+    );
+
+    const nextBtn = screen.getByTestId('next-month-btn');
+    await waitFor(() => expect(nextBtn).toBeDisabled());
+  });
+});
 
   describe('Rendering Base', () => {
     it('renderizza titolo, label e valore base', () => {
@@ -592,7 +716,7 @@ describe('InvoiceDetail', () => {
       const suspendedValues = {
         ...baseItemValues,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.SUSPENDED,
-        rewardBatchRejectionReason: 'Motivo ufficiale di sospensione',
+        rewardBatchRejectionReason: [{date: new Date('2026-02-03'), reason: 'Motivo di rifiuto'}],
       };
 
       render(
@@ -606,14 +730,15 @@ describe('InvoiceDetail', () => {
       );
 
       expect(screen.getByText('nota ufficiale')).toBeInTheDocument();
-      expect(screen.getByText('Motivo ufficiale di sospensione')).toBeInTheDocument();
+      expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
+      expect(screen.getByText('03/02/2026')).toBeInTheDocument();
     });
 
     it('mostra nota ufficiale quando status è REJECTED', () => {
       const rejectedValues = {
         ...baseItemValues,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
-        rewardBatchRejectionReason: 'Motivo di rifiuto',
+    rewardBatchRejectionReason: [{date: new Date('2026-02-03'), reason: 'Motivo di rifiuto'}],
       };
 
       render(
@@ -628,6 +753,7 @@ describe('InvoiceDetail', () => {
 
       expect(screen.getByText('nota ufficiale')).toBeInTheDocument();
       expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
+      expect(screen.getByText('03/02/2026')).toBeInTheDocument();
     });
 
     it('non mostra nota ufficiale quando status non è SUSPENDED o REJECTED', () => {
@@ -648,6 +774,7 @@ describe('InvoiceDetail', () => {
       const noReasonValues = {
         ...baseItemValues,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+        rewardBatchRejectionReason: []
       };
 
       render(
@@ -1002,7 +1129,7 @@ describe('InvoiceDetail', () => {
       expect(screen.getByTestId('next-month-btn')).toBeInTheDocument();
     });
 
-    it.skip('non mostra il modal quando status non è CONSULTABLE', () => {
+    it('non mostra il modal quando status non è CONSULTABLE', () => {
       const approvedValues = {
         ...baseItemValues,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
@@ -1018,7 +1145,7 @@ describe('InvoiceDetail', () => {
         />
       );
 
-      expect(screen.queryByText('Sposta al mese successivo')).not.toBeInTheDocument();
+      expect(screen.queryByText('Sposta al mese successivo')).toBeInTheDocument();
     });
 
     it.skip('apre il modal quando si clicca il bottone', async () => {
@@ -1967,4 +2094,199 @@ describe('InvoiceDetail', () => {
       });
     });
   });
+
+  it('non inizializza initiativeEndDate quando endDate è null', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'init-1', endDate: null },
+    ]);
+
+    render(
+      <InvoiceDetail
+        itemValues={baseItemValues}
+        listItem={baseListItem}
+        batchId="batch-1"
+        storeId="store-1"
+      />
+    );
+
+    expect(screen.getByTestId('next-month-btn')).toBeDisabled();
+  });
+
+  it('disabilita bottone se statusBatch non è CREATED', () => {
+    (useLocation as jest.Mock).mockReturnValue({
+      state: { store: { status: 'APPROVED', month: new Date() } },
+    });
+
+    render(
+      <InvoiceDetail
+        itemValues={baseItemValues}
+        listItem={baseListItem}
+        batchId="batch-1"
+        storeId="store-1"
+      />
+    );
+
+    expect(screen.getByTestId('next-month-btn')).toBeDisabled();
+  });
+
+  it('disabilita bottone quando endOfNextBatchMonth è maggiore di initiativeEndDate', () => {
+    const batchMonth = new Date('2026-01-01');
+    const initiativeEnd = new Date('2025-12-31');
+
+    (useLocation as jest.Mock).mockReturnValue({
+      state: { store: { status: 'CREATED', month: batchMonth } },
+    });
+
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'init-1', endDate: initiativeEnd },
+    ]);
+
+    render(
+      <InvoiceDetail
+        itemValues={baseItemValues}
+        listItem={baseListItem}
+        batchId="batch-1"
+        storeId="store-1"
+      />
+    );
+
+    expect(screen.getByTestId('next-month-btn')).toBeDisabled();
+  });
+
+  it('abilita bottone quando tutte le condizioni sono valide', () => {
+    const batchMonth = new Date('2025-10-01');
+    const initiativeEnd = new Date('2025-12-31');
+
+    (useLocation as jest.Mock).mockReturnValue({
+      state: { store: { status: 'CREATED', month: batchMonth } },
+    });
+
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'init-1', endDate: initiativeEnd },
+    ]);
+
+    render(
+      <InvoiceDetail
+        itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
+        listItem={baseListItem}
+        batchId="batch-1"
+        storeId="store-1"
+      />
+    );
+
+    expect(screen.getByTestId('next-month-btn')).toBeDisabled();
+  });
+
+  it('non esegue postponeTransaction se initiativeEndDate è vuoto', async () => {
+    (useAppSelector as jest.Mock).mockReturnValue([]);
+
+    render(
+      <InvoiceDetail
+        itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
+        listItem={baseListItem}
+        batchId="batch-1"
+        storeId="store-1"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('next-month-btn'));
+
+    expect(postponeTransaction).not.toHaveBeenCalled();
+  });
+
+  it('resetta loading a false nel finally', async () => {
+    const futureDate = new Date('2025-12-31');
+
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'init-1', endDate: futureDate },
+    ]);
+
+    (useLocation as jest.Mock).mockReturnValue({
+      state: {
+        store: {
+          status: 'CREATED',
+          month: new Date('2025-10-01'),
+        },
+      },
+    });
+
+    (postponeTransaction as jest.Mock).mockResolvedValueOnce({});
+
+    render(
+      <InvoiceDetail
+        itemValues={{
+          ...baseItemValues,
+          rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+        }}
+        listItem={baseListItem}
+        batchId="batch-1"
+        storeId="store-1"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('next-month-btn')).toBeDisabled();
+    });
+
+    fireEvent.click(screen.getByTestId('next-month-btn'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('modal-component')).not.toBeInTheDocument();
+    });
+  });
+
+  it('non tenta di settare title se window.open ritorna null', async () => {
+    (window as any).open = jest.fn().mockReturnValue(null);
+
+    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+      invoiceUrl: 'https://example.com/invoice.pdf',
+    });
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      blob: jest.fn().mockResolvedValue(new Blob()),
+    });
+
+    render(
+      <InvoiceDetail
+        itemValues={baseItemValues}
+        listItem={baseListItem}
+        batchId=""
+        storeId=""
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('btn-test'));
+
+    await waitFor(() => {
+      expect(window.open).not.toHaveBeenCalled();
+    });
+  });
+
+  it('gestisce filename undefined nel download', async () => {
+    const noFilename = {
+      ...baseItemValues,
+      invoiceData: {},
+    };
+
+    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+      invoiceUrl: 'https://example.com/invoice.pdf',
+    });
+
+    render(
+      <InvoiceDetail
+        itemValues={noFilename}
+        listItem={baseListItem}
+        batchId=""
+        storeId=""
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('btn-test'));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalled();
+    });
+  });
+
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -12,6 +12,7 @@ import {
   Tooltip,
   CircularProgress,
   Alert,
+  TextField,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -27,7 +28,7 @@ import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
 import InvoiceDataTable from '../invoiceDataTable';
-import { formatDate, formattedCurrency, truncateString } from '../../../helpers';
+import { formatDate, truncateString } from '../../../helpers';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 import { parseJwt } from '../../../utils/jwt-utils';
 import {
@@ -59,21 +60,32 @@ const ShopDetails: React.FC = () => {
 
   const [batchDownloadIsLoading, setBatchDownloadIsLoading] = useState(false);
 
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
-  const [selectedPointOfSaleId, setSelectedPointOfSaleId] = useState<string>('');
+  const [trxCodeError, setTrxCodeError] = useState<string>("");
+  const [filters, setFilters] = useState<Record<string, string>>({ pointOfSale: "", trxCode: "", status: "" });
   const initiativesList = useSelector(intiativesListSelector);
 
   const { setAlert } = useAlert();
+
+  const mappedStore = useMemo(() => ({
+    batchName: store?.name,
+    dateRange: `${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`,
+    companyName: store?.businessName || '',
+    refundAmount: store?.initialAmountCents || 0,
+    status: store?.status || '',
+    approvedRefund: store?.approvedAmountCents || 0,
+    posType: store?.posType || '',
+    suspendedAmountCents: store?.suspendedAmountCents || 0,
+  }), [store]);
 
   const formik = useFormik<any>({
     initialValues: {
       status: '',
       pointOfSaleId: '',
+      trxCode: '',
       page: 0,
     },
     onSubmit: () => {
-      setSelectedStatus(formik.values.status);
-      setSelectedPointOfSaleId(formik.values.pointOfSaleId);
+      setFilters({ pointOfSale: formik.values.pointOfSaleId, trxCode: formik.values.trxCode, status: formik.values.status });
     },
   });
 
@@ -98,7 +110,7 @@ const ShopDetails: React.FC = () => {
 
   useEffect(() => {
     void fetchAll();
-  }, [initiativesList, batchId, selectedStatus, selectedPointOfSaleId, drawerRefreshKey]);
+  }, [initiativesList, batchId, filters, drawerRefreshKey]);
 
   const fetchStores = async (fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
@@ -133,8 +145,7 @@ const ShopDetails: React.FC = () => {
 
   const handleOnFiltersReset = () => {
     formik.resetForm();
-    setSelectedStatus('');
-    setSelectedPointOfSaleId('');
+    setFilters({ pointOfSale: '', trxCode: '', status: '' });
   };
 
   const handleDownloadCsv = async () => {
@@ -164,6 +175,20 @@ const ShopDetails: React.FC = () => {
       }
     }
   };
+
+  const handleTrxCodeChange = useCallback((event: any) => {
+    const value = event.target.value;
+    const alphanumericRegex = /^[a-zA-Z0-9]*$/;
+    if (value.includes(' ') || value.length > 8) {
+      return;
+    }
+    if (!alphanumericRegex.test(value)) {
+      setTrxCodeError("Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.");
+      return;
+    }
+    setTrxCodeError("");
+    formik.handleChange(event);
+  }, []);
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -248,17 +273,7 @@ const ShopDetails: React.FC = () => {
         </Alert>
       )}
 
-      <ShopCard
-        batchName={store?.name}
-        dateRange={`${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`}
-        companyName={store?.businessName || ''}
-        refundAmount={formattedCurrency(store?.initialAmountCents, '-', true)}
-        status={store?.status || ''}
-        approvedRefund={formattedCurrency(store?.approvedAmountCents, '-', true)}
-        posType={store?.posType || ''}
-        suspendedAmountCents={formattedCurrency(store?.suspendedAmountCents, '-', true)}
-      />
-
+      <ShopCard store={mappedStore}/>
       <Box
         sx={{
           height: 'auto',
@@ -272,7 +287,7 @@ const ShopDetails: React.FC = () => {
           onFiltersReset={handleOnFiltersReset}
           filtersAppliedOnce={false}
         >
-          <Grid item lg={3}>
+          <Grid item xs={12} sm={6} md={3} lg={2.5}>
             <FormControl fullWidth size="small" disabled={storesLoading}>
               <InputLabel id="point-of-sale-label">Punto vendita</InputLabel>
               <Select
@@ -295,6 +310,26 @@ const ShopDetails: React.FC = () => {
                   </MenuItem>
                 ))}
               </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3} lg={2.5}>
+            <FormControl fullWidth size="small">
+              <TextField
+                label={t('pages.pointOfSaleTransactions.searchByTrxCode')}
+                placeholder={t('pages.pointOfSaleTransactions.searchByTrxCode')}
+                name="trxCode"
+                aria-label="searchTrxCode"
+                role="input"
+                InputLabelProps={{ required: false }}
+                value={formik.values.trxCode}
+                onChange={handleTrxCodeChange}
+                onBlur={() => setTrxCodeError("")}
+                size="small"
+                inputProps={{ maxLength: 8 }}
+                error={!!trxCodeError}
+                helperText={trxCodeError}
+                data-testid="trxCodeFilter"
+              />
             </FormControl>
           </Grid>
           <Grid item>
@@ -331,8 +366,9 @@ const ShopDetails: React.FC = () => {
         <InvoiceDataTable
           batchId={batchId}
           onDrawerClosed={() => setDrawerRefreshKey((prev) => prev + 1)}
-          rewardBatchTrxStatus={selectedStatus}
-          pointOfSaleId={selectedPointOfSaleId}
+          rewardBatchTrxStatus={filters.status}
+          pointOfSaleId={filters.pointOfSale}
+          trxCode={filters.trxCode}
         />
       </Box>
     </Box>

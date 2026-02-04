@@ -496,6 +496,14 @@ paths:
             type: string
             maxLength: 14
             pattern: ^[a-zA-Z0-9]{1,14}$
+        - name: trxCode
+          in: query
+          description: "ENG: The transaction's code - IT: Codice della transazione"
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+            pattern: '^[A-Z0-9]+$'
       responses:
         "200":
           description: Ok
@@ -1145,6 +1153,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: trxCode
+          in: query
+          description: "ENG: The transaction's code - IT: Codice della transazione"
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+            pattern: '^[A-Z0-9]+$'
       responses:
         '200':
           description: Ok
@@ -2008,8 +2024,10 @@ components:
         rewardBatchTrxStatus:
           $ref: "#/components/schemas/RewardBatchTrxStatus"
         rewardBatchRejectionReason:
-          type: string
-          description: Reason why the transaction was rejected from the reward batch, if any
+          type: array
+          items:
+            $ref: "#/components/schemas/ReasonDTO"
+          description: "ENG: Reason associated with TRX status - IT: Motivo associato allo stato della trx"
         rewardBatchInclusionDate:
           type: string
           format: date-time
@@ -2689,16 +2707,16 @@ components:
           format: date-time
           description: 'ENG: The date of the transaction - IT: La data della transazione'
           maxLength: 255
-        trxCode:
-          type: string
-          description: "ENG: Transaction code - IT: Il codice della transazione"
-          maxLength: 100
-          pattern: "^[a-zA-Z0-9]+$"
         trxChargeDate:
           type: string
           format: date-time
           description: "ENG: Payment authorization date - IT: La data di autorizzazione del pagamento"
           maxLength: 255
+        trxCode:
+          type: string
+          description: "ENG: Transaction code - IT: Il codice della transazione"
+          maxLength: 100
+          pattern: "^[a-zA-Z0-9]+$"
         updateDate:
           type: string
           format: date-time
@@ -2966,6 +2984,16 @@ components:
       required:
         - franchiseName
         - pointOfSaleId
+    ReasonDTO:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+          example: "2026-01-30T10:00:00Z"
+        reason:
+          type: string
+          example: "Invoice error"
   securitySchemes:
     Bearer:
       type: apiKey
