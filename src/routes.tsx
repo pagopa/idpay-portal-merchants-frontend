@@ -24,6 +24,7 @@ const ROUTES = {
   REFUND_REQUESTS: `${BASE_ROUTE}/:id/richieste-di-rimborso`,
   REFUND_REQUESTS_STORE: `${BASE_ROUTE}/:id/richieste-di-rimborso/punto-vendita/:batch`,
   SIDE_MENU_REFUND_REQUESTS: `richieste-di-rimborso`,
+  MODIFY_DOCUMENT: `${BASE_ROUTE}/modifica-documento/:trxId/:fileDocNumber`,
 };
 
 export default ROUTES;
