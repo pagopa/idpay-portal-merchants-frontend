@@ -19,7 +19,6 @@ import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import EmptyList from '../../pages/components/EmptyList';
-import DetailDrawer from '../Drawer/DetailDrawer';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import CustomChip from '../Chip/CustomChip';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
@@ -214,9 +213,9 @@ const MerchantTransactions = ({
     setDrawerOpened(true);
   };
 
-  const handleToggleDrawer = (newOpen: boolean) => {
-    setAlert({ ...alert, isOpen: newOpen });
-    setDrawerOpened(newOpen);
+  const handleToggleDrawer = () => {
+    setAlert({ ...alert, isOpen: false });
+    setDrawerOpened(false);
   };
 
   const handleCodeChange = useCallback((event: any, length: number, code: string) => {
@@ -367,17 +366,14 @@ const MerchantTransactions = ({
       {!dataTableIsLoading && rows.length === 0 && (
         <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
       )}
-      <DetailDrawer
-        data-testid="detail-drawer"
-        open={drawerOpened}
-        toggleDrawer={handleToggleDrawer}
-      >
         <TransactionDetail
-          title={'Dettaglio transazione'}
+          data-testid="detail-drawer"
+          isOpen={drawerOpened}
+          setIsOpen={handleToggleDrawer}
+          title="Dettaglio transazione"
           itemValues={rowDetail}
           listItem={listItemDetail}
         />
-      </DetailDrawer>
     </Box>
   );
 };

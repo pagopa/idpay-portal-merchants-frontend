@@ -1,5 +1,5 @@
-import { Box, Grid, Typography, Button, CircularProgress } from '@mui/material';
-import { ReactNode, useEffect, useState } from 'react';
+import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { useEffect, useState, useMemo } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
@@ -15,19 +15,17 @@ import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../../redux/hooks';
 import { formatDate } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
+import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
 
-type Props = {
-  title?: string;
+type Props = DetailDrawerProps & {
   itemValues: Record<string, any>;
   listItem: Array<any>;
   batchId: string;
   storeId: string;
-  children?: ReactNode;
-  onCloseDrawer?: () => void;
   onSuccess?: () => void;
 };
 
-export default function InvoiceDetail({ title, itemValues, listItem, batchId, onCloseDrawer, onSuccess }: Props) {
+export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess, isOpen, setIsOpen, ...rest }: Props) {
   const { setAlert } = useAlert();
   const [isLoading, setLoading] = useState(false);
   const [initiativeEndDate, setInitiativeEndDate] = useState<string>('');
@@ -60,6 +58,15 @@ export default function InvoiceDetail({ title, itemValues, listItem, batchId, on
       ? true
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
+
+  const isEditable = itemValues?.rewardBatchTrxStatus !== "APPROVED" && !(itemValues?.status === "CANCELLED" || itemValues?.status === "REFUNDED");
+
+  const editButton: DetailDrawerProps['buttons'] = useMemo(() => isEditable ? [{
+      variant: "contained",
+      title: "Modifica documento",
+      dataTestId: "change-file-btn"
+    }] : [], [isEditable]);
+
   const handlePostponeTransaction = async () => {
     if (!initiativeEndDate) { return; }
 
@@ -76,9 +83,10 @@ export default function InvoiceDetail({ title, itemValues, listItem, batchId, on
         text: 'Transazione spostata al mese successivo',
         isOpen: true,
         severity: 'success',
+        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300' },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' }
       });
       setInvoiceTransactionModal(false);
-      onCloseDrawer?.();
       onSuccess?.();
     } catch (error) {
       setAlert({
@@ -86,9 +94,10 @@ export default function InvoiceDetail({ title, itemValues, listItem, batchId, on
         text: 'Non è stato possibile spostare la transazione',
         isOpen: true,
         severity: 'error',
+        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300' },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' }
       });
       setInvoiceTransactionModal(false);
-      onCloseDrawer?.();
     } finally {
       setLoading(false);
     }
@@ -143,14 +152,8 @@ export default function InvoiceDetail({ title, itemValues, listItem, batchId, on
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
         severity: 'error',
-        containerStyle: {
-          height: 'fit-content',
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          zIndex: '1300'
-        },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' },
+        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300' },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' }
       });
       setLoading(false);
     }
@@ -176,205 +179,178 @@ export default function InvoiceDetail({ title, itemValues, listItem, batchId, on
   }
 
   return (
-    <Box sx={{ width: 375 }} p={'1.5rem'} pt={0} data-testid="product-detail">
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <Typography variant="h6">{title}</Typography>
-        </Grid>
+    <>
+      <DetailDrawer
+        {...rest}
+        data-testid="transaction-detail"
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        buttons={[ ...editButton, {
+          disabled: isNextMonthDisabled,
+          onClick: () => setInvoiceTransactionModal(true),
+          variant: "contained",
+          title: "Sposta al mese successivo",
+          dataTestId: "next-month-btn"
+        }]}>
         {listItem.map((item, index) => (
-          <Grid item xs={12} key={index}>
-            <Box mt={1}>
-              <Typography
-                variant="body2"
-                fontWeight={theme.typography.fontWeightRegular}
-                color={theme.palette.text.secondary}
+          <Box key={`${item?.id}-${index}`}>
+            <Typography
+              variant="body2"
+              fontWeight={theme.typography.fontWeightRegular}
+              color={theme.palette.text.secondary}
+            >
+              {item?.label}
+            </Typography>
+            <Typography
+              variant="body2"
+              fontWeight="fontWeightMedium"
+              sx={{
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'anywhere',
+              }}
+            >
+              {item.format
+                ? item.format(getNestedValue(itemValues, item?.id))
+                : getValueText(item?.id, item?.type)}
+            </Typography>
+          </Box>
+        ))}
+        <Box >
+          <Typography
+            variant="body2"
+            fontWeight={theme.typography.fontWeightRegular}
+            color={theme.palette.text.secondary}
+          >
+            {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
+          </Typography>
+          <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
+            {itemValues?.invoiceData?.docNumber ?? MISSING_DATA_PLACEHOLDER}
+          </Typography>
+        </Box>
+        <Box >
+          <Typography
+            variant="body2"
+            fontWeight={theme.typography.fontWeightRegular}
+            color={theme.palette.text.secondary}
+          >
+            {itemValues.status === 'REFUNDED' ? 'Nota di credito' : 'Fattura'}
+          </Typography>
+          <Button
+            data-testid="btn-test"
+            sx={{
+              padding: 0,
+              width: '100%',
+              display: 'block',
+              textAlign: 'left',
+              minWidth: 0,
+              maxWidth: '100%',
+              minHeight: 'fit-content',
+              height: 'auto',
+              '&:hover': {
+                backgroundColor: '#fff',
+                color: '#0055AA',
+              },
+            }}
+            onClick={() => handleDownloadFile(itemValues)}
+          >
+            {isLoading ? (
+              <CircularProgress color="inherit" size={20} data-testid="item-loader" />
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: '6px',
+                  width: "100%",
+                  mt: '2px',
+                  minWidth: 0,
+                }}
               >
-                {item?.label}
+                <ReceiptLong sx={{ flexShrink: 0, mt: '2px' }} />
+                <Typography
+                  component="span"
+                  variant="inherit"
+                  sx={{
+                    whiteSpace: 'pre-wrap',
+                    overflowWrap: 'anywhere',
+                    wordBreak: 'break-word',
+                    minWidth: 0,
+                    flex: 1,
+                  }}
+                >
+                  {itemValues?.invoiceData?.filename ?? MISSING_DATA_PLACEHOLDER}
+                </Typography>
+              </Box>
+            )}
+          </Button>
+        </Box>
+        <Box >
+          <Typography
+            variant="body2"
+            fontWeight={theme.typography.fontWeightRegular}
+            color={theme.palette.text.secondary}
+          >
+            Stato
+          </Typography>
+          <StatusChipInvoice status={itemValues?.rewardBatchTrxStatus} />
+        </Box>
+        {[RewardBatchTrxStatusEnum.SUSPENDED, RewardBatchTrxStatusEnum.REJECTED].includes(
+          itemValues.rewardBatchTrxStatus
+        ) && (
+            <Box >
+              <Typography
+                variant="overline"
+                fontWeight={theme.typography.fontWeightBold}
+                color={theme.palette.text.primary}
+              >
+                nota ufficiale
               </Typography>
               <Typography
                 variant="body2"
-                fontWeight="fontWeightMedium"
+                fontWeight={600}
                 sx={{
                   whiteSpace: 'pre-wrap',
                   overflowWrap: 'anywhere',
                 }}
               >
-                {item.format
-                  ? item.format(getNestedValue(itemValues, item?.id))
-                  : getValueText(item?.id, item?.type)}
+                {itemValues?.rewardBatchRejectionReason && itemValues?.rewardBatchRejectionReason.length ? itemValues?.rewardBatchRejectionReason.map(({ date, reason }: ReasonDTO, index: number) =>
+                  <Box key={`${date}-${index}`}>
+                    <Typography
+                      variant="body2"
+                      fontWeight={theme.typography.fontWeightRegular}
+                      color={theme.palette.text.secondary}
+                    >
+                      {date ? formatDate(date) : MISSING_DATA_PLACEHOLDER}
+                    </Typography>
+                    <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
+                      {reason ?? MISSING_DATA_PLACEHOLDER}
+                    </Typography>
+                  </Box>) :
+                  <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
+                    {MISSING_DATA_PLACEHOLDER}
+                  </Typography>}
               </Typography>
             </Box>
-          </Grid>
-        ))}
-
-        <Grid item xs={12}>
-          <Box mt={1}>
-            <Typography
-              variant="body2"
-              fontWeight={theme.typography.fontWeightRegular}
-              color={theme.palette.text.secondary}
-            >
-              {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
-            </Typography>
-            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
-              {itemValues?.invoiceData?.docNumber ?? MISSING_DATA_PLACEHOLDER}
-            </Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={12} sx={{ minWidth: 0 }}>
-          <Box mt={1}>
-            <Typography
-              variant="body2"
-              fontWeight={theme.typography.fontWeightRegular}
-              color={theme.palette.text.secondary}
-            >
-              {itemValues.status === 'REFUNDED' ? 'Nota di credito' : 'Fattura'}
-            </Typography>
-            <Button
-              data-testid="btn-test"
-              sx={{
-                padding: 0,
-                width: '100%',
-                display: 'block',
-                textAlign: 'left',
-                minWidth: 0,
-                maxWidth: '100%',
-                minHeight: 'fit-content',
-                height: 'auto',
-                '&:hover': {
-                  backgroundColor: '#fff',
-                  color: '#0055AA',
-                },
-              }}
-              onClick={() => handleDownloadFile(itemValues)}
-            >
-              {isLoading ? (
-                <CircularProgress color="inherit" size={20} data-testid="item-loader" />
-              ) : (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: '6px',
-                    width: "100%",
-                    mt: '2px',
-                    minWidth: 0,
-                  }}
-                >
-                  <ReceiptLong sx={{ flexShrink: 0, mt: '2px' }} />
-                  <Typography
-                    component="span"
-                    variant="inherit"
-                    sx={{
-                      whiteSpace: 'pre-wrap',
-                      overflowWrap: 'anywhere',
-                      wordBreak: 'break-word',
-                      minWidth: 0,
-                      flex: 1,
-                    }}
-                  >
-                    {itemValues?.invoiceData?.filename ?? MISSING_DATA_PLACEHOLDER}
-                  </Typography>
-                </Box>
-              )}
-            </Button>
-          </Box>
-        </Grid>
-
-        <Grid item xs={12} minWidth={0}>
-          <Box mt={1}>
-            <Typography
-              variant="body2"
-              fontWeight={theme.typography.fontWeightRegular}
-              color={theme.palette.text.secondary}
-            >
-              Stato
-            </Typography>
-            <StatusChipInvoice status={itemValues?.rewardBatchTrxStatus} />
-          </Box>
-        </Grid>
-        {[RewardBatchTrxStatusEnum.SUSPENDED, RewardBatchTrxStatusEnum.REJECTED].includes(
-          itemValues.rewardBatchTrxStatus
-        ) && (
-            <Grid item xs={12} sx={{ minWidth: 0 }}>
-              <Box mt={1} sx={{ minWidth: 0 }}>
-                <Typography
-                  variant="overline"
-                  fontWeight={theme.typography.fontWeightBold}
-                  color={theme.palette.text.primary}
-                >
-                  nota ufficiale
-                </Typography>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  sx={{
-                    whiteSpace: 'pre-wrap',
-                    overflowWrap: 'anywhere',
-                  }}
-                >
-                  {itemValues?.rewardBatchRejectionReason && itemValues?.rewardBatchRejectionReason.length ? itemValues?.rewardBatchRejectionReason.map(({ date, reason }: ReasonDTO, index: number) =>
-                    <Grid item xs={12} key={`${date}-${index}`}>
-                      <Box mt={1}>
-                        <Typography
-                          variant="body2"
-                          fontWeight={theme.typography.fontWeightRegular}
-                          color={theme.palette.text.secondary}
-                        >
-                          {date ? formatDate(date) : MISSING_DATA_PLACEHOLDER}
-                        </Typography>
-                        <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
-                          {reason ?? MISSING_DATA_PLACEHOLDER}
-                        </Typography>
-                      </Box>
-                    </Grid>) :
-                    <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
-                      {MISSING_DATA_PLACEHOLDER}
-                    </Typography>}
-                </Typography>
-              </Box>
-            </Grid>
           )}
-        <Grid item xs={12}>
-          <Box
-            mt={1}
-            sx={{
-              bottom: 0,
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              padding: '1.5rem',
-            }}
-          >
-            <Button
-              data-testid='next-month-btn'
-              onClick={() => setInvoiceTransactionModal(true)}
-              disabled={isNextMonthDisabled}
-              variant={'contained'}>
-              {'Sposta al mese successivo'}
-            </Button>
-          </Box>
-        </Grid>
-        <ModalComponent data-testid="modal-component" open={invoiceTransactionModal} onClose={() => setInvoiceTransactionModal(false)}>
-          <Box display={'flex'} flexDirection={'column'} gap={2}>
-            <Typography variant="h6">{t('pages.refundRequests.invoiceDetailConfirmModal.title')}</Typography>
-            <Typography variant="body1">{t('pages.refundRequests.invoiceDetailConfirmModal.description')}</Typography>
-          </Box>
-          <Box display={'flex'} justifyContent={'flex-end'} gap={2} mt={4}>
-            <Button variant="outlined" onClick={() => {
-              setInvoiceTransactionModal(false);
-            }}>
-              Indietro
-            </Button>
-            <Button
-              onClick={handlePostponeTransaction}
-              variant="contained">
-              {'Conferma'}
-            </Button>
-          </Box>
-        </ModalComponent>
-      </Grid>
-    </Box>
-
+      </DetailDrawer>
+      <ModalComponent data-testid="modal-component" open={invoiceTransactionModal} onClose={() => setInvoiceTransactionModal(false)}>
+        <Box display={'flex'} flexDirection={'column'} gap={2}>
+          <Typography variant="h6">{t('pages.refundRequests.invoiceDetailConfirmModal.title')}</Typography>
+          <Typography variant="body1">{t('pages.refundRequests.invoiceDetailConfirmModal.description')}</Typography>
+        </Box>
+        <Box display={'flex'} justifyContent={'flex-end'} gap={2} mt={4}>
+          <Button variant="outlined" onClick={() => {
+            setInvoiceTransactionModal(false);
+          }}>
+            Indietro
+          </Button>
+          <Button
+            onClick={handlePostponeTransaction}
+            variant="contained">
+            {'Conferma'}
+          </Button>
+        </Box>
+      </ModalComponent>
+    </>
   );
 }

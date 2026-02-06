@@ -10,10 +10,13 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('DetailDrawer', () => {
   const defaultProps = {
-    open: true,
-    toggleDrawer: mockToggleDrawer,
+    isOpen: true,
+    setIsOpen: mockToggleDrawer,
     children: <div data-testid="drawer-content">Contenuto di Test</div>,
+    title: "Titolo"
   };
+
+  const buttons = [{title: "button", dataTestId: "button-test-id"}]
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,16 +32,18 @@ describe('DetailDrawer', () => {
     const drawer = screen.getByTestId('detail-drawer');
     expect(drawer).toBeInTheDocument();
     expect(screen.getByText('Contenuto di Test')).toBeInTheDocument();
+    expect(screen.getByText('Titolo')).toBeInTheDocument();
   });
 
   it('should not render the content when open prop is false', () => {
     render(
       <Wrapper>
-        <DetailDrawer {...defaultProps} open={false} />
+        <DetailDrawer {...defaultProps} isOpen={false} />
       </Wrapper>
     );
 
     expect(screen.queryByText('Contenuto di Test')).not.toBeInTheDocument();
+    expect(screen.queryByTestId("buttons-box")).not.toBeInTheDocument();
   });
 
   it('should call toggleDrawer(false) when the CloseIcon button is clicked', () => {
@@ -48,25 +53,30 @@ describe('DetailDrawer', () => {
       </Wrapper>
     );
 
-    const closeButton = screen.getByTestId('open-detail-button');
+    const closeButton = screen.getByTestId('close-button');
     fireEvent.click(closeButton);
 
     expect(mockToggleDrawer).toHaveBeenCalledTimes(1);
-    expect(mockToggleDrawer).toHaveBeenCalledWith(false);
   });
 
-  it('should call toggleDrawer(false) when the drawer is closed via background click (onClose event)', () => {
+  it('should render buttons', () => {
     render(
       <Wrapper>
-        <DetailDrawer {...defaultProps} />
+        <DetailDrawer {...defaultProps} buttons={buttons} />
       </Wrapper>
     );
 
-    const drawer = screen.getByTestId('detail-drawer');
+    expect(screen.getByTestId("buttons-box")).toBeInTheDocument();
+    expect(screen.getByTestId("button-test-id")).toBeInTheDocument();
+  });
 
-    fireEvent.keyDown(drawer, { key: 'Escape' });
+  it('should not render buttons when is an empty array', () => {
+    render(
+      <Wrapper>
+        <DetailDrawer {...defaultProps} buttons={[]} />
+      </Wrapper>
+    );
 
-    expect(mockToggleDrawer).toHaveBeenCalledTimes(1);
-    expect(mockToggleDrawer).toHaveBeenCalledWith(false);
+    expect(screen.queryByTestId("buttons-box")).not.toBeInTheDocument();
   });
 });
