@@ -29,6 +29,7 @@ import RefundRequests from './pages/refundRequests/RefundRequests';
 import ROUTES from './routes';
 import { useInitiativesList } from './hooks/useInitiativesList';
 import ShopDetails from './pages/refundRequests/detail/ShopDetails';
+import ExportReport from './pages/exportReport/ExportReport';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -79,6 +80,9 @@ const SecuredRoutes = withLogin(
         </Route>
         <Route path={routes.REPORTED_USERS} exact={true}>
           <ReportedUsers />
+        </Route>
+        <Route path={routes.EXPORT_REPORT} exact={true}>
+          <ExportReport />
         </Route>
         <Route path={routes.REPORTED_USERS_INSERT} exact={true}>
           <InsertReportedUser />
