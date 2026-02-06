@@ -108,11 +108,22 @@ describe('Test suite for SideMenu component', () => {
     });
   });
 
+  test('checkIsSelected returns true when pathname matches export report route', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const exportReportPath = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`;
+    history.replace(exportReportPath);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(exportReportPath);
+    });
+  });
+
   test('checkIsSelected returns true for stores detail route', async () => {
     const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
     
-    // Navigate to stores detail route
     const storesDetailPath = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_STORES}/detail`;
     history.replace(storesDetailPath);
     
