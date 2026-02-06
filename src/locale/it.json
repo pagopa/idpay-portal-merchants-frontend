@@ -251,7 +251,7 @@
     },
       "ModalReportedUser": {
         "title": "Vuoi procedere con la cancellazione?",
-"description": "Stai per cancellare il soggetto <strong>{{cf}}</strong> dalla lista degli utenti segnalati.",
+        "description": "Stai per cancellare il soggetto <strong>{{cf}}</strong> dalla lista degli utenti segnalati.",
         "descriptionTwo": "Questa operazione non comporta il blocco della relativa richiesta di rimborso.",
         "cancelText": "Annulla",
         "confirmText": "Conferma"
@@ -367,6 +367,10 @@
         "title": "Conferma spostamento",
         "description": "Confermi di voler spostare la transazione al mese successivo?"
       }
+    },
+    "reportExport": {
+      "title": "Esporta report",
+      "subtitle": "Esporta le transazioni del Bonus Elettrodomestici in base ai criteri selezionati."
     }
   },
   "roles": {

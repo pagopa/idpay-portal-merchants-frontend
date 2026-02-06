@@ -16,6 +16,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import ReportIcon from '@mui/icons-material/Report';
 import EuroIcon from '@mui/icons-material/Euro';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
 import ROUTES, { BASE_ROUTE } from '../../routes';
@@ -46,7 +47,8 @@ export default function SideMenu() {
   });
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS, ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS, ROUTES.REFUND_REQUESTS_STORE],
+    path: [ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS,
+      ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS, ROUTES.REFUND_REQUESTS_STORE, ROUTES.EXPORT_REPORT],
     exact: true,
     strict: false,
   });
@@ -76,6 +78,10 @@ export default function SideMenu() {
 
   const checkIsReportedUsersPage = (item: any) => pathname.startsWith(
     `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
+  );
+
+  const checkIsExportReport = (item: any) => pathname.startsWith(
+    `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`
   );
 
   return (
@@ -227,6 +233,29 @@ export default function SideMenu() {
                     icon={ReportIcon}
                     level={2}
                     data-testid="reportedUsers-click-test"
+                  />
+                  <SidenavItem
+                    title={t('pages.reportExport.title')}
+                    handleClick={() =>
+                      onExit(() => {
+                        dispatch(
+                          setSelectedInitative({
+                            spendingPeriod:
+                              `${item.startDate?.toLocaleDateString(
+                                'fr-FR'
+                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
+                            initiativeName: item.initiativeName,
+                          })
+                        );
+                        history.replace(
+                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`
+                        );
+                      })
+                    }
+                    isSelected={checkIsExportReport(item)}
+                    icon={FileDownloadIcon}
+                    level={2}
+                    data-testid="export-report-click-test"
                   />
                 </List>
               </AccordionDetails>
