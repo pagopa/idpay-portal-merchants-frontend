@@ -1,7 +1,8 @@
-import { Box, Table, TableBody, TableCell, TableRow } from "@mui/material";
+import { Box } from '@mui/material';
 import { TitleBox } from "@pagopa/selfcare-common-frontend";
 import { useTranslation } from 'react-i18next';
 import ExportFiltersCard from '../../components/exportFiltersCard/ExportFiltersCard';
+import ReportDataTable from './ReportDataTable';
 
 
 
@@ -30,27 +31,7 @@ const InitiativeExportReportPage = () => {
           onGenerateReport={(range: { from: string; to: string }) => console.log(range.from+'-'+range.to)}
         />
       </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1, mb: 3 }}>
-        <Table sx={{ backgroundColor: '#FFFFFF' }}>
-          <TableBody>
-            <TableRow>
-              <TableCell
-                colSpan={10}
-                sx={{
-                  textAlign: 'center',
-                  py: 4,
-                  fontSize: 16,
-                  fontWeight: 500,
-                  color: '#5C6F82',
-                  backgroundColor: '#FFFFFF'
-                }}
-              >
-                {t('pages.reportExport.noReportFound')}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </Box>
+      <ReportDataTable />
     </Box>
   );
 };
