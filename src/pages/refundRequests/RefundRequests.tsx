@@ -136,7 +136,7 @@ const RefundRequests = () => {
     currentPagination.pageNo,
     currentPagination.pageSize,
   ]);
-  
+
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
     fontSize: theme.typography.fontSize,
@@ -319,11 +319,7 @@ const RefundRequests = () => {
             rows={rewardBatches}
             rowsPerPage={currentPagination.pageSize}
             checkable={true}
-            paginationModel={{
-              pageNo: currentPagination.pageNo,
-              pageSize: currentPagination.pageSize,
-              totalElements: currentPagination.totalElements,
-            }}
+            // paginationModel={{ page: currentPagination.pageNo, pageSize: currentPagination.pageSize, totalElements:  }}
             onPaginationPageChange={handlePaginationPageChange}
             onRowSelectionChange={handleRowSelectionChange}
             isRowSelectable={isRowSelectable}
