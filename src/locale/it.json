@@ -370,7 +370,9 @@
     },
     "reportExport": {
       "title": "Esporta report",
-      "subtitle": "Esporta le transazioni del Bonus Elettrodomestici in base ai criteri selezionati."
+      "subtitle": "Esporta le transazioni del Bonus Elettrodomestici in base ai criteri selezionati.",
+      "formTitle": "Seleziona i parametri di esportazione",
+      "formSubtitle": "Imposta i criteri di ricerca per generare il report delle transazioni."
     }
   },
   "roles": {
