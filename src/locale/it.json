@@ -371,8 +371,15 @@
     "reportExport": {
       "title": "Esporta report",
       "subtitle": "Esporta le transazioni del Bonus Elettrodomestici in base ai criteri selezionati.",
-      "formTitle": "Seleziona i parametri di esportazione",
-      "formSubtitle": "Imposta i criteri di ricerca per generare il report delle transazioni."
+      "form": {
+        "title": "Seleziona i parametri di esportazione",
+        "subtitle": "Imposta i criteri di ricerca per generare il report delle transazioni. Puoi selezionare le date a partire da ieri, con un range massimo consentito di 90 giorni.",
+        "from": "Dal",
+        "to": "Al",
+        "submit": "Genera report"
+      },
+      "reportTitle": "I tuoi report",
+      "noReportFound": "Non hai ancora generato report."
     }
   },
   "roles": {
