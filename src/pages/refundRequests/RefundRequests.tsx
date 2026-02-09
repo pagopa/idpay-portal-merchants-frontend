@@ -40,9 +40,8 @@ const RefundRequests = () => {
   const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
   const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
   const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
-  // const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
+  const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
   const initiativesList = useSelector(intiativesListSelector);
-
   const columns: Array<GridColDef> = [
     {
       field: 'spacer',
@@ -127,14 +126,16 @@ const RefundRequests = () => {
       ),
     },
   ];
-
   const { t } = useTranslation();
 
   useEffect(() => {
     if (initiativesList && initiativesList.length > 0) {
       void fetchRewardBatches(initiativesList[0].initiativeId!);
     }
-  }, [initiativesList]);
+  }, [initiativesList,
+    currentPagination.pageNo,
+    currentPagination.pageSize,
+  ]);
 
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
@@ -144,7 +145,7 @@ const RefundRequests = () => {
   const fetchRewardBatches = async (initiativeId: string): Promise<void> => {
     setRewardBatchesLoading(true);
     try {
-      const response = await getRewardBatches(initiativeId);
+      const response = await getRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
       if (response?.content) {
         const mappedResponse = response.content.map((value) => ({
           ...value,
@@ -152,6 +153,11 @@ const RefundRequests = () => {
           suspendedAmountCents: value.status === 'APPROVED' ? value.suspendedAmountCents : undefined
         }));
         setRewardBatches(mappedResponse);
+        setCurrentPagination({
+          pageNo: response?.pageNo as number,
+          pageSize: response?.pageSize as number,
+          totalElements: response?.totalElements as number,
+        });
         setSelectedRows([]);
       }
     } catch (error: any) {
@@ -175,15 +181,7 @@ const RefundRequests = () => {
   );
 
   const handlePaginationPageChange = (page: number) => {
-    console.log('Page changed:', page);
-    // const updatedPagination = { ...storesPagination, pageNo: page, initiativeId: id, sort: currentSort };
-    // setStoresPagination(updatedPagination);
-    // sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
-    // void fetchStores({
-    //   ...appliedFilters,
-    //   page,
-    //   sort: currentSort,
-    // });
+    setCurrentPagination((prev) => ({ ...prev, pageNo: page }));
   };
 
   const handleRowSelectionChange = (rows: Array<number>) => {
@@ -319,9 +317,13 @@ const RefundRequests = () => {
           <DataTable
             columns={columns}
             rows={rewardBatches}
-            rowsPerPage={1}
+            rowsPerPage={currentPagination.pageSize}
             checkable={true}
-            // paginationModel={{ page: currentPagination.pageNo, pageSize: currentPagination.pageSize, totalElements:  }}
+            paginationModel={{
+              pageNo: currentPagination.pageNo,
+              pageSize: currentPagination.pageSize,
+              totalElements: currentPagination.totalElements
+            }}
             onPaginationPageChange={handlePaginationPageChange}
             onRowSelectionChange={handleRowSelectionChange}
             isRowSelectable={isRowSelectable}

@@ -232,8 +232,8 @@ describe('merchantService', () => {
   describe('getRewardBatches', () => {
     test('should call MerchantApi.getRewardBatches with correct initiativeId', async () => {
       const initiativeId = 'init-1';
-      await getRewardBatches(initiativeId);
-      expect(mockedMerchantApi.getRewardBatches).toHaveBeenCalledWith(initiativeId);
+      await getRewardBatches(initiativeId, 0,10);
+      expect(mockedMerchantApi.getRewardBatches).toHaveBeenCalledWith(initiativeId, 0, 10);
     });
   });
 
