@@ -319,7 +319,11 @@ const RefundRequests = () => {
             rows={rewardBatches}
             rowsPerPage={currentPagination.pageSize}
             checkable={true}
-            // paginationModel={{ page: currentPagination.pageNo, pageSize: currentPagination.pageSize, totalElements:  }}
+            paginationModel={{
+              pageNo: currentPagination.pageNo,
+              pageSize: currentPagination.pageSize,
+              totalElements: currentPagination.totalElements
+            }}
             onPaginationPageChange={handlePaginationPageChange}
             onRowSelectionChange={handleRowSelectionChange}
             isRowSelectable={isRowSelectable}
