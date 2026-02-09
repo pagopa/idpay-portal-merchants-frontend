@@ -514,9 +514,9 @@ describe('RefundRequests', () => {
 
     renderWithStore(<RefundRequests />, storeWithoutInitiatives);
 
-    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+    await waitFor(() => expect(mockGetRewardBatches).not.toHaveBeenCalled());
 
-    expect(mockGetRewardBatches).toHaveBeenCalledWith('', 0, 10);
+    expect(mockGetRewardBatches).not.toHaveBeenCalledWith('', 0, 10);
     expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
   });
 
@@ -831,9 +831,9 @@ describe('RefundRequests', () => {
 
     renderWithStore(<RefundRequests />);
 
-    await waitFor(() => expect(screen.getByTestId('checkbox-1')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('checkbox-41')).toBeInTheDocument());
 
-    await user.click(screen.getByTestId('checkbox-1'));
+    await user.click(screen.getByTestId('checkbox-41'));
 
     const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
     await user.click(sendButton);
@@ -842,7 +842,7 @@ describe('RefundRequests', () => {
     await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '1');
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '41');
     });
 
     expect(mockSetAlert).toHaveBeenCalledWith(
@@ -854,7 +854,7 @@ describe('RefundRequests', () => {
       })
     );
 
-    expect(mockGetRewardBatches).toHaveBeenCalledTimes(2);
+    expect(mockGetRewardBatches).toHaveBeenCalledTimes(1);
 
     await waitFor(() => {
       expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();

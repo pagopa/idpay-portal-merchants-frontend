@@ -132,17 +132,11 @@ const RefundRequests = () => {
     if (initiativesList && initiativesList.length > 0) {
       void fetchRewardBatches(initiativesList[0].initiativeId!);
     }
-  }, [initiativesList]);
-
-  useEffect(() => {
-    const initiativeId =
-      initiativesList && initiativesList.length > 0 ? initiativesList[0].initiativeId : '';
-    void fetchRewardBatches(initiativeId || '');
-  }, [
+  }, [initiativesList,
     currentPagination.pageNo,
     currentPagination.pageSize,
   ]);
-  
+
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
     fontSize: theme.typography.fontSize,
@@ -323,12 +317,12 @@ const RefundRequests = () => {
           <DataTable
             columns={columns}
             rows={rewardBatches}
-            rowsPerPage={1}
+            rowsPerPage={currentPagination.pageSize}
             checkable={true}
             paginationModel={{
-              page: currentPagination.pageNo,
+              pageNo: currentPagination.pageNo,
               pageSize: currentPagination.pageSize,
-              totalElements: currentPagination.totalElements,
+              totalElements: currentPagination.totalElements
             }}
             onPaginationPageChange={handlePaginationPageChange}
             onRowSelectionChange={handleRowSelectionChange}
