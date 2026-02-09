@@ -1013,6 +1013,88 @@ paths:
               example:
                 code: PAYMENT_GENERIC_ERROR
                 message: Application error
+  /transactions/{transactionId}/invoice/update:
+    put:
+      tags:
+        - merchant-transactions
+      summary: Point of sales update invoice transaction
+      description: "ENG: Point of sales invoice transaction update <br> IT: Aggiornamento del file e del numero fattura per una transazione da parte di un Punto Vendita"
+      operationId: updateInvoiceTransaction
+      parameters:
+        - name: transactionId
+          in: path
+          description: The transaction ID
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+            pattern: "^[a-zA-Z0-9]+$"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Invoice file
+                docNumber:
+                  type: string
+                  description: Invoice document number
+      responses:
+        "204":
+          description: Ok - no content
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: PAYMENT_INVALID_REQUEST
+                message: Something went wrong handling the request
+        "401":
+          description: Authentication failed
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT
+                message: "The merchant with id [%s] associated to the transaction is not equal to the merchant with id [%s]"
+        "404":
+          description: The requested resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: PAYMENT_NOT_FOUND_OR_EXPIRED
+                message: "Cannot find transaction with transactionId [%s]"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: PAYMENT_TOO_MANY_REQUESTS
+                message: Too many requests
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: PAYMENT_GENERIC_ERROR
+                message: Application error
   /initiatives/{initiativeId}/transactions:
     get:
       tags:
