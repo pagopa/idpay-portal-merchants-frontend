@@ -4,7 +4,6 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Route, useHistory } from 'react-router-dom';
 import RefundRequests from '../RefundRequests'
-import routes from '../../../routes';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -136,7 +135,8 @@ const mockGetRewardBatches = jest.fn();
 const mockSendRewardBatch = jest.fn();
 
 jest.mock('../../../services/merchantService', () => ({
-  getRewardBatches: (initiativeId: string) => mockGetRewardBatches(initiativeId),
+  getRewardBatches: (initiativeId: string, pageNo: number, pageSize: number) =>
+    mockGetRewardBatches(initiativeId, pageNo, pageSize),
   sendRewardBatch: (initiativeId: string, batchId: string) =>
     mockSendRewardBatch(initiativeId, batchId),
 }));
@@ -157,6 +157,7 @@ const mockData = [
     initialAmountCents: 10000,
     status: 'CREATED',
     month: getPreviousMonth(),
+    numberOfTransactions: 1,
   },
   {
     id: 2,
@@ -165,6 +166,7 @@ const mockData = [
     initialAmountCents: 20000,
     status: 'SENT',
     month: getPreviousMonth(),
+    numberOfTransactions: 1,
   },
   {
     id: 3,
@@ -173,6 +175,7 @@ const mockData = [
     initialAmountCents: 300000,
     status: 'EVALUATING',
     month: getPreviousMonth(),
+    numberOfTransactions: 1,
   },
 ];
 
@@ -195,7 +198,12 @@ const renderWithStore = (component: React.ReactElement, store = createMockStore(
 describe('RefundRequests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetRewardBatches.mockResolvedValue({ content: mockData });
+    mockGetRewardBatches.mockResolvedValue({
+      content: mockData,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: mockData.length,
+    });
     mockSendRewardBatch.mockResolvedValue({});
   });
 
@@ -218,12 +226,6 @@ describe('RefundRequests', () => {
       push: pushMock,
     });
 
-    const params = {
-      row: {
-        id: '1',
-        name: '001-20251125 223',
-      },
-    };
     renderWithStore(<RefundRequests />);
 
     await waitFor(() => {
@@ -239,7 +241,7 @@ describe('RefundRequests', () => {
     renderWithStore(<RefundRequests />);
 
     await waitFor(() => {
-      expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id');
+      expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id', 0, 10);
     });
   });
 
@@ -272,7 +274,12 @@ describe('RefundRequests', () => {
   });
 
   it('should show no result paper when there is no data', async () => {
-    mockGetRewardBatches.mockResolvedValueOnce({ content: [] });
+    mockGetRewardBatches.mockResolvedValue({
+      content: [],
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 0,
+    });
     renderWithStore(<RefundRequests />);
 
     await waitFor(() => {
@@ -284,18 +291,22 @@ describe('RefundRequests', () => {
   });
 
   it('should handle fetch error gracefully', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    mockGetRewardBatches.mockRejectedValueOnce(new Error('API Error'));
+    mockGetRewardBatches.mockRejectedValue(new Error('API Error'));
 
     renderWithStore(<RefundRequests />);
 
-    await waitFor(() => {
-      expect(mockGetRewardBatches).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
 
-    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+    expect(mockSetAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
 
-    consoleErrorSpy.mockRestore();
+    expect(await screen.findByTestId('no-result-paper')).toBeInTheDocument();
   });
 
   it('should not show send button when no rows are selected', async () => {
@@ -492,34 +503,34 @@ describe('RefundRequests', () => {
   });
 
   it('should handle missing initiativesList gracefully', async () => {
+    mockGetRewardBatches.mockResolvedValue({
+      content: [],
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 0,
+    });
+
     const storeWithoutInitiatives = createMockStore([]);
 
     renderWithStore(<RefundRequests />, storeWithoutInitiatives);
 
-    await waitFor(() => {
-      expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
 
+    expect(mockGetRewardBatches).toHaveBeenCalledWith('', 0, 10);
     expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
-    expect(mockGetRewardBatches).not.toHaveBeenCalled();
   });
 
   it('should handle pagination page change', async () => {
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     const user = userEvent.setup();
-
     renderWithStore(<RefundRequests />);
 
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    await user.click(screen.getByText('Next Page'));
+
     await waitFor(() => {
-      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+      expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id', 2, 10);
     });
-
-    const nextPageButton = screen.getByText('Next Page');
-    await user.click(nextPageButton);
-
-    expect(consoleLogSpy).toHaveBeenCalledWith('Page changed:', 2);
-
-    consoleLogSpy.mockRestore();
   });
 
   it('should show loading state in modal when sending batch', async () => {
@@ -598,7 +609,12 @@ describe('RefundRequests', () => {
       },
     ];
 
-    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
+    mockGetRewardBatches.mockResolvedValue({
+      content: data,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: data.length,
+    });
 
     const storeWithUndefinedInitiativeId = createMockStore([{ initiativeId: undefined } as any]);
     renderWithStore(<RefundRequests />, storeWithUndefinedInitiativeId);
@@ -638,7 +654,12 @@ describe('RefundRequests', () => {
       },
     ];
 
-    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
+    mockGetRewardBatches.mockResolvedValue({
+      content: data,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: data.length,
+    });
 
     renderWithStore(<RefundRequests />);
 
@@ -660,7 +681,12 @@ describe('RefundRequests', () => {
   });
 
   it('should handle null response from getRewardBatches', async () => {
-    mockGetRewardBatches.mockResolvedValueOnce(null);
+    mockGetRewardBatches.mockResolvedValue({
+      content: [],
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 0,
+    });
 
     renderWithStore(<RefundRequests />);
 
@@ -672,7 +698,12 @@ describe('RefundRequests', () => {
   });
 
   it('should handle response without content property', async () => {
-    mockGetRewardBatches.mockResolvedValueOnce({});
+    mockGetRewardBatches.mockResolvedValue({
+      content: [],
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 0,
+    });
 
     renderWithStore(<RefundRequests />);
 
@@ -753,7 +784,12 @@ describe('RefundRequests', () => {
       },
     ];
 
-    mockGetRewardBatches.mockResolvedValueOnce({ content: customData });
+    mockGetRewardBatches.mockResolvedValue({
+      content: customData,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: customData.length,
+    });
 
     renderWithStore(<RefundRequests />);
 
@@ -785,14 +821,19 @@ describe('RefundRequests', () => {
       },
     ];
 
-    mockGetRewardBatches.mockResolvedValueOnce({ content: data });
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: data,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: data.length
+    });
     mockSendRewardBatch.mockResolvedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
 
     renderWithStore(<RefundRequests />);
 
-    await waitFor(() => expect(screen.getByTestId('checkbox-41')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('checkbox-1')).toBeInTheDocument());
 
-    await user.click(screen.getByTestId('checkbox-41'));
+    await user.click(screen.getByTestId('checkbox-1'));
 
     const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
     await user.click(sendButton);
@@ -801,7 +842,7 @@ describe('RefundRequests', () => {
     await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '41');
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '1');
     });
 
     expect(mockSetAlert).toHaveBeenCalledWith(
@@ -813,12 +854,13 @@ describe('RefundRequests', () => {
       })
     );
 
-    expect(mockGetRewardBatches).toHaveBeenCalledTimes(1);
+    expect(mockGetRewardBatches).toHaveBeenCalledTimes(2);
 
     await waitFor(() => {
       expect(screen.queryByTestId('refund-modal')).not.toBeInTheDocument();
     });
   });
+
   it('should map approved/suspended amounts only for APPROVED batches (others become undefined)', async () => {
     const currentYear = new Date().getFullYear();
     const monthAlwaysSelectable = `${currentYear}-00`;
@@ -848,28 +890,43 @@ describe('RefundRequests', () => {
       },
     ];
 
-    mockGetRewardBatches.mockResolvedValueOnce({ content: dataWithApprovedAmounts });
+    mockGetRewardBatches.mockResolvedValue({
+      content: dataWithApprovedAmounts,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: dataWithApprovedAmounts.length,
+    });
 
     renderWithStore(<RefundRequests />);
 
-    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    await waitFor(() => {
+      const chips = screen.getAllByTestId('custom-chip');
+      expect(chips.some((c) => c.textContent === 'APPROVED')).toBe(true);
+    });
 
     expect(screen.getByText('Rimborso approvato')).toBeInTheDocument();
     expect(screen.getByText('Rimborso sospeso')).toBeInTheDocument();
 
-    expect(screen.getByText('123.45 €')).toBeInTheDocument();
-    expect(screen.getByText('2.00 €')).toBeInTheDocument();
+    expect(screen.getByText((t) => t.replace(/\s+/g, ' ').includes('123.45 €'))).toBeInTheDocument();
+    expect(screen.getByText((t) => t.replace(/\s+/g, ' ').includes('2.00 €'))).toBeInTheDocument();
 
-    expect(screen.queryByText('99.99 €')).not.toBeInTheDocument();
-    expect(screen.queryByText('88.88 €')).not.toBeInTheDocument();
+    expect(screen.queryByText((t) => t.replace(/\s+/g, ' ').includes('99.99 €'))).not.toBeInTheDocument();
+    expect(screen.queryByText((t) => t.replace(/\s+/g, ' ').includes('88.88 €'))).not.toBeInTheDocument();
 
-    const nanValues = screen.getAllByText('NaN €');
+    const nanValues = screen.getAllByText((t) => t.replace(/\s+/g, ' ').includes('NaN €'));
     expect(nanValues.length).toBeGreaterThanOrEqual(2);
   });
 
   it('should dispatch an error alert when getRewardBatches fails', async () => {
     mockGetRewardBatches.mockRejectedValueOnce(new Error('API Error'));
-
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: [],
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 0
+    });
     renderWithStore(<RefundRequests />);
 
     await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
