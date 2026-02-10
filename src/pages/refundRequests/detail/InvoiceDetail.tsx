@@ -84,6 +84,7 @@ export default function InvoiceDetail({
               onClick: () =>
                 history.push(routes.MODIFY_DOCUMENT, {
                   pointOfSaleId: itemValues.pointOfSaleId,
+                  fileDocNumber: itemValues?.invoiceData?.docNumber,
                 }),
             },
           ]
