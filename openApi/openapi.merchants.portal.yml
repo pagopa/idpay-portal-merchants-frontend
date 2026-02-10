@@ -1030,21 +1030,10 @@ paths:
             maxLength: 255
             pattern: "^[a-zA-Z0-9]+$"
       requestBody:
-        required: true
         content:
           multipart/form-data:
             schema:
-              type: object
-              required:
-                - file
-              properties:
-                file:
-                  type: string
-                  format: binary
-                  description: Invoice file
-                docNumber:
-                  type: string
-                  description: Invoice document number
+              $ref: "#/components/schemas/InvoiceDTO"
       responses:
         "204":
           description: Ok - no content
@@ -3076,6 +3065,18 @@ components:
         reason:
           type: string
           example: "Invoice error"
+    InvoiceDTO:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          maxLength: 41943040
+          format: binary
+        docNumber:
+          type: string
+          maxLength: 255
   securitySchemes:
     Bearer:
       type: apiKey
