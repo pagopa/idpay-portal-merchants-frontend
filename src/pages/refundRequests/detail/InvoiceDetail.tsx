@@ -62,10 +62,10 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
   const isEditable = itemValues?.rewardBatchTrxStatus !== "APPROVED" && !(itemValues?.status === "CANCELLED" || itemValues?.status === "REFUNDED");
 
   const editButton: DetailDrawerProps['buttons'] = useMemo(() => isEditable ? [{
-      variant: "contained",
-      title: "Modifica documento",
-      dataTestId: "change-file-btn"
-    }] : [], [isEditable]);
+    variant: "contained",
+    title: "Modifica documento",
+    dataTestId: "change-file-btn"
+  }] : [], [isEditable]);
 
   const handlePostponeTransaction = async () => {
     if (!initiativeEndDate) { return; }
@@ -74,9 +74,9 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
     try {
       await postponeTransaction(
         initiativeId,
+        initiativeEndDate,
         batchId ?? '',
-        itemValues.id,
-        initiativeEndDate
+        itemValues.id
       );
       setAlert({
         title: 'Successo',
@@ -185,8 +185,8 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
         data-testid="transaction-detail"
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        buttons={[ ...editButton, {
-          disabled: isNextMonthDisabled,
+        buttons={[...editButton, {
+          disabled: !!isNextMonthDisabled,
           onClick: () => setInvoiceTransactionModal(true),
           variant: "contained",
           title: "Sposta al mese successivo",
@@ -303,7 +303,7 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
                 fontWeight={theme.typography.fontWeightBold}
                 color={theme.palette.text.primary}
               >
-                nota ufficiale
+                Nota ufficiale
               </Typography>
               <Typography
                 variant="body2"
@@ -347,7 +347,7 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
           <Button
             onClick={handlePostponeTransaction}
             variant="contained">
-            {'Conferma'}
+            Conferma
           </Button>
         </Box>
       </ModalComponent>

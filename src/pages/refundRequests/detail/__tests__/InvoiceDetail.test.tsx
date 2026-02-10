@@ -1,8 +1,9 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import InvoiceDetail from '../InvoiceDetail';
+import * as formatUtils from '../../../../utils/formatUtils';
 import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
-import { getEndOfNextMonth } from '../../../../utils/formatUtils';
+import { useLocation } from 'react-router-dom';
 
 jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
     __esModule: true,
@@ -22,13 +23,14 @@ jest.mock('../../../../components/Chip/StatusChipInvoice', () => (props: any) =>
     <div data-testid="status-chip">{props.status}</div>
 ));
 
-jest.mock('../../../../components/modal/ModalComponent', () => (props: any) =>
-  props.open ? (
-    <div data-testid="modal-component">
-      {props.children}
-    </div>
-  ) : null
-);
+// jest.mock('../../../../components/modal/ModalComponent', () => (props: any) =>
+//     props.open ? (
+//         <div data-testid="modal-component">
+//             {props.children}
+//         </div>
+//     ) : null
+// );
+
 jest.mock('../../../../hooks/useAlert', () => ({
     useAlert: jest.fn(),
 }));
@@ -38,15 +40,16 @@ jest.mock('react-i18next', () => ({
         t: (key: string) => key,
     }),
 }));
-jest.mock('react-router-dom', () => ({
-    ...jest.requireActual('react-router-dom'),
-    useLocation: jest.fn()
-}));
 
-const mockUseLocation = { state: { store: { status: 'CREATED' } } };
+const mockUseLocation = { state: { store: { status: 'CREATED', month: (new Date('2026-02-15')).toISOString().split('T')[0] } } };
 
 jest.mock('../../../../redux/hooks', () => ({
     useAppSelector: jest.fn(),
+}));
+
+jest.mock('react-router-dom', () => ({
+    ...jest.requireActual('react-router-dom'),
+    useLocation: jest.fn()
 }));
 
 jest.mock('../../../../redux/slices/initiativesSlice', () => ({
@@ -54,21 +57,16 @@ jest.mock('../../../../redux/slices/initiativesSlice', () => ({
 }));
 
 jest.mock('../../../../utils/formatUtils', () => ({
+    ...jest.requireActual('../../../../utils/formatUtils'),
     formatValues: jest.fn((val: string) => `formatted-${val}`),
-    currencyFormatter: jest.fn((val: number) => ({ toString: () => `€${val.toFixed(2)}` })),
-    getEndOfNextMonth: jest.fn((date: Date) => {
-        const nextMonth = new Date(date);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        nextMonth.setDate(0);
-        return nextMonth;
-    }),
+    currencyFormatter: jest.fn((val: number) => ({ toString: () => `€${val.toFixed(2)}` }))
 }));
+
 
 import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile, postponeTransaction } from '../../../../services/merchantService';
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
-import { useLocation } from 'react-router-dom';
 
 describe('InvoiceDetail', () => {
     let mockSetAlert: jest.Mock;
@@ -78,6 +76,7 @@ describe('InvoiceDetail', () => {
         pointOfSaleId: 'pos-1',
         status: 'APPROVED',
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
+        initiativeId: 'init-123',
         invoiceData: {
             docNumber: 'DOC-123',
             filename: 'fattura.pdf',
@@ -111,14 +110,17 @@ describe('InvoiceDetail', () => {
         mockSetAlert = jest.fn();
         (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
         (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
-        (useAppSelector as jest.Mock).mockReturnValue([]);
         (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+        (useAppSelector as jest.Mock).mockReset();
         (window as any).open = jest.fn();
         global.fetch = jest.fn();
     });
 
     describe('Render component', () => {
+
         it('should render component', () => {
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
             render(
                 <InvoiceDetail
                     title="Dettaglio transazione"
@@ -135,12 +137,41 @@ describe('InvoiceDetail', () => {
             expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
             expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
             expect(screen.getByText('Numero fattura')).toBeInTheDocument();
+            expect(screen.queryByText('Motivo di rifiuto')).not.toBeInTheDocument();
+            expect(screen.queryByText('Nota ufficiale')).not.toBeInTheDocument();
+            expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
+            expect(screen.getByTestId('btn-test')).toBeInTheDocument();
+        });
+        it('should render component', () => {
+            (useAppSelector as jest.Mock).mockReturnValue([])
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: 'SUSPENDED' }}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+
+            expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+            expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
+            expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
+            expect(screen.getByText('Numero fattura')).toBeInTheDocument();
+            expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
+            expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
+            expect(screen.getByText('03/02/2026')).toBeInTheDocument();
             expect(screen.getByTestId('btn-test')).toBeInTheDocument();
         });
     });
 
     describe('Download File', () => {
+
         it('should successfully download file', async () => {
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
             const mockBlob = new Blob(['pdf content'], { type: 'application/pdf' });
             const mockResponse = {
                 ok: true,
@@ -180,6 +211,8 @@ describe('InvoiceDetail', () => {
             });
         });
         it('should handle fetch fail', async () => {
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
             (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
                 invoiceUrl: 'https://example.com/invoice.pdf',
             });
@@ -215,6 +248,9 @@ describe('InvoiceDetail', () => {
         });
 
         it('should handle wrong exstension', async () => {
+
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
             const unsupportedValues = {
                 ...baseItemValues,
                 invoiceData: {
@@ -259,6 +295,9 @@ describe('InvoiceDetail', () => {
         });
 
         it('should handle missing file', async () => {
+
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
             const noFilenameValues = {
                 ...baseItemValues,
                 invoiceData: {
@@ -302,6 +341,8 @@ describe('InvoiceDetail', () => {
         });
 
         it('should handle error', async () => {
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
             (downloadInvoiceFile as jest.Mock).mockRejectedValueOnce(
                 new Error('download error')
             );
@@ -332,6 +373,9 @@ describe('InvoiceDetail', () => {
         });
 
         it('should show loader', async () => {
+
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
             const mockPromise = new Promise(() => { });
 
             (downloadInvoiceFile as jest.Mock).mockReturnValueOnce(mockPromise);
@@ -356,9 +400,9 @@ describe('InvoiceDetail', () => {
     });
 
     describe('Postpone Transaction Logic', () => {
-        it('should disable button when isNextMonthDisabled is true', () => {
-            const pastDate = new Date();
-            pastDate.setMonth(pastDate.getMonth() - 1);
+
+        it('should disable button when isNextMonthDisabled is true', async () => {
+            const pastDate = new Date('2026-01-15');
 
             const mockInitiatives = [
                 {
@@ -369,11 +413,12 @@ describe('InvoiceDetail', () => {
 
             (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
 
+            (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+
             const consultableValues = {
                 ...baseItemValues,
                 rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
             };
-
             render(
                 <InvoiceDetail
                     title="Dettaglio transazione"
@@ -385,14 +430,13 @@ describe('InvoiceDetail', () => {
                     setIsOpen={() => { }}
                 />
             );
+            const button = await screen.findByTestId('next-month-btn');
 
-            const button = screen.getByTestId('next-month-btn');
             expect(button).toBeDisabled();
         });
 
-        it.skip('should show success alert', async () => {
-            const futureDate = new Date();
-            futureDate.setMonth(futureDate.getMonth() + 1)
+        it('should show success alert', async () => {
+            const futureDate = new Date('2026-03-15')
             const mockInitiatives = [
                 {
                     initiativeId: 'init-123',
@@ -401,30 +445,33 @@ describe('InvoiceDetail', () => {
             ];
 
             (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
+
+            (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+
             (postponeTransaction as jest.Mock).mockResolvedValueOnce({ success: true });
 
             const consultableValues = {
                 ...baseItemValues,
                 rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
             };
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={consultableValues}
-                    listItem={baseListItem}
-                    batchId="batch-1"
-                    storeId="store-1"
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
+            render(<InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={consultableValues}
+                listItem={baseListItem}
+                batchId="batch-1"
+                storeId="store-1"
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
             );
+            const button = await screen.findByTestId('next-month-btn');
 
-            const button = screen.getByTestId('next-month-btn');
+            await waitFor(() => expect(button).not.toBeDisabled());
+
             fireEvent.click(button);
-
             await waitFor(() => {
-                expect(screen.getByTestId('modal-component')).toBeInTheDocument();
+                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.title')).toBeInTheDocument();
+                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.description')).toBeInTheDocument();
             });
 
             const confirmButton = screen.getByText('Conferma');
@@ -436,13 +483,14 @@ describe('InvoiceDetail', () => {
                     text: 'Transazione spostata al mese successivo',
                     isOpen: true,
                     severity: 'success',
+                    containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300' },
+                    contentStyle: { position: 'unset', bottom: '0', right: '0' }
                 });
             });
         });
 
-        it.skip('should show error alert', async () => {
-            const futureDate = new Date();
-            futureDate.setMonth(futureDate.getMonth() + 1)
+        it('should close modal', async () => {
+            const futureDate = new Date('2026-03-15')
             const mockInitiatives = [
                 {
                     initiativeId: 'init-123',
@@ -451,6 +499,57 @@ describe('InvoiceDetail', () => {
             ];
 
             (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
+
+            (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+
+            (postponeTransaction as jest.Mock).mockResolvedValueOnce({ success: true });
+
+            const consultableValues = {
+                ...baseItemValues,
+                rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+            };
+
+            render(<InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={consultableValues}
+                listItem={baseListItem}
+                batchId="batch-1"
+                storeId="store-1"
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+            );
+            const button = await screen.findByTestId('next-month-btn');
+
+            await waitFor(() => expect(button).not.toBeDisabled());
+
+            fireEvent.click(button);
+
+            await waitFor(() => {
+                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.title')).toBeInTheDocument();
+                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.description')).toBeInTheDocument();
+            });
+
+            const backButton = screen.getByText('Indietro');
+            fireEvent.click(backButton);
+
+            await waitFor(() => {
+                expect(screen.queryByText('pages.refundRequests.invoiceDetailConfirmModal.title')).not.toBeInTheDocument();
+                expect(screen.queryByText('pages.refundRequests.invoiceDetailConfirmModal.description')).not.toBeInTheDocument();
+            });
+        });
+
+        it('should show error alert', async () => {
+            const futureDate = new Date('2026-03-15')
+            const mockInitiatives = [
+                {
+                    initiativeId: 'init-123',
+                    endDate: futureDate,
+                },
+            ];
+
+            (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
+
             (postponeTransaction as jest.Mock).mockRejectedValueOnce(
                 new Error('postpone error')
             );
@@ -460,23 +559,25 @@ describe('InvoiceDetail', () => {
                 rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
             };
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={consultableValues}
-                    listItem={baseListItem}
-                    batchId="batch-1"
-                    storeId="store-1"
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
+            render(<InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={consultableValues}
+                listItem={baseListItem}
+                batchId="batch-1"
+                storeId="store-1"
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
             );
+            const button = await screen.findByTestId('next-month-btn');
 
-            const button = screen.getByTestId('next-month-btn');
+            await waitFor(() => expect(button).not.toBeDisabled());
+
             fireEvent.click(button);
-            
+
             await waitFor(() => {
-                expect(screen.getByTestId('modal-component')).toBeInTheDocument();
+                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.title')).toBeInTheDocument();
+                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.description')).toBeInTheDocument();
             });
 
             const confirmButton = screen.getByText('Conferma');
@@ -492,6 +593,23 @@ describe('InvoiceDetail', () => {
                     })
                 );
             });
+        });
+    });
+    describe('Status Chip Display', () => {
+        it('Should show correct StatusChip state', () => {
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED }}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+
+            expect(screen.getByTestId('status-chip')).toBeInTheDocument();
         });
     });
 });
