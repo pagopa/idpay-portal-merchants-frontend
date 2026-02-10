@@ -318,7 +318,36 @@ export const MerchantApi = {
 
     return extractResponse(result, 200, onRedirectToLogin);
   },
-  
+
+  updateInvoiceTransaction: async (
+    transactionId: string,
+    file: File,
+    docNumber?: string
+  ): Promise<{ code: string; message: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (docNumber) {
+      formData.append('docNumber', docNumber);
+    }
+
+    const result = await apiClient.updateInvoiceTransaction({
+      transactionId,
+      body: formData,
+    } as any);
+
+    if (!isRight(result)) {
+      return {
+        code:
+          (result.left as any)?.at?.(0)?.value ??
+          (result.left as any)?.at?.(0)?.actual,
+        message:
+          (result.left as any)?.at?.(0)?.context?.[1]?.actual?.message,
+      };
+    } else {
+      return extractResponse(result, 204, onRedirectToLogin);
+    }
+  },
+
 };
 
 

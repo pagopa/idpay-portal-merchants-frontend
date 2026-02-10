@@ -155,3 +155,10 @@ export const postponeTransaction = (
     transactionId,
     initiativeEndDate
   );
+
+export const updateInvoiceTransaction = (
+  transactionId: string,
+  file: File,
+  docNumber?: string
+): Promise<{ code: string; message: string }> =>
+  MerchantApi.updateInvoiceTransaction(transactionId, file, docNumber);
