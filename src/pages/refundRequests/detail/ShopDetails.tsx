@@ -60,22 +60,29 @@ const ShopDetails: React.FC = () => {
 
   const [batchDownloadIsLoading, setBatchDownloadIsLoading] = useState(false);
 
-  const [trxCodeError, setTrxCodeError] = useState<string>("");
-  const [filters, setFilters] = useState<Record<string, string>>({ pointOfSale: "", trxCode: "", status: "" });
+  const [trxCodeError, setTrxCodeError] = useState<string>('');
+  const [filters, setFilters] = useState<Record<string, string>>({
+    pointOfSale: '',
+    trxCode: '',
+    status: '',
+  });
   const initiativesList = useSelector(intiativesListSelector);
 
   const { setAlert } = useAlert();
 
-  const mappedStore = useMemo(() => ({
-    batchName: store?.name,
-    dateRange: `${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`,
-    companyName: store?.businessName || '',
-    refundAmount: store?.initialAmountCents || 0,
-    status: store?.status || '',
-    approvedRefund: store?.approvedAmountCents || 0,
-    posType: store?.posType || '',
-    suspendedAmountCents: store?.suspendedAmountCents || 0,
-  }), [store]);
+  const mappedStore = useMemo(
+    () => ({
+      batchName: store?.name,
+      dateRange: `${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`,
+      companyName: store?.businessName || '',
+      refundAmount: store?.initialAmountCents || 0,
+      status: store?.status || '',
+      approvedRefund: store?.approvedAmountCents || 0,
+      posType: store?.posType || '',
+      suspendedAmountCents: store?.suspendedAmountCents || 0,
+    }),
+    [store]
+  );
 
   const formik = useFormik<any>({
     initialValues: {
@@ -85,7 +92,11 @@ const ShopDetails: React.FC = () => {
       page: 0,
     },
     onSubmit: () => {
-      setFilters({ pointOfSale: formik.values.pointOfSaleId, trxCode: formik.values.trxCode, status: formik.values.status });
+      setFilters({
+        pointOfSale: formik.values.pointOfSaleId,
+        trxCode: formik.values.trxCode,
+        status: formik.values.status,
+      });
     },
   });
 
@@ -93,6 +104,7 @@ const ShopDetails: React.FC = () => {
     try {
       let response: any;
       if (initiativesList) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         response = await getAllRewardBatches(initiativesList[0].initiativeId!);
 
         const match = response.content.find((e: any) => e.id === staticStore.id);
@@ -183,10 +195,10 @@ const ShopDetails: React.FC = () => {
       return;
     }
     if (!alphanumericRegex.test(value)) {
-      setTrxCodeError("Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.");
+      setTrxCodeError('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.');
       return;
     }
-    setTrxCodeError("");
+    setTrxCodeError('');
     formik.handleChange(event);
   }, []);
 
@@ -273,7 +285,7 @@ const ShopDetails: React.FC = () => {
         </Alert>
       )}
 
-      <ShopCard store={mappedStore}/>
+      <ShopCard store={mappedStore} />
       <Box
         sx={{
           height: 'auto',
@@ -323,7 +335,7 @@ const ShopDetails: React.FC = () => {
                 InputLabelProps={{ required: false }}
                 value={formik.values.trxCode}
                 onChange={handleTrxCodeChange}
-                onBlur={() => setTrxCodeError("")}
+                onBlur={() => setTrxCodeError('')}
                 size="small"
                 inputProps={{ maxLength: 8 }}
                 error={!!trxCodeError}

@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { updateInvoiceTransactionApi } from '../../services/merchantService';
-import FileUploadAction from '../../components/FileUploadAction/FileUploadAction';
-import styles from '../reverse/reverse.module.css';
+import { updateInvoiceTransaction } from '../../services/merchantService';
+import FileUploadAction from '../FileUploadAction/FileUploadAction';
+import ROUTES from '../../routes';
+import { ENV } from '../../utils/env';
 
 const ModifyDocument = () => {
   const { t } = useTranslation();
@@ -11,15 +12,14 @@ const ModifyDocument = () => {
       titleKey="pages.modifyDocument.title"
       subtitleKey=""
       i18nBlockKey="pages.modifyDocument"
-      apiCall={updateInvoiceTransactionApi}
+      apiCall={updateInvoiceTransaction}
       successStateKey="refundUploadSuccess"
       breadcrumbsLabelKey={t('routes.refund')}
       breadcrumbsProp={{
         label: t('routes.refundManagement'),
-        path: ROUTES.REFUNDS_MANAGEMENT,
+        path: ROUTES.REFUND_REQUESTS,
       }}
-      manualLink={import.meta.env.VITE_MANUAL_LINK}
-      styleClass={styles.uploadFileContainer}
+      manualLink={ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK}
       docNumberTitle={t('pages.modifyDocument.invoiceTitle')}
       docNumberInsert={t('pages.modifyDocument.insertInvoice')}
       docNumberLabel={t('pages.modifyDocument.invoiceLabel')}
