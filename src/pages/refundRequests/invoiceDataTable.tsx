@@ -13,7 +13,6 @@ import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
-import DetailDrawer from '../../components/Drawer/DetailDrawer';
 import {
   downloadInvoiceFile,
   getMerchantTransactionsProcessed,
@@ -56,7 +55,6 @@ const InvoiceDataTable = ({
   pointOfSaleId,
   trxCode,
   fiscalCode,
-  onDrawerClosed,
 }: InvoiceDataTableProps) => {
   const [transactions, setTransactions] = useState<MerchantTransactionsListDTO>({
     content: [],
@@ -77,7 +75,7 @@ const InvoiceDataTable = ({
     { field: 'trxChargeDate', sort: 'desc' },
   ]);
   const { id } = useParams<RouteParams>();
-  const { setAlert } = useAlert();
+  const { alert, setAlert } = useAlert();
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleListButtonClick = (row: any) => {
@@ -85,13 +83,11 @@ const InvoiceDataTable = ({
     setDrawerOpened(true);
   };
 
-  const handleToggleDrawer = (open: boolean) => {
-    setDrawerOpened(open);
-    if (!open) {
-      setRowDetail(null);
-      onDrawerClosed?.();
-    }
+  const handleToggleDrawer = () => {
+    setAlert({ ...alert, isOpen: false });
+    setDrawerOpened(false);
   };
+
   const handleSortModelChange = (model: GridSortModel) => {
     if (
       model.length === 0 ||
@@ -148,13 +144,12 @@ const InvoiceDataTable = ({
           pdfWindow.document.title = selectedTransaction?.invoiceData?.filename;
         }, 100);
       }
-
     } catch (error) {
       setAlert({
         title: 'Errore download file',
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
-        severity: 'error'
+        severity: 'error',
       });
     } finally {
       setIsDownloading(false);
@@ -196,7 +191,6 @@ const InvoiceDataTable = ({
       })
       .finally(() => setLoading(false));
   };
-
 
   useEffect(() => {
     loadTransactions();
@@ -244,7 +238,8 @@ const InvoiceDataTable = ({
       flex: 2,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || MISSING_DATA_PLACEHOLDER),
+      renderCell: (params: any) =>
+        renderCellWithTooltip(params.row.franchiseName || MISSING_DATA_PLACEHOLDER),
     },
     {
       field: 'additionalProperties.productName',
@@ -253,7 +248,9 @@ const InvoiceDataTable = ({
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
-        renderCellWithTooltip(params.row.additionalProperties?.productName || MISSING_DATA_PLACEHOLDER),
+        renderCellWithTooltip(
+          params.row.additionalProperties?.productName || MISSING_DATA_PLACEHOLDER
+        ),
     },
     {
       field: 'trxChargeDate',
@@ -319,9 +316,7 @@ const InvoiceDataTable = ({
   }));
 
   return (
-    <Box
-      sx={{ my: 2, position: 'relative' }}
-    >
+    <Box sx={{ my: 2, position: 'relative' }}>
       <Stack
         direction={{ xs: 'column', md: 'row' }}
         spacing={{ xs: 2, md: 3 }}
@@ -335,9 +330,7 @@ const InvoiceDataTable = ({
           <CircularProgress />
         </Box>
       ) : (
-        <Box
-          sx={{ height: 'auto', width: '100%' }}
-        >
+        <Box sx={{ height: 'auto', width: '100%' }}>
           <DataTable
             rows={tableRows}
             columns={columns}
@@ -380,63 +373,62 @@ const InvoiceDataTable = ({
           <Typography variant="body2">Nessuna richiesta di rimborso trovata.</Typography>
         </Paper>
       )}
-      <DetailDrawer open={drawerOpened} toggleDrawer={handleToggleDrawer}>
-        {rowDetail && (
-          <InvoiceDetail
-            batchId={batchId ?? ''}
-            onSuccess={loadTransactions}
-            onCloseDrawer={() => handleToggleDrawer(false)}
-            title="Dettaglio transazione"
-            itemValues={rowDetail}
-            storeId={rowDetail?.pointOfSaleId || ''}
-            listItem={[
-              {
-                label: 'Data e ora',
-                id: 'trxChargeDate',
-                type: TYPE_TEXT.Text,
-                format: (val: any) => safeFormatDate(val),
-              },
-              {
-                label: 'Elettrodomestico',
-                id: 'additionalProperties.productName',
-                type: TYPE_TEXT.Text,
-              },
-              {
-                label: 'Codice Fiscale Beneficiario',
-                id: 'fiscalCode',
-                type: TYPE_TEXT.Text,
-              },
-              {
-                label: 'ID transazione',
-                id: 'trxId',
-                type: TYPE_TEXT.Text,
-                bold: true,
-              },
-              {
-                label: 'Codice sconto',
-                id: 'trxCode',
-                type: TYPE_TEXT.Text,
-              },
-              {
-                label: 'Totale della spesa',
-                id: 'effectiveAmountCents',
-                type: TYPE_TEXT.Currency,
-                bold: true,
-              },
-              {
-                label: 'Sconto applicato',
-                id: 'rewardAmountCents',
-                type: TYPE_TEXT.Currency,
-              },
-              {
-                label: 'Importo autorizzato',
-                id: 'authorizedAmountCents',
-                type: TYPE_TEXT.Currency,
-              },
-            ]}
-          />
-        )}
-      </DetailDrawer>
+      {rowDetail && (
+        <InvoiceDetail
+          isOpen={drawerOpened}
+          setIsOpen={handleToggleDrawer}
+          batchId={batchId ?? ''}
+          onSuccess={loadTransactions}
+          title="Dettaglio transazione"
+          itemValues={rowDetail}
+          storeId={rowDetail?.pointOfSaleId || ''}
+          listItem={[
+            {
+              label: 'Data e ora',
+              id: 'trxChargeDate',
+              type: TYPE_TEXT.Text,
+              format: (val: any) => safeFormatDate(val),
+            },
+            {
+              label: 'Elettrodomestico',
+              id: 'additionalProperties.productName',
+              type: TYPE_TEXT.Text,
+            },
+            {
+              label: 'Codice Fiscale Beneficiario',
+              id: 'fiscalCode',
+              type: TYPE_TEXT.Text,
+            },
+            {
+              label: 'ID transazione',
+              id: 'trxId',
+              type: TYPE_TEXT.Text,
+              bold: true,
+            },
+            {
+              label: 'Codice sconto',
+              id: 'trxCode',
+              type: TYPE_TEXT.Text,
+            },
+            {
+              label: 'Totale della spesa',
+              id: 'effectiveAmountCents',
+              type: TYPE_TEXT.Currency,
+              bold: true,
+            },
+            {
+              label: 'Sconto applicato',
+              id: 'rewardAmountCents',
+              type: TYPE_TEXT.Currency,
+            },
+            {
+              label: 'Importo autorizzato',
+              id: 'authorizedAmountCents',
+              type: TYPE_TEXT.Currency,
+            },
+          ]}
+        />
+      )}
     </Box>
   );
 };

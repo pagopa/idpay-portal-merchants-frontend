@@ -322,6 +322,7 @@ export const MerchantApi = {
   updateInvoiceTransaction: async (
     transactionId: string,
     file: File,
+    pointOfSaleId: string,
     docNumber?: string
   ): Promise<{ code: string; message: string }> => {
     const formData = new FormData();
@@ -333,6 +334,7 @@ export const MerchantApi = {
     const result = await apiClient.updateInvoiceTransaction({
       transactionId,
       body: formData,
+      'x-point-of-sale-id': pointOfSaleId,
     } as any);
 
     if (!isRight(result)) {

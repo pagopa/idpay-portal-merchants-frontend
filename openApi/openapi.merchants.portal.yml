@@ -1799,6 +1799,12 @@ paths:
             type: string
             maxLength: 255
             pattern: "^[a-zA-Z0-9]+$"
+        - name: x-point-of-sale-id
+          in: header
+          description: PointOfSale ID
+          required: true
+          schema:
+            type: string    
       requestBody:
         required: true
         content:

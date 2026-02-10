@@ -9,20 +9,13 @@ const ModifyDocument = () => {
 
   return (
     <FileUploadAction
-      titleKey="pages.modifyDocument.title"
-      subtitleKey=""
-      i18nBlockKey="pages.modifyDocument"
       apiCall={updateInvoiceTransaction}
       successStateKey="refundUploadSuccess"
-      breadcrumbsLabelKey={t('routes.refund')}
       breadcrumbsProp={{
         label: t('routes.refundManagement'),
         path: ROUTES.REFUND_REQUESTS,
       }}
       manualLink={ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK}
-      docNumberTitle={t('pages.modifyDocument.invoiceTitle')}
-      docNumberInsert={t('pages.modifyDocument.insertInvoice')}
-      docNumberLabel={t('pages.modifyDocument.invoiceLabel')}
     />
   );
 };
