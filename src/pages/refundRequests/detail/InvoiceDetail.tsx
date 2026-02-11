@@ -81,11 +81,15 @@ export default function InvoiceDetail({
               variant: 'contained',
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
-              onClick: () =>
-                history.push(routes.MODIFY_DOCUMENT, {
-                  pointOfSaleId: itemValues.pointOfSaleId,
-                  fileDocNumber: itemValues?.invoiceData?.docNumber,
-                }),
+              onClick: () => {
+                const merchantId = history.location.pathname.split('/')[2];
+
+                const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
+                  .replace(':trxId', itemValues.pointOfSaleId)
+                  .replace(':fileDocNumber', itemValues?.invoiceData?.docNumber);
+
+                history.push(path);
+              },
             },
           ]
         : [],

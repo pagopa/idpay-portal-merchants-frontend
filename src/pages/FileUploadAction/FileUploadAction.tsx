@@ -5,8 +5,6 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-
-import ROUTES from '../../routes';
 import AlertComponent from '../../components/Alert/AlertComponent';
 import BreadcrumbsBoxUpload from '../components/BreadcrumbsBoxUpload';
 
@@ -16,7 +14,12 @@ interface BreadcrumbsProps {
 }
 
 interface FileUploadActionProps {
-  apiCall: (trxId: string, file: File, docNumber: string) => Promise<unknown>;
+  apiCall: (
+    trxId: string,
+    file: File,
+    pointOfSaleId: string,
+    docNumber?: string
+  ) => Promise<unknown>;
   successStateKey: string;
   breadcrumbsProp: BreadcrumbsProps;
   manualLink: string;
@@ -50,7 +53,8 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   const history = useHistory();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { trxId, fileDocNumber } = useParams<{
+  const { id, trxId, fileDocNumber } = useParams<{
+    id: string;
     trxId: string;
     fileDocNumber: string;
   }>();
@@ -58,7 +62,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   useEffect(() => {
     if (fileDocNumber) {
       try {
-        const decoded = atob(fileDocNumber);
+        const decoded = decodeURIComponent(escape(window.atob(fileDocNumber)));
         setDocNumber(decoded);
       } catch (e) {
         setDocNumber(fileDocNumber);
@@ -118,8 +122,11 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   };
 
   const handleBackNavigation = () => {
-    // history.push(breadcrumbsProp?.path);
-    history.push(ROUTES.REFUND_REQUESTS);
+    const resolvedPath = breadcrumbsProp?.path?.includes(':id')
+      ? breadcrumbsProp.path.replace(':id', id)
+      : breadcrumbsProp?.path;
+
+    history.push(resolvedPath);
   };
 
   const handleAction = async (): Promise<void> => {
@@ -139,7 +146,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       setLoadingFile(true);
 
       try {
-        await apiCall(trxId, file, docNumber);
+        await apiCall(trxId, file, id, docNumber);
 
         setLoadingFile(false);
         history.push(breadcrumbsProp?.path, {
@@ -177,14 +184,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       <Box p={4} maxWidth="75%" justifySelf="center">
         <BreadcrumbsBoxUpload
           backLabel={t('commons.exitBtn')}
-          /* items={[
-            { label: breadcrumbsProp?.label, path: breadcrumbsProp?.path },
-            { label: breadcrumbsLabelKey, path: ROUTES.REFUND_REQUESTS },
-          ]} */
-          items={[]}
+          items={[breadcrumbsProp?.label, t('commons.refundRequests')]}
           active={true}
-          // onClickBackButton={() => history.push(breadcrumbsProp?.path)}
-          onClickBackButton={() => history.push(ROUTES.REFUND_REQUESTS)}
+          onClickBackButton={handleBackNavigation}
         />
 
         <TitleBox
