@@ -1810,18 +1810,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              allOf:
-                - $ref: "#/components/schemas/InvoiceDTO"
-                - type: object
-                  properties:
-                    file:
-                      type: string
-                      format: binary
-                      description: Invoice file
-                    docNumber:
-                      type: string
-                      maxLength: 255
-                      description: Invoice document number
+              $ref: "#/components/schemas/InvoiceDTO"
       responses:
         "204":
           description: Ok - no content

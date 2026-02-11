@@ -85,7 +85,7 @@ export default function InvoiceDetail({
                 const merchantId = history.location.pathname.split('/')[2];
 
                 const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
-                  .replace(':trxId', itemValues.pointOfSaleId)
+                  .replace(':trxId', itemValues.id)
                   .replace(':fileDocNumber', itemValues?.invoiceData?.docNumber);
 
                 history.push(path);

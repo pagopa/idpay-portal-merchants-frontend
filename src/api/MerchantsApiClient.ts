@@ -325,15 +325,10 @@ export const MerchantApi = {
     pointOfSaleId: string,
     docNumber?: string
   ): Promise<{ code: string; message: string }> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (docNumber) {
-      formData.append('docNumber', docNumber);
-    }
-
     const result = await apiClient.updateInvoiceTransaction({
       transactionId,
-      body: formData,
+      file,
+      docNumber,
       'x-point-of-sale-id': pointOfSaleId,
     } as any);
 
