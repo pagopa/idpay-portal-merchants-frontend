@@ -251,7 +251,7 @@
     },
       "ModalReportedUser": {
         "title": "Vuoi procedere con la cancellazione?",
-"description": "Stai per cancellare il soggetto <strong>{{cf}}</strong> dalla lista degli utenti segnalati.",
+        "description": "Stai per cancellare il soggetto <strong>{{cf}}</strong> dalla lista degli utenti segnalati.",
         "descriptionTwo": "Questa operazione non comporta il blocco della relativa richiesta di rimborso.",
         "cancelText": "Annulla",
         "confirmText": "Conferma"
@@ -396,6 +396,9 @@
       "uploadFileButton": "selezionalo dal tuo computer",
       "invoiceTitle": "Qual è il numero  della fattura?",
       "insertInvoice": "Inserisci il numero della fattura",
-      "invoiceLabel": "Numero della fattura"
+      "invoiceLabel": "Numero della fattura",
+      "errors": {
+        "requiredFileError": "Selezionare un file da caricare"
+      }
     }
 }

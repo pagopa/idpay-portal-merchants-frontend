@@ -278,7 +278,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
           {requiredFileError && (
             <Box mt={2}>
-              <Alert severity="error">{t('errors.requiredFileError')}</Alert>
+              <Alert severity="error">{t('modifyDocument.errors.requiredFileError')}</Alert>
             </Box>
           )}
 
