@@ -164,12 +164,12 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           errorResponseCode = (error as any).response?.data?.code;
         }
 
-        let errorMessage = t('pages.reverse.errorAlert');
+        let errorMessage = t('modifyDocument.reverse.errorAlert');
 
         if (errorResponseCode === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
-          errorMessage = t('pages.reverse.deniedSentError');
+          errorMessage = t('modifyDocument.reverse.deniedSentError');
         } else if (errorResponseCode === 'REWARD_BATCH_ALREADY_SENT') {
-          errorMessage = t('pages.reverse.alreadySentError');
+          errorMessage = t('modifyDocument.reverse.alreadySentError');
         }
 
         console.error('API Error:', error);
