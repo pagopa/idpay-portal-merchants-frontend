@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Box, IconButton, Typography, CircularProgress, Paper, Card } from '@mui/material';
+import { Box, IconButton, Typography, CircularProgress, Paper, Card, Tooltip } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useTranslation } from 'react-i18next';
+import { theme } from '@pagopa/mui-italia';
+import CachedIcon from '@mui/icons-material/Cached';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 import DataTable from '../../components/dataTable/DataTable';
 import { safeFormatDate } from '../../utils/formatUtils';
+import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 
 export type MerchantReportDTO = {
   id: string;
@@ -27,6 +32,19 @@ type ReportsApiResponse = {
   totalPages: number;
 };
 
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'GENERATED':
+      return <CachedIcon color="info" />;
+    case 'FAILED':
+      return <ErrorIcon color="error" />;
+    case 'INSERTED':
+      return <CheckCircleIcon color="success" />;
+    default:
+      return <CachedIcon name="default" />;
+  }
+};
+
 const mockFetchReports = (): Promise<ReportsApiResponse> =>
   new Promise((resolve) => {
     setTimeout(() => {
@@ -35,7 +53,7 @@ const mockFetchReports = (): Promise<ReportsApiResponse> =>
           {
             id: '1',
             initiativeId: 'INIT-001',
-            reportStatus: 'GENERATED',
+            reportStatus: 'INSERTED',
             fileName: 'Report_300126.csv',
             requestDate: '2026-01-30T11:11:00Z',
             elaborationDate: '2026-01-30T11:11:00Z',
@@ -63,13 +81,11 @@ const ReportDataTable: React.FC = () => {
     totalElements: 0,
     totalPages: 0,
   });
-
   const [pagination, setPagination] = useState({
     pageNo: 0,
     pageSize: 10,
     totalElements: 0,
   });
-
   const [loading, setLoading] = useState(false);
 
   const loadReports = () => {
@@ -95,40 +111,85 @@ const ReportDataTable: React.FC = () => {
       field: 'fileName',
       headerName: 'Nome file',
       flex: 1,
-      renderCell: (params: any) => <Typography fontWeight={600}>{params.row.fileName}</Typography>,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params: any) => (
+        <>
+          {getStatusIcon(params.row.reportStatus)}
+          <Tooltip
+            title={
+              params.row.fileName && params.row.fileName !== ''
+                ? params.row.fileName
+                : MISSING_DATA_PLACEHOLDER
+            }
+          >
+            <Typography variant="caption-semibold" fontSize="1rem">
+              {params.row.fileName}
+            </Typography>
+          </Tooltip>
+        </>
+      ),
     },
     {
       field: 'requestDate',
       headerName: 'Data richiesta',
       flex: 1,
-      renderCell: (params: any) => safeFormatDate(params.row.requestDate),
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params: any) => (
+        <Typography color={theme.palette.text.secondary} fontWeight={400}>
+          {safeFormatDate(params.row.requestDate)}
+        </Typography>
+      ),
     },
     {
       field: 'elaborationDate',
       headerName: 'Data generazione',
       flex: 1,
-      renderCell: (params: any) => safeFormatDate(params.row.elaborationDate),
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params: any) => (
+        <Typography color={theme.palette.text.secondary} fontWeight={400}>
+          {safeFormatDate(params.row.elaborationDate)}
+        </Typography>
+      ),
     },
     {
       field: 'period',
       headerName: 'Periodo',
       flex: 1,
-      renderCell: (params: any) => (
-        <Typography fontWeight={600}>
-          {safeFormatDate(params.row.startPeriod)} - {safeFormatDate(params.row.endPeriod)}
-        </Typography>
-      ),
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params: any) => {
+        const period =
+          safeFormatDate(params.row.startPeriod, false) +
+          ' - ' +
+          safeFormatDate(params.row.endPeriod, false);
+        return (
+          <Tooltip title={period && period !== '' ? period : MISSING_DATA_PLACEHOLDER}>
+            <Typography variant="caption-semibold" fontSize="1rem">
+              {period}
+            </Typography>
+          </Tooltip>
+        );
+      },
     },
     {
       field: 'actions',
       headerName: '',
       sortable: false,
+      disableColumnMenu: true,
       align: 'right' as const,
-      renderCell: () => (
-        <IconButton>
-          <DownloadIcon />
-        </IconButton>
-      ),
+      renderCell: (params: any) => {
+        if (params.row.reportStatus !== 'FAILED'){
+          return (
+            <IconButton disabled={params.row.reportStatus === 'GENERATED'}>
+              <DownloadIcon color='primary'/>
+            </IconButton>
+          );
+        }
+          return '';
+      },
     },
   ];
 

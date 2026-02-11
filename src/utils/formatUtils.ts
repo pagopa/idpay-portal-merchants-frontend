@@ -11,13 +11,13 @@ export const getEndOfNextMonth = (date?: string | Date): Date | undefined => {
   return new Date(d.getFullYear(), d.getMonth() + 2, 0);
 };
 
-export function safeFormatDate(value: any) {
+export function safeFormatDate(value: any, withHours: boolean = true) {
   try {
     const date = value instanceof Date ? value : new Date(value);
     if (isNaN(date.getTime())) {
       return MISSING_DATA_PLACEHOLDER;
     }
-    return format(date, 'dd/MM/yyyy HH:mm');
+    return withHours ? format(date, 'dd/MM/yyyy HH:mm') : format(date, 'dd/MM/yyyy');
   } catch {
     return MISSING_DATA_PLACEHOLDER;
   }
