@@ -89,7 +89,7 @@ export default function InvoiceDetail({
                   .replace(':trxId', itemValues.id)
                   .replace(':fileDocNumber', itemValues?.invoiceData?.docNumber);
 
-                history.push(path);
+                history.push(path, { fromPath: history.location.pathname });
               },
             },
           ]

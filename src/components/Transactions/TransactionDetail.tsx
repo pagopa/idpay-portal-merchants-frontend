@@ -22,6 +22,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   const { setAlert } = useAlert();
   const { storeId } = useStore();
   const history = useHistory();
+
   const { id: merchantId } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,7 +44,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
                   .replace(':trxId', itemValues.id)
                   .replace(':fileDocNumber', itemValues?.invoiceFile?.docNumber ?? '');
 
-                history.push(path, { from: 'transaction' });
+                history.push(path, { fromLocation: history.location });
               },
             },
           ]

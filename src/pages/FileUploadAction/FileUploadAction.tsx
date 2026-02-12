@@ -31,7 +31,6 @@ const VALID_MIME_TYPES = ['application/pdf', 'application/xml', 'text/xml'];
 
 const FileUploadAction: React.FC<FileUploadActionProps> = ({
   apiCall,
-  successStateKey,
   breadcrumbsProp,
   manualLink,
   styleClass,
@@ -53,7 +52,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   const history = useHistory();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { id, pointOfSaleId, trxId, fileDocNumber } = useParams<{
+  const secondBreadcrumbLabel = 'Modifica documento';
+
+  const { pointOfSaleId, trxId, fileDocNumber } = useParams<{
     id: string;
     pointOfSaleId: string;
     trxId: string;
@@ -123,18 +124,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   };
 
   const handleBackNavigation = () => {
-    const locationState = history.location.state as { from?: string } | undefined;
-
-    if (locationState?.from === 'transaction') {
-      history.goBack();
-      return;
-    }
-
-    const resolvedPath = breadcrumbsProp?.path?.includes(':id')
-      ? breadcrumbsProp.path.replace(':id', id)
-      : breadcrumbsProp?.path;
-
-    history.push(resolvedPath);
+    history.goBack();
   };
 
   const handleAction = async (): Promise<void> => {
@@ -157,13 +147,16 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         await apiCall(trxId, file, pointOfSaleId, docNumber);
 
         setLoadingFile(false);
-        const resolvedPath = breadcrumbsProp?.path?.includes(':id')
-          ? breadcrumbsProp.path.replace(':id', id)
-          : breadcrumbsProp?.path;
 
-        history.push(resolvedPath, {
-          [successStateKey]: true,
+        history.replace({
+          ...history.location,
+          state: {
+            ...(history.location.state || {}),
+            refundUploadSuccess: true,
+          },
         });
+
+        history.goBack();
       } catch (error: unknown) {
         let errorResponseCode: string | undefined;
 
@@ -196,7 +189,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       <Box p={4} maxWidth="75%" justifySelf="center">
         <BreadcrumbsBoxUpload
           backLabel={t('commons.exitBtn')}
-          items={[breadcrumbsProp?.label, t('commons.refundRequests')]}
+          items={[breadcrumbsProp?.label, secondBreadcrumbLabel]}
           active={true}
           onClickBackButton={handleBackNavigation}
         />
