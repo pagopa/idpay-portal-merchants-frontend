@@ -157,7 +157,11 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         await apiCall(trxId, file, pointOfSaleId, docNumber);
 
         setLoadingFile(false);
-        history.push(breadcrumbsProp?.path, {
+        const resolvedPath = breadcrumbsProp?.path?.includes(':id')
+          ? breadcrumbsProp.path.replace(':id', id)
+          : breadcrumbsProp?.path;
+
+        history.push(resolvedPath, {
           [successStateKey]: true,
         });
       } catch (error: unknown) {

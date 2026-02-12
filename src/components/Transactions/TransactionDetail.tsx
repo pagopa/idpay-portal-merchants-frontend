@@ -1,6 +1,6 @@
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
 import routes from '../../routes';
@@ -22,6 +22,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   const { setAlert } = useAlert();
   const { storeId } = useStore();
   const history = useHistory();
+  const { id: merchantId } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(false);
 
   const isEditable =
@@ -37,8 +38,6 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
               onClick: () => {
-                const merchantId = history.location.pathname.split('/')[2];
-
                 const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
                   .replace(':pointOfSaleId', storeId)
                   .replace(':trxId', itemValues.id)
