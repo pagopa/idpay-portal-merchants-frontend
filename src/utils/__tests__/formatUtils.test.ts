@@ -86,6 +86,18 @@ describe('safeFormatDate', () => {
     expect(result).toBe('15/01/2024 10:30');
   });
 
+  test('should throw error', () => {
+    const error = {
+      toString: () => {
+        throw new Error();
+      }
+    };
+
+    const result = safeFormatDate(error);
+
+    expect(result).toBe(MISSING_DATA_PLACEHOLDER);
+  });
+
   test('should return MISSING_DATA_PLACEHOLDER for invalid date', () => {
     const result = safeFormatDate('invalid-date');
 
