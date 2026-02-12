@@ -1,5 +1,5 @@
-import { Box, Grid, Typography,Button, CircularProgress } from '@mui/material';
-import { ReactNode, useState } from 'react';
+import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { useMemo, useState } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';
@@ -8,19 +8,26 @@ import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { downloadInvoiceFile } from '../../services/merchantService';
 import { useStore } from '../../pages/initiativeStores/StoreContext';
 import { useAlert } from '../../hooks/useAlert';
+import DetailDrawer, { DetailDrawerProps } from '../Drawer/DetailDrawer';
 import getStatus from './useStatus';
 
-type Props = {
-  title?: string;
+type Props = DetailDrawerProps & {
   itemValues: any;
   listItem: Array<any>;
-  children?: ReactNode;
 };
 
-export default function TransactionDetail({ title, itemValues, listItem }: Props) {
-  const {setAlert} = useAlert();
+export default function TransactionDetail({ itemValues, listItem, ...rest }: Props) {
+  const { setAlert } = useAlert();
   const { storeId } = useStore();
   const [isLoading, setIsLoading] = useState(false);
+
+  const isEditable = itemValues?.rewardBatchTrxStatus !== "APPROVED" && !(itemValues?.status === "CANCELLED" || itemValues?.status === "REFUNDED");
+
+  const editButton: DetailDrawerProps['buttons'] = useMemo(() => isEditable ? [{
+      variant: "contained",
+      title: "Modifica documento",
+      dataTestId: "change-file-btn"
+    }] : [], [isEditable]);
 
   const getStatusChip = () => {
     const chipItem = getStatus(itemValues.status);
@@ -46,8 +53,8 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
         severity: 'error',
-        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300'},
-        contentStyle: {position: 'unset', bottom: '0', right: '0'}
+        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300' },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' }
       });
       setIsLoading(false);
     }
@@ -69,124 +76,114 @@ export default function TransactionDetail({ title, itemValues, listItem }: Props
   }
 
   return (
-    <Box sx={{ width: 375 }} p={'1.5rem'} pt={0} data-testid="product-detail">
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <Typography variant="h6">{title}</Typography>
-        </Grid>
-        {listItem.map((item, index) => (
-          <Grid item xs={12} key={index}>
-            <Box
-              mt={1}
-              sx={{
-                wordBreak: 'break-word'
-              }}
-            >
-              <Typography
-                variant="body2"
-                fontWeight={theme.typography.fontWeightRegular}
-                color={theme.palette.text.secondary}
-              >
-                {item?.label}
-              </Typography>
-              <Typography variant="body2" fontWeight="fontWeightMedium">
-                {getValueText(item?.id, item?.type)}
-              </Typography>
-            </Box>
-          </Grid>
-        ))}
-
-        <Grid item xs={12}>
-          <Box mt={1}>
+    <DetailDrawer
+      {...rest}
+      data-testid="transaction-detail"
+      buttons={[ ...editButton]}
+    >
+      {listItem.map((item, index) => (
+        <Box
+          key={`${item?.id}-${index}`}
+          sx={{
+            wordBreak: 'break-word'
+          }}
+        >
+          <Typography
+            variant="body2"
+            fontWeight={theme.typography.fontWeightRegular}
+            color={theme.palette.text.secondary}
+          >
+            {item?.label}
+          </Typography>
+          <Typography variant="body2" fontWeight="fontWeightMedium">
+            {getValueText(item?.id, item?.type)}
+          </Typography>
+        </Box>
+      ))}
+      <Box>
+        <Typography
+          variant="body2"
+          fontWeight={theme.typography.fontWeightRegular}
+          color={theme.palette.text.secondary}
+        >
+          Stato
+        </Typography>
+        {getStatusChip()}
+      </Box>
+      {itemValues.status !== 'CANCELLED' && (
+        <>
+          <Box>
             <Typography
               variant="body2"
               fontWeight={theme.typography.fontWeightRegular}
               color={theme.palette.text.secondary}
             >
-              Stato
+              {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
             </Typography>
-            {getStatusChip()}
+            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
+              {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
+            </Typography>
           </Box>
-        </Grid>
-        {itemValues.status !== 'CANCELLED' && (
-          <>
-            <Grid item xs={12}>
-              <Box mt={1}>
-                <Typography
-                  variant="body2"
-                  fontWeight={theme.typography.fontWeightRegular}
-                  color={theme.palette.text.secondary}
-                >
-                  {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
-                </Typography>
-                <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
-                  {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box mt={1}>
-                <Typography
-                  variant="body2"
-                  fontWeight={theme.typography.fontWeightRegular}
-                  color={theme.palette.text.secondary}
-                >
-                  {itemValues.status === 'REFUNDED' ? 'Nota di credito' : 'Fattura'}
-                </Typography>
-                <Button
-                  data-testid="btn-test"
+          <Box>
+            <Typography
+              variant="body2"
+              fontWeight={theme.typography.fontWeightRegular}
+              color={theme.palette.text.secondary}
+            >
+              {itemValues.status === 'REFUNDED' ? 'Nota di credito' : 'Fattura'}
+            </Typography>
+            <Button
+              data-testid="btn-test"
+              sx={{
+                padding: 0,
+                width: '100%',
+                display: 'block',
+                textAlign: 'left',
+                minWidth: 0,
+                maxWidth: '100%',
+                minHeight: 'fit-content',
+                height: 'auto',
+                '&:hover': {
+                  backgroundColor: '#fff',
+                  color: '#0055AA',
+                },
+              }}
+              onClick={() => downloadFile(itemValues, storeId)}
+            >
+              {isLoading ? (
+                <CircularProgress color="inherit" size={20} data-testid="item-loader" />
+              ) : (
+                <Box
                   sx={{
-                    padding: 0,
-                    width: '100%',
-                    display: 'block',
-                    textAlign: 'left',
-                    minWidth: 0,
-                    maxWidth: '100%',
-                    minHeight: 'fit-content',
-                    height: 'auto',
-                    '&:hover': {
-                      backgroundColor: '#fff',
-                      color: '#0055AA',
-                    },
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: '6px',
+                    width: "100%",
+                    mt: '2px',
+                    textAlign: "left"
                   }}
-                  onClick={() => downloadFile(itemValues, storeId)}
                 >
-                  {isLoading ? (
-                    <CircularProgress color="inherit" size={20} data-testid="item-loader" />
-                  ) : (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: '6px',
-                        width: "100%",
-                        mt: '2px',
-                        textAlign: "left"
-                      }}
-                    >
-                      <ReceiptLong sx={{ flexShrink: 0, mt: 2 }} />
-                      <Typography
-                        component="span"
-                        variant="inherit"
-                        sx={{
-                          whiteSpace: 'pre-wrap',
-                          overflowWrap: 'anywhere',
-                          wordBreak: 'break-word',
-                          minWidth: 0,
-                          flex: 1,
-                          marginTop:2
-                        }}
-                      >
-                        {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
-                      </Typography>
-                    </Box>
-                  )}
-                </Button>
-              </Box>
-            </Grid>
-          </>
-        )}
-      </Grid>
-    </Box>
+                  <ReceiptLong sx={{ flexShrink: 0, mt: 2 }} />
+                  <Typography
+                    component="span"
+                    variant="inherit"
+                    sx={{
+                      whiteSpace: 'pre-wrap',
+                      overflowWrap: 'anywhere',
+                      wordBreak: 'break-word',
+                      minWidth: 0,
+                      flex: 1,
+                      marginTop: 2
+                    }}
+                  >
+                    {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
+                  </Typography>
+                </Box>
+              )}
+            </Button>
+          </Box>
+        </>
+      )}
+    </DetailDrawer>
   );
 }

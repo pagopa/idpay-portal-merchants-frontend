@@ -13,7 +13,6 @@ import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
-import DetailDrawer from '../../components/Drawer/DetailDrawer';
 import {
   downloadInvoiceFile,
   getMerchantTransactionsProcessed,
@@ -56,7 +55,6 @@ const InvoiceDataTable = ({
   pointOfSaleId,
   trxCode,
   fiscalCode,
-  onDrawerClosed,
 }: InvoiceDataTableProps) => {
   const [transactions, setTransactions] = useState<MerchantTransactionsListDTO>({
     content: [],
@@ -77,7 +75,7 @@ const InvoiceDataTable = ({
     { field: 'trxChargeDate', sort: 'desc' },
   ]);
   const { id } = useParams<RouteParams>();
-  const { setAlert } = useAlert();
+  const { alert, setAlert } = useAlert();
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleListButtonClick = (row: any) => {
@@ -85,13 +83,11 @@ const InvoiceDataTable = ({
     setDrawerOpened(true);
   };
 
-  const handleToggleDrawer = (open: boolean) => {
-    setDrawerOpened(open);
-    if (!open) {
-      setRowDetail(null);
-      onDrawerClosed?.();
-    }
+  const handleToggleDrawer = () => {
+    setAlert({ ...alert, isOpen: false });
+    setDrawerOpened(false);
   };
+
   const handleSortModelChange = (model: GridSortModel) => {
     if (
       model.length === 0 ||
@@ -380,12 +376,12 @@ const InvoiceDataTable = ({
           <Typography variant="body2">Nessuna richiesta di rimborso trovata.</Typography>
         </Paper>
       )}
-      <DetailDrawer open={drawerOpened} toggleDrawer={handleToggleDrawer}>
         {rowDetail && (
           <InvoiceDetail
+            isOpen={drawerOpened}
+            setIsOpen={handleToggleDrawer}
             batchId={batchId ?? ''}
             onSuccess={loadTransactions}
-            onCloseDrawer={() => handleToggleDrawer(false)}
             title="Dettaglio transazione"
             itemValues={rowDetail}
             storeId={rowDetail?.pointOfSaleId || ''}
@@ -436,7 +432,6 @@ const InvoiceDataTable = ({
             ]}
           />
         )}
-      </DetailDrawer>
     </Box>
   );
 };
