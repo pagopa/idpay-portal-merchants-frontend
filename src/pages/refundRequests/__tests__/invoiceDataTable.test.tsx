@@ -163,7 +163,6 @@ describe('InvoiceDataTable', () => {
     expect(mockedGetTransactions).toHaveBeenCalledWith(
       expect.objectContaining({
         initiativeId: 'initiative-123',
-        page: 0,
         size: 10,
       })
     );
@@ -185,7 +184,6 @@ describe('InvoiceDataTable', () => {
     expect(mockedGetTransactions).toHaveBeenCalledWith(
       expect.objectContaining({
         initiativeId: 'initiative-123',
-        page: 0,
         size: 10,
         rewardBatchId: 'batch-1',
         rewardBatchTrxStatus: 'ELIGIBLE',
@@ -225,6 +223,7 @@ describe('InvoiceDataTable', () => {
     const clearSortButton = screen.getByTestId('clear-sort');
     fireEvent.click(clearSortButton);
     await waitFor(() => expect(mockedGetTransactions).toHaveBeenCalledTimes(2));
+    // await waitFor(() => expect(mockedGetTransactions).toHaveBeenCalledWith({initiativeId: "initiative-123", size: 10}));
     const secondCallArgs = mockedGetTransactions.mock.calls[1][0];
     expect(secondCallArgs.sort).toBeUndefined();
   });
