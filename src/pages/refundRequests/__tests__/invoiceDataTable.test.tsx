@@ -90,17 +90,13 @@ jest.mock('../../../components/Chip/StatusChipInvoice', () => (props: any) => (
   <div data-testid="status-chip">{props.status}</div>
 ));
 
-jest.mock('../../../components/Drawer/DetailDrawer', () => (props: any) => (
-  <div data-testid="detail-drawer" data-open={props.open}>
+jest.mock('../detail/InvoiceDetail', () => (props: any) => (
+  <div data-testid="detail-drawer" data-open={props.isOpen}>
     {props.open && props.children}
-    <button type="button" data-testid="close-drawer" onClick={() => props.toggleDrawer(false)}>
+    <button type="button" data-testid="close-drawer" onClick={() => props.setIsOpen(false)}>
       close
     </button>
   </div>
-));
-
-jest.mock('../detail/InvoiceDetail', () => (props: any) => (
-  <div data-testid="invoice-detail">{props.title}</div>
 ));
 
 jest.mock('../../../utils/constants', () => ({
@@ -123,6 +119,7 @@ const mockedDownloadInvoiceFile = downloadInvoiceFile as jest.MockedFunction<
 const mockedUseAlert = useAlert as jest.MockedFunction<typeof useAlert>;
 
 describe('InvoiceDataTable', () => {
+  const mockSetAlert = jest.fn()
   const baseTransactions: any = {
     content: [
       {
@@ -151,7 +148,7 @@ describe('InvoiceDataTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedGetTransactions.mockResolvedValue(baseTransactions);
-    mockedUseAlert.mockReturnValue({ setAlert: jest.fn() });
+    (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
     (global as any).fetch = jest.fn().mockResolvedValue({
       ok: true,
       blob: jest.fn().mockResolvedValue(new Blob(['test'], { type: 'application/pdf' })),
@@ -270,7 +267,6 @@ describe('InvoiceDataTable', () => {
     fireEvent.click(actionIcon);
     await screen.findByTestId('detail-drawer');
     expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'true');
-    expect(screen.getByTestId('invoice-detail')).toBeInTheDocument();
     const closeButton = screen.getByTestId('close-drawer');
     fireEvent.click(closeButton);
     await waitFor(() =>
@@ -326,8 +322,6 @@ describe('InvoiceDataTable', () => {
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
-    const mockSetAlert = jest.fn();
-    mockedUseAlert.mockReturnValue({ setAlert: mockSetAlert });
     render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
@@ -351,8 +345,6 @@ describe('InvoiceDataTable', () => {
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.txt',
     } as any);
-    const mockSetAlert = jest.fn();
-    mockedUseAlert.mockReturnValue({ setAlert: mockSetAlert });
     const invalidTransaction = {
       ...baseTransactions.content[0],
       invoiceData: { filename: 'INV-003.txt' },
@@ -378,8 +370,6 @@ describe('InvoiceDataTable', () => {
 
   it('handles download error when downloadInvoiceFile throws', async () => {
     mockedDownloadInvoiceFile.mockRejectedValueOnce(new Error('download error'));
-    const mockSetAlert = jest.fn();
-    mockedUseAlert.mockReturnValue({ setAlert: mockSetAlert });
     render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
@@ -477,6 +467,9 @@ describe('InvoiceDataTable', () => {
     await waitFor(() =>
       expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'false')
     );
+    await waitFor(() =>
+      expect(mockSetAlert).toHaveBeenCalled()
+    );
   });
 
   it('handles loading state', async () => {
@@ -497,6 +490,6 @@ describe('InvoiceDataTable', () => {
     expect(mockedGetTransactions).toHaveBeenCalledTimes(1);
     const actionIcon = screen.getByTestId('trx-1');
     fireEvent.click(actionIcon);
-    await screen.findByTestId('invoice-detail');
+    await screen.findByTestId('detail-drawer');
   });
 });
