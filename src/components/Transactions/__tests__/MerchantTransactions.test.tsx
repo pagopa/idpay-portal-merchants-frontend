@@ -7,14 +7,12 @@ import MerchantTransactions from '../MerchantTransactions';
 import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import getStatus from '../useStatus';
 import CustomChip from '../../Chip/CustomChip';
-import TransactionDataTable from '../TransactionDataTable';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
 const mockSetAlert = jest.fn();
-
 jest.mock('../../../hooks/useAlert', () => ({
   useAlert: () => ({
     alert: { isOpen: false },
@@ -24,6 +22,7 @@ jest.mock('../../../hooks/useAlert', () => ({
 
 jest.mock('../useStatus', () => jest.fn());
 jest.mock('../useDetailList', () => () => []);
+
 jest.mock('../../Chip/CustomChip', () => {
   return jest.fn((props: any) => (
     <div data-testid="custom-chip">{props.label}</div>
@@ -40,60 +39,63 @@ jest.mock('@mui/material', () => ({
 }));
 
 jest.mock('../CurrencyColumn', () => (props: any) => <div>{props.value}</div>);
+
 jest.mock('../../../pages/components/EmptyList', () => (props: any) => (
   <div data-testid="empty-list">{props.message}</div>
 ));
-jest.mock('../TransactionDetail', () => (props: any) => (
-  <div data-testid="transaction-detail">{props.title}</div>
-));
+
+jest.mock('../TransactionDataTable', () =>
+  (props: any) => (
+    <div data-testid="transaction-data-table">
+      <button onClick={() => props.onSortModelChange([{ field: 'updateDate', sort: 'desc' }])}>
+        Sort Action
+      </button>
+      <button onClick={() => props.onPaginationPageChange(2)}>Pagination Action</button>
+      <button onClick={() => props.handleRowAction(props.rows[0])}>Row Action</button>
+      {props.columns.map((col: any) => {
+        return (
+          <div key={col.field} data-testid={`col-${col.field}`}>
+            {col.valueGetter ? props?.rows[0]?.additionalProperties?.productName : props?.rows[0]?.[col.field]}
+          </div>
+        );
+      })}
+    </div>
+  )
+);
+
 jest.mock(
-  '../TransactionDataTable',
+  '../TransactionDetail',
   () =>
-    ({ handleRowAction, onSortModelChange, onPaginationPageChange, rows }: any) =>
-      (
-        <div data-testid="transaction-data-table">
-          <button onClick={() => handleRowAction(rows[0])}>Row Action</button>
-          <button onClick={() => onSortModelChange([{ field: 'updateDate', sort: 'desc' }])}>
-            Sort Action
-          </button>
-          <button onClick={() => onPaginationPageChange(2)}>Pagination Action</button>
+    ({ isOpen, setIsOpen, children }: any) =>
+      isOpen && (
+        <div data-testid="detail-drawer">
+          {children}
+          <button data-testid="close-button" onClick={() => setIsOpen(false)}>Close Drawer</button>
         </div>
       )
 );
-jest.mock(
-  '../../Drawer/DetailDrawer',
-  () =>
-    ({ open, toggleDrawer, children }: any) =>
-      open ? (
-        <div data-testid="detail-drawer">
-          {children}
-          <button onClick={() => toggleDrawer(false)}>Close Drawer</button>
-        </div>
-      ) : null
-);
 
 const MockedCustomChip = CustomChip as jest.Mock;
-const MockedTransactionDataTable = TransactionDataTable as jest.Mock;
 const mockedGetStatus = getStatus as jest.Mock;
 const MockedTooltip = Tooltip as jest.Mock;
-
-const mockTransactions: Array<PointOfSaleTransactionProcessedDTO> = [
-  {
-    trxId: '1',
-    updateDate: '2025-10-06T10:00:00Z',
-    fiscalCode: 'AAAAAA00A00A000A',
-    effectiveAmountCents: 5000,
-    rewardAmountCents: 500,
-    status: 'REWARDED',
-    additionalProperties: { productName: 'Frigorifero' },
-  },
-];
 
 describe('MerchantTransactions', () => {
   const handleFiltersApplied = jest.fn();
   const handleFiltersReset = jest.fn();
   const handleSortChange = jest.fn();
   const handlePaginationPageChange = jest.fn();
+
+  const mockTransactions: any = [
+    {
+      trxId: '1',
+      updateDate: '2025-10-06T10:00:00Z',
+      fiscalCode: 'AAAAAA00A00A000A',
+      effectiveAmountCents: 5000,
+      rewardAmountCents: 500,
+      status: 'REWARDED',
+      additionalProperties: { productName: 'Frigorifero' },
+    }
+  ]
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -105,10 +107,14 @@ describe('MerchantTransactions', () => {
       <MerchantTransactions
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-      />
+        handleFiltersReset={handleFiltersReset} />
     );
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+    expect(screen.getByText('Frigorifero')).toBeInTheDocument();
+    expect(screen.getByText('AAAAAA00A00A000A')).toBeInTheDocument();
+    expect(screen.getByText('5000')).toBeInTheDocument();
+    expect(screen.getByText('500')).toBeInTheDocument();
+    expect(screen.getByText('REWARDED')).toBeInTheDocument();
     expect(screen.queryByTestId('empty-list')).not.toBeInTheDocument();
   });
 
@@ -262,7 +268,7 @@ describe('MerchantTransactions', () => {
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
 
-    // expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
   });
 
   it('closes drawer when toggle is called', async () => {
@@ -276,11 +282,11 @@ describe('MerchantTransactions', () => {
 
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
-    // expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
 
-    // const closeButton = screen.getByRole('button', { name: 'Close Drawer' });
-    // await userEvent.click(closeButton);
-    // expect(screen.queryByTestId('detail-drawer')).not.toBeInTheDocument();
+    const closeButton = screen.getByTestId('close-button');
+    await userEvent.click(closeButton);
+    expect(screen.queryByTestId('detail-drawer')).not.toBeInTheDocument();
   });
 
   it('calls setAlert when the drawer is closed', async () => {
@@ -295,12 +301,13 @@ describe('MerchantTransactions', () => {
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
 
-    // const closeButton = screen.getByRole('button', { name: 'Close Drawer' });
-    // await userEvent.click(closeButton);
+    await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
+    const closeButton = screen.getByTestId('close-button');
+    await userEvent.click(closeButton);
 
-    // await waitFor(() => {
-    //   expect(mockSetAlert).toHaveBeenCalledWith({ isOpen: false });
-    // });
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({ isOpen: false });
+    });
   });
 
   it('updates fiscal code input on user input', async () => {
@@ -632,7 +639,7 @@ describe('MerchantTransactions', () => {
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
 
-    expect(screen.getByTestId('transaction-detail')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
   });
 
   it('passes correct props to transaction data table', () => {
@@ -745,6 +752,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('does not call handleFiltersReset when callback is undefined', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     render(
       <MerchantTransactions
         transactions={mockTransactions}
@@ -759,11 +767,15 @@ describe('MerchantTransactions', () => {
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
+    expect(consoleSpy).toHaveBeenCalled()
 
     await waitFor(() => {
       const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
       expect(resetButton).toBeInTheDocument();
+      userEvent.click(resetButton)
     });
+    expect(consoleSpy).toHaveBeenCalled()
+    consoleSpy.mockRestore();
   });
 
   it('does not call handleSortChange when callback is undefined', async () => {
@@ -861,10 +873,9 @@ describe('MerchantTransactions', () => {
       await userEvent.click(rowButton);
     });
 
-    // await waitFor(() => {
-    //   expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
-    //   expect(screen.getByTestId('transaction-detail')).toBeInTheDocument();
-    // });
+    await waitFor(() => {
+      expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
+    });
   });
 
   it('handles tooltip rendering with long values', () => {
@@ -905,19 +916,19 @@ describe('MerchantTransactions', () => {
       await userEvent.click(rowButton);
     });
 
-    // await waitFor(() => {
-    //   expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
-    // });
+    await waitFor(() => {
+      expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
+    });
 
-    // const closeButton = screen.getByRole('button', { name: 'Close Drawer' });
+    const closeButton = screen.getByRole('button', { name: 'Close Drawer' });
 
-    // await act(async () => {
-    //   await userEvent.click(closeButton);
-    // });
+    await act(async () => {
+      await userEvent.click(closeButton);
+    });
 
-    // await waitFor(() => {
-    //   expect(screen.queryByTestId('detail-drawer')).not.toBeInTheDocument();
-    // });
+    await waitFor(() => {
+      expect(screen.queryByTestId('detail-drawer')).not.toBeInTheDocument();
+    });
   });
 
   it('passes status label to CustomChip', () => {
@@ -939,7 +950,7 @@ describe('MerchantTransactions', () => {
     render(<MerchantTransactions
       transactions={mockTransactions}
       handleFiltersApplied={handleFiltersApplied}
-      handleFiltersReset={handleFiltersReset} sortModel={[]}    />);
+      handleFiltersReset={handleFiltersReset} sortModel={[]} />);
 
     const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
     fireEvent.click(applyButton);
@@ -956,11 +967,12 @@ describe('MerchantTransactions', () => {
     />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Row Action' }));
-    // await userEvent.click(screen.getByRole('button', { name: 'Close Drawer' }));
+    await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
+    await userEvent.click(screen.getByTestId('close-button'));
 
-    // await waitFor(() => {
-    //   expect(mockSetAlert).toHaveBeenCalledWith({ isOpen: false });
-    // });
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({ isOpen: false });
+    });
   });
   it('rejects GTIN input with spaces or long values without updating formik', () => {
     render(<MerchantTransactions
@@ -1041,7 +1053,7 @@ describe('MerchantTransactions', () => {
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
     await userEvent.click(rowButton);
-    // expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
+    expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
   });
 
   it('clears input fields on filter reset', async () => {
