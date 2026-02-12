@@ -53,8 +53,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   const history = useHistory();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { id, trxId, fileDocNumber } = useParams<{
+  const { id, pointOfSaleId, trxId, fileDocNumber } = useParams<{
     id: string;
+    pointOfSaleId: string;
     trxId: string;
     fileDocNumber: string;
   }>();
@@ -122,6 +123,13 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   };
 
   const handleBackNavigation = () => {
+    const locationState = history.location.state as { from?: string } | undefined;
+
+    if (locationState?.from === 'transaction') {
+      history.goBack();
+      return;
+    }
+
     const resolvedPath = breadcrumbsProp?.path?.includes(':id')
       ? breadcrumbsProp.path.replace(':id', id)
       : breadcrumbsProp?.path;
@@ -146,7 +154,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       setLoadingFile(true);
 
       try {
-        await apiCall(trxId, file, id, docNumber);
+        await apiCall(trxId, file, pointOfSaleId, docNumber);
 
         setLoadingFile(false);
         history.push(breadcrumbsProp?.path, {

@@ -1,7 +1,9 @@
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
+import routes from '../../routes';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';
 import CustomChip from '../Chip/CustomChip';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
@@ -19,6 +21,7 @@ type Props = DetailDrawerProps & {
 export default function TransactionDetail({ itemValues, listItem, ...rest }: Props) {
   const { setAlert } = useAlert();
   const { storeId } = useStore();
+  const history = useHistory();
   const [isLoading, setIsLoading] = useState(false);
 
   const isEditable =
@@ -33,10 +36,20 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
               variant: 'contained',
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
+              onClick: () => {
+                const merchantId = history.location.pathname.split('/')[2];
+
+                const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
+                  .replace(':pointOfSaleId', storeId)
+                  .replace(':trxId', itemValues.id)
+                  .replace(':fileDocNumber', itemValues?.invoiceFile?.docNumber ?? '');
+
+                history.push(path, { from: 'transaction' });
+              },
             },
           ]
         : [],
-    [isEditable]
+    [isEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const getStatusChip = () => {
