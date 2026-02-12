@@ -13,7 +13,6 @@ import { MISSING_DATA_PLACEHOLDER } from '../constants';
 describe('formatDate', () => {
   test('should format a valid date object correctly', () => {
     const date = new Date('2025-10-06T19:30:00');
-
     expect(formatDate(date)).toBe('06/10/2025 19:30');
   });
 
@@ -35,84 +34,92 @@ describe('formatDate', () => {
 describe('getEndOfNextMonth', () => {
   test('should return undefined when date is not provided', () => {
     const result = getEndOfNextMonth();
-
     expect(result).toBeUndefined();
   });
 
   test('should return undefined when date is null', () => {
     const result = getEndOfNextMonth(null as any);
-
     expect(result).toBeUndefined();
   });
 
   test('should return end of next month for valid date string', () => {
     const result = getEndOfNextMonth('2024-01-15');
-
     expect(result).toEqual(new Date(2024, 2, 0));
   });
 
   test('should return end of next month for valid Date object', () => {
     const date = new Date('2024-06-10');
     const result = getEndOfNextMonth(date);
-
     expect(result).toEqual(new Date(2024, 7, 0));
   });
 
   test('should handle year boundary transition', () => {
     const result = getEndOfNextMonth('2024-12-25');
-
     expect(result).toEqual(new Date(2025, 1, 0));
   });
 
   test('should handle month with different days', () => {
     const result = getEndOfNextMonth('2024-02-15');
-
     expect(result).toEqual(new Date(2024, 3, 0));
   });
 });
 
 describe('safeFormatDate', () => {
-  test('should format valid date object correctly', () => {
+  test('should format valid date object correctly (default withHours=true)', () => {
     const mockDate = new Date('2024-01-15T10:30:00');
-
     const result = safeFormatDate(mockDate);
-
     expect(result).toBe('15/01/2024 10:30');
   });
 
-  test('should format date string correctly', () => {
+  test('should format date string correctly (default withHours=true)', () => {
     const result = safeFormatDate('2024-01-15T10:30:00');
-
     expect(result).toBe('15/01/2024 10:30');
+  });
+
+  test('should format valid date without hours when withHours=false', () => {
+    const mockDate = new Date('2024-01-15T10:30:00');
+    const result = safeFormatDate(mockDate, false);
+    expect(result).toBe('15/01/2024');
+  });
+
+  test('should format date string without hours when withHours=false', () => {
+    const result = safeFormatDate('2024-12-25T23:59:00', false);
+    expect(result).toBe('25/12/2024');
   });
 
   test('should return MISSING_DATA_PLACEHOLDER for invalid date', () => {
     const result = safeFormatDate('invalid-date');
-
     expect(result).toBe(MISSING_DATA_PLACEHOLDER);
   });
 
   test('should return MISSING_DATA_PLACEHOLDER for NaN date', () => {
     const result = safeFormatDate(NaN);
-
     expect(result).toBe(MISSING_DATA_PLACEHOLDER);
   });
 
-  test('should handle null value', () => {
-    const result = safeFormatDate(null);
+  test('should hit catch branch and return MISSING_DATA_PLACEHOLDER when Date constructor throws', () => {
+    const throwingValue = {
+      valueOf() {
+        throw new Error('boom');
+      },
+    };
 
+    const result = safeFormatDate(throwingValue as any);
+    expect(result).toBe(MISSING_DATA_PLACEHOLDER);
+  });
+
+  test('should handle null value (Date(null) is valid)', () => {
+    const result = safeFormatDate(null);
     expect(result).not.toBe(MISSING_DATA_PLACEHOLDER);
   });
 
   test('should handle undefined value', () => {
     const result = safeFormatDate(undefined);
-
     expect(result).toBe(MISSING_DATA_PLACEHOLDER);
   });
 
   test('should handle empty string', () => {
     const result = safeFormatDate('');
-
     expect(result).toBe(MISSING_DATA_PLACEHOLDER);
   });
 
@@ -205,19 +212,27 @@ describe('normalizeUrlHttps', () => {
   });
 
   test('should handle urls with paths', () => {
-    expect(normalizeUrlHttps('example.com/path')).toBe('https://example.com/path');
+    expect(normalizeUrlHttps('example.com/path')).toBe(
+      'https://example.com/path'
+    );
   });
 
   test('should handle http with paths', () => {
-    expect(normalizeUrlHttps('http://example.com/path')).toBe('https://example.com/path');
+    expect(normalizeUrlHttps('http://example.com/path')).toBe(
+      'https://example.com/path'
+    );
   });
 
   test('should handle https with paths', () => {
-    expect(normalizeUrlHttps('https://example.com/path')).toBe('https://example.com/path');
+    expect(normalizeUrlHttps('https://example.com/path')).toBe(
+      'https://example.com/path'
+    );
   });
 
   test('should handle urls with ports', () => {
-    expect(normalizeUrlHttps('example.com:8080')).toBe('https://example.com:8080');
+    expect(normalizeUrlHttps('example.com:8080')).toBe(
+      'https://example.com:8080'
+    );
   });
 
   test('should handle whitespace only input', () => {
@@ -238,15 +253,21 @@ describe('normalizeUrlHttp', () => {
   });
 
   test('should handle urls with paths', () => {
-    expect(normalizeUrlHttp('example.com/path')).toBe('http://example.com/path');
+    expect(normalizeUrlHttp('example.com/path')).toBe(
+      'http://example.com/path'
+    );
   });
 
   test('should handle http with paths', () => {
-    expect(normalizeUrlHttp('http://example.com/path')).toBe('http://example.com/path');
+    expect(normalizeUrlHttp('http://example.com/path')).toBe(
+      'http://example.com/path'
+    );
   });
 
   test('should handle https with paths', () => {
-    expect(normalizeUrlHttp('https://example.com/path')).toBe('https://example.com/path');
+    expect(normalizeUrlHttp('https://example.com/path')).toBe(
+      'https://example.com/path'
+    );
   });
 
   test('should handle urls with ports', () => {
@@ -258,6 +279,8 @@ describe('normalizeUrlHttp', () => {
   });
 
   test('should preserve protocol for https with whitespace', () => {
-    expect(normalizeUrlHttp('  https://example.com  ')).toBe('https://example.com');
+    expect(normalizeUrlHttp('  https://example.com  ')).toBe(
+      'https://example.com'
+    );
   });
 });
