@@ -69,33 +69,14 @@ export default function InvoiceDetail({
       ? true
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
-  const isEditable =
-    itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
-    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED');
 
-  const editButton: DetailDrawerProps['buttons'] = useMemo(
-    () =>
-      isEditable && itemValues?.pointOfSaleId
-        ? [
-            {
-              variant: 'contained',
-              title: 'Modifica documento',
-              dataTestId: 'change-file-btn',
-              onClick: () => {
-                const merchantId = history.location.pathname.split('/')[2];
+  const isEditable = itemValues?.rewardBatchTrxStatus !== "APPROVED" && !(itemValues?.status === "CANCELLED" || itemValues?.status === "REFUNDED");
 
-                const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
-                  .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
-                  .replace(':trxId', itemValues.id)
-                  .replace(':fileDocNumber', itemValues?.invoiceData?.docNumber);
-
-                history.push(path, { fromPath: history.location.pathname });
-              },
-            },
-          ]
-        : [],
-    [isEditable, itemValues?.pointOfSaleId, history]
-  );
+  const editButton: DetailDrawerProps['buttons'] = useMemo(() => isEditable ? [{
+    variant: "contained",
+    title: "Modifica documento",
+    dataTestId: "change-file-btn"
+  }] : [], [isEditable]);
 
   const handlePostponeTransaction = async () => {
     if (!initiativeEndDate) {
