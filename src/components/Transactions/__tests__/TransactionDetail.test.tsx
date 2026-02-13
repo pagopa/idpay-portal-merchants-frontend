@@ -1,9 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
-// --- IMPORTANT: mock order matters (mocks before importing the component) ---
-
-// Mock routes used to build history.push path
 jest.mock('../../../routes', () => ({
   __esModule: true,
   default: {
@@ -11,7 +8,6 @@ jest.mock('../../../routes', () => ({
   },
 }));
 
-// Mock formatters (prefix with "mock" to satisfy Jest hoisting rules)
 const mockCurrencyFormatter = jest.fn((n: number) => `€ ${n.toFixed(2)}`);
 const mockFormatValues = jest.fn((s: string) => `Formatted: ${s}`);
 
@@ -21,7 +17,6 @@ jest.mock('../../../utils/formatUtils', () => ({
   formatValues: (s: string) => mockFormatValues(s),
 }));
 
-// Mock constants
 jest.mock('../../../utils/constants', () => ({
   __esModule: true,
   MISSING_DATA_PLACEHOLDER: '-',
@@ -31,7 +26,6 @@ jest.mock('../../../utils/constants', () => ({
   },
 }));
 
-// Mock store hook
 const mockUseStore = jest.fn();
 
 jest.mock('../../../pages/initiativeStores/StoreContext', () => ({
@@ -39,28 +33,24 @@ jest.mock('../../../pages/initiativeStores/StoreContext', () => ({
   useStore: () => mockUseStore(),
 }));
 
-// Mock alert hook
 const mockSetAlert  = jest.fn();
 jest.mock('../../../hooks/useAlert', () => ({
   __esModule: true,
   useAlert: () => ({ setAlert: mockSetAlert  }),
 }));
 
-// Mock merchant service
 const mockDownloadInvoiceFile = jest.fn();
 jest.mock('../../../services/merchantService', () => ({
   __esModule: true,
   downloadInvoiceFile: (...args: any[]) => mockDownloadInvoiceFile(...args),
 }));
 
-// Mock getStatus (useStatus)
 const mockGetStatus = jest.fn();
 jest.mock('../useStatus', () => ({
   __esModule: true,
   default: (status: string) => mockGetStatus(status),
 }));
 
-// Mock CustomChip (render something deterministic)
 jest.mock('../../Chip/CustomChip', () => ({
   __esModule: true,
   default: ({ label, colorChip }: any) => (
@@ -70,7 +60,6 @@ jest.mock('../../Chip/CustomChip', () => ({
   ),
 }));
 
-// Mock DetailDrawer to render buttons so we can click them
 jest.mock('../../Drawer/DetailDrawer', () => ({
   __esModule: true,
   default: ({ children, buttons, ...rest }: any) => (
@@ -91,7 +80,6 @@ jest.mock('../../Drawer/DetailDrawer', () => ({
   ),
 }));
 
-// Mock react-router-dom hooks (v5 style)
 const pushMock = jest.fn();
 const mockUseHistory = jest.fn();
 const mockUseParams = jest.fn();
@@ -102,7 +90,6 @@ jest.mock('react-router-dom', () => ({
   useParams: () => mockUseParams(),
 }));
 
-// NOW import the component under test
 import TransactionDetail from '../TransactionDetail';
 import routes from '../../../routes';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
@@ -111,14 +98,11 @@ describe('TransactionDetail (100% coverage)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // default router mocks
     mockUseParams.mockReturnValue({ id: 'merchant-123' });
     mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/here' } });
 
-    // default store
     mockUseStore.mockReturnValue({ storeId: 'store-999' });
 
-    // default getStatus
     mockGetStatus.mockReturnValue({ label: 'Completato', color: '#00FF00' });
   });
 
@@ -150,27 +134,21 @@ describe('TransactionDetail (100% coverage)', () => {
       />
     );
 
-    // Text branch
     expect(mockFormatValues).toHaveBeenCalledWith('hello');
     expect(screen.getByText('Formatted: hello')).toBeInTheDocument();
 
-    // Currency branch
     expect(mockCurrencyFormatter).toHaveBeenCalledWith(10);
     expect(screen.getByText('€ 10.00')).toBeInTheDocument();
 
-    // nested productName branch
     expect(screen.getByText('Laptop')).toBeInTheDocument();
 
-    // unknown type branch
     expect(screen.getByText('error on type')).toBeInTheDocument();
 
-    // status block
     expect(mockGetStatus).toHaveBeenCalledWith('COMPLETED');
     expect(screen.getByText('Stato')).toBeInTheDocument();
     expect(screen.getByTestId('chip')).toHaveTextContent('Completato');
     expect(screen.getByTestId('chip')).toHaveAttribute('data-color', '#00FF00');
 
-    // invoice section shown when not CANCELLED
     expect(screen.getByText('Numero fattura')).toBeInTheDocument();
     expect(screen.getByText('DOC-1')).toBeInTheDocument();
     expect(screen.getByText('Fattura')).toBeInTheDocument();
@@ -199,14 +177,11 @@ describe('TransactionDetail (100% coverage)', () => {
       />
     );
 
-    // missing nested productName
     expect(screen.getAllByText(MISSING_DATA_PLACEHOLDER)[0]).toBeInTheDocument();
 
-    // invoice docNumber missing
     expect(screen.getByText('Numero fattura')).toBeInTheDocument();
     expect(screen.getAllByText(MISSING_DATA_PLACEHOLDER).length).toBeGreaterThanOrEqual(2);
 
-    // invoice filename missing
     expect(screen.getByText('Fattura')).toBeInTheDocument();
   });
 
@@ -228,7 +203,6 @@ describe('TransactionDetail (100% coverage)', () => {
       />
     );
 
-    // invoice section must be absent
     expect(screen.queryByText('Numero fattura')).not.toBeInTheDocument();
     expect(screen.queryByText('Fattura')).not.toBeInTheDocument();
     expect(screen.queryByText('Nota di credito')).not.toBeInTheDocument();
@@ -256,7 +230,6 @@ describe('TransactionDetail (100% coverage)', () => {
     expect(screen.getByText('CN-1')).toBeInTheDocument();
     expect(screen.getByText('credit-note.pdf')).toBeInTheDocument();
 
-    // isEditable is false when status is REFUNDED => no edit button
     expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
   });
 
@@ -296,7 +269,7 @@ describe('TransactionDetail (100% coverage)', () => {
       id: 'TRX-6',
       status: 'COMPLETED',
       rewardBatchTrxStatus: 'PENDING',
-      invoiceFile: null, // docNumber missing -> ""
+      invoiceFile: null,
     };
 
     render(
@@ -349,7 +322,6 @@ describe('TransactionDetail (100% coverage)', () => {
       click: jest.fn(),
     };
 
-    // save original to avoid recursion
     const origCreateElement = document.createElement.bind(document);
     const createElSpy = jest
       .spyOn(document, 'createElement')
@@ -374,10 +346,8 @@ describe('TransactionDetail (100% coverage)', () => {
       />
     );
 
-    // click the invoice button
     fireEvent.click(screen.getByTestId('btn-test'));
 
-    // loader branch
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
@@ -395,7 +365,6 @@ describe('TransactionDetail (100% coverage)', () => {
 
     const linkMock = { href: '', download: '', click: jest.fn() };
 
-    // save original to avoid recursion
     const origCreateElement = document.createElement.bind(document);
     const createElSpy = jest
       .spyOn(document, 'createElement')
@@ -407,7 +376,7 @@ describe('TransactionDetail (100% coverage)', () => {
     const itemValues = {
       id: 'TRX-9',
       status: 'COMPLETED',
-      invoiceFile: null, // filename missing -> default "fattura.pdf"
+      invoiceFile: null,
     };
 
     render(
@@ -455,7 +424,6 @@ describe('TransactionDetail (100% coverage)', () => {
 
     fireEvent.click(screen.getByTestId('btn-test'));
 
-    // loader shows initially
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
@@ -463,13 +431,11 @@ describe('TransactionDetail (100% coverage)', () => {
       expect(mockSetAlert ).toHaveBeenCalled();
     });
 
-    // Ensure alert payload is the expected one (high-signal fields)
     const payload = mockSetAlert .mock.calls[0][0];
     expect(payload.title).toBe('Errore download file');
     expect(payload.severity).toBe('error');
     expect(payload.isOpen).toBe(true);
 
-    // After error, loader should go away and filename should be visible again
     await waitFor(() => {
       expect(screen.queryByTestId('item-loader')).not.toBeInTheDocument();
       expect(screen.getByText('invoice-10.pdf')).toBeInTheDocument();

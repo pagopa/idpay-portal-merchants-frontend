@@ -109,7 +109,6 @@ describe('InvoiceDetail', () => {
     },
   ];
 
-  // Default location (include month because some branches use it)
   const mockUseLocation = {
     state: { store: { status: 'CREATED' }, month: new Date('2025-10-01') },
   };
@@ -338,13 +337,9 @@ describe('InvoiceDetail', () => {
         fireEvent.click(screen.getByTestId('btn-test'));
       });
 
-      // advance the timeout used to set title
       act(() => {
         jest.advanceTimersByTime(200);
       });
-
-      // If the component sets title to filename, enable this:
-      // expect(mockWindow.document.title).toBe('fattura.pdf');
 
       jest.useRealTimers();
     });
@@ -833,7 +828,6 @@ describe('InvoiceDetail', () => {
       storeId: 'store-1',
     });
 
-    // Keeping your expectation as-is:
     expect(screen.getByTestId('next-month-btn')).toBeDisabled();
   });
 
