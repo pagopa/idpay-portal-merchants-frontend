@@ -25,8 +25,10 @@ jest.mock('../../../../components/Chip/StatusChipInvoice', () => (props: any) =>
   <div data-testid="status-chip">{props.status}</div>
 ));
 
-jest.mock('../../../../components/modal/ModalComponent', () => (props: any) =>
-  props.open ? <div data-testid="modal-component">{props.children}</div> : null
+jest.mock(
+  '../../../../components/modal/ModalComponent',
+  () => (props: any) =>
+    props.open ? <div data-testid="modal-component">{props.children}</div> : null
 );
 
 jest.mock('../../../../hooks/useAlert', () => ({
@@ -113,9 +115,7 @@ describe('InvoiceDetail', () => {
     state: { store: { status: 'CREATED' }, month: new Date('2025-10-01') },
   };
 
-  const renderInvoiceDetail = (
-    props?: Partial<React.ComponentProps<typeof InvoiceDetail>>
-  ) =>
+  const renderInvoiceDetail = (props?: any) =>
     render(
       <InvoiceDetail
         isOpen={true}
@@ -523,7 +523,9 @@ describe('InvoiceDetail', () => {
         itemValues: {
           ...baseItemValues,
           rewardBatchTrxStatus: RewardBatchTrxStatusEnum.SUSPENDED,
-          rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+          rewardBatchRejectionReason: [
+            { date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' },
+          ],
         },
       });
 
@@ -538,7 +540,9 @@ describe('InvoiceDetail', () => {
         itemValues: {
           ...baseItemValues,
           rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
-          rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+          rewardBatchRejectionReason: [
+            { date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' },
+          ],
         },
       });
 
@@ -601,7 +605,9 @@ describe('InvoiceDetail', () => {
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
         itemValues: { ...baseItemValues, customField: 'test' },
-        listItem: [{ id: 'customField', label: 'Custom Field', format: (v: string) => `CUSTOM-${v}` }],
+        listItem: [
+          { id: 'customField', label: 'Custom Field', format: (v: string) => `CUSTOM-${v}` },
+        ],
       });
 
       expect(screen.getByText('CUSTOM-test')).toBeInTheDocument();
@@ -643,7 +649,11 @@ describe('InvoiceDetail', () => {
         { initiativeId: 'init-123', endDate: new Date('2025-12-31') },
       ]);
 
-      renderInvoiceDetail({ title: 'Dettaglio transazione', batchId: 'batch-1', storeId: 'store-1' });
+      renderInvoiceDetail({
+        title: 'Dettaglio transazione',
+        batchId: 'batch-1',
+        storeId: 'store-1',
+      });
 
       expect(screen.getByTestId('item-test')).toBeInTheDocument();
     });
@@ -652,9 +662,15 @@ describe('InvoiceDetail', () => {
       const futureDate = new Date();
       futureDate.setMonth(futureDate.getMonth() + 2);
 
-      (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'init-123', endDate: futureDate }]);
+      (useAppSelector as jest.Mock).mockReturnValue([
+        { initiativeId: 'init-123', endDate: futureDate },
+      ]);
 
-      renderInvoiceDetail({ title: 'Dettaglio transazione', batchId: 'batch-1', storeId: 'store-1' });
+      renderInvoiceDetail({
+        title: 'Dettaglio transazione',
+        batchId: 'batch-1',
+        storeId: 'store-1',
+      });
 
       expect(screen.getByTestId('item-test')).toBeInTheDocument();
     });
@@ -662,7 +678,11 @@ describe('InvoiceDetail', () => {
     it('gestisce Redux state vuoto senza crashes', () => {
       (useAppSelector as jest.Mock).mockReturnValue([]);
 
-      renderInvoiceDetail({ title: 'Dettaglio transazione', batchId: 'batch-1', storeId: 'store-1' });
+      renderInvoiceDetail({
+        title: 'Dettaglio transazione',
+        batchId: 'batch-1',
+        storeId: 'store-1',
+      });
 
       expect(screen.getByTestId('item-test')).toBeInTheDocument();
     });
@@ -670,7 +690,11 @@ describe('InvoiceDetail', () => {
     it('gestisce Redux state con endDate undefined', () => {
       (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'init-123' }]);
 
-      renderInvoiceDetail({ title: 'Dettaglio transazione', batchId: 'batch-1', storeId: 'store-1' });
+      renderInvoiceDetail({
+        title: 'Dettaglio transazione',
+        batchId: 'batch-1',
+        storeId: 'store-1',
+      });
 
       expect(screen.getByTestId('item-test')).toBeInTheDocument();
     });
@@ -678,7 +702,11 @@ describe('InvoiceDetail', () => {
     it('gestisce Redux state con initiativeId undefined', () => {
       (useAppSelector as jest.Mock).mockReturnValue([{ endDate: new Date('2025-12-31') }]);
 
-      renderInvoiceDetail({ title: 'Dettaglio transazione', batchId: 'batch-1', storeId: 'store-1' });
+      renderInvoiceDetail({
+        title: 'Dettaglio transazione',
+        batchId: 'batch-1',
+        storeId: 'store-1',
+      });
 
       expect(screen.getByTestId('item-test')).toBeInTheDocument();
     });
@@ -714,7 +742,10 @@ describe('InvoiceDetail', () => {
     it('mostra il modal quando status è CONSULTABLE', () => {
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
-        itemValues: { ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE },
+        itemValues: {
+          ...baseItemValues,
+          rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+        },
         batchId: 'batch-1',
         storeId: 'store-1',
       });
@@ -739,11 +770,16 @@ describe('InvoiceDetail', () => {
       const pastDate = new Date();
       pastDate.setMonth(pastDate.getMonth() - 1);
 
-      (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'init-123', endDate: pastDate }]);
+      (useAppSelector as jest.Mock).mockReturnValue([
+        { initiativeId: 'init-123', endDate: pastDate },
+      ]);
 
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
-        itemValues: { ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE },
+        itemValues: {
+          ...baseItemValues,
+          rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+        },
         batchId: 'batch-1',
         storeId: 'store-1',
       });
@@ -756,7 +792,10 @@ describe('InvoiceDetail', () => {
 
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
-        itemValues: { ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE },
+        itemValues: {
+          ...baseItemValues,
+          rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+        },
         batchId: 'batch-1',
         storeId: 'store-1',
       });
@@ -769,7 +808,10 @@ describe('InvoiceDetail', () => {
 
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
-        itemValues: { ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE },
+        itemValues: {
+          ...baseItemValues,
+          rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+        },
         batchId: 'batch-1',
         storeId: 'store-1',
       });
@@ -805,7 +847,9 @@ describe('InvoiceDetail', () => {
       state: { store: { status: 'CREATED' }, month: batchMonth },
     });
 
-    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'init-1', endDate: initiativeEnd }]);
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'init-1', endDate: initiativeEnd },
+    ]);
 
     renderInvoiceDetail({ batchId: 'batch-1', storeId: 'store-1' });
 
@@ -820,7 +864,9 @@ describe('InvoiceDetail', () => {
       state: { store: { status: 'CREATED' }, month: batchMonth },
     });
 
-    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'init-1', endDate: initiativeEnd }]);
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'init-1', endDate: initiativeEnd },
+    ]);
 
     renderInvoiceDetail({
       itemValues: { ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE },
@@ -847,7 +893,9 @@ describe('InvoiceDetail', () => {
   it('resetta loading a false nel finally', async () => {
     const futureDate = new Date('2025-12-31');
 
-    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'init-1', endDate: futureDate }]);
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'init-1', endDate: futureDate },
+    ]);
 
     (useLocation as jest.Mock).mockReturnValue({
       state: { store: { status: 'CREATED' }, month: new Date('2025-10-01') },

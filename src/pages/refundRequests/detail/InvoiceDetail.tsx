@@ -4,7 +4,6 @@ import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useHistory } from 'react-router-dom';
-import routes from '../../../routes';
 import { downloadInvoiceFile, postponeTransaction } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { formatValues, currencyFormatter, getEndOfNextMonth } from '../../../utils/formatUtils';
@@ -69,14 +68,23 @@ export default function InvoiceDetail({
       ? true
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
+  const isEditable =
+    itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
+    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED');
 
-  const isEditable = itemValues?.rewardBatchTrxStatus !== "APPROVED" && !(itemValues?.status === "CANCELLED" || itemValues?.status === "REFUNDED");
-
-  const editButton: DetailDrawerProps['buttons'] = useMemo(() => isEditable ? [{
-    variant: "contained",
-    title: "Modifica documento",
-    dataTestId: "change-file-btn"
-  }] : [], [isEditable]);
+  const editButton: DetailDrawerProps['buttons'] = useMemo(
+    () =>
+      isEditable
+        ? [
+            {
+              variant: 'contained',
+              title: 'Modifica documento',
+              dataTestId: 'change-file-btn',
+            },
+          ]
+        : [],
+    [isEditable]
+  );
 
   const handlePostponeTransaction = async () => {
     if (!initiativeEndDate) {
