@@ -241,11 +241,15 @@ export const MerchantApi = {
   },
 
   getRewardBatches: async (
-    initiativeId: string
+    initiativeId: string,
+    page: number,
+    size: number
   ): Promise<RewardBatchListDTO> => {
      try {
     const result = await apiClient.getRewardBatches({
-      initiativeId
+      initiativeId,
+      page,
+      size
     });
 
     return extractResponse(result, 200, onRedirectToLogin);
