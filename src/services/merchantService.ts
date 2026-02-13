@@ -122,9 +122,11 @@ export const deleteReportedUser = (
   MerchantApi.deleteReportedUser(initiativeId, userFiscalCode);
 
 export const getRewardBatches = (
-  initiativeId: string
+  initiativeId: string,
+  page: number,
+  size: number,
 ): Promise<RewardBatchListDTO> =>
-  MerchantApi.getRewardBatches(initiativeId);
+  MerchantApi.getRewardBatches(initiativeId, page, size);
 
 export const getAllRewardBatches = (
   initiativeId: string

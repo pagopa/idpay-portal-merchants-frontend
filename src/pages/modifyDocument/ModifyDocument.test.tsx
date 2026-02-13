@@ -1,31 +1,69 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import * as merchantService from '../../services/merchantService';
 import ROUTES from '../../routes';
+import { ENV } from '../../utils/env';
 import ModifyDocument from './ModifyDocument';
 
-// Mock del service coerente con l'implementazione reale
+const mockUseLocation = jest.fn();
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => mockUseLocation(),
+}));
+
 jest.mock('../../services/merchantService', () => ({
   updateInvoiceTransaction: jest.fn(),
 }));
 
+const mockFileUploadAction = jest.fn();
+
+jest.mock('../FileUploadAction/FileUploadAction', () => (props: any) => {
+  mockFileUploadAction(props);
+  return <div data-testid="file-upload-action" />;
+});
+
 describe('ModifyDocument page', () => {
-  it('renders the page title', () => {
-    render(<ModifyDocument />);
-
-    expect(screen.getByText(/modifyDocument.title/i)).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('uses updateInvoiceTransaction service', () => {
+  it('passes correct props when coming from refund requests (default case)', () => {
+    mockUseLocation.mockReturnValue({
+      state: undefined,
+    });
+
     render(<ModifyDocument />);
 
-    expect(merchantService.updateInvoiceTransaction).toBeDefined();
+    expect(mockFileUploadAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiCall: merchantService.updateInvoiceTransaction,
+        successStateKey: 'refundUploadSuccess',
+        breadcrumbsProp: {
+          label: 'Richieste di rimborso',
+          path: ROUTES.REFUND_REQUESTS,
+        },
+        manualLink: ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK,
+      })
+    );
   });
 
-  it('renders breadcrumbs with correct route', () => {
+  it('passes correct props when coming from stores', () => {
+    mockUseLocation.mockReturnValue({
+      state: { fromLocation: true },
+    });
+
     render(<ModifyDocument />);
 
-    const breadcrumbs = screen.getByTestId('breadcrumbs-path');
-
-    expect(breadcrumbs).toHaveTextContent(ROUTES.MODIFY_DOCUMENT);
+    expect(mockFileUploadAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiCall: merchantService.updateInvoiceTransaction,
+        successStateKey: 'refundUploadSuccess',
+        breadcrumbsProp: {
+          label: 'Punti vendita',
+          path: ROUTES.STORES,
+        },
+        manualLink: ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK,
+      })
+    );
   });
 });
