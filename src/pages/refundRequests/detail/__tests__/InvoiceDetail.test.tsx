@@ -25,6 +25,25 @@ jest.mock('../../../../components/Chip/StatusChipInvoice', () => (props: any) =>
   <div data-testid="status-chip">{props.status}</div>
 ));
 
+jest.mock('../../../../components/Drawer/DetailDrawer', () => ({
+  __esModule: true,
+  default: (props: any) => (
+    <div data-testid="item-test">
+      {props.buttons?.map((btn: any) => (
+        <button
+          key={btn.dataTestId}
+          data-testid={btn.dataTestId}
+          disabled={btn.disabled}
+          onClick={btn.onClick}
+        >
+          {btn.title}
+        </button>
+      ))}
+      {props.children}
+    </div>
+  ),
+}));
+
 jest.mock(
   '../../../../components/modal/ModalComponent',
   () => (props: any) =>
