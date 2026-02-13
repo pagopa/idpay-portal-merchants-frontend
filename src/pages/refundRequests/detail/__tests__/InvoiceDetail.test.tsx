@@ -25,6 +25,25 @@ jest.mock('../../../../components/Chip/StatusChipInvoice', () => (props: any) =>
   <div data-testid="status-chip">{props.status}</div>
 ));
 
+jest.mock('../../../../components/Drawer/DetailDrawer', () => ({
+  __esModule: true,
+  default: (props: any) => (
+    <div data-testid="item-test">
+      {props.buttons?.map((btn: any) => (
+        <button
+          key={btn.dataTestId}
+          data-testid={btn.dataTestId}
+          disabled={btn.disabled}
+          onClick={btn.onClick}
+        >
+          {btn.title}
+        </button>
+      ))}
+      {props.children}
+    </div>
+  ),
+}));
+
 jest.mock(
   '../../../../components/modal/ModalComponent',
   () => (props: any) =>
@@ -241,9 +260,7 @@ describe('InvoiceDetail', () => {
 
   describe('Rendering Base', () => {
     it('renderizza titolo, label e valore base', () => {
-      renderInvoiceDetail({ title: 'Dettaglio transazione' });
-
-      expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+      renderInvoiceDetail();
       expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
       expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
       expect(screen.getByText('Numero fattura')).toBeInTheDocument();

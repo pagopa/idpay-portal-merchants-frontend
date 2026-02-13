@@ -56,6 +56,7 @@ const InvoiceDataTable = ({
   pointOfSaleId,
   trxCode,
   fiscalCode,
+  onDrawerClosed
 }: InvoiceDataTableProps) => {
   const [transactions, setTransactions] = useState<MerchantTransactionsListDTO["content"]>([]);
   const [pagination, setPagination] = useState({
@@ -78,9 +79,13 @@ const InvoiceDataTable = ({
     setDrawerOpened(true);
   };
 
-  const handleToggleDrawer = () => {
+  const handleToggleDrawer = (open: boolean) => {
     setAlert({ ...alert, isOpen: false });
     setDrawerOpened(false);
+    if (!open) {
+      setRowDetail(null);
+      onDrawerClosed?.();
+    }
   };
 
   const downloadFile = async (selectedTransaction: any) => {
@@ -347,6 +352,7 @@ const InvoiceDataTable = ({
       )}
       {rowDetail && (
         <InvoiceDetail
+          onCloseDrawer={() => handleToggleDrawer(false)}
           isOpen={drawerOpened}
           setIsOpen={handleToggleDrawer}
           batchId={batchId ?? ''}

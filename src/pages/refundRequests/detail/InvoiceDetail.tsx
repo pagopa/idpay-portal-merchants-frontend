@@ -3,7 +3,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
+import routes from '../../../routes';
 import { downloadInvoiceFile, postponeTransaction } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { formatValues, currencyFormatter, getEndOfNextMonth } from '../../../utils/formatUtils';
@@ -23,6 +24,7 @@ type Props = DetailDrawerProps & {
   batchId: string;
   storeId: string;
   onSuccess?: () => void;
+  onCloseDrawer?: () => void;
 };
 
 export default function InvoiceDetail({
@@ -30,6 +32,7 @@ export default function InvoiceDetail({
   listItem,
   batchId,
   onSuccess,
+  onCloseDrawer,
   isOpen,
   setIsOpen,
   ...rest
@@ -45,6 +48,7 @@ export default function InvoiceDetail({
   const statusBatch = location.state?.store?.status;
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
+  const history = useHistory();
 
   useEffect(() => {
     if (
@@ -73,16 +77,26 @@ export default function InvoiceDetail({
 
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isEditable
+      isEditable && itemValues?.pointOfSaleId
         ? [
             {
               variant: 'contained',
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
+              onClick: () => {
+                const merchantId = history.location.pathname.split('/')[2];
+
+                const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
+                  .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
+                  .replace(':trxId', itemValues.id)
+                  .replace(':fileDocNumber', itemValues?.invoiceData?.docNumber);
+
+                history.push(path, { fromPath: history.location.pathname });
+              },
             },
           ]
         : [],
-    [isEditable]
+    [isEditable, itemValues?.pointOfSaleId, history]
   );
 
   const handlePostponeTransaction = async () => {
@@ -108,6 +122,7 @@ export default function InvoiceDetail({
         contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setInvoiceTransactionModal(false);
+      onCloseDrawer?.();
       onSuccess?.();
     } catch (error) {
       setAlert({
@@ -125,6 +140,7 @@ export default function InvoiceDetail({
         contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setInvoiceTransactionModal(false);
+      onCloseDrawer?.();
     } finally {
       setLoading(false);
     }

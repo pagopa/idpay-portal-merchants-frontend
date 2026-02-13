@@ -119,7 +119,7 @@ const mockedDownloadInvoiceFile = downloadInvoiceFile as jest.MockedFunction<
 const mockedUseAlert = useAlert as jest.MockedFunction<typeof useAlert>;
 
 describe('InvoiceDataTable', () => {
-  const mockSetAlert = jest.fn()
+  const mockSetAlert = jest.fn();
   const baseTransactions: any = {
     content: [
       {
@@ -177,7 +177,7 @@ describe('InvoiceDataTable', () => {
         rewardBatchTrxStatus="ELIGIBLE"
         pointOfSaleId="POS-2"
         fiscalCode="BBBBBB00B00B000B"
-        trxCode='TRX-CODE-001'
+        trxCode="TRX-CODE-001"
       />
     );
     await screen.findByTestId('data-table');
@@ -268,9 +268,7 @@ describe('InvoiceDataTable', () => {
     expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'true');
     const closeButton = screen.getByTestId('close-drawer');
     fireEvent.click(closeButton);
-    await waitFor(() =>
-      expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'false')
-    );
+    await waitFor(() => expect(screen.queryByTestId('detail-drawer')).not.toBeInTheDocument());
   });
 
   it('downloads invoice file PDF and opens new window', async () => {
@@ -463,20 +461,13 @@ describe('InvoiceDataTable', () => {
     expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'true');
     const closeButton = screen.getByTestId('close-drawer');
     fireEvent.click(closeButton);
-    await waitFor(() =>
-      expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'false')
-    );
-    await waitFor(() =>
-      expect(mockSetAlert).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(screen.queryByTestId('detail-drawer')).not.toBeInTheDocument());
+    await waitFor(() => expect(mockSetAlert).toHaveBeenCalled());
   });
 
   it('handles loading state', async () => {
     mockedGetTransactions.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(() => resolve(baseTransactions), 100)
-        )
+      () => new Promise((resolve) => setTimeout(() => resolve(baseTransactions), 100))
     );
     render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
