@@ -24,6 +24,7 @@ type Props = DetailDrawerProps & {
   batchId: string;
   storeId: string;
   onSuccess?: () => void;
+  onCloseDrawer?: () => void;
 };
 
 export default function InvoiceDetail({
@@ -31,6 +32,7 @@ export default function InvoiceDetail({
   listItem,
   batchId,
   onSuccess,
+  onCloseDrawer,
   isOpen,
   setIsOpen,
   ...rest
@@ -120,6 +122,7 @@ export default function InvoiceDetail({
         contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setInvoiceTransactionModal(false);
+      onCloseDrawer?.();
       onSuccess?.();
     } catch (error) {
       setAlert({
@@ -137,6 +140,7 @@ export default function InvoiceDetail({
         contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setInvoiceTransactionModal(false);
+      onCloseDrawer?.();
     } finally {
       setLoading(false);
     }
