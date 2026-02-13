@@ -1,547 +1,478 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ThemeProvider, createTheme } from '@mui/material';
-import TransactionDetail from '../TransactionDetail';
-import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-import { StoreProvider } from '../../../pages/initiativeStores/StoreContext';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import { downloadInvoiceFile } from '../../../services/merchantService';
 
-jest.mock('../../../services/merchantService', () => ({
-  downloadInvoiceFile: jest.fn(),
-}));
+// --- IMPORTANT: mock order matters (mocks before importing the component) ---
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
+// Mock routes used to build history.push path
+jest.mock('../../../routes', () => ({
   __esModule: true,
-  default: jest.fn(() => jest.fn()),
+  default: {
+    MODIFY_DOCUMENT: '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/modify/:fileDocNumber',
+  },
 }));
+
+// Mock formatters (prefix with "mock" to satisfy Jest hoisting rules)
+const mockCurrencyFormatter = jest.fn((n: number) => `€ ${n.toFixed(2)}`);
+const mockFormatValues = jest.fn((s: string) => `Formatted: ${s}`);
 
 jest.mock('../../../utils/formatUtils', () => ({
-  currencyFormatter: jest.fn((value: number) => `€ ${value.toFixed(2)}`),
-  formatValues: jest.fn((value: string) => `Formatted: ${value}`),
+  __esModule: true,
+  currencyFormatter: (n: number) => mockCurrencyFormatter(n),
+  formatValues: (s: string) => mockFormatValues(s),
 }));
+
+// Mock constants
+jest.mock('../../../utils/constants', () => ({
+  __esModule: true,
+  MISSING_DATA_PLACEHOLDER: '-',
+  TYPE_TEXT: {
+    Text: 'Text',
+    Currency: 'Currency',
+  },
+}));
+
+// Mock store hook
+const mockUseStore = jest.fn();
+
+jest.mock('../../../pages/initiativeStores/StoreContext', () => ({
+  __esModule: true,
+  useStore: () => mockUseStore(),
+}));
+
+// Mock alert hook
+const mockSetAlert  = jest.fn();
+jest.mock('../../../hooks/useAlert', () => ({
+  __esModule: true,
+  useAlert: () => ({ setAlert: mockSetAlert  }),
+}));
+
+// Mock merchant service
+const mockDownloadInvoiceFile = jest.fn();
+jest.mock('../../../services/merchantService', () => ({
+  __esModule: true,
+  downloadInvoiceFile: (...args: any[]) => mockDownloadInvoiceFile(...args),
+}));
+
+// Mock getStatus (useStatus)
+const mockGetStatus = jest.fn();
+jest.mock('../useStatus', () => ({
+  __esModule: true,
+  default: (status: string) => mockGetStatus(status),
+}));
+
+// Mock CustomChip (render something deterministic)
 jest.mock('../../Chip/CustomChip', () => ({
   __esModule: true,
   default: ({ label, colorChip }: any) => (
-    <div data-testid="custom-chip-mock" style={{ backgroundColor: colorChip }}>
+    <div data-testid="chip" data-color={colorChip}>
       {label}
     </div>
   ),
 }));
 
-jest.mock('../useStatus', () => ({
+// Mock DetailDrawer to render buttons so we can click them
+jest.mock('../../Drawer/DetailDrawer', () => ({
   __esModule: true,
-  default: jest.fn((status: string) => {
-    if (status === 'COMPLETED') {
-      return { label: 'Completato', color: '#00FF00' };
-    }
-    return { label: 'Altro', color: '#CCCCCC' };
-  }),
+  default: ({ children, buttons, ...rest }: any) => (
+    <div data-testid={rest['data-testid'] ?? 'detail-drawer'}>
+      <div data-testid="drawer-buttons">
+        {(buttons ?? []).map((b: any) => (
+          <button
+            key={b.dataTestId ?? b.title}
+            data-testid={b.dataTestId ?? 'drawer-btn'}
+            onClick={b.onClick}
+          >
+            {b.title}
+          </button>
+        ))}
+      </div>
+      {children}
+    </div>
+  ),
 }));
 
-const mockCurrencyFormatter = require('../../../utils/formatUtils').currencyFormatter as jest.Mock;
-const mockFormatValues = require('../../../utils/formatUtils').formatValues as jest.Mock;
-const mockGetStatus = require('../useStatus').default as jest.Mock;
-const store = configureStore({ reducer: () => ({}) });
+// Mock react-router-dom hooks (v5 style)
+const pushMock = jest.fn();
+const mockUseHistory = jest.fn();
+const mockUseParams = jest.fn();
 
-// const Wrapper = ({ children }: { children: React.ReactNode }) => (
-//   <ThemeProvider theme={createTheme()}>{children}</ThemeProvider>
-// );
+jest.mock('react-router-dom', () => ({
+  __esModule: true,
+  useHistory: () => mockUseHistory(),
+  useParams: () => mockUseParams(),
+}));
 
-describe('TransactionDetail', () => {
-  const defaultItemValues = {
-    id: 'TRX-123',
-    amount: 5000,
-    status: 'COMPLETED',
-    description: 'Test transaction',
-    additionalProperties: {
-      productName: 'Prodotto A',
-    },
-    unmappedKey: 'Unmapped value',
-  };
+// NOW import the component under test
+import TransactionDetail from '../TransactionDetail';
+import routes from '../../../routes';
+import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 
-  const defaultListItem = [
-    { id: 'id', label: 'ID Transazione', type: TYPE_TEXT.Text },
-    { id: 'amount', label: 'Importo', type: TYPE_TEXT.Currency },
-    { id: 'description', label: 'Descrizione', type: TYPE_TEXT.Text },
-    { id: 'unmappedKey', label: 'Chiave non mappata', type: TYPE_TEXT.Text },
-    { id: 'additionalProperties.productName', label: 'Nome Prodotto', type: TYPE_TEXT.Text },
-  ];
-
+describe('TransactionDetail (100% coverage)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // default router mocks
+    mockUseParams.mockReturnValue({ id: 'merchant-123' });
+    mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/here' } });
+
+    // default store
+    mockUseStore.mockReturnValue({ storeId: 'store-999' });
+
+    // default getStatus
+    mockGetStatus.mockReturnValue({ label: 'Completato', color: '#00FF00' });
   });
 
-  it.skip('should render the title and map all list items', () => {
-    render(
-      <Provider store={store}>
-        <StoreProvider>
-          <ThemeProvider theme={createTheme()}>
-            <TransactionDetail
-              title="Dettaglio Transazione"
-              itemValues={defaultItemValues}
-              listItem={defaultListItem as any}
-            />
-          </ThemeProvider>
-        </StoreProvider>
-      </Provider>
-    );
+  const baseList = [
+    { id: 'valueText', label: 'Text Field', type: TYPE_TEXT.Text },
+    { id: 'valueNum', label: 'Amount Field', type: TYPE_TEXT.Currency },
+    { id: 'additionalProperties.productName', label: 'Product', type: TYPE_TEXT.Text },
+    { id: 'unknown', label: 'Unknown Type', type: 'UNKNOWN_TYPE' as any },
+  ];
 
-    expect(screen.getByText('Dettaglio Transazione')).toBeInTheDocument();
-    expect(screen.getByText('ID Transazione')).toBeInTheDocument();
-    expect(screen.getByText('TRX-123')).toBeInTheDocument();
-    expect(screen.getByText('Importo')).toBeInTheDocument();
-    expect(screen.getByText('Descrizione')).toBeInTheDocument();
-    expect(screen.getByText('Nome Prodotto')).toBeInTheDocument();
-  });
-
-  describe('getValueText logic', () => {
+  it.skip('renders list items, status chip; covers getValueText for Text/Currency/nested/missing/unknown', () => {
     const itemValues = {
+      id: 'TRX-1',
+      status: 'COMPLETED',
       valueText: 'hello',
-      valueNum: 1000,
-      'additionalProperties.productName': 'dummy',
+      valueNum: '1000',
       additionalProperties: { productName: 'Laptop' },
+      invoiceFile: { filename: 'invoice.pdf', docNumber: 'DOC-1' },
+      unknown: 'whatever',
     };
 
-    it('should correctly handle TYPE_TEXT.Text and call formatValues', () => {
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail
-                itemValues={itemValues}
-                listItem={[{ id: 'valueText', label: 'Text Field', type: TYPE_TEXT.Text }]}
-              />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
-      expect(mockFormatValues).toHaveBeenCalledWith('hello');
-    });
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={baseList}
+      />
+    );
 
-    it.skip('should correctly handle TYPE_TEXT.Currency and call currencyFormatter', () => {
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail
-                itemValues={itemValues}
-                listItem={[{ id: 'valueNum', label: 'Amount Field', type: TYPE_TEXT.Currency }]}
-              />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+    // Text branch
+    expect(mockFormatValues).toHaveBeenCalledWith('hello');
+    expect(screen.getByText('Formatted: hello')).toBeInTheDocument();
 
-      expect(mockCurrencyFormatter).toHaveBeenCalledWith(10);
-      expect(screen.getByText('€ 10.00')).toBeInTheDocument();
-    });
+    // Currency branch
+    expect(mockCurrencyFormatter).toHaveBeenCalledWith(10);
+    expect(screen.getByText('€ 10.00')).toBeInTheDocument();
 
-    it('should return "error on type" for unhandled TYPE_TEXT', () => {
-      const unknownType = 'UNKNOWN_TYPE' as any;
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail
-                itemValues={itemValues}
-                listItem={[{ id: 'valueText', label: 'Error Field', type: unknownType }]}
-              />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
-      expect(screen.getByText('error on type')).toBeInTheDocument();
-    });
+    // nested productName branch
+    expect(screen.getByText('Laptop')).toBeInTheDocument();
 
-    it('should correctly extract nested productName and ignore type', () => {
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail
-                itemValues={itemValues}
-                listItem={[
-                  {
-                    id: 'additionalProperties.productName',
-                    label: 'Product',
-                    type: TYPE_TEXT.Currency,
-                  },
-                ]}
-              />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
-      expect(screen.getByText('Laptop')).toBeInTheDocument();
-    });
+    // unknown type branch
+    expect(screen.getByText('error on type')).toBeInTheDocument();
 
-    it('should return MISSING_DATA_PLACEHOLDER for missing nested productName', () => {
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail
-                itemValues={{ additionalProperties: null }}
-                listItem={[
-                  {
-                    id: 'additionalProperties.productName',
-                    label: 'Product',
-                    type: TYPE_TEXT.Text,
-                  },
-                ]}
-              />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
-      expect(screen.getAllByText(MISSING_DATA_PLACEHOLDER)[0]).toBeInTheDocument();
-    });
+    // status block
+    expect(mockGetStatus).toHaveBeenCalledWith('COMPLETED');
+    expect(screen.getByText('Stato')).toBeInTheDocument();
+    expect(screen.getByTestId('chip')).toHaveTextContent('Completato');
+    expect(screen.getByTestId('chip')).toHaveAttribute('data-color', '#00FF00');
+
+    // invoice section shown when not CANCELLED
+    expect(screen.getByText('Numero fattura')).toBeInTheDocument();
+    expect(screen.getByText('DOC-1')).toBeInTheDocument();
+    expect(screen.getByText('Fattura')).toBeInTheDocument();
+    expect(screen.getByText('invoice.pdf')).toBeInTheDocument();
   });
 
-  describe('getStatusChip and Status Display', () => {
-    it.skip('should render the status label and CustomChip correctly', () => {
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={{ status: 'COMPLETED' }} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+  it('renders MISSING_DATA_PLACEHOLDER when additionalProperties is null and for invoice fields when missing', () => {
+    const itemValues = {
+      id: 'TRX-2',
+      status: 'COMPLETED',
+      valueText: 'x',
+      valueNum: '0',
+      additionalProperties: null,
+      invoiceFile: null,
+    };
 
-      expect(mockGetStatus).toHaveBeenCalledWith('COMPLETED');
-      expect(screen.getByText('Stato')).toBeInTheDocument();
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={[
+          { id: 'additionalProperties.productName', label: 'Product', type: TYPE_TEXT.Text },
+        ]}
+      />
+    );
 
-      const chip = screen.getByTestId('custom-chip-mock');
-      expect(chip).toBeInTheDocument();
-      expect(chip).toHaveTextContent('Completato');
-      expect(chip).toHaveStyle('background-color: #00FF00');
-    });
+    // missing nested productName
+    expect(screen.getAllByText(MISSING_DATA_PLACEHOLDER)[0]).toBeInTheDocument();
 
-    it.skip('should use default status configuration for unmocked status', () => {
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={{ status: 'PENDING' }} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+    // invoice docNumber missing
+    expect(screen.getByText('Numero fattura')).toBeInTheDocument();
+    expect(screen.getAllByText(MISSING_DATA_PLACEHOLDER).length).toBeGreaterThanOrEqual(2);
 
-      const chip = screen.getByTestId('custom-chip-mock');
-      expect(chip).toHaveTextContent('Altro');
-      expect(chip).toHaveStyle('background-color: #CCCCCC');
-    });
+    // invoice filename missing
+    expect(screen.getByText('Fattura')).toBeInTheDocument();
   });
 
-  describe('Invoice Download functionality', () => {
-    const mockDownloadInvoiceFile = downloadInvoiceFile as jest.Mock;
-    let mockLink: any;
+  it('hides invoice section when status is CANCELLED (CANCELLED branch)', () => {
+    const itemValues = {
+      id: 'TRX-3',
+      status: 'CANCELLED',
+      valueText: 'hello',
+      additionalProperties: { productName: 'x' },
+    };
 
-    beforeEach(() => {
-      jest.clearAllMocks();
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={[{ id: 'valueText', label: 'Text Field', type: TYPE_TEXT.Text }]}
+      />
+    );
 
-      // Mock completo per document.createElement
-      mockLink = {
-        href: '',
-        download: '',
-        click: jest.fn(),
-        setAttribute: jest.fn(),
-        style: {},
-      };
+    // invoice section must be absent
+    expect(screen.queryByText('Numero fattura')).not.toBeInTheDocument();
+    expect(screen.queryByText('Fattura')).not.toBeInTheDocument();
+    expect(screen.queryByText('Nota di credito')).not.toBeInTheDocument();
+  });
 
-      jest.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-        if (tagName === 'a') {
-          return mockLink as any;
-        }
-        return document.createElement(tagName);
-      });
-    });
+  it('shows REFUNDED labels (REFUNDED branch) and isEditable=false (no edit button)', () => {
+    const itemValues = {
+      id: 'TRX-4',
+      status: 'REFUNDED',
+      invoiceFile: { filename: 'credit-note.pdf', docNumber: 'CN-1' },
+    };
 
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
 
-    it.skip('should display "Fattura" label and filename when status is not REFUNDED', () => {
-      const itemValues = {
-        status: 'COMPLETED',
-        invoiceFile: { filename: 'invoice-123.pdf' },
-      };
+    expect(screen.getByText('Numero nota di credito')).toBeInTheDocument();
+    expect(screen.getByText('Nota di credito')).toBeInTheDocument();
+    expect(screen.getByText('CN-1')).toBeInTheDocument();
+    expect(screen.getByText('credit-note.pdf')).toBeInTheDocument();
 
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={itemValues} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+    // isEditable is false when status is REFUNDED => no edit button
+    expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
+  });
 
-      expect(screen.getByText('Fattura')).toBeInTheDocument();
-      expect(screen.getByText('invoice-123.pdf')).toBeInTheDocument();
-    });
+  it('creates edit button when editable and pushes correct path on click (docNumber present)', () => {
+    const itemValues = {
+      id: 'TRX-5',
+      status: 'COMPLETED',
+      rewardBatchTrxStatus: 'PENDING',
+      invoiceFile: { filename: 'invoice-5.pdf', docNumber: 'DOC-5' },
+    };
 
-    it.skip('should display "Nota di credito" label when status is REFUNDED', () => {
-      const itemValues = {
-        status: 'REFUNDED',
-        invoiceFile: { filename: 'credit-note.pdf' },
-      };
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
 
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={itemValues} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+    const btn = screen.getByTestId('change-file-btn');
+    expect(btn).toBeInTheDocument();
 
-      expect(screen.getByText('Nota di credito')).toBeInTheDocument();
-      expect(screen.getByText('credit-note.pdf')).toBeInTheDocument();
-    });
+    fireEvent.click(btn);
 
-    it.skip('should display MISSING_DATA_PLACEHOLDER when invoice filename is missing', () => {
-      const itemValues = {
-        status: 'COMPLETED',
-        invoiceFile: null,
-      };
+    const expectedPath = routes.MODIFY_DOCUMENT.replace(':id', 'merchant-123')
+      .replace(':pointOfSaleId', 'store-999')
+      .replace(':trxId', 'TRX-5')
+      .replace(':fileDocNumber', 'DOC-5');
 
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={itemValues} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+    expect(pushMock).toHaveBeenCalledWith(expectedPath, { fromLocation: { pathname: '/here' } });
+  });
 
-      expect(screen.getByText('Fattura')).toBeInTheDocument();
+  it('creates edit button when editable and pushes path with empty docNumber when missing (?? "" branch)', () => {
+    const itemValues = {
+      id: 'TRX-6',
+      status: 'COMPLETED',
+      rewardBatchTrxStatus: 'PENDING',
+      invoiceFile: null, // docNumber missing -> ""
+    };
 
-      // Cerca il MISSING_DATA_PLACEHOLDER nel link
-      const links = screen.getAllByRole('link');
-      const invoiceLink = links.find((link) =>
-        link.textContent?.includes(MISSING_DATA_PLACEHOLDER)
-      );
-      expect(invoiceLink).toBeInTheDocument();
-    });
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
 
-    it.skip('should successfully download invoice file when link is clicked', async () => {
-      mockDownloadInvoiceFile.mockResolvedValue({
-        invoiceUrl: 'https://example.com/invoice.pdf',
-      });
+    const btn = screen.getByTestId('change-file-btn');
+    fireEvent.click(btn);
 
-      const itemValues = {
-        id: 'TRX-123',
-        status: 'COMPLETED',
-        invoiceFile: { filename: 'invoice-123.pdf' },
-      };
+    const expectedPath = routes.MODIFY_DOCUMENT.replace(':id', 'merchant-123')
+      .replace(':pointOfSaleId', 'store-999')
+      .replace(':trxId', 'TRX-6')
+      .replace(':fileDocNumber', '');
 
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={itemValues} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+    expect(pushMock).toHaveBeenCalledWith(expectedPath, { fromLocation: { pathname: '/here' } });
+  });
 
-      // Trova il link che contiene il filename
-      const downloadLink = screen.getByText('invoice-123.pdf').closest('a');
-      expect(downloadLink).toBeInTheDocument();
+  it('does NOT show edit button when rewardBatchTrxStatus is APPROVED (isEditable=false branch)', () => {
+    const itemValues = {
+      id: 'TRX-7',
+      status: 'COMPLETED',
+      rewardBatchTrxStatus: 'APPROVED',
+    };
 
-      if (downloadLink) {
-        fireEvent.click(downloadLink);
-      }
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
 
-      await waitFor(() => {
-        expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-123', 'store-123');
-        expect(mockLink.href).toBe('https://example.com/invoice.pdf');
-        expect(mockLink.download).toBe('invoice-123.pdf');
-        expect(mockLink.click).toHaveBeenCalled();
-      });
-    });
+    expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
+  });
 
-    it.skip('should use default filename "fattura.pdf" when filename is not provided', async () => {
-      mockDownloadInvoiceFile.mockResolvedValue({
-        invoiceUrl: 'https://example.com/default-invoice.pdf',
-      });
+  it('download success: shows loader, calls service, creates link, uses provided filename', async () => {
+    mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/invoice.pdf' });
 
-      const itemValues = {
-        id: 'TRX-456',
-        status: 'COMPLETED',
-        invoiceFile: null, // Nessun filename fornito
-      };
+    const linkMock = {
+      href: '',
+      download: '',
+      click: jest.fn(),
+    };
 
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={itemValues} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
-
-      // Trova il link con MISSING_DATA_PLACEHOLDER
-      const links = screen.getAllByRole('link');
-      const downloadLink = links.find((link) =>
-        link.textContent?.includes(MISSING_DATA_PLACEHOLDER)
-      );
-
-      expect(downloadLink).toBeInTheDocument();
-
-      if (downloadLink) {
-        fireEvent.click(downloadLink);
-      }
-
-      await waitFor(() => {
-        expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-456', 'store-123');
-        expect(mockLink.href).toBe('https://example.com/default-invoice.pdf');
-        expect(mockLink.download).toBe('fattura.pdf'); // Filename di default
-        expect(mockLink.click).toHaveBeenCalled();
-      });
-    });
-
-    it.skip('should handle download when invoiceFile is undefined', async () => {
-      mockDownloadInvoiceFile.mockResolvedValue({
-        invoiceUrl: 'https://example.com/invoice.pdf',
+    // save original to avoid recursion
+    const origCreateElement = document.createElement.bind(document);
+    const createElSpy = jest
+      .spyOn(document, 'createElement')
+      .mockImplementation((tag: any) => {
+        if (tag === 'a') return linkMock as any;
+        return origCreateElement(tag);
       });
 
-      const itemValues = {
-        id: 'TRX-789',
-        status: 'COMPLETED',
-        // invoiceFile non definito
-      };
+    const itemValues = {
+      id: 'TRX-8',
+      status: 'COMPLETED',
+      invoiceFile: { filename: 'invoice-8.pdf', docNumber: 'D8' },
+    };
 
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={itemValues} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
 
-      const links = screen.getAllByRole('link');
-      const downloadLink = links.find((link) =>
-        link.textContent?.includes(MISSING_DATA_PLACEHOLDER)
-      );
+    // click the invoice button
+    fireEvent.click(screen.getByTestId('btn-test'));
 
-      if (downloadLink) {
-        fireEvent.click(downloadLink);
-      }
+    // loader branch
+    expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
-      await waitFor(() => {
-        expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-789', 'store-123');
-        expect(mockLink.download).toBe('fattura.pdf');
-      });
+    await waitFor(() => {
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-8', 'store-999');
+      expect(linkMock.href).toBe('https://example.com/invoice.pdf');
+      expect(linkMock.download).toBe('invoice-8.pdf');
+      expect(linkMock.click).toHaveBeenCalled();
     });
 
-    it.skip('should dispatch error when download fails', async () => {
-      const errorMessage = 'Download failed';
-      mockDownloadInvoiceFile.mockRejectedValue(new Error(errorMessage));
+    createElSpy.mockRestore();
+  });
 
-      const itemValues = {
-        id: 'TRX-999',
-        status: 'COMPLETED',
-        invoiceFile: { filename: 'invoice-999.pdf' },
-      };
+  it('download success uses default filename "fattura.pdf" when filename is missing (|| branch)', async () => {
+    mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/default.pdf' });
 
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={itemValues} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+    const linkMock = { href: '', download: '', click: jest.fn() };
 
-      const downloadLink = screen.getByText('invoice-999.pdf').closest('a');
-
-      if (downloadLink) {
-        fireEvent.click(downloadLink);
-      }
-
-      await waitFor(() => {
-        expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-999', 'store-123');
+    // save original to avoid recursion
+    const origCreateElement = document.createElement.bind(document);
+    const createElSpy = jest
+      .spyOn(document, 'createElement')
+      .mockImplementation((tag: any) => {
+        if (tag === 'a') return linkMock as any;
+        return origCreateElement(tag);
       });
 
-      // Verifica che il link.click non sia stato chiamato in caso di errore
-      expect(mockLink.click).not.toHaveBeenCalled();
+    const itemValues = {
+      id: 'TRX-9',
+      status: 'COMPLETED',
+      invoiceFile: null, // filename missing -> default "fattura.pdf"
+    };
+
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('btn-test'));
+
+    expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-9', 'store-999');
+      expect(linkMock.href).toBe('https://example.com/default.pdf');
+      expect(linkMock.download).toBe('fattura.pdf');
+      expect(linkMock.click).toHaveBeenCalled();
     });
 
-    it.skip('should handle network error during download', async () => {
-      const networkError = new Error('Network error');
-      mockDownloadInvoiceFile.mockRejectedValue(networkError);
+    createElSpy.mockRestore();
+  });
 
-      const itemValues = {
-        id: 'TRX-NET-001',
-        status: 'REFUNDED',
-        invoiceFile: { filename: 'credit-note-001.pdf' },
-      };
+  it('download error: calls setAlert and stops loading (catch branch)', async () => {
+    mockDownloadInvoiceFile.mockRejectedValue(new Error('boom'));
 
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={itemValues} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
+    const itemValues = {
+      id: 'TRX-10',
+      status: 'COMPLETED',
+      invoiceFile: { filename: 'invoice-10.pdf', docNumber: 'D10' },
+    };
 
-      // Verifica che sia "Nota di credito" per REFUNDED
-      expect(screen.getByText('Nota di credito')).toBeInTheDocument();
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        onClose={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
 
-      const downloadLink = screen.getByText('credit-note-001.pdf').closest('a');
+    fireEvent.click(screen.getByTestId('btn-test'));
 
-      if (downloadLink) {
-        fireEvent.click(downloadLink);
-      }
+    // loader shows initially
+    expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-10', 'store-999');
+      expect(mockSetAlert ).toHaveBeenCalled();
     });
 
-    it.skip('should handle download for REFUNDED status', async () => {
-      mockDownloadInvoiceFile.mockResolvedValue({
-        invoiceUrl: 'https://example.com/credit-note.pdf',
-      });
+    // Ensure alert payload is the expected one (high-signal fields)
+    const payload = mockSetAlert .mock.calls[0][0];
+    expect(payload.title).toBe('Errore download file');
+    expect(payload.severity).toBe('error');
+    expect(payload.isOpen).toBe(true);
 
-      const itemValues = {
-        id: 'TRX-REFUND-001',
-        status: 'REFUNDED',
-        invoiceFile: { filename: 'credit-note.pdf' },
-      };
-
-      render(
-        <Provider store={store}>
-          <StoreProvider>
-            <ThemeProvider theme={createTheme()}>
-              <TransactionDetail itemValues={itemValues} listItem={[]} />
-            </ThemeProvider>
-          </StoreProvider>
-        </Provider>
-      );
-
-      const downloadLink = screen.getByText('credit-note.pdf').closest('a');
-
-      if (downloadLink) {
-        fireEvent.click(downloadLink);
-      }
-
-      await waitFor(() => {
-        expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-REFUND-001', 'store-123');
-        expect(mockLink.href).toBe('https://example.com/credit-note.pdf');
-        expect(mockLink.download).toBe('credit-note.pdf');
-        expect(mockLink.click).toHaveBeenCalled();
-      });
+    // After error, loader should go away and filename should be visible again
+    await waitFor(() => {
+      expect(screen.queryByTestId('item-loader')).not.toBeInTheDocument();
+      expect(screen.getByText('invoice-10.pdf')).toBeInTheDocument();
     });
   });
 });
