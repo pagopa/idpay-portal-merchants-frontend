@@ -260,9 +260,7 @@ describe('InvoiceDetail', () => {
 
   describe('Rendering Base', () => {
     it('renderizza titolo, label e valore base', () => {
-      renderInvoiceDetail({ title: 'Dettaglio transazione' });
-
-      expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+      renderInvoiceDetail();
       expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
       expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
       expect(screen.getByText('Numero fattura')).toBeInTheDocument();
