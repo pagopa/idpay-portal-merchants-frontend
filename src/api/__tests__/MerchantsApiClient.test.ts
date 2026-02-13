@@ -56,8 +56,7 @@ describe('MerchantApi', () => {
 
     (createClient as jest.Mock).mockReturnValue(mockApiClient);
     (extractResponse as jest.Mock).mockReset().mockReturnValue('extracted');
-  });
-
+});
   const loadApi = () => {
     let MerchantApi: any;
     jest.isolateModules(() => {
@@ -65,6 +64,40 @@ describe('MerchantApi', () => {
     });
     return MerchantApi;
   };
+
+describe('MerchantsApiClient uncovered branches', () => {
+  it('getRewardBatches catch branch returns empty object', async () => {
+    const client = require('../generated/merchants/client');
+    const MerchantApi = loadApi();
+    client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
+
+    const res = await MerchantApi.getRewardBatches('id', 0, 10);
+    expect(res).toEqual({});
+  });
+
+  it('getAllRewardBatches catch branch returns empty object', async () => {
+    const client = require('../generated/merchants/client');
+    client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
+    const MerchantApi = loadApi();
+
+    const res = await MerchantApi.getAllRewardBatches('id');
+    expect(res).toEqual({});
+  });
+
+  it('sendRewardBatches handles REWARD_BATCH_PREVIOUS_NOT_SENT', async () => {
+    const client = require('../generated/merchants/client');
+    client.createClient().sendRewardBatches = jest.fn().mockResolvedValue({
+      right: {
+        status: 400,
+        value: { code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' },
+      },
+    });
+    const MerchantApi = loadApi();
+    const res = await MerchantApi.sendRewardBatches('id', 'batch');
+    expect(res).toBe('REWARD_BATCH_PREVIOUS_NOT_SENT');
+  });
+});
+
 
   it('downloadInvoiceFile', async () => {
     mockApiClient.downloadInvoiceFile.mockResolvedValue({ right: 'data' });
