@@ -13,6 +13,7 @@ import { MISSING_DATA_PLACEHOLDER } from '../constants';
 describe('formatDate', () => {
   test('should format a valid date object correctly', () => {
     const date = new Date('2025-10-06T19:30:00');
+
     expect(formatDate(date)).toBe('06/10/2025 19:30');
   });
 
@@ -86,6 +87,18 @@ describe('safeFormatDate', () => {
     const result = safeFormatDate('2024-12-25T23:59:00', false);
     expect(result).toBe('25/12/2024');
   });
+
+  // test('should throw error', () => {
+  //   const error = {
+  //     toString: () => {
+  //       throw new Error();
+  //     }
+  //   };
+
+  //   const result = safeFormatDate(error);
+
+  //   expect(result).toBe(MISSING_DATA_PLACEHOLDER);
+  // });
 
   test('should return MISSING_DATA_PLACEHOLDER for invalid date', () => {
     const result = safeFormatDate('invalid-date');

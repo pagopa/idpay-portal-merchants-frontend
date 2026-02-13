@@ -56,7 +56,11 @@ const MerchantTransactions = ({
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState<boolean>(false);
-  const [codeError, setCodeError] = useState<Record<string, string>>({ gtinError: "", trxCodeError: "" });
+  const [codeError, setCodeError] = useState<Record<string, string>>({
+    gtinError: '',
+    trxCodeError: '',
+  });
+  // const [gtinValue, setGtinValue] = useState<string>('');
   const listItemDetail = getDetailFieldList();
 
   const infoStyles = {
@@ -220,8 +224,8 @@ const MerchantTransactions = ({
   const handleCodeChange = useCallback((event: any, length: number, code: string) => {
     const value = event.target.value;
     const codeMap: Record<string, string> = {
-      gtinError: "GTIN/EAN",
-      trxCodeError: "sconto"
+      gtinError: 'GTIN/EAN',
+      trxCodeError: 'sconto',
     };
 
     if (value.includes(' ') || value.length > length) {
@@ -231,11 +235,14 @@ const MerchantTransactions = ({
     const alphanumericRegex = /^[a-zA-Z0-9]*$/;
 
     if (!alphanumericRegex.test(value)) {
-      setCodeError(prev => ({ ...prev, [code]: `Il codice ${codeMap[code]} deve contenere al massimo ${length} caratteri alfanumerici.` }));
+      setCodeError((prev) => ({
+        ...prev,
+        [code]: `Il codice ${codeMap[code]} deve contenere al massimo ${length} caratteri alfanumerici.`,
+      }));
       return;
     }
 
-    setCodeError(prev => ({ ...prev, [code]: "" }));
+    setCodeError((prev) => ({ ...prev, [code]: '' }));
     formik.handleChange(event);
   }, []);
 
@@ -281,8 +288,8 @@ const MerchantTransactions = ({
               role="input"
               InputLabelProps={{ required: false }}
               value={formik.values.productGtin}
-              onChange={(e) => handleCodeChange(e, 14, "gtinError")}
-              onBlur={() => setCodeError(prev => ({ ...prev, gtinError: "" }))}
+              onChange={(e) => handleCodeChange(e, 14, 'gtinError')}
+              onBlur={() => setCodeError((prev) => ({ ...prev, gtinError: '' }))}
               size="small"
               inputProps={{ maxLength: 14 }}
               error={!!codeError.gtinError}
@@ -300,8 +307,8 @@ const MerchantTransactions = ({
               role="input"
               InputLabelProps={{ required: false }}
               value={formik.values.trxCode}
-              onChange={(e) => handleCodeChange(e, 8, "trxCodeError")}
-              onBlur={() => setCodeError(prev => ({ ...prev, trxCodeError: "" }))}
+              onChange={(e) => handleCodeChange(e, 8, 'trxCodeError')}
+              onBlur={() => setCodeError((prev) => ({ ...prev, trxCodeError: '' }))}
               size="small"
               inputProps={{ maxLength: 8 }}
               error={!!codeError.trxCodeError}

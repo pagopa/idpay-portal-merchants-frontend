@@ -78,22 +78,24 @@ export const MerchantApi = {
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
-  getMerchantTransactionsProcessed: async (params: {
-    initiativeId: string;
-    page?: number;
-    size?: number;
-    sort?: string;
-    fiscalCode?: string;
-    status?: string;
-    rewardBatchId?: string;
-    rewardBatchTrxStatus?: string;
-    pointOfSaleId?: string;
-    trxCode?: string;
-  }): Promise<MerchantTransactionsListDTO> => {
+  getMerchantTransactionsProcessed: async (
+    params: {
+      initiativeId: string;
+      page?: number;
+      size?: number;
+      sort?: string;
+      fiscalCode?: string;
+      status?: string;
+      rewardBatchId?: string;
+      rewardBatchTrxStatus?: string;
+      pointOfSaleId?: string;
+      trxCode?: string;
+    }
+  ): Promise<MerchantTransactionsListDTO> => {
     const result = await apiClient.getMerchantTransactionsProcessed({
-      ...params,
+      ...params
     });
-    console.log('[DEBUG] getMerchantTransactionsProcessed:', result);
+    console.log("[DEBUG] getMerchantTransactionsProcessed:", result);
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
@@ -352,6 +354,33 @@ export const MerchantApi = {
     });
     return extractResponse(result, 200, onRedirectToLogin);
   },
+
+  updateInvoiceTransaction: async (
+    transactionId: string,
+    file: File,
+    pointOfSaleId: string,
+    docNumber?: string
+  ): Promise<{ code: string; message: string }> => {
+    const result = await apiClient.updateInvoiceTransaction({
+      transactionId,
+      file,
+      docNumber,
+      'x-point-of-sale-id': pointOfSaleId,
+    } as any);
+
+    if (!isRight(result)) {
+      return {
+        code:
+          (result.left as any)?.at?.(0)?.value ??
+          (result.left as any)?.at?.(0)?.actual,
+        message:
+          (result.left as any)?.at?.(0)?.context?.[1]?.actual?.message,
+      };
+    } else {
+      return extractResponse(result, 204, onRedirectToLogin);
+    }
+  },
+
 };
 
 

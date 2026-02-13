@@ -1,7 +1,9 @@
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useMemo, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
+import routes from '../../routes';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';
 import CustomChip from '../Chip/CustomChip';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
@@ -19,15 +21,36 @@ type Props = DetailDrawerProps & {
 export default function TransactionDetail({ itemValues, listItem, ...rest }: Props) {
   const { setAlert } = useAlert();
   const { storeId } = useStore();
+  const history = useHistory();
+
+  const { id: merchantId } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const isEditable = itemValues?.rewardBatchTrxStatus !== "APPROVED" && !(itemValues?.status === "CANCELLED" || itemValues?.status === "REFUNDED");
+  const isEditable =
+    itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
+    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED');
 
-  const editButton: DetailDrawerProps['buttons'] = useMemo(() => isEditable ? [{
-      variant: "contained",
-      title: "Modifica documento",
-      dataTestId: "change-file-btn"
-    }] : [], [isEditable]);
+  const editButton: DetailDrawerProps['buttons'] = useMemo(
+    () =>
+      isEditable
+        ? [
+            {
+              variant: 'contained',
+              title: 'Modifica documento',
+              dataTestId: 'change-file-btn',
+              onClick: () => {
+                const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
+                  .replace(':pointOfSaleId', storeId)
+                  .replace(':trxId', itemValues.id)
+                  .replace(':fileDocNumber', itemValues?.invoiceFile?.docNumber ?? '');
+
+                history.push(path, { fromLocation: history.location });
+              },
+            },
+          ]
+        : [],
+    [isEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+  );
 
   const getStatusChip = () => {
     const chipItem = getStatus(itemValues.status);
@@ -76,16 +99,12 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   }
 
   return (
-    <DetailDrawer
-      {...rest}
-      data-testid="transaction-detail"
-      buttons={[ ...editButton]}
-    >
+    <DetailDrawer {...rest} data-testid="transaction-detail" buttons={[...editButton]}>
       {listItem.map((item, index) => (
         <Box
           key={`${item?.id}-${index}`}
           sx={{
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
           }}
         >
           <Typography
@@ -155,12 +174,12 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
               ) : (
                 <Box
                   sx={{
-                    display: "flex",
-                    alignItems: "flex-start",
+                    display: 'flex',
+                    alignItems: 'flex-start',
                     gap: '6px',
-                    width: "100%",
+                    width: '100%',
                     mt: '2px',
-                    textAlign: "left"
+                    textAlign: 'left',
                   }}
                 >
                   <ReceiptLong sx={{ flexShrink: 0, mt: 2 }} />
@@ -173,7 +192,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
                       wordBreak: 'break-word',
                       minWidth: 0,
                       flex: 1,
-                      marginTop: 2
+                      marginTop: 2,
                     }}
                   >
                     {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
