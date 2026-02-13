@@ -17,6 +17,8 @@ import { ReportedUserCreateResponseDTO } from '../api/generated/merchants/Report
 import { RewardBatchListDTO } from '../api/generated/merchants/RewardBatchListDTO';
 import { DownloadRewardBatchResponseDTO } from '../api/generated/merchants/DownloadRewardBatchResponseDTO';
 import { FranchisePointOfSaleDTO } from '../api/generated/merchants/FranchisePointOfSaleDTO';
+import { ReportListDTO } from '../api/generated/merchants/ReportListDTO';
+import { ReportRequest } from '../api/generated/merchants/ReportRequest';
 
 export type GetMerchantTransactionsProcessedParams = {
   initiativeId: string;
@@ -157,3 +159,22 @@ export const postponeTransaction = (
     transactionId,
     initiativeEndDate
   );
+
+export const getMerchantReports = (
+  initiativeId: string,
+  page?: number,
+  size?: number
+): Promise<ReportListDTO> =>
+  MerchantApi.getMerchantReports(initiativeId, page, size);
+
+export const generateMerchantReport = (
+  initiativeId: string,
+  body: ReportRequest
+): Promise<void> =>
+  MerchantApi.generateMerchantReport(initiativeId, body);
+
+export const downloadMerchantReport = (
+  initiativeId: string,
+  reportId: string,
+) =>
+  MerchantApi.downloadMerchantReport(initiativeId, reportId);

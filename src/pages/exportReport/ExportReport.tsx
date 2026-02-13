@@ -27,9 +27,7 @@ const InitiativeExportReportPage = () => {
         </Box>
       </Box>
       <Box sx={{ display: 'flex', gap: 3, mt: 1, mb: 3, alignItems: 'center' }}>
-        <ExportFiltersCard
-          onGenerateReport={(range: { from: string; to: string }) => console.log(range.from+'-'+range.to)}
-        />
+        <ExportFiltersCard />
       </Box>
       <ReportDataTable />
     </Box>

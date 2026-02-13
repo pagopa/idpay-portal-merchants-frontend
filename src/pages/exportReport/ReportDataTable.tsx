@@ -6,76 +6,36 @@ import { theme } from '@pagopa/mui-italia';
 import CachedIcon from '@mui/icons-material/Cached';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import { useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { getMerchantReports, downloadMerchantReport } from '../../services/merchantService';
+import { ReportDTO, ReportStatusEnum } from '../../api/generated/merchants/ReportDTO';
 
-export type MerchantReportDTO = {
+type RouteParams = {
   id: string;
-  initiativeId: string;
-  reportStatus: 'INSERTED' | 'IN_PROGRESS' | 'GENERATED' | 'FAILED';
-  fileName: string;
-  requestDate: string;
-  elaborationDate: string;
-  startPeriod: string;
-  endPeriod: string;
-  merchantId: string;
-  businessName: string;
-  rewardBatchAssignee: 'L1' | 'L2' | 'L3';
-};
-
-type ReportsApiResponse = {
-  content: Array<MerchantReportDTO>;
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
 };
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'GENERATED':
+    case ReportStatusEnum.GENERATED:
       return <CachedIcon color="info" />;
-    case 'FAILED':
+    case ReportStatusEnum.FAILED:
       return <ErrorIcon color="error" />;
-    case 'INSERTED':
+    case ReportStatusEnum.INSERTED:
       return <CheckCircleIcon color="success" />;
     default:
       return <CachedIcon name="default" />;
   }
 };
 
-const mockFetchReports = (): Promise<ReportsApiResponse> =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        content: [
-          {
-            id: '1',
-            initiativeId: 'INIT-001',
-            reportStatus: 'INSERTED',
-            fileName: 'Report_300126.csv',
-            requestDate: '2026-01-30T11:11:00Z',
-            elaborationDate: '2026-01-30T11:11:00Z',
-            startPeriod: '2025-12-30T00:00:00Z',
-            endPeriod: '2026-01-30T00:00:00Z',
-            merchantId: 'MERCHANT-001',
-            businessName: 'Esercente Demo',
-            rewardBatchAssignee: 'L1',
-          },
-        ],
-        page: 0,
-        size: 10,
-        totalElements: 1,
-        totalPages: 1,
-      });
-    }, 500);
-  });
 
 const ReportDataTable: React.FC = () => {
   const { t } = useTranslation();
-  const [reports, setReports] = useState<ReportsApiResponse>({
-    content: [],
+  const { id } = useParams<RouteParams>();
+  const [reports, setReports] = useState<any>({
+    reports: [],
     page: 0,
     size: 10,
     totalElements: 0,
@@ -89,22 +49,46 @@ const ReportDataTable: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const loadReports = () => {
+    if (!id) {return;}
+
     setLoading(true);
 
-    void mockFetchReports().then((response) => {
-      setReports(response);
-      setPagination({
-        pageNo: response.page,
-        pageSize: response.size,
-        totalElements: response.totalElements,
-      });
-      setLoading(false);
-    });
+    void getMerchantReports(id, pagination.pageNo, pagination.pageSize)
+      .then((response) => {
+        setReports(response);
+        setPagination({
+          pageNo: response.page ?? 0,
+          pageSize: response.size ?? 10,
+          totalElements: response.totalElements ?? 0,
+        });
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     loadReports();
   }, [pagination.pageNo, pagination.pageSize]);
+
+  const handleDownload = async (reportId: string, fileName: string) => {
+    if (!id) {
+      return;
+    }
+    try {
+      const response = await downloadMerchantReport(id, reportId);
+      const blob = new Blob([response as any], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      // eslint-disable-next-line functional/immutable-data
+      link.href = url;
+      link.setAttribute('download', fileName || 'report.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading report', error);
+    }
+  };
 
   const columns = [
     {
@@ -123,7 +107,7 @@ const ReportDataTable: React.FC = () => {
                 : MISSING_DATA_PLACEHOLDER
             }
           >
-            <Typography variant="caption-semibold" fontSize="1rem">
+            <Typography variant="caption-semibold" fontSize="1rem" pl={1}>
               {params.row.fileName}
             </Typography>
           </Tooltip>
@@ -181,19 +165,24 @@ const ReportDataTable: React.FC = () => {
       disableColumnMenu: true,
       align: 'right' as const,
       renderCell: (params: any) => {
-        if (params.row.reportStatus !== 'FAILED'){
+        if (params.row.reportStatus !== ReportStatusEnum.FAILED) {
           return (
-            <IconButton disabled={params.row.reportStatus === 'GENERATED'}>
-              <DownloadIcon color='primary'/>
+            <IconButton
+              disabled={params.row.reportStatus !== ReportStatusEnum.INSERTED}
+              onClick={() =>
+                handleDownload(params.row.id, params.row.fileName)
+              }
+            >
+              <DownloadIcon color={params.row.reportStatus === ReportStatusEnum.INSERTED ? 'primary' : 'disabled'} />
             </IconButton>
           );
         }
-          return '';
+        return '';
       },
     },
   ];
 
-  const tableRows = reports.content.map((row) => ({
+  const tableRows = reports?.reports?.map((row: ReportDTO) => ({
     ...row,
     id: row.id,
   }));
@@ -208,42 +197,47 @@ const ReportDataTable: React.FC = () => {
 
   return (
     <Card>
-      <Box px={2} sx={{ mt: 3, position: 'relative' }}>
-        <Typography variant="h6" mb={2}>
-          {t('pages.reportExport.reportTitle')}
-        </Typography>
-
+      <Box px={2} sx={{ mt: 2, position: 'relative' }}>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
             <CircularProgress />
           </Box>
         ) : (
-          <Box sx={{ width: '100%' }}>
-            <DataTable
-              rows={tableRows}
-              columns={columns}
-              rowsPerPage={pagination.pageSize}
-              paginationModel={{
-                pageNo: pagination.pageNo,
-                pageSize: pagination.pageSize,
-                totalElements: pagination.totalElements,
-              }}
-              onPaginationPageChange={handlePaginationPageChange}
-              onRowsPerPageChange={handleRowsPerPageChange}
-            />
-          </Box>
-        )}
+          <>
+            {reports?.reports && reports.reports.length > 0 ? (
+              <>
+                <Typography variant="h6" mb={2}>
+                  {t('pages.reportExport.reportTitle')}
+                </Typography>
 
-        {!loading && reports.content.length === 0 && (
-          <Paper
-            sx={{
-              my: 4,
-              p: 3,
-              textAlign: 'center',
-            }}
-          >
-            <Typography variant="body2">{t('pages.reportExport.noReportFound')}</Typography>
-          </Paper>
+                <Box sx={{ width: '100%' }}>
+                  <DataTable
+                    rows={tableRows}
+                    columns={columns}
+                    rowsPerPage={pagination.pageSize}
+                    paginationModel={{
+                      pageNo: pagination.pageNo,
+                      pageSize: pagination.pageSize,
+                      totalElements: pagination.totalElements,
+                    }}
+                    onPaginationPageChange={handlePaginationPageChange}
+                    onRowsPerPageChange={handleRowsPerPageChange}
+                  />
+                </Box>
+              </>
+            ) : (
+              <Paper
+                sx={{
+                  p: 3,
+                  textAlign: 'center',
+                }}
+              >
+                <Typography variant="body2">
+                  {t('pages.reportExport.noReportFound')}
+                </Typography>
+              </Paper>
+            )}
+          </>
         )}
       </Box>
     </Card>

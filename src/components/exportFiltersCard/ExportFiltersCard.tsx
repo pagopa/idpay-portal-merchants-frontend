@@ -12,6 +12,9 @@ import { FormikProps, useFormik } from 'formik';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { useParams } from 'react-router-dom';
+import { generateMerchantReport } from '../../services/merchantService';
+import { ReportTypeEnum } from '../../api/generated/merchants/ReportRequest';
 
 type DatePickerRenderInputProps<T> = {
   formik: FormikProps<T>;
@@ -44,38 +47,51 @@ type FormValues = {
   endDate: Dayjs | null;
 };
 
-interface ExportFiltersCardProps {
-  onGenerateReport?: (range: { from: string; to: string }) => void;
-}
+type RouteParams = {
+  id: string;
+};
 
-const ExportFiltersCard = ({ onGenerateReport }: ExportFiltersCardProps) => {
+const ExportFiltersCard = () => {
   const { t } = useTranslation();
 
   const yesterday = dayjs().subtract(1, 'day').startOf('day');
+  const { id } = useParams<RouteParams>();
 
   const formik = useFormik<FormValues>({
     initialValues: {
       startDate: null,
       endDate: null,
     },
-    onSubmit: (values) => {
-      if (!values.startDate || !values.endDate || !isValidRange) {
+    validate: (values) => ({
+      ...( !values.startDate && {
+        startDate: t('pages.reportExport.form.validation.required'),
+      }),
+      ...( !values.endDate && {
+        endDate: t('pages.reportExport.form.validation.required'),
+      }),
+      ...( values.startDate && values.endDate && values.endDate.diff(values.startDate, 'day') < 1 && {
+        endDate: t('pages.reportExport.form.validation.invalidRange'),
+      }),
+      ...( values.startDate && values.endDate && values.endDate.diff(values.startDate, 'day') > 90 && {
+        endDate: t('pages.reportExport.form.validation.maxRange'),
+      }),
+    }),
+    onSubmit: async (values) => {
+      if (!id) {
         return;
       }
 
-      onGenerateReport?.({
-        from: values.startDate.format('DD-MM-YYYY'),
-        to: values.endDate.format('DD-MM-YYYY'),
-      });
-
+      try {
+        await generateMerchantReport(id, {
+          startPeriod: values?.startDate!.startOf('day').toDate(),
+          endPeriod: values?.endDate!.endOf('day').toDate(),
+          reportType: ReportTypeEnum.MERCHANT_TRANSACTIONS,
+        });
+      } catch (error) {
+        console.error('Error generating report', error);
+      }
     },
   });
-
-  const isValidRange =
-    formik.values.startDate &&
-    formik.values.endDate &&
-    formik.values.endDate.diff(formik.values.startDate, 'day') >= 1 &&
-    formik.values.endDate.diff(formik.values.startDate, 'day') <= 90;
 
 
   return (
