@@ -51,7 +51,11 @@ type RouteParams = {
   id: string;
 };
 
-const ExportFiltersCard = () => {
+type Props = {
+  updateAlerts: (key: string, open: boolean) => void;
+};
+
+const ExportFiltersCard = ({ updateAlerts }: Props) => {
   const { t } = useTranslation();
 
   const yesterday = dayjs().subtract(1, 'day').startOf('day');
@@ -82,13 +86,27 @@ const ExportFiltersCard = () => {
       }
 
       try {
-        await generateMerchantReport(id, {
+        const response = await generateMerchantReport(id, {
           startPeriod: values?.startDate!.startOf('day').toDate(),
           endPeriod: values?.endDate!.endOf('day').toDate(),
           reportType: ReportTypeEnum.MERCHANT_TRANSACTIONS,
-        });
+        }) as any;
+
+        const status = response?.reportStatus;
+
+        if (status === 'INSERTED') {
+          updateAlerts('inserted', true);
+          setTimeout(() => updateAlerts('inserted', false), 3000);
+        } else if (status === 'GENERATED') {
+          updateAlerts('generated', true);
+          setTimeout(() => updateAlerts('generated', false), 3000);
+        } else if (status === 'FAILED') {
+          updateAlerts('failed', true);
+          setTimeout(() => updateAlerts('failed', false), 3000);
+        }
       } catch (error) {
-        console.error('Error generating report', error);
+        updateAlerts('failed', true);
+        setTimeout(() => updateAlerts('failed', false), 3000);
       }
     },
   });
