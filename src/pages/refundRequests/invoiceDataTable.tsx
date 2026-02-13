@@ -124,13 +124,12 @@ const InvoiceDataTable = ({
           pdfWindow.document.title = selectedTransaction?.invoiceData?.filename;
         }, 100);
       }
-
     } catch (error) {
       setAlert({
         title: 'Errore download file',
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
-        severity: 'error'
+        severity: 'error',
       });
     } finally {
       setIsDownloading(false);
@@ -197,7 +196,8 @@ const InvoiceDataTable = ({
       flex: 2,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.row.franchiseName || MISSING_DATA_PLACEHOLDER),
+      renderCell: (params: any) =>
+        renderCellWithTooltip(params.row.franchiseName || MISSING_DATA_PLACEHOLDER),
     },
     {
       field: 'additionalProperties.productName',
@@ -206,7 +206,9 @@ const InvoiceDataTable = ({
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
-        renderCellWithTooltip(params.row.additionalProperties?.productName || MISSING_DATA_PLACEHOLDER),
+        renderCellWithTooltip(
+          params.row.additionalProperties?.productName || MISSING_DATA_PLACEHOLDER
+        ),
     },
     {
       field: 'trxChargeDate',
@@ -290,9 +292,7 @@ const InvoiceDataTable = ({
   }));
 
   return (
-    <Box
-      sx={{ my: 2, position: 'relative' }}
-    >
+    <Box sx={{ my: 2, position: 'relative' }}>
       <Stack
         direction={{ xs: 'column', md: 'row' }}
         spacing={{ xs: 2, md: 3 }}
@@ -306,9 +306,7 @@ const InvoiceDataTable = ({
           <CircularProgress />
         </Box>
       ) : (
-        <Box
-          sx={{ height: 'auto', width: '100%' }}
-        >
+        <Box sx={{ height: 'auto', width: '100%' }}>
           <DataTable
             rows={tableRows}
             columns={columns}

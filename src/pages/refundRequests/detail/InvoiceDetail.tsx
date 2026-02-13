@@ -25,7 +25,15 @@ type Props = DetailDrawerProps & {
   onSuccess?: () => void;
 };
 
-export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess, isOpen, setIsOpen, ...rest }: Props) {
+export default function InvoiceDetail({
+  itemValues,
+  listItem,
+  batchId,
+  onSuccess,
+  isOpen,
+  setIsOpen,
+  ...rest
+}: Props) {
   const { setAlert } = useAlert();
   const [isLoading, setLoading] = useState(false);
   const [initiativeEndDate, setInitiativeEndDate] = useState<string>('');
@@ -39,7 +47,10 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
   const initiativesListSel = useAppSelector(intiativesListSelector);
 
   useEffect(() => {
-    if (initiativesListSel?.[0]?.endDate && initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]) {
+    if (
+      initiativesListSel?.[0]?.endDate &&
+      initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]
+    ) {
       const endOfNextMonth = getEndOfNextMonth(initiativesListSel?.[0]?.endDate);
       setNextMonthInitiativeEndDate(endOfNextMonth);
       setInitiativeEndDate(initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]);
@@ -49,42 +60,52 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
     }
   }, [initiativesListSel]);
 
-  const endOfNextBatchMonth = batchMonth
-    ? getEndOfNextMonth(batchMonth)
-    : undefined;
+  const endOfNextBatchMonth = batchMonth ? getEndOfNextMonth(batchMonth) : undefined;
 
   const isNextMonthDisabled =
     !endOfNextBatchMonth || !nextMonthInitiativeEndDate || statusBatch !== 'CREATED'
       ? true
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
+  const isEditable =
+    itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
+    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED');
 
-  const isEditable = itemValues?.rewardBatchTrxStatus !== "APPROVED" && !(itemValues?.status === "CANCELLED" || itemValues?.status === "REFUNDED");
-
-  const editButton: DetailDrawerProps['buttons'] = useMemo(() => isEditable ? [{
-    variant: "contained",
-    title: "Modifica documento",
-    dataTestId: "change-file-btn"
-  }] : [], [isEditable]);
+  const editButton: DetailDrawerProps['buttons'] = useMemo(
+    () =>
+      isEditable
+        ? [
+            {
+              variant: 'contained',
+              title: 'Modifica documento',
+              dataTestId: 'change-file-btn',
+            },
+          ]
+        : [],
+    [isEditable]
+  );
 
   const handlePostponeTransaction = async () => {
-    if (!initiativeEndDate) { return; }
+    if (!initiativeEndDate) {
+      return;
+    }
 
     setLoading(true);
     try {
-      await postponeTransaction(
-        initiativeId,
-        initiativeEndDate,
-        batchId ?? '',
-        itemValues.id
-      );
+      await postponeTransaction(initiativeId, batchId ?? '', itemValues.id, initiativeEndDate);
       setAlert({
         title: 'Successo',
         text: 'Transazione spostata al mese successivo',
         isOpen: true,
         severity: 'success',
-        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300' },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' }
+        containerStyle: {
+          height: 'fit-content',
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          zIndex: '1300',
+        },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setInvoiceTransactionModal(false);
       onSuccess?.();
@@ -94,15 +115,20 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
         text: 'Non è stato possibile spostare la transazione',
         isOpen: true,
         severity: 'error',
-        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300' },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' }
+        containerStyle: {
+          height: 'fit-content',
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          zIndex: '1300',
+        },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setInvoiceTransactionModal(false);
     } finally {
       setLoading(false);
     }
   };
-
 
   const handleDownloadFile = async (selectedTransaction: any) => {
     setLoading(true);
@@ -152,8 +178,14 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
         severity: 'error',
-        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300' },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' }
+        containerStyle: {
+          height: 'fit-content',
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          zIndex: '1300',
+        },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setLoading(false);
     }
@@ -185,13 +217,17 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
         data-testid="transaction-detail"
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        buttons={[...editButton, {
-          disabled: !!isNextMonthDisabled,
-          onClick: () => setInvoiceTransactionModal(true),
-          variant: "contained",
-          title: "Sposta al mese successivo",
-          dataTestId: "next-month-btn"
-        }]}>
+        buttons={[
+          ...editButton,
+          {
+            disabled: isNextMonthDisabled,
+            onClick: () => setInvoiceTransactionModal(true),
+            variant: 'contained',
+            title: 'Sposta al mese successivo',
+            dataTestId: 'next-month-btn',
+          },
+        ]}
+      >
         {listItem.map((item, index) => (
           <Box key={`${item?.id}-${index}`}>
             <Typography
@@ -215,7 +251,7 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
             </Typography>
           </Box>
         ))}
-        <Box >
+        <Box>
           <Typography
             variant="body2"
             fontWeight={theme.typography.fontWeightRegular}
@@ -223,11 +259,15 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
           >
             {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
           </Typography>
-          <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
+          <Typography
+            variant="body2"
+            fontWeight={theme.typography.fontWeightMedium}
+            sx={{ overflowWrap: 'break-word' }}
+          >
             {itemValues?.invoiceData?.docNumber ?? MISSING_DATA_PLACEHOLDER}
           </Typography>
         </Box>
-        <Box >
+        <Box>
           <Typography
             variant="body2"
             fontWeight={theme.typography.fontWeightRegular}
@@ -258,10 +298,10 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
             ) : (
               <Box
                 sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
+                  display: 'flex',
+                  alignItems: 'flex-start',
                   gap: '6px',
-                  width: "100%",
+                  width: '100%',
                   mt: '2px',
                   minWidth: 0,
                 }}
@@ -284,7 +324,7 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
             )}
           </Button>
         </Box>
-        <Box >
+        <Box>
           <Typography
             variant="body2"
             fontWeight={theme.typography.fontWeightRegular}
@@ -297,57 +337,81 @@ export default function InvoiceDetail({ itemValues, listItem, batchId, onSuccess
         {[RewardBatchTrxStatusEnum.SUSPENDED, RewardBatchTrxStatusEnum.REJECTED].includes(
           itemValues.rewardBatchTrxStatus
         ) && (
-            <Box >
-              <Typography
-                variant="overline"
-                fontWeight={theme.typography.fontWeightBold}
-                color={theme.palette.text.primary}
-              >
-                Nota ufficiale
-              </Typography>
-              <Typography
-                variant="body2"
-                fontWeight={600}
-                sx={{
-                  whiteSpace: 'pre-wrap',
-                  overflowWrap: 'anywhere',
-                }}
-              >
-                {itemValues?.rewardBatchRejectionReason && itemValues?.rewardBatchRejectionReason.length ? itemValues?.rewardBatchRejectionReason.map(({ date, reason }: ReasonDTO, index: number) =>
-                  <Box key={`${date}-${index}`}>
-                    <Typography
-                      variant="body2"
-                      fontWeight={theme.typography.fontWeightRegular}
-                      color={theme.palette.text.secondary}
-                    >
-                      {date ? formatDate(date) : MISSING_DATA_PLACEHOLDER}
-                    </Typography>
-                    <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
-                      {reason ?? MISSING_DATA_PLACEHOLDER}
-                    </Typography>
-                  </Box>) :
-                  <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: "break-word" }}>
-                    {MISSING_DATA_PLACEHOLDER}
-                  </Typography>}
-              </Typography>
-            </Box>
-          )}
+          <Box>
+            <Typography
+              variant="overline"
+              fontWeight={theme.typography.fontWeightBold}
+              color={theme.palette.text.primary}
+            >
+              nota ufficiale
+            </Typography>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              sx={{
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'anywhere',
+              }}
+            >
+              {itemValues?.rewardBatchRejectionReason &&
+              itemValues?.rewardBatchRejectionReason.length ? (
+                itemValues?.rewardBatchRejectionReason.map(
+                  ({ date, reason }: ReasonDTO, index: number) => (
+                    <Box key={`${date}-${index}`}>
+                      <Typography
+                        variant="body2"
+                        fontWeight={theme.typography.fontWeightRegular}
+                        color={theme.palette.text.secondary}
+                      >
+                        {date ? formatDate(date) : MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        fontWeight={theme.typography.fontWeightMedium}
+                        sx={{ overflowWrap: 'break-word' }}
+                      >
+                        {reason ?? MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Box>
+                  )
+                )
+              ) : (
+                <Typography
+                  variant="body2"
+                  fontWeight={theme.typography.fontWeightMedium}
+                  sx={{ overflowWrap: 'break-word' }}
+                >
+                  {MISSING_DATA_PLACEHOLDER}
+                </Typography>
+              )}
+            </Typography>
+          </Box>
+        )}
       </DetailDrawer>
-      <ModalComponent data-testid="modal-component" open={invoiceTransactionModal} onClose={() => setInvoiceTransactionModal(false)}>
+      <ModalComponent
+        data-testid="modal-component"
+        open={invoiceTransactionModal}
+        onClose={() => setInvoiceTransactionModal(false)}
+      >
         <Box display={'flex'} flexDirection={'column'} gap={2}>
-          <Typography variant="h6">{t('pages.refundRequests.invoiceDetailConfirmModal.title')}</Typography>
-          <Typography variant="body1">{t('pages.refundRequests.invoiceDetailConfirmModal.description')}</Typography>
+          <Typography variant="h6">
+            {t('pages.refundRequests.invoiceDetailConfirmModal.title')}
+          </Typography>
+          <Typography variant="body1">
+            {t('pages.refundRequests.invoiceDetailConfirmModal.description')}
+          </Typography>
         </Box>
         <Box display={'flex'} justifyContent={'flex-end'} gap={2} mt={4}>
-          <Button variant="outlined" onClick={() => {
-            setInvoiceTransactionModal(false);
-          }}>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setInvoiceTransactionModal(false);
+            }}
+          >
             Indietro
           </Button>
-          <Button
-            onClick={handlePostponeTransaction}
-            variant="contained">
-            Conferma
+          <Button onClick={handlePostponeTransaction} variant="contained">
+            {'Conferma'}
           </Button>
         </Box>
       </ModalComponent>

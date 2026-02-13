@@ -27,8 +27,8 @@ interface RouteParams {
 }
 
 const posTypeMapper: Record<string, string> = {
-  'PHYSICAL': 'Fisico',
-  'ONLINE': 'Online'
+  PHYSICAL: 'Fisico',
+  ONLINE: 'Online',
 };
 
 const RefundRequests = () => {
@@ -130,6 +130,7 @@ const RefundRequests = () => {
 
   useEffect(() => {
     if (initiativesList && initiativesList.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       void fetchRewardBatches(initiativesList[0].initiativeId!);
     }
   }, [initiativesList,
@@ -150,7 +151,8 @@ const RefundRequests = () => {
         const mappedResponse = response.content.map((value) => ({
           ...value,
           approvedAmountCents: value.status === 'APPROVED' ? value.approvedAmountCents : undefined,
-          suspendedAmountCents: value.status === 'APPROVED' ? value.suspendedAmountCents : undefined
+          suspendedAmountCents:
+            value.status === 'APPROVED' ? value.suspendedAmountCents : undefined,
         }));
         setRewardBatches(mappedResponse);
         setCurrentPagination({
