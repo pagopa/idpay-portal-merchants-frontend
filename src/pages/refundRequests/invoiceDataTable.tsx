@@ -79,8 +79,12 @@ const InvoiceDataTable = ({
     setDrawerOpened(true);
   };
 
-  const handleToggleDrawer = (open: boolean) => {
+  const handleToggleDrawer = () => {
     setAlert({ ...alert, isOpen: false });
+    setDrawerOpened(false);
+  };
+
+  const handleCloseDrawer = (open: boolean) => {
     setDrawerOpened(false);
     if (!open) {
       setRowDetail(null);
@@ -352,7 +356,7 @@ const InvoiceDataTable = ({
       )}
       {rowDetail && (
         <InvoiceDetail
-          onCloseDrawer={() => handleToggleDrawer(false)}
+          onCloseDrawer={() => handleCloseDrawer(false)}
           isOpen={drawerOpened}
           setIsOpen={handleToggleDrawer}
           batchId={batchId ?? ''}

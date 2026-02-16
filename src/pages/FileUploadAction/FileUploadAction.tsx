@@ -5,8 +5,8 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import AlertComponent from '../../components/Alert/AlertComponent';
 import BreadcrumbsBoxUpload from '../components/BreadcrumbsBoxUpload';
+import { useAlert } from '../../hooks/useAlert';
 
 interface BreadcrumbsProps {
   label: string;
@@ -38,13 +38,14 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [docNumber, setDocNumber] = useState<string>('');
 
+  const {setAlert} = useAlert();
+
   const [requiredFileError, setRequiredFileError] = useState<boolean>(false);
   const [docNumberError, setDocNumberError] = useState<boolean>(false);
   const [fileSizeError, setFileSizeError] = useState<boolean>(false);
   const [fileTypeError, setFileTypeError] = useState<boolean>(false);
 
   const [loadingFile, setLoadingFile] = useState<boolean>(false);
-  const [errorAlert, setErrorAlert] = useState({ isOpen: false, message: '' });
 
   const [inputKey, setInputKey] = useState<number>(0);
 
@@ -71,18 +72,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       }
     }
   }, [fileDocNumber]);
-
-  useEffect(() => {
-    if (!errorAlert.isOpen) {
-      return undefined;
-    }
-
-    const timer = setTimeout(() => {
-      setErrorAlert({ isOpen: false, message: '' });
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [errorAlert.isOpen]);
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile) {
@@ -155,6 +144,8 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             refundUploadSuccess: true,
           },
         });
+        
+        setAlert({text: t('modifyDocument.refundSuccessUpload'), isOpen: true, severity: "success"});
 
         history.goBack();
       } catch (error: unknown) {
@@ -169,16 +160,15 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           errorResponseCode = (error as any).response?.data?.code;
         }
 
-        let errorMessage = t('modifyDocument.reverse.errorAlert');
-
         if (errorResponseCode === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
-          errorMessage = t('modifyDocument.reverse.deniedSentError');
+          setAlert({text: t('modifyDocument.reverse.deniedSentError'), isOpen: true, severity: "error"});
         } else if (errorResponseCode === 'REWARD_BATCH_ALREADY_SENT') {
-          errorMessage = t('modifyDocument.reverse.alreadySentError');
+          setAlert({text: t('modifyDocument.reverse.alreadySentError'), isOpen: true, severity: "error"});
+        } else {
+          setAlert({text: t('modifyDocument.reverse.errorAlert'), isOpen: true, severity: "error"});
         }
 
         console.error('API Error:', error);
-        setErrorAlert({ isOpen: true, message: errorMessage });
         setLoadingFile(false);
       }
     }
@@ -342,13 +332,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           </Stack>
         </Box>
       </Box>
-
-      <AlertComponent
-        isOpen={errorAlert.isOpen}
-        severity="error"
-        text={errorAlert.message}
-        contentStyle={{ right: '20px' }}
-      />
     </>
   );
 };
