@@ -1,156 +1,132 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import FileUploadAction from '../FileUploadAction';
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import FileUploadAction from "../FileUploadAction";
 
-const mockNavigate = jest.fn();
-const mockSetAlert = jest.fn();
-const mockApiCall = jest.fn();
+const mockGoBack = jest.fn();
+const mockReplace = jest.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
-  useParams: () => ({ initiativeId: '123' }),
+jest.mock("react-router-dom", () => ({
+  useParams: () => ({
+    pointOfSaleId: "pos1",
+    trxId: "trx1",
+    fileDocNumber: undefined,
+  }),
+  useHistory: () => ({
+    goBack: mockGoBack,
+    replace: mockReplace,
+    location: { state: {} },
+  }),
 }));
 
-jest.mock('react-i18next', () => ({
-  ...jest.requireActual('react-i18next'),
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (k: string) => k }),
+}));
 
-  useTranslation: () => ({
-    t: (key: string) => key,
-    i18n: { changeLanguage: jest.fn() },
-  }),
+jest.mock("@pagopa/selfcare-common-frontend", () => ({
+  TitleBox: ({ title }: any) => <div>{title}</div>,
+}));
 
-  withTranslation: () => (Component: any) => {
-    Component.defaultProps = { ...Component.defaultProps, t: (key: string) => key };
-    return Component;
+jest.mock("@pagopa/mui-italia", () => ({
+  SingleFileInput: ({ onFileSelected }: any) => (
+    <button
+      data-testid="mock-file-input"
+      onClick={() =>
+        onFileSelected(
+          new File(["test"], "test.pdf", { type: "application/pdf" })
+        )
+      }
+    >
+      Upload
+    </button>
+  ),
+  ButtonNaked: ({ children, onClick }: any) => (
+    <button onClick={onClick}>{children}</button>
+  ),
+  theme: {
+    palette: { background: { paper: "#fff" } },
+    typography: { fontWeightBold: 700, fontWeightMedium: 500 },
   },
 }));
 
-jest.mock('../../../hooks/useAlert', () => ({
-  useAlert: () => ({
-    setAlert: mockSetAlert,
-  }),
-}));
+jest.mock("../../../components/Alert/AlertComponent", () => (props: any) =>
+  props.isOpen ? <div>{props.text}</div> : null
+);
 
-jest.mock('@pagopa/mui-italia', () => ({
-  ...jest.requireActual('@pagopa/mui-italia'),
-  SingleFileInput: (props: any) => (
-    <div data-testid="single-file-input-mock">
-      <button onClick={() => props.onFileSelected?.(new File(['x'], 'a.pdf', { type: 'application/pdf' }))}>
-        select
-      </button>
-      <button onClick={() => props.onFileRemoved?.()}>remove</button>
-    </div>
-  ),
-}));
+describe("FileUploadAction", () => {
+  const baseProps = {
+    apiCall: jest.fn().mockResolvedValue({}),
+    successStateKey: "refundUploadSuccess",
+    breadcrumbsProp: { label: "Test", path: "/test" },
+    manualLink: "http://manual",
+  };
 
-describe('FileUploadAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.open = jest.fn();
   });
 
-  it('renders correctly with disabled upload button initially', () => {
-    render(
-      <FileUploadAction
-        apiCall={mockApiCall}
-        successStateKey="fileUpload.success"
-        breadcrumbsProp={{ label: 'Test', path: '/test' }}
-        manualLink="/manual"
-      />
-    );
-
-    expect(screen.getByText('modifyDocument.title')).toBeInTheDocument();
-
-    const uploadButton = screen.getByText('commons.continueBtn').closest('button');
-    expect(uploadButton).not.toBeDisabled();
+  it("renders and navigates back", () => {
+    render(<FileUploadAction {...baseProps} />);
+    fireEvent.click(screen.getByText("commons.backBtn"));
+    expect(mockGoBack).toHaveBeenCalled();
   });
 
-  it('enables upload button after file selection', () => {
-    render(
-      <FileUploadAction
-        apiCall={mockApiCall}
-        successStateKey="fileUpload.success"
-        breadcrumbsProp={{ label: 'Test', path: '/test' }}
-        manualLink="/manual"
-      />
-    );
+  it("shows required file error", async () => {
+    render(<FileUploadAction {...baseProps} />);
+    fireEvent.click(screen.getByText("commons.continueBtn"));
+    expect(
+      screen.getByText("modifyDocument.errors.requiredFileError")
+    ).toBeInTheDocument();
+  });
 
-    const fileInput =
-      screen.getByRole('textbox', { hidden: true }) ||
-      (document.querySelector('input[type="file"]') as HTMLInputElement);
-
-    const file = new File(['test'], 'test.csv', { type: 'text/csv' });
-
-    fireEvent.change(fileInput, {
-      target: { files: [file] },
+  it("validates doc number length", async () => {
+    render(<FileUploadAction {...baseProps} />);
+    fireEvent.click(screen.getByTestId("mock-file-input"));
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "A" },
     });
-
-    const uploadButton = screen.getByText('commons.continueBtn').closest('button');
-
-    expect(uploadButton).not.toBeDisabled();
+    fireEvent.click(screen.getByText("commons.continueBtn"));
+    expect(screen.getByText("Lunghezza minima 2 caratteri")).toBeInTheDocument();
   });
 
-  it('calls upload service and shows success alert on successful upload', async () => {
-    mockApiCall.mockResolvedValueOnce({});
-
-    render(
-      <FileUploadAction
-        apiCall={mockApiCall}
-        successStateKey="fileUpload.success"
-        breadcrumbsProp={{ label: 'Test', path: '/test' }}
-        manualLink="/manual"
-      />
-    );
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-
-    const file = new File(['test'], 'test.csv', { type: 'text/csv' });
-
-    fireEvent.change(fileInput, {
-      target: { files: [file] },
+  it("calls api successfully", async () => {
+    const apiCall = jest.fn().mockResolvedValue({});
+    render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
+    fireEvent.click(screen.getByTestId("mock-file-input"));
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "ABC" },
     });
-
-    const uploadButton = screen.getByText('commons.continueBtn');
-    fireEvent.click(uploadButton);
+    fireEvent.click(screen.getByText("commons.continueBtn"));
 
     await waitFor(() => {
-      expect(mockApiCall).not.toHaveBeenCalledWith('123', file);
+      expect(apiCall).toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalled();
+      expect(mockGoBack).toHaveBeenCalled();
     });
   });
 
-  it('shows error alert on failed upload', async () => {
-    mockApiCall.mockRejectedValueOnce(new Error('error'));
-
-    render(
-      <FileUploadAction
-        apiCall={mockApiCall}
-        successStateKey="fileUpload.success"
-        breadcrumbsProp={{ label: 'Test', path: '/test' }}
-        manualLink="/manual"
-      />
-    );
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-
-    const file = new File(['test'], 'test.csv', { type: 'text/csv' });
-
-    fireEvent.change(fileInput, {
-      target: { files: [file] },
+  it("handles API specific error code", async () => {
+    const apiCall = jest.fn().mockRejectedValue({
+      response: { data: { code: "REWARD_BATCH_ALREADY_SENT" } },
     });
 
-    const uploadButton = screen.getByText('commons.continueBtn');
-    fireEvent.click(uploadButton);
+    render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
+    fireEvent.click(screen.getByTestId("mock-file-input"));
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "ABC" },
+    });
+    fireEvent.click(screen.getByText("commons.continueBtn"));
 
     await waitFor(() => {
-      expect(mockApiCall).not.toHaveBeenCalled();
+      expect(
+        screen.getByText("modifyDocument.reverse.alreadySentError")
+      ).toBeInTheDocument();
     });
+  });
 
-    expect(mockSetAlert).not.toHaveBeenCalledWith({
-      severity: 'error',
-      message: 'fileUpload.error',
-    });
-
-    expect(mockNavigate).not.toHaveBeenCalledWith(-1);
+  it("opens manual link", () => {
+    render(<FileUploadAction {...baseProps} />);
+    fireEvent.click(screen.getByText("modifyDocument.manualLink"));
+    expect(window.open).toHaveBeenCalledWith("http://manual", "_blank");
   });
 });
