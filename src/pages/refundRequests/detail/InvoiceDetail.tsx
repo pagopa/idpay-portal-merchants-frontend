@@ -89,7 +89,7 @@ export default function InvoiceDetail({
                 const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
                   .replace(':trxId', itemValues.id)
-                  .replace(':fileDocNumber', window.btoa(itemValues?.invoiceData?.docNumber));
+                  .replace(':fileDocNumber', window.btoa(itemValues?.invoiceData?.docNumber ?? ''));
 
                 history.push(path, { fromPath: history.location.pathname });
               },
