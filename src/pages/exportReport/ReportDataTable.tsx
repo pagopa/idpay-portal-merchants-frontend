@@ -217,7 +217,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
 
   return (
     <Card>
-      <Box px={2} sx={{ mt: 2, position: 'relative' }}>
+      <Box px={2} sx={{ position: 'relative' }}>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
             <CircularProgress />
@@ -226,7 +226,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
           <>
             {reports?.reports && reports.reports.length > 0 ? (
               <>
-                <Typography variant="h6" mb={2}>
+                <Typography variant="h6" my={2}>
                   {t('pages.reportExport.reportTitle')}
                 </Typography>
 

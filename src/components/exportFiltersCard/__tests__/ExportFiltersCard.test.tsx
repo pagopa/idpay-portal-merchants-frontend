@@ -126,4 +126,47 @@ describe('ExportFiltersCard', () => {
     jest.runAllTimers();
     expect(updateAlerts).toHaveBeenCalledWith('failed', false);
   });
+
+  it('does nothing if id is missing', async () => {
+    const reactRouter = require('react-router-dom');
+    jest
+      .spyOn(reactRouter, 'useParams')
+      .mockReturnValue({ id: undefined });
+
+    const updateAlerts = jest.fn();
+
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    );
+
+    clickSubmit();
+
+    expect(mockedGenerate).not.toHaveBeenCalled();
+  });
+
+  it('calls onReportGenerated in finally block', async () => {
+    mockedGenerate.mockResolvedValue({ reportStatus: 'INSERTED' });
+
+    const updateAlerts = jest.fn();
+    const onReportGenerated = jest.fn();
+
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard
+          updateAlerts={updateAlerts}
+          onReportGenerated={onReportGenerated}
+        />
+      </BrowserRouter>
+    );
+
+    clickSubmit();
+
+    await waitFor(() =>
+      expect(updateAlerts).toHaveBeenCalledWith('inserted', true)
+    );
+
+    expect(onReportGenerated).toHaveBeenCalled();
+  });
 });

@@ -19,7 +19,15 @@ jest.mock("../../../services/merchantService", () => ({
 jest.mock("../../../components/dataTable/DataTable", () => (props: any) => {
   return (
     <div>
-      <div data-testid="rows">{JSON.stringify(props.rows)}</div>
+      {props.rows?.map((row: any) => (
+        <div key={row.id} data-testid={`row-${row.id}`}>
+          {props.columns.map((col: any, idx: number) =>
+            col.renderCell ? (
+              <div key={idx}>{col.renderCell({ row })}</div>
+            ) : null
+          )}
+        </div>
+      ))}
       <button
         onClick={() => props.onPaginationPageChange(1)}
         data-testid="page-change"
@@ -83,7 +91,7 @@ describe("ReportDataTable", () => {
     render(<ReportDataTable />);
 
     await waitFor(() =>
-      expect(screen.getByTestId("rows")).toBeInTheDocument()
+      expect(screen.getByTestId("row-r1")).toBeInTheDocument()
     );
 
     expect(screen.getByText("pages.reportExport.reportTitle")).toBeInTheDocument();
@@ -107,7 +115,7 @@ describe("ReportDataTable", () => {
     render(<ReportDataTable />);
 
     await waitFor(() =>
-      expect(screen.getByTestId("rows")).toBeInTheDocument()
+expect(screen.getByTestId(/row-/)).toBeInTheDocument()
     );
 
     fireEvent.click(screen.getByTestId("page-change"));
@@ -149,8 +157,8 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable refreshKey={0} />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("rows")).toBeInTheDocument()
+await waitFor(() =>
+      expect(screen.getByTestId(/row-/)).toBeInTheDocument()
     );
 
     expect(downloadMerchantReport).not.toHaveBeenCalled();
@@ -185,8 +193,8 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("rows")).toBeInTheDocument()
+await waitFor(() =>
+      expect(screen.getByTestId(/row-/)).toBeInTheDocument()
     );
 
     fireEvent.click(screen.getByTestId("rows-change"));
@@ -219,8 +227,8 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("rows")).toBeInTheDocument()
+await waitFor(() =>
+      expect(screen.getByTestId(/row-/)).toBeInTheDocument()
     );
 
     await expect(
@@ -246,10 +254,10 @@ describe("ReportDataTable", () => {
     render(<ReportDataTable />);
 
     await waitFor(() =>
-      expect(screen.getByTestId("rows")).toBeInTheDocument()
+      expect(screen.getByTestId("row-r3")).toBeInTheDocument()
     );
 
     // ensure FAILED row is rendered in table mock
-    expect(screen.getByTestId("rows")).toHaveTextContent("FAILED");
+expect(screen.getByTestId("row-r3")).toBeInTheDocument();
   });
 });

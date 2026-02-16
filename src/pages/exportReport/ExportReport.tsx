@@ -37,9 +37,9 @@ const InitiativeExportReportPage = () => {
 
   return (
     <>
-      <Box sx={{ width: '100%', pt: 2, px: 2 }}>
+      <Box sx={{ width: '100%'}}>
         <Box>
-          <Box sx={{ display: 'grid', gridColumn: 'span 10', mt: 2 }}>
+          <Box sx={{ display: 'grid', gridColumn: 'span 10' }}>
             <TitleBox
               title={t('pages.reportExport.title')}
               subTitle={t('pages.reportExport.subtitle')}
