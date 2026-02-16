@@ -69,9 +69,7 @@ describe("InitiativeExportReportPage", () => {
     fireEvent.click(trigger);
 
     expect(
-      screen.getByText(
-        "Il report è stato generato ed è pronto per il download."
-      )
+      screen.getByText("pages.reportExport.alert.success")
     ).toBeInTheDocument();
 
     const closeBtn = screen.getByTestId("close-0");

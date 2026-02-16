@@ -110,7 +110,9 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
         updateAlerts('failed', true);
         setTimeout(() => updateAlerts('failed', false), 3000);
       } finally {
-        formik.resetForm();
+        if (typeof formik.resetForm === 'function') {
+          formik.resetForm();
+        }
         onReportGenerated?.();
       }
     },

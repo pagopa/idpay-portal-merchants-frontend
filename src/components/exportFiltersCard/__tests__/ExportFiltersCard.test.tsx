@@ -1,10 +1,8 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ExportFiltersCard from '../ExportFiltersCard';
 import { BrowserRouter } from 'react-router-dom';
 
-// ✅ Properly mock service with factory
 jest.mock('../../../services/merchantService', () => ({
   generateMerchantReport: jest.fn(),
 }));
@@ -16,7 +14,6 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ id: 'test-id' }),
 }));
 
-// ✅ Mock formik without external deps
 jest.mock('formik', () => ({
   useFormik: (config: any) => {
     const mockDay = {

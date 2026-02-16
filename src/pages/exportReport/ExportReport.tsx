@@ -20,7 +20,7 @@ const InitiativeExportReportPage = () => {
       severity: 'info',
     },
     failed: {
-      text: t('pages.reportExport.alert.errorr'),
+      text: t('pages.reportExport.alert.error'),
       isOpen: false,
       severity: 'error',
     },
