@@ -259,7 +259,7 @@ describe('TransactionDetail (100% coverage)', () => {
     const expectedPath = routes.MODIFY_DOCUMENT.replace(':id', 'merchant-123')
       .replace(':pointOfSaleId', 'store-999')
       .replace(':trxId', 'TRX-5')
-      .replace(':fileDocNumber', 'DOC-5');
+      .replace(':fileDocNumber', window.btoa('DOC-5'));
 
     expect(pushMock).toHaveBeenCalledWith(expectedPath, { fromLocation: { pathname: '/here' } });
   });
