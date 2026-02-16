@@ -112,14 +112,6 @@ export default function InvoiceDetail({
         text: 'Transazione spostata al mese successivo',
         isOpen: true,
         severity: 'success',
-        containerStyle: {
-          height: 'fit-content',
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          zIndex: '1300',
-        },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setInvoiceTransactionModal(false);
       onCloseDrawer?.();
