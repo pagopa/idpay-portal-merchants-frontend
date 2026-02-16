@@ -371,4 +371,46 @@ describe('merchantService uncovered branches', () => {
       );
     });
   });
+
+  describe('getMerchantReports', () => {
+    test('should call MerchantApi.getMerchantReports with correct params', async () => {
+      mockedMerchantApi.getMerchantReports = jest.fn().mockResolvedValue({} as any);
+
+      await (await import('../merchantService')).getMerchantReports('init-1', 1, 10);
+
+      expect(mockedMerchantApi.getMerchantReports).toHaveBeenCalledWith(
+        'init-1',
+        1,
+        10
+      );
+    });
+  });
+
+  describe('generateMerchantReport', () => {
+    test('should call MerchantApi.generateMerchantReport with correct params', async () => {
+      mockedMerchantApi.generateMerchantReport = jest.fn().mockResolvedValue(undefined as any);
+
+      const body = { fromDate: '2024-01-01', toDate: '2024-01-31' };
+
+      await (await import('../merchantService')).generateMerchantReport('init-1', body as any);
+
+      expect(mockedMerchantApi.generateMerchantReport).toHaveBeenCalledWith(
+        'init-1',
+        body
+      );
+    });
+  });
+
+  describe('downloadMerchantReport', () => {
+    test('should call MerchantApi.downloadMerchantReport with correct params', async () => {
+      mockedMerchantApi.downloadMerchantReport = jest.fn().mockResolvedValue('file' as any);
+
+      await (await import('../merchantService')).downloadMerchantReport('init-1', 'report-1');
+
+      expect(mockedMerchantApi.downloadMerchantReport).toHaveBeenCalledWith(
+        'init-1',
+        'report-1'
+      );
+    });
+  });
 });
