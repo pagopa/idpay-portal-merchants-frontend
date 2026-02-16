@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, IconButton, Typography, CircularProgress, Paper, Card, Tooltip } from '@mui/material';
+import { Box, Card, CircularProgress, IconButton, Paper, Tooltip, Typography } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia';
@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
-import { getMerchantReports, downloadMerchantReport } from '../../services/merchantService';
+import { downloadMerchantReport, getMerchantReports } from '../../services/merchantService';
 import { ReportDTO, ReportStatusEnum } from '../../api/generated/merchants/ReportDTO';
 
 type RouteParams = {
@@ -19,7 +19,7 @@ type RouteParams = {
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case ReportStatusEnum.GENERATED:
+    case ReportStatusEnum.GENERATED || ReportStatusEnum.INSERTED:
       return <CachedIcon color="info" />;
     case ReportStatusEnum.FAILED:
       return <ErrorIcon color="error" />;
@@ -47,6 +47,7 @@ const ReportDataTable: React.FC = () => {
     totalElements: 0,
   });
   const [loading, setLoading] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const loadReports = () => {
     if (!id) {return;}
@@ -73,6 +74,9 @@ const ReportDataTable: React.FC = () => {
     if (!id) {
       return;
     }
+
+    setDownloadingId(reportId);
+
     try {
       const response = await downloadMerchantReport(id, reportId);
       const blob = new Blob([response as any], { type: 'text/csv;charset=utf-8;' });
@@ -87,6 +91,8 @@ const ReportDataTable: React.FC = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading report', error);
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -168,12 +174,22 @@ const ReportDataTable: React.FC = () => {
         if (params.row.reportStatus !== ReportStatusEnum.FAILED) {
           return (
             <IconButton
-              disabled={params.row.reportStatus !== ReportStatusEnum.INSERTED}
+              disabled={
+                params.row.reportStatus !== ReportStatusEnum.INSERTED ||
+                downloadingId === params.row.id
+              }
               onClick={() =>
                 handleDownload(params.row.id, params.row.fileName)
               }
             >
-              <DownloadIcon color={params.row.reportStatus === ReportStatusEnum.INSERTED ? 'primary' : 'disabled'} />
+              <DownloadIcon
+                color={
+                  params.row.reportStatus === ReportStatusEnum.INSERTED &&
+                  downloadingId !== params.row.id
+                    ? 'primary'
+                    : 'disabled'
+                }
+              />
             </IconButton>
           );
         }
@@ -222,6 +238,7 @@ const ReportDataTable: React.FC = () => {
                     }}
                     onPaginationPageChange={handlePaginationPageChange}
                     onRowsPerPageChange={handleRowsPerPageChange}
+                    isTransactionsPage={true}
                   />
                 </Box>
               </>

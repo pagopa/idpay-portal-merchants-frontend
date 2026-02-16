@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { FormikProps, useFormik } from 'formik';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
+import 'dayjs/locale/it';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { useParams } from 'react-router-dom';
 import { generateMerchantReport } from '../../services/merchantService';
@@ -123,12 +124,13 @@ const ExportFiltersCard = ({ updateAlerts }: Props) => {
           {t('pages.reportExport.form.subtitle')}
         </Typography>
 
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="it">
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
               <DatePicker
                 label="Dal"
                 value={formik.values.startDate}
+                inputFormat="DD/MM/YYYY"
                 maxDate={yesterday}
                 onChange={(value) => {
                   void formik.setFieldValue('startDate', value);
@@ -139,11 +141,13 @@ const ExportFiltersCard = ({ updateAlerts }: Props) => {
                   fieldName: 'startDate',
                   placeholder: 'Dal',
                 })}
+
               />
 
               <DatePicker
                 label="Al"
                 value={formik.values.endDate}
+                inputFormat="DD/MM/YYYY"
                 minDate={
                   formik.values.startDate
                     ? formik.values.startDate.add(1, 'day')
@@ -165,6 +169,7 @@ const ExportFiltersCard = ({ updateAlerts }: Props) => {
 
             <Button
               variant="contained"
+              disabled={formik.isSubmitting}
               onClick={() => formik.handleSubmit()}
             >
               {t('pages.reportExport.form.submit')}
