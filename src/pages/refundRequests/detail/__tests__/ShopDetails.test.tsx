@@ -63,7 +63,6 @@ describe("ShopDetails - FULL BRANCH COVERAGE", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // ✅ Prevent `.then` undefined crashes in child components
     getMerchantDetail.mockResolvedValue({});
     getMerchantTransactionsProcessed.mockResolvedValue({
       content: [],

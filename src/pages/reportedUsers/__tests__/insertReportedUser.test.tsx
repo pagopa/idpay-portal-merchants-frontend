@@ -255,7 +255,7 @@ describe('InsertReportedUser', () => {
 
     await waitFor(() => {
       expect(mockCreateReportedUser).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalled(); // redireziona dopo errore "Service unavailable"
+      expect(mockPush).toHaveBeenCalled();
     });
   });
 

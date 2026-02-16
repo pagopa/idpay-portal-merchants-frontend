@@ -12,8 +12,6 @@ beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   // @ts-ignore
-  // Accepts a function that will be used as an implementation of the mock for one call to the mocked function.
-  // Can be chained so that multiple function calls produce different results.
   useStateMock.mockImplementation((init: any) => [init, setDiscountCreated]);
 });
 

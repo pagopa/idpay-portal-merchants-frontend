@@ -111,12 +111,6 @@ describe('ShopCard', () => {
     expect(screen.getByText('100,00 €')).toBeInTheDocument();
     expect(screen.getByText('80,00 €')).toBeInTheDocument();
 
-  //   await waitFor(() => {expect(
-  //     screen.getByText('IT60X0542811101000000123456')
-  //   ).toBeInTheDocument()
-  //   expect(screen.getByText('Mario Rossi')).toBeInTheDocument()
-  // });
-
     const batchLabel = screen.getByText('pages.refundRequests.storeDetails.referredBatch');
     const batchRow = batchLabel.parentElement?.parentElement as HTMLElement;
     const batchTooltip = within(batchRow).getByTestId('tooltip');

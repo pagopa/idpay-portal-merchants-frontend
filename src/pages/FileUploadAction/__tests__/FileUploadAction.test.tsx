@@ -78,7 +78,6 @@ describe("FileUploadAction", () => {
   it("shows required file error", async () => {
     render(<FileUploadAction {...baseProps} />);
     fireEvent.click(screen.getByText("commons.continueBtn"));
-    // branch executed
     expect(true).toBe(true);
   });
 

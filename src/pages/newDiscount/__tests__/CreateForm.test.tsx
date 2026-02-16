@@ -64,7 +64,6 @@ describe('Test suite for CreateForm component', () => {
 
   test('Render component with id prop undefined', async () => {
     renderWithContext(
-      // @ts-expect-error trying to render component without the required prop id
       <CreateForm id={undefined} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
     );
     const user = userEvent.setup();
