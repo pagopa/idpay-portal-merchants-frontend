@@ -42,7 +42,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
                 const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
                   .replace(':pointOfSaleId', storeId)
                   .replace(':trxId', itemValues.id)
-                  .replace(':fileDocNumber', itemValues?.invoiceFile?.docNumber ?? '');
+                  .replace(':fileDocNumber', window.btoa(itemValues?.invoiceFile?.docNumber ?? ''));
 
                 history.push(path, { fromLocation: history.location });
               },
