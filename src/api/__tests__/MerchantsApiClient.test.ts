@@ -1,6 +1,7 @@
 import { extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
 import { createClient } from '../generated/merchants/client';
 import { store } from '../../redux/store';
+import { appStateActions } from '@pagopa/selfcare-common-frontend/redux/slices/appStateSlice';
 
 jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
   storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
@@ -585,5 +586,75 @@ describe('MerchantApi', () => {
       value: originalGroupEnd,
       configurable: true,
     });
+  });
+
+  it('getAllRewardBatches - success', async () => {
+    mockApiClient.getRewardBatches.mockResolvedValue({ right: 'data' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.getAllRewardBatches('init1');
+
+    expect(mockApiClient.getRewardBatches).toHaveBeenCalledWith({
+      initiativeId: 'init1',
+      size: 1000,
+    });
+    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
+    expect(result).toBe('extracted');
+  });
+
+  it('getAllRewardBatches - error path logs and returns empty object', async () => {
+    const error = {
+      message: 'Boom',
+      name: 'Error',
+      stack: 'stack-trace',
+      response: { data: { errorKey: 'ERR_KEY_TEST' } },
+    };
+
+    mockApiClient.getRewardBatches.mockRejectedValue(error);
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleGroupSpy = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
+    const consoleGroupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.getAllRewardBatches('init1');
+
+    expect(extractResponse).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error Key: ERR_KEY_TEST');
+    expect(consoleGroupSpy).toHaveBeenCalledWith('[API ERROR] MerchantsApi.userPermission');
+    expect(consoleGroupEndSpy).toHaveBeenCalled();
+    expect(result).toEqual({});
+
+    consoleErrorSpy.mockRestore();
+    consoleGroupSpy.mockRestore();
+    consoleGroupEndSpy.mockRestore();
+  });
+
+
+  it('getMerchantPointOfSalesWithTransactions calls redirectToLogin (dispatch) when response not ok', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: false });
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.getMerchantPointOfSalesWithTransactions('batch-id');
+
+    expect(result).toEqual([]);
+    expect(store.dispatch).toHaveBeenCalledTimes(1);
+    // optional but nice: ensure it dispatched the action created by addError
+    expect(appStateActions.addError).toHaveBeenCalled();
+  });
+
+  it('getMerchantTransactionsProcessed logs debug', async () => {
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    mockApiClient.getMerchantTransactionsProcessed.mockResolvedValue({ right: 'data' });
+
+    const MerchantApi = loadApi();
+    await MerchantApi.getMerchantTransactionsProcessed({ initiativeId: 'init1' });
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '[DEBUG] getMerchantTransactionsProcessed:',
+      { right: 'data' }
+    );
+
+    consoleLogSpy.mockRestore();
   });
 });

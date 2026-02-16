@@ -29,6 +29,7 @@ import RefundRequests from './pages/refundRequests/RefundRequests';
 import ROUTES from './routes';
 import { useInitiativesList } from './hooks/useInitiativesList';
 import ShopDetails from './pages/refundRequests/detail/ShopDetails';
+import ModifyDocument from './pages/modifyDocument/ModifyDocument';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -38,77 +39,91 @@ const SecuredRoutes = withLogin(
     useEffect(() => {
       setMatch(
         matchPath(location.pathname, {
-          path: [ROUTES.HOME, ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS, ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS, ROUTES.REFUND_REQUESTS_STORE],
+          path: [
+            ROUTES.HOME,
+            ROUTES.DISCOUNTS,
+            ROUTES.OVERVIEW,
+            ROUTES.STORES,
+            ROUTES.REPORTED_USERS,
+            ROUTES.STORES_DETAIL,
+            ROUTES.REFUND_REQUESTS,
+            ROUTES.REFUND_REQUESTS_STORE,
+          ],
           exact: true,
           strict: false,
-      }));
+        })
+      );
     }, [location]);
 
-  useInitiativesList(match);
+    useInitiativesList(match);
 
-    return(
-    <AlertProvider>
-      <Layout>
-        <Switch>
-          <Route path={routes.HOME} exact={true}>
-            <InitiativesList />
-          </Route>
-          <Route path={routes.ASSISTANCE} exact={true}>
-            <Assistance />
-          </Route>
+    return (
+      <AlertProvider>
+        <Layout>
+          <Switch>
+            <Route path={routes.HOME} exact={true}>
+              <InitiativesList />
+            </Route>
+            <Route path={routes.ASSISTANCE} exact={true}>
+              <Assistance />
+            </Route>
 
-          <Route path={routes.TOS} exact={true}>
-            <TOS />
-          </Route>
+            <Route path={routes.TOS} exact={true}>
+              <TOS />
+            </Route>
 
-          <Route path={routes.PRIVACY_POLICY} exact={true}>
-            <PrivacyPolicy />
-          </Route>
+            <Route path={routes.PRIVACY_POLICY} exact={true}>
+              <PrivacyPolicy />
+            </Route>
 
-        {/* <Route path={routes.DISCOUNTS} exact={true}>
+            {/* <Route path={routes.DISCOUNTS} exact={true}>
             <InitiativeDiscounts />
           </Route> */}
-        <Route path={routes.OVERVIEW} exact={true}>
-          <InitiativeOverview />
-        </Route>
-        <Route path={routes.STORES_UPLOAD} exact={true}>
-          <InitiativeStoresUpload />
-        </Route>
-        <Route path={routes.STORES} exact={true}>
-          <InitiativeStores />
-        </Route>
-        <Route path={routes.REPORTED_USERS} exact={true}>
-          <ReportedUsers />
-        </Route>
-        <Route path={routes.REPORTED_USERS_INSERT} exact={true}>
-          <InsertReportedUser />
-        </Route>
-        <Route path={routes.STORES_DETAIL} exact={true}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Route>
-        <Route path={routes.NEW_DISCOUNT} exact={true}>
-          <NewDiscount />
-        </Route>
-          <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
-            <AcceptNewDiscount />
-          </Route>
-          <Route path={routes.REFUND_REQUESTS} exact={true}>
-            <RefundRequests />
-          </Route>
-          <Route path={routes.REFUND_REQUESTS_STORE} exact={true}>
-            <StoreProvider>
-              <ShopDetails />
-            </StoreProvider>
-          </Route>
-        <Route path="*">
-          <Redirect to={routes.HOME} />
-        </Route>
-        </Switch>
-      </Layout>
-    </AlertProvider>
-  );})
+            <Route path={routes.OVERVIEW} exact={true}>
+              <InitiativeOverview />
+            </Route>
+            <Route path={routes.STORES_UPLOAD} exact={true}>
+              <InitiativeStoresUpload />
+            </Route>
+            <Route path={routes.STORES} exact={true}>
+              <InitiativeStores />
+            </Route>
+            <Route path={routes.REPORTED_USERS} exact={true}>
+              <ReportedUsers />
+            </Route>
+            <Route path={routes.REPORTED_USERS_INSERT} exact={true}>
+              <InsertReportedUser />
+            </Route>
+            <Route path={routes.STORES_DETAIL} exact={true}>
+              <StoreProvider>
+                <InitiativeStoreDetail />
+              </StoreProvider>
+            </Route>
+            <Route path={routes.NEW_DISCOUNT} exact={true}>
+              <NewDiscount />
+            </Route>
+            <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
+              <AcceptNewDiscount />
+            </Route>
+            <Route path={routes.REFUND_REQUESTS} exact={true}>
+              <RefundRequests />
+            </Route>
+            <Route path={routes.REFUND_REQUESTS_STORE} exact={true}>
+              <StoreProvider>
+                <ShopDetails />
+              </StoreProvider>
+            </Route>
+            <Route path={routes.MODIFY_DOCUMENT} exact={true}>
+              <ModifyDocument />
+            </Route>
+            <Route path="*">
+              <Redirect to={routes.HOME} />
+            </Route>
+          </Switch>
+        </Layout>
+      </AlertProvider>
+    );
+  })
 );
 
 const App = () => (

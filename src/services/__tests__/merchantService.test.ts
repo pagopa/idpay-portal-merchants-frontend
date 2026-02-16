@@ -20,6 +20,10 @@ import {
   sendRewardBatch,
   downloadBatchCsv,
   postponeTransaction,
+  getMerchantPointOfSalesWithTransactions,
+  getAllRewardBatches,
+  updateInvoiceTransaction,
+
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
@@ -44,6 +48,9 @@ jest.mock('../../api/MerchantsApiClient', () => ({
     sendRewardBatches: jest.fn(),
     downloadBatchCsv: jest.fn(),
     postponeTransaction: jest.fn(),
+    getMerchantPointOfSalesWithTransactions: jest.fn(),
+    getAllRewardBatches: jest.fn(),
+    updateInvoiceTransaction: jest.fn(),
   },
 }));
 
@@ -278,6 +285,56 @@ describe('merchantService', () => {
         params.rewardBatchId,
         params.transactionId,
         params.initiativeEndDate
+      );
+    });
+  });
+
+  describe('getMerchantPointOfSalesWithTransactions', () => {
+    test('should call MerchantApi.getMerchantPointOfSalesWithTransactions with correct params', async () => {
+      mockedMerchantApi.getMerchantPointOfSalesWithTransactions.mockResolvedValue([]);
+      await getMerchantPointOfSalesWithTransactions('batch-1');
+
+      expect(mockedMerchantApi.getMerchantPointOfSalesWithTransactions).toHaveBeenCalledWith('batch-1');
+    });
+  });
+
+  describe('getAllRewardBatches', () => {
+    test('should call MerchantApi.getAllRewardBatches with correct initiativeId', async () => {
+      mockedMerchantApi.getAllRewardBatches.mockResolvedValue({} as any);
+      await getAllRewardBatches('init-1');
+
+      expect(mockedMerchantApi.getAllRewardBatches).toHaveBeenCalledWith('init-1');
+    });
+  });
+
+  describe('updateInvoiceTransaction', () => {
+    test('should call MerchantApi.updateInvoiceTransaction with correct params', async () => {
+      mockedMerchantApi.updateInvoiceTransaction.mockResolvedValue({ code: 'OK', message: 'ok' });
+
+      const file = new File(['dummy'], 'invoice.pdf', { type: 'application/pdf' });
+
+      await updateInvoiceTransaction('trx-1', file, 'pos-1', 'DOC-001');
+
+      expect(mockedMerchantApi.updateInvoiceTransaction).toHaveBeenCalledWith(
+        'trx-1',
+        file,
+        'pos-1',
+        'DOC-001'
+      );
+    });
+
+    test('should call MerchantApi.updateInvoiceTransaction without docNumber', async () => {
+      mockedMerchantApi.updateInvoiceTransaction.mockResolvedValue({ code: 'OK', message: 'ok' });
+
+      const file = new File(['dummy'], 'invoice.pdf', { type: 'application/pdf' });
+
+      await updateInvoiceTransaction('trx-1', file, 'pos-1');
+
+      expect(mockedMerchantApi.updateInvoiceTransaction).toHaveBeenCalledWith(
+        'trx-1',
+        file,
+        'pos-1',
+        undefined
       );
     });
   });
