@@ -10,17 +10,17 @@ const InitiativeExportReportPage = () => {
   const { t } = useTranslation();
   const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
     inserted: {
-      text: 'Il report è stato generato ed è pronto per il download.',
+      text: t('pages.reportExport.alert.success'),
       isOpen: false,
       severity: 'success',
     },
     generated: {
-      text: 'Stiamo elaborando il file. Una volta fatto, il report potrà essere scaricato in questa sezione.',
+      text: t('pages.reportExport.alert.info'),
       isOpen: false,
       severity: 'info',
     },
     failed: {
-      text: 'Si è verificato un errore nella generazione del report. Riprova',
+      text: t('pages.reportExport.alert.errorr'),
       isOpen: false,
       severity: 'error',
     },
@@ -32,6 +32,8 @@ const InitiativeExportReportPage = () => {
       [key]: { ...prev[key], isOpen: open },
     }));
   }, []);
+
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <>
@@ -51,9 +53,12 @@ const InitiativeExportReportPage = () => {
         </Box>
 
         <Box sx={{ display: 'flex', gap: 3, mt: 1, mb: 3, alignItems: 'center' }}>
-          <ExportFiltersCard updateAlerts={updateAlerts} />
+          <ExportFiltersCard
+            updateAlerts={updateAlerts}
+            onReportGenerated={() => setRefreshKey((prev) => prev + 1)}
+          />
         </Box>
-        <ReportDataTable />
+        <ReportDataTable refreshKey={refreshKey} />
       </Box>
       <AlertListComponent
         alertList={Object.entries(alerts).map(([key, value]) => ({

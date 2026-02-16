@@ -31,7 +31,11 @@ const getStatusIcon = (status: string) => {
 };
 
 
-const ReportDataTable: React.FC = () => {
+interface ReportDataTableProps {
+  refreshKey?: number;
+}
+
+const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
   const { t } = useTranslation();
   const { id } = useParams<RouteParams>();
   const [reports, setReports] = useState<any>({
@@ -68,7 +72,7 @@ const ReportDataTable: React.FC = () => {
 
   useEffect(() => {
     loadReports();
-  }, [pagination.pageNo, pagination.pageSize]);
+  }, [pagination.pageNo, pagination.pageSize, refreshKey]);
 
   const handleDownload = async (reportId: string, fileName: string) => {
     if (!id) {

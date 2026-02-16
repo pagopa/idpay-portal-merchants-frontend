@@ -383,7 +383,12 @@
         }
       },
       "reportTitle": "I tuoi report",
-      "noReportFound": "Non hai ancora generato report."
+      "noReportFound": "Non hai ancora generato report.",
+      "alert": {
+        "success": "Il report è stato generato ed è pronto per il download.",
+        "info": "Stiamo elaborando il file. Una volta fatto, il report potrà essere scaricato in questa sezione.",
+        "error": "Si è verificato un errore nella generazione del report. Riprova"
+      }
     }
   },
   "roles": {

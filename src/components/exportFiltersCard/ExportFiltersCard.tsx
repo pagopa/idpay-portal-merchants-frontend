@@ -54,9 +54,10 @@ type RouteParams = {
 
 type Props = {
   updateAlerts: (key: string, open: boolean) => void;
+  onReportGenerated?: () => void;
 };
 
-const ExportFiltersCard = ({ updateAlerts }: Props) => {
+const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
   const { t } = useTranslation();
 
   const yesterday = dayjs().subtract(1, 'day').startOf('day');
@@ -108,6 +109,9 @@ const ExportFiltersCard = ({ updateAlerts }: Props) => {
       } catch (error) {
         updateAlerts('failed', true);
         setTimeout(() => updateAlerts('failed', false), 3000);
+      } finally {
+        formik.resetForm();
+        onReportGenerated?.();
       }
     },
   });
