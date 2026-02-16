@@ -14,8 +14,12 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ id: 'test-id' }),
 }));
 
+let lastFormikConfig: any;
+
 jest.mock('formik', () => ({
   useFormik: (config: any) => {
+    lastFormikConfig = config;
+
     const mockDay = {
       startOf: () => ({ toDate: () => new Date() }),
       endOf: () => ({ toDate: () => new Date() }),
@@ -30,6 +34,8 @@ jest.mock('formik', () => ({
       },
       touched: {},
       errors: {},
+      isSubmitting: false,
+      resetForm: jest.fn(),
       setFieldValue: jest.fn(),
       handleSubmit: () =>
         config.onSubmit({
@@ -168,5 +174,74 @@ describe('ExportFiltersCard', () => {
     );
 
     expect(onReportGenerated).toHaveBeenCalled();
+  });
+
+  it('covers validate required branch', () => {
+    const result = lastFormikConfig.validate({
+      startDate: null,
+      endDate: null,
+    });
+
+    expect(result.startDate).toBeDefined();
+    expect(result.endDate).toBeDefined();
+  });
+
+  it('covers validate invalidRange branch (<1 day)', () => {
+    const mockDay = {
+      diff: () => 0,
+    };
+
+    const result = lastFormikConfig.validate({
+      startDate: mockDay,
+      endDate: mockDay,
+    });
+
+    expect(result.endDate).toBeDefined();
+  });
+
+  it('covers validate maxRange branch (>90 days)', () => {
+    const mockDay = {
+      diff: () => 100,
+    };
+
+    const result = lastFormikConfig.validate({
+      startDate: mockDay,
+      endDate: mockDay,
+    });
+
+    expect(result.endDate).toBeDefined();
+  });
+
+  it('covers validate success branch (no errors)', () => {
+    const mockDay = {
+      diff: () => 10,
+    };
+
+    const result = lastFormikConfig.validate({
+      startDate: mockDay,
+      endDate: mockDay,
+    });
+
+    expect(result).toEqual({});
+  });
+
+  it('covers renderFormikDatePickerInput error branch', () => {
+    const { renderFormikDatePickerInput } = require('../ExportFiltersCard');
+
+    const formikMock = {
+      touched: { startDate: true },
+      errors: { startDate: 'error' },
+      values: { startDate: true },
+    };
+
+    const renderInput = renderFormikDatePickerInput({
+      formik: formikMock,
+      fieldName: 'startDate',
+      placeholder: 'Test',
+    });
+
+    const { container } = render(renderInput({}));
+
+    expect(container).toBeInTheDocument();
   });
 });
