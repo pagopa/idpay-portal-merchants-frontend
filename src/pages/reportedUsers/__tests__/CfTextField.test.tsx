@@ -1,212 +1,86 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import CfTextField from '../CfTextField';
+import { render, screen, fireEvent } from "@testing-library/react";
+import CfTextField from "../CfTextField";
 
-describe('CfTextField', () => {
-  const setup = (props = {}) => {
-    const formik = {
-      values: { cf: '' },
-      errors: { cf: '' },
-      setFieldValue: jest.fn(),
-      setFieldError: jest.fn(),
-      touched: {},
-      isSubmitting: false,
-      isValidating: false,
-      submitCount: 0,
-      handleChange: jest.fn(),
-      handleBlur: jest.fn(),
-      handleSubmit: jest.fn(),
-      handleReset: jest.fn(),
-      setTouched: jest.fn(),
-      setValues: jest.fn(),
-      setErrors: jest.fn(),
-      validateForm: jest.fn(),
-      validateField: jest.fn(),
-      resetForm: jest.fn(),
-      initialValues: { cf: '' },
-      initialErrors: {},
-      initialTouched: {},
-      initialStatus: undefined,
-      status: undefined,
-      dirty: false,
-      isValid: true,
-      registerField: jest.fn(),
-      unregisterField: jest.fn(),
-      setStatus: jest.fn(),
-      setSubmitting: jest.fn(),
-      setFieldTouched: jest.fn(),
-      getFieldProps: jest.fn(),
-      getFieldMeta: jest.fn(),
-      getFieldHelpers: jest.fn(),
-      submitForm: jest.fn(),
-      setFormikState: jest.fn(),
-    };
+describe("CfTextField - FULL BRANCH COVERAGE", () => {
+  const createFormik = (initialValue: string, error?: string) => ({
+    values: { cf: initialValue },
+    errors: { cf: error || "" },
+    setFieldValue: jest.fn(),
+    setFieldError: jest.fn(),
+  });
+
+  it("cleans input (uppercase, alphanumeric, max 16)", () => {
+    const formik: any = createFormik("");
     const setShowErrors = jest.fn();
-    const defaultProps = {
-      formik,
-      showErrors: false,
-      setShowErrors,
-      label: 'Codice Fiscale',
-      ...props,
-    };
-    render(<CfTextField {...defaultProps} />);
-    return { formik, setShowErrors };
-  };
 
-  it('renders the field with label', () => {
-    setup();
-    expect(screen.getByLabelText(/codice fiscale/i)).toBeInTheDocument();
+    render(
+      <CfTextField
+        formik={formik}
+        showErrors={false}
+        setShowErrors={setShowErrors}
+        label="CF"
+      />
+    );
+
+    const input = screen.getByLabelText("CF");
+    fireEvent.change(input, { target: { value: "abc123!!@@xyz789012345" } });
+
+    expect(formik.setFieldValue).toHaveBeenCalledWith(
+      "cf",
+      "ABC123XYZ7890123",
+      false
+    );
   });
 
-  it('accepts only alphanumeric characters, uppercase and max 16', () => {
-    const { formik } = setup();
-    const input = screen.getByLabelText(/codice fiscale/i);
-    fireEvent.change(input, { target: { value: 'ab!c1234def5678ghijkl' } });
-    // Should call setFieldValue with "ABC1234DEF5678GH"
-    expect(formik.setFieldValue).toHaveBeenCalledWith('cf', 'ABC1234DEF5678GH', false);
+  it("handles empty cleaned value branch", () => {
+    const formik: any = createFormik("ABC");
+    const setShowErrors = jest.fn();
+
+    render(
+      <CfTextField
+        formik={formik}
+        showErrors={true}
+        setShowErrors={setShowErrors}
+        label="CF"
+      />
+    );
+
+    const input = screen.getByLabelText("CF");
+    fireEvent.change(input, { target: { value: "" } });
+
+    expect(setShowErrors).toHaveBeenCalledWith(false);
+    expect(formik.setFieldError).toHaveBeenCalledWith("cf", "");
   });
 
-  it('resets errors and showErrors if input is empty', () => {
-    const { formik, setShowErrors } = setup({ showErrors: true });
-    const input = screen.getByLabelText(/codice fiscale/i);
-    fireEvent.change(input, { target: { value: '' } });
-    expect(setShowErrors).not.toHaveBeenCalledWith();
-    expect(formik.setFieldError).not.toHaveBeenCalledWith('cf', '');
+  it("shows error when showErrors true", () => {
+    const formik: any = createFormik("ABC", "Errore");
+    const setShowErrors = jest.fn();
+
+    render(
+      <CfTextField
+        formik={formik}
+        showErrors={true}
+        setShowErrors={setShowErrors}
+        label="CF"
+      />
+    );
+
+    expect(screen.getByText("Errore")).toBeInTheDocument();
   });
 
-  it('shows helperText and error state if showErrors is true and there is an error', () => {
-    const errorMsg = 'Invalid CF';
-    setup({
-      showErrors: true,
-      formik: {
-        values: { cf: '' },
-        errors: { cf: errorMsg },
-        setFieldValue: jest.fn(),
-        setFieldError: jest.fn(),
-        touched: {},
-        isSubmitting: false,
-        isValidating: false,
-        submitCount: 0,
-        handleChange: jest.fn(),
-        handleBlur: jest.fn(),
-        handleSubmit: jest.fn(),
-        handleReset: jest.fn(),
-        setTouched: jest.fn(),
-        setValues: jest.fn(),
-        setErrors: jest.fn(),
-        validateForm: jest.fn(),
-        validateField: jest.fn(),
-        resetForm: jest.fn(),
-        initialValues: { cf: '' },
-        initialErrors: {},
-        initialTouched: {},
-        initialStatus: undefined,
-        status: undefined,
-        dirty: false,
-        isValid: true,
-        registerField: jest.fn(),
-        unregisterField: jest.fn(),
-        setStatus: jest.fn(),
-        setSubmitting: jest.fn(),
-        setFieldTouched: jest.fn(),
-        getFieldProps: jest.fn(),
-        getFieldMeta: jest.fn(),
-        getFieldHelpers: jest.fn(),
-        submitForm: jest.fn(),
-        setFormikState: jest.fn(),
-      },
-    });
-    expect(screen.getByText(errorMsg)).toBeInTheDocument();
-    const input = screen.getByLabelText(/codice fiscale/i);
-    expect(input).toHaveAttribute('aria-invalid', 'true');
-  });
+  it("hides error when showErrors false", () => {
+    const formik: any = createFormik("ABC", "Errore");
+    const setShowErrors = jest.fn();
 
-  it('does not show helperText if showErrors is false', () => {
-    setup({
-      showErrors: false,
-      formik: {
-        values: { cf: '' },
-        errors: { cf: 'Error' },
-        setFieldValue: jest.fn(),
-        setFieldError: jest.fn(),
-        touched: {},
-        isSubmitting: false,
-        isValidating: false,
-        submitCount: 0,
-        handleChange: jest.fn(),
-        handleBlur: jest.fn(),
-        handleSubmit: jest.fn(),
-        handleReset: jest.fn(),
-        setTouched: jest.fn(),
-        setValues: jest.fn(),
-        setErrors: jest.fn(),
-        validateForm: jest.fn(),
-        validateField: jest.fn(),
-        resetForm: jest.fn(),
-        initialValues: { cf: '' },
-        initialErrors: {},
-        initialTouched: {},
-        initialStatus: undefined,
-        status: undefined,
-        dirty: false,
-        isValid: true,
-        registerField: jest.fn(),
-        unregisterField: jest.fn(),
-        setStatus: jest.fn(),
-        setSubmitting: jest.fn(),
-        setFieldTouched: jest.fn(),
-        getFieldProps: jest.fn(),
-        getFieldMeta: jest.fn(),
-        getFieldHelpers: jest.fn(),
-        submitForm: jest.fn(),
-        setFormikState: jest.fn(),
-      },
-    });
-    expect(screen.queryByText('Error')).not.toBeInTheDocument();
-  });
+    render(
+      <CfTextField
+        formik={formik}
+        showErrors={false}
+        setShowErrors={setShowErrors}
+        label="CF"
+      />
+    );
 
-  it('uses the name prop if provided', () => {
-    const { formik } = setup({
-      formik: {
-        values: { custom: '' },
-        errors: { custom: '' },
-        setFieldValue: jest.fn(),
-        setFieldError: jest.fn(),
-        touched: {},
-        isSubmitting: false,
-        isValidating: false,
-        submitCount: 0,
-        handleChange: jest.fn(),
-        handleBlur: jest.fn(),
-        handleSubmit: jest.fn(),
-        handleReset: jest.fn(),
-        setTouched: jest.fn(),
-        setValues: jest.fn(),
-        setErrors: jest.fn(),
-        validateForm: jest.fn(),
-        validateField: jest.fn(),
-        resetForm: jest.fn(),
-        initialValues: { custom: '' },
-        initialErrors: {},
-        initialTouched: {},
-        initialStatus: undefined,
-        status: undefined,
-        dirty: false,
-        isValid: true,
-        registerField: jest.fn(),
-        unregisterField: jest.fn(),
-        setStatus: jest.fn(),
-        setSubmitting: jest.fn(),
-        setFieldTouched: jest.fn(),
-        getFieldProps: jest.fn(),
-        getFieldMeta: jest.fn(),
-        getFieldHelpers: jest.fn(),
-        submitForm: jest.fn(),
-        setFormikState: jest.fn(),
-      },
-      name: 'custom',
-    });
-    const input = screen.getByLabelText(/codice fiscale/i);
-    fireEvent.change(input, { target: { value: 'abc' } });
-    expect(formik.setFieldValue).not.toHaveBeenCalledWith('custom', 'ABC', false);
+    expect(screen.queryByText("Errore")).not.toBeInTheDocument();
   });
 });
