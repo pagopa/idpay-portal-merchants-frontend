@@ -9,8 +9,8 @@ describe('isValidCF', () => {
   });
 
   it('restituisce false per CF troppo corto o troppo lungo', () => {
-    expect(isValidCF('ABCDEF12G34H567')).toBe(false); // 15
-    expect(isValidCF('ABCDEF12G34H567II')).toBe(false); // 17
+    expect(isValidCF('ABCDEF12G34H567')).toBe(false);
+    expect(isValidCF('ABCDEF12G34H567II')).toBe(false);
   });
 
   it('restituisce false per CF con caratteri non validi', () => {

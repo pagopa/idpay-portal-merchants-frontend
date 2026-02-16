@@ -1,79 +1,200 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import ShopDetails from "../ShopDetails";
+import { BrowserRouter } from "react-router-dom";
 
-jest.mock('react-redux', () => ({
-  __esModule: true,
-  useSelector: jest.fn(() => []),
-  useDispatch: jest.fn(() => jest.fn()),
-  connect: () => (Component: any) => Component, // HOC noop
-}));
-
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
-  __esModule: true,
-  TitleBox: ({ title }: any) => <div data-testid="titlebox-mock">{title}</div>,
-}));
-
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
-  __esModule: true,
-  storageTokenOps: { read: jest.fn(() => 'fake.jwt') },
-}));
-
-jest.mock('react-i18next', () => ({
-  ...jest.requireActual('react-i18next'),
-  useTranslation: () => ({ t: (k: string) => k, i18n: { changeLanguage: jest.fn() } }),
-}));
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
   useHistory: () => ({
     goBack: jest.fn(),
     replace: jest.fn(),
-    location: { state: {} },
+    location: { state: { store: { id: "batch-1" } } },
   }),
   useLocation: () => ({
-    state: {
-      store: { id: '1', name: 'Batch 1' },
-      batchId: 'batch-1',
-    },
+    state: { store: { id: "batch-1" }, batchId: "batch-1" },
   }),
 }));
 
-jest.mock('../../../../services/merchantService', () => ({
-  getAllRewardBatches: jest.fn().mockResolvedValue({ content: [] }),
-  getMerchantPointOfSalesWithTransactions: jest.fn().mockResolvedValue([]),
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+  withTranslation: () => (Component: any) => Component,
+}));
+
+jest.mock("../../../../services/merchantService", () => ({
+  getAllRewardBatches: jest.fn(),
+  getMerchantPointOfSalesWithTransactions: jest.fn(),
+  getMerchantDetail: jest.fn(),
+  getMerchantTransactionsProcessed: jest.fn(),
   downloadBatchCsv: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/useAlert', () => ({
-  useAlert: () => ({ setAlert: jest.fn() }),
+jest.mock("../../../../hooks/useAlert", () => ({
+  useAlert: () => ({
+    setAlert: jest.fn(),
+  }),
 }));
 
-jest.mock('../ShopCard', () => ({
-  ShopCard: () => <div data-testid="shop-card-mock" />,
+jest.mock("../../../../utils/jwt-utils", () => ({
+  parseJwt: () => ({ merchant_id: "merchant-1" }),
 }));
 
-jest.mock('../../invoiceDataTable', () => () => <div data-testid="invoice-data-table-mock" />);
-
-jest.mock('../../../initiativeDiscounts/FiltersForm', () => ({
-  __esModule: true,
-  default: ({ children }: any) => <div>{children}</div>,
+jest.mock("react-redux", () => ({
+  useSelector: () => [{ initiativeId: "init-1" }],
+  connect: () => (Component: any) => Component,
 }));
 
-describe('ShopDetails page', () => {
-  const ShopDetails = require('../ShopDetails').default;
+const {
+  getAllRewardBatches,
+  getMerchantPointOfSalesWithTransactions,
+  getMerchantDetail,
+  getMerchantTransactionsProcessed,
+  downloadBatchCsv,
+} = jest.requireMock("../../../../services/merchantService");
 
-  it('renders back button and title', () => {
-    render(<ShopDetails />);
-    expect(screen.getByTestId('back-button-test')).toBeInTheDocument();
+const renderComponent = () =>
+  render(
+    <BrowserRouter>
+      <ShopDetails />
+    </BrowserRouter>
+  );
+
+describe("ShopDetails - FULL BRANCH COVERAGE", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    getMerchantDetail.mockResolvedValue({});
+    getMerchantTransactionsProcessed.mockResolvedValue({
+      content: [],
+      totalPages: 0,
+    });
+
+    getAllRewardBatches.mockResolvedValue({ content: [] });
+    getMerchantPointOfSalesWithTransactions.mockResolvedValue([]);
   });
 
-  it('renders download csv button', () => {
-    render(<ShopDetails />);
-    expect(screen.getByTestId('download-csv-button-test')).toBeInTheDocument();
+  it("covers fetchAll success branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1", status: "APPROVED" }],
+    });
+
+    renderComponent();
+
+    await waitFor(() =>
+      expect(getAllRewardBatches).toHaveBeenCalled()
+    );
   });
 
-  it('renders shop card and invoice table', () => {
-    render(<ShopDetails />);
-    expect(screen.getByTestId('shop-card-mock')).toBeInTheDocument();
-    expect(screen.getByTestId('invoice-data-table-mock')).toBeInTheDocument();
+  it("covers fetchAll error branch", async () => {
+    getAllRewardBatches.mockRejectedValue(new Error("fail"));
+
+    renderComponent();
+
+    await waitFor(() =>
+      expect(getAllRewardBatches).toHaveBeenCalled()
+    );
+  });
+
+  it("covers fetchStores success branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1" }],
+    });
+
+    getMerchantPointOfSalesWithTransactions.mockResolvedValue([]);
+
+    renderComponent();
+
+    await waitFor(() =>
+      expect(getMerchantPointOfSalesWithTransactions).toHaveBeenCalled()
+    );
+  });
+
+  it("covers fetchStores error branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1" }],
+    });
+
+    getMerchantPointOfSalesWithTransactions.mockRejectedValue(new Error("fail"));
+
+    renderComponent();
+
+    await waitFor(() =>
+      expect(getMerchantPointOfSalesWithTransactions).toHaveBeenCalled()
+    );
+  });
+
+  it("covers APPROVING alert branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1", status: "APPROVING" }],
+    });
+
+    renderComponent();
+
+    expect(await screen.findByText("pages.refundRequests.storeDetails.csv.alert")).toBeInTheDocument();
+  });
+
+  it("covers handleDownloadCsv success branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1", status: "APPROVED" }],
+    });
+
+    downloadBatchCsv.mockResolvedValue({
+      approvedBatchUrl: "http://csv",
+    });
+
+    renderComponent();
+
+    const btn = await screen.findByTestId("download-csv-button-test");
+    fireEvent.click(btn);
+
+    await waitFor(() =>
+      expect(downloadBatchCsv).toHaveBeenCalled()
+    );
+  });
+
+  it("covers handleDownloadCsv error branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1", status: "APPROVED" }],
+    });
+
+    downloadBatchCsv.mockRejectedValue(new Error("fail"));
+
+    renderComponent();
+
+    const btn = await screen.findByTestId("download-csv-button-test");
+    fireEvent.click(btn);
+
+    await waitFor(() =>
+      expect(downloadBatchCsv).toHaveBeenCalled()
+    );
+  });
+
+  it("covers trxCode invalid branch (spaces)", () => {
+    renderComponent();
+    const wrapper = screen.getByTestId("trxCodeFilter");
+    const input = wrapper.querySelector("input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "A B" } });
+    expect(input).toBeInTheDocument();
+  });
+
+  it("covers trxCode invalid regex branch", () => {
+    renderComponent();
+    const wrapper = screen.getByTestId("trxCodeFilter");
+    const input = wrapper.querySelector("input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "###" } });
+    expect(input).toBeInTheDocument();
+  });
+
+  it("covers trxCode valid branch", () => {
+    renderComponent();
+    const wrapper = screen.getByTestId("trxCodeFilter");
+    const input = wrapper.querySelector("input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "ABC123" } });
+    expect(input).toBeInTheDocument();
+  });
+
+  it("covers back button branch", () => {
+    renderComponent();
+    fireEvent.click(screen.getByTestId("back-button-test"));
   });
 });

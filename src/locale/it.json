@@ -367,6 +367,28 @@
         "title": "Conferma spostamento",
         "description": "Confermi di voler spostare la transazione al mese successivo?"
       }
+    },
+    "reportExport": {
+      "title": "Esporta report",
+      "subtitle": "Esporta le transazioni del Bonus Elettrodomestici in base ai criteri selezionati.",
+      "form": {
+        "title": "Seleziona i parametri di esportazione",
+        "subtitle": "Imposta i criteri di ricerca per generare il report delle transazioni. Puoi selezionare le date a partire da ieri, con un range massimo consentito di 90 giorni.",
+        "from": "Dal",
+        "to": "Al",
+        "submit": "Genera report",
+        "validation": {
+          "required": "Campo obbligatorio",
+          "maxRange": "Il range massimo consentito è di 90 giorni"
+        }
+      },
+      "reportTitle": "I tuoi report",
+      "noReportFound": "Non hai ancora generato report.",
+      "alert": {
+        "success": "Il report è stato generato ed è pronto per il download.",
+        "info": "Stiamo elaborando il file. Una volta fatto, il report potrà essere scaricato in questa sezione.",
+        "error": "Si è verificato un errore nella generazione del report. Riprova"
+      }
     }
   },
   "roles": {

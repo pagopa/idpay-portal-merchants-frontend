@@ -31,7 +31,6 @@ describe('PrivacyPolicy', () => {
 
   test('renders without crashing', () => {
     render(<PrivacyPolicy />);
-    // Just check that it renders without throwing
     expect(screen.getByText(/pages\.privacyPolicyStatic\.title/i)).toBeInTheDocument();
   });
 });

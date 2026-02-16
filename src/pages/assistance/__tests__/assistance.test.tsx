@@ -47,8 +47,6 @@ describe('<Assistance />', (injectedStore?: ReturnType<typeof createStore>) => {
     const assMessage = screen.getByLabelText('pages.assistanceRequest.message') as HTMLInputElement;
     const sendBtn = screen.getByTestId('sendAssistenceRequest-test');
     const exitBtn = screen.getByTestId('open-exit-test') as HTMLButtonElement;
-    //not found
-    // const thankYou = screen.getByTestId('thankyouPageBackBtn-test') as HTMLButtonElement;
 
     fireEvent.change(assSubject, { target: { value: 'assistance subject' } });
     expect(assSubject.value).toBe('assistance subject');
@@ -61,8 +59,5 @@ describe('<Assistance />', (injectedStore?: ReturnType<typeof createStore>) => {
 
     fireEvent.click(exitBtn);
     expect(exitBtn).toBeInTheDocument();
-
-    // fireEvent.click(thankYou);
-    // expect(thankYou).toBeInTheDocument();
   });
 });

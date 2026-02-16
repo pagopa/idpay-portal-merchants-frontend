@@ -85,7 +85,6 @@ describe('NoResultPaper', () => {
 
   test('should use useTranslation hook', () => {
     render(<NoResultPaper translationKey="test.key" />);
-    // Verify translation was applied
     expect(screen.getByText('translated_test.key')).toBeInTheDocument();
   });
 
@@ -121,7 +120,6 @@ describe('NoResultPaper', () => {
   test('should have correct Paper padding and margin', () => {
     const { container } = render(<NoResultPaper translationKey="test.key" />);
     const paper = container.querySelector('[class*="MuiPaper"]');
-    // MUI applies these via sx prop
     expect(paper).toBeInTheDocument();
   });
 

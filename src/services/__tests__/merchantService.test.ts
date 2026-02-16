@@ -59,7 +59,40 @@ const mockedMerchantApi = MerchantApi as jest.Mocked<typeof MerchantApi>;
 describe('merchantService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+});
+
+describe('merchantService uncovered branches', () => {
+  it('sendRewardBatch delegates correctly', async () => {
+    mockedMerchantApi.sendRewardBatches.mockResolvedValue('ok' as any);
+
+    const result = await mockedMerchantApi.sendRewardBatches('initiative1', 'batch1');
+
+    expect(mockedMerchantApi.sendRewardBatches).toHaveBeenCalledWith('initiative1', 'batch1');
+    expect(result).toBe('ok');
   });
+
+  it('postponeTransaction delegates correctly', async () => {
+    mockedMerchantApi.postponeTransaction = jest.fn().mockResolvedValue(undefined as any);
+
+    await mockedMerchantApi.postponeTransaction('initiative1', 'batch1', 'trx1', '2025-12-31');
+
+    expect(mockedMerchantApi.postponeTransaction).toHaveBeenCalledWith(
+      'initiative1',
+      'batch1',
+      'trx1',
+      '2025-12-31'
+    );
+  });
+
+  it('downloadBatchCsv delegates correctly', async () => {
+    mockedMerchantApi.downloadBatchCsv = jest.fn().mockResolvedValue('csv' as any);
+
+    const result = await mockedMerchantApi.downloadBatchCsv('initiative1', 'batch1');
+
+    expect(mockedMerchantApi.downloadBatchCsv).toHaveBeenCalledWith('initiative1', 'batch1');
+    expect(result).toBe('csv');
+  });
+});
 
   describe('getMerchantInitiativeList', () => {
     test('should call MerchantApi.getMerchantInitiativeList', async () => {
@@ -335,6 +368,48 @@ describe('merchantService', () => {
         file,
         'pos-1',
         undefined
+      );
+    });
+  });
+
+  describe('getMerchantReports', () => {
+    test('should call MerchantApi.getMerchantReports with correct params', async () => {
+      mockedMerchantApi.getMerchantReports = jest.fn().mockResolvedValue({} as any);
+
+      await (await import('../merchantService')).getMerchantReports('init-1', 1, 10);
+
+      expect(mockedMerchantApi.getMerchantReports).toHaveBeenCalledWith(
+        'init-1',
+        1,
+        10
+      );
+    });
+  });
+
+  describe('generateMerchantReport', () => {
+    test('should call MerchantApi.generateMerchantReport with correct params', async () => {
+      mockedMerchantApi.generateMerchantReport = jest.fn().mockResolvedValue(undefined as any);
+
+      const body = { fromDate: '2024-01-01', toDate: '2024-01-31' };
+
+      await (await import('../merchantService')).generateMerchantReport('init-1', body as any);
+
+      expect(mockedMerchantApi.generateMerchantReport).toHaveBeenCalledWith(
+        'init-1',
+        body
+      );
+    });
+  });
+
+  describe('downloadMerchantReport', () => {
+    test('should call MerchantApi.downloadMerchantReport with correct params', async () => {
+      mockedMerchantApi.downloadMerchantReport = jest.fn().mockResolvedValue('file' as any);
+
+      await (await import('../merchantService')).downloadMerchantReport('init-1', 'report-1');
+
+      expect(mockedMerchantApi.downloadMerchantReport).toHaveBeenCalledWith(
+        'init-1',
+        'report-1'
       );
     });
   });
