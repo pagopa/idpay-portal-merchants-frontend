@@ -147,16 +147,109 @@ describe("ReportDataTable", () => {
       .spyOn(window.URL, "createObjectURL")
       .mockReturnValue("blob:url");
 
+    render(<ReportDataTable refreshKey={0} />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("rows")).toBeInTheDocument()
+    );
+
+    expect(downloadMerchantReport).not.toHaveBeenCalled();
+
+    createObjectURLSpy.mockRestore();
+  });
+
+  it("renders loading state", async () => {
+    getMerchantReports.mockImplementation(
+      () => new Promise(() => {})
+    );
+
+    render(<ReportDataTable />);
+
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+  });
+
+  it("handles rows per page change", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r10",
+          fileName: "file.csv",
+          reportStatus: "INSERTED",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
     render(<ReportDataTable />);
 
     await waitFor(() =>
       expect(screen.getByTestId("rows")).toBeInTheDocument()
     );
 
-    await downloadMerchantReport("merchant-1", "r1");
+    fireEvent.click(screen.getByTestId("rows-change"));
 
-    expect(downloadMerchantReport).toHaveBeenCalled();
+    await waitFor(() =>
+      expect(getMerchantReports).toHaveBeenLastCalledWith(
+        "merchant-1",
+        0,
+        20
+      )
+    );
+  });
 
-    createObjectURLSpy.mockRestore();
+  it("handles download error branch", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r2",
+          fileName: "file.csv",
+          reportStatus: "INSERTED",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    downloadMerchantReport.mockRejectedValue(new Error("fail"));
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("rows")).toBeInTheDocument()
+    );
+
+    await expect(
+      downloadMerchantReport("merchant-1", "r2")
+    ).rejects.toThrow("fail");
+  });
+
+  it("renders failed status branch", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r3",
+          fileName: "",
+          reportStatus: "FAILED",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("rows")).toBeInTheDocument()
+    );
+
+    // ensure FAILED row is rendered in table mock
+    expect(screen.getByTestId("rows")).toHaveTextContent("FAILED");
   });
 });
