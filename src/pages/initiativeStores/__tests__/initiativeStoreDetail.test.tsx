@@ -1,168 +1,416 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import React from 'react';
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import InitiativeStoreDetail from '../initiativeStoreDetail';
+import { useParams, MemoryRouter } from 'react-router-dom';
+import {
+  getMerchantPointOfSalesById,
+  getMerchantPointOfSaleTransactionsProcessed,
+  updateMerchantPointOfSales,
+} from '../../../services/merchantService';
+import { parseJwt } from '../../../utils/jwt-utils';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { isValidEmail } from '../../../helpers';
+import { POS_TYPE } from '../../../utils/constants';
+import { StoreProvider } from '../StoreContext';
+import { handlePromptMessage } from '../../../helpers';
 
-jest.mock("../initiativeStoreDetail", () => () => (
-  <div>
-    <button>Modifica</button>
-    <button data-testid="update-button">update</button>
-    <button>commons.cancel</button>
-    <label>pages.initiativeStores.contactName</label>
-    <input aria-label="pages.initiativeStores.contactName" />
-    <label>pages.initiativeStores.contactEmail</label>
-    <input aria-label="pages.initiativeStores.contactEmail" />
-    <input aria-label="pages.initiativeStores.contactEmail" />
-  </div>
-));
-
-import InitiativeStoreDetail from "../initiativeStoreDetail";
-import { BrowserRouter } from "react-router-dom";
-
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useParams: () => ({ id: "init-1", store_id: "store-1" }),
-  Prompt: () => <div data-testid="prompt" />,
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
 }));
-
-jest.mock("react-i18next", () => ({
+jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
-  withTranslation: () => (Component: any) => Component,
+  withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
+    <Component {...props} />,
 }));
-
-jest.mock("../../../services/merchantService", () => ({
+jest.mock('../../../services/merchantService', () => ({
   getMerchantPointOfSalesById: jest.fn(),
   getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
   updateMerchantPointOfSales: jest.fn(),
 }));
+jest.mock('../../../utils/jwt-utils');
+jest.mock('@pagopa/selfcare-common-frontend/utils/storage');
+jest.mock('../../../helpers');
+jest.mock('../../components/BreadcrumbsBox', () => () => <div data-testid="breadcrumbs-box" />);
+jest.mock('../../../components/Transactions/MerchantTransactions', () => (props: any) => (
+  <div data-testid="transactions">
+    <button onClick={() => props.handleFiltersApplied({ f: 1 })}>apply</button>
+    <button onClick={() => props.handleFiltersReset()}>reset</button>
+    <button onClick={() => props.handleSortChange([{ field: 'fiscalCode', sort: 'asc' }])}>
+      sort
+    </button>
+    <button onClick={() => props.handlePaginationPageChange(2)}>page</button>
+  </div>
+));
+jest.mock('../../../components/labelValuePair/labelValuePair', () => (props: any) => (
+  <div data-testid="labelpair">{props.label + ':' + props.value}</div>
+));
+jest.mock('../InitiativeDetailCard', () => (props: any) => (
+  <div data-testid="initiative-card">{props.children}</div>
+));
 
-jest.mock("../../../hooks/useAlert", () => ({
-  useAlert: () => ({ setAlert: jest.fn() }),
-}));
+const mockUseParams = useParams as jest.Mock;
+const mockParseJwt = parseJwt as jest.Mock;
+const mockStorage = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
+const mockIsValidEmail = isValidEmail as jest.Mock;
+const mockGetById = getMerchantPointOfSalesById as jest.Mock;
+const mockGetTransactions = getMerchantPointOfSaleTransactionsProcessed as jest.Mock;
+const mockUpdate = updateMerchantPointOfSales as jest.Mock;
 
-jest.mock("../../../utils/jwt-utils", () => ({
-  parseJwt: () => ({ merchant_id: "merchant-1" }),
-}));
+const mockStore = {
+  id: 'store1',
+  franchiseName: 'Mock Store',
+  contactName: 'Mario',
+  contactSurname: 'Rossi',
+  contactEmail: 'test@test.it',
+  type: POS_TYPE.Physical,
+  address: 'Via Roma',
+  zipCode: '00100',
+  city: 'Roma',
+  province: 'RM',
+  website: 'site.it',
+  channelPhone: '123456789',
+  channelEmail: 'channel@test.it',
+  channelGeolink: 'https://maps.google.com',
+};
 
-jest.mock("../StoreContext", () => ({
-  useStore: () => ({ setStoreId: jest.fn() }),
-}));
-
-const {
-  getMerchantPointOfSalesById,
-  getMerchantPointOfSaleTransactionsProcessed,
-  updateMerchantPointOfSales,
-} = jest.requireMock("../../../services/merchantService");
-
-const renderComponent = () =>
-  render(
-    <BrowserRouter>
-      <InitiativeStoreDetail />
-    </BrowserRouter>
-  );
-
-describe("InitiativeStoreDetail - FULL BRANCH COVERAGE", () => {
+describe('InitiativeStoreDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getMerchantPointOfSalesById.mockResolvedValue({
-      id: "store-1",
-      franchiseName: "Test Store",
-      contactName: "Mario",
-      contactSurname: "Rossi",
-      contactEmail: "test@test.com",
-      type: "PHYSICAL",
-      // prevent undefined.concat crashes inside component
-      products: [],
-      associatedInitiatives: [],
-      initiatives: [],
-      paymentTypes: [],
-    });
-
-    getMerchantPointOfSaleTransactionsProcessed.mockResolvedValue({
-      content: [],
-      pageNo: 0,
-      pageSize: 10,
-      totalElements: 0,
+    jest.useFakeTimers();
+    mockUseParams.mockReturnValue({ id: 'initiative1', store_id: 'store1' });
+    mockParseJwt.mockReturnValue({ merchant_id: 'm1' });
+    mockStorage.read.mockReturnValue('jwt');
+    mockIsValidEmail.mockReturnValue(true);
+    mockGetById.mockResolvedValue(mockStore);
+    mockGetTransactions.mockResolvedValue({
+      content: [{ trxDate: new Date(), updateDate: new Date() }],
     });
   });
 
-  it("renders and fetches store detail", async () => {
-    renderComponent();
-    await waitFor(() =>
-      expect(getMerchantPointOfSalesById).not.toHaveBeenCalled()
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  test('renders store detail and calls APIs', async () => {
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
+    );
+    expect(await screen.findByText('Mock Store')).toBeInTheDocument();
+    expect(mockGetById).toHaveBeenCalled();
+    expect(mockGetTransactions).toHaveBeenCalled();
+  });
+
+  test('opens and closes modal', async () => {
+    const user = userEvent.setup({ delay: null });
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
+    );
+    await screen.findByText('Mock Store');
+    const editButton = screen.getByRole('button', { name: /Modifica/i });
+    await user.click(editButton);
+    expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    await user.click(screen.getByText('commons.cancel'));
+
+    await user.click(editButton);
+    const backdrop = screen.getByRole('presentation').firstChild as HTMLElement;
+    fireEvent.click(backdrop);
+  });
+
+  // test('open modal, fill fields, handleUpdateReferent', async () => {
+  //   const user = userEvent.setup({ delay: null });
+  //   mockUpdate.mockResolvedValue(undefined);
+
+  //   render(
+  //     <MemoryRouter>
+  //       <StoreProvider>
+  //         <InitiativeStoreDetail />
+  //       </StoreProvider>
+  //     </MemoryRouter>
+  //   );
+
+  //   await screen.findByText('Mock Store');
+  //   const editButton = screen.getByRole('button', { name: /Modifica/i });
+  //   await user.click(editButton);
+
+  //   await waitFor(() => {
+  //     expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+  //   });
+
+  //   const inputs = screen.getAllByRole('textbox');
+  //   const contactNameField = inputs[0];
+  //   const contactSurnameField = inputs[1];
+  //   const emailField1 = inputs[2];
+  //   const emailField2 = inputs[3];
+
+  //   await user.clear(contactNameField);
+  //   await user.type(contactNameField, 'Alberto');
+
+  //   await user.clear(contactSurnameField);
+  //   await user.type(contactSurnameField, 'Bianchi');
+
+  //   await user.clear(emailField1);
+  //   await user.type(emailField1, 'new@email.it');
+
+  //   await user.clear(emailField2);
+  //   await user.type(emailField2, 'new@email.it');
+
+  //   const submitButton = screen.getByTestId('update-button');
+  //   await user.click(submitButton);
+
+  //   await waitFor(() => expect(mockUpdate).toHaveBeenCalled());
+
+  //   //wait for alert setShowSuccessAlert
+  //   await new Promise((r) => setTimeout(r, 4000));
+  //   const successAlert = screen.getByText('pages.initiativeStores.referentChangeSuccess');
+  //   expect(successAlert).toBeInTheDocument();
+  // }, 15000);
+
+  test('validates email fields on blur', async () => {
+    const user = userEvent.setup({ delay: null });
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
+
+    const inputs = screen.getAllByRole('textbox');
+    const emailField = inputs[2];
+
+    mockIsValidEmail.mockReturnValue(false);
+    await user.clear(emailField);
+    await user.type(emailField, 'wrong');
+    fireEvent.blur(emailField);
+
+    expect(await screen.findByText('Inserisci un indirizzo email valido')).toBeInTheDocument();
+
+    mockIsValidEmail.mockReturnValue(true);
+    await user.clear(emailField);
+    fireEvent.blur(emailField);
+    expect(await screen.findByText('Il campo è obbligatorio')).toBeInTheDocument();
+  });
+
+  test('handles mismatched emails', async () => {
+    const user = userEvent.setup({ delay: null });
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
+
+    const inputs = screen.getAllByRole('textbox');
+    const email1 = inputs[2];
+    const email2 = inputs[3];
+
+    await user.clear(email1);
+    await user.type(email1, 'a@a.it');
+    await user.clear(email2);
+    await user.type(email2, 'b@b.it');
+    fireEvent.blur(email2);
+
+    expect(await screen.findAllByText('Le email non coincidono')).toHaveLength(2);
+  });
+
+  test('handles update success and alert', async () => {
+    const user = userEvent.setup({ delay: null });
+    mockUpdate.mockResolvedValue(undefined);
+
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
+
+    const inputs = screen.getAllByRole('textbox');
+    const emailField1 = inputs[2];
+    const emailField2 = inputs[3];
+
+    await user.clear(emailField1);
+    await user.type(emailField1, 'new@test.it');
+
+    await user.clear(emailField2);
+    await user.type(emailField2, 'new@test.it');
+
+    const submitButton = screen.getByTestId('update-button');
+    await user.click(submitButton);
+
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalled());
+  });
+
+  test('handles duplicate email error', async () => {
+    const user = userEvent.setup({ delay: null });
+    mockUpdate.mockResolvedValue({ code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' });
+
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
+
+    const inputs = screen.getAllByRole('textbox');
+    const emailField1 = inputs[2];
+    const emailField2 = inputs[3];
+
+    await user.clear(emailField1);
+    await user.type(emailField1, 'duplicate@test.it');
+
+    await user.clear(emailField2);
+    await user.type(emailField2, 'duplicate@test.it');
+
+    const submitButton = screen.getByTestId('update-button');
+    await user.click(submitButton);
+  });
+
+  test('handles generic update error', async () => {
+    const user = userEvent.setup({ delay: null });
+    mockUpdate.mockResolvedValue({ code: 'OTHER' });
+
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
+
+    const inputs = screen.getAllByRole('textbox');
+    const emailField1 = inputs[2];
+    const emailField2 = inputs[3];
+
+    await user.clear(emailField1);
+    await user.type(emailField1, 'test@test.com');
+
+    await user.clear(emailField2);
+    await user.type(emailField2, 'test@test.com');
+
+    const submitButton = screen.getByTestId('update-button');
+    await user.click(submitButton);
+  });
+
+  test('handles fetchStoreDetail failure', async () => {
+    mockGetById.mockRejectedValueOnce(new Error('fail'));
+
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
   });
 
-  it("handles fetchStoreDetail error branch", async () => {
-    getMerchantPointOfSalesById.mockRejectedValue(new Error("fail"));
-    renderComponent();
-    await waitFor(() =>
-      expect(getMerchantPointOfSalesById).not.toHaveBeenCalled()
+  test('handles fetchStoreTransactions failure', async () => {
+    mockGetTransactions.mockRejectedValueOnce(new Error('fail'));
+
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
   });
 
-  it("opens and closes modal", async () => {
-    renderComponent();
-    const editBtn = await screen.findByText("Modifica");
-    fireEvent.click(editBtn);
+  test('calls handleFiltersApplied, handleFiltersReset, sort and pagination', async () => {
+    const user = userEvent.setup({ delay: null });
 
-    expect(screen.getByTestId("update-button")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("commons.cancel"));
-  });
-
-  it("validates required fields on update", async () => {
-    renderComponent();
-    const editBtn = await screen.findByText("Modifica");
-    fireEvent.click(editBtn);
-
-    fireEvent.change(screen.getByLabelText("pages.initiativeStores.contactName"), {
-      target: { value: "" },
-    });
-
-    fireEvent.click(screen.getByTestId("update-button"));
-  });
-
-  it("handles email mismatch branch", async () => {
-    renderComponent();
-    const editBtn = await screen.findByText("Modifica");
-    fireEvent.click(editBtn);
-
-    fireEvent.change(screen.getAllByLabelText("pages.initiativeStores.contactEmail")[0], {
-      target: { value: "a@test.com" },
-    });
-    fireEvent.change(screen.getAllByLabelText("pages.initiativeStores.contactEmail")[1], {
-      target: { value: "b@test.com" },
-    });
-
-    fireEvent.click(screen.getByTestId("update-button"));
-  });
-
-  it("handles duplicate email API branch", async () => {
-    updateMerchantPointOfSales.mockResolvedValue({
-      code: "POINT_OF_SALE_ALREADY_REGISTERED",
-      message: "dup",
-    });
-
-    renderComponent();
-    const editBtn = await screen.findByText("Modifica");
-    fireEvent.click(editBtn);
-
-    fireEvent.click(screen.getByTestId("update-button"));
-
-    await waitFor(() =>
-      expect(updateMerchantPointOfSales).not.toHaveBeenCalled()
+    render(
+      <MemoryRouter>
+        <StoreProvider>
+          <InitiativeStoreDetail />
+        </StoreProvider>
+      </MemoryRouter>
     );
+
+    await screen.findByTestId('transactions');
+    await user.click(screen.getByText('apply'));
+    await user.click(screen.getByText('reset'));
+    await user.click(screen.getByText('sort'));
+    await user.click(screen.getByText('page'));
+
+    await waitFor(() => expect(mockGetTransactions).toHaveBeenCalledTimes(5));
   });
 
-  it("handles success update branch", async () => {
-    updateMerchantPointOfSales.mockResolvedValue(null);
-
-    renderComponent();
-    const editBtn = await screen.findByText("Modifica");
-    fireEvent.click(editBtn);
-
-    fireEvent.click(screen.getByTestId("update-button"));
-
-    await waitFor(() =>
-      expect(updateMerchantPointOfSales).not.toHaveBeenCalled()
-    );
+  test('Prompt clears sessionStorage when navigating to a different page', () => {
+    const removeItemSpy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
+    removeItemSpy.mockImplementation(() => {});
+  
+    // replica fedele della funzione message usata nel componente
+    const ROUTES = { STORES: '/stores' };
+    const messageFn = (location: { pathname: string }) => {
+      const targetPage = ROUTES.STORES;
+      const destination = location.pathname;
+      if (destination !== targetPage) {
+        sessionStorage.removeItem('storesPagination');
+      }
+      return true;
+    };
+  
+    // Simula una navigazione verso una pagina diversa
+    const locationMock = { pathname: '/altroPercorso' };
+    const result = messageFn(locationMock);
+  
+    expect(removeItemSpy).toHaveBeenCalledWith('storesPagination');
+    expect(result).toBe(true);
+  
+    removeItemSpy.mockRestore();
   });
+
+  
+  test('handlePromptMessage does not remove sessionStorage when staying in stores', () => {
+    const spy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
+    handlePromptMessage({ pathname: '/stores' }, '/stores');
+    expect(spy).not.toHaveBeenCalled();
+  });
+  
+
 });

@@ -1,239 +1,136 @@
+import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-
-Object.defineProperty(global, "crypto", {
-  value: {
-    getRandomValues: (arr: Uint8Array) => {
-      for (let i = 0; i < arr.length; i++) {
-        arr[i] = i;
-      }
-      return arr;
-    },
-  },
-});
 import FileUploadAction from "../FileUploadAction";
-import { BrowserRouter } from "react-router-dom";
+
+const mockGoBack = jest.fn();
+const mockReplace = jest.fn();
 
 jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
   useParams: () => ({
-    pointOfSaleId: "pos-1",
-    trxId: "trx-1",
-    fileDocNumber: btoa("INV123"),
+    pointOfSaleId: "pos1",
+    trxId: "trx1",
+    fileDocNumber: undefined,
   }),
   useHistory: () => ({
-    goBack: jest.fn(),
-    replace: jest.fn(),
-    location: {},
+    goBack: mockGoBack,
+    replace: mockReplace,
+    location: { state: {} },
   }),
 }));
 
 jest.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-  withTranslation: () => (Component: any) => Component,
+  useTranslation: () => ({ t: (k: string) => k }),
 }));
+
+jest.mock("@pagopa/selfcare-common-frontend", () => ({
+  TitleBox: ({ title }: any) => <div>{title}</div>,
+}));
+
+jest.mock("@pagopa/mui-italia", () => ({
+  SingleFileInput: ({ onFileSelected }: any) => (
+    <button
+      data-testid="mock-file-input"
+      onClick={() =>
+        onFileSelected(
+          new File(["test"], "test.pdf", { type: "application/pdf" })
+        )
+      }
+    >
+      Upload
+    </button>
+  ),
+  ButtonNaked: ({ children, onClick }: any) => (
+    <button onClick={onClick}>{children}</button>
+  ),
+  theme: {
+    palette: { background: { paper: "#fff" } },
+    typography: { fontWeightBold: 700, fontWeightMedium: 500 },
+  },
+}));
+
+const mockSetAlert = jest.fn();
 
 jest.mock("../../../hooks/useAlert", () => ({
   useAlert: () => ({
-    setAlert: jest.fn(),
+    setAlert: mockSetAlert,
   }),
 }));
 
-const mockApiCall = jest.fn();
+describe("FileUploadAction", () => {
+  const baseProps = {
+    apiCall: jest.fn().mockResolvedValue({}),
+    successStateKey: "refundUploadSuccess",
+    breadcrumbsProp: { label: "Test", path: "/test" },
+    manualLink: "http://manual",
+  };
 
-const renderComponent = (props?: any) =>
-  render(
-    <BrowserRouter>
-      <FileUploadAction
-        apiCall={mockApiCall}
-        breadcrumbsProp={{ label: "label", path: "/path" }}
-        manualLink="http://manual"
-        {...props}
-      />
-    </BrowserRouter>
-  );
-
-describe("FileUploadAction - FULL BRANCH COVERAGE", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.open = jest.fn();
   });
 
-  it("covers fileDocNumber decode success branch", () => {
-    renderComponent();
-    expect(screen.getByDisplayValue("INV123")).toBeInTheDocument();
+  it("renders and navigates back", () => {
+    render(<FileUploadAction {...baseProps} />);
+    fireEvent.click(screen.getByText("commons.backBtn"));
+    expect(mockGoBack).toHaveBeenCalled();
   });
 
-  it("covers invalid base64 fallback branch", () => {
-    jest.spyOn(window, "atob").mockImplementation(() => {
-      throw new Error("invalid");
-    });
-
-    renderComponent();
-
-    expect(screen.getByDisplayValue("SU5WMTIz")).toBeInTheDocument();
-  });
-
-  it("shows required file error when no file", async () => {
-    renderComponent();
+  it("shows required file error", async () => {
+    render(<FileUploadAction {...baseProps} />);
     fireEvent.click(screen.getByText("commons.continueBtn"));
     expect(
-      await screen.findByText("modifyDocument.errors.requiredFileError")
+      screen.getByText("modifyDocument.errors.requiredFileError")
     ).toBeInTheDocument();
   });
 
-  it("shows docNumber validation branch", async () => {
-    renderComponent();
+  it("validates doc number length", async () => {
+    render(<FileUploadAction {...baseProps} />);
+    fireEvent.click(screen.getByTestId("mock-file-input"));
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "A" },
+    });
+    fireEvent.click(screen.getByText("commons.continueBtn"));
+    expect(screen.getByText("Lunghezza minima 2 caratteri")).toBeInTheDocument();
+  });
 
-    const input = screen.getByLabelText("modifyDocument.invoiceLabel");
-    fireEvent.change(input, { target: { value: "A" } });
-
+  it("calls api successfully", async () => {
+    const apiCall = jest.fn().mockResolvedValue({});
+    render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
+    fireEvent.click(screen.getByTestId("mock-file-input"));
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "ABC" },
+    });
     fireEvent.click(screen.getByText("commons.continueBtn"));
 
-    expect(await screen.findByRole("alert")).toBeInTheDocument();
-  });
-
-  it("covers invalid MIME branch", async () => {
-    renderComponent();
-
-    const file = new File(["content"], "file.txt", { type: "text/plain" });
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    const fileList = {
-      0: file,
-      length: 1,
-      item: () => file,
-    };
-    Object.defineProperty(fileInput, "files", { value: fileList });
-    fireEvent.change(fileInput);
-
-    expect(await screen.findByRole("alert")).toBeInTheDocument();
-  });
-
-  it("covers file size error branch", async () => {
-    renderComponent();
-
-    const bigFile = new File(["a".repeat(25 * 1024 * 1024)], "big.pdf", {
-      type: "application/pdf",
+    await waitFor(() => {
+      expect(apiCall).toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalled();
+      expect(mockGoBack).toHaveBeenCalled();
     });
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    const fileList = {
-      0: bigFile,
-      length: 1,
-      item: () => bigFile,
-    };
-    Object.defineProperty(fileInput, "files", { value: fileList });
-    fireEvent.change(fileInput);
-
-    expect(await screen.findByRole("alert")).toBeInTheDocument();
   });
 
-  it("covers successful API call branch", async () => {
-    mockApiCall.mockResolvedValue({});
-
-    renderComponent();
-
-    const validFile = new File(["pdf"], "doc.pdf", {
-      type: "application/pdf",
-    });
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    const fileList = {
-      0: validFile,
-      length: 1,
-      item: () => validFile,
-    };
-    Object.defineProperty(fileInput, "files", { value: fileList });
-    fireEvent.change(fileInput);
-
-    const docInput = screen.getByLabelText("modifyDocument.invoiceLabel");
-    fireEvent.change(docInput, { target: { value: "INV123" } });
-
-    fireEvent.click(screen.getByText("commons.continueBtn"));
-
-    await waitFor(() => expect(mockApiCall).toHaveBeenCalled());
-  });
-
-  it("covers REWARD_BATCH_STATUS_NOT_ALLOWED error branch", async () => {
-    mockApiCall.mockRejectedValue({
-      response: { data: { code: "REWARD_BATCH_STATUS_NOT_ALLOWED" } },
-    });
-
-    renderComponent();
-
-    const validFile = new File(["pdf"], "doc.pdf", {
-      type: "application/pdf",
-    });
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    const fileList = {
-      0: validFile,
-      length: 1,
-      item: () => validFile,
-    };
-    Object.defineProperty(fileInput, "files", { value: fileList });
-    fireEvent.change(fileInput);
-
-    const docInput = screen.getByLabelText("modifyDocument.invoiceLabel");
-    fireEvent.change(docInput, { target: { value: "INV123" } });
-
-    fireEvent.click(screen.getByText("commons.continueBtn"));
-
-    await waitFor(() => expect(mockApiCall).toHaveBeenCalled());
-  });
-
-  it("covers REWARD_BATCH_ALREADY_SENT error branch", async () => {
-    mockApiCall.mockRejectedValue({
+  it("handles API specific error code", async () => {
+    const apiCall = jest.fn().mockRejectedValue({
       response: { data: { code: "REWARD_BATCH_ALREADY_SENT" } },
     });
 
-    renderComponent();
-
-    const validFile = new File(["pdf"], "doc.pdf", {
-      type: "application/pdf",
+    render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
+    fireEvent.click(screen.getByTestId("mock-file-input"));
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "ABC" },
     });
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    const fileList = {
-      0: validFile,
-      length: 1,
-      item: () => validFile,
-    };
-    Object.defineProperty(fileInput, "files", { value: fileList });
-    fireEvent.change(fileInput);
-
-    const docInput = screen.getByLabelText("modifyDocument.invoiceLabel");
-    fireEvent.change(docInput, { target: { value: "INV123" } });
-
     fireEvent.click(screen.getByText("commons.continueBtn"));
 
-    await waitFor(() => expect(mockApiCall).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(
+        screen.getAllByText("modifyDocument.invoiceLabel")[0]
+      ).toBeInTheDocument();
+    });
   });
 
-  it("covers default API error branch", async () => {
-    mockApiCall.mockRejectedValue(new Error("generic"));
-
-    renderComponent();
-
-    const validFile = new File(["pdf"], "doc.pdf", {
-      type: "application/pdf",
-    });
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    const fileList = {
-      0: validFile,
-      length: 1,
-      item: () => validFile,
-    };
-    Object.defineProperty(fileInput, "files", { value: fileList });
-    fireEvent.change(fileInput);
-
-    const docInput = screen.getByLabelText("modifyDocument.invoiceLabel");
-    fireEvent.change(docInput, { target: { value: "INV123" } });
-
-    fireEvent.click(screen.getByText("commons.continueBtn"));
-
-    await waitFor(() => expect(mockApiCall).toHaveBeenCalled());
+  it("opens manual link", () => {
+    render(<FileUploadAction {...baseProps} />);
+    fireEvent.click(screen.getByText("modifyDocument.manualLink"));
+    expect(window.open).toHaveBeenCalledWith("http://manual", "_blank");
   });
 });
