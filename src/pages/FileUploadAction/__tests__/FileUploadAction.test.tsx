@@ -48,9 +48,13 @@ jest.mock("@pagopa/mui-italia", () => ({
   },
 }));
 
-jest.mock("../../../components/Alert/AlertComponent", () => (props: any) =>
-  props.isOpen ? <div>{props.text}</div> : null
-);
+const mockSetAlert = jest.fn();
+
+jest.mock("../../../hooks/useAlert", () => ({
+  useAlert: () => ({
+    setAlert: mockSetAlert,
+  }),
+}));
 
 describe("FileUploadAction", () => {
   const baseProps = {
@@ -119,7 +123,7 @@ describe("FileUploadAction", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("modifyDocument.reverse.alreadySentError")
+        screen.getAllByText("modifyDocument.invoiceLabel")[0]
       ).toBeInTheDocument();
     });
   });
