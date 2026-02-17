@@ -105,7 +105,6 @@ describe('ModalReportedUser', () => {
     it('should call onCancel when dialog is closed via backdrop', () => {
       const onCancel = jest.fn();
       render(<ModalReportedUser {...defaultProps} onCancel={onCancel} />);
-      // Dialog onClose is triggered by clicking the backdrop
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
     });
@@ -144,7 +143,6 @@ describe('ModalReportedUser', () => {
       const title = screen.getByText('Test Title');
       const titleElement = title.closest('.MuiDialogTitle-root');
       expect(titleElement).toHaveClass('MuiDialogTitle-root');
-      // Check that title exists and is rendered
       expect(title).toBeInTheDocument();
     });
   });

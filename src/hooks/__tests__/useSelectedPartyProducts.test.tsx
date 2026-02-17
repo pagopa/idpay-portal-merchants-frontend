@@ -47,9 +47,7 @@ describe('useSelectedPartyProducts', () => {
     expect(selector).toBe(partiesSelectors.selectPartySelectedProducts);
     expect(action).toBe(partiesActions.setPartySelectedProducts);
 
-    // Test the fetcher function
     fetcher();
-    //expect(productService.fetchProducts).toHaveBeenCalledWith(mockParty.partyId);
 
     expect(result.current).toBe(mockReturnValue);
   });

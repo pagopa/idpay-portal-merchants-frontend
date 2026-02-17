@@ -10,7 +10,6 @@ beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
-  // Mock the fetch response
   const mockResponse = {
     blob: () => Promise.resolve(new Blob()),
   } as Response;

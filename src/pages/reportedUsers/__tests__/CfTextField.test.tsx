@@ -61,7 +61,6 @@ describe('CfTextField', () => {
     const { formik } = setup();
     const input = screen.getByLabelText(/codice fiscale/i);
     fireEvent.change(input, { target: { value: 'ab!c1234def5678ghijkl' } });
-    // Should call setFieldValue with "ABC1234DEF5678GH"
     expect(formik.setFieldValue).toHaveBeenCalledWith('cf', 'ABC1234DEF5678GH', false);
   });
 

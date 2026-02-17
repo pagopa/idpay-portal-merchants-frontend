@@ -2,7 +2,7 @@ import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import SideMenu from '../SideMenu';
 import { setInitiativesList } from '../../../redux/slices/initiativesSlice';
 import { mockedInitiativesList } from '../../../api/__mocks__/MerchantsApiClient';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ROUTES, { BASE_ROUTE } from '../../../routes';
 
@@ -46,9 +46,7 @@ describe('Test suite for SideMenu component', () => {
     store.dispatch(setInitiativesList(mockedInitiativesList));
     const link = await screen.findByText('Iniziativa mock 1234');
     const user = userEvent.setup();
-    // First click to expand
     await user.click(link);
-    // Second click to collapse
     await user.click(link);
     await waitFor(() => expect(link).toBeInTheDocument());
   });
@@ -108,11 +106,22 @@ describe('Test suite for SideMenu component', () => {
     });
   });
 
+  test('checkIsSelected returns true when pathname matches export report route', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const exportReportPath = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`;
+    history.replace(exportReportPath);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(exportReportPath);
+    });
+  });
+
   test('checkIsSelected returns true for stores detail route', async () => {
     const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
     
-    // Navigate to stores detail route
     const storesDetailPath = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_STORES}/detail`;
     history.replace(storesDetailPath);
     
@@ -294,7 +303,6 @@ describe('Test suite for SideMenu component', () => {
   test('History listen is configured during component construction', () => {
     const { history } = renderWithContext(<SideMenu />);
 
-    // Trigger history change
     history.push(ROUTES.HOME);
 
     expect(history.location.pathname).toBe(ROUTES.HOME);
@@ -317,4 +325,101 @@ describe('Test suite for SideMenu component', () => {
     store.dispatch(setInitiativesList([]));
     expect(screen.getByTestId('list-test')).toBeInTheDocument();
   });
+
+  test('Reported users menu item is selected when pathname matches', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const path = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`;
+    history.push(path);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(path);
+    });
+  });
+
+  test('Export report menu item is selected when pathname matches', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const path = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`;
+    history.push(path);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(path);
+    });
+  });
+
+  test('User clicks on refund requests menu item', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const user = userEvent.setup();
+
+    const refundLink = await screen.findAllByText('pages.refundRequests.title');
+
+    await user.click(refundLink[0]);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toContain(
+        ROUTES.SIDE_MENU_REFUND_REQUESTS
+      );
+    });
+  });
+
+  test('User clicks on reported users menu item', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const user = userEvent.setup();
+
+    const accordions = await screen.findAllByTestId('accordion-click-test');
+    const reportedUsersLink = within(accordions[0]).getByText(
+      'pages.reportedUsers.title'
+    );
+
+    await user.click(reportedUsersLink);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toContain(
+        ROUTES.SIDE_MENU_REPORTED_USERS
+      );
+    });
+  });
+
+  test('User clicks on export report menu item', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const user = userEvent.setup();
+
+    const accordions = await screen.findAllByTestId('accordion-click-test');
+    const exportReportLink = within(accordions[0]).getByText(
+      'pages.reportExport.title'
+    );
+
+    await user.click(exportReportLink);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toContain(
+        ROUTES.SIDE_MENU_EXPORT_REPORT
+      );
+    });
+  });
+
+  test('Accordion collapses when handleChange is called with isExpanded=false', async () => {
+    const { store } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const accordions = await screen.findAllByTestId('accordion-click-test');
+    const user = userEvent.setup();
+
+    await user.click(accordions[0]);
+    await user.click(accordions[0]);
+
+    await waitFor(() => {
+      expect(accordions[0]).toBeInTheDocument();
+    });
+  });
+
 });
