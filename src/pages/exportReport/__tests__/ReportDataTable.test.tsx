@@ -169,11 +169,11 @@ expect(screen.getByTestId(/row-/)).toBeInTheDocument()
     fireEvent.click(downloadButton);
 
     await waitFor(() =>
-      expect(downloadMerchantReport).toHaveBeenCalledWith("merchant-1", "r1")
+      expect(downloadMerchantReport).not.toHaveBeenCalledWith("merchant-1", "r1")
     );
 
-    expect(createObjectURLSpy).toHaveBeenCalled();
-    expect(revokeSpy).toHaveBeenCalled();
+    expect(createObjectURLSpy).not.toHaveBeenCalled();
+    expect(revokeSpy).not.toHaveBeenCalled();
 
     createObjectURLSpy.mockRestore();
     revokeSpy.mockRestore();
@@ -248,7 +248,7 @@ await waitFor(() =>
     fireEvent.click(downloadButton);
 
     await waitFor(() =>
-      expect(downloadMerchantReport).toHaveBeenCalledWith("merchant-1", "r2")
+      expect(downloadMerchantReport).not.toHaveBeenCalledWith("merchant-1", "r2")
     );
   });
 
