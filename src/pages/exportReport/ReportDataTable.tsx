@@ -19,14 +19,14 @@ type RouteParams = {
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case ReportStatusEnum.GENERATED || ReportStatusEnum.INSERTED:
+    case ReportStatusEnum.INSERTED || ReportStatusEnum.IN_PROGRESS:
       return <CachedIcon color="info" />;
     case ReportStatusEnum.FAILED:
       return <ErrorIcon color="error" />;
-    case ReportStatusEnum.INSERTED:
+    case ReportStatusEnum.GENERATED:
       return <CheckCircleIcon color="success" />;
     default:
-      return <CachedIcon name="default" />;
+      return <CachedIcon name="default" color="info"/>;
   }
 };
 
@@ -72,7 +72,22 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
 
   useEffect(() => {
     loadReports();
-  }, [pagination.pageNo, pagination.pageSize, refreshKey]);
+  }, [pagination.pageNo, pagination.pageSize]);
+
+  useEffect(() => {
+    if (refreshKey !== undefined) {
+      setPagination((prev) => {
+        if (prev.pageNo === 0) {
+          loadReports();
+          return prev;
+        }
+        return {
+          ...prev,
+          pageNo: 0,
+        };
+      });
+    }
+  }, [refreshKey]);
 
   const handleDownload = async (reportId: string, fileName: string) => {
     if (!id) {
@@ -83,16 +98,17 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
 
     try {
       const response = await downloadMerchantReport(id, reportId);
-      const blob = new Blob([response as any], { type: 'text/csv;charset=utf-8;' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      // eslint-disable-next-line functional/immutable-data
-      link.href = url;
-      link.setAttribute('download', fileName || 'report.csv');
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const reportUrl = (response as any)?.reportUrl;
+
+      if (reportUrl) {
+        const link = document.createElement('a');
+        // eslint-disable-next-line functional/immutable-data
+        link.href = reportUrl;
+        link.setAttribute('download', fileName || 'report.csv');
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+      }
     } catch (error) {
       console.error('Error downloading report', error);
     } finally {
@@ -179,7 +195,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
           return (
             <IconButton
               disabled={
-                params.row.reportStatus !== ReportStatusEnum.INSERTED ||
+                params.row.reportStatus !== ReportStatusEnum.GENERATED ||
                 downloadingId === params.row.id
               }
               onClick={() =>
@@ -188,7 +204,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
             >
               <DownloadIcon
                 color={
-                  params.row.reportStatus === ReportStatusEnum.INSERTED &&
+                  params.row.reportStatus === ReportStatusEnum.GENERATED &&
                   downloadingId !== params.row.id
                     ? 'primary'
                     : 'disabled'

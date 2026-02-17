@@ -4,44 +4,16 @@ import {
   Card,
   CardContent,
   Typography,
-  TextFieldProps,
-  Stack, TextField,
+  Stack,
+  TextField,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { FormikProps, useFormik } from 'formik';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { useFormik } from 'formik';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/it';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { useParams } from 'react-router-dom';
 import { generateMerchantReport } from '../../services/merchantService';
 import { ReportTypeEnum } from '../../api/generated/merchants/ReportRequest';
-
-type DatePickerRenderInputProps<T> = {
-  formik: FormikProps<T>;
-  fieldName: keyof T;
-  placeholder: string;
-};
-
-export const renderFormikDatePickerInput =
-  <T,>({ formik, fieldName, placeholder }: DatePickerRenderInputProps<T>) =>
-    (params: TextFieldProps) => (
-      <TextField
-        {...params}
-        size="small"
-        placeholder={placeholder}
-        error={Boolean(formik.touched[fieldName] && formik.errors[fieldName])}
-        helperText={
-          formik.touched[fieldName] && formik.errors[fieldName]
-            ? String(formik.errors[fieldName])
-            : undefined
-        }
-        InputLabelProps={{
-          ...params.InputLabelProps,
-          shrink: Boolean(formik.values[fieldName]),
-        }}
-      />
-    );
 
 type FormValues = {
   startDate: Dayjs | null;
@@ -59,9 +31,10 @@ type Props = {
 
 const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
   const { t } = useTranslation();
+  const { id } = useParams<RouteParams>();
 
   const yesterday = dayjs().subtract(1, 'day').startOf('day');
-  const { id } = useParams<RouteParams>();
+  const yesterdayStr = yesterday.format('YYYY-MM-DD');
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -75,10 +48,10 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
       ...( !values.endDate && {
         endDate: t('pages.reportExport.form.validation.required'),
       }),
-      ...( values.startDate && values.endDate && values.endDate.diff(values.startDate, 'day') < 1 && {
+      ...( values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 1 && {
         endDate: t('pages.reportExport.form.validation.invalidRange'),
       }),
-      ...( values.startDate && values.endDate && values.endDate.diff(values.startDate, 'day') > 90 && {
+      ...( values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') > 90 && {
         endDate: t('pages.reportExport.form.validation.maxRange'),
       }),
     }),
@@ -89,8 +62,8 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
 
       try {
         const response = await generateMerchantReport(id, {
-          startPeriod: values?.startDate!.startOf('day').toDate(),
-          endPeriod: values?.endDate!.endOf('day').toDate(),
+          startPeriod: dayjs(values.startDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
+          endPeriod: dayjs(values.endDate).endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
           reportType: ReportTypeEnum.MERCHANT_TRANSACTIONS,
         }) as any;
 
@@ -110,14 +83,16 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
         updateAlerts('failed', true);
         setTimeout(() => updateAlerts('failed', false), 3000);
       } finally {
-        if (typeof formik.resetForm === 'function') {
-          formik.resetForm();
-        }
+        formik.resetForm();
         onReportGenerated?.();
       }
     },
   });
 
+  const minEndDateStr =
+    formik.values.startDate
+      ? dayjs(formik.values.startDate).add(1, 'day').format('YYYY-MM-DD')
+      : '';
 
   return (
     <Card sx={{ width: '100%' }}>
@@ -130,58 +105,60 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
           {t('pages.reportExport.form.subtitle')}
         </Typography>
 
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="it">
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
-              <DatePicker
-                label="Dal"
-                value={formik.values.startDate}
-                inputFormat="DD/MM/YYYY"
-                maxDate={yesterday}
-                onChange={(value) => {
-                  void formik.setFieldValue('startDate', value);
-                  void formik.setFieldValue('endDate', null);
-                }}
-                renderInput={renderFormikDatePickerInput({
-                  formik,
-                  fieldName: 'startDate',
-                  placeholder: 'Dal',
-                })}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+            <TextField
+              label="Dal"
+              type="date"
+              size="small"
+              value={formik.values.startDate ?? ''}
+              onChange={(e) => {
+                void formik.setFieldValue('startDate', e.target.value);
+                void formik.setFieldValue('endDate', '');
+              }}
+              onBlur={formik.handleBlur}
+              inputProps={{ max: yesterdayStr, placeholder: '' }}
+              InputLabelProps={{ shrink: true }}
+              error={Boolean(formik.touched.startDate && formik.errors.startDate)}
+              helperText={
+                formik.touched.startDate && formik.errors.startDate
+                  ? String(formik.errors.startDate)
+                  : undefined
+              }
+            />
 
-              />
+            <TextField
+              label="Al"
+              type="date"
+              size="small"
+              value={formik.values.endDate ?? ''}
+              onChange={(e) => void formik.setFieldValue('endDate', e.target.value)}
+              onBlur={formik.handleBlur}
+              inputProps={{
+                min: minEndDateStr || undefined,
+                max: yesterdayStr,
+                placeholder: '',
+              }}
+              InputLabelProps={{ shrink: true }}
+              error={Boolean(formik.touched.endDate && formik.errors.endDate)}
+              helperText={
+                formik.touched.endDate && formik.errors.endDate
+                  ? String(formik.errors.endDate)
+                  : undefined
+              }
+            />
+          </Stack>
 
-              <DatePicker
-                label="Al"
-                value={formik.values.endDate}
-                inputFormat="DD/MM/YYYY"
-                minDate={
-                  formik.values.startDate
-                    ? formik.values.startDate.add(1, 'day')
-                    : undefined
-                }
-                maxDate={yesterday}
-                onChange={(value) =>
-                  formik.setFieldValue('endDate', value)
-                }
-                renderInput={renderFormikDatePickerInput({
-                  formik,
-                  fieldName: 'endDate',
-                  placeholder: 'Al',
-                })}
-              />
-            </Stack>
+          <Box sx={{ flex: 1 }} />
 
-            <Box sx={{ flex: 1 }} />
-
-            <Button
-              variant="contained"
-              disabled={formik.isSubmitting}
-              onClick={() => formik.handleSubmit()}
-            >
-              {t('pages.reportExport.form.submit')}
-            </Button>
-          </Box>
-        </LocalizationProvider>
+          <Button
+            variant="contained"
+            disabled={formik.isSubmitting}
+            onClick={() => formik.handleSubmit()}
+          >
+            {t('pages.reportExport.form.submit')}
+          </Button>
+        </Box>
       </CardContent>
     </Card>
   );
