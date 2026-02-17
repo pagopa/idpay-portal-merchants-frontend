@@ -111,7 +111,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               label="Dal"
               type="date"
               size="small"
-              value={formik.values.startDate}
+              value={formik.values.startDate ?? ''}
               onChange={(e) => {
                 void formik.setFieldValue('startDate', e.target.value);
                 void formik.setFieldValue('endDate', '');
@@ -131,7 +131,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               label="Al"
               type="date"
               size="small"
-              value={formik.values.endDate}
+              value={formik.values.endDate ?? ''}
               onChange={(e) => void formik.setFieldValue('endDate', e.target.value)}
               onBlur={formik.handleBlur}
               inputProps={{
