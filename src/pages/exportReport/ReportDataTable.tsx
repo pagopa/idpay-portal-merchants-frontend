@@ -98,16 +98,17 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
 
     try {
       const response = await downloadMerchantReport(id, reportId);
-      const blob = new Blob([response as any], { type: 'text/csv;charset=utf-8;' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      // eslint-disable-next-line functional/immutable-data
-      link.href = url;
-      link.setAttribute('download', fileName || 'report.csv');
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const reportUrl = (response as any)?.reportUrl;
+
+      if (reportUrl) {
+        const link = document.createElement('a');
+        // eslint-disable-next-line functional/immutable-data
+        link.href = reportUrl;
+        link.setAttribute('download', fileName || 'report.csv');
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+      }
     } catch (error) {
       console.error('Error downloading report', error);
     } finally {
