@@ -14,6 +14,7 @@ import 'dayjs/locale/it';
 import { useParams } from 'react-router-dom';
 import { generateMerchantReport } from '../../services/merchantService';
 import { ReportTypeEnum } from '../../api/generated/merchants/ReportRequest';
+import { MIN_START_DATE } from '../../utils/constants';
 
 type FormValues = {
   startDate: Dayjs | null;
@@ -92,7 +93,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
   const minEndDateStr =
     formik.values.startDate
       ? dayjs(formik.values.startDate).add(1, 'day').format('YYYY-MM-DD')
-      : '';
+      : MIN_START_DATE;
 
   return (
     <Card sx={{ width: '100%' }}>
@@ -117,7 +118,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
                 void formik.setFieldValue('endDate', '');
               }}
               onBlur={formik.handleBlur}
-              inputProps={{ max: yesterdayStr, placeholder: '' }}
+              inputProps={{ min: MIN_START_DATE, max: yesterdayStr, placeholder: '' }}
               InputLabelProps={{ shrink: true }}
               error={Boolean(formik.touched.startDate && formik.errors.startDate)}
               helperText={

@@ -33,3 +33,5 @@ export const enum TYPE_TEXT {
   Text = 'text',
   Currency = 'manual',
 }
+
+export const MIN_START_DATE = '2025-11-18';

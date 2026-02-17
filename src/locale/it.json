@@ -379,7 +379,8 @@
         "submit": "Genera report",
         "validation": {
           "required": "Campo obbligatorio",
-          "maxRange": "Il range massimo consentito è di 90 giorni"
+          "maxRange": "Il range massimo consentito è di 90 giorni",
+          "invalidRange": "Il range delle date non è valido"
         }
       },
       "reportTitle": "I tuoi report",
