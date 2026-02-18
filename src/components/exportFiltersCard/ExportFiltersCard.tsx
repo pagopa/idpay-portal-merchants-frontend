@@ -15,6 +15,7 @@ import { useParams } from 'react-router-dom';
 import { generateMerchantReport } from '../../services/merchantService';
 import { ReportTypeEnum } from '../../api/generated/merchants/ReportRequest';
 import { MIN_START_DATE } from '../../utils/constants';
+import { ReportStatusEnum } from '../../api/generated/merchants/ReportDTO';
 
 type FormValues = {
   startDate: Dayjs | null;
@@ -43,57 +44,46 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
       endDate: null,
     },
     validate: (values) => ({
-      ...( !values.startDate && {
+      ...(!values.startDate && {
         startDate: t('pages.reportExport.form.validation.required'),
       }),
-      ...( !values.endDate && {
+      ...(!values.endDate && {
         endDate: t('pages.reportExport.form.validation.required'),
       }),
-      ...( values.startDate && dayjs(values.startDate).isAfter(yesterday, 'day') && {
+      ...(values.startDate && dayjs(values.startDate).isAfter(yesterday, 'day') && {
         startDate: t('pages.reportExport.form.validation.invalidRange'),
       }),
-      ...( values.endDate && dayjs(values.endDate).isAfter(yesterday, 'day') && {
+      ...(values.endDate && dayjs(values.endDate).isAfter(yesterday, 'day') && {
         endDate: t('pages.reportExport.form.validation.invalidRange'),
       }),
-      ...( values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 1 && {
+      ...(values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 1 && {
         endDate: t('pages.reportExport.form.validation.invalidRange'),
       }),
-      ...( values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') > 90 && {
+      ...(values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') > 90 && {
         endDate: t('pages.reportExport.form.validation.maxRange'),
       }),
     }),
     onSubmit: async (values) => {
       if (!id) {
         return;
-      }
-
+      };
       try {
         const response = await generateMerchantReport(id, {
           startPeriod: dayjs(values.startDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
           endPeriod: dayjs(values.endDate).endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
           reportType: ReportTypeEnum.MERCHANT_TRANSACTIONS,
         }) as any;
-
-        const status = response?.reportStatus;
-
-        if (status === 'INSERTED') {
-          updateAlerts('inserted', true);
-          setTimeout(() => updateAlerts('inserted', false), 3000);
-        } else if (status === 'GENERATED') {
-          updateAlerts('generated', true);
-          setTimeout(() => updateAlerts('generated', false), 3000);
-        } else if (status === 'FAILED') {
-          updateAlerts('failed', true);
-          setTimeout(() => updateAlerts('failed', false), 3000);
-        }
+        const status: ReportStatusEnum = response?.reportStatus;
+        updateAlerts(status, true);
+        setTimeout(() => updateAlerts(status, false), 3000);
       } catch (error) {
-        updateAlerts('failed', true);
-        setTimeout(() => updateAlerts('failed', false), 3000);
+        updateAlerts(ReportStatusEnum.FAILED, true);
+        setTimeout(() => updateAlerts(ReportStatusEnum.FAILED, false), 3000);
       } finally {
         formik.resetForm();
         onReportGenerated?.();
       }
-    },
+    }
   });
 
   const minEndDateStr =

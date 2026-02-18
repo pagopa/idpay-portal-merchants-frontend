@@ -26,16 +26,17 @@ const getStatusIcon = (status: string) => {
     case ReportStatusEnum.GENERATED:
       return <CheckCircleIcon color="success" />;
     default:
-      return <CachedIcon name="default" color="info"/>;
+      return <CachedIcon name="default" color="info" />;
   }
 };
 
 
 interface ReportDataTableProps {
+  updateAlerts: (key: string, open: boolean) => void;
   refreshKey?: number;
 }
 
-const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
+const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refreshKey }) => {
   const { t } = useTranslation();
   const { id } = useParams<RouteParams>();
   const [reports, setReports] = useState<any>({
@@ -54,7 +55,9 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const loadReports = () => {
-    if (!id) {return;}
+    if (!id) {
+      return;
+    }
 
     setLoading(true);
 
@@ -93,7 +96,6 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
     if (!id) {
       return;
     }
-
     setDownloadingId(reportId);
 
     try {
@@ -111,6 +113,8 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
       }
     } catch (error) {
       console.error('Error downloading report', error);
+      updateAlerts('error', true);
+      setTimeout(() => updateAlerts('error', false), 3000);
     } finally {
       setDownloadingId(null);
     }
@@ -205,7 +209,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ refreshKey }) => {
               <DownloadIcon
                 color={
                   params.row.reportStatus === ReportStatusEnum.GENERATED &&
-                  downloadingId !== params.row.id
+                    downloadingId !== params.row.id
                     ? 'primary'
                     : 'disabled'
                 }

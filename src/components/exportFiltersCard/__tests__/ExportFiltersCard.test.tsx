@@ -81,11 +81,11 @@ describe('ExportFiltersCard', () => {
     clickSubmit();
 
     await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('inserted', true)
+      expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true)
     );
 
     jest.runAllTimers();
-    expect(updateAlerts).toHaveBeenCalledWith('inserted', false);
+    expect(updateAlerts).toHaveBeenCalledWith('INSERTED', false);
   });
 
   it('handles GENERATED status', async () => {
@@ -96,11 +96,11 @@ describe('ExportFiltersCard', () => {
     clickSubmit();
 
     await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('generated', true)
+      expect(updateAlerts).toHaveBeenCalledWith('GENERATED', true)
     );
 
     jest.runAllTimers();
-    expect(updateAlerts).toHaveBeenCalledWith('generated', false);
+    expect(updateAlerts).toHaveBeenCalledWith('GENERATED', false);
   });
 
   it('handles FAILED status', async () => {
@@ -111,11 +111,11 @@ describe('ExportFiltersCard', () => {
     clickSubmit();
 
     await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('failed', true)
+      expect(updateAlerts).toHaveBeenCalledWith('FAILED', true)
     );
 
     jest.runAllTimers();
-    expect(updateAlerts).toHaveBeenCalledWith('failed', false);
+    expect(updateAlerts).toHaveBeenCalledWith('FAILED', false);
   });
 
   it('handles API error', async () => {
@@ -126,11 +126,11 @@ describe('ExportFiltersCard', () => {
     clickSubmit();
 
     await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('failed', true)
+      expect(updateAlerts).toHaveBeenCalledWith('FAILED', true)
     );
 
     jest.runAllTimers();
-    expect(updateAlerts).toHaveBeenCalledWith('failed', false);
+    expect(updateAlerts).toHaveBeenCalledWith('FAILED', false);
   });
 
   it('does nothing if id is missing', async () => {
@@ -170,7 +170,7 @@ describe('ExportFiltersCard', () => {
     clickSubmit();
 
     await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('inserted', true)
+      expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true)
     );
 
     expect(onReportGenerated).toHaveBeenCalled();
