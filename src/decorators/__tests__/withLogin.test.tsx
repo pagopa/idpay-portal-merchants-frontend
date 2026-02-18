@@ -1,6 +1,6 @@
 import { render, waitFor, screen } from '@testing-library/react';
 import { Provider, useSelector as useSelectorOriginal } from 'react-redux';
-import { storageUserOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { createStore } from '../../redux/store';
 import withLogin from '../withLogin';
 

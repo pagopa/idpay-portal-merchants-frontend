@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { Container, Button, Stack, IconButton } from '@mui/material';
-import { ButtonNaked } from '@pagopa/mui-italia/dist/components/ButtonNaked';
-import { AccountDropdown } from '@pagopa/mui-italia/dist/components/AccountDropdown';
+import { ButtonNaked } from '@pagopa/mui-italia';
+import { AccountDropdown } from '@pagopa/mui-italia';
 
 /* Icons */
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';

@@ -23,7 +23,7 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import StoreIcon from '@mui/icons-material/Store';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';

@@ -3,12 +3,12 @@ import '@testing-library/jest-dom';
 import MerchantTransactionsProcessed from '../MerchantTransactionsProcessed';
 import * as service from '../../../services/merchantService';
 import * as helpers from '../../../helpers';
-import * as hooks from '@pagopa/selfcare-common-frontend/hooks/useLoading';
+import * as hooks from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
 import { MerchantTransactionProcessedDTO } from '../../../api/generated/merchants/MerchantTransactionProcessedDTO';
 import { getMerchantTransactionsProcessed } from '../../../services/merchantService';
 import { formatDate, formattedCurrency } from '../../../helpers';
-import * as loadingHook from '@pagopa/selfcare-common-frontend/hooks/useLoading';
-import * as errorHook from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import * as loadingHook from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
+import * as errorHook from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import * as tableDataFilteredHook from '../useTableDataFiltered';
 
 window.scrollTo = jest.fn();

@@ -2,8 +2,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import CustomHeader from '../CustomHeader';
-import { User } from '@pagopa/selfcare-common-frontend/model/User';
-import { trackEvent } from '@pagopa/selfcare-common-frontend/services/analyticsService';
+import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
+import { trackEvent } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
 import { ENV } from '../../../utils/env';
 
 jest.mock('react-i18next', () => ({
@@ -12,11 +12,11 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/services/analyticsService', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService', () => ({
   trackEvent: jest.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/config/env', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     HEADER: {
       LINK: {

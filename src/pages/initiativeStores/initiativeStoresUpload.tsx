@@ -13,7 +13,7 @@ import {
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
 import { parseJwt } from '../../utils/jwt-utils';

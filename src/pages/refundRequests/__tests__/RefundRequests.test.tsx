@@ -31,7 +31,7 @@ jest.mock('@pagopa/selfcare-common-frontend', () => ({
   ),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
   __esModule: true,
   default: () => jest.fn(),
 }));

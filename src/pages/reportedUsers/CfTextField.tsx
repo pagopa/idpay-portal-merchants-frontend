@@ -29,14 +29,18 @@ function CfTextField<T extends { cf: string }>({
           .replace(/[^A-Za-z0-9]/g, '')
           .toUpperCase()
           .slice(0, 16);
-        formik.setFieldValue(name, cleaned, false);
+        void formik.setFieldValue(name, cleaned, false);
         if (cleaned === '') {
           setShowErrors(false);
           formik.setFieldError(name, '');
         }
       }}
       error={showErrors && Boolean(formik.errors[name as keyof T])}
-      helperText={showErrors ? formik.errors[name as keyof T] : ''}
+      helperText={
+        showErrors
+          ? String(formik.errors[name as keyof T] ?? '')
+          : ''
+      }
       FormHelperTextProps={{ sx: { minHeight: '20px' } }}
     />
   );

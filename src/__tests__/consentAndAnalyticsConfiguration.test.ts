@@ -1,4 +1,4 @@
-jest.mock("@pagopa/selfcare-common-frontend/config/env", () => ({
+jest.mock("@pagopa/selfcare-common-frontend/lib/config/env", () => ({
   CONFIG: {
     ANALYTCS: {
       ENABLE: false,
@@ -25,7 +25,7 @@ jest.mock("../utils/env", () => ({
 }));
 
 jest.mock(
-  "@pagopa/selfcare-common-frontend/consentManagementConfigure",
+  "@pagopa/selfcare-common-frontend/lib/consentManagementConfigure",
   () => ({})
 );
 
@@ -34,7 +34,7 @@ describe("consentAndAnalyticsConfiguration", () => {
     await import("../consentAndAnalyticsConfiguration");
 
     const { CONFIG } = await import(
-      "@pagopa/selfcare-common-frontend/config/env"
+      "@pagopa/selfcare-common-frontend/lib/config/env"
     );
 
     expect(CONFIG.ANALYTCS.ENABLE).toBe(true);

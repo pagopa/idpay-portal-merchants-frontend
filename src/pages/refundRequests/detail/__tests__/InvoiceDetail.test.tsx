@@ -6,7 +6,7 @@ import InvoiceDetail from '../InvoiceDetail';
 import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
 import { getEndOfNextMonth } from '../../../../utils/formatUtils';
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
   __esModule: true,
   default: jest.fn(),
 }));

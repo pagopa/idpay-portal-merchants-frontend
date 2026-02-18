@@ -1,5 +1,5 @@
 import { Box, Table, TableBody, TableCell, TableRow } from '@mui/material';
-import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
+import useLoading from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';

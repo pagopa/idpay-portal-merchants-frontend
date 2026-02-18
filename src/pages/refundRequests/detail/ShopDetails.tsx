@@ -21,7 +21,7 @@ import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useSelector } from 'react-redux';
 import { Sync } from '@mui/icons-material';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';

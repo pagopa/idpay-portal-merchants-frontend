@@ -5,7 +5,7 @@ import { renderWithContext } from '../utils/__tests__/test-utils';
 import useTCAgreement from '../hooks/useTCAgreement';
 import { createMemoryHistory } from 'history';
 
-jest.mock('@pagopa/mui-italia/dist/components/Footer/Footer', () => ({
+jest.mock('@pagopa/mui-italia', () => ({
   Footer: () => {},
 }));
 
