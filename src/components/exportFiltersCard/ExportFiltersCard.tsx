@@ -49,6 +49,12 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
       ...( !values.endDate && {
         endDate: t('pages.reportExport.form.validation.required'),
       }),
+      ...( values.startDate && dayjs(values.startDate).isAfter(yesterday, 'day') && {
+        startDate: t('pages.reportExport.form.validation.invalidRange'),
+      }),
+      ...( values.endDate && dayjs(values.endDate).isAfter(yesterday, 'day') && {
+        endDate: t('pages.reportExport.form.validation.invalidRange'),
+      }),
       ...( values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 1 && {
         endDate: t('pages.reportExport.form.validation.invalidRange'),
       }),

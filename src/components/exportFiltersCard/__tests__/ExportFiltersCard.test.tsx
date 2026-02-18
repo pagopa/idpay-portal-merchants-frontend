@@ -225,6 +225,32 @@ describe('ExportFiltersCard', () => {
     expect(result).toEqual({});
   });
 
+  it('covers validate future startDate invalidRange branch', () => {
+    const dayjs = require('dayjs');
+    const futureDate = dayjs().add(2, 'day');
+    const validEndDate = dayjs();
+
+    const result = lastFormikConfig.validate({
+      startDate: futureDate,
+      endDate: validEndDate,
+    });
+
+    expect(result.startDate).toBeDefined();
+  });
+
+  it('covers validate future endDate invalidRange branch', () => {
+    const dayjs = require('dayjs');
+    const futureDate = dayjs().add(2, 'day');
+    const validStartDate = dayjs();
+
+    const result = lastFormikConfig.validate({
+      startDate: validStartDate,
+      endDate: futureDate,
+    });
+
+    expect(result.endDate).toBeDefined();
+  });
+
   it.skip('covers renderFormikDatePickerInput error branch', () => {
     const { renderFormikDatePickerInput } = require('../ExportFiltersCard');
 
