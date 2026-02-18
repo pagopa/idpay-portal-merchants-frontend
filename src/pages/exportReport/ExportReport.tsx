@@ -9,12 +9,12 @@ import ReportDataTable from './ReportDataTable';
 const InitiativeExportReportPage = () => {
   const { t } = useTranslation();
   const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
-    inserted: {
+    generated: {
       text: t('pages.reportExport.alert.success'),
       isOpen: false,
       severity: 'success',
     },
-    generated: {
+    inserted: {
       text: t('pages.reportExport.alert.info'),
       isOpen: false,
       severity: 'info',
