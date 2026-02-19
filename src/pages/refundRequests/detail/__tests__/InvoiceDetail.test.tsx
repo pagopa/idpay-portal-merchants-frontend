@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import InvoiceDetail from '../InvoiceDetail';
 import * as formatUtils from '../../../../utils/formatUtils';
 import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
     __esModule: true,
@@ -42,6 +42,8 @@ jest.mock('react-i18next', () => ({
 }));
 
 const mockUseLocation = { state: { store: { status: 'CREATED', month: (new Date('2026-02-15')).toISOString().split('T')[0] } } };
+const pushMock = jest.fn();
+const mockUseHistory = jest.fn()
 
 jest.mock('../../../../redux/hooks', () => ({
     useAppSelector: jest.fn(),
@@ -49,7 +51,8 @@ jest.mock('../../../../redux/hooks', () => ({
 
 jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'),
-    useLocation: jest.fn()
+    useLocation: jest.fn(),
+    useHistory: () => mockUseHistory()
 }));
 
 jest.mock('../../../../redux/slices/initiativesSlice', () => ({
@@ -108,6 +111,7 @@ describe('InvoiceDetail', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockSetAlert = jest.fn();
+        mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/merchants/merchant-1/refunds', state: {} }});
         (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
         (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
         (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
@@ -210,6 +214,7 @@ describe('InvoiceDetail', () => {
                 });
             });
         });
+        
         it('should handle fetch fail', async () => {
             (useAppSelector as jest.Mock).mockReturnValue([]);
 
@@ -608,6 +613,24 @@ describe('InvoiceDetail', () => {
             );
 
             expect(screen.getByTestId('status-chip')).toBeInTheDocument();
+        });
+    });
+    describe('Modify file', () => {
+        it('Should navigate', () => {
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE, status: "REWARDED" }}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+            const button = screen.getByTestId('change-file-btn');
+            fireEvent.click(button);
+            expect(pushMock).toHaveBeenCalled()
         });
     });
 });
