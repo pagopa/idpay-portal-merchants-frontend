@@ -11,6 +11,7 @@ const viteConfig = defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    chunkSizeWarningLimit: 10000
   },
   server: {
     port: 3000

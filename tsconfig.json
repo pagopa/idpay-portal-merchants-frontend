@@ -1,18 +1,7 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ],
-  "include": ["src"],
   "compilerOptions": {
-    "typeRoots": ["./node_modules/@types"],
-    "types": ["vite/client", "vitest"],
     "strict": false,
-    "skipLibCheck": false
-  }
+    "skipLibCheck": true
+  },
+  "include": ["src"]
 }
