@@ -351,7 +351,7 @@ export default function InvoiceDetail({
               fontWeight={theme.typography.fontWeightBold}
               color={theme.palette.text.primary}
             >
-              nota ufficiale
+              Nota ufficiale
             </Typography>
             <Typography
               variant="body2"
