@@ -1,4 +1,4 @@
- // @ts-nocheck
+// @ts-nocheck
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import ReportDataTable from "../ReportDataTable";
 
@@ -49,6 +49,7 @@ const { getMerchantReports, downloadMerchantReport } = jest.requireMock(
 describe("ReportDataTable", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
   it("renders empty state when no reports", async () => {
@@ -117,7 +118,7 @@ describe("ReportDataTable", () => {
     render(<ReportDataTable />);
 
     await waitFor(() =>
-expect(screen.getByTestId(/row-/)).toBeInTheDocument()
+      expect(screen.getByTestId(/row-/)).toBeInTheDocument()
     );
 
     fireEvent.click(screen.getByTestId("page-change"));
@@ -137,7 +138,7 @@ expect(screen.getByTestId(/row-/)).toBeInTheDocument()
         {
           id: "r1",
           fileName: "file.csv",
-          reportStatus: "INSERTED",
+          reportStatus: "GENERATED",
         },
       ],
       page: 0,
@@ -157,7 +158,7 @@ expect(screen.getByTestId(/row-/)).toBeInTheDocument()
 
     const revokeSpy = jest
       .spyOn(window.URL, "revokeObjectURL")
-      .mockImplementation(() => {});
+      .mockImplementation(() => { });
 
     render(<ReportDataTable refreshKey={0} />);
 
@@ -169,7 +170,7 @@ expect(screen.getByTestId(/row-/)).toBeInTheDocument()
     fireEvent.click(downloadButton);
 
     await waitFor(() =>
-      expect(downloadMerchantReport).not.toHaveBeenCalledWith("merchant-1", "r1")
+      expect(downloadMerchantReport).toHaveBeenCalledWith("merchant-1", "r1")
     );
 
     expect(createObjectURLSpy).not.toHaveBeenCalled();
@@ -181,7 +182,7 @@ expect(screen.getByTestId(/row-/)).toBeInTheDocument()
 
   it("renders loading state", async () => {
     getMerchantReports.mockImplementation(
-      () => new Promise(() => {})
+      () => new Promise(() => { })
     );
 
     render(<ReportDataTable />);
@@ -206,7 +207,7 @@ expect(screen.getByTestId(/row-/)).toBeInTheDocument()
 
     render(<ReportDataTable />);
 
-await waitFor(() =>
+    await waitFor(() =>
       expect(screen.getByTestId(/row-/)).toBeInTheDocument()
     );
 
@@ -222,12 +223,13 @@ await waitFor(() =>
   });
 
   it("handles download error branch and resets state", async () => {
+    const updateAlerts = jest.fn();
     getMerchantReports.mockResolvedValue({
       reports: [
         {
           id: "r2",
           fileName: "file.csv",
-          reportStatus: "INSERTED",
+          reportStatus: "GENERATED",
         },
       ],
       page: 0,
@@ -238,7 +240,7 @@ await waitFor(() =>
 
     downloadMerchantReport.mockRejectedValue(new Error("fail"));
 
-    render(<ReportDataTable />);
+    render(<ReportDataTable updateAlerts={updateAlerts} />);
 
     await waitFor(() =>
       expect(screen.getByTestId("row-r2")).toBeInTheDocument()
@@ -248,8 +250,12 @@ await waitFor(() =>
     fireEvent.click(downloadButton);
 
     await waitFor(() =>
-      expect(downloadMerchantReport).not.toHaveBeenCalledWith("merchant-1", "r2")
+      expect(downloadMerchantReport).toHaveBeenCalledWith("merchant-1", "r2")
     );
+
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith("error", true));
+    jest.runAllTimers();
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith("error", false));
   });
 
   it("renders FAILED status branch (no download button)", async () => {
