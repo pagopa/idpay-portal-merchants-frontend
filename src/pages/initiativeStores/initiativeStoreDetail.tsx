@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Typography, TextField } from '@mui/material';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, Prompt } from 'react-router-dom';

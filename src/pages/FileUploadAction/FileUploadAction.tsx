@@ -1,7 +1,7 @@
 import { Box, Typography, Link, Stack, Button, Alert, TextField } from '@mui/material';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { SingleFileInput, theme } from '@pagopa/mui-italia';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';

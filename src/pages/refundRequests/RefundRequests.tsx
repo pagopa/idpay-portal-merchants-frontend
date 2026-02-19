@@ -3,7 +3,7 @@ import { Box, Stack, Tooltip, Typography, CircularProgress, IconButton } from '@
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from 'react-i18next';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { GridColDef } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia';
 import { useSelector } from 'react-redux';

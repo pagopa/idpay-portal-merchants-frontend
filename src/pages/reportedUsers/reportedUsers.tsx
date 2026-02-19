@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import { Box, Stack, Button } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
 import ReportIcon from '@mui/icons-material/Report';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import DataTable from '../../components/dataTable/DataTable';

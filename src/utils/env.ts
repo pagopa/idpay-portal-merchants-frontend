@@ -1,84 +1,69 @@
-import * as env from 'env-var';
-const PUBLIC_URL_INNER: string | undefined =
-  env.get('PUBLIC_URL').asString() || '/portale-esercenti';
+const env = import.meta.env;
+
 export const ENV = {
-  ENV: env.get('REACT_APP_ENV').required().asString(),
-  PUBLIC_URL: PUBLIC_URL_INNER,
+  ENV: env.VITE_ENV,
+
+  PUBLIC_URL: env.BASE_URL || '/portale-esercenti',
+
   CONFIG: {
     HEADER: {
-      OPERATION_MANUAL_LINK: env
-        .get('REACT_APP_PAGOPA_HEADER_OPERATION_MANUAL_LINK')
-        .required()
-        .asString(),
+      OPERATION_MANUAL_LINK: env.VITE_PAGOPA_HEADER_OPERATION_MANUAL_LINK,
     },
     FOOTER: {
       LINK: {
-        PRIVACYPOLICY: env.get('REACT_APP_PAGOPA_FOOTER_PRIVACYPOLICY').required().asString(),
-        PROTECTIONOFPERSONALDATA: env
-          .get('REACT_APP_PAGOPA_FOOTER_PROTECTIONOFPERSONALDATA')
-          .required()
-          .asString(),
-        TERMSANDCONDITIONS: env
-          .get('REACT_APP_PAGOPA_FOOTER_TERMSANDCONDITIONS')
-          .required()
-          .asString(),
-        ACCESSIBILITY: env.get('REACT_APP_PAGOPA_FOOTER_ACCESSIBILITY').required().asString(),
+        PRIVACYPOLICY: env.VITE_PAGOPA_FOOTER_PRIVACYPOLICY,
+        PROTECTIONOFPERSONALDATA:
+          env.VITE_PAGOPA_FOOTER_PROTECTIONOFPERSONALDATA,
+        TERMSANDCONDITIONS: env.VITE_PAGOPA_FOOTER_TERMSANDCONDITIONS,
+        ACCESSIBILITY: env.VITE_PAGOPA_FOOTER_ACCESSIBILITY,
       },
     },
   },
+
   ASSISTANCE: {
-    EMAIL: env.get('REACT_APP_PAGOPA_HELP_EMAIL').required().asString(),
-    LINK: env.get('REACT_APP_PAGOPA_HELP_LINK').required().asString(),
-    // MANUAL_LINK: env.get('REACT_APP_MANUAL_LINK').required().asString(),
+    EMAIL: env.VITE_PAGOPA_HELP_EMAIL,
+    LINK: env.VITE_PAGOPA_HELP_LINK,
   },
+
   URL_FE: {
-    PRE_LOGIN: env.get('REACT_APP_URL_FE_PRE_LOGIN').required().asString(),
-    LOGIN: env.get('REACT_APP_URL_FE_LOGIN').required().asString(),
-    LOGOUT: env.get('REACT_APP_URL_FE_LOGOUT').required().asString(),
-    LANDING: env.get('REACT_APP_URL_FE_LANDING').required().asString(),
-    ASSISTANCE_MERCHANT: env.get('REACT_APP_URL_FE_ASSISTANCE_MERCHANTS').required().asString(),
+    PRE_LOGIN: env.VITE_URL_FE_PRE_LOGIN,
+    LOGIN: env.VITE_URL_FE_LOGIN,
+    LOGOUT: env.VITE_URL_FE_LOGOUT,
+    LANDING: env.VITE_URL_FE_LANDING,
+    ASSISTANCE_MERCHANT: env.VITE_URL_FE_ASSISTANCE_MERCHANTS,
   },
+
   URL_API: {
-    MERCHANTS: env.get('REACT_APP_URL_API_MERCHANTS').required().asString(),
-    MERCHANTS_PORTAL: env.get('REACT_APP_URL_API_MERCHANTS_PORTAL').required().asString(),
-    ROLE_PERMISSION: env.get('REACT_APP_URL_API_ROLE_PERMISSION').required().asString(),
-    EMAIL_NOTIFICATION: env.get('REACT_APP_URL_API_EMAIL_NOTIFICATION').required().asString(),
+    MERCHANTS: env.VITE_URL_API_MERCHANTS,
+    MERCHANTS_PORTAL: env.VITE_URL_API_MERCHANTS_PORTAL,
+    ROLE_PERMISSION: env.VITE_URL_API_ROLE_PERMISSION,
+    EMAIL_NOTIFICATION: env.VITE_URL_API_EMAIL_NOTIFICATION,
   },
+
   API_TIMEOUT_MS: {
-    MERCHANTS_PORTAL: env.get('REACT_APP_API_MERCHANTS_PORTAL_TIMEOUT_MS').required().asInt(),
-    MERCHANTS: env.get('REACT_APP_API_MERCHANTS_TIMEOUT_MS').required().asInt(),
-    ROLE_PERMISSION: env.get('REACT_APP_API_ROLE_PERMISSION_TIMEOUT_MS').required().asInt(),
-    EMAIL_NOTIFICATION: env.get('REACT_APP_API_EMAIL_NOTIFICATION_TIMEOUT_MS').required().asInt(),
+    MERCHANTS_PORTAL: Number(env.VITE_API_MERCHANTS_PORTAL_TIMEOUT_MS),
+    MERCHANTS: Number(env.VITE_API_MERCHANTS_TIMEOUT_MS),
+    ROLE_PERMISSION: Number(env.VITE_API_ROLE_PERMISSION_TIMEOUT_MS),
+    EMAIL_NOTIFICATION: Number(env.VITE_API_EMAIL_NOTIFICATION_TIMEOUT_MS),
   },
+
   URL_INSTITUTION_LOGO: {
-    PREFIX: env.get('REACT_APP_URL_INSTITUTION_LOGO_PREFIX').required().asString(),
-    SUFFIX: env.get('REACT_APP_URL_INSTITUTION_LOGO_SUFFIX').required().asString(),
+    PREFIX: env.VITE_URL_INSTITUTION_LOGO_PREFIX,
+    SUFFIX: env.VITE_URL_INSTITUTION_LOGO_SUFFIX,
   },
+
   ANALYTCS: {
-    ENABLE: env.get('REACT_APP_ANALYTICS_ENABLE').default('false').asBool(),
-    MOCK: env.get('REACT_APP_ANALYTICS_MOCK').default('false').asBool(),
-    DEBUG: env.get('REACT_APP_ANALYTICS_DEBUG').default('false').asBool(),
-    TOKEN: env.get('REACT_APP_MIXPANEL_TOKEN').required().asString(),
-    API_HOST: env
-      .get('REACT_APP_MIXPANEL_API_HOST')
-      .default('https://api-eu.mixpanel.com')
-      .asString(),
+    ENABLE: env.VITE_ANALYTICS_ENABLE === 'true',
+    MOCK: env.VITE_ANALYTICS_MOCK === 'true',
+    DEBUG: env.VITE_ANALYTICS_DEBUG === 'true',
+    TOKEN: env.VITE_MIXPANEL_TOKEN,
+    API_HOST:
+      env.VITE_MIXPANEL_API_HOST ?? 'https://api-eu.mixpanel.com',
   },
+
   ONE_TRUST: {
-    OT_NOTICE_CDN_URL: env.get('REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL').required().asString(),
-    OT_NOTICE_CDN_SETTINGS: env
-      .get('REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS')
-      .required()
-      .asString(),
-    // PRIVACY_POLICY_ID: env
-    //   .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID_MERCHANTS')
-    //   .required()
-    //   .asString(),
-    // PRIVACY_POLICY_JSON_URL: env
-    //   .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL_MERCHANTS')
-    //   .required()
-    //   .asString(),
-    // TOS_ID: env.get('REACT_APP_ONE_TRUST_TOS_ID_MERCHANTS').required().asString(),
-    // TOS_JSON_URL: env.get('REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS').required().asString(),
+    OT_NOTICE_CDN_URL: env.VITE_ONE_TRUST_OTNOTICE_CDN_URL,
+    OT_NOTICE_CDN_SETTINGS:
+      env.VITE_ONE_TRUST_OTNOTICE_CDN_SETTINGS,
   },
 };
