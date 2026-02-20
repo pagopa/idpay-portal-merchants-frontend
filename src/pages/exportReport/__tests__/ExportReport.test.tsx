@@ -72,11 +72,11 @@ describe("InitiativeExportReportPage", () => {
       screen.getByText("pages.reportExport.alert.success")
     ).toBeInTheDocument();
 
-    const closeBtn = screen.getByTestId("close-1");
+    const closeBtn = screen.getByTestId("close-5");
     fireEvent.click(closeBtn);
 
     expect(
-      screen.queryByTestId("close-1")
+      screen.queryByTestId("close-5")
     ).not.toBeInTheDocument();
   });
 });
