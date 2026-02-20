@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import ExportFiltersCard from '../ExportFiltersCard';
 import { BrowserRouter } from 'react-router-dom';
