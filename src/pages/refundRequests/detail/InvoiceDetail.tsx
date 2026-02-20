@@ -71,15 +71,16 @@ export default function InvoiceDetail({
       ? true
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
-  const isEditable =
-    itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
-    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED');
+  const isVisible =
+    (itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
+    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED'));
 
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isEditable && itemValues?.pointOfSaleId
+      isVisible && itemValues?.pointOfSaleId
         ? [
             {
+              disabled: !(statusBatch === "CREATED" || statusBatch === "EVALUTATING"),
               variant: 'contained',
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
@@ -96,7 +97,7 @@ export default function InvoiceDetail({
             },
           ]
         : [],
-    [isEditable, itemValues?.pointOfSaleId, history]
+    [isVisible, itemValues?.pointOfSaleId, history]
   );
 
   const handlePostponeTransaction = async () => {
