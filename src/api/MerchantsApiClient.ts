@@ -369,16 +369,30 @@ export const MerchantApi = {
     } as any);
 
     if (!isRight(result)) {
+      const firstError = (result.left as any)?.[0];
+      const actualError =
+        firstError?.context?.[0]?.actual ??
+        firstError?.context?.[1]?.actual;
+
       return {
         code:
-          (result.left as any)?.at?.(0)?.value ??
-          (result.left as any)?.at?.(0)?.actual,
+          actualError?.code ??
+          firstError?.value ??
+          'UNKNOWN_ERROR',
         message:
-          (result.left as any)?.at?.(0)?.context?.[1]?.actual?.message,
+          actualError?.message ??
+          'Errore generico',
       };
-    } else {
-      return extractResponse(result, 204, onRedirectToLogin);
     }
+
+    if ((result as any)?.right?.status === 400) {
+      return {
+        code: (result as any)?.right?.value?.code ?? '400',
+        message: (result as any)?.right?.value?.message ?? 'Bad request',
+      };
+    }
+
+    return extractResponse(result, 204, onRedirectToLogin);
   },
 
 };
