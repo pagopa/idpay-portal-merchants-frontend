@@ -56,7 +56,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
       ...(values.endDate && dayjs(values.endDate).isAfter(yesterday, 'day') && {
         endDate: t('pages.reportExport.form.validation.invalidRange'),
       }),
-      ...(values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 1 && {
+      ...(values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 0 && {
         endDate: t('pages.reportExport.form.validation.invalidRange'),
       }),
       ...(values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') > 90 && {
@@ -88,7 +88,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
 
   const minEndDateStr =
     formik.values.startDate
-      ? dayjs(formik.values.startDate).add(1, 'day').format('YYYY-MM-DD')
+      ? dayjs(formik.values.startDate).add(0, 'day').format('YYYY-MM-DD')
       : MIN_START_DATE;
 
   return (
