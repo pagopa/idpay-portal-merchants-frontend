@@ -3,12 +3,12 @@
 // import { fetchProducts } from '../productService';
 // import { productResource2Product } from '../../model/Product';
 
-// jest.mock('../../api/PortalApiClient');
+// vi.mock('../../api/PortalApiClient');
 import { fetchProducts } from '../../services/productService';
 
 beforeEach(() => {
-  // jest.spyOn(PortalApi, 'getProducts');
-  // jest.spyOn(PortalApi, 'getProductRoles');
+  // vi.spyOn(PortalApi, 'getProducts');
+  // vi.spyOn(PortalApi, 'getProductRoles');
 });
 
 describe('fetchProducts Service', () => {

@@ -9,7 +9,7 @@ let mockedMuiFooterProps: any;
 
 const mockedPagoPALink = { ...pagoPALink };
 
-jest.mock('@pagopa/mui-italia', () => ({
+vi.mock('@pagopa/mui-italia', () => ({
   Footer: (props: {
     loggedUser: {
       toString: () =>
@@ -68,7 +68,7 @@ jest.mock('@pagopa/mui-italia', () => ({
   },
 }));
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
@@ -77,14 +77,14 @@ jest.mock('react-i18next', () => ({
   ),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
   __esModule: true,
   default: {
-    changeLanguage: jest.fn().mockResolvedValue(undefined),
+    changeLanguage: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     FOOTER: {
       LINK: {
@@ -110,7 +110,7 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   },
 }));
 
-jest.mock('../../../utils/env', () => ({
+vi.mock('../../../utils/env', () => ({
   ENV: {
     CONFIG: {
       FOOTER: {
@@ -124,7 +124,7 @@ jest.mock('../../../utils/env', () => ({
   },
 }));
 
-jest.mock('../FooterConfig', () => ({
+vi.mock('../FooterConfig', () => ({
   pagoPALink: { href: 'https://www.pagopa.it' },
   LANGUAGES: [
     { it: 'Italiano' },
@@ -132,7 +132,7 @@ jest.mock('../FooterConfig', () => ({
   ],
 }));
 
-jest.mock('../../../routes', () => ({
+vi.mock('../../../routes', () => ({
   default: {
     PRIVACY_POLICY: '/privacy-policy',
     TOS: '/terms-of-service',
@@ -140,14 +140,14 @@ jest.mock('../../../routes', () => ({
 }));
 
 global.window.OneTrust = {
-  ToggleInfoDisplay: jest.fn(),
+  ToggleInfoDisplay: vi.fn(),
 };
 
-global.window.open = jest.fn();
+global.window.open = vi.fn();
 
 afterEach(() => {
   mockedMuiFooterProps = undefined;
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('<Footer />', () => {
@@ -180,8 +180,8 @@ describe('<Footer />', () => {
   });
 
   test('should call onExit prop when the exit action is triggered', () => {
-    const onExitMock = jest.fn((exitAction) => exitAction());
-    const mockExitAction = jest.fn();
+    const onExitMock = vi.fn((exitAction) => exitAction());
+    const mockExitAction = vi.fn();
     render(<Footer loggedUser={true} onExit={onExitMock} />);
 
     expect(mockedMuiFooterProps.onExit).toBeDefined();
@@ -275,7 +275,7 @@ describe('<Footer />', () => {
   });
 
   test('should call onClickNavigate when aboutUs link is clicked', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={false} />);
 
     const aboutUsLink = mockedMuiFooterProps.preLoginLinks.aboutUs.links[0];
@@ -285,7 +285,7 @@ describe('<Footer />', () => {
   });
 
   test('should call onClickNavigate when media link is clicked', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={false} />);
 
     const mediaLink = mockedMuiFooterProps.preLoginLinks.aboutUs.links[1];
@@ -295,7 +295,7 @@ describe('<Footer />', () => {
   });
 
   test('should call onClickNavigate when work with us link is clicked', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={false} />);
 
     const workWithUsLink = mockedMuiFooterProps.preLoginLinks.aboutUs.links[2];
@@ -305,7 +305,7 @@ describe('<Footer />', () => {
   });
 
   test('should call onClickNavigate when certifications link is clicked', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={false} />);
 
     const certificationsLink = mockedMuiFooterProps.preLoginLinks.resources.links.find(
@@ -317,7 +317,7 @@ describe('<Footer />', () => {
   });
 
   test('should call onClickNavigate when information security link is clicked', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={false} />);
 
     const infoSecurityLink = mockedMuiFooterProps.preLoginLinks.resources.links.find(
@@ -372,13 +372,13 @@ describe('<Footer />', () => {
 
   test('should have default onExit function that calls exitAction', () => {
     render(<Footer loggedUser={false} />);
-    const mockAction = jest.fn();
+    const mockAction = vi.fn();
     mockedMuiFooterProps.onExit(mockAction);
     expect(mockAction).toHaveBeenCalled();
   });
 
   test('should call onClickNavigate when protection of personal data link is clicked', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={false} />);
 
     const protectionLink = mockedMuiFooterProps.preLoginLinks.resources.links.find(
@@ -401,7 +401,7 @@ describe('<Footer />', () => {
   });
 
   test('should call onClickNavigate for post-login privacy link', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={true} />);
 
     const privacyLink = mockedMuiFooterProps.postLoginLinks[0];
@@ -411,7 +411,7 @@ describe('<Footer />', () => {
   });
 
   test('should call onClickNavigate for post-login terms link', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={true} />);
 
     const termsLink = mockedMuiFooterProps.postLoginLinks[2];
@@ -421,7 +421,7 @@ describe('<Footer />', () => {
   });
 
   test('should call onClickNavigate for post-login protection link', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={true} />);
 
     const protectionLink = mockedMuiFooterProps.postLoginLinks.find(
@@ -433,7 +433,7 @@ describe('<Footer />', () => {
   });
 
   test('should call onClickNavigate for post-login accessibility link', () => {
-    jest.spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     render(<Footer loggedUser={true} />);
 
     const accessibilityLink = mockedMuiFooterProps.postLoginLinks.find(

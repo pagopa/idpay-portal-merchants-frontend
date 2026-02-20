@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TableHeader from '../TableHeader';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => `translated_${key}`,
   }),

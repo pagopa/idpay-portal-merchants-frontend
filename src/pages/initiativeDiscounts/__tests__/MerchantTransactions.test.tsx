@@ -9,8 +9,8 @@ import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 const renderComponent = () =>
   render(

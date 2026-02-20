@@ -2,23 +2,23 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import ReportDataTable from "../ReportDataTable";
 
-jest.mock("react-router-dom", () => ({
+vi.mock("react-router-dom", () => ({
   useParams: () => ({ id: "merchant-1" }),
 }));
 
-jest.mock("react-i18next", () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     // @ts-ignore
     t: (key) => key,
   }),
 }));
 
-jest.mock("../../../services/merchantService", () => ({
-  getMerchantReports: jest.fn(),
-  downloadMerchantReport: jest.fn(),
+vi.mock("../../../services/merchantService", () => ({
+  getMerchantReports: vi.fn(),
+  downloadMerchantReport: vi.fn(),
 }));
 
-jest.mock("../../../components/dataTable/DataTable", () => (props) => {
+vi.mock("../../../components/dataTable/DataTable", () => (props) => {
   return (
     <div>
       {props.rows?.map((row) => (
@@ -42,13 +42,13 @@ jest.mock("../../../components/dataTable/DataTable", () => (props) => {
   );
 });
 
-const { getMerchantReports, downloadMerchantReport } = jest.requireMock(
+const { getMerchantReports, downloadMerchantReport } = vi.requireMock(
   "../../../services/merchantService"
 );
 
 describe("ReportDataTable", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders empty state when no reports", async () => {
@@ -148,14 +148,14 @@ expect(screen.getByTestId(/row-/)).toBeInTheDocument()
 
     downloadMerchantReport.mockResolvedValue("csv-content");
 
-    if (!window.URL.createObjectURL) window.URL.createObjectURL = jest.fn();
-    if (!window.URL.revokeObjectURL) window.URL.revokeObjectURL = jest.fn();
+    if (!window.URL.createObjectURL) window.URL.createObjectURL = vi.fn();
+    if (!window.URL.revokeObjectURL) window.URL.revokeObjectURL = vi.fn();
 
-    const createObjectURLSpy = jest
+    const createObjectURLSpy = vi
       .spyOn(window.URL, "createObjectURL")
       .mockReturnValue("blob:url");
 
-    const revokeSpy = jest
+    const revokeSpy = vi
       .spyOn(window.URL, "revokeObjectURL")
       .mockImplementation(() => {});
 

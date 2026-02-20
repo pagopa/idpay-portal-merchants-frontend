@@ -4,13 +4,13 @@ import { usePlacesAutocomplete } from '../useAutocomplete';
 import { autocompleteService } from '../../services/autocompleteService';
 import { AddressDTO } from '../../api/generated/autocomplete/AddressDTO';
 
-jest.mock('../../services/autocompleteService');
+vi.mock('../../services/autocompleteService');
 
-const mockedAutocompleteService = autocompleteService as jest.Mocked<typeof autocompleteService>;
+const mockedAutocompleteService = autocompleteService as vi.Mocked<typeof autocompleteService>;
 
 describe('usePlacesAutocomplete', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return the initial state correctly', () => {

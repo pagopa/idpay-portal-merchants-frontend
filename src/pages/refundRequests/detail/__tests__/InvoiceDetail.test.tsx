@@ -6,26 +6,26 @@ import InvoiceDetail from '../InvoiceDetail';
 import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
 import { getEndOfNextMonth } from '../../../../utils/formatUtils';
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: vi.fn(),
 }));
 
-jest.mock('../../../../pages/initiativeStores/StoreContext', () => ({
+vi.mock('../../../../pages/initiativeStores/StoreContext', () => ({
   __esModule: true,
-  useStore: jest.fn(),
+  useStore: vi.fn(),
 }));
 
-jest.mock('../../../../services/merchantService', () => ({
-  downloadInvoiceFile: jest.fn(),
-  postponeTransaction: jest.fn(),
+vi.mock('../../../../services/merchantService', () => ({
+  downloadInvoiceFile: vi.fn(),
+  postponeTransaction: vi.fn(),
 }));
 
-jest.mock('../../../../components/Chip/StatusChipInvoice', () => (props: any) => (
+vi.mock('../../../../components/Chip/StatusChipInvoice', () => (props: any) => (
   <div data-testid="status-chip">{props.status}</div>
 ));
 
-jest.mock('../../../../components/Drawer/DetailDrawer', () => ({
+vi.mock('../../../../components/Drawer/DetailDrawer', () => ({
   __esModule: true,
   default: (props: any) => (
     <div data-testid="item-test">
@@ -44,43 +44,43 @@ jest.mock('../../../../components/Drawer/DetailDrawer', () => ({
   ),
 }));
 
-jest.mock(
+vi.mock(
   '../../../../components/modal/ModalComponent',
   () => (props: any) =>
     props.open ? <div data-testid="modal-component">{props.children}</div> : null
 );
 
-jest.mock('../../../../hooks/useAlert', () => ({
-  useAlert: jest.fn(),
+vi.mock('../../../../hooks/useAlert', () => ({
+  useAlert: vi.fn(),
 }));
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(),
-  useHistory: jest.fn(() => ({
-    push: jest.fn(),
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
+  useLocation: vi.fn(),
+  useHistory: vi.fn(() => ({
+    push: vi.fn(),
     location: { pathname: '/merchants/merchant-1/refunds', state: {} },
   })),
 }));
 
-jest.mock('../../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
+vi.mock('../../../../redux/hooks', () => ({
+  useAppSelector: vi.fn(),
 }));
 
-jest.mock('../../../../redux/slices/initiativesSlice', () => ({
+vi.mock('../../../../redux/slices/initiativesSlice', () => ({
   intiativesListSelector: (state: any) => state,
 }));
 
-jest.mock('../../../../utils/formatUtils', () => ({
-  formatValues: jest.fn((val: string) => `formatted-${val}`),
-  currencyFormatter: jest.fn((val: number) => ({ toString: () => `€${val.toFixed(2)}` })),
-  getEndOfNextMonth: jest.fn((date: Date) => {
+vi.mock('../../../../utils/formatUtils', () => ({
+  formatValues: vi.fn((val: string) => `formatted-${val}`),
+  currencyFormatter: vi.fn((val: number) => ({ toString: () => `€${val.toFixed(2)}` })),
+  getEndOfNextMonth: vi.fn((date: Date) => {
     const nextMonth = new Date(date);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     nextMonth.setDate(0);
@@ -95,7 +95,7 @@ import { useAppSelector } from '../../../../redux/hooks';
 import { useLocation } from 'react-router-dom';
 
 describe('InvoiceDetail', () => {
-  let mockSetAlert: jest.Mock;
+  let mockSetAlert: vi.Mock;
 
   const baseItemValues: any = {
     id: 'trx-1',
@@ -138,7 +138,7 @@ describe('InvoiceDetail', () => {
     render(
       <InvoiceDetail
         isOpen={true}
-        setIsOpen={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={baseItemValues}
         listItem={baseListItem}
         batchId=""
@@ -148,21 +148,21 @@ describe('InvoiceDetail', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockSetAlert = jest.fn();
+    vi.clearAllMocks();
+    mockSetAlert = vi.fn();
 
-    (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
-    (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
-    (useAppSelector as jest.Mock).mockReturnValue([]);
-    (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+    (useStore as vi.Mock).mockReturnValue({ storeId: 'STORE_ID' });
+    (useAlert as vi.Mock).mockReturnValue({ setAlert: mockSetAlert });
+    (useAppSelector as vi.Mock).mockReturnValue([]);
+    (useLocation as vi.Mock).mockReturnValue(mockUseLocation);
 
-    (window as any).open = jest.fn();
-    global.fetch = jest.fn();
+    (window as any).open = vi.fn();
+    global.fetch = vi.fn();
   });
 
   describe('Additional coverage for missing branches', () => {
     it('covers useEffect branch with initiativeId and endDate', () => {
-      (useAppSelector as jest.Mock).mockReturnValue([
+      (useAppSelector as vi.Mock).mockReturnValue([
         { initiativeId: 'init-100', endDate: new Date('2025-12-31') },
       ]);
 
@@ -179,19 +179,19 @@ describe('InvoiceDetail', () => {
     });
 
     it('calls onCloseDrawer and onSuccess on successful postponeTransaction', async () => {
-      (getEndOfNextMonth as jest.Mock).mockReturnValueOnce(new Date('2025-10-31'));
-      const onCloseDrawer = jest.fn();
-      const onSuccess = jest.fn();
+      (getEndOfNextMonth as vi.Mock).mockReturnValueOnce(new Date('2025-10-31'));
+      const onCloseDrawer = vi.fn();
+      const onSuccess = vi.fn();
 
-      (useAppSelector as jest.Mock).mockReturnValue([
+      (useAppSelector as vi.Mock).mockReturnValue([
         { initiativeId: 'init-200', endDate: new Date('2025-12-31') },
       ]);
 
-      (useLocation as jest.Mock).mockReturnValue({
+      (useLocation as vi.Mock).mockReturnValue({
         state: { store: { status: 'CREATED' }, month: new Date('2025-09-01') },
       });
 
-      (postponeTransaction as jest.Mock).mockResolvedValueOnce({});
+      (postponeTransaction as vi.Mock).mockResolvedValueOnce({});
 
       renderInvoiceDetail({
         itemValues: {
@@ -209,17 +209,17 @@ describe('InvoiceDetail', () => {
     });
 
     it('calls onCloseDrawer on postponeTransaction error', async () => {
-      const onCloseDrawer = jest.fn();
+      const onCloseDrawer = vi.fn();
 
-      (useAppSelector as jest.Mock).mockReturnValue([
+      (useAppSelector as vi.Mock).mockReturnValue([
         { initiativeId: 'init-300', endDate: new Date('2025-12-31') },
       ]);
 
-      (useLocation as jest.Mock).mockReturnValue({
+      (useLocation as vi.Mock).mockReturnValue({
         state: { store: { status: 'CREATED', month: new Date('2025-09-01') } },
       });
 
-      (postponeTransaction as jest.Mock).mockRejectedValueOnce(new Error('error'));
+      (postponeTransaction as vi.Mock).mockRejectedValueOnce(new Error('error'));
 
       renderInvoiceDetail({
         itemValues: {
@@ -236,11 +236,11 @@ describe('InvoiceDetail', () => {
     });
 
     it('closes modal using Indietro button and Modal onClose', async () => {
-      (useAppSelector as jest.Mock).mockReturnValue([
+      (useAppSelector as vi.Mock).mockReturnValue([
         { initiativeId: 'init-400', endDate: new Date('2025-12-31') },
       ]);
 
-      (useLocation as jest.Mock).mockReturnValue({
+      (useLocation as vi.Mock).mockReturnValue({
         state: { store: { status: 'CREATED', month: new Date('2025-09-01') } },
       });
 
@@ -310,12 +310,12 @@ describe('InvoiceDetail', () => {
   describe('Download File - PDF', () => {
     it('scarica file PDF con successo', async () => {
       const mockBlob = new Blob(['pdf content'], { type: 'application/pdf' });
-      const mockResponse = { ok: true, blob: jest.fn().mockResolvedValue(mockBlob) };
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
 
-      (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+      (downloadInvoiceFile as vi.Mock).mockResolvedValueOnce({
         invoiceUrl: 'https://example.com/invoice.pdf',
       });
-      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (global.fetch as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       renderInvoiceDetail({ title: 'Dettaglio transazione' });
 
@@ -335,18 +335,18 @@ describe('InvoiceDetail', () => {
     });
 
     it('setta il titolo della finestra PDF quando window.open non è null', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       const mockBlob = new Blob(['pdf content'], { type: 'application/pdf' });
-      const mockResponse = { ok: true, blob: jest.fn().mockResolvedValue(mockBlob) };
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
 
       const mockWindow: any = { document: { title: '' } };
 
-      (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+      (downloadInvoiceFile as vi.Mock).mockResolvedValueOnce({
         invoiceUrl: 'https://example.com/invoice.pdf',
       });
-      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
-      (window as any).open = jest.fn().mockReturnValueOnce(mockWindow);
+      (global.fetch as vi.Mock).mockResolvedValueOnce(mockResponse);
+      (window as any).open = vi.fn().mockReturnValueOnce(mockWindow);
 
       renderInvoiceDetail({ title: 'Dettaglio transazione' });
 
@@ -355,21 +355,21 @@ describe('InvoiceDetail', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
       });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('gestisce il caso quando window.open ritorna null', async () => {
       const mockBlob = new Blob(['content'], { type: 'application/pdf' });
-      const mockResponse = { ok: true, blob: jest.fn().mockResolvedValue(mockBlob) };
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
 
-      (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+      (downloadInvoiceFile as vi.Mock).mockResolvedValueOnce({
         invoiceUrl: 'https://example.com/invoice.pdf',
       });
-      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
-      (window as any).open = jest.fn().mockReturnValueOnce(null);
+      (global.fetch as vi.Mock).mockResolvedValueOnce(mockResponse);
+      (window as any).open = vi.fn().mockReturnValueOnce(null);
 
       renderInvoiceDetail({ title: 'Dettaglio transazione' });
 
@@ -389,12 +389,12 @@ describe('InvoiceDetail', () => {
       };
 
       const mockBlob = new Blob(['xml content'], { type: 'application/xml' });
-      const mockResponse = { ok: true, blob: jest.fn().mockResolvedValue(mockBlob) };
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
 
-      (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+      (downloadInvoiceFile as vi.Mock).mockResolvedValueOnce({
         invoiceUrl: 'https://example.com/invoice.xml',
       });
-      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (global.fetch as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       renderInvoiceDetail({ title: 'Dettaglio transazione', itemValues: xmlItemValues });
 
@@ -408,10 +408,10 @@ describe('InvoiceDetail', () => {
 
   describe('Download File - Error Handling', () => {
     it('mostra errore quando il fetch della fattura fallisce', async () => {
-      (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+      (downloadInvoiceFile as vi.Mock).mockResolvedValueOnce({
         invoiceUrl: 'https://example.com/invoice.pdf',
       });
-      (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false });
+      (global.fetch as vi.Mock).mockResolvedValueOnce({ ok: false });
 
       renderInvoiceDetail({ title: 'Dettaglio transazione' });
 
@@ -435,13 +435,13 @@ describe('InvoiceDetail', () => {
         invoiceData: { docNumber: 'DOC-125', filename: 'fattura.txt' },
       };
 
-      (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+      (downloadInvoiceFile as vi.Mock).mockResolvedValueOnce({
         invoiceUrl: 'https://example.com/invoice.txt',
       });
 
       const mockBlob = new Blob(['content'], { type: 'text/plain' });
-      const mockResponse = { ok: true, blob: jest.fn().mockResolvedValue(mockBlob) };
-      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
+      (global.fetch as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       renderInvoiceDetail({ title: 'Dettaglio transazione', itemValues: unsupportedValues });
 
@@ -458,13 +458,13 @@ describe('InvoiceDetail', () => {
         invoiceData: { docNumber: 'DOC-126' },
       };
 
-      (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+      (downloadInvoiceFile as vi.Mock).mockResolvedValueOnce({
         invoiceUrl: 'https://example.com/invoice.pdf',
       });
 
       const mockBlob = new Blob(['content'], { type: 'application/pdf' });
-      const mockResponse = { ok: true, blob: jest.fn().mockResolvedValue(mockBlob) };
-      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+      const mockResponse = { ok: true, blob: vi.fn().mockResolvedValue(mockBlob) };
+      (global.fetch as vi.Mock).mockResolvedValueOnce(mockResponse);
 
       renderInvoiceDetail({ title: 'Dettaglio transazione', itemValues: noFilenameValues });
 
@@ -476,7 +476,7 @@ describe('InvoiceDetail', () => {
     });
 
     it('gestisce eccezione nel download', async () => {
-      (downloadInvoiceFile as jest.Mock).mockRejectedValueOnce(new Error('download error'));
+      (downloadInvoiceFile as vi.Mock).mockRejectedValueOnce(new Error('download error'));
 
       renderInvoiceDetail({ title: 'Dettaglio transazione' });
 
@@ -494,7 +494,7 @@ describe('InvoiceDetail', () => {
 
     it('carica il loader durante il download', () => {
       const mockPromise = new Promise(() => {});
-      (downloadInvoiceFile as jest.Mock).mockReturnValueOnce(mockPromise);
+      (downloadInvoiceFile as vi.Mock).mockReturnValueOnce(mockPromise);
 
       renderInvoiceDetail({ title: 'Dettaglio transazione' });
 
@@ -662,7 +662,7 @@ describe('InvoiceDetail', () => {
 
   describe('Redux Initialization - useEffect', () => {
     it('inizializza initiativeId da Redux quando disponibile', () => {
-      (useAppSelector as jest.Mock).mockReturnValue([
+      (useAppSelector as vi.Mock).mockReturnValue([
         { initiativeId: 'init-123', endDate: new Date('2025-12-31') },
       ]);
 
@@ -679,7 +679,7 @@ describe('InvoiceDetail', () => {
       const futureDate = new Date();
       futureDate.setMonth(futureDate.getMonth() + 2);
 
-      (useAppSelector as jest.Mock).mockReturnValue([
+      (useAppSelector as vi.Mock).mockReturnValue([
         { initiativeId: 'init-123', endDate: futureDate },
       ]);
 
@@ -693,7 +693,7 @@ describe('InvoiceDetail', () => {
     });
 
     it('gestisce Redux state vuoto senza crashes', () => {
-      (useAppSelector as jest.Mock).mockReturnValue([]);
+      (useAppSelector as vi.Mock).mockReturnValue([]);
 
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
@@ -705,7 +705,7 @@ describe('InvoiceDetail', () => {
     });
 
     it('gestisce Redux state con endDate undefined', () => {
-      (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'init-123' }]);
+      (useAppSelector as vi.Mock).mockReturnValue([{ initiativeId: 'init-123' }]);
 
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
@@ -717,7 +717,7 @@ describe('InvoiceDetail', () => {
     });
 
     it('gestisce Redux state con initiativeId undefined', () => {
-      (useAppSelector as jest.Mock).mockReturnValue([{ endDate: new Date('2025-12-31') }]);
+      (useAppSelector as vi.Mock).mockReturnValue([{ endDate: new Date('2025-12-31') }]);
 
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
@@ -735,14 +735,14 @@ describe('InvoiceDetail', () => {
         storeId: 'store-1',
       });
 
-      (useAppSelector as jest.Mock).mockReturnValue([
+      (useAppSelector as vi.Mock).mockReturnValue([
         { initiativeId: 'init-123', endDate: new Date('2025-12-31') },
       ]);
 
       rerender(
         <InvoiceDetail
           isOpen={true}
-          setIsOpen={jest.fn()}
+          setIsOpen={vi.fn()}
           title="Dettaglio transazione"
           itemValues={baseItemValues}
           listItem={baseListItem}
@@ -787,7 +787,7 @@ describe('InvoiceDetail', () => {
       const pastDate = new Date();
       pastDate.setMonth(pastDate.getMonth() - 1);
 
-      (useAppSelector as jest.Mock).mockReturnValue([
+      (useAppSelector as vi.Mock).mockReturnValue([
         { initiativeId: 'init-123', endDate: pastDate },
       ]);
 
@@ -805,7 +805,7 @@ describe('InvoiceDetail', () => {
     });
 
     it('gestisce il caso quando initiativeEndDate è undefined nel postpone', () => {
-      (useAppSelector as jest.Mock).mockReturnValue([]);
+      (useAppSelector as vi.Mock).mockReturnValue([]);
 
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
@@ -821,7 +821,7 @@ describe('InvoiceDetail', () => {
     });
 
     it('non chiama postponeTransaction se initiativeEndDate è null', () => {
-      (useAppSelector as jest.Mock).mockReturnValue([]);
+      (useAppSelector as vi.Mock).mockReturnValue([]);
 
       renderInvoiceDetail({
         title: 'Dettaglio transazione',
@@ -839,7 +839,7 @@ describe('InvoiceDetail', () => {
   });
 
   it('non inizializza initiativeEndDate quando endDate è null', () => {
-    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'init-1', endDate: null }]);
+    (useAppSelector as vi.Mock).mockReturnValue([{ initiativeId: 'init-1', endDate: null }]);
 
     renderInvoiceDetail({ batchId: 'batch-1', storeId: 'store-1' });
 
@@ -847,7 +847,7 @@ describe('InvoiceDetail', () => {
   });
 
   it('disabilita bottone se statusBatch non è CREATED', () => {
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as vi.Mock).mockReturnValue({
       state: { store: { status: 'APPROVED' }, month: new Date() },
     });
 
@@ -860,11 +860,11 @@ describe('InvoiceDetail', () => {
     const batchMonth = new Date('2026-01-01');
     const initiativeEnd = new Date('2025-12-31');
 
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as vi.Mock).mockReturnValue({
       state: { store: { status: 'CREATED' }, month: batchMonth },
     });
 
-    (useAppSelector as jest.Mock).mockReturnValue([
+    (useAppSelector as vi.Mock).mockReturnValue([
       { initiativeId: 'init-1', endDate: initiativeEnd },
     ]);
 
@@ -877,11 +877,11 @@ describe('InvoiceDetail', () => {
     const batchMonth = new Date('2025-10-01');
     const initiativeEnd = new Date('2025-12-31');
 
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as vi.Mock).mockReturnValue({
       state: { store: { status: 'CREATED' }, month: batchMonth },
     });
 
-    (useAppSelector as jest.Mock).mockReturnValue([
+    (useAppSelector as vi.Mock).mockReturnValue([
       { initiativeId: 'init-1', endDate: initiativeEnd },
     ]);
 
@@ -895,7 +895,7 @@ describe('InvoiceDetail', () => {
   });
 
   it('non esegue postponeTransaction se initiativeEndDate è vuoto', () => {
-    (useAppSelector as jest.Mock).mockReturnValue([]);
+    (useAppSelector as vi.Mock).mockReturnValue([]);
 
     renderInvoiceDetail({
       itemValues: { ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE },
@@ -910,15 +910,15 @@ describe('InvoiceDetail', () => {
   it('resetta loading a false nel finally', async () => {
     const futureDate = new Date('2025-12-31');
 
-    (useAppSelector as jest.Mock).mockReturnValue([
+    (useAppSelector as vi.Mock).mockReturnValue([
       { initiativeId: 'init-1', endDate: futureDate },
     ]);
 
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as vi.Mock).mockReturnValue({
       state: { store: { status: 'CREATED' }, month: new Date('2025-10-01') },
     });
 
-    (postponeTransaction as jest.Mock).mockResolvedValueOnce({});
+    (postponeTransaction as vi.Mock).mockResolvedValueOnce({});
 
     renderInvoiceDetail({
       itemValues: { ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE },
@@ -938,15 +938,15 @@ describe('InvoiceDetail', () => {
   });
 
   it('non crasha se window.open ritorna null (non setta title)', async () => {
-    (window as any).open = jest.fn().mockReturnValue(null);
+    (window as any).open = vi.fn().mockReturnValue(null);
 
-    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+    (downloadInvoiceFile as vi.Mock).mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     });
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    (global.fetch as vi.Mock).mockResolvedValueOnce({
       ok: true,
-      blob: jest.fn().mockResolvedValue(new Blob()),
+      blob: vi.fn().mockResolvedValue(new Blob()),
     });
 
     renderInvoiceDetail();
@@ -961,7 +961,7 @@ describe('InvoiceDetail', () => {
   it('gestisce filename undefined nel download', async () => {
     const noFilename = { ...baseItemValues, invoiceData: {} };
 
-    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+    (downloadInvoiceFile as vi.Mock).mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     });
 

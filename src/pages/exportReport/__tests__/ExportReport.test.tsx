@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import InitiativeExportReportPage from "../ExportReport";
 
-jest.mock("react-i18next", () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
 }));
 
-jest.mock("@pagopa/selfcare-common-frontend", () => ({
+vi.mock("@pagopa/selfcare-common-frontend", () => ({
   TitleBox: ({ title, subTitle }: any) => (
     <div>
       <div>{title}</div>
@@ -16,7 +16,7 @@ jest.mock("@pagopa/selfcare-common-frontend", () => ({
   ),
 }));
 
-jest.mock("../../../components/exportFiltersCard/ExportFiltersCard", () => 
+vi.mock("../../../components/exportFiltersCard/ExportFiltersCard", () => 
   ({ updateAlerts }: any) => (
     <button
       data-testid="trigger-alert"
@@ -27,11 +27,11 @@ jest.mock("../../../components/exportFiltersCard/ExportFiltersCard", () =>
   )
 );
 
-jest.mock("../ReportDataTable", () => () => (
+vi.mock("../ReportDataTable", () => () => (
   <div data-testid="report-table">Report Table</div>
 ));
 
-jest.mock("../../../components/Alert/AlertListComponent", () => 
+vi.mock("../../../components/Alert/AlertListComponent", () => 
   ({ alertList }: any) => (
     <div>
       {alertList.map((alert: any, index: number) => (

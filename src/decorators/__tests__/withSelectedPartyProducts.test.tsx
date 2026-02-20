@@ -8,17 +8,17 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/stor
 import { testToken } from '../../utils/constants';
 import withSelectedPartyProducts from '../withSelectedPartyProducts';
 
-jest.mock('../../services/partyService');
-jest.mock('../../services/productService');
+vi.mock('../../services/partyService');
+vi.mock('../../services/productService');
 
 const expectedPartyId: string = '26a0aabf-ce6a-4dfa-af4e-d4f744a8b944';
 
-let fetchPartyDetailsSpy: jest.SpyInstance;
-let fetchPartyProductsSpy: jest.SpyInstance;
+let fetchPartyDetailsSpy: vi.SpyInstance;
+let fetchPartyProductsSpy: vi.SpyInstance;
 
 beforeEach(() => {
-  fetchPartyDetailsSpy = jest.spyOn(require('../../services/partyService'), 'fetchParties');
-  fetchPartyProductsSpy = jest.spyOn(require('../../services/productService'), 'fetchProducts');
+  fetchPartyDetailsSpy = vi.spyOn(require('../../services/partyService'), 'fetchParties');
+  fetchPartyProductsSpy = vi.spyOn(require('../../services/productService'), 'fetchProducts');
 
   //storageTokenOps.write(testToken); // party with partyId="onboarded"
 });

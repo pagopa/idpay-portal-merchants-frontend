@@ -8,39 +8,39 @@ import { useHistory, useParams } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
   withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
     <Component {...props} />,
 }));
-jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
-  storageTokenOps: { read: jest.fn() },
+vi.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
+  storageTokenOps: { read: vi.fn() },
 }));
-jest.mock('../../../services/merchantService', () => ({
-  getMerchantPointOfSales: jest.fn(),
-}));
-
-jest.mock('../../../services/merchantService', () => ({
-  updateMerchantPointOfSales: jest.fn(),
-}));
-jest.mock('../../../utils/jwt-utils');
-jest.mock('../../../utils/formatUtils', () => ({
-  normalizeUrlHttp: jest.fn((x) => x),
-  normalizeUrlHttps: jest.fn((x) => x),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: jest.fn(),
-  useParams: jest.fn(),
+vi.mock('../../../services/merchantService', () => ({
+  getMerchantPointOfSales: vi.fn(),
 }));
 
-jest.mock('../../../hooks/useAutocomplete');
-const mockUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
+vi.mock('../../../services/merchantService', () => ({
+  updateMerchantPointOfSales: vi.fn(),
+}));
+vi.mock('../../../utils/jwt-utils');
+vi.mock('../../../utils/formatUtils', () => ({
+  normalizeUrlHttp: vi.fn((x) => x),
+  normalizeUrlHttps: vi.fn((x) => x),
+}));
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
+  useHistory: vi.fn(),
+  useParams: vi.fn(),
+}));
 
-const pushMock = jest.fn();
-const readTokenMock = storageTokenOps.read as jest.Mock;
-const updateMerchantPointOfSalesMock = merchantService.updateMerchantPointOfSales as jest.Mock;
+vi.mock('../../../hooks/useAutocomplete');
+const mockUsePlacesAutocomplete = usePlacesAutocomplete as vi.Mock;
+
+const pushMock = vi.fn();
+const readTokenMock = storageTokenOps.read as vi.Mock;
+const updateMerchantPointOfSalesMock = merchantService.updateMerchantPointOfSales as vi.Mock;
 
 const optionsAutocomplete = [
   {
@@ -247,14 +247,14 @@ const optionsAutocomplete = [
 
 describe('InitiativeStoresUpload', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useParams as jest.Mock).mockReturnValue({ id: 'test-initiative' });
-    (useHistory as jest.Mock).mockReturnValue({ push: pushMock });
+    vi.clearAllMocks();
+    (useParams as vi.Mock).mockReturnValue({ id: 'test-initiative' });
+    (useHistory as vi.Mock).mockReturnValue({ push: pushMock });
     mockUsePlacesAutocomplete.mockReturnValue({
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: jest.fn(),
+      search: vi.fn(),
     });
   });
 
@@ -284,7 +284,7 @@ describe('InitiativeStoresUpload', () => {
 
   it('shows POINT_OF_SALE_ALREADY_REGISTERED error', async () => {
     readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+    (jwtUtils.parseJwt as vi.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
     render(<InitiativeStoresUpload />);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
@@ -292,8 +292,8 @@ describe('InitiativeStoresUpload', () => {
 
   it('navigates to STORES when response is null', async () => {
     readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(null);
+    (jwtUtils.parseJwt as vi.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+    (updateMerchantPointOfSalesMock as vi.Mock).mockResolvedValue(null);
 
     render(<InitiativeStoresUpload />);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
@@ -301,9 +301,9 @@ describe('InitiativeStoresUpload', () => {
 
   it('normalizes URLs when uploading manually', async () => {
     readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+    (jwtUtils.parseJwt as vi.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue({
+    (updateMerchantPointOfSalesMock as vi.Mock).mockResolvedValue({
       code: 'POINT_OF_SALE_ALREADY_REGISTERED',
       message: 'Email duplicata',
     });
@@ -323,10 +323,10 @@ describe('InitiativeStoresUpload', () => {
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: jest.fn(),
+      search: vi.fn(),
     });
     readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue(undefined);
+    (jwtUtils.parseJwt as vi.Mock).mockReturnValue(undefined);
 
     await render(<InitiativeStoresUpload />);
     await fillFormForSuccess(screen);
@@ -339,12 +339,12 @@ describe('InitiativeStoresUpload', () => {
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: jest.fn(),
+      search: vi.fn(),
     });
     readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+    (jwtUtils.parseJwt as vi.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue({
+    (updateMerchantPointOfSalesMock as vi.Mock).mockResolvedValue({
       code: 'POINT_OF_SALE_ALREADY_REGISTERED',
       message: 'Email duplicata',
     });
@@ -360,12 +360,12 @@ describe('InitiativeStoresUpload', () => {
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: jest.fn(),
+      search: vi.fn(),
     });
     readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+    (jwtUtils.parseJwt as vi.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue({
+    (updateMerchantPointOfSalesMock as vi.Mock).mockResolvedValue({
       code: 'GENERIC ERROR',
       message: 'Error with SailPoint',
     });
@@ -381,12 +381,12 @@ describe('InitiativeStoresUpload', () => {
       options: optionsAutocomplete,
       loading: false,
       error: false,
-      search: jest.fn(),
+      search: vi.fn(),
     });
     readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+    (jwtUtils.parseJwt as vi.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue();
+    (updateMerchantPointOfSalesMock as vi.Mock).mockResolvedValue();
 
     const rendered = await render(<InitiativeStoresUpload />);
     await fillFormForSuccess(screen);

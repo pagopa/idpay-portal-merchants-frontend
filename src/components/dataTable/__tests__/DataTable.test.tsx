@@ -49,7 +49,7 @@ describe('DataTable', () => {
   });
 
   it('calls onSortModelChange when sorting changes', () => {
-    const onSortModelChange = jest.fn();
+    const onSortModelChange = vi.fn();
     const props: DataTableProps = {
       ...baseProps,
       onSortModelChange,
@@ -73,7 +73,7 @@ describe('DataTable', () => {
   });
 
   it('calls onPaginationPageChange when page changes', () => {
-    const onPaginationPageChange = jest.fn();
+    const onPaginationPageChange = vi.fn();
     const props: DataTableProps = {
       ...baseProps,
       onPaginationPageChange,
@@ -107,7 +107,7 @@ describe('DataTable', () => {
   });
 
   it('calls onRowSelectionChange with selected rows in multi-select mode', () => {
-    const onRowSelectionChange = jest.fn();
+    const onRowSelectionChange = vi.fn();
     const props: DataTableProps = {
       ...baseProps,
       checkable: true,
@@ -127,7 +127,7 @@ describe('DataTable', () => {
   });
 
   it('enforces single selection and allows clearing selection', () => {
-    const onRowSelectionChange = jest.fn();
+    const onRowSelectionChange = vi.fn();
     const props: DataTableProps = {
       ...baseProps,
       checkable: true,

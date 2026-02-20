@@ -4,23 +4,23 @@ import { storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/stora
 import { createStore } from '../../redux/store';
 import withLogin from '../withLogin';
 
-jest.mock('../../hooks/useLogin', () => ({
+vi.mock('../../hooks/useLogin', () => ({
   useLogin: () => ({
-    attemptSilentLogin: jest.fn().mockResolvedValue(undefined),
+    attemptSilentLogin: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: any) => key }),
 }));
 
-const useSelector = useSelectorOriginal as unknown as jest.Mock;
+const useSelector = useSelectorOriginal as unknown as vi.Mock;
 
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+vi.mock('react-redux', () => {
+  const actual = vi.importActual('react-redux');
   return {
     ...actual,
-    useSelector: jest.fn(),
+    useSelector: vi.fn(),
   };
 });
 
@@ -36,7 +36,7 @@ export interface IDPayUser {
 
 const oldWindowLocation = global.window.location;
 const mockedLocation = {
-  assign: jest.fn(),
+  assign: vi.fn(),
   pathname: '',
   origin: 'MOCKED_ORIGIN',
   search: '',

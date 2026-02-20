@@ -4,7 +4,7 @@ import { useOneTrustNotice } from '../useOneTrustNotice';
 const mockOneTrust = {
   NoticeApi: {
     Initialized: Promise.resolve(),
-    LoadNotices: jest.fn(),
+    LoadNotices: vi.fn(),
   },
 };
 
@@ -12,20 +12,20 @@ const mockOneTrust = {
 
 describe('useOneTrustNotice', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     document.body.innerHTML = '';
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('should initialize and load notices on mount, then call setContentLoaded', async () => {
-    const setContentLoaded = jest.fn();
+    const setContentLoaded = vi.fn();
     const testUrl = 'https://example.com/notice';
 
     renderHook(() => useOneTrustNotice(testUrl, false, setContentLoaded, ''));
@@ -49,7 +49,7 @@ describe('useOneTrustNotice', () => {
       <div class="otnotice-menu"></div>
     `;
 
-    const setContentLoaded = jest.fn();
+    const setContentLoaded = vi.fn();
     const urlPrefix = '/prefix';
 
     const { rerender } = renderHook(
@@ -73,7 +73,7 @@ describe('useOneTrustNotice', () => {
     });
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     const internalLink = document.querySelector('a[href="/prefix#internal-section"]');

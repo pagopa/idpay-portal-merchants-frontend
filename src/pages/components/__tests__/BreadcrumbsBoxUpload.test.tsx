@@ -1,17 +1,17 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import BreadcrumbsBox from "../BreadcrumbsBoxUpload";
 
-const mockPush = jest.fn();
-const mockGoBack = jest.fn();
+const mockPush = vi.fn();
+const mockGoBack = vi.fn();
 
-jest.mock("react-router-dom", () => ({
+vi.mock("react-router-dom", () => ({
   useHistory: () => ({
     push: mockPush,
     goBack: mockGoBack,
   }),
 }));
 
-jest.mock("@pagopa/mui-italia", () => ({
+vi.mock("@pagopa/mui-italia", () => ({
   ButtonNaked: ({ children, onClick, ...rest }: any) => (
     <button onClick={onClick} {...rest}>
       {children}
@@ -21,7 +21,7 @@ jest.mock("@pagopa/mui-italia", () => ({
 
 describe("BreadcrumbsBoxUpload", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders back label and breadcrumb items", () => {
@@ -39,7 +39,7 @@ describe("BreadcrumbsBoxUpload", () => {
   });
 
   it("calls onClickBackButton if provided", () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     render(
       <BreadcrumbsBox

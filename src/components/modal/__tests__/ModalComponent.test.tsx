@@ -31,7 +31,7 @@ describe('ModalComponent', () => {
 
   // Test 3: Chiamata alla funzione onClose quando la modale viene chiusa
   test('should call onClose when the modal is closed', () => {
-    const handleCloseMock = jest.fn();
+    const handleCloseMock = vi.fn();
 
     render(
       <ModalComponent open={true} onClose={handleCloseMock}>

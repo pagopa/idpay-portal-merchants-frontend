@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import InsertReportedUser from '../insertReportedUser';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (k: string) => k,
   }),
@@ -11,11 +11,11 @@ jest.mock('react-i18next', () => ({
   },
 }));
 
-const mockPush = jest.fn();
-const mockGoBack = jest.fn();
-const mockUseLocation = jest.fn();
+const mockPush = vi.fn();
+const mockGoBack = vi.fn();
+const mockUseLocation = vi.fn();
 
-jest.mock('react-router-dom', () => ({
+vi.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: mockPush,
     goBack: mockGoBack,
@@ -25,7 +25,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: () => mockUseLocation(),
 }));
 
-jest.mock('../../../redux/hooks', () => ({
+vi.mock('../../../redux/hooks', () => ({
   useAppSelector: () => ({
     partyId: 'PARTY_ID',
     externalId: 'EXT_ID',
@@ -34,23 +34,23 @@ jest.mock('../../../redux/hooks', () => ({
   }),
 }));
 
-jest.mock('../../../utils/jwt-utils', () => ({
+vi.mock('../../../utils/jwt-utils', () => ({
   parseJwt: () => ({ merchant_id: 'MERCHANT_ID' }),
 }));
 
-const mockCreateReportedUser = jest.fn().mockResolvedValue({});
-jest.mock('../../../services/merchantService', () => ({
+const mockCreateReportedUser = vi.fn().mockResolvedValue({});
+vi.mock('../../../services/merchantService', () => ({
   createReportedUser: (...args: any[]) => mockCreateReportedUser(...args),
 }));
 
-const mockGetReportedUser = jest.fn();
-jest.mock('../../../api/MerchantsApiClient', () => ({
+const mockGetReportedUser = vi.fn();
+vi.mock('../../../api/MerchantsApiClient', () => ({
   MerchantApi: {
     getReportedUser: (...args: any[]) => mockGetReportedUser(...args),
   },
 }));
 
-jest.mock('../modalReportedUser', () => (props: any) => {
+vi.mock('../modalReportedUser', () => (props: any) => {
   if (!props.open) return null;
   return (
     <div data-testid="modal-reported-user">
@@ -65,7 +65,7 @@ jest.mock('../modalReportedUser', () => (props: any) => {
   );
 });
 
-jest.mock('../CfTextField', () => (props: any) => {
+vi.mock('../CfTextField', () => (props: any) => {
   const { name, formik } = props;
   return (
     <input
@@ -79,7 +79,7 @@ jest.mock('../CfTextField', () => (props: any) => {
 
 describe('InsertReportedUser', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseLocation.mockReturnValue({
       state: { merchantId: 'MERCHANT123', initiativeID: 'INITIATIVE456' },
     });

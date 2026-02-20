@@ -9,25 +9,25 @@ import { useLocation } from 'react-router-dom';
 
 const mockId = 'initiative-123';
 const mockHistory = {
-  replace: jest.fn(),
-  push: jest.fn()
+  replace: vi.fn(),
+  push: vi.fn()
 };
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
   withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
     <Component {...props} />,
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
   useHistory: () => ({ ...mockHistory }),
   useParams: () => ({ id: mockId }),
-  useLocation: jest.fn(),
+  useLocation: vi.fn(),
 }));
 
 let dataTableProps: any = {};
-jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
+vi.mock('../../../components/dataTable/DataTable', () => (props: any) => {
   dataTableProps = props;
   return (
     <div data-testid="mock-datatable">
@@ -52,15 +52,15 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
   );
 });
 
-jest.mock('../../../services/merchantService', () => ({
-  getMerchantPointOfSales: jest.fn(),
+vi.mock('../../../services/merchantService', () => ({
+  getMerchantPointOfSales: vi.fn(),
 }));
 
-jest.mock('../../../utils/jwt-utils');
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
+vi.mock('../../../utils/jwt-utils');
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
 
-const mockParseJwt = jwtUtils.parseJwt as jest.Mock;
-const mockStorageRead = storageTokenOps.read as jest.Mock;
+const mockParseJwt = jwtUtils.parseJwt as vi.Mock;
+const mockStorageRead = storageTokenOps.read as vi.Mock;
 
 const mockStores = [
   {
@@ -90,14 +90,14 @@ const mockPagination = { pageNo: 0, pageSize: 5, totalElements: 3, totalPages: 1
 
 describe('<InitiativeStores />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
     mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+    (merchantService.getMerchantPointOfSales as vi.Mock).mockResolvedValue({
       content: mockStores,
       ...mockPagination,
     });
-    (useLocation as jest.Mock).mockReturnValue({ state: {} });
+    (useLocation as vi.Mock).mockReturnValue({ state: {} });
   });
 
   test('renderizza correttamente, mostra il loader e poi i dati della tabella', async () => {
@@ -114,7 +114,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('mostra lo stato vuoto se non ci sono punti vendita', async () => {
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+    (merchantService.getMerchantPointOfSales as vi.Mock).mockResolvedValue({
       content: [],
       ...mockPagination,
       totalElements: 0,
@@ -130,9 +130,9 @@ describe('<InitiativeStores />', () => {
   });
 
   test('gestisce il fallimento della chiamata API iniziale', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const error = new Error('API Failure');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
+    (merchantService.getMerchantPointOfSales as vi.Mock).mockRejectedValue(error);
     renderWithContext(<InitiativeStores />);
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalled();
@@ -145,7 +145,7 @@ describe('<InitiativeStores />', () => {
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const error = new Error('Reset failure');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
+    (merchantService.getMerchantPointOfSales as vi.Mock).mockRejectedValue(error);
 
     const resetButton = screen.getByTestId('reset-filters-test');
     fireEvent.click(resetButton);
@@ -156,7 +156,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test("gestisce la rimozione dell'ordinamento", async () => {
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     renderWithContext(<InitiativeStores />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
@@ -181,7 +181,7 @@ describe('<InitiativeStores />', () => {
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const error = new Error('External catch failure');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
+    (merchantService.getMerchantPointOfSales as vi.Mock).mockRejectedValue(error);
 
     const resetButton = screen.getByTestId('reset-filters-test');
     fireEvent.click(resetButton);
@@ -238,7 +238,7 @@ describe('<InitiativeStores />', () => {
     renderWithContext(<InitiativeStores />);
     await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
 
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+    (merchantService.getMerchantPointOfSales as vi.Mock).mockResolvedValue({
       content: [],
       ...mockPagination,
       totalElements: 0,
@@ -296,7 +296,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('mostra l\'alert di successo quando showSuccessAlert è true', async () => {
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as vi.Mock).mockReturnValue({
       state: { showSuccessAlert: true },
       pathname: '/'
     });
@@ -307,7 +307,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('naviga a censisci quando non ci sono store al click su link', async () => {
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+    (merchantService.getMerchantPointOfSales as vi.Mock).mockResolvedValue({
       content: [],
       ...mockPagination,
       totalElements: 0,
@@ -370,7 +370,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('non mostra bottone add store quando loading', async () => {
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockImplementation(
+    (merchantService.getMerchantPointOfSales as vi.Mock).mockImplementation(
       () => new Promise(() => {})
     );
     renderWithContext(<InitiativeStores />);
@@ -395,14 +395,14 @@ describe('<InitiativeStores />', () => {
 
 describe('Column rendering logic', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
     mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+    (merchantService.getMerchantPointOfSales as vi.Mock).mockResolvedValue({
       content: mockStores,
       ...mockPagination,
     });
-    (useLocation as jest.Mock).mockReturnValue({ state: {} });
+    (useLocation as vi.Mock).mockReturnValue({ state: {} });
   });
 
   test('il renderCell della colonna "type" formatta correttamente i valori', async () => {
@@ -528,15 +528,15 @@ describe('Column rendering logic', () => {
 
   describe('sessionStorage behavior', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       sessionStorage.clear();
       mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
       mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-      (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+      (merchantService.getMerchantPointOfSales as vi.Mock).mockResolvedValue({
         content: mockStores,
         ...mockPagination,
       });
-      (useLocation as jest.Mock).mockReturnValue({ state: {} });
+      (useLocation as vi.Mock).mockReturnValue({ state: {} });
     });
 
     test('carica paginazione e ordinamento da sessionStorage se presenti e initiativeId corrisponde', async () => {

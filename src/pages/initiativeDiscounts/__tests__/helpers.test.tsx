@@ -11,7 +11,7 @@ import { StatusEnum as TransactionCreatedStatusEnum } from '../../../api/generat
 import { StatusEnum as TransactionProcessedStatusEnum } from '../../../api/generated/merchants/MerchantTransactionProcessedDTO';
 import { FormikProps } from 'formik';
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
   t: (key: string) => key,
 }));
 
@@ -76,25 +76,25 @@ describe('initiativeDiscounts/helpers', () => {
     const endDate = new Date('2023-01-31T23:59:59.999Z');
 
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should return true if current date is within the period', () => {
-      jest.setSystemTime(new Date('2023-01-15T12:00:00.000Z'));
+      vi.setSystemTime(new Date('2023-01-15T12:00:00.000Z'));
       expect(userCanCreateDiscount(startDate, endDate)).toBe(true);
     });
 
     it('should return false if current date is before the start date', () => {
-      jest.setSystemTime(new Date('2022-12-31T23:59:59.999Z'));
+      vi.setSystemTime(new Date('2022-12-31T23:59:59.999Z'));
       expect(userCanCreateDiscount(startDate, endDate)).toBe(false);
     });
 
     it('should return false if current date is after the end date', () => {
-      jest.setSystemTime(new Date('2023-02-01T00:00:00.000Z'));
+      vi.setSystemTime(new Date('2023-02-01T00:00:00.000Z'));
       expect(userCanCreateDiscount(startDate, endDate)).toBe(false);
     });
 
@@ -105,15 +105,15 @@ describe('initiativeDiscounts/helpers', () => {
 
   describe('resetForm', () => {
     it('should reset form and fetch data', () => {
-      const mockResetForm = jest.fn();
+      const mockResetForm = vi.fn();
       const mockFormik = {
         resetForm: mockResetForm,
       } as unknown as FormikProps<{ searchUser: string; filterStatus: string }>;
 
-      const mockSetFilterByUser = jest.fn();
-      const mockSetFilterByStatus = jest.fn();
-      const mockSetRows = jest.fn();
-      const mockGetTableData = jest.fn();
+      const mockSetFilterByUser = vi.fn();
+      const mockSetFilterByStatus = vi.fn();
+      const mockSetRows = vi.fn();
+      const mockGetTableData = vi.fn();
 
       resetForm(
         'initiative-123',

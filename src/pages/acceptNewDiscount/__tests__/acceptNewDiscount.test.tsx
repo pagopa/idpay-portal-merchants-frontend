@@ -2,17 +2,17 @@ import React, { useState as useStateMock } from 'react';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import AcceptNewDiscount from '../acceptNewDiscount';
 
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useState: jest.fn(),
+vi.mock('react', () => ({
+  ...vi.importActual('react'),
+  useState: vi.fn(),
 }));
-const setActiveStep = jest.fn();
-const setAmount = jest.fn();
-const setCode = jest.fn();
+const setActiveStep = vi.fn();
+const setAmount = vi.fn();
+const setCode = vi.fn();
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
   // @ts-ignore
   useStateMock.mockImplementation((init: any) => [init, setActiveStep]);
   // @ts-ignore
@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 describe('Test suite for AcceptnewDiscount page', () => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = vi.fn();
   test('Render component with step 0 active', () => {
     // @ts-ignore
     useStateMock.mockImplementationOnce(() => [0, setActiveStep]);

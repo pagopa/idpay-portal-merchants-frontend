@@ -8,14 +8,14 @@ import { MerchantsApiMocked } from '../../../api/__mocks__/MerchantsApiClient';
 import { TransactionResponse } from '../../../api/generated/merchants/TransactionResponse';
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 const oldWindowLocation = global.window.location;
 
 const mockedLocation = {
-  assign: jest.fn(),
+  assign: vi.fn(),
   pathname: `${BASE_ROUTE}/crea-sconto/1234`,
   origin: 'MOCKED_ORIGIN',
   search: '',
@@ -33,16 +33,16 @@ afterAll(() => {
 afterEach(cleanup);
 
 describe('Test suite for CreateForm component', () => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = vi.fn();
   test('Render component', () => {
     renderWithContext(
-      <CreateForm id={'1234'} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
+      <CreateForm id={'1234'} setDiscountCreated={vi.fn()} setDiscountResponse={vi.fn()} />
     );
   });
 
   test('Navigate to InitiativeDiscounts page clicking the back button', async () => {
     const { history } = renderWithContext(
-      <CreateForm id={'1234'} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
+      <CreateForm id={'1234'} setDiscountCreated={vi.fn()} setDiscountResponse={vi.fn()} />
     );
     const backButton = screen.getByTestId('back-to-initiative-discounts-test') as HTMLButtonElement;
     const oldLocationPathname = history.location.pathname;
@@ -52,7 +52,7 @@ describe('Test suite for CreateForm component', () => {
 
   test('Form filling and submit OK', async () => {
     renderWithContext(
-      <CreateForm id={'1234'} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
+      <CreateForm id={'1234'} setDiscountCreated={vi.fn()} setDiscountResponse={vi.fn()} />
     );
     const user = userEvent.setup();
     const spendingAmountField = screen.getByLabelText(
@@ -64,7 +64,7 @@ describe('Test suite for CreateForm component', () => {
 
   test('Render component with id prop undefined', async () => {
     renderWithContext(
-      <CreateForm id={undefined} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
+      <CreateForm id={undefined} setDiscountCreated={vi.fn()} setDiscountResponse={vi.fn()} />
     );
     const user = userEvent.setup();
     const spendingAmountField = screen.getByLabelText(
@@ -83,7 +83,7 @@ describe('Test suite for CreateForm component', () => {
     ): Promise<TransactionResponse> => Promise.reject('testing catch case');
 
     renderWithContext(
-      <CreateForm id={'1234'} setDiscountCreated={jest.fn()} setDiscountResponse={jest.fn()} />
+      <CreateForm id={'1234'} setDiscountCreated={vi.fn()} setDiscountResponse={vi.fn()} />
     );
 
     const user = userEvent.setup();

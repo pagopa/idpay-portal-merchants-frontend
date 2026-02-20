@@ -5,24 +5,24 @@ import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Route, useHistory } from 'react-router-dom';
 import RefundRequests from '../RefundRequests'
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
 }));
 
-const mockSetAlert = jest.fn();
-jest.mock('../../../hooks/useAlert', () => ({
+const mockSetAlert = vi.fn();
+vi.mock('../../../hooks/useAlert', () => ({
   __esModule: true,
   useAlert: () => ({ setAlert: mockSetAlert }),
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: jest.fn(),
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
+  useHistory: vi.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
+vi.mock('@pagopa/selfcare-common-frontend', () => ({
   TitleBox: ({ title, subTitle }: any) => (
     <div>
       <h4>{title}</h4>
@@ -31,12 +31,12 @@ jest.mock('@pagopa/selfcare-common-frontend', () => ({
   ),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
   __esModule: true,
-  default: () => jest.fn(),
+  default: () => vi.fn(),
 }));
 
-jest.mock('../../../components/dataTable/DataTable', () => ({
+vi.mock('../../../components/dataTable/DataTable', () => ({
   __esModule: true,
   default: ({
     columns,
@@ -80,12 +80,12 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
   ),
 }));
 
-jest.mock('../../../components/Chip/CustomChip', () => ({
+vi.mock('../../../components/Chip/CustomChip', () => ({
   __esModule: true,
   default: ({ label }: any) => <span data-testid="custom-chip">{label}</span>,
 }));
 
-jest.mock('../../../components/Transactions/useStatus', () => ({
+vi.mock('../../../components/Transactions/useStatus', () => ({
   __esModule: true,
   default: (status: string) => ({
     label: status,
@@ -94,21 +94,21 @@ jest.mock('../../../components/Transactions/useStatus', () => ({
   }),
 }));
 
-jest.mock('../../../components/Transactions/CurrencyColumn', () => ({
+vi.mock('../../../components/Transactions/CurrencyColumn', () => ({
   __esModule: true,
   default: ({ value }: any) => <span>{value.toFixed(2)} €</span>,
 }));
 
-jest.mock('../../reportedUsers/NoResultPaper', () => ({
+vi.mock('../../reportedUsers/NoResultPaper', () => ({
   __esModule: true,
   default: ({ translationKey }: any) => <div data-testid="no-result-paper">{translationKey}</div>,
 }));
 
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
+vi.mock('../../../redux/slices/initiativesSlice', () => ({
   intiativesListSelector: (state: any) => state.initiatives.initiativesList,
 }));
 
-jest.mock('../RefundRequestModal', () => ({
+vi.mock('../RefundRequestModal', () => ({
   RefundRequestsModal: ({
     isOpen,
     setIsOpen,
@@ -131,10 +131,10 @@ jest.mock('../RefundRequestModal', () => ({
     ) : null,
 }));
 
-const mockGetRewardBatches = jest.fn();
-const mockSendRewardBatch = jest.fn();
+const mockGetRewardBatches = vi.fn();
+const mockSendRewardBatch = vi.fn();
 
-jest.mock('../../../services/merchantService', () => ({
+vi.mock('../../../services/merchantService', () => ({
   getRewardBatches: (initiativeId: string, pageNo: number, pageSize: number) =>
     mockGetRewardBatches(initiativeId, pageNo, pageSize),
   sendRewardBatch: (initiativeId: string, batchId: string) =>
@@ -197,7 +197,7 @@ const renderWithStore = (component: React.ReactElement, store = createMockStore(
 
 describe('RefundRequests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetRewardBatches.mockResolvedValue({
       content: mockData,
       pageNo: 0,
@@ -220,9 +220,9 @@ describe('RefundRequests', () => {
   });
 
   it('should call history.push', async () => {
-    const pushMock = jest.fn();
+    const pushMock = vi.fn();
 
-    (useHistory as jest.Mock).mockReturnValue({
+    (useHistory as vi.Mock).mockReturnValue({
       push: pushMock,
     });
 
@@ -407,7 +407,7 @@ describe('RefundRequests', () => {
   });
 
   it('should handle sendRewardBatch error and show error notification', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
     mockSendRewardBatch.mockRejectedValueOnce(new Error('Send Error'));
 
     const user = userEvent.setup();
@@ -568,7 +568,7 @@ describe('RefundRequests', () => {
   });
 
  it('should handle missing initiativeId when sending batch', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
     const storeWithoutInitiatives = createMockStore([]);
 
     renderWithStore(<RefundRequests />, storeWithoutInitiatives);
@@ -581,7 +581,7 @@ describe('RefundRequests', () => {
   });
 
   it('should handle missing batchId when sending batch', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
     renderWithStore(<RefundRequests />);
 
@@ -593,7 +593,7 @@ describe('RefundRequests', () => {
   });
   it('should log error and not call sendRewardBatch when initiativeId is missing', async () => {
     const user = userEvent.setup();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
     const currentYear = new Date().getFullYear();
     const monthAlwaysSelectable = `${currentYear}-00`;
@@ -638,7 +638,7 @@ describe('RefundRequests', () => {
 
   it('should log error and not call sendRewardBatch when batchId is missing', async () => {
     const user = userEvent.setup();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
     const currentYear = new Date().getFullYear();
     const monthAlwaysSelectable = `${currentYear}-00`;

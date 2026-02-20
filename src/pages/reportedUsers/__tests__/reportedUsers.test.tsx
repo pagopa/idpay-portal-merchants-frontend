@@ -6,27 +6,27 @@ import { getReportedUser, deleteReportedUser } from '../../../services/merchantS
 import { parseJwt } from '../../../utils/jwt-utils';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 
-jest.mock('../../../services/merchantService', () => ({
+vi.mock('../../../services/merchantService', () => ({
   __esModule: true,
-  getReportedUser: jest.fn(),
-  deleteReportedUser: jest.fn(),
+  getReportedUser: vi.fn(),
+  deleteReportedUser: vi.fn(),
 }));
 
-jest.mock('../../../utils/jwt-utils', () => ({
+vi.mock('../../../utils/jwt-utils', () => ({
   __esModule: true,
-  parseJwt: jest.fn(),
+  parseJwt: vi.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   __esModule: true,
   storageTokenOps: {
-    read: jest.fn(),
-    write: jest.fn(),
-    remove: jest.fn(),
+    read: vi.fn(),
+    write: vi.fn(),
+    remove: vi.fn(),
   },
 }));
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, params?: any) => {
       const translations: Record<string, string> = {
@@ -55,7 +55,7 @@ jest.mock('react-i18next', () => ({
   },
 }));
 
-jest.mock('../../../components/dataTable/DataTable', () => ({
+vi.mock('../../../components/dataTable/DataTable', () => ({
   __esModule: true,
   default: ({ rows, columns }: any) => (
     <div data-testid="data-table">
@@ -75,7 +75,7 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
   ),
 }));
 
-jest.mock('../SearchTaxCode', () => ({
+vi.mock('../SearchTaxCode', () => ({
   __esModule: true,
   default: ({ formik, onSearch, onReset }: any) => (
     <div data-testid="search-tax-code">
@@ -94,17 +94,17 @@ jest.mock('../SearchTaxCode', () => ({
   ),
 }));
 
-jest.mock('../../../components/Alert/AlertComponent', () => ({
+vi.mock('../../../components/Alert/AlertComponent', () => ({
   __esModule: true,
   default: ({ text, isOpen }: any) => isOpen && <div data-testid='msg-alert'>{text}</div>,
 }));
 
-jest.mock('../NoResultPaper', () => ({
+vi.mock('../NoResultPaper', () => ({
   __esModule: true,
   default: ({ translationKey }: any) => <div data-testid="no-result-paper">{translationKey}</div>,
 }));
 
-jest.mock('../modalReportedUser', () => ({
+vi.mock('../modalReportedUser', () => ({
   __esModule: true,
   default: ({ open, onCancel, onConfirm, description }: any) =>
     open ? (
@@ -120,7 +120,7 @@ jest.mock('../modalReportedUser', () => ({
     ) : null,
 }));
 
-jest.mock('../columnsReportedUser', () => ({
+vi.mock('../columnsReportedUser', () => ({
   getReportedUsersColumns: (handleDelete: any) => [
     {
       field: 'cf',
@@ -140,10 +140,10 @@ jest.mock('../columnsReportedUser', () => ({
   ],
 }));
 
-const mockGetReportedUser = getReportedUser as jest.MockedFunction<typeof getReportedUser>;
-const mockDeleteReportedUser = deleteReportedUser as jest.MockedFunction<typeof deleteReportedUser>;
-const mockParseJwt = parseJwt as jest.MockedFunction<typeof parseJwt>;
-const mockStorageTokenOps = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
+const mockGetReportedUser = getReportedUser as vi.MockedFunction<typeof getReportedUser>;
+const mockDeleteReportedUser = deleteReportedUser as vi.MockedFunction<typeof deleteReportedUser>;
+const mockParseJwt = parseJwt as vi.MockedFunction<typeof parseJwt>;
+const mockStorageTokenOps = storageTokenOps as vi.Mocked<typeof storageTokenOps>;
 
 describe('ReportedUsers Component', () => {
   let history: any;
@@ -155,13 +155,13 @@ describe('ReportedUsers Component', () => {
     mockParseJwt.mockReturnValue({ merchant_id: 'MERCHANT123' });
     mockStorageTokenOps.read.mockReturnValue('mock-token');
 
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   const renderComponent = (locationState?: any) => {
@@ -588,7 +588,7 @@ describe('ReportedUsers Component', () => {
         expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
 
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
 
       await waitFor(() => {
         expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
@@ -613,7 +613,7 @@ describe('ReportedUsers Component', () => {
         expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
 
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
 
       await waitFor(() => {
         expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
@@ -655,7 +655,7 @@ describe('ReportedUsers Component', () => {
         expect(screen.getByText('Utenti Segnalati')).toBeInTheDocument();
       });
 
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
 
       await waitFor(() => {
         expect(screen.queryByText('Utente rimosso con successo')).not.toBeInTheDocument();

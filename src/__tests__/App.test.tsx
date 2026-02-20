@@ -5,29 +5,29 @@ import { renderWithContext } from '../utils/__tests__/test-utils';
 import useTCAgreement from '../hooks/useTCAgreement';
 import { createMemoryHistory } from 'history';
 
-jest.mock('@pagopa/mui-italia', () => ({
+vi.mock('@pagopa/mui-italia', () => ({
   Footer: () => {},
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
   useLocation: () => ({
     pathname: 'localhost:3000/portale-esercenti',
   }),
 }));
 
-const mockSignOutFn = jest.fn();
+const mockSignOutFn = vi.fn();
 
-jest.mock('../services/rolePermissionService');
-jest.mock('../decorators/withLogin');
-jest.mock('../decorators/withSelectedPartyProducts');
+vi.mock('../services/rolePermissionService');
+vi.mock('../decorators/withLogin');
+vi.mock('../decorators/withSelectedPartyProducts');
 
-jest.mock('../hooks/useTCAgreement');
-const mockUseTCAgreement = useTCAgreement as jest.Mock;
+vi.mock('../hooks/useTCAgreement');
+const mockUseTCAgreement = useTCAgreement as vi.Mock;
 
 beforeEach(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 
 describe('Test suite for App component', () => {

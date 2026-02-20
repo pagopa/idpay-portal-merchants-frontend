@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import AutocompleteComponent from "../AutocompleteComponent";
 
 
-jest.mock("react-i18next", () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => {
       if (key === "pages.pointOfSales.noOptionsText") return "Nessuna opzione";
@@ -13,17 +13,17 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
-jest.mock("../../../utils/constants", () => ({
+vi.mock("../../../utils/constants", () => ({
   MANDATORY_FIELD: "Campo obbligatorio",
 }));
 
 describe("AutocompleteComponent", () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("renders correctly with label", () => {
@@ -32,7 +32,7 @@ describe("AutocompleteComponent", () => {
   });
 
   it("does not trigger onChangeDebounce for input shorter than 5 chars", () => {
-    const onChangeDebounce = jest.fn();
+    const onChangeDebounce = vi.fn();
     render(
       <AutocompleteComponent
         options={[]}
@@ -43,7 +43,7 @@ describe("AutocompleteComponent", () => {
     const input = screen.getByLabelText("Test");
 
     fireEvent.change(input, { target: { value: "abcd" } });
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     expect(onChangeDebounce).not.toHaveBeenCalled();
     expect(screen.queryByRole("progressbar")).toBeNull();
@@ -68,7 +68,7 @@ describe("AutocompleteComponent", () => {
   });
 
   it("calls onChange when an option is selected", () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const options = [{ Address: { Label: "Via Roma 1" } }];
     render(
       <AutocompleteComponent options={options} onChange={onChange} label="Seleziona" />

@@ -38,7 +38,7 @@ describe('StoreProvider', () => {
   });
 
   test('should throw an error if useStore is used outside of StoreProvider', () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const FaultyComponent = () => {
       useStore();

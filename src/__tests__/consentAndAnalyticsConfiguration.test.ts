@@ -1,4 +1,4 @@
-jest.mock("@pagopa/selfcare-common-frontend/lib/config/env", () => ({
+vi.mock("@pagopa/selfcare-common-frontend/lib/config/env", () => ({
   CONFIG: {
     ANALYTCS: {
       ENABLE: false,
@@ -11,7 +11,7 @@ jest.mock("@pagopa/selfcare-common-frontend/lib/config/env", () => ({
   },
 }));
 
-jest.mock("../utils/env", () => ({
+vi.mock("../utils/env", () => ({
   ENV: {
     ANALYTCS: {
       ENABLE: true,
@@ -24,7 +24,7 @@ jest.mock("../utils/env", () => ({
   },
 }));
 
-jest.mock(
+vi.mock(
   "@pagopa/selfcare-common-frontend/lib/consentManagementConfigure",
   () => ({})
 );

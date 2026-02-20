@@ -11,22 +11,22 @@ import { getUserPermission } from '../../services/rolePermissionService';
 import { setUserRole, setPermissionsList } from '../../redux/slices/permissionsSlice';
 import { useLogin, userFromJwtToken, userFromJwtTokenAsJWTUser } from '../useLogin';
 
-jest.mock('react-redux');
-jest.mock('@pagopa/selfcare-common-frontend/lib/config/env');
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
-jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
-jest.mock('react-i18next');
-jest.mock('../../utils/jwt-utils');
-jest.mock('../../services/rolePermissionService', () => ({
-  getUserPermission: jest.fn(),
+vi.mock('react-redux');
+vi.mock('@pagopa/selfcare-common-frontend/lib/config/env');
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
+vi.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
+vi.mock('react-i18next');
+vi.mock('../../utils/jwt-utils');
+vi.mock('../../services/rolePermissionService', () => ({
+  getUserPermission: vi.fn(),
 }));
 
-const mockedUseDispatch = useDispatch as jest.Mock;
-const mockedStorageTokenOps = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
-const mockedStorageUserOps = storageUserOps as jest.Mocked<typeof storageUserOps>;
-const mockedUseErrorDispatcher = useErrorDispatcher as jest.Mock;
-const mockedParseJwt = parseJwt as jest.Mock;
-const mockedGetUserPermission = getUserPermission as jest.Mock;
+const mockedUseDispatch = useDispatch as vi.Mock;
+const mockedStorageTokenOps = storageTokenOps as vi.Mocked<typeof storageTokenOps>;
+const mockedStorageUserOps = storageUserOps as vi.Mocked<typeof storageUserOps>;
+const mockedUseErrorDispatcher = useErrorDispatcher as vi.Mock;
+const mockedParseJwt = parseJwt as vi.Mock;
+const mockedGetUserPermission = getUserPermission as vi.Mock;
 
 const mockJwtPayload = {
   uid: 'test-uid-123',
@@ -76,14 +76,14 @@ describe('JWT Helper Functions', () => {
 });
 
 describe('useLogin', () => {
-  const mockDispatch = jest.fn();
-  const mockAddError = jest.fn();
+  const mockDispatch = vi.fn();
+  const mockAddError = vi.fn();
   const assign = window.location.assign;
 
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: {
-        assign: jest.fn(),
+        assign: vi.fn(),
       },
       writable: true,
     });
@@ -94,11 +94,11 @@ describe('useLogin', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseDispatch.mockReturnValue(mockDispatch);
     mockedUseErrorDispatcher.mockReturnValue(mockAddError);
-    (useTranslation as jest.Mock).mockReturnValue({ t: (key: string) => key });
-    (window.location.assign as jest.Mock).mockClear();
+    (useTranslation as vi.Mock).mockReturnValue({ t: (key: string) => key });
+    (window.location.assign as vi.Mock).mockClear();
   });
 
   test('should do nothing and redirect to login if no token is found', async () => {

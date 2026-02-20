@@ -9,7 +9,7 @@ import * as helperFunctions from '../../../helpers';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../../../api/generated/merchants/MerchantStatisticsDTO';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
   withTranslation: () => (Component: any) => {
     Component.defaultProps = { ...Component.defaultProps, t: (key: string) => key };
@@ -17,10 +17,10 @@ jest.mock('react-i18next', () => ({
   },
 }));
 
-jest.mock('../../../services/merchantService');
+vi.mock('../../../services/merchantService');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
   useParams: () => ({ id: 'initiative-123' }),
 }));
 
@@ -50,18 +50,18 @@ const mockMerchantStatistics: MerchantStatisticsDTO = {
 describe('InitiativeOverview', () => {
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(helperFunctions, 'formatDate');
-    jest.spyOn(helperFunctions, 'formatIban');
-    jest.spyOn(helperFunctions, 'formattedCurrency');
-    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetail);
+    vi.clearAllMocks();
+    vi.spyOn(helperFunctions, 'formatDate');
+    vi.spyOn(helperFunctions, 'formatIban');
+    vi.spyOn(helperFunctions, 'formattedCurrency');
+    vi.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetail);
     jest
       .spyOn(merchantService, 'getMerchantInitiativeStatistics')
       .mockResolvedValue(mockMerchantStatistics);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should render the main titles and cards', async () => {
@@ -78,14 +78,14 @@ describe('InitiativeOverview', () => {
 
   it('should handle API error for getMerchantDetail', async () => {
     const error = new Error('API Error Detail');
-    jest.spyOn(merchantService, 'getMerchantDetail').mockRejectedValue(error);
+    vi.spyOn(merchantService, 'getMerchantDetail').mockRejectedValue(error);
 
     renderComponent();
   });
 
   // it('should handle API error for getMerchantInitiativeStatistics', async () => {
   //   const error = new Error('API Error Stats');
-  //   jest.spyOn(merchantService, 'getMerchantInitiativeStatistics').mockRejectedValue(error);
+  //   vi.spyOn(merchantService, 'getMerchantInitiativeStatistics').mockRejectedValue(error);
 
   //   renderComponent();
 

@@ -8,43 +8,43 @@ import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merch
 import getStatus from '../useStatus';
 import CustomChip from '../../Chip/CustomChip';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
-const mockSetAlert = jest.fn();
-jest.mock('../../../hooks/useAlert', () => ({
+const mockSetAlert = vi.fn();
+vi.mock('../../../hooks/useAlert', () => ({
   useAlert: () => ({
     alert: { isOpen: false },
     setAlert: mockSetAlert,
   }),
 }));
 
-jest.mock('../useStatus', () => jest.fn());
-jest.mock('../useDetailList', () => () => []);
+vi.mock('../useStatus', () => vi.fn());
+vi.mock('../useDetailList', () => () => []);
 
-jest.mock('../../Chip/CustomChip', () => {
-  return jest.fn((props: any) => (
+vi.mock('../../Chip/CustomChip', () => {
+  return vi.fn((props: any) => (
     <div data-testid="custom-chip">{props.label}</div>
   ));
 });
 
-jest.mock('@mui/material', () => ({
-  ...jest.requireActual('@mui/material'),
-  Tooltip: jest.fn(({ title, children }) => (
+vi.mock('@mui/material', () => ({
+  ...vi.importActual('@mui/material'),
+  Tooltip: vi.fn(({ title, children }) => (
     <div data-testid="mock-tooltip" data-title={title}>
       {children}
     </div>
   )),
 }));
 
-jest.mock('../CurrencyColumn', () => (props: any) => <div>{props.value}</div>);
+vi.mock('../CurrencyColumn', () => (props: any) => <div>{props.value}</div>);
 
-jest.mock('../../../pages/components/EmptyList', () => (props: any) => (
+vi.mock('../../../pages/components/EmptyList', () => (props: any) => (
   <div data-testid="empty-list">{props.message}</div>
 ));
 
-jest.mock('../TransactionDataTable', () =>
+vi.mock('../TransactionDataTable', () =>
   (props: any) => (
     <div data-testid="transaction-data-table">
       <button onClick={() => props.onSortModelChange([{ field: 'updateDate', sort: 'desc' }])}>
@@ -63,7 +63,7 @@ jest.mock('../TransactionDataTable', () =>
   )
 );
 
-jest.mock(
+vi.mock(
   '../TransactionDetail',
   () =>
     ({ isOpen, setIsOpen, children }: any) =>
@@ -75,15 +75,15 @@ jest.mock(
       )
 );
 
-const MockedCustomChip = CustomChip as jest.Mock;
-const mockedGetStatus = getStatus as jest.Mock;
-const MockedTooltip = Tooltip as jest.Mock;
+const MockedCustomChip = CustomChip as vi.Mock;
+const mockedGetStatus = getStatus as vi.Mock;
+const MockedTooltip = Tooltip as vi.Mock;
 
 describe('MerchantTransactions', () => {
-  const handleFiltersApplied = jest.fn();
-  const handleFiltersReset = jest.fn();
-  const handleSortChange = jest.fn();
-  const handlePaginationPageChange = jest.fn();
+  const handleFiltersApplied = vi.fn();
+  const handleFiltersReset = vi.fn();
+  const handleSortChange = vi.fn();
+  const handlePaginationPageChange = vi.fn();
 
   const mockTransactions: any = [
     {
@@ -98,7 +98,7 @@ describe('MerchantTransactions', () => {
   ]
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedGetStatus.mockImplementation((status) => ({ label: status, color: 'green', textColor: 'white' }));
   });
 
@@ -752,7 +752,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('does not call handleFiltersReset when callback is undefined', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
     render(
       <MerchantTransactions
         transactions={mockTransactions}

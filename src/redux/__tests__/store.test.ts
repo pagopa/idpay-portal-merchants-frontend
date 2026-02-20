@@ -1,35 +1,40 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as toolkit from '@reduxjs/toolkit';
 import logger from 'redux-logger';
 
-jest.mock('@reduxjs/toolkit', () => ({
-  ...jest.requireActual('@reduxjs/toolkit'),
-  configureStore: jest.fn(),
-}));
+vi.mock('@reduxjs/toolkit', async () => {
+  const actual = await vi.importActual<any>('@reduxjs/toolkit');
+  return {
+    ...actual,
+    configureStore: vi.fn(),
+  };
+});
 
-jest.mock('redux-logger', () => ({
+vi.mock('redux-logger', () => ({
   __esModule: true,
   default: 'mocked-logger',
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
-  appStateReducer: jest.fn(),
+vi.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
+  appStateReducer: vi.fn(),
 }));
-jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice', () => ({
-  userReducer: jest.fn(),
+vi.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice', () => ({
+  userReducer: vi.fn(),
 }));
-jest.mock('../slices/partiesSlice', () => ({ partiesReducer: jest.fn() }));
-jest.mock('../slices/permissionsSlice', () => ({ permissionsReducer: jest.fn() }));
-jest.mock('../slices/initiativesSlice', () => ({ initiativesReducer: jest.fn() }));
+vi.mock('../slices/partiesSlice', () => ({ partiesReducer: vi.fn() }));
+vi.mock('../slices/permissionsSlice', () => ({ permissionsReducer: vi.fn() }));
+vi.mock('../slices/initiativesSlice', () => ({ initiativesReducer: vi.fn() }));
 
-describe('Redux Store Configuration', () => {
-  const mockedConfigureStore = configureStore as jest.Mock;
+describe('Redux Store Configuration (Vitest ESM)', () => {
+  const mockedConfigureStore = toolkit.configureStore as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    vi.resetModules();
   });
 
-  it('dovrebbe creare uno store con tutti i reducer combinati correttamente', () => {
-    require('../store');
+  it('should create store with combined reducers', async () => {
+    await import('../store');
 
     expect(mockedConfigureStore).toHaveBeenCalledTimes(1);
 
@@ -43,43 +48,35 @@ describe('Redux Store Configuration', () => {
     ]);
   });
 
-  describe('Configurazione del Middleware', () => {
-    beforeEach(() => {
-      jest.resetModules();
-    });
-
-    it('dovrebbe configurare i middleware di default senza il logger se LOG_REDUX_ACTIONS è false', () => {
-      jest.mock('../../utils/constants', () => ({
+  describe('Middleware configuration', () => {
+    it('should NOT add logger when LOG_REDUX_ACTIONS is false', async () => {
+      vi.doMock('../../utils/constants', () => ({
         LOG_REDUX_ACTIONS: false,
       }));
 
-      const localMockedConfigureStore = require('@reduxjs/toolkit').configureStore;
+      await import('../store');
 
-      require('../store');
-
-      const config = localMockedConfigureStore.mock.calls[0][0];
+      const config = mockedConfigureStore.mock.calls[0][0];
       const middlewareCallback = config.middleware;
 
-      const getDefaultMiddleware = jest.fn(() => ['default-middleware']);
+      const getDefaultMiddleware = vi.fn(() => ['default-middleware']);
       const finalMiddlewares = middlewareCallback(getDefaultMiddleware);
 
       expect(finalMiddlewares).not.toContain(logger);
       expect(finalMiddlewares).toEqual(['default-middleware']);
     });
 
-    it('dovrebbe aggiungere il logger ai middleware di default se LOG_REDUX_ACTIONS è true', () => {
-      jest.mock('../../utils/constants', () => ({
+    it('should add logger when LOG_REDUX_ACTIONS is true', async () => {
+      vi.doMock('../../utils/constants', () => ({
         LOG_REDUX_ACTIONS: true,
       }));
 
-      const localMockedConfigureStore = require('@reduxjs/toolkit').configureStore;
+      await import('../store');
 
-      require('../store');
-
-      const config = localMockedConfigureStore.mock.calls[0][0];
+      const config = mockedConfigureStore.mock.calls[0][0];
       const middlewareCallback = config.middleware;
 
-      const getDefaultMiddleware = jest.fn(() => ['default-middleware']);
+      const getDefaultMiddleware = vi.fn(() => ['default-middleware']);
       const finalMiddlewares = middlewareCallback(getDefaultMiddleware);
 
       expect(finalMiddlewares).toContain(logger);

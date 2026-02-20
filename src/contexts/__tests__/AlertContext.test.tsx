@@ -1,63 +1,73 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import { AlertProvider } from "../AlertContext";
-import { useAlert } from "../../hooks/useAlert";
-import { useEffect } from "react";
-import AlertComponent from "../../components/Alert/AlertComponent";
+import { render, screen, waitFor } from '@testing-library/react';
+import { AlertProvider } from '../AlertContext';
+import { useAlert } from '../../hooks/useAlert';
+import { useEffect } from 'react';
+import AlertComponent from '../../components/Alert/AlertComponent';
+import { vi } from 'vitest';
 
 const EmptyConsumer = () => {
-    const { alert, setAlert } = useAlert();
+  const { alert, setAlert } = useAlert();
 
-    useEffect(() => {
-        setAlert()
-    }, [])
+  useEffect(() => {
+    setAlert();
+  }, []);
 
-    return <div><AlertComponent data-testid="alert-test" { ...alert} /></div>
-}
+  return (
+    <div>
+      {alert?.isOpen && <AlertComponent data-testid="alert-test" {...alert} />}
+    </div>
+  );
+};
 
 const Consumer = () => {
-    const { alert, setAlert } = useAlert();
+  const { alert, setAlert } = useAlert();
 
-    useEffect(() => {
-        setAlert({title: 'title', text: 'text', isOpen: true})
-    }, [])
+  useEffect(() => {
+    setAlert({ title: 'title', text: 'text', isOpen: true });
+  }, []);
 
-    return <div><AlertComponent data-testid="alert-test" { ...alert}/></div>
-}
+  return (
+    <div>
+      {alert?.isOpen && <AlertComponent data-testid="alert-test" {...alert} />}
+    </div>
+  );
+};
 
 describe('AlertContext', () => {
-
-  it('renders AlertContext with empty values', () => {
-
-    render(
-        <AlertProvider>
-            <EmptyConsumer />
-        </AlertProvider>
-    );
-
-    const alert = document.querySelector('[data-testid="alert-test"') as HTMLElement;
-
-    expect(alert).not.toBeInTheDocument()
-
+  beforeEach(() => {
+    vi.useFakeTimers();
   });
 
-  it('renders AlertContext with populated state', async () => {
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+  });
 
+  it('renders AlertContext with empty values', () => {
     render(
-        <AlertProvider>
-            <Consumer />
-        </AlertProvider>
+      <AlertProvider>
+        <EmptyConsumer />
+      </AlertProvider>
     );
 
-    const alert = document.querySelector('[data-testid="alert-test"') as HTMLElement;
+    expect(screen.queryByTestId('alert-test')).not.toBeInTheDocument();
+  });
 
-    expect(screen.getByText('title')).toBeInTheDocument()
-    expect(screen.getByText('text')).toBeInTheDocument()
+  it('renders AlertContext with populated state and auto closes', async () => {
+    render(
+      <AlertProvider>
+        <Consumer />
+      </AlertProvider>
+    );
+
+    expect(await screen.findByText('title')).toBeInTheDocument();
+    expect(screen.getByText('text')).toBeInTheDocument();
+
+    // advance auto-close timer (3 seconds)
+    vi.advanceTimersByTime(3000);
 
     await waitFor(() => {
-      setTimeout(() => {
-        expect(alert).not.toBeInTheDocument()
-      }, 3000)
-    })
-
+      expect(screen.queryByTestId('alert-test')).not.toBeInTheDocument();
+    });
   });
 });

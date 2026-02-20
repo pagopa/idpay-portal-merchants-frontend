@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "strict": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "types": ["vitest/globals", "node"]
   },
   "include": ["src"]
 }

@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import DetailDrawer from '../DetailDrawer';
 
-const mockToggleDrawer = jest.fn();
+const mockToggleDrawer = vi.fn();
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider theme={createTheme()}>{children}</ThemeProvider>
@@ -19,7 +19,7 @@ describe('DetailDrawer', () => {
   const buttons = [{title: "button", dataTestId: "button-test-id"}]
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the drawer when open prop is true', () => {

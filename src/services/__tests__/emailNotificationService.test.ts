@@ -3,18 +3,18 @@ import { getInstitutionProductUserInfo, sendEmail } from '../emailNotificationSe
 import { EmailMessageDTO } from '../../api/generated/email-notification/EmailMessageDTO';
 import { UserInstitutionInfoDTO } from '../../api/generated/email-notification/UserInstitutionInfoDTO';
 
-jest.mock('../../api/emailNotificationApiClient', () => ({
+vi.mock('../../api/emailNotificationApiClient', () => ({
   EmailNotificationApi: {
-    getInstitutionProductUserInfo: jest.fn(),
-    sendEmail: jest.fn(),
+    getInstitutionProductUserInfo: vi.fn(),
+    sendEmail: vi.fn(),
   },
 }));
 
-const mockedEmailNotificationApi = EmailNotificationApi as jest.Mocked<typeof EmailNotificationApi>;
+const mockedEmailNotificationApi = EmailNotificationApi as vi.Mocked<typeof EmailNotificationApi>;
 
 describe('emailNotificationService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getInstitutionProductUserInfo', () => {

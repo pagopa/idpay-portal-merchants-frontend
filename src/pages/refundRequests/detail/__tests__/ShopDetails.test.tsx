@@ -2,11 +2,11 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ShopDetails from "../ShopDetails";
 import { BrowserRouter } from "react-router-dom";
 
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
+vi.mock("react-router-dom", () => ({
+  ...vi.importActual("react-router-dom"),
   useHistory: () => ({
-    goBack: jest.fn(),
-    replace: jest.fn(),
+    goBack: vi.fn(),
+    replace: vi.fn(),
     location: { state: { store: { id: "batch-1" } } },
   }),
   useLocation: () => ({
@@ -14,32 +14,32 @@ jest.mock("react-router-dom", () => ({
   }),
 }));
 
-jest.mock("react-i18next", () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
   withTranslation: () => (Component: any) => Component,
 }));
 
-jest.mock("../../../../services/merchantService", () => ({
-  getAllRewardBatches: jest.fn(),
-  getMerchantPointOfSalesWithTransactions: jest.fn(),
-  getMerchantDetail: jest.fn(),
-  getMerchantTransactionsProcessed: jest.fn(),
-  downloadBatchCsv: jest.fn(),
+vi.mock("../../../../services/merchantService", () => ({
+  getAllRewardBatches: vi.fn(),
+  getMerchantPointOfSalesWithTransactions: vi.fn(),
+  getMerchantDetail: vi.fn(),
+  getMerchantTransactionsProcessed: vi.fn(),
+  downloadBatchCsv: vi.fn(),
 }));
 
-jest.mock("../../../../hooks/useAlert", () => ({
+vi.mock("../../../../hooks/useAlert", () => ({
   useAlert: () => ({
-    setAlert: jest.fn(),
+    setAlert: vi.fn(),
   }),
 }));
 
-jest.mock("../../../../utils/jwt-utils", () => ({
+vi.mock("../../../../utils/jwt-utils", () => ({
   parseJwt: () => ({ merchant_id: "merchant-1" }),
 }));
 
-jest.mock("react-redux", () => ({
+vi.mock("react-redux", () => ({
   useSelector: () => [{ initiativeId: "init-1" }],
   connect: () => (Component: any) => Component,
 }));
@@ -50,7 +50,7 @@ const {
   getMerchantDetail,
   getMerchantTransactionsProcessed,
   downloadBatchCsv,
-} = jest.requireMock("../../../../services/merchantService");
+} = vi.requireMock("../../../../services/merchantService");
 
 const renderComponent = () =>
   render(
@@ -61,7 +61,7 @@ const renderComponent = () =>
 
 describe("ShopDetails - FULL BRANCH COVERAGE", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     getMerchantDetail.mockResolvedValue({});
     getMerchantTransactionsProcessed.mockResolvedValue({

@@ -16,25 +16,25 @@ import { POS_TYPE } from '../../../utils/constants';
 import { StoreProvider } from '../StoreContext';
 import { handlePromptMessage } from '../../../helpers';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
+  useParams: vi.fn(),
 }));
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
   withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
     <Component {...props} />,
 }));
-jest.mock('../../../services/merchantService', () => ({
-  getMerchantPointOfSalesById: jest.fn(),
-  getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
-  updateMerchantPointOfSales: jest.fn(),
+vi.mock('../../../services/merchantService', () => ({
+  getMerchantPointOfSalesById: vi.fn(),
+  getMerchantPointOfSaleTransactionsProcessed: vi.fn(),
+  updateMerchantPointOfSales: vi.fn(),
 }));
-jest.mock('../../../utils/jwt-utils');
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
-jest.mock('../../../helpers');
-jest.mock('../../components/BreadcrumbsBox', () => () => <div data-testid="breadcrumbs-box" />);
-jest.mock('../../../components/Transactions/MerchantTransactions', () => (props: any) => (
+vi.mock('../../../utils/jwt-utils');
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
+vi.mock('../../../helpers');
+vi.mock('../../components/BreadcrumbsBox', () => () => <div data-testid="breadcrumbs-box" />);
+vi.mock('../../../components/Transactions/MerchantTransactions', () => (props: any) => (
   <div data-testid="transactions">
     <button onClick={() => props.handleFiltersApplied({ f: 1 })}>apply</button>
     <button onClick={() => props.handleFiltersReset()}>reset</button>
@@ -44,20 +44,20 @@ jest.mock('../../../components/Transactions/MerchantTransactions', () => (props:
     <button onClick={() => props.handlePaginationPageChange(2)}>page</button>
   </div>
 ));
-jest.mock('../../../components/labelValuePair/labelValuePair', () => (props: any) => (
+vi.mock('../../../components/labelValuePair/labelValuePair', () => (props: any) => (
   <div data-testid="labelpair">{props.label + ':' + props.value}</div>
 ));
-jest.mock('../InitiativeDetailCard', () => (props: any) => (
+vi.mock('../InitiativeDetailCard', () => (props: any) => (
   <div data-testid="initiative-card">{props.children}</div>
 ));
 
-const mockUseParams = useParams as jest.Mock;
-const mockParseJwt = parseJwt as jest.Mock;
-const mockStorage = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
-const mockIsValidEmail = isValidEmail as jest.Mock;
-const mockGetById = getMerchantPointOfSalesById as jest.Mock;
-const mockGetTransactions = getMerchantPointOfSaleTransactionsProcessed as jest.Mock;
-const mockUpdate = updateMerchantPointOfSales as jest.Mock;
+const mockUseParams = useParams as vi.Mock;
+const mockParseJwt = parseJwt as vi.Mock;
+const mockStorage = storageTokenOps as vi.Mocked<typeof storageTokenOps>;
+const mockIsValidEmail = isValidEmail as vi.Mock;
+const mockGetById = getMerchantPointOfSalesById as vi.Mock;
+const mockGetTransactions = getMerchantPointOfSaleTransactionsProcessed as vi.Mock;
+const mockUpdate = updateMerchantPointOfSales as vi.Mock;
 
 const mockStore = {
   id: 'store1',
@@ -78,8 +78,8 @@ const mockStore = {
 
 describe('InitiativeStoreDetail', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     mockUseParams.mockReturnValue({ id: 'initiative1', store_id: 'store1' });
     mockParseJwt.mockReturnValue({ merchant_id: 'm1' });
     mockStorage.read.mockReturnValue('jwt');
@@ -91,8 +91,8 @@ describe('InitiativeStoreDetail', () => {
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   test('renders store detail and calls APIs', async () => {
@@ -381,7 +381,7 @@ describe('InitiativeStoreDetail', () => {
   });
 
   test('Prompt clears sessionStorage when navigating to a different page', () => {
-    const removeItemSpy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
+    const removeItemSpy = vi.spyOn(window.sessionStorage.__proto__, 'removeItem');
     removeItemSpy.mockImplementation(() => {});
   
     // replica fedele della funzione message usata nel componente
@@ -407,7 +407,7 @@ describe('InitiativeStoreDetail', () => {
 
   
   test('handlePromptMessage does not remove sessionStorage when staying in stores', () => {
-    const spy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
+    const spy = vi.spyOn(window.sessionStorage.__proto__, 'removeItem');
     handlePromptMessage({ pathname: '/stores' }, '/stores');
     expect(spy).not.toHaveBeenCalled();
   });

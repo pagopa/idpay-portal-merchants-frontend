@@ -3,17 +3,17 @@ import { AddressAutocompleteRequestDTO } from '../../api/generated/autocomplete/
 import { AddressAutocompleteResponseDTO } from '../../api/generated/autocomplete/AddressAutocompleteResponseDTO';
 import { autocompleteService } from '../autocompleteService';
 
-jest.mock('../../api/AutocompleteApiClient', () => ({
+vi.mock('../../api/AutocompleteApiClient', () => ({
   AutocompleteApi: {
-    getAddresses: jest.fn(),
+    getAddresses: vi.fn(),
   },
 }));
 
-const mockedAutocompleteApi = AutocompleteApi as jest.Mocked<typeof AutocompleteApi>;
+const mockedAutocompleteApi = AutocompleteApi as vi.Mocked<typeof AutocompleteApi>;
 
 describe('autocompleteService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getAddresses', () => {

@@ -5,17 +5,17 @@ import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import CancelTransactionModal from '../CancelTransactionModal';
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 describe('Test suite for CancelTransactionModal component', () => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = vi.fn();
   test('Render component with status enum IDENTIFIED and onClose with escape button', async () => {
     renderWithContext(
       <CancelTransactionModal
         openCancelTrxModal={true}
-        setOpenCancelTrxModal={jest.fn()}
+        setOpenCancelTrxModal={vi.fn()}
         initiativeId={'1234'}
         trxId={'123456789'}
         status={TransactionStatusEnum.IDENTIFIED}
@@ -36,7 +36,7 @@ describe('Test suite for CancelTransactionModal component', () => {
     renderWithContext(
       <CancelTransactionModal
         openCancelTrxModal={true}
-        setOpenCancelTrxModal={jest.fn()}
+        setOpenCancelTrxModal={vi.fn()}
         initiativeId={'1234'}
         trxId={'123456789'}
         status={TransactionStatusEnum.AUTHORIZED}
@@ -51,7 +51,7 @@ describe('Test suite for CancelTransactionModal component', () => {
     renderWithContext(
       <CancelTransactionModal
         openCancelTrxModal={true}
-        setOpenCancelTrxModal={jest.fn()}
+        setOpenCancelTrxModal={vi.fn()}
         initiativeId={'1234'}
         trxId={'123456789'}
         status={TransactionStatusEnum.AUTHORIZED}

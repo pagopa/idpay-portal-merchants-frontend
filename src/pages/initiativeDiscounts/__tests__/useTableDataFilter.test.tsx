@@ -4,16 +4,16 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useTableDataFiltered } from '../useTableDataFiltered';
 
 describe('useTableDataFiltered', () => {
-  const mockGetTableData = jest.fn();
-  const mockSetRows = jest.fn();
-  const mockScrollTo = jest.fn();
+  const mockGetTableData = vi.fn();
+  const mockSetRows = vi.fn();
+  const mockScrollTo = vi.fn();
 
   beforeAll(() => {
     window.scrollTo = mockScrollTo;
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('dovrebbe chiamare getTableData e scrollTo al primo render', () => {
@@ -57,7 +57,7 @@ describe('useTableDataFiltered', () => {
       { initialProps: { page: 0 } }
     );
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     rerender({ page: 1 });
 
@@ -85,7 +85,7 @@ describe('useTableDataFiltered', () => {
       { initialProps }
     );
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     rerender({ ...initialProps, filterByUser: 'user2' });
 
@@ -99,7 +99,7 @@ describe('useTableDataFiltered', () => {
       useTableDataFiltered('initiative-123', 0, undefined, undefined, mockGetTableData, mockSetRows)
     );
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     unmount();
 

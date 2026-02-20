@@ -4,27 +4,27 @@ import ROUTES from '../../routes';
 import { ENV } from '../../utils/env';
 import ModifyDocument from './ModifyDocument';
 
-const mockUseLocation = jest.fn();
+const mockUseLocation = vi.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
   useLocation: () => mockUseLocation(),
 }));
 
-jest.mock('../../services/merchantService', () => ({
-  updateInvoiceTransaction: jest.fn(),
+vi.mock('../../services/merchantService', () => ({
+  updateInvoiceTransaction: vi.fn(),
 }));
 
-const mockFileUploadAction = jest.fn();
+const mockFileUploadAction = vi.fn();
 
-jest.mock('../FileUploadAction/FileUploadAction', () => (props: any) => {
+vi.mock('../FileUploadAction/FileUploadAction', () => (props: any) => {
   mockFileUploadAction(props);
   return <div data-testid="file-upload-action" />;
 });
 
 describe('ModifyDocument page', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes correct props when coming from refund requests (default case)', () => {

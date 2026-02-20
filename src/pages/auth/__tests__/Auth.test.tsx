@@ -10,26 +10,26 @@ import { userFromJwtTokenAsJWTUser } from '../../../hooks/useLogin';
 import ROUTES from '../../../routes';
 import { ENV } from '../../../utils/env';
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService', () => ({
-  trackAppError: jest.fn(),
-  trackEvent: jest.fn(),
+vi.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService', () => ({
+  trackAppError: vi.fn(),
+  trackEvent: vi.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
-  storageTokenOps: { write: jest.fn(), read: jest.fn() },
-  storageUserOps: { write: jest.fn() },
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
+  storageTokenOps: { write: vi.fn(), read: vi.fn() },
+  storageUserOps: { write: vi.fn() },
 }));
 
-jest.mock('../../../hooks/useLogin', () => ({
-  userFromJwtTokenAsJWTUser: jest.fn(),
+vi.mock('../../../hooks/useLogin', () => ({
+  userFromJwtTokenAsJWTUser: vi.fn(),
 }));
 
-jest.mock('../../../routes', () => ({
+vi.mock('../../../routes', () => ({
   __esModule: true,
   default: { HOME: '/home' },
 }));
 
-jest.mock('../../../utils/env', () => ({
+vi.mock('../../../utils/env', () => ({
   ENV: {
     URL_FE: { PRE_LOGIN: '/api/prelogin', LOGIN: '/login' },
   },
@@ -39,7 +39,7 @@ const originalLocation = window.location;
 beforeAll(() => {
   delete (window as any).location;
   (window as any).location = {
-    assign: jest.fn(),
+    assign: vi.fn(),
   };
 });
 afterAll(() => {
@@ -49,7 +49,7 @@ afterAll(() => {
 describe('readUserFromToken', () => {
   it('should parse user from token and store it', () => {
     const fakeUser = { name: 'Francesco' };
-    (userFromJwtTokenAsJWTUser as jest.Mock).mockReturnValueOnce(fakeUser);
+    (userFromJwtTokenAsJWTUser as vi.Mock).mockReturnValueOnce(fakeUser);
 
     const result = readUserFromToken('fakeToken');
 
@@ -59,7 +59,7 @@ describe('readUserFromToken', () => {
   });
 
   it('should return null if no user parsed', () => {
-    (userFromJwtTokenAsJWTUser as jest.Mock).mockReturnValueOnce(null);
+    (userFromJwtTokenAsJWTUser as vi.Mock).mockReturnValueOnce(null);
     const result = readUserFromToken('invalid');
     expect(result).toBeNull();
     expect(storageUserOps.write).not.toHaveBeenCalled();
@@ -68,19 +68,19 @@ describe('readUserFromToken', () => {
 
 describe('Auth component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should handle successful login flow with token and redirect to HOME', async () => {
     (window as any).location.hash = '#token=validToken';
 
     const mockResponse = {
-      headers: { get: jest.fn(() => null) },
-      text: jest.fn().mockResolvedValueOnce('innerToken'),
+      headers: { get: vi.fn(() => null) },
+      text: vi.fn().mockResolvedValueOnce('innerToken'),
     };
-    global.fetch = jest.fn(() => Promise.resolve(mockResponse as any)) as any;
+    global.fetch = vi.fn(() => Promise.resolve(mockResponse as any)) as any;
 
-    (userFromJwtTokenAsJWTUser as jest.Mock).mockReturnValueOnce({ id: '123' });
+    (userFromJwtTokenAsJWTUser as vi.Mock).mockReturnValueOnce({ id: '123' });
 
     render(<Auth />);
 
@@ -94,10 +94,10 @@ describe('Auth component', () => {
   it('should redirect to x-location-to header if present', async () => {
     (window as any).location.hash = '#token=headerToken';
     const mockResponse = {
-      headers: { get: jest.fn(() => '/redirectUrl') },
-      text: jest.fn().mockResolvedValueOnce('unused'),
+      headers: { get: vi.fn(() => '/redirectUrl') },
+      text: vi.fn().mockResolvedValueOnce('unused'),
     };
-    global.fetch = jest.fn(() => Promise.resolve(mockResponse as any)) as any;
+    global.fetch = vi.fn(() => Promise.resolve(mockResponse as any)) as any;
 
     render(<Auth />);
 
@@ -108,7 +108,7 @@ describe('Auth component', () => {
 
   it('should handle fetch failure and redirect to LOGIN', async () => {
     (window as any).location.hash = '#token=errorToken';
-    global.fetch = jest.fn(() => Promise.reject(new Error('network error'))) as any;
+    global.fetch = vi.fn(() => Promise.reject(new Error('network error'))) as any;
 
     render(<Auth />);
 

@@ -15,7 +15,7 @@ import {
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 
 describe('copyTextToClipboard', () => {
-  const writeTextMock = jest.fn();
+  const writeTextMock = vi.fn();
 
   beforeAll(() => {
     // Mock dell'API clipboard del browser
@@ -45,16 +45,16 @@ describe('copyTextToClipboard', () => {
 
 describe('downloadQRCodeFromURL', () => {
   // Mock delle API globali necessarie per questa funzione
-  global.fetch = jest.fn();
-  global.URL.createObjectURL = jest.fn();
-  const appendChildSpy = jest.spyOn(document.body, 'appendChild');
-  const removeChildSpy = jest.spyOn(document.body, 'removeChild');
-  const clickSpy = jest.fn();
+  global.fetch = vi.fn();
+  global.URL.createObjectURL = vi.fn();
+  const appendChildSpy = vi.spyOn(document.body, 'appendChild');
+  const removeChildSpy = vi.spyOn(document.body, 'removeChild');
+  const clickSpy = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Simula la creazione di un elemento <a> con un metodo click fittizio
-    jest.spyOn(document, 'createElement').mockReturnValue({
+    vi.spyOn(document, 'createElement').mockReturnValue({
       click: clickSpy,
       href: '',
       download: '',
@@ -64,7 +64,7 @@ describe('downloadQRCodeFromURL', () => {
   test('should perform fetch and trigger download on success', async () => {
     const mockUrl = 'https://example.com/qrcode.png';
     const mockBlob = new Blob(['qrcode-data'], { type: 'image/png' });
-    (fetch as jest.Mock).mockResolvedValue({ blob: () => Promise.resolve(mockBlob) });
+    (fetch as vi.Mock).mockResolvedValue({ blob: () => Promise.resolve(mockBlob) });
 
     downloadQRCodeFromURL(mockUrl);
 
@@ -78,9 +78,9 @@ describe('downloadQRCodeFromURL', () => {
   });
 
   test('should log an error if fetch fails', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const mockError = new Error('Network error');
-    (fetch as jest.Mock).mockRejectedValue(mockError);
+    (fetch as vi.Mock).mockRejectedValue(mockError);
 
     downloadQRCodeFromURL('https://example.com/qrcode.png');
 
@@ -199,8 +199,8 @@ describe('generateUniqueId', () => {
   });
 
   test.skip('should generate a predictable id when Date and Math are mocked', () => {
-    jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
-    jest.spyOn(Math, 'random').mockReturnValue(0.123456789);
+    vi.spyOn(Date, 'now').mockReturnValue(1700000000000);
+    vi.spyOn(Math, 'random').mockReturnValue(0.123456789);
     // 0.123456789.toString(36).substring(2, 9) -> "4f25k6o"
     expect(generateUniqueId()).toBe('17000000000004f25k6o');
   });

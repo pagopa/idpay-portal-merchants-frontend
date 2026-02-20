@@ -6,26 +6,26 @@ import {
 } from '../../../services/merchantService';
 import { useAlert } from '../../../hooks/useAlert';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
   useParams: () => ({ id: 'initiative-123' }),
 }));
 
-jest.mock('../../../services/merchantService', () => ({
-  getMerchantTransactionsProcessed: jest.fn(),
-  downloadInvoiceFile: jest.fn(),
+vi.mock('../../../services/merchantService', () => ({
+  getMerchantTransactionsProcessed: vi.fn(),
+  downloadInvoiceFile: vi.fn(),
 }));
 
-jest.mock('../../../hooks/useAlert', () => ({
-  useAlert: jest.fn(),
+vi.mock('../../../hooks/useAlert', () => ({
+  useAlert: vi.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: vi.fn(),
 }));
 
-jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
+vi.mock('../../../components/dataTable/DataTable', () => (props: any) => {
   const firstRow = props.rows[0];
   return (
     <div data-testid="data-table">
@@ -86,11 +86,11 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
   );
 });
 
-jest.mock('../../../components/Chip/StatusChipInvoice', () => (props: any) => (
+vi.mock('../../../components/Chip/StatusChipInvoice', () => (props: any) => (
   <div data-testid="status-chip">{props.status}</div>
 ));
 
-jest.mock('../detail/InvoiceDetail', () => (props: any) => (
+vi.mock('../detail/InvoiceDetail', () => (props: any) => (
   <div data-testid="detail-drawer" data-open={props.isOpen}>
     {props.open && props.children}
     <button type="button" data-testid="close-drawer" onClick={() => props.setIsOpen(false)}>
@@ -99,27 +99,27 @@ jest.mock('../detail/InvoiceDetail', () => (props: any) => (
   </div>
 ));
 
-jest.mock('../../../utils/constants', () => ({
+vi.mock('../../../utils/constants', () => ({
   TYPE_TEXT: {
     Text: 'Text',
     Currency: 'Currency',
   },
 }));
 
-jest.mock('../../../utils/formatUtils', () => ({
+vi.mock('../../../utils/formatUtils', () => ({
   safeFormatDate: (value: string) => `formatted-${value}`,
 }));
 
-const mockedGetTransactions = getMerchantTransactionsProcessed as jest.MockedFunction<
+const mockedGetTransactions = getMerchantTransactionsProcessed as vi.MockedFunction<
   typeof getMerchantTransactionsProcessed
 >;
-const mockedDownloadInvoiceFile = downloadInvoiceFile as jest.MockedFunction<
+const mockedDownloadInvoiceFile = downloadInvoiceFile as vi.MockedFunction<
   typeof downloadInvoiceFile
 >;
-const mockedUseAlert = useAlert as jest.MockedFunction<typeof useAlert>;
+const mockedUseAlert = useAlert as vi.MockedFunction<typeof useAlert>;
 
 describe('InvoiceDataTable', () => {
-  const mockSetAlert = jest.fn();
+  const mockSetAlert = vi.fn();
   const baseTransactions: any = {
     content: [
       {
@@ -146,15 +146,15 @@ describe('InvoiceDataTable', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedGetTransactions.mockResolvedValue(baseTransactions);
-    (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
-    (global as any).fetch = jest.fn().mockResolvedValue({
+    (useAlert as vi.Mock).mockReturnValue({ setAlert: mockSetAlert });
+    (global as any).fetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: jest.fn().mockResolvedValue(new Blob(['test'], { type: 'application/pdf' })),
+      blob: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'application/pdf' })),
     });
-    (global as any).URL.createObjectURL = jest.fn(() => 'blob:fake-url');
-    (global as any).URL.revokeObjectURL = jest.fn();
+    (global as any).URL.createObjectURL = vi.fn(() => 'blob:fake-url');
+    (global as any).URL.revokeObjectURL = vi.fn();
   });
 
   it('fetches and displays transactions', async () => {
@@ -272,8 +272,8 @@ describe('InvoiceDataTable', () => {
   });
 
   it('downloads invoice file PDF and opens new window', async () => {
-    const mockWindow = { document: { title: '' }, focus: jest.fn() };
-    const openSpy = jest.spyOn(window, 'open').mockReturnValue(mockWindow as any);
+    const mockWindow = { document: { title: '' }, focus: vi.fn() };
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockWindow as any);
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
@@ -289,8 +289,8 @@ describe('InvoiceDataTable', () => {
   });
 
   it('downloads invoice file XML and opens new window', async () => {
-    const mockWindow = { document: { title: '' }, focus: jest.fn() };
-    const openSpy = jest.spyOn(window, 'open').mockReturnValue(mockWindow as any);
+    const mockWindow = { document: { title: '' }, focus: vi.fn() };
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockWindow as any);
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.xml',
     } as any);
@@ -313,7 +313,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('handles download error with fetch failure', async () => {
-    (global as any).fetch = jest.fn().mockResolvedValue({
+    (global as any).fetch = vi.fn().mockResolvedValue({
       ok: false,
     });
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
@@ -335,9 +335,9 @@ describe('InvoiceDataTable', () => {
   });
 
   it('handles download error with invalid file extension', async () => {
-    (global as any).fetch = jest.fn().mockResolvedValue({
+    (global as any).fetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: jest.fn().mockResolvedValue(new Blob(['test'], { type: 'application/txt' })),
+      blob: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'application/txt' })),
     });
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.txt',
@@ -383,7 +383,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('handles download with window.open returning null', async () => {
-    jest.spyOn(window, 'open').mockReturnValue(null);
+    vi.spyOn(window, 'open').mockReturnValue(null);
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);

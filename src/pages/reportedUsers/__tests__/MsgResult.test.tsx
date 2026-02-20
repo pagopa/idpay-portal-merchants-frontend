@@ -2,13 +2,13 @@ import { render, screen, act, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MsgResult } from '../MsgResult';
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('MsgResult', () => {
   afterEach(() => {
     cleanup();
-    jest.clearAllTimers();
-    jest.clearAllMocks();
+    vi.clearAllTimers();
+    vi.clearAllMocks();
   });
 
   it('renders with defaults and shows success icon', () => {
@@ -42,7 +42,7 @@ describe('MsgResult', () => {
     render(<MsgResult message="Will disappear" />);
     expect(screen.getByRole('alert')).toBeInTheDocument();
     act(() => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
     });
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -52,7 +52,7 @@ describe('MsgResult', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
     unmount();
     act(() => {
-      jest.advanceTimersByTime(6000);
+      vi.advanceTimersByTime(6000);
     });
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });

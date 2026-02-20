@@ -11,23 +11,23 @@ import * as loadingHook from '@pagopa/selfcare-common-frontend/lib/hooks/useLoad
 import * as errorHook from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import * as tableDataFilteredHook from '../useTableDataFiltered';
 
-window.scrollTo = jest.fn();
+window.scrollTo = vi.fn();
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
-jest.mock('../../../services/merchantService', () => ({
-  getMerchantTransactionsProcessed: jest.fn(),
+vi.mock('../../../services/merchantService', () => ({
+  getMerchantTransactionsProcessed: vi.fn(),
 }));
 
-jest.mock('../../../helpers', () => ({
-  formatDate: jest.fn(),
-  formattedCurrency: jest.fn(),
+vi.mock('../../../helpers', () => ({
+  formatDate: vi.fn(),
+  formattedCurrency: vi.fn(),
 }));
 
-jest.mock('../helpers', () => ({
-  renderTrasactionProcessedStatus: jest.fn((status: string) => `status-${status}`),
+vi.mock('../helpers', () => ({
+  renderTrasactionProcessedStatus: vi.fn((status: string) => `status-${status}`),
   tableHeadData: [
     { width: '20%', label: 'head.date' },
     { width: '20%', label: 'head.fiscalCode' },
@@ -37,19 +37,19 @@ jest.mock('../helpers', () => ({
   ],
 }));
 
-jest.mock('../useTableDataFiltered', () => ({
-  useTableDataFiltered: jest.fn(),
+vi.mock('../useTableDataFiltered', () => ({
+  useTableDataFiltered: vi.fn(),
 }));
 
-jest.mock('../useMemoInitTableData', () => ({
-  useMemoInitTableData: jest.fn(),
+vi.mock('../useMemoInitTableData', () => ({
+  useMemoInitTableData: vi.fn(),
 }));
 
-jest.mock('../../components/EmptyList', () => (props: { message: string }) => (
+vi.mock('../../components/EmptyList', () => (props: { message: string }) => (
   <div data-testid="empty-list">{props.message}</div>
 ));
 
-jest.mock('../TableHeader', () => () => (
+vi.mock('../TableHeader', () => () => (
   <thead data-testid="table-header-mock">
   <tr>
     <th>mock header</th>
@@ -57,13 +57,13 @@ jest.mock('../TableHeader', () => () => (
   </thead>
 ));
 
-jest.mock('../TablePaginator', () => (props: any) => (
+vi.mock('../TablePaginator', () => (props: any) => (
   <div data-testid="paginator-mock">
     paginator-page-{props.page}-total-{props.totalElements}-rpp-{props.rowsPerPage}
   </div>
 ));
 
-jest.mock('../FiltersForm', () => (props: any) => (
+vi.mock('../FiltersForm', () => (props: any) => (
   <div data-testid="filters-form-mock">
     <button
       data-testid="submit-filters"
@@ -78,26 +78,26 @@ jest.mock('../FiltersForm', () => (props: any) => (
 
 let lastFormikConfig: any;
 
-jest.mock('formik', () => ({
+vi.mock('formik', () => ({
   useFormik: (config: any) => {
     lastFormikConfig = config;
     return {
       ...config,
       values: config.initialValues,
-      handleSubmit: jest.fn(),
-      handleChange: jest.fn(),
+      handleSubmit: vi.fn(),
+      handleChange: vi.fn(),
     };
   },
 }));
 
 const useTableDataFilteredMock =
-  tableDataFilteredHook.useTableDataFiltered as jest.Mock;
+  tableDataFilteredHook.useTableDataFiltered as vi.Mock;
 
 const getMerchantTransactionsProcessedMock =
-  getMerchantTransactionsProcessed as jest.Mock;
+  getMerchantTransactionsProcessed as vi.Mock;
 
-const formatDateMock = formatDate as jest.Mock;
-const formattedCurrencyMock = formattedCurrency as jest.Mock;
+const formatDateMock = formatDate as vi.Mock;
+const formattedCurrencyMock = formattedCurrency as vi.Mock;
 
 describe('MerchantTransactionsProcessed', () => {
   const fakeId = '123';
@@ -112,15 +112,15 @@ describe('MerchantTransactionsProcessed', () => {
     },
   ];
 
-  let setLoadingMock: jest.Mock;
+  let setLoadingMock: vi.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     lastFormikConfig = undefined;
 
-    setLoadingMock = jest.fn();
+    setLoadingMock = vi.fn();
 
-    jest.spyOn(loadingHook, 'default').mockReturnValue(setLoadingMock);
+    vi.spyOn(loadingHook, 'default').mockReturnValue(setLoadingMock);
 
     formatDateMock.mockReturnValue('formatted-date');
     formattedCurrencyMock.mockImplementation((value: number) => `currency-${value}`);

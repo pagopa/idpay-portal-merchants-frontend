@@ -6,7 +6,7 @@ import { Formik, useFormik } from 'formik';
 import { TextField } from '@mui/material';
 import FiltersForm from '../FiltersForm';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
       if (key === 'commons.filterBtn') return 'Applica';
@@ -62,7 +62,7 @@ describe('FiltersForm', () => {
   });
 
   test('should call onFiltersApplied with correct values when apply button is clicked', async () => {
-    const handleApply = jest.fn();
+    const handleApply = vi.fn();
     render(<TestFormWrapper onApply={handleApply} />);
     const fiscalCodeInput = screen.getByLabelText('Codice Fiscale');
     const applyButton = screen.getByRole('button', { name: /Applica/i });
@@ -75,7 +75,7 @@ describe('FiltersForm', () => {
   });
 
   test('should call onFiltersReset and clear the form when reset button is clicked', async () => {
-    const handleReset = jest.fn();
+    const handleReset = vi.fn();
     render(<TestFormWrapper onReset={handleReset} />);
     const fiscalCodeInput = screen.getByLabelText('Codice Fiscale');
     const resetButton = screen.getByRole('button', { name: /Rimuovi filtri/i });
@@ -95,14 +95,14 @@ describe('FiltersForm', () => {
   });
 
   test('should clone valid children with name prop and call onChange/onBlur correctly', async () => {
-  const mockOnChange = jest.fn();
-  const mockOnBlur = jest.fn();
+  const mockOnChange = vi.fn();
+  const mockOnBlur = vi.fn();
 
   const formik = {
     values: { field1: '' },
-    handleChange: jest.fn(),
-    handleBlur: jest.fn(),
-    resetForm: jest.fn(),
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    resetForm: vi.fn(),
     dirty: true,
   } as any;
 
@@ -131,14 +131,14 @@ describe('FiltersForm', () => {
 });
 
 test('should clone valid children with name prop and call onChange/onBlur correctly', async () => {
-  const mockOnChange = jest.fn();
-  const mockOnBlur = jest.fn();
+  const mockOnChange = vi.fn();
+  const mockOnBlur = vi.fn();
 
   const formik = {
     values: { field1: '' },
-    handleChange: jest.fn(),
-    handleBlur: jest.fn(),
-    resetForm: jest.fn(),
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    resetForm: vi.fn(),
     dirty: true,
   } as any;
 
@@ -173,12 +173,12 @@ test('should clone valid children with name prop and call onChange/onBlur correc
 });
 
 test('should call onFiltersApplied when provided', async () => {
-  const handleApply = jest.fn();
+  const handleApply = vi.fn();
   const formik = {
     values: { testField: 'value' },
-    handleChange: jest.fn(),
-    handleBlur: jest.fn(),
-    resetForm: jest.fn(),
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    resetForm: vi.fn(),
     dirty: true,
   } as any;
 
@@ -198,9 +198,9 @@ test('should call onFiltersApplied when provided', async () => {
 test('should not throw if onFiltersApplied is not provided', async () => {
   const formik = {
     values: { testField: 'value' },
-    handleChange: jest.fn(),
-    handleBlur: jest.fn(),
-    resetForm: jest.fn(),
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    resetForm: vi.fn(),
     dirty: true,
   } as any;
 
@@ -217,12 +217,12 @@ test('should not throw if onFiltersApplied is not provided', async () => {
 });
 
 test('should call onFiltersReset and formik.resetForm when provided', async () => {
-  const handleReset = jest.fn();
+  const handleReset = vi.fn();
   const formik = {
     values: {},
-    handleChange: jest.fn(),
-    handleBlur: jest.fn(),
-    resetForm: jest.fn(),
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    resetForm: vi.fn(),
     dirty: true,
   } as any;
 
@@ -242,9 +242,9 @@ test('should call onFiltersReset and formik.resetForm when provided', async () =
 test('should not throw if onFiltersReset is not provided', async () => {
   const formik = {
     values: {},
-    handleChange: jest.fn(),
-    handleBlur: jest.fn(),
-    resetForm: jest.fn(),
+    handleChange: vi.fn(),
+    handleBlur: vi.fn(),
+    resetForm: vi.fn(),
     dirty: true,
   } as any;
 

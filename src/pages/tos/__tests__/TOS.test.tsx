@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-jest.mock('../../../hooks/useOneTrustNotice');
-jest.mock('../../components/OneTrustContentWrapper', () => (props: { idSelector: string }) => (
+vi.mock('../../../hooks/useOneTrustNotice');
+vi.mock('../../components/OneTrustContentWrapper', () => (props: { idSelector: string }) => (
   <div data-testid="onetrust-wrapper" data-idselector={props.idSelector} />
 ));
 
-jest.mock('../../../utils/env', () => ({
+vi.mock('../../../utils/env', () => ({
   ENV: {
     ONE_TRUST: {
       TOS_JSON_URL: 'mock-tos-json-url',
@@ -14,17 +14,17 @@ jest.mock('../../../utils/env', () => ({
     },
   },
 }));
-jest.mock('../../../routes', () => ({
+vi.mock('../../../routes', () => ({
   TOS: '/mock-tos-route',
 }));
 
 describe('TOS component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders without crashing', async () => {
-    jest.doMock('../tosHTML.json', () => ({
+    vi.doMock('../tosHTML.json', () => ({
       __esModule: true,
       default: { html: '<p>Some TOS content</p>' },
       html: '<p>Some TOS content</p>',
@@ -40,7 +40,7 @@ describe('TOS component', () => {
   });
 
   test('renders fallback Typography when html is empty (branch 2)', async () => {
-    jest.doMock('../tosHTML.json', () => ({
+    vi.doMock('../tosHTML.json', () => ({
       __esModule: true,
       default: { html: '' },
       html: '',

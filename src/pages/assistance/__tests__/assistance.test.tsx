@@ -6,23 +6,23 @@ import { createStore } from '../../../redux/store';
 import * as emailNotificationService from '../../../services/emailNotificationService';
 import { mockedInstitutionInfo } from '../../../services/__mocks__/emailNotificationService';
 
-jest.mock('react-router-dom', () => Function());
+vi.mock('react-router-dom', () => Function());
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
   useLocation: () => ({
     pathname: 'localhost:3000/portale-esercenti',
   }),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
-  useLoading: jest.fn(),
+vi.mock('@pagopa/selfcare-common-frontend', () => ({
+  useLoading: vi.fn(),
 }));
 
-jest.mock('../../../services/emailNotificationService');
+vi.mock('../../../services/emailNotificationService');
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: any) => key }),
   Trans: () => '',
 }));
@@ -31,7 +31,7 @@ describe('<Assistance />', (injectedStore?: ReturnType<typeof createStore>) => {
   const store = injectedStore ? injectedStore : createStore();
 
   it('renders without crashing', () => {
-    window.scrollTo = jest.fn();
+    window.scrollTo = vi.fn();
   });
 
   test('Should render the Assistance component', async () => {

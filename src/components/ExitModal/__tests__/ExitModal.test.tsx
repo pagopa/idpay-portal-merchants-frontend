@@ -5,15 +5,15 @@ import ExitModal from '../ExitModal';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import ROUTES from '../../../routes';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: any) => key }),
 }));
 
 describe('<ExitModal />', () => {
-  const handleCloseExitModal = jest.fn();
+  const handleCloseExitModal = vi.fn();
 
   it('renders without crashing', () => {
-    window.scrollTo = jest.fn();
+    window.scrollTo = vi.fn();
   });
 
   it('the modal should be in the document', async () => {

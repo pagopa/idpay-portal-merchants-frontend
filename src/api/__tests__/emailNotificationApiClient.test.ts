@@ -1,58 +1,70 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
 import { createClient } from '../generated/email-notification/client';
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
-  storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
+  storageTokenOps: { read: vi.fn().mockReturnValue('mocked-token') },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
-  appStateActions: { addError: jest.fn((e) => e) },
+vi.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
+  appStateActions: { addError: vi.fn((e) => e) },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/api-utils', () => ({
-  buildFetchApi: jest.fn(),
-  extractResponse: jest.fn(),
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/api-utils', () => ({
+  buildFetchApi: vi.fn(),
+  extractResponse: vi.fn(),
 }));
 
-jest.mock('../generated/email-notification/client', () => ({
-  createClient: jest.fn(),
+vi.mock('../generated/email-notification/client', () => ({
+  createClient: vi.fn(),
 }));
 
 let mockEmailNotificationClient: any;
 
-describe('EmailNotificationApi', () => {
+describe('EmailNotificationApi (Vitest ESM)', () => {
   beforeEach(() => {
+    vi.resetModules();
+
     mockEmailNotificationClient = {
-      getInstitutionProductUserInfo: jest.fn(),
-      sendEmail: jest.fn(),
+      getInstitutionProductUserInfo: vi.fn(),
+      sendEmail: vi.fn(),
     };
 
-    (createClient as jest.Mock).mockReturnValue(mockEmailNotificationClient);
-    (extractResponse as jest.Mock).mockReset().mockReturnValue('extracted');
+    (createClient as any).mockReturnValue(mockEmailNotificationClient);
+    (extractResponse as any).mockReset().mockReturnValue('extracted');
   });
 
-  it('getInstitutionProductUserInfo calls client and extractResponse', async () => {
-    mockEmailNotificationClient.getInstitutionProductUserInfo.mockResolvedValue({ right: 'data' });
+  const loadApi = async () => {
+    const mod = await import('../emailNotificationApiClient');
+    return mod.EmailNotificationApi;
+  };
 
-    let EmailNotificationApi: any;
-    jest.isolateModules(() => {
-      EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
+  it('getInstitutionProductUserInfo calls client and extractResponse', async () => {
+    mockEmailNotificationClient.getInstitutionProductUserInfo.mockResolvedValue({
+      right: 'data',
     });
 
-    const result = await EmailNotificationApi.getInstitutionProductUserInfo();
+    const EmailNotificationApi = await loadApi();
+    const result =
+      await EmailNotificationApi.getInstitutionProductUserInfo();
 
-    expect(mockEmailNotificationClient.getInstitutionProductUserInfo).toHaveBeenCalledWith({});
-    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
+    expect(
+      mockEmailNotificationClient.getInstitutionProductUserInfo
+    ).toHaveBeenCalledWith({});
+    expect(extractResponse).toHaveBeenCalledWith(
+      { right: 'data' },
+      200,
+      expect.any(Function)
+    );
     expect(result).toBe('extracted');
   });
 
   it('sendEmail calls client with body and extractResponse', async () => {
-    mockEmailNotificationClient.sendEmail.mockResolvedValue({ right: 'sent' });
-
-    let EmailNotificationApi: any;
-    jest.isolateModules(() => {
-      EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
+    mockEmailNotificationClient.sendEmail.mockResolvedValue({
+      right: 'sent',
     });
+
+    const EmailNotificationApi = await loadApi();
 
     const emailData = {
       subject: 'Test',
@@ -65,7 +77,11 @@ describe('EmailNotificationApi', () => {
     expect(mockEmailNotificationClient.sendEmail).toHaveBeenCalledWith({
       body: { ...emailData },
     });
-    expect(extractResponse).toHaveBeenCalledWith({ right: 'sent' }, 204, expect.any(Function));
+    expect(extractResponse).toHaveBeenCalledWith(
+      { right: 'sent' },
+      204,
+      expect.any(Function)
+    );
     expect(result).toBe('extracted');
   });
 });

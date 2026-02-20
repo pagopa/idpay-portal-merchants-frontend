@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import InitiativeOverviewCard from '../initiativeOverviewCard';
 
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
+vi.mock('@pagopa/selfcare-common-frontend', () => ({
   TitleBox: ({ title, subTitle, variantTitle, variantSubTitle, ...props }: any) => (
     <div data-testid="title-box" {...props}>
       <h1 data-testid="title" data-variant={variantTitle}>{title}</h1>
@@ -12,7 +12,7 @@ jest.mock('@pagopa/selfcare-common-frontend', () => ({
   ),
 }));
 
-jest.mock('../../../styles', () => ({
+vi.mock('../../../styles', () => ({
   inititiveOverviewCardStyle: { backgroundColor: 'white' },
   inititiveOverviewCardContentStyle: { padding: '16px' },
 }));

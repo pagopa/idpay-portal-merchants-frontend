@@ -5,11 +5,11 @@ import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import AuthorizeTransactionModal from '../AuthorizeTransactionModal';
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
-global.URL.createObjectURL = jest.fn();
+global.URL.createObjectURL = vi.fn();
 
 Object.defineProperty(navigator, 'clipboard', {
   value: {
@@ -18,19 +18,19 @@ Object.defineProperty(navigator, 'clipboard', {
 });
 
 describe('Test suite for AuthorizeTransactionModal component', () => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = vi.fn();
 
   test('Render component and and onClose with escape button', async () => {
     renderWithContext(
       <AuthorizeTransactionModal
         openAuthorizeTrxModal={true}
-        setOpenAuthorizeTrxModal={jest.fn()}
+        setOpenAuthorizeTrxModal={vi.fn()}
         data={mockedMerchantTransactionList.content[0]}
       />
     );
 
     // Create a mock for the document.getElementById function
-    const mockGetElementById = jest.spyOn(document, 'getElementById');
+    const mockGetElementById = vi.spyOn(document, 'getElementById');
     const mockContent = document.createElement('div');
     mockGetElementById.mockReturnValue(mockContent);
 
@@ -57,7 +57,7 @@ describe('Test suite for AuthorizeTransactionModal component', () => {
     renderWithContext(
       <AuthorizeTransactionModal
         openAuthorizeTrxModal={true}
-        setOpenAuthorizeTrxModal={jest.fn()}
+        setOpenAuthorizeTrxModal={vi.fn()}
         data={mockedMerchantTransactionList.content[0]}
       />
     );

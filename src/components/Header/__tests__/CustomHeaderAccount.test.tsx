@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CustomHeaderAccount, JwtUser, RootLinkType } from '../CustomHeaderAccount';
 
-jest.mock('@pagopa/mui-italia/dist/components/ButtonNaked', () => ({
+vi.mock('@pagopa/mui-italia/dist/components/ButtonNaked', () => ({
   ButtonNaked: ({ children, ...props }: any) => (
     <button data-testid="button-naked" {...props}>
       {children}
@@ -9,7 +9,7 @@ jest.mock('@pagopa/mui-italia/dist/components/ButtonNaked', () => ({
   ),
 }));
 
-jest.mock('@pagopa/mui-italia/dist/components/AccountDropdown', () => ({
+vi.mock('@pagopa/mui-italia/dist/components/AccountDropdown', () => ({
   AccountDropdown: ({ user }: any) => (
     <div data-testid="account-dropdown">{user?.email}</div>
   ),
@@ -35,7 +35,7 @@ describe('CustomHeaderAccount', () => {
       <CustomHeaderAccount
         rootLink={rootLink}
         loggedUser={false}
-        onAssistanceClick={jest.fn()}
+        onAssistanceClick={vi.fn()}
       />
     );
 
@@ -46,12 +46,12 @@ describe('CustomHeaderAccount', () => {
   });
 
   test('mostra i controlli di documentazione (desktop e mobile) quando onDocumentationClick è presente', () => {
-    const onDocumentationClick = jest.fn();
+    const onDocumentationClick = vi.fn();
     render(
       <CustomHeaderAccount
         rootLink={rootLink}
         loggedUser={false}
-        onAssistanceClick={jest.fn()}
+        onAssistanceClick={vi.fn()}
         onDocumentationClick={onDocumentationClick}
       />
     );
@@ -68,7 +68,7 @@ describe('CustomHeaderAccount', () => {
   });
 
   test('mostra i controlli di assistenza (desktop e mobile) quando enableAssistanceButton è true', () => {
-    const onAssistanceClick = jest.fn();
+    const onAssistanceClick = vi.fn();
     render(
       <CustomHeaderAccount
         rootLink={rootLink}
@@ -93,7 +93,7 @@ describe('CustomHeaderAccount', () => {
       <CustomHeaderAccount
         rootLink={rootLink}
         loggedUser={false}
-        onAssistanceClick={jest.fn()}
+        onAssistanceClick={vi.fn()}
         enableAssistanceButton={false}
       />
     );
@@ -108,7 +108,7 @@ describe('CustomHeaderAccount', () => {
         rootLink={rootLink}
         loggedUser={loggedUser}
         enableDropdown={true}
-        onAssistanceClick={jest.fn()}
+        onAssistanceClick={vi.fn()}
       />
     );
 
@@ -123,14 +123,14 @@ describe('CustomHeaderAccount', () => {
   });
 
   test('utente loggato + enableDropdown = false → mostra bottone Logout', () => {
-    const onLogout = jest.fn();
+    const onLogout = vi.fn();
 
     render(
       <CustomHeaderAccount
         rootLink={rootLink}
         loggedUser={loggedUser}
         enableDropdown={false}
-        onAssistanceClick={jest.fn()}
+        onAssistanceClick={vi.fn()}
         onLogout={onLogout}
       />
     );
@@ -147,13 +147,13 @@ describe('CustomHeaderAccount', () => {
   });
 
   test('utente non loggato → mostra bottone Login', () => {
-    const onLogin = jest.fn();
+    const onLogin = vi.fn();
 
     render(
       <CustomHeaderAccount
         rootLink={rootLink}
         loggedUser={false}
-        onAssistanceClick={jest.fn()}
+        onAssistanceClick={vi.fn()}
         onLogin={onLogin}
       />
     );
@@ -175,7 +175,7 @@ describe('CustomHeaderAccount', () => {
         loggedUser={loggedUser}
         enableDropdown={true}
         enableLogin={false}
-        onAssistanceClick={jest.fn()}
+        onAssistanceClick={vi.fn()}
       />
     );
 
@@ -185,10 +185,10 @@ describe('CustomHeaderAccount', () => {
   });
 
   test('usa translationsMap personalizzato per logIn/logOut/assistance/documentation', () => {
-    const onAssistanceClick = jest.fn();
-    const onDocumentationClick = jest.fn();
-    const onLogin = jest.fn();
-    const onLogout = jest.fn();
+    const onAssistanceClick = vi.fn();
+    const onDocumentationClick = vi.fn();
+    const onLogin = vi.fn();
+    const onLogout = vi.fn();
 
     const translationsMap = {
       logIn: 'Entra',

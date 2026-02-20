@@ -5,16 +5,16 @@ import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import { BASE_ROUTE } from '../../../routes';
 import TotalAmount from '../TotalAmount';
 
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useState: jest.fn(),
+vi.mock('react', () => ({
+  ...vi.importActual('react'),
+  useState: vi.fn(),
 }));
-const setActiveStep = jest.fn();
-const setOpenExitModal = jest.fn();
+const setActiveStep = vi.fn();
+const setOpenExitModal = vi.fn();
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
   // @ts-ignore
   useStateMock.mockImplementation((init: any) => [init, setActiveStep]);
   // @ts-ignore
@@ -24,7 +24,7 @@ beforeEach(() => {
 const oldWindowLocation = global.window.location;
 
 const mockedLocation = {
-  assign: jest.fn(),
+  assign: vi.fn(),
   pathname: `${BASE_ROUTE}/accetta-sconto/1234`,
   origin: 'MOCKED_ORIGIN',
   search: '',
@@ -47,10 +47,10 @@ describe('Test suite for TotalAmount component', () => {
       <TotalAmount
         id={'1234'}
         amount={undefined}
-        setAmount={jest.fn()}
+        setAmount={vi.fn()}
         steps={2}
         activeStep={0}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
   });
@@ -60,10 +60,10 @@ describe('Test suite for TotalAmount component', () => {
       <TotalAmount
         id={'1234'}
         amount={undefined}
-        setAmount={jest.fn()}
+        setAmount={vi.fn()}
         steps={2}
         activeStep={0}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     // @ts-ignore
@@ -80,10 +80,10 @@ describe('Test suite for TotalAmount component', () => {
       <TotalAmount
         id={'1234'}
         amount={undefined}
-        setAmount={jest.fn()}
+        setAmount={vi.fn()}
         steps={2}
         activeStep={0}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
   });
@@ -93,10 +93,10 @@ describe('Test suite for TotalAmount component', () => {
       <TotalAmount
         id={'1234'}
         amount={undefined}
-        setAmount={jest.fn()}
+        setAmount={vi.fn()}
         steps={2}
         activeStep={0}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -115,10 +115,10 @@ describe('Test suite for TotalAmount component', () => {
   //       // @ts-expect-error trying to render component without the required prop id
   //       id={undefined}
   //       amount={undefined}
-  //       setAmount={jest.fn()}
+  //       setAmount={vi.fn()}
   //       steps={2}
   //       activeStep={0}
-  //       setActiveStep={jest.fn()}
+  //       setActiveStep={vi.fn()}
   //     />
   //   );
   //   const user = userEvent.setup();
@@ -134,10 +134,10 @@ describe('Test suite for TotalAmount component', () => {
   //     <TotalAmount
   //       id={'1234'}
   //       amount={undefined}
-  //       setAmount={jest.fn()}
+  //       setAmount={vi.fn()}
   //       steps={2}
   //       activeStep={0}
-  //       setActiveStep={jest.fn()}
+  //       setActiveStep={vi.fn()}
   //     />
   //   );
   // });

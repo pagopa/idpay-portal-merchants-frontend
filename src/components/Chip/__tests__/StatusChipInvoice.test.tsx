@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import StatusChipInvoice from '../StatusChipInvoice';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 
-jest.mock('../CustomChip', () => {
+vi.mock('../CustomChip', () => {
   return function MockCustomChip({
                                    label,
                                    colorChip,

@@ -8,16 +8,16 @@ import { InitiativeDTO, StatusEnum } from '../../api/generated/merchants/Initiat
 import { match } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-jest.mock('../../services/merchantService', () => ({
-  getMerchantInitiativeList: jest.fn(),
+vi.mock('../../services/merchantService', () => ({
+  getMerchantInitiativeList: vi.fn(),
 }));
-const mockedGetMerchantInitiativeList = getMerchantInitiativeList as jest.Mock;
+const mockedGetMerchantInitiativeList = getMerchantInitiativeList as vi.Mock;
 
-jest.mock('../../redux/hooks');
-const mockedUseAppDispatch = useAppDispatch as jest.Mock;
+vi.mock('../../redux/hooks');
+const mockedUseAppDispatch = useAppDispatch as vi.Mock;
 
-jest.mock('react-i18next');
-const mockedUseTranslation = useTranslation as jest.Mock;
+vi.mock('react-i18next');
+const mockedUseTranslation = useTranslation as vi.Mock;
 
 const mockInitiatives: Array<InitiativeDTO> = [
   { initiativeId: '1', initiativeName: 'Iniziativa Pubblicata', status: StatusEnum.PUBLISHED },
@@ -33,10 +33,10 @@ const mockMatchObject: match = {
 };
 
 describe('useInitiativesList', () => {
-  const mockDispatch = jest.fn();
+  const mockDispatch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseAppDispatch.mockReturnValue(mockDispatch);
     mockedUseTranslation.mockReturnValue({ t: (key: string) => key } as any);
   });

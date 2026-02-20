@@ -2,12 +2,12 @@ import { render, screen } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import CurrencyColumn from '../CurrencyColumn';
 
-jest.mock('../../../utils/formatUtils', () => ({
-  currencyFormatter: jest.fn(),
+vi.mock('../../../utils/formatUtils', () => ({
+  currencyFormatter: vi.fn(),
 }));
 
 const formatUtils = require('../../../utils/formatUtils');
-const mockCurrencyFormatter = formatUtils.currencyFormatter as jest.Mock;
+const mockCurrencyFormatter = formatUtils.currencyFormatter as vi.Mock;
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider theme={createTheme()}>{children}</ThemeProvider>

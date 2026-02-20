@@ -4,12 +4,12 @@ describe("buildRoute", () => {
   const originalWarn = console.warn;
 
   beforeEach(() => {
-    console.warn = jest.fn();
+    console.warn = vi.fn();
   });
 
   afterEach(() => {
     console.warn = originalWarn;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("replaces all params in the template", () => {
@@ -38,13 +38,13 @@ describe("buildRoute", () => {
     });
 
     expect(console.warn).toHaveBeenCalledTimes(3);
-    expect((console.warn as jest.Mock).mock.calls[0][0]).toContain(
+    expect((console.warn as vi.Mock).mock.calls[0][0]).toContain(
       'Param "id" is undefined'
     );
-    expect((console.warn as jest.Mock).mock.calls[1][0]).toContain(
+    expect((console.warn as vi.Mock).mock.calls[1][0]).toContain(
       'Param "section" is null'
     );
-    expect((console.warn as jest.Mock).mock.calls[2][0]).toContain(
+    expect((console.warn as vi.Mock).mock.calls[2][0]).toContain(
       "Unresolved params"
     );
 

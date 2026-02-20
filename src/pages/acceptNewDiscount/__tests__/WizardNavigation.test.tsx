@@ -5,14 +5,14 @@ import WizardNavigation from '../WizardNavigation';
 import React from 'react';
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 const oldWindowLocation = global.window.location;
 
 const mockedLocation = {
-  assign: jest.fn(),
+  assign: vi.fn(),
   pathname: `${BASE_ROUTE}/accetta-sconto/1234`,
   origin: 'MOCKED_ORIGIN',
   search: '',
@@ -32,7 +32,7 @@ afterEach(cleanup);
 describe('Test suite for WizardNavigation component', () => {
   test('Render component', () => {
     renderWithContext(
-      <WizardNavigation handleBack={jest.fn()} handleNext={jest.fn()} disabledNext={false} />
+      <WizardNavigation handleBack={vi.fn()} handleNext={vi.fn()} disabledNext={false} />
     );
   });
 });

@@ -12,7 +12,7 @@ describe('Test suite for SideNavItem component', (injectedStore?: ReturnType<
   const store = injectedStore ? injectedStore : createStore();
 
   it('renders without crashing', () => {
-    window.scrollTo = jest.fn();
+    window.scrollTo = vi.fn();
   });
 
   test('Testing rendering of SideMenu component', async () => {

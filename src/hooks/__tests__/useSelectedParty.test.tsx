@@ -13,19 +13,19 @@ import { ENV } from '../../utils/env';
 
 // --- Mocks ---
 
-jest.mock('../../redux/hooks');
-const mockedUseAppDispatch = useAppDispatch as jest.Mock;
-const mockedUseAppSelector = useAppSelector as jest.Mock;
+vi.mock('../../redux/hooks');
+const mockedUseAppDispatch = useAppDispatch as vi.Mock;
+const mockedUseAppSelector = useAppSelector as vi.Mock;
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
-const mockedStorageTokenOps = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
+const mockedStorageTokenOps = storageTokenOps as vi.Mocked<typeof storageTokenOps>;
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService');
-const mockedTrackEvent = trackEvent as jest.Mock;
+vi.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService');
+const mockedTrackEvent = trackEvent as vi.Mock;
 
-jest.mock('../../services/partyService');
+vi.mock('../../services/partyService');
 
-jest.mock('../../utils/jwt-utils', () => ({
+vi.mock('../../utils/jwt-utils', () => ({
   parseJwt: (token: string): Partial<JWTUser> | null => {
     if (token === 'valid_token') {
       return {
@@ -43,7 +43,7 @@ jest.mock('../../utils/jwt-utils', () => ({
   },
 }));
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
 const mockParty: Party = {
   partyId: 'party-1',
@@ -67,13 +67,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useSelectedParty', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseAppDispatch.mockReturnValue(mockDispatch);
     mockedStorageTokenOps.read.mockReturnValue('valid_token');
     // Mock window.location.assign
     Object.defineProperty(window, 'location', {
       writable: true,
-      value: { assign: jest.fn() },
+      value: { assign: vi.fn() },
     });
   });
 
@@ -122,7 +122,7 @@ describe('useSelectedParty', () => {
 
     it('should fetch party details if not in Redux and save to store on success', async () => {
       mockedUseAppSelector.mockReturnValue(undefined); // No party in redux
-      jest.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue(mockParty);
+      vi.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue(mockParty);
 
       const { result } = renderHook(() => useSelectedParty(), { wrapper });
       await act(async () => {
@@ -142,7 +142,7 @@ describe('useSelectedParty', () => {
 
     it('should create a fallback party if API returns no data', async () => {
       mockedUseAppSelector.mockReturnValue(undefined);
-      jest.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue(null); // API finds nothing
+      vi.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue(null); // API finds nothing
 
       const { result } = renderHook(() => useSelectedParty(), { wrapper });
       await act(async () => {
@@ -164,7 +164,7 @@ describe('useSelectedParty', () => {
 
     it('should throw an error if fetched party is not ACTIVE', async () => {
       mockedUseAppSelector.mockReturnValue(undefined);
-      jest.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue({
+      vi.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue({
         ...mockParty,
         status: 'INACTIVE',
       });
@@ -177,7 +177,7 @@ describe('useSelectedParty', () => {
     it('should handle API fetch rejection', async () => {
       mockedUseAppSelector.mockReturnValue(undefined);
       const error = new Error('API Failure');
-      jest.spyOn(partyService, 'fetchPartyDetails').mockRejectedValue(error);
+      vi.spyOn(partyService, 'fetchPartyDetails').mockRejectedValue(error);
 
       const { result } = renderHook(() => useSelectedParty(), { wrapper });
       await expect(result.current()).rejects.toThrow('API Failure');
@@ -189,7 +189,7 @@ describe('useSelectedParty', () => {
       mockedUseAppSelector.mockImplementation((selector) =>
         selector.name === 'selectPartySelected' ? oldParty : []
       );
-      jest.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue(mockParty);
+      vi.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue(mockParty);
 
       const { result } = renderHook(() => useSelectedParty(), { wrapper });
       await act(async () => {
@@ -204,7 +204,7 @@ describe('useSelectedParty', () => {
 
     it('should create a fallback party if API returns no data and JWT is valid', async () => {
       mockedUseAppSelector.mockReturnValue(undefined);
-      jest.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue(null);
+      vi.spyOn(partyService, 'fetchPartyDetails').mockResolvedValue(null);
 
       const { result } = renderHook(() => useSelectedParty(), { wrapper });
       const party = await result.current();

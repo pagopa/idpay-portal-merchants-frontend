@@ -5,24 +5,24 @@ import { useTranslation } from 'react-i18next';
 import { getPortalConsent, savePortalConsent } from '../../services/rolePermissionService';
 import useTCAgreement from '../useTCAgreement';
 
-jest.mock('../../services/rolePermissionService', () => ({
-  getPortalConsent: jest.fn(),
-  savePortalConsent: jest.fn(),
+vi.mock('../../services/rolePermissionService', () => ({
+  getPortalConsent: vi.fn(),
+  savePortalConsent: vi.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
-jest.mock('react-i18next');
+vi.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
+vi.mock('react-i18next');
 
-const mockedGetPortalConsent = getPortalConsent as jest.Mock;
-const mockedSavePortalConsent = savePortalConsent as jest.Mock;
-const mockedUseErrorDispatcher = useErrorDispatcher as jest.Mock;
-const mockedUseTranslation = useTranslation as jest.Mock;
+const mockedGetPortalConsent = getPortalConsent as vi.Mock;
+const mockedSavePortalConsent = savePortalConsent as vi.Mock;
+const mockedUseErrorDispatcher = useErrorDispatcher as vi.Mock;
+const mockedUseTranslation = useTranslation as vi.Mock;
 
 describe('useTCAgreement', () => {
-  const mockAddError = jest.fn();
+  const mockAddError = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseErrorDispatcher.mockReturnValue(mockAddError);
     mockedUseTranslation.mockReturnValue({ t: (key: string) => key });
   });

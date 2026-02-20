@@ -4,7 +4,7 @@ import TablePaginator from '../TablePaginator';
 
 describe('TablePaginator', () => {
   it('renderizza il componente con i valori passati', () => {
-    const setPageMock = jest.fn();
+    const setPageMock = vi.fn();
 
     render(
       <TablePaginator
@@ -20,7 +20,7 @@ describe('TablePaginator', () => {
   });
 
   it('chiama setPage con il valore corretto quando si clicca su "pagina successiva"', () => {
-    const setPageMock = jest.fn();
+    const setPageMock = vi.fn();
 
     render(
       <TablePaginator
@@ -39,7 +39,7 @@ describe('TablePaginator', () => {
   });
 
   it('disabilita il pulsante "pagina successiva" quando è già sull’ultima pagina', () => {
-    const setPageMock = jest.fn();
+    const setPageMock = vi.fn();
 
     render(
       <TablePaginator

@@ -1,7 +1,7 @@
 import { pagoPALink, LANGUAGES } from '../FooterConfig';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     FOOTER: {
       LINK: {
@@ -13,11 +13,11 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
 
 describe('pagoPALink', () => {
   beforeEach(() => {
-    global.window.open = jest.fn();
+    global.window.open = vi.fn();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should have correct href from CONFIG', () => {

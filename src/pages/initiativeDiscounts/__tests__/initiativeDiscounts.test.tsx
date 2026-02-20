@@ -6,17 +6,17 @@ import InitiativeDiscounts from '../initiativeDiscounts';
 import { setSelectedInitative } from '../../../redux/slices/initiativesSlice';
 import { store } from '../../../redux/store';
 
-jest.mock('../../../services/merchantService');
+vi.mock('../../../services/merchantService');
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 const oldWindowLocation = global.window.location;
 
 const mockedLocation = {
-  assign: jest.fn(),
+  assign: vi.fn(),
   pathname: `${BASE_ROUTE}/sconti-iniziativa/testIniziativeId`,
   origin: 'MOCKED_ORIGIN',
   search: '',
@@ -31,7 +31,7 @@ afterAll(() => {
 });
 
 describe('Test suite for initiativeDiscounts page', () => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = vi.fn();
   test('Render component', () => {
     renderWithContext(<InitiativeDiscounts />);
   });

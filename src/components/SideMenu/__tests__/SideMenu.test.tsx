@@ -7,8 +7,8 @@ import userEvent from '@testing-library/user-event';
 import ROUTES, { BASE_ROUTE } from '../../../routes';
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 describe('Test suite for SideMenu component', () => {
@@ -133,7 +133,7 @@ describe('Test suite for SideMenu component', () => {
   test('Appropriate item expanded based on parameter id value (overview route)', () => {
     const initiativeId = mockedInitiativesList[0].initiativeId;
     const mockedLocation = {
-      assign: jest.fn(),
+      assign: vi.fn(),
       pathname: `${BASE_ROUTE}/${initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`,
       origin: 'MOCKED_ORIGIN',
       search: '',
@@ -150,7 +150,7 @@ describe('Test suite for SideMenu component', () => {
   test('Appropriate item expanded based on parameter id value (stores route)', () => {
     const initiativeId = mockedInitiativesList[0].initiativeId;
     const mockedLocation = {
-      assign: jest.fn(),
+      assign: vi.fn(),
       pathname: `${BASE_ROUTE}/${initiativeId}/${ROUTES.SIDE_MENU_STORES}`,
       origin: 'MOCKED_ORIGIN',
       search: '',
@@ -167,7 +167,7 @@ describe('Test suite for SideMenu component', () => {
   test('Appropriate item expanded based on parameter id value (discounts route)', () => {
     const initiativeId = mockedInitiativesList[0].initiativeId;
     const mockedLocation = {
-      assign: jest.fn(),
+      assign: vi.fn(),
       pathname: `${BASE_ROUTE}/sconti-iniziativa/${initiativeId}`,
       origin: 'MOCKED_ORIGIN',
       search: '',
@@ -183,7 +183,7 @@ describe('Test suite for SideMenu component', () => {
 
   test('First initiative expanded when no match found', () => {
     const mockedLocation = {
-      assign: jest.fn(),
+      assign: vi.fn(),
       pathname: `${BASE_ROUTE}/some-other-route`,
       origin: 'MOCKED_ORIGIN',
       search: '',
@@ -199,7 +199,7 @@ describe('Test suite for SideMenu component', () => {
 
   test('No expansion when initiatives list is empty and no match', () => {
     const mockedLocation = {
-      assign: jest.fn(),
+      assign: vi.fn(),
       pathname: `${BASE_ROUTE}/some-other-route`,
       origin: 'MOCKED_ORIGIN',
       search: '',
@@ -240,7 +240,7 @@ describe('Test suite for SideMenu component', () => {
 
   test('Appropriate item expanded based on parameter id value in match', () => {
     const mockedLocation = {
-      assign: jest.fn(),
+      assign: vi.fn(),
       pathname: `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`,
       origin: 'MOCKED_ORIGIN',
       search: '',
@@ -256,7 +256,7 @@ describe('Test suite for SideMenu component', () => {
 
   test('Expands first initiative when no match params', async () => {
     const mockedLocation = {
-      assign: jest.fn(),
+      assign: vi.fn(),
       pathname: ROUTES.HOME,
       origin: 'MOCKED_ORIGIN',
       search: '',

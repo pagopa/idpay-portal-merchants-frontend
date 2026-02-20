@@ -1,22 +1,25 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import ExportFiltersCard from '../ExportFiltersCard';
 import { BrowserRouter } from 'react-router-dom';
 
-jest.mock('../../../services/merchantService', () => ({
-  generateMerchantReport: jest.fn(),
+vi.mock('../../../services/merchantService', () => ({
+  generateMerchantReport: vi.fn(),
 }));
 
 import { generateMerchantReport } from '../../../services/merchantService';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ id: 'test-id' }),
-}));
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<any>('react-router-dom');
+  return {
+    ...actual,
+    useParams: () => ({ id: 'test-id' }),
+  };
+});
 
 let lastFormikConfig: any;
 
-jest.mock('formik', () => ({
+vi.mock('formik', () => ({
   useFormik: (config: any) => {
     lastFormikConfig = config;
 
@@ -35,8 +38,8 @@ jest.mock('formik', () => ({
       touched: {},
       errors: {},
       isSubmitting: false,
-      resetForm: jest.fn(),
-      setFieldValue: jest.fn(),
+      resetForm: vi.fn(),
+      setFieldValue: vi.fn(),
       handleSubmit: () =>
         config.onSubmit({
           startDate: mockDay,
@@ -46,9 +49,10 @@ jest.mock('formik', () => ({
   },
 }));
 
-const mockedGenerate = generateMerchantReport as jest.Mock;
+import type { Mock } from 'vitest';
+const mockedGenerate = generateMerchantReport as unknown as Mock;
 
-const renderComponent = (updateAlerts = jest.fn()) =>
+const renderComponent = (updateAlerts = vi.fn()) =>
   render(
     <BrowserRouter>
       <ExportFiltersCard updateAlerts={updateAlerts} />
@@ -57,8 +61,8 @@ const renderComponent = (updateAlerts = jest.fn()) =>
 
 describe('ExportFiltersCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   const clickSubmit = () => {
@@ -75,7 +79,7 @@ describe('ExportFiltersCard', () => {
 
   it('handles INSERTED status', async () => {
     mockedGenerate.mockResolvedValue({ reportStatus: 'INSERTED' });
-    const updateAlerts = jest.fn();
+    const updateAlerts = vi.fn();
 
     renderComponent(updateAlerts);
     clickSubmit();
@@ -84,13 +88,13 @@ describe('ExportFiltersCard', () => {
       expect(updateAlerts).toHaveBeenCalledWith('inserted', true)
     );
 
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(updateAlerts).toHaveBeenCalledWith('inserted', false);
   });
 
   it('handles GENERATED status', async () => {
     mockedGenerate.mockResolvedValue({ reportStatus: 'GENERATED' });
-    const updateAlerts = jest.fn();
+    const updateAlerts = vi.fn();
 
     renderComponent(updateAlerts);
     clickSubmit();
@@ -99,13 +103,13 @@ describe('ExportFiltersCard', () => {
       expect(updateAlerts).toHaveBeenCalledWith('generated', true)
     );
 
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(updateAlerts).toHaveBeenCalledWith('generated', false);
   });
 
   it('handles FAILED status', async () => {
     mockedGenerate.mockResolvedValue({ reportStatus: 'FAILED' });
-    const updateAlerts = jest.fn();
+    const updateAlerts = vi.fn();
 
     renderComponent(updateAlerts);
     clickSubmit();
@@ -114,13 +118,13 @@ describe('ExportFiltersCard', () => {
       expect(updateAlerts).toHaveBeenCalledWith('failed', true)
     );
 
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(updateAlerts).toHaveBeenCalledWith('failed', false);
   });
 
   it('handles API error', async () => {
     mockedGenerate.mockRejectedValue(new Error('error'));
-    const updateAlerts = jest.fn();
+    const updateAlerts = vi.fn();
 
     renderComponent(updateAlerts);
     clickSubmit();
@@ -129,17 +133,15 @@ describe('ExportFiltersCard', () => {
       expect(updateAlerts).toHaveBeenCalledWith('failed', true)
     );
 
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(updateAlerts).toHaveBeenCalledWith('failed', false);
   });
 
   it('does nothing if id is missing', async () => {
-    const reactRouter = require('react-router-dom');
-    jest
-      .spyOn(reactRouter, 'useParams')
-      .mockReturnValue({ id: undefined });
+    const reactRouter = await import('react-router-dom');
+    vi.spyOn(reactRouter, 'useParams').mockReturnValue({ id: undefined } as any);
 
-    const updateAlerts = jest.fn();
+    const updateAlerts = vi.fn();
 
     render(
       <BrowserRouter>
@@ -155,8 +157,8 @@ describe('ExportFiltersCard', () => {
   it('calls onReportGenerated in finally block', async () => {
     mockedGenerate.mockResolvedValue({ reportStatus: 'INSERTED' });
 
-    const updateAlerts = jest.fn();
-    const onReportGenerated = jest.fn();
+    const updateAlerts = vi.fn();
+    const onReportGenerated = vi.fn();
 
     render(
       <BrowserRouter>
@@ -226,7 +228,7 @@ describe('ExportFiltersCard', () => {
   });
 
   it('covers validate future startDate invalidRange branch', () => {
-    const dayjs = require('dayjs');
+    const dayjs = (await import('dayjs')).default;
     const futureDate = dayjs().add(2, 'day');
     const validEndDate = dayjs();
 
@@ -239,7 +241,7 @@ describe('ExportFiltersCard', () => {
   });
 
   it('covers validate future endDate invalidRange branch', () => {
-    const dayjs = require('dayjs');
+    const dayjs = (await import('dayjs')).default;
     const futureDate = dayjs().add(2, 'day');
     const validStartDate = dayjs();
 

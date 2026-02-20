@@ -5,7 +5,7 @@ import { RefundRequestsModal } from '../RefundRequestModal';
 describe('RefundRequestsModal', () => {
   const defaultProps = {
     isOpen: true,
-    setIsOpen: jest.fn(),
+    setIsOpen: vi.fn(),
     title: "Test title",
     description: "Test description",
     descriptionTwo: "Test description two",
@@ -13,12 +13,12 @@ describe('RefundRequestsModal', () => {
     cancelBtn: "Test cancel",
     confirmBtn: {
         text: "Test confirm",
-        onConfirm: jest.fn()
+        onConfirm: vi.fn()
     }
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Rendering', () => {

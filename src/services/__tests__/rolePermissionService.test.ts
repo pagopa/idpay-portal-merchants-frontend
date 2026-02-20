@@ -1,19 +1,19 @@
 import { RolePermissionApi } from '../../api/rolePermissionApiClient';
 import { getUserPermission, getPortalConsent, savePortalConsent } from '../rolePermissionService';
 
-jest.mock('../../api/rolePermissionApiClient', () => ({
+vi.mock('../../api/rolePermissionApiClient', () => ({
   RolePermissionApi: {
-    userPermission: jest.fn(),
-    getPortalConsent: jest.fn(),
-    savePortalConsent: jest.fn(),
+    userPermission: vi.fn(),
+    getPortalConsent: vi.fn(),
+    savePortalConsent: vi.fn(),
   },
 }));
 
-const mockedRolePermissionApi = RolePermissionApi as jest.Mocked<typeof RolePermissionApi>;
+const mockedRolePermissionApi = RolePermissionApi as vi.Mocked<typeof RolePermissionApi>;
 
 describe('rolePermissionService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getUserPermission', () => {

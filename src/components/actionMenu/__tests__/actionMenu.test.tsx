@@ -7,13 +7,13 @@ import {
   StatusEnum as TransactionStatusEnum,
 } from '../../../api/generated/merchants/MerchantTransactionDTO';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
 }));
 
-jest.mock('../../../pages/initiativeDiscounts/CancelTransactionModal', () => ({
+vi.mock('../../../pages/initiativeDiscounts/CancelTransactionModal', () => ({
   __esModule: true,
   default: ({
     openCancelTrxModal,
@@ -29,7 +29,7 @@ jest.mock('../../../pages/initiativeDiscounts/CancelTransactionModal', () => ({
   ),
 }));
 
-jest.mock('../../../pages/initiativeDiscounts/AuthorizeTransactionModal', () => ({
+vi.mock('../../../pages/initiativeDiscounts/AuthorizeTransactionModal', () => ({
   __esModule: true,
   default: ({
     openAuthorizeTrxModal,

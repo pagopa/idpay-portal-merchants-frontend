@@ -3,9 +3,10 @@ import { Provider } from 'react-redux';
 import { createStore } from '../../redux/store';
 import withParties from '../withParties';
 import { verifyFetchPartiesMockExecution } from '../../services/__mocks__/partyService';
+import * as partyService from '../../services/partyService';
 import React, { Fragment } from 'react';
 
-jest.mock('../../services/partyService');
+vi.mock('../../services/partyService');
 
 const renderApp = (injectedStore?: any) => {
   const store = injectedStore ? injectedStore : createStore();
@@ -19,10 +20,10 @@ const renderApp = (injectedStore?: any) => {
   return store;
 };
 
-let fetchPartiesSpy: jest.SpyInstance;
+let fetchPartiesSpy: any;
 
 beforeEach(() => {
-  fetchPartiesSpy = jest.spyOn(require('../../services/partyService'), 'fetchParties');
+  fetchPartiesSpy = vi.spyOn(partyService, 'fetchParties');
 });
 
 test('Test', async () => {
@@ -33,5 +34,5 @@ test('Test', async () => {
 
   await waitFor(() => verifyFetchPartiesMockExecution(store.getState().parties.list));
 
-  expect(fetchPartiesSpy).toBeCalledTimes(1);
+  expect(fetchPartiesSpy).toHaveBeenCalledTimes(1);
 });

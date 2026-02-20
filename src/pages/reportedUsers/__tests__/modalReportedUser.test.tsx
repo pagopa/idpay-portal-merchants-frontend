@@ -9,12 +9,12 @@ describe('ModalReportedUser', () => {
     description: 'Test Description',
     cancelText: 'Cancel',
     confirmText: 'Confirm',
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
+    onCancel: vi.fn(),
+    onConfirm: vi.fn(),
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Rendering', () => {
@@ -89,21 +89,21 @@ describe('ModalReportedUser', () => {
 
   describe('Button interactions', () => {
     it('should call onCancel when cancel button is clicked', () => {
-      const onCancel = jest.fn();
+      const onCancel = vi.fn();
       render(<ModalReportedUser {...defaultProps} onCancel={onCancel} />);
       fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
       expect(onCancel).toHaveBeenCalledTimes(1);
     });
 
     it('should call onConfirm when confirm button is clicked', () => {
-      const onConfirm = jest.fn();
+      const onConfirm = vi.fn();
       render(<ModalReportedUser {...defaultProps} onConfirm={onConfirm} />);
       fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
       expect(onConfirm).toHaveBeenCalledTimes(1);
     });
 
     it('should call onCancel when dialog is closed via backdrop', () => {
-      const onCancel = jest.fn();
+      const onCancel = vi.fn();
       render(<ModalReportedUser {...defaultProps} onCancel={onCancel} />);
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
@@ -185,7 +185,7 @@ describe('ModalReportedUser', () => {
     });
 
     it('should handle multiple rapid button clicks', () => {
-      const onConfirm = jest.fn();
+      const onConfirm = vi.fn();
       render(<ModalReportedUser {...defaultProps} onConfirm={onConfirm} />);
       const confirmButton = screen.getByRole('button', { name: 'Confirm' });
 

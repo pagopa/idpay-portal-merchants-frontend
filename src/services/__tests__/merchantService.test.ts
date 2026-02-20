@@ -26,39 +26,39 @@ import {
 
 } from '../merchantService';
 
-jest.mock('../../api/MerchantsApiClient', () => ({
+vi.mock('../../api/MerchantsApiClient', () => ({
   MerchantApi: {
-    getMerchantInitiativeList: jest.fn(),
-    getMerchantTransactions: jest.fn(),
-    getMerchantTransactionsProcessed: jest.fn(),
-    getMerchantInitiativeStatistics: jest.fn(),
-    getMerchantDetail: jest.fn(),
-    deleteTransaction: jest.fn(),
-    createTransaction: jest.fn(),
-    authPaymentBarCode: jest.fn(),
-    updateMerchantPointOfSales: jest.fn(),
-    getMerchantPointOfSales: jest.fn(),
-    getMerchantPointOfSalesById: jest.fn(),
-    getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
-    downloadInvoiceFile: jest.fn(),
-    getReportedUser: jest.fn(),
-    createReportedUser: jest.fn(),
-    deleteReportedUser: jest.fn(),
-    getRewardBatches: jest.fn(),
-    sendRewardBatches: jest.fn(),
-    downloadBatchCsv: jest.fn(),
-    postponeTransaction: jest.fn(),
-    getMerchantPointOfSalesWithTransactions: jest.fn(),
-    getAllRewardBatches: jest.fn(),
-    updateInvoiceTransaction: jest.fn(),
+    getMerchantInitiativeList: vi.fn(),
+    getMerchantTransactions: vi.fn(),
+    getMerchantTransactionsProcessed: vi.fn(),
+    getMerchantInitiativeStatistics: vi.fn(),
+    getMerchantDetail: vi.fn(),
+    deleteTransaction: vi.fn(),
+    createTransaction: vi.fn(),
+    authPaymentBarCode: vi.fn(),
+    updateMerchantPointOfSales: vi.fn(),
+    getMerchantPointOfSales: vi.fn(),
+    getMerchantPointOfSalesById: vi.fn(),
+    getMerchantPointOfSaleTransactionsProcessed: vi.fn(),
+    downloadInvoiceFile: vi.fn(),
+    getReportedUser: vi.fn(),
+    createReportedUser: vi.fn(),
+    deleteReportedUser: vi.fn(),
+    getRewardBatches: vi.fn(),
+    sendRewardBatches: vi.fn(),
+    downloadBatchCsv: vi.fn(),
+    postponeTransaction: vi.fn(),
+    getMerchantPointOfSalesWithTransactions: vi.fn(),
+    getAllRewardBatches: vi.fn(),
+    updateInvoiceTransaction: vi.fn(),
   },
 }));
 
-const mockedMerchantApi = MerchantApi as jest.Mocked<typeof MerchantApi>;
+const mockedMerchantApi = MerchantApi as vi.Mocked<typeof MerchantApi>;
 
 describe('merchantService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 });
 
 describe('merchantService uncovered branches', () => {
@@ -72,7 +72,7 @@ describe('merchantService uncovered branches', () => {
   });
 
   it('postponeTransaction delegates correctly', async () => {
-    mockedMerchantApi.postponeTransaction = jest.fn().mockResolvedValue(undefined as any);
+    mockedMerchantApi.postponeTransaction = vi.fn().mockResolvedValue(undefined as any);
 
     await mockedMerchantApi.postponeTransaction('initiative1', 'batch1', 'trx1', '2025-12-31');
 
@@ -85,7 +85,7 @@ describe('merchantService uncovered branches', () => {
   });
 
   it('downloadBatchCsv delegates correctly', async () => {
-    mockedMerchantApi.downloadBatchCsv = jest.fn().mockResolvedValue('csv' as any);
+    mockedMerchantApi.downloadBatchCsv = vi.fn().mockResolvedValue('csv' as any);
 
     const result = await mockedMerchantApi.downloadBatchCsv('initiative1', 'batch1');
 
@@ -374,7 +374,7 @@ describe('merchantService uncovered branches', () => {
 
   describe('getMerchantReports', () => {
     test('should call MerchantApi.getMerchantReports with correct params', async () => {
-      mockedMerchantApi.getMerchantReports = jest.fn().mockResolvedValue({} as any);
+      mockedMerchantApi.getMerchantReports = vi.fn().mockResolvedValue({} as any);
 
       await (await import('../merchantService')).getMerchantReports('init-1', 1, 10);
 
@@ -388,7 +388,7 @@ describe('merchantService uncovered branches', () => {
 
   describe('generateMerchantReport', () => {
     test('should call MerchantApi.generateMerchantReport with correct params', async () => {
-      mockedMerchantApi.generateMerchantReport = jest.fn().mockResolvedValue(undefined as any);
+      mockedMerchantApi.generateMerchantReport = vi.fn().mockResolvedValue(undefined as any);
 
       const body = { fromDate: '2024-01-01', toDate: '2024-01-31' };
 
@@ -403,7 +403,7 @@ describe('merchantService uncovered branches', () => {
 
   describe('downloadMerchantReport', () => {
     test('should call MerchantApi.downloadMerchantReport with correct params', async () => {
-      mockedMerchantApi.downloadMerchantReport = jest.fn().mockResolvedValue('file' as any);
+      mockedMerchantApi.downloadMerchantReport = vi.fn().mockResolvedValue('file' as any);
 
       await (await import('../merchantService')).downloadMerchantReport('init-1', 'report-1');
 

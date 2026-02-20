@@ -1,23 +1,23 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
-jest.mock('../../../routes', () => ({
+vi.mock('../../../routes', () => ({
   __esModule: true,
   default: {
     MODIFY_DOCUMENT: '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/modify/:fileDocNumber',
   },
 }));
 
-const mockCurrencyFormatter = jest.fn((n: number) => `€ ${n.toFixed(2)}`);
-const mockFormatValues = jest.fn((s: string) => `Formatted: ${s}`);
+const mockCurrencyFormatter = vi.fn((n: number) => `€ ${n.toFixed(2)}`);
+const mockFormatValues = vi.fn((s: string) => `Formatted: ${s}`);
 
-jest.mock('../../../utils/formatUtils', () => ({
+vi.mock('../../../utils/formatUtils', () => ({
   __esModule: true,
   currencyFormatter: (n: number) => mockCurrencyFormatter(n),
   formatValues: (s: string) => mockFormatValues(s),
 }));
 
-jest.mock('../../../utils/constants', () => ({
+vi.mock('../../../utils/constants', () => ({
   __esModule: true,
   MISSING_DATA_PLACEHOLDER: '-',
   TYPE_TEXT: {
@@ -26,32 +26,32 @@ jest.mock('../../../utils/constants', () => ({
   },
 }));
 
-const mockUseStore = jest.fn();
+const mockUseStore = vi.fn();
 
-jest.mock('../../../pages/initiativeStores/StoreContext', () => ({
+vi.mock('../../../pages/initiativeStores/StoreContext', () => ({
   __esModule: true,
   useStore: () => mockUseStore(),
 }));
 
-const mockSetAlert  = jest.fn();
-jest.mock('../../../hooks/useAlert', () => ({
+const mockSetAlert  = vi.fn();
+vi.mock('../../../hooks/useAlert', () => ({
   __esModule: true,
   useAlert: () => ({ setAlert: mockSetAlert  }),
 }));
 
-const mockDownloadInvoiceFile = jest.fn();
-jest.mock('../../../services/merchantService', () => ({
+const mockDownloadInvoiceFile = vi.fn();
+vi.mock('../../../services/merchantService', () => ({
   __esModule: true,
   downloadInvoiceFile: (...args: any[]) => mockDownloadInvoiceFile(...args),
 }));
 
-const mockGetStatus = jest.fn();
-jest.mock('../useStatus', () => ({
+const mockGetStatus = vi.fn();
+vi.mock('../useStatus', () => ({
   __esModule: true,
   default: (status: string) => mockGetStatus(status),
 }));
 
-jest.mock('../../Chip/CustomChip', () => ({
+vi.mock('../../Chip/CustomChip', () => ({
   __esModule: true,
   default: ({ label, colorChip }: any) => (
     <div data-testid="chip" data-color={colorChip}>
@@ -60,7 +60,7 @@ jest.mock('../../Chip/CustomChip', () => ({
   ),
 }));
 
-jest.mock('../../Drawer/DetailDrawer', () => ({
+vi.mock('../../Drawer/DetailDrawer', () => ({
   __esModule: true,
   default: ({ children, buttons, ...rest }: any) => (
     <div data-testid={rest['data-testid'] ?? 'detail-drawer'}>
@@ -80,11 +80,11 @@ jest.mock('../../Drawer/DetailDrawer', () => ({
   ),
 }));
 
-const pushMock = jest.fn();
-const mockUseHistory = jest.fn();
-const mockUseParams = jest.fn();
+const pushMock = vi.fn();
+const mockUseHistory = vi.fn();
+const mockUseParams = vi.fn();
 
-jest.mock('react-router-dom', () => ({
+vi.mock('react-router-dom', () => ({
   __esModule: true,
   useHistory: () => mockUseHistory(),
   useParams: () => mockUseParams(),
@@ -96,7 +96,7 @@ import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 
 describe('TransactionDetail (100% coverage)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseParams.mockReturnValue({ id: 'merchant-123' });
     mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/here' } });
@@ -128,7 +128,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={baseList}
       />
@@ -169,7 +169,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={[
           { id: 'additionalProperties.productName', label: 'Product', type: TYPE_TEXT.Text },
@@ -197,7 +197,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={[{ id: 'valueText', label: 'Text Field', type: TYPE_TEXT.Text }]}
       />
@@ -219,7 +219,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -245,7 +245,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -276,7 +276,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -304,7 +304,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -319,11 +319,11 @@ describe('TransactionDetail (100% coverage)', () => {
     const linkMock = {
       href: '',
       download: '',
-      click: jest.fn(),
+      click: vi.fn(),
     };
 
     const origCreateElement = document.createElement.bind(document);
-    const createElSpy = jest
+    const createElSpy = vi
       .spyOn(document, 'createElement')
       .mockImplementation((tag: any) => {
         if (tag === 'a') return linkMock as any;
@@ -340,7 +340,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -363,10 +363,10 @@ describe('TransactionDetail (100% coverage)', () => {
   it('download success uses default filename "fattura.pdf" when filename is missing (|| branch)', async () => {
     mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/default.pdf' });
 
-    const linkMock = { href: '', download: '', click: jest.fn() };
+    const linkMock = { href: '', download: '', click: vi.fn() };
 
     const origCreateElement = document.createElement.bind(document);
-    const createElSpy = jest
+    const createElSpy = vi
       .spyOn(document, 'createElement')
       .mockImplementation((tag: any) => {
         if (tag === 'a') return linkMock as any;
@@ -383,7 +383,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -416,7 +416,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={vi.fn()}
         itemValues={itemValues}
         listItem={[]}
       />

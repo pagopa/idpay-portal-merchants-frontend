@@ -5,14 +5,14 @@ import { MISSING_DATA_PLACEHOLDER } from '../../../../utils/constants';
 import { getMerchantDetail } from '../../../../services/merchantService';
 import getStatus from '../../../../components/Transactions/useStatus';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
 }));
 
-jest.mock('@mui/material', () => {
-  const actual = jest.requireActual('@mui/material');
+vi.mock('@mui/material', () => {
+  const actual = vi.importActual('@mui/material');
   return {
     ...actual,
     Tooltip: ({ title, children }: any) => (
@@ -23,16 +23,16 @@ jest.mock('@mui/material', () => {
   };
 });
 
-jest.mock('../../../../services/merchantService', () => ({
-  getMerchantDetail: jest.fn(),
+vi.mock('../../../../services/merchantService', () => ({
+  getMerchantDetail: vi.fn(),
 }));
 
-jest.mock('../../../../components/Transactions/useStatus', () => ({
+vi.mock('../../../../components/Transactions/useStatus', () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: vi.fn(),
 }));
 
-jest.mock('../../../../components/Chip/CustomChip', () => ({
+vi.mock('../../../../components/Chip/CustomChip', () => ({
   __esModule: true,
   default: ({ label, colorChip }: { label: string; colorChip: string }) => (
     <div data-testid="status-chip">
@@ -41,12 +41,12 @@ jest.mock('../../../../components/Chip/CustomChip', () => ({
   ),
 }));
 
-const mockedGetMerchantDetail = getMerchantDetail as jest.MockedFunction<typeof getMerchantDetail>;
-const mockedGetStatus = getStatus as jest.MockedFunction<typeof getStatus>;
+const mockedGetMerchantDetail = getMerchantDetail as vi.MockedFunction<typeof getMerchantDetail>;
+const mockedGetStatus = getStatus as vi.MockedFunction<typeof getStatus>;
 
 describe('ShopCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renderizza i dati principali e chiama il servizio getMerchantDetail', async () => {

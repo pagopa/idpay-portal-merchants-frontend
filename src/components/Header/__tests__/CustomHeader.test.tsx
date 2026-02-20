@@ -6,17 +6,17 @@ import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
 import { trackEvent } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
 import { ENV } from '../../../utils/env';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService', () => ({
-  trackEvent: jest.fn(),
+vi.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService', () => ({
+  trackEvent: vi.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     HEADER: {
       LINK: {
@@ -26,7 +26,7 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   },
 }));
 
-jest.mock('../../../utils/env', () => ({
+vi.mock('../../../utils/env', () => ({
   ENV: {
     URL_FE: {
       LOGOUT: 'http://logout-url.com',
@@ -43,7 +43,7 @@ jest.mock('../../../utils/env', () => ({
   },
 }));
 
-jest.mock('../../../components/Header/CustomHeaderAccount', () => ({
+vi.mock('../../../components/Header/CustomHeaderAccount', () => ({
   CustomHeaderAccount: ({ onLogout, onLogin, onDocumentationClick, onAssistanceClick, loggedUser }: any) => (
     <div data-testid="custom-header-account">
       {loggedUser && (
@@ -60,7 +60,7 @@ jest.mock('../../../components/Header/CustomHeaderAccount', () => ({
   ),
 }));
 
-jest.mock('@pagopa/mui-italia', () => ({
+vi.mock('@pagopa/mui-italia', () => ({
   HeaderProduct: ({ partyId, productId, productsList, partyList, onSelectedProduct, onSelectedParty }: any) => (
     <div data-testid="header-product">
       <div data-testid="party-id">{partyId}</div>
@@ -128,7 +128,7 @@ const createMockStore = (initialState: any = mockPartiesState) => {
 };
 
 describe('CustomHeader', () => {
-  const mockOnExit = jest.fn((callback) => callback());
+  const mockOnExit = vi.fn((callback) => callback());
   const mockLoggedUser: User = {
     uid: 'user-123',
     name: 'John',
@@ -138,10 +138,10 @@ describe('CustomHeader', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     delete (window as any).location;
-    (window as any).location = { assign: jest.fn() };
-    window.open = jest.fn();
+    (window as any).location = { assign: vi.fn() };
+    window.open = vi.fn();
   });
 
   it('should render CustomHeader component', () => {
@@ -353,7 +353,7 @@ describe('CustomHeader', () => {
 
   it('should handle product selection', () => {
     const store = createMockStore();
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
 
     render(
       <Provider store={store}>
@@ -477,7 +477,7 @@ describe('CustomHeader', () => {
 
   it('should not call onSelectedParty when selectedParty is null or undefined', () => {
     const store = createMockStore();
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
 
     render(
       <Provider store={store}>
@@ -492,7 +492,7 @@ describe('CustomHeader', () => {
 
     const partyButton = screen.getByTestId('select-party-undefined');
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     fireEvent.click(partyButton);
 
@@ -516,7 +516,7 @@ describe('CustomHeader', () => {
       </Provider>
     );
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const headerProduct = screen.getByTestId('header-product');
     expect(headerProduct).toBeInTheDocument();
@@ -659,7 +659,7 @@ describe('CustomHeader', () => {
       </Provider>
     );
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // call handler with undefined
     const headerProduct = screen.getByTestId('header-product');

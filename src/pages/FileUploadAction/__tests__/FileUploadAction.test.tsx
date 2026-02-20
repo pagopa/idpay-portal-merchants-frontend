@@ -2,10 +2,10 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import FileUploadAction from "../FileUploadAction";
 
-const mockGoBack = jest.fn();
-const mockReplace = jest.fn();
+const mockGoBack = vi.fn();
+const mockReplace = vi.fn();
 
-jest.mock("react-router-dom", () => ({
+vi.mock("react-router-dom", () => ({
   useParams: () => ({
     pointOfSaleId: "pos1",
     trxId: "trx1",
@@ -18,15 +18,15 @@ jest.mock("react-router-dom", () => ({
   }),
 }));
 
-jest.mock("react-i18next", () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (k: any) => k }),
 }));
 
-jest.mock("@pagopa/selfcare-common-frontend", () => ({
+vi.mock("@pagopa/selfcare-common-frontend", () => ({
   TitleBox: ({ title }: any) => <div>{title}</div>,
 }));
 
-jest.mock("@pagopa/mui-italia", () => ({
+vi.mock("@pagopa/mui-italia", () => ({
   SingleFileInput: ({ onFileSelected }: any) => (
     <button
       data-testid="mock-file-input"
@@ -48,9 +48,9 @@ jest.mock("@pagopa/mui-italia", () => ({
   },
 }));
 
-const mockSetAlert = jest.fn();
+const mockSetAlert = vi.fn();
 
-jest.mock("../../../hooks/useAlert", () => ({
+vi.mock("../../../hooks/useAlert", () => ({
   useAlert: () => ({
     setAlert: mockSetAlert,
   }),
@@ -58,15 +58,15 @@ jest.mock("../../../hooks/useAlert", () => ({
 
 describe("FileUploadAction", () => {
   const baseProps = {
-    apiCall: jest.fn().mockResolvedValue({}),
+    apiCall: vi.fn().mockResolvedValue({}),
     successStateKey: "refundUploadSuccess",
     breadcrumbsProp: { label: "Test", path: "/test" },
     manualLink: "http://manual",
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    window.open = jest.fn();
+    vi.clearAllMocks();
+    window.open = vi.fn();
   });
 
   it("renders and navigates back", () => {
@@ -93,7 +93,7 @@ describe("FileUploadAction", () => {
   });
 
   it("calls api successfully", async () => {
-    const apiCall = jest.fn().mockResolvedValue({});
+    const apiCall = vi.fn().mockResolvedValue({});
     render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
     fireEvent.click(screen.getByTestId("mock-file-input"));
     fireEvent.change(screen.getByRole("textbox"), {
@@ -109,7 +109,7 @@ describe("FileUploadAction", () => {
   });
 
   it("handles REWARD_BATCH_STATUS_NOT_ALLOWED error", async () => {
-    const apiCall = jest.fn().mockRejectedValue({
+    const apiCall = vi.fn().mockRejectedValue({
       response: { data: { code: "REWARD_BATCH_STATUS_NOT_ALLOWED" } },
     });
 
@@ -126,7 +126,7 @@ describe("FileUploadAction", () => {
   });
 
   it("handles generic API error branch", async () => {
-    const apiCall = jest.fn().mockRejectedValue(new Error("generic"));
+    const apiCall = vi.fn().mockRejectedValue(new Error("generic"));
 
     render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
     fireEvent.click(screen.getByTestId("mock-file-input"));
@@ -187,7 +187,7 @@ describe("FileUploadAction", () => {
   });
 
   it("handles REWARD_BATCH_ALREADY_SENT branch", async () => {
-    const apiCall = jest.fn().mockRejectedValue({
+    const apiCall = vi.fn().mockRejectedValue({
       response: { data: { code: "REWARD_BATCH_ALREADY_SENT" } },
     });
 

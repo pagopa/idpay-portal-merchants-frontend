@@ -6,14 +6,14 @@ import { partiesActions, partiesSelectors } from '../../redux/slices/partiesSlic
 import * as productService from '../../services/productService';
 import { Party } from '../../model/Party';
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useReduxCachedValue');
-const mockedUseReduxCachedValue = useReduxCachedValue as jest.Mock;
+vi.mock('@pagopa/selfcare-common-frontend/lib/hooks/useReduxCachedValue');
+const mockedUseReduxCachedValue = useReduxCachedValue as vi.Mock;
 
-jest.mock('../../redux/hooks');
+vi.mock('../../redux/hooks');
 
 describe('useSelectedPartyProducts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call useReduxCachedValue with correct parameters when a party is selected', () => {
@@ -28,14 +28,14 @@ describe('useSelectedPartyProducts', () => {
       roles: [],
     };
 
-    (useAppSelector as jest.Mock).mockImplementation((selector) => {
+    (useAppSelector as vi.Mock).mockImplementation((selector) => {
       if (selector === partiesSelectors.selectPartySelected) {
         return mockParty;
       }
       return undefined;
     });
 
-    const mockReturnValue = jest.fn();
+    const mockReturnValue = vi.fn();
     mockedUseReduxCachedValue.mockReturnValue(mockReturnValue);
 
     const { result } = renderHook(() => useSelectedPartyProducts());
@@ -53,7 +53,7 @@ describe('useSelectedPartyProducts', () => {
   });
 
   it('should throw an error if no party is selected', () => {
-    (useAppSelector as jest.Mock).mockReturnValue(null);
+    (useAppSelector as vi.Mock).mockReturnValue(null);
 
     const { result } = renderHook(() => useSelectedPartyProducts(), {
       wrapper: ({ children }) => <>{children}</>,

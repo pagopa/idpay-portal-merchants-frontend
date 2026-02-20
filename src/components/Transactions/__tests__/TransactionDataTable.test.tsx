@@ -4,9 +4,9 @@ import TransactionDataTable, { DataTableProps } from '../TransactionDataTable';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 
 describe('TransactionDataTable', () => {
-  const mockHandleRowAction = jest.fn();
-  const mockOnSortModelChange = jest.fn();
-  const mockOnPaginationPageChange = jest.fn();
+  const mockHandleRowAction = vi.fn();
+  const mockOnSortModelChange = vi.fn();
+  const mockOnPaginationPageChange = vi.fn();
 
   const baseProps: DataTableProps = {
     rows: [
@@ -26,7 +26,7 @@ describe('TransactionDataTable', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders rows and columns', () => {

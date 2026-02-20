@@ -6,17 +6,17 @@ import { BASE_ROUTE } from '../../../routes';
 import DiscountCode from '../DiscountCode';
 import { MerchantsApiMocked } from '../../../api/__mocks__/MerchantsApiClient';
 
-jest.mock('../../../services/merchantService');
+vi.mock('../../../services/merchantService');
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 const oldWindowLocation = global.window.location;
 
 const mockedLocation = {
-  assign: jest.fn(),
+  assign: vi.fn(),
   pathname: `${BASE_ROUTE}/accetta-sconto/1234`,
   origin: 'MOCKED_ORIGIN',
   search: '',
@@ -40,10 +40,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
   });
@@ -54,10 +54,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -70,10 +70,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -96,10 +96,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -122,10 +122,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -150,10 +150,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -176,10 +176,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -202,10 +202,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -228,10 +228,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -254,10 +254,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -282,10 +282,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -308,10 +308,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -334,10 +334,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -360,10 +360,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -388,10 +388,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -416,10 +416,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -442,10 +442,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -468,10 +468,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();
@@ -493,10 +493,10 @@ describe('Test suite for DiscountCode component', () => {
         id={'1234'}
         amount={100}
         code={undefined}
-        setCode={jest.fn()}
+        setCode={vi.fn()}
         steps={2}
         activeStep={1}
-        setActiveStep={jest.fn()}
+        setActiveStep={vi.fn()}
       />
     );
     const user = userEvent.setup();

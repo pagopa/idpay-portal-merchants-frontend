@@ -5,7 +5,7 @@ import { getReportedUsersColumns } from '../columnsReportedUser';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import * as formatUtils from '../../../utils/formatUtils';
 
-jest.mock('../../../utils/formatUtils');
+vi.mock('../../../utils/formatUtils');
 
 // Wrapper component to properly render the cell content with hooks
 const CellWrapper = ({ renderCell, params }: any) => {
@@ -13,7 +13,7 @@ const CellWrapper = ({ renderCell, params }: any) => {
 };
 
 describe('getReportedUsersColumns', () => {
-  const mockHandleDelete = jest.fn();
+  const mockHandleDelete = vi.fn();
   const testRow = {
     cf: 'ABCDEF12G34H567I',
     reportedDate: '2024-01-01T00:00:00Z',
@@ -22,8 +22,8 @@ describe('getReportedUsersColumns', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (formatUtils.safeFormatDate as jest.Mock).mockImplementation((date) => {
+    vi.clearAllMocks();
+    (formatUtils.safeFormatDate as vi.Mock).mockImplementation((date) => {
       if (!date) return MISSING_DATA_PLACEHOLDER;
       return '01/01/2024';
     });

@@ -4,7 +4,7 @@ import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import BreadcrumbsBox from '../BreadcrumbsBox';
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 
 describe('test suite for BreadcrumbsBox', () => {

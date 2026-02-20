@@ -1,58 +1,56 @@
+import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import { extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
 import { createClient } from '../generated/autocomplete/client';
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
-  storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
+  storageTokenOps: { read: vi.fn().mockReturnValue('mocked-token') },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
-  appStateActions: { addError: jest.fn((e) => e) },
+vi.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
+  appStateActions: { addError: vi.fn((e) => e) },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/api-utils', () => ({
-  buildFetchApi: jest.fn(),
-  extractResponse: jest.fn(),
+vi.mock('@pagopa/selfcare-common-frontend/lib/utils/api-utils', () => ({
+  buildFetchApi: vi.fn(),
+  extractResponse: vi.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
-  t: jest.fn((key) => key),
+vi.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
+  t: vi.fn((key) => key),
 }));
 
-jest.mock('../../redux/store', () => ({
-  store: { dispatch: jest.fn() },
+vi.mock('../../redux/store', () => ({
+  store: { dispatch: vi.fn() },
 }));
 
-jest.mock('../generated/autocomplete/client', () => ({
-  createClient: jest.fn(),
+vi.mock('../generated/autocomplete/client', () => ({
+  createClient: vi.fn(),
 }));
 
 let mockAutocompleteClient: any;
 
 describe('AutocompleteApiClient', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockAutocompleteClient = {
-      autocomplete: jest.fn(),
+      autocomplete: vi.fn(),
     };
 
-    (createClient as jest.Mock).mockReturnValue(mockAutocompleteClient);
-    (extractResponse as jest.Mock).mockResolvedValue('extracted');
+    (createClient as unknown as Mock).mockReturnValue(mockAutocompleteClient);
+    (extractResponse as unknown as Mock).mockResolvedValue('extracted');
   });
 
-  const loadApi = () => {
-    let AutocompleteApi: any;
-    jest.isolateModules(() => {
-      AutocompleteApi = require('../AutocompleteApiClient').AutocompleteApi;
-    });
-    return AutocompleteApi;
+  const loadApi = async () => {
+    const module = await import('../AutocompleteApiClient');
+    return module.AutocompleteApi;
   };
 
   it('chiama apiClient.autocomplete con Bearer token corretto', async () => {
     mockAutocompleteClient.autocomplete.mockResolvedValue({ right: 'data' });
-    const AutocompleteApi = loadApi();
+    const AutocompleteApi = await loadApi();
 
-    const request = { query: 'via roma' };
+    const request = { QueryText: 'via roma' } as any;
     const result = await AutocompleteApi.getAddresses(request);
 
     expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
@@ -60,27 +58,27 @@ describe('AutocompleteApiClient', () => {
   });
 
   it('inserisce Bearer anche se il token è vuoto', async () => {
-    const { storageTokenOps } = require('@pagopa/selfcare-common-frontend/lib/utils/storage');
-    (storageTokenOps.read as jest.Mock).mockReturnValueOnce('');
+    const { storageTokenOps } = await import('@pagopa/selfcare-common-frontend/lib/utils/storage');
+    (storageTokenOps.read as unknown as Mock).mockReturnValueOnce('');
 
     mockAutocompleteClient.autocomplete.mockResolvedValue({ right: 'data' });
-    const AutocompleteApi = loadApi();
+    const AutocompleteApi = await loadApi();
 
-    await AutocompleteApi.getAddresses({ query: 'via milano' });
+    await AutocompleteApi.getAddresses({ QueryText: 'via milano' } as any);
   });
 
   it('invoca onRedirectToLogin se extractResponse richiama callback', async () => {
-    const { store } = require('../../redux/store');
-    store.dispatch = jest.fn();
+    const { store } = await import('../../redux/store');
+    store.dispatch = vi.fn();
 
-    (extractResponse as jest.Mock).mockImplementation(async (_res, _status, callback) => {
+    (extractResponse as unknown as Mock).mockImplementation(async (_res, _status, callback) => {
       callback();
       return 'extracted';
     });
 
     mockAutocompleteClient.autocomplete.mockResolvedValue({ right: 'data' });
-    const AutocompleteApi = loadApi();
+    const AutocompleteApi = await loadApi();
 
-    await AutocompleteApi.getAddresses({ query: 'via torino' });
+    await AutocompleteApi.getAddresses({ QueryText: 'via torino' } as any);
   });
 });

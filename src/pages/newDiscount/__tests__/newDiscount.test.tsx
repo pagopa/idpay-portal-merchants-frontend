@@ -2,21 +2,21 @@ import React, { useState as useStateMock } from 'react';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import NewDiscount from '../newDiscount';
 
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useState: jest.fn(),
+vi.mock('react', () => ({
+  ...vi.importActual('react'),
+  useState: vi.fn(),
 }));
-const setDiscountCreated = jest.fn();
+const setDiscountCreated = vi.fn();
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
   // @ts-ignore
   useStateMock.mockImplementation((init: any) => [init, setDiscountCreated]);
 });
 
 describe('Test suite for newDiscount page', () => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = vi.fn();
   test('Render component', () => {
     renderWithContext(<NewDiscount />);
   });

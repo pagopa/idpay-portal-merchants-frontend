@@ -26,7 +26,6 @@
     "eslint-plugin-sonarjs": "^0.14.0",
     "formik": "^2.2.9",
     "i18next": "^25.8.10",
-    "jest-sonar-reporter": "^2.0.0",
     "node-fetch": "^3.0.0",
     "patch-package": "^8.0.1",
     "postinstall-postinstall": "^2.1.0",
@@ -45,7 +44,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean:build": "rimraf dist",
-    "test": "jest",
+    "test": "vitest",
     "clean:coverage": "rimraf coverage",
     "lint-autofix": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix",
     "lint": "eslint -f json -o eslint-report.json . -c .eslintrc.js --ext .ts,.tsx --cache",
@@ -62,8 +61,7 @@
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
   },
   "browserslist": {
@@ -80,7 +78,6 @@
   },
   "devDependencies": {
     "@pagopa/openapi-codegen-ts": "^10.0.6",
-    "@testing-library/jest-dom": "^5.16.3",
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "7",
     "@testing-library/user-event": "^14.0.4",
@@ -114,22 +111,5 @@
     "react-redux": "8.1.3",
     "i18next": "25.8.10",
     "react-i18next": "16.5.4"
-  },
-  "jest": {
-    "restoreMocks": true,
-    "clearMocks": true,
-    "resetMocks": true,
-    "coveragePathIgnorePatterns": [
-      "src/index.js",
-      "src/bootstrap.tsx",
-      "src/reportWebVitals.ts",
-      "src/api/generated"
-    ],
-    "moduleNameMapper": {
-      "next/router": "<rootDir>/__mocks__/next/router.js",
-      "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",
-      "^.+\\.(jpg|jpeg|png|gif|webp|avif|svg)$": "<rootDir>/__mocks__/file-mock.js",
-      "react-markdown": "<rootDir>/node_modules/react-markdown/react-markdown.min.js"
-    }
   }
 }

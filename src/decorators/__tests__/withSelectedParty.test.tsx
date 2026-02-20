@@ -8,19 +8,19 @@ import { testToken } from '../../utils/constants';
 import { Fragment } from 'react';
 import { PartiesState } from '../../redux/slices/partiesSlice';
 
-jest.mock('../../services/partyService');
+vi.mock('../../services/partyService');
 
 // const expectedPartyId: string = '2b48bf96-fd74-477e-a70a-286b410f020a';
 //
-// let fetchPartyDetailsSpy: jest.SpyInstance;
+// let fetchPartyDetailsSpy: vi.SpyInstance;
 
 beforeEach(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 
 beforeEach(() => {
-  jest.spyOn(require('../../services/partyService'), 'fetchPartyDetails');
+  vi.spyOn(require('../../services/partyService'), 'fetchPartyDetails');
 
   //storageTokenOps.write(testToken); // party with partyId="onboarded"
 });

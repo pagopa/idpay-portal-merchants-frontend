@@ -1,5 +1,5 @@
-jest.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService');
-jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
+vi.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService');
+vi.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     HEADER: {
       LINK: {
@@ -9,12 +9,12 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   },
 }));
 
-let mockOnExit = jest.fn();
-let mockOnDocumentationClick = jest.fn();
-let mockOnSelectedProduct = jest.fn();
-let mockOnSelectedParty = jest.fn();
+let mockOnExit = vi.fn();
+let mockOnDocumentationClick = vi.fn();
+let mockOnSelectedProduct = vi.fn();
+let mockOnSelectedParty = vi.fn();
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
+vi.mock('@pagopa/selfcare-common-frontend', () => ({
   Header: (props: any) => {
     if (props.onDocumentationClick) {
       mockOnDocumentationClick = props.onDocumentationClick;
@@ -30,7 +30,7 @@ jest.mock('@pagopa/selfcare-common-frontend', () => ({
   },
 }));
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const translations: { [key: string]: string } = {
@@ -110,23 +110,23 @@ const mockedParties: Array<Party> = [
 ];
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  mockOnExit = jest.fn();
-  mockOnDocumentationClick = jest.fn();
-  mockOnSelectedProduct = jest.fn();
-  mockOnSelectedParty = jest.fn();
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  window.open = jest.fn();
+  vi.clearAllMocks();
+  mockOnExit = vi.fn();
+  mockOnDocumentationClick = vi.fn();
+  mockOnSelectedProduct = vi.fn();
+  mockOnSelectedParty = vi.fn();
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+  window.open = vi.fn();
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('test suite for Header', () => {
   test('render Header with no parties', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -149,7 +149,7 @@ describe('test suite for Header', () => {
   });
 
   test('render CustomHeader with no parties', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -172,7 +172,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with parties', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -195,7 +195,7 @@ describe('test suite for Header', () => {
   });
 
   test('render CustomHeader with parties', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -218,7 +218,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with withSecondHeader true', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -241,7 +241,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with withSecondHeader false', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -274,7 +274,7 @@ describe('test suite for Header', () => {
       },
     ];
 
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: partiesWithMultipleRoles[0],
@@ -297,7 +297,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header without loggedUser', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -320,7 +320,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with empty products', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -343,7 +343,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with null selected party', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: null,
@@ -366,7 +366,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with null products', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -398,7 +398,7 @@ describe('test suite for Header', () => {
       },
     ];
 
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: partiesWithDifferentRoles[0],
@@ -421,7 +421,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header when selectedParty updates', async () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -464,7 +464,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with loggedUser properties', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -487,7 +487,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header renders CommonHeader component', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -511,7 +511,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with single role in party', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -534,7 +534,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with party logo url', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: { ...mockedParties[0], urlLogo: 'http://custom-logo.com' },
@@ -557,7 +557,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header handles rerender with new loggedUser', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -593,7 +593,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with multiple parties selection', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -616,7 +616,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with active and inactive products', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const mixedProducts = [
       { id: 'prod-1', title: 'Active', status: 'ACTIVE', authorized: true },
       { id: 'prod-2', title: 'Inactive', status: 'INACTIVE', authorized: true },
@@ -643,7 +643,7 @@ describe('test suite for Header', () => {
   });
 
   test('render Header with authorized and unauthorized products', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const mixedProducts = [
       { id: 'prod-1', title: 'Authorized', status: 'ACTIVE', authorized: true },
       { id: 'prod-2', title: 'Unauthorized', status: 'ACTIVE', authorized: false },
@@ -670,7 +670,7 @@ describe('test suite for Header', () => {
   });
 
   test('call onDocumentationClick callback', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -694,7 +694,7 @@ describe('test suite for Header', () => {
   });
 
   test('call onSelectedProduct callback', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -718,7 +718,7 @@ describe('test suite for Header', () => {
   });
 
   test('call onSelectedParty callback with valid party', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -745,7 +745,7 @@ describe('test suite for Header', () => {
   });
 
   test('call onSelectedParty callback with null party', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -769,7 +769,7 @@ describe('test suite for Header', () => {
   });
 
   test('useEffect updates party2Show when selectedParty changes', async () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const store = createMockStore({
       parties: {
         selected: mockedParties[0],
@@ -812,7 +812,7 @@ describe('test suite for Header', () => {
   });
 
   test('useMemo filters products correctly', () => {
-    const onExit = jest.fn();
+    const onExit = vi.fn();
     const products = [
       { id: 'prod-idpay-merchants', title: 'Welfare', status: 'ACTIVE', authorized: true },
       { id: 'prod-2', title: 'Active Auth', status: 'ACTIVE', authorized: true },

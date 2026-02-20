@@ -2,7 +2,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import TOSWall from '../TOSWall';
 
-jest.mock('react-i18next', () => ({
+vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
@@ -11,7 +11,7 @@ jest.mock('react-i18next', () => ({
 
 describe('tests for TOSWall', () => {
   test('test render of TOSWall component with not already accepted tos', () => {
-    const mockAcceptTos = jest.fn();
+    const mockAcceptTos = vi.fn();
 
     renderWithContext(
       <TOSWall acceptTOS={mockAcceptTos} tosRoute="" privacyRoute="" firstAcceptance={true} />
@@ -30,7 +30,7 @@ describe('tests for TOSWall', () => {
   test('test render of TOSWall component with tos already accepted (firstAcceptance = false)', () => {
     renderWithContext(
       <TOSWall
-        acceptTOS={jest.fn()}
+        acceptTOS={vi.fn()}
         tosRoute="/tos"
         privacyRoute="/privacy"
         firstAcceptance={false}

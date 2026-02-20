@@ -4,13 +4,13 @@ import { MemoryRouter } from 'react-router-dom';
 import Layout from '../Layout';
 import ROUTES from '../../../routes';
 
-jest.mock('../../../hooks/useInitiativesList', () => ({
-  useInitiativesList: jest.fn(),
+vi.mock('../../../hooks/useInitiativesList', () => ({
+  useInitiativesList: vi.fn(),
 }));
 
-jest.mock('../../SideMenu/SideMenu', () => () => <div data-testid="side-menu-mock" />);
-jest.mock('../../Footer/Footer', () => () => <div data-testid="footer-mock" />);
-jest.mock('../../Header/CustomHeader', () => () => <div data-testid="header-mock" />);
+vi.mock('../../SideMenu/SideMenu', () => () => <div data-testid="side-menu-mock" />);
+vi.mock('../../Footer/Footer', () => () => <div data-testid="footer-mock" />);
+vi.mock('../../Header/CustomHeader', () => () => <div data-testid="header-mock" />);
 
 describe('Layout branch coverage', () => {
   test('renders layout with SideMenu when match is found', () => {
