@@ -75,12 +75,14 @@ export default function InvoiceDetail({
     (itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
     !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED'));
 
+  const isDisabled = statusBatch === "CREATED" || statusBatch === "EVALUATING";
+
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
       isVisible && itemValues?.pointOfSaleId
         ? [
             {
-              disabled: !(statusBatch === "CREATED" || statusBatch === "EVALUTATING"),
+              disabled: !isDisabled,
               variant: 'contained',
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
