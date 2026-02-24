@@ -90,17 +90,13 @@ jest.mock('../../../components/Chip/StatusChipInvoice', () => (props: any) => (
   <div data-testid="status-chip">{props.status}</div>
 ));
 
-jest.mock('../../../components/Drawer/DetailDrawer', () => (props: any) => (
-  <div data-testid="detail-drawer" data-open={props.open}>
+jest.mock('../detail/InvoiceDetail', () => (props: any) => (
+  <div data-testid="detail-drawer" data-open={props.isOpen}>
     {props.open && props.children}
-    <button type="button" data-testid="close-drawer" onClick={() => props.toggleDrawer(false)}>
+    <button type="button" data-testid="close-drawer" onClick={() => props.setIsOpen(false)}>
       close
     </button>
   </div>
-));
-
-jest.mock('../detail/InvoiceDetail', () => (props: any) => (
-  <div data-testid="invoice-detail">{props.title}</div>
 ));
 
 jest.mock('../../../utils/constants', () => ({
@@ -123,6 +119,7 @@ const mockedDownloadInvoiceFile = downloadInvoiceFile as jest.MockedFunction<
 const mockedUseAlert = useAlert as jest.MockedFunction<typeof useAlert>;
 
 describe('InvoiceDataTable', () => {
+  const mockSetAlert = jest.fn();
   const baseTransactions: any = {
     content: [
       {
@@ -151,7 +148,7 @@ describe('InvoiceDataTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedGetTransactions.mockResolvedValue(baseTransactions);
-    mockedUseAlert.mockReturnValue({ setAlert: jest.fn() });
+    (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
     (global as any).fetch = jest.fn().mockResolvedValue({
       ok: true,
       blob: jest.fn().mockResolvedValue(new Blob(['test'], { type: 'application/pdf' })),
@@ -166,7 +163,6 @@ describe('InvoiceDataTable', () => {
     expect(mockedGetTransactions).toHaveBeenCalledWith(
       expect.objectContaining({
         initiativeId: 'initiative-123',
-        page: 0,
         size: 10,
       })
     );
@@ -181,14 +177,13 @@ describe('InvoiceDataTable', () => {
         rewardBatchTrxStatus="ELIGIBLE"
         pointOfSaleId="POS-2"
         fiscalCode="BBBBBB00B00B000B"
-        trxCode='TRX-CODE-001'
+        trxCode="TRX-CODE-001"
       />
     );
     await screen.findByTestId('data-table');
     expect(mockedGetTransactions).toHaveBeenCalledWith(
       expect.objectContaining({
         initiativeId: 'initiative-123',
-        page: 0,
         size: 10,
         rewardBatchId: 'batch-1',
         rewardBatchTrxStatus: 'ELIGIBLE',
@@ -228,6 +223,7 @@ describe('InvoiceDataTable', () => {
     const clearSortButton = screen.getByTestId('clear-sort');
     fireEvent.click(clearSortButton);
     await waitFor(() => expect(mockedGetTransactions).toHaveBeenCalledTimes(2));
+    // await waitFor(() => expect(mockedGetTransactions).toHaveBeenCalledWith({initiativeId: "initiative-123", size: 10}));
     const secondCallArgs = mockedGetTransactions.mock.calls[1][0];
     expect(secondCallArgs.sort).toBeUndefined();
   });
@@ -270,12 +266,9 @@ describe('InvoiceDataTable', () => {
     fireEvent.click(actionIcon);
     await screen.findByTestId('detail-drawer');
     expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'true');
-    expect(screen.getByTestId('invoice-detail')).toBeInTheDocument();
     const closeButton = screen.getByTestId('close-drawer');
     fireEvent.click(closeButton);
-    await waitFor(() =>
-      expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'false')
-    );
+    await waitFor(() => expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'false'));
   });
 
   it('downloads invoice file PDF and opens new window', async () => {
@@ -326,8 +319,6 @@ describe('InvoiceDataTable', () => {
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
-    const mockSetAlert = jest.fn();
-    mockedUseAlert.mockReturnValue({ setAlert: mockSetAlert });
     render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
@@ -351,8 +342,6 @@ describe('InvoiceDataTable', () => {
     mockedDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.txt',
     } as any);
-    const mockSetAlert = jest.fn();
-    mockedUseAlert.mockReturnValue({ setAlert: mockSetAlert });
     const invalidTransaction = {
       ...baseTransactions.content[0],
       invoiceData: { filename: 'INV-003.txt' },
@@ -378,8 +367,6 @@ describe('InvoiceDataTable', () => {
 
   it('handles download error when downloadInvoiceFile throws', async () => {
     mockedDownloadInvoiceFile.mockRejectedValueOnce(new Error('download error'));
-    const mockSetAlert = jest.fn();
-    mockedUseAlert.mockReturnValue({ setAlert: mockSetAlert });
     render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
@@ -474,17 +461,13 @@ describe('InvoiceDataTable', () => {
     expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'true');
     const closeButton = screen.getByTestId('close-drawer');
     fireEvent.click(closeButton);
-    await waitFor(() =>
-      expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'false')
-    );
+    await waitFor(() => expect(screen.queryByTestId('detail-drawer')).toHaveAttribute('data-open', 'false'));
+    await waitFor(() => expect(mockSetAlert).toHaveBeenCalled());
   });
 
   it('handles loading state', async () => {
     mockedGetTransactions.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(() => resolve(baseTransactions), 100)
-        )
+      () => new Promise((resolve) => setTimeout(() => resolve(baseTransactions), 100))
     );
     render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
@@ -497,6 +480,6 @@ describe('InvoiceDataTable', () => {
     expect(mockedGetTransactions).toHaveBeenCalledTimes(1);
     const actionIcon = screen.getByTestId('trx-1');
     fireEvent.click(actionIcon);
-    await screen.findByTestId('invoice-detail');
+    await screen.findByTestId('detail-drawer');
   });
 });

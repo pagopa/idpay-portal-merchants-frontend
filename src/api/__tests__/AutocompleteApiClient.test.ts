@@ -1,7 +1,6 @@
 import { extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
 import { createClient } from '../generated/autocomplete/client';
 
-// --- MOCK GLOBALI ---
 jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
   storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
 }));
@@ -27,7 +26,6 @@ jest.mock('../generated/autocomplete/client', () => ({
   createClient: jest.fn(),
 }));
 
-// --- VARIABILI DI TEST ---
 let mockAutocompleteClient: any;
 
 describe('AutocompleteApiClient', () => {
@@ -42,7 +40,6 @@ describe('AutocompleteApiClient', () => {
     (extractResponse as jest.Mock).mockResolvedValue('extracted');
   });
 
-  // Funzione per ricaricare il modulo in ambiente isolato (serve per mock statici)
   const loadApi = () => {
     let AutocompleteApi: any;
     jest.isolateModules(() => {
@@ -77,7 +74,7 @@ describe('AutocompleteApiClient', () => {
     store.dispatch = jest.fn();
 
     (extractResponse as jest.Mock).mockImplementation(async (_res, _status, callback) => {
-      callback(); // Simula scadenza token
+      callback();
       return 'extracted';
     });
 

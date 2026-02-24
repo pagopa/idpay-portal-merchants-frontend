@@ -1,6 +1,8 @@
 import { Alert, AlertColor, AlertTitle, Box, Slide, SxProps, Theme } from '@mui/material';
 import ErrorOutline from '@mui/icons-material/ErrorOutline';
-import { CheckCircleOutline } from '@mui/icons-material';
+import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
+import CachedIcon from '@mui/icons-material/Cached';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 export type AlertComponentProps = {
     title?: string;
@@ -13,10 +15,10 @@ export type AlertComponentProps = {
 };
 
 const severityMap = {
-    error: {color: '#FF5C5C', icon: <ErrorOutline />},
-    warning: {color: undefined, icon: undefined},
-    info: {color: undefined, icon: undefined},
-    success: {color: '#6CC66A', icon: <CheckCircleOutline />}
+    error: <ErrorOutline color='error' /> ,
+    warning: <WarningAmberIcon color='warning' />,
+    info: <CachedIcon color='info'/>,
+    success: <CheckCircleOutline color='success' />
 };
 
 const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentStyle, onClose}: AlertComponentProps) =>
@@ -36,7 +38,7 @@ const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentS
                 onClose={onClose}
                 data-testid="alert"
                 severity={severity}
-                icon={severity && severityMap[severity].icon}
+                icon={severity && severityMap[severity]}
                 sx={{
                     position: 'absolute',
                     bottom: '-108px',
@@ -46,9 +48,6 @@ const AlertComponent = ({title, text, isOpen, severity, containerStyle, contentS
                     minWidth: '300px',
                     boxShadow: 3,
                     borderRadius: 1,
-                    '& .MuiAlert-icon': {
-                        color: severity && severityMap[severity].color,
-                    },
                     ...contentStyle,
                 }}>
                 <AlertTitle>{title}</AlertTitle>

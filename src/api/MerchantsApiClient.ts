@@ -24,6 +24,8 @@ import { ReportedUserCreateResponseDTO } from './generated/merchants/ReportedUse
 import { RewardBatchListDTO } from './generated/merchants/RewardBatchListDTO';
 import { DownloadRewardBatchResponseDTO } from './generated/merchants/DownloadRewardBatchResponseDTO';
 import { FranchisePointOfSaleDTO } from './generated/merchants/FranchisePointOfSaleDTO';
+import { ReportListDTO } from './generated/merchants/ReportListDTO';
+import { ReportRequest } from './generated/merchants/ReportRequest';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -128,8 +130,11 @@ export const MerchantApi = {
     amountCents: number,
     idTrxAcquirer: string
   ): Promise<any> => {
-    const result = await apiClient.authPaymentBarCode({ trxCode, body: {  amountCents, idTrxAcquirer  } });
-     return extractResponse(result, 200, onRedirectToLogin);
+    const result = await apiClient.authPaymentBarCode({
+      trxCode,
+      body: { amountCents, idTrxAcquirer },
+    });
+    return extractResponse(result, 200, onRedirectToLogin);
   },
   updateMerchantPointOfSales: async (
     merchantId: string,
@@ -157,20 +162,20 @@ export const MerchantApi = {
   getMerchantPointOfSalesWithTransactions: async (
     rewardBatchId: string
   ): Promise<Array<FranchisePointOfSaleDTO>> => {
-      const token = storageTokenOps.read();
-      const res = await fetch(`${ENV.URL_API.MERCHANTS_PORTAL}/point-of-sales/${rewardBatchId}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      });
-      if (!res.ok) {
-        onRedirectToLogin();
-        return [];
-      }
+    const token = storageTokenOps.read();
+    const res = await fetch(`${ENV.URL_API.MERCHANTS_PORTAL}/point-of-sales/${rewardBatchId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!res.ok) {
+      onRedirectToLogin();
+      return [];
+    }
 
-      return (await res.json()) as Array<FranchisePointOfSaleDTO>;
+    return (await res.json()) as Array<FranchisePointOfSaleDTO>;
   },
 
   getMerchantPointOfSalesById: async (
@@ -241,50 +246,51 @@ export const MerchantApi = {
   },
 
   getRewardBatches: async (
-    initiativeId: string
-  ): Promise<RewardBatchListDTO> => {
-     try {
-    const result = await apiClient.getRewardBatches({
-      initiativeId
-    });
-
-    return extractResponse(result, 200, onRedirectToLogin);
-    } catch (error) {
-      logApiError(error, "userPermission");
-      return {} as RewardBatchListDTO;
-    }
-  },
-
-  getAllRewardBatches: async (
-    initiativeId: string
+    initiativeId: string,
+    page: number,
+    size: number
   ): Promise<RewardBatchListDTO> => {
     try {
       const result = await apiClient.getRewardBatches({
         initiativeId,
-        size: 1000
+        page,
+        size,
       });
 
       return extractResponse(result, 200, onRedirectToLogin);
     } catch (error) {
-      logApiError(error, "userPermission");
+      logApiError(error, 'userPermission');
       return {} as RewardBatchListDTO;
     }
   },
 
-  sendRewardBatches: async (
-    initiativeId: string,
-    batchId: string
-  ): Promise<any> => {
+  getAllRewardBatches: async (initiativeId: string): Promise<RewardBatchListDTO> => {
+    try {
+      const result = await apiClient.getRewardBatches({
+        initiativeId,
+        size: 1000,
+      });
 
+      return extractResponse(result, 200, onRedirectToLogin);
+    } catch (error) {
+      logApiError(error, 'userPermission');
+      return {} as RewardBatchListDTO;
+    }
+  },
+
+  sendRewardBatches: async (initiativeId: string, batchId: string): Promise<any> => {
     let result: any = await apiClient.sendRewardBatches({
       initiativeId,
-      batchId
+      batchId,
     });
-    if(result?.right?.status === 400 && result?.right?.value?.code === "REWARD_BATCH_PREVIOUS_NOT_SENT"){
-      return "REWARD_BATCH_PREVIOUS_NOT_SENT";
+    if (
+      result?.right?.status === 400 &&
+      result?.right?.value?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT'
+    ) {
+      return 'REWARD_BATCH_PREVIOUS_NOT_SENT';
     }
     if (result?.right?.value === undefined) {
-      const right = {...result.right, value: {}};
+      const right = { ...result.right, value: {} };
       result = { ...result, right };
     }
     return extractResponse(result, 204, onRedirectToLogin);
@@ -300,12 +306,10 @@ export const MerchantApi = {
       initiativeId,
       rewardBatchId,
       transactionId,
-      initiativeEndDate
+      initiativeEndDate,
     });
     return extractResponse(result, 204, onRedirectToLogin);
   },
-
-
 
   downloadBatchCsv: async (
     initiativeId: string,
@@ -313,12 +317,84 @@ export const MerchantApi = {
   ): Promise<DownloadRewardBatchResponseDTO> => {
     const result = await apiClient.approveDownloadRewardBatch({
       initiativeId,
-      rewardBatchId
+      rewardBatchId,
     });
 
     return extractResponse(result, 200, onRedirectToLogin);
   },
-  
+
+  getMerchantReports: async (
+    initiativeId: string,
+    page?: number,
+    size?: number
+  ): Promise<ReportListDTO> => {
+    const result = await apiClient.getMerchantTransactionsReports({
+      initiativeId,
+      page,
+      size,
+    });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  generateMerchantReport: async (
+    initiativeId: string,
+    body: ReportRequest
+  ): Promise<void> => {
+    const result = await apiClient.generateReport({
+      initiativeId,
+      body,
+    });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  downloadMerchantReport: async (initiativeId: string, reportId: string) => {
+    const result = await apiClient.downloadTransactionsReport({
+      initiativeId,
+      reportId,
+    });
+    return extractResponse(result, 200, onRedirectToLogin);
+  },
+
+  updateInvoiceTransaction: async (
+    transactionId: string,
+    file: File,
+    pointOfSaleId: string,
+    docNumber?: string
+  ): Promise<{ code: string; message: string }> => {
+    const result = await apiClient.updateInvoiceTransaction({
+      transactionId,
+      file,
+      docNumber,
+      'x-point-of-sale-id': pointOfSaleId,
+    } as any);
+
+    if (!isRight(result)) {
+      const firstError = (result.left as any)?.[0];
+      const actualError =
+        firstError?.context?.[0]?.actual ??
+        firstError?.context?.[1]?.actual;
+
+      return {
+        code:
+          actualError?.code ??
+          firstError?.value ??
+          'UNKNOWN_ERROR',
+        message:
+          actualError?.message ??
+          'Errore generico',
+      };
+    }
+
+    if ((result as any)?.right?.status === 400) {
+      return {
+        code: (result as any)?.right?.value?.code ?? '400',
+        message: (result as any)?.right?.value?.message ?? 'Bad request',
+      };
+    }
+
+    return extractResponse(result, 204, onRedirectToLogin);
+  },
+
 };
 
 

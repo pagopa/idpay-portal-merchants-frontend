@@ -540,6 +540,111 @@ paths:
               example:
                 code: "PAYMENT_GENERIC_ERROR"
                 message: "Application error"
+  /initiative/{initiativeId}/reports:
+    post:
+      tags:
+        - merchant-report
+      summary: Generates a report with all transactions associated with a merchant and a reference period and returns the data from the created file
+      description: "ENG: Generates a report with all transactions associated with a merchant and a reference period and returns the data from the created file <br> IT: Genera un report con tutte le transazioni associate ad un esercente e ad un periodo di riferimento e ritorna i dati del file creato"
+      operationId: generateReport
+      parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/POST_generate_transactions_report_200_Response"
+        "400":
+          $ref: "#/components/responses/POST_generate_transactions_report_400_Response"
+        "401":
+          $ref: "#/components/responses/POST_generate_transactions_report_401_Response"
+        "404":
+          $ref: "#/components/responses/POST_generate_transactions_report_404_Response"
+        "429":
+          $ref: "#/components/responses/POST_generate_transactions_report_429_Response"
+        "500":
+          $ref: "#/components/responses/POST_generate_transactions_report_500_Response"
+    get:
+      tags:
+        - merchant-report
+      summary: Retrieve the list of generated reports
+      description: "ENG: Retrieves the paginated list of reports generated for a merchant or Invitalia operator, ordered by request creation date descending. <br> IT: Recupera la lista paginata dei report generati per un merchant o per un operatore Invitalia, ordinata per data di richiesta in ordine decrescente."
+      operationId: getMerchantTransactionsReports
+      parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          $ref: "#/components/responses/GET_list_transactions_reports_200_Response"
+        "400":
+          $ref: "#/components/responses/GET_list_transactions_reports_400_Response"
+        "401":
+          $ref: "#/components/responses/GET_list_transactions_reports_401_Response"
+        "404":
+          $ref: "#/components/responses/GET_list_transactions_reports_404_Response"
+        "429":
+          $ref: "#/components/responses/GET_list_transactions_reports_429_Response"
+        "500":
+          $ref: "#/components/responses/GET_list_transactions_reports_500_Response"
+  /initiative/{initiativeId}/reports/{reportId}/download:
+    get:
+      tags:
+        - merchant-report
+      summary: Download the generated transactions report file
+      description: "ENG: This service allows downloading the file associated with a previously generated transactions report. <br> IT: Questo servizio consente di scaricare il file associato a un report di transazioni precedentemente generato."
+      operationId: downloadTransactionsReport
+      parameters:
+        - name: initiativeId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/GET_download_transactions_report_200_Response"
+        "400":
+          $ref: "#/components/responses/GET_download_transactions_report_400_Response"
+        "401":
+          $ref: "#/components/responses/GET_download_transactions_report_401_Response"
+        "404":
+          $ref: "#/components/responses/GET_download_transactions_report_404_Response"
+        "429":
+          $ref: "#/components/responses/GET_download_transactions_report_429_Response"
+        "500":
+          $ref: "#/components/responses/GET_download_transactions_report_500_Response"
   /initiatives:
     get:
       tags:
@@ -1783,6 +1888,140 @@ paths:
               $ref: '#/components/headers/X-RateLimit-Reset'
             Retry-After:
               $ref: '#/components/headers/Retry-After'
+  /transactions/{transactionId}/invoice/update:
+    put:
+      tags:
+        - transaction
+      summary: Point of sales update invoice transaction
+      description: "ENG: Point of sales invoice transaction update <br> IT: Aggiornamento del file e del numero fattura per una transazione da parte di un Punto Vendita"
+      operationId: updateInvoiceTransaction
+      parameters:
+        - name: transactionId
+          in: path
+          description: The transaction ID
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+            pattern: "^[a-zA-Z0-9]+$"
+        - name: x-point-of-sale-id
+          in: header
+          description: PointOfSale ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/InvoiceDTO"
+      responses:
+        "204":
+          description: Ok - no content
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+        "400":
+          description: Bad request
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: "PAYMENT_INVALID_REQUEST"
+                message: "Something went wrong handling the request"
+        "401":
+          description: Authentication failed
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+        "403":
+          description: "Forbidden"
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: "PAYMENT_NOT_ALLOWED_MISMATCHED_MERCHANT"
+                message: "The merchant with id [%s] associated to the transaction is not equal to the merchant with id [%s]"
+        "404":
+          description: The requested resource was not found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: "PAYMENT_NOT_FOUND_OR_EXPIRED"
+                message: "Cannot find transaction with transactionId [%s]"
+        "429":
+          description: Too many requests
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+            Retry-After:
+              $ref: "#/components/headers/Retry-After"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: "PAYMENT_TOO_MANY_REQUESTS"
+                message: "Too many requests"
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionErrorDTO"
+              example:
+                code: "PAYMENT_GENERIC_ERROR"
+                message: "Application error"
 components:
   responses:
     GET_download_reward_batch_file_200_Response:
@@ -1865,6 +2104,276 @@ components:
           example:
             code: REWARD_BATCH_GENERIC_ERROR
             message: An error occurred during file reading
+    GET_download_transactions_report_200_Response:
+      description: Ok
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DownloadReportResponseDTO"
+    GET_download_transactions_report_400_Response:
+      description: Bad request
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_download_transactions_report_401_Response:
+      description: Authentication failed
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_download_transactions_report_404_Response:
+      description: Resource not found
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_download_transactions_report_429_Response:
+      description: Too many requests
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_download_transactions_report_500_Response:
+      description: Server error
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    POST_generate_transactions_report_200_Response:
+      description: Ok
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ReportDTO"
+    POST_generate_transactions_report_400_Response:
+      description: Bad request
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    POST_generate_transactions_report_401_Response:
+      description: Authentication failed
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    POST_generate_transactions_report_404_Response:
+      description: Resource not found
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    POST_generate_transactions_report_429_Response:
+      description: Too many requests
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    POST_generate_transactions_report_500_Response:
+      description: Server error
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_list_transactions_reports_200_Response:
+      description: Ok
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ReportListDTO"
+    GET_list_transactions_reports_400_Response:
+      description: Bad request
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_list_transactions_reports_401_Response:
+      description: Authentication failed
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_list_transactions_reports_404_Response:
+      description: Resource not found
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_list_transactions_reports_429_Response:
+      description: Too many requests
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_list_transactions_reports_500_Response:
+      description: Server error
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/Access-Control-Allow-Origin"
+        X-RateLimit-Limit:
+          $ref: "#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "#/components/headers/X-RateLimit-Reset"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionErrorDTO"
   headers:
     X-RateLimit-Limit:
       description: The maximum number of requests allowed in the current period
@@ -2568,6 +3077,61 @@ components:
           type: integer
           format: int32
           description: "ENG: The total number of the pages <br> IT: Il numero totale delle pagine"
+    ReportDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "ENG: Report ID <br> IT: ID del report"
+          maxLength: 64
+          pattern: .*
+        initiativeId:
+          type: string
+          description: "ENG: The ID of the initiative <br> IT: L'ID' dell'iniziativa"
+        reportStatus:
+          type: string
+          enum:
+            - INSERTED
+            - IN_PROGRESS
+            - GENERATED
+            - FAILED
+          description: "ENG: Report status <br> IT: Stato del report"
+        fileName:
+          type: string
+          description: "ENG: Name of the report <br> IT: Nome del report"
+        requestDate:
+          type: string
+          format: date-time
+          description: "ENG: Report request date <br> IT: Data di richiesta del report"
+        elaborationDate:
+          type: string
+          format: date-time
+          description: "ENG: Report processing end date <br> IT: Data di fine elaborazione del report"
+        startPeriod:
+          type: string
+          format: date-time
+          description: "ENG: Start date of the reference period <br> IT: Data di inizio del periodo di riferimento"
+        endPeriod:
+          type: string
+          format: date-time
+          description: "ENG: End date of the reference period <br> IT: Data di fine del periodo di riferimento"
+        merchantId:
+          type: string
+          description: "ENG: Merchant ID <br> IT: L'ID dell'esercente"
+        businessName:
+          type: string
+          description: "ENG: The name of the merchant <br> IT: La ragione sociale dell'esercente"
+        operatorLevel:
+          type: string
+          enum:
+            - L1
+            - L2
+            - L3
+          description: "ENG: Invitalia operator level <br> IT: Livello dell'operatore Invitalia"
+        reportType:
+          type: string
+          enum:
+            - MERCHANT_TRANSACTIONS
     PointOfSaleErrorDTO:
       type: object
       required:
@@ -2757,6 +3321,14 @@ components:
           description: "ENG: URL to download the invoice file - IT: URL per scaricare il file della fattura"
       required:
         - invoiceUrl
+    DownloadReportResponseDTO:
+      type: object
+      properties:
+        reportUrl:
+          type: string
+          description: "ENG: URL to download the report file - IT: URL per scaricare il file del report"
+      required:
+        - reportUrl
     ReportedUserCreateResponseDTO:
       type: object
       properties:
@@ -2994,6 +3566,68 @@ components:
         reason:
           type: string
           example: "Invoice error"
+    InvoiceDTO:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          maxLength: 41943040
+          format: binary
+        docNumber:
+          type: string
+          maxLength: 255
+    ReportListDTO:
+      type: object
+      description: "ENG: Paginated list of generated transaction reports. <br> IT: Lista paginata dei report di transazioni generati."
+      properties:
+        content:
+          type: array
+          description: >
+            ENG: List of generated reports for the requested page. <br>
+            IT: Elenco dei report generati per la pagina richiesta.
+          items:
+            $ref: "#/components/schemas/ReportDTO"
+        page:
+          type: integer
+          description: >
+            ENG: Current page number (0-based). <br>
+            IT: Numero della pagina corrente (partendo da 0).
+        size:
+          type: integer
+          description: >
+            ENG: Number of elements per page. <br>
+            IT: Numero di elementi per pagina.
+        totalElements:
+          type: integer
+          description: >
+            ENG: Total number of available reports. <br>
+            IT: Numero totale dei report disponibili.
+        totalPages:
+          type: integer
+          description: >
+            ENG: Total number of available pages. <br>
+            IT: Numero totale delle pagine disponibili.
+    ReportRequest:
+      type: object
+      properties:
+        startPeriod:
+          type: string
+          format: date-time
+          description: "ENG: Start date of the reference period <br> IT: Data di inizio del periodo di riferimento"
+        endPeriod:
+          type: string
+          format: date-time
+          description: "ENG: End date of the reference period <br> IT: Data di fine del periodo di riferimento"
+        reportType:
+          type: string
+          enum:
+            - MERCHANT_TRANSACTIONS
+      required:
+        - startPeriod
+        - endPeriod
+        - reportType
   securitySchemes:
     Bearer:
       type: apiKey

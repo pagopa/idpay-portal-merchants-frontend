@@ -1,0 +1,340 @@
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import ExportFiltersCard from '../ExportFiltersCard';
+import { BrowserRouter } from 'react-router-dom';
+
+jest.mock('../../../services/merchantService', () => ({
+  generateMerchantReport: jest.fn(),
+}));
+
+import { generateMerchantReport } from '../../../services/merchantService';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({ id: 'test-id' }),
+}));
+
+let lastFormikConfig: any;
+const mockSetFormFieldValue = jest.fn()
+
+jest.mock('formik', () => ({
+  useFormik: (config: any) => {
+    lastFormikConfig = config;
+
+    const mockDay = {
+      startOf: () => ({ toDate: () => new Date() }),
+      endOf: () => ({ toDate: () => new Date() }),
+      add: () => mockDay,
+      diff: () => 2,
+    };
+
+    return {
+      values: {
+        startDate: mockDay,
+        endDate: mockDay,
+      },
+      touched: {},
+      errors: {},
+      isSubmitting: false,
+      resetForm: jest.fn(),
+      setFieldValue: () => mockSetFormFieldValue(),
+      handleSubmit: () =>
+        config.onSubmit({
+          startDate: mockDay,
+          endDate: mockDay,
+        }),
+    };
+  },
+}));
+
+const mockedGenerate = generateMerchantReport as jest.Mock;
+
+const renderComponent = (updateAlerts = jest.fn()) =>
+  render(
+    <BrowserRouter>
+      <ExportFiltersCard updateAlerts={updateAlerts} />
+    </BrowserRouter>
+  );
+
+describe('ExportFiltersCard', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  const clickSubmit = () => {
+    const submitButton = screen.getByText('pages.reportExport.form.submit');
+    fireEvent.click(submitButton);
+  };
+
+  it('renders correctly', () => {
+    renderComponent();
+    expect(
+      screen.getByText('pages.reportExport.form.submit')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('pages.reportExport.form.title')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('pages.reportExport.form.subtitle')
+    ).toBeInTheDocument();
+  });
+
+  it('handles INSERTED status', async () => {
+    mockedGenerate.mockResolvedValue({ reportStatus: 'INSERTED' });
+    const updateAlerts = jest.fn();
+
+    renderComponent(updateAlerts);
+    clickSubmit();
+
+    await waitFor(() =>
+      expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true)
+    );
+
+    jest.runAllTimers();
+    expect(updateAlerts).toHaveBeenCalledWith('INSERTED', false);
+  });
+
+  it('handles GENERATED status', async () => {
+    mockedGenerate.mockResolvedValue({ reportStatus: 'GENERATED' });
+    const updateAlerts = jest.fn();
+
+    renderComponent(updateAlerts);
+    clickSubmit();
+
+    await waitFor(() =>
+      expect(updateAlerts).toHaveBeenCalledWith('GENERATED', true)
+    );
+
+    jest.runAllTimers();
+    expect(updateAlerts).toHaveBeenCalledWith('GENERATED', false);
+  });
+
+  it('handles FAILED status', async () => {
+    mockedGenerate.mockResolvedValue({ reportStatus: 'FAILED' });
+    const updateAlerts = jest.fn();
+
+    renderComponent(updateAlerts);
+    clickSubmit();
+
+    await waitFor(() =>
+      expect(updateAlerts).toHaveBeenCalledWith('FAILED', true)
+    );
+
+    jest.runAllTimers();
+    expect(updateAlerts).toHaveBeenCalledWith('FAILED', false);
+  });
+
+  it('handles API error', async () => {
+    mockedGenerate.mockRejectedValue(new Error('error'));
+    const updateAlerts = jest.fn();
+
+    renderComponent(updateAlerts);
+    clickSubmit();
+
+    await waitFor(() =>
+      expect(updateAlerts).toHaveBeenCalledWith('FAILED', true)
+    );
+
+    jest.runAllTimers();
+    expect(updateAlerts).toHaveBeenCalledWith('FAILED', false);
+  });
+
+  it('does nothing if id is missing', async () => {
+    const reactRouter = require('react-router-dom');
+    jest
+      .spyOn(reactRouter, 'useParams')
+      .mockReturnValue({ id: undefined });
+
+    const updateAlerts = jest.fn();
+
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    );
+
+    clickSubmit();
+
+    expect(mockedGenerate).not.toHaveBeenCalled();
+  });
+
+  it('calls onReportGenerated in finally block', async () => {
+    mockedGenerate.mockResolvedValue({ reportStatus: 'INSERTED' });
+
+    const updateAlerts = jest.fn();
+    const onReportGenerated = jest.fn();
+
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard
+          updateAlerts={updateAlerts}
+          onReportGenerated={onReportGenerated}
+        />
+      </BrowserRouter>
+    );
+
+    clickSubmit();
+
+    await waitFor(() =>
+      expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true)
+    );
+
+    expect(onReportGenerated).toHaveBeenCalled();
+  });
+
+  it('covers validate required branch', async () => {
+    const updateAlerts = jest.fn();
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    );
+    
+    const result = lastFormikConfig.validate({
+      startDate: null,
+      endDate: null,
+    });
+    const inputDal = screen.getByLabelText('Dal')
+    const inputAl = screen.getByLabelText('Al')
+
+    fireEvent.change(inputDal, result.startDate)
+    fireEvent.change(inputAl, result.endDate)
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
+    expect(result.startDate).toBe('pages.reportExport.form.validation.required');
+    expect(result.endDate).toBe('pages.reportExport.form.validation.required');
+  });
+
+  it('covers validate invalidRange branch (<1 day)', async () => {
+    const updateAlerts = jest.fn();
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    );
+    const dayjs = require('dayjs');
+    const startDate = dayjs();
+    const endDate = dayjs().add(0, 'day');
+
+    const result = lastFormikConfig.validate({
+      startDate: startDate,
+      endDate: endDate,
+    });
+    const inputDal = screen.getByLabelText('Dal')
+    const inputAl = screen.getByLabelText('Al')
+
+    fireEvent.change(inputDal, result.startDate)
+    fireEvent.change(inputAl, result.endDate)
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
+    clickSubmit()
+    await waitFor(() => expect(result.endDate).toBe('pages.reportExport.form.validation.invalidRange'))
+
+  });
+
+  it('covers validate maxRange branch (>90 days)', async () => {
+    const updateAlerts = jest.fn();
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    );
+    const dayjs = require('dayjs');
+    const startDate = dayjs();
+    const endDate = dayjs().add(100, 'day');
+
+    const result = lastFormikConfig.validate({
+      startDate: startDate,
+      endDate: endDate,
+    });
+
+    const inputDal = screen.getByLabelText('Dal')
+    const inputAl = screen.getByLabelText('Al')
+
+    fireEvent.change(inputDal, result.startDate)
+    fireEvent.change(inputAl, result.endDate)
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
+    clickSubmit()
+    await waitFor(() => expect(result.endDate).toBe('pages.reportExport.form.validation.maxRange'))
+  });
+
+  it('covers validate success branch (no errors)', async () => {
+    const updateAlerts = jest.fn();
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    );
+    const mockDay = {
+      diff: () => 10,
+    };
+
+    const result = lastFormikConfig.validate({
+      startDate: mockDay,
+      endDate: mockDay,
+    });
+
+    const inputDal = screen.getByLabelText('Dal')
+    const inputAl = screen.getByLabelText('Al')
+
+    fireEvent.change(inputDal, result.startDate)
+    fireEvent.change(inputAl, result.endDate)
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
+
+    clickSubmit()
+    await waitFor(()=> expect(result).toEqual({}))
+    await waitFor(() => expect(inputDal).not.toHaveAttribute('helperText'))
+    await waitFor(() => expect(inputAl).not.toHaveAttribute('helperText'))
+  });
+
+  it('covers validate future startDate invalidRange branch', async () => {
+    const updateAlerts = jest.fn();
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    );
+    const dayjs = require('dayjs');
+    const futureDate = dayjs().add(2, 'day');
+    const validEndDate = dayjs();
+
+    const result = lastFormikConfig.validate({
+      startDate: futureDate,
+      endDate: validEndDate,
+    });
+
+    const inputDal = screen.getByLabelText('Dal')
+    const inputAl = screen.getByLabelText('Al')
+
+    fireEvent.change(inputDal, result.startDate)
+    fireEvent.change(inputAl, result.endDate)
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
+    clickSubmit()
+    await waitFor(() => expect(result.startDate).toBe('pages.reportExport.form.validation.invalidRange'))
+  });
+
+  it('covers validate future endDate invalidRange branch', async () => {
+    const updateAlerts = jest.fn();
+    render(
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    );
+    const dayjs = require('dayjs');
+    const futureDate = dayjs().add(2, 'day');
+    const validStartDate = dayjs();
+
+    const result = lastFormikConfig.validate({
+      startDate: validStartDate,
+      endDate: futureDate,
+    });
+
+    const inputDal = screen.getByLabelText('Dal')
+    const inputAl = screen.getByLabelText('Al')
+
+    fireEvent.change(inputDal, result.startDate)
+    fireEvent.change(inputAl, result.endDate)
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
+    clickSubmit()
+    await waitFor(() => expect(result.endDate).toBe('pages.reportExport.form.validation.invalidRange'))
+  });
+});

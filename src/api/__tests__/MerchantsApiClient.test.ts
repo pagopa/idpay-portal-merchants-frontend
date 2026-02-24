@@ -1,6 +1,7 @@
 import { extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
 import { createClient } from '../generated/merchants/client';
 import { store } from '../../redux/store';
+import { appStateActions } from '@pagopa/selfcare-common-frontend/redux/slices/appStateSlice';
 
 jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
   storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
@@ -55,8 +56,7 @@ describe('MerchantApi', () => {
 
     (createClient as jest.Mock).mockReturnValue(mockApiClient);
     (extractResponse as jest.Mock).mockReset().mockReturnValue('extracted');
-  });
-
+});
   const loadApi = () => {
     let MerchantApi: any;
     jest.isolateModules(() => {
@@ -64,6 +64,40 @@ describe('MerchantApi', () => {
     });
     return MerchantApi;
   };
+
+describe('MerchantsApiClient uncovered branches', () => {
+  it('getRewardBatches catch branch returns empty object', async () => {
+    const client = require('../generated/merchants/client');
+    const MerchantApi = loadApi();
+    client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
+
+    const res = await MerchantApi.getRewardBatches('id', 0, 10);
+    expect(res).toEqual({});
+  });
+
+  it('getAllRewardBatches catch branch returns empty object', async () => {
+    const client = require('../generated/merchants/client');
+    client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
+    const MerchantApi = loadApi();
+
+    const res = await MerchantApi.getAllRewardBatches('id');
+    expect(res).toEqual({});
+  });
+
+  it('sendRewardBatches handles REWARD_BATCH_PREVIOUS_NOT_SENT', async () => {
+    const client = require('../generated/merchants/client');
+    client.createClient().sendRewardBatches = jest.fn().mockResolvedValue({
+      right: {
+        status: 400,
+        value: { code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' },
+      },
+    });
+    const MerchantApi = loadApi();
+    const res = await MerchantApi.sendRewardBatches('id', 'batch');
+    expect(res).toBe('REWARD_BATCH_PREVIOUS_NOT_SENT');
+  });
+});
+
 
   it('downloadInvoiceFile', async () => {
     mockApiClient.downloadInvoiceFile.mockResolvedValue({ right: 'data' });
@@ -503,7 +537,25 @@ describe('MerchantApi', () => {
     expect(extractResponse).toHaveBeenCalledWith(
       {
         left: [{ value: 'OTHER_ERROR' }],
-        right:{ value: {} }
+        right: { value: {} },
+      },
+      204,
+      expect.any(Function)
+    );
+    expect(result).toBe('extracted');
+  });
+
+  it('sendRewardBatches - right branch with undefined value triggers normalization', async () => {
+    mockApiClient.sendRewardBatches.mockResolvedValue({
+      right: { status: 204, value: undefined },
+    });
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.sendRewardBatches('init1', 'batch1');
+
+    expect(extractResponse).toHaveBeenCalledWith(
+      {
+        right: { status: 204, value: {} },
       },
       204,
       expect.any(Function)
@@ -585,5 +637,165 @@ describe('MerchantApi', () => {
       value: originalGroupEnd,
       configurable: true,
     });
+  });
+
+  it('getAllRewardBatches - success', async () => {
+    mockApiClient.getRewardBatches.mockResolvedValue({ right: 'data' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.getAllRewardBatches('init1');
+
+    expect(mockApiClient.getRewardBatches).toHaveBeenCalledWith({
+      initiativeId: 'init1',
+      size: 1000,
+    });
+    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
+    expect(result).toBe('extracted');
+  });
+
+  it('getAllRewardBatches - error path logs and returns empty object', async () => {
+    const error = {
+      message: 'Boom',
+      name: 'Error',
+      stack: 'stack-trace',
+      response: { data: { errorKey: 'ERR_KEY_TEST' } },
+    };
+
+    mockApiClient.getRewardBatches.mockRejectedValue(error);
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleGroupSpy = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
+    const consoleGroupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.getAllRewardBatches('init1');
+
+    expect(extractResponse).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error Key: ERR_KEY_TEST');
+    expect(consoleGroupSpy).toHaveBeenCalledWith('[API ERROR] MerchantsApi.userPermission');
+    expect(consoleGroupEndSpy).toHaveBeenCalled();
+    expect(result).toEqual({});
+
+    consoleErrorSpy.mockRestore();
+    consoleGroupSpy.mockRestore();
+    consoleGroupEndSpy.mockRestore();
+  });
+
+
+  it('getMerchantPointOfSalesWithTransactions calls redirectToLogin (dispatch) when response not ok', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: false });
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.getMerchantPointOfSalesWithTransactions('batch-id');
+
+    expect(result).toEqual([]);
+    expect(store.dispatch).toHaveBeenCalledTimes(1);
+    expect(appStateActions.addError).toHaveBeenCalled();
+  });
+
+  it('getMerchantTransactionsProcessed logs debug', async () => {
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    mockApiClient.getMerchantTransactionsProcessed.mockResolvedValue({ right: 'data' });
+
+    const MerchantApi = loadApi();
+    await MerchantApi.getMerchantTransactionsProcessed({ initiativeId: 'init1' });
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '[DEBUG] getMerchantTransactionsProcessed:',
+      { right: 'data' }
+    );
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it('updateInvoiceTransaction - left branch', async () => {
+    mockApiClient.updateInvoiceTransaction = jest.fn().mockResolvedValue({
+      left: [
+        {
+          value: 'INV_ERR',
+          context: [{}, { actual: { message: 'Invoice error' } }],
+        },
+      ],
+    });
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.updateInvoiceTransaction(
+      'trx1',
+      new File(['x'], 'file.pdf'),
+      'pos1',
+      'DOC1'
+    );
+
+    expect(result).toEqual({ code: 'INV_ERR', message: 'Invoice error' });
+  });
+
+  it('updateInvoiceTransaction - right branch', async () => {
+    mockApiClient.updateInvoiceTransaction = jest.fn().mockResolvedValue({
+      _tag: 'Right',
+      right: { status: 204 },
+    });
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.updateInvoiceTransaction(
+      'trx1',
+      new File(['x'], 'file.pdf'),
+      'pos1',
+      'DOC1'
+    );
+
+    expect(result).toBe('extracted');
+  });
+
+  it('getMerchantReports', async () => {
+    mockApiClient.getMerchantTransactionsReports = jest.fn().mockResolvedValue({
+      right: 'data',
+    });
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.getMerchantReports('init1', 1, 10);
+
+    expect(mockApiClient.getMerchantTransactionsReports).toHaveBeenCalledWith({
+      initiativeId: 'init1',
+      page: 1,
+      size: 10,
+    });
+    expect(result).toBe('extracted');
+  });
+
+  it('generateMerchantReport', async () => {
+    mockApiClient.generateReport = jest.fn().mockResolvedValue({ right: 'ok' });
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.generateMerchantReport('init1', {
+      fromDate: '2024-01-01',
+      toDate: '2024-01-31',
+    } as any);
+
+    expect(mockApiClient.generateReport).toHaveBeenCalledWith({
+      initiativeId: 'init1',
+      body: {
+        fromDate: '2024-01-01',
+        toDate: '2024-01-31',
+      },
+    });
+    expect(result).toBe('extracted');
+  });
+
+  it('downloadMerchantReport', async () => {
+    mockApiClient.downloadTransactionsReport = jest.fn().mockResolvedValue({
+      right: 'file',
+    });
+
+    const MerchantApi = loadApi();
+    const result = await MerchantApi.downloadMerchantReport(
+      'init1',
+      'report1'
+    );
+
+    expect(mockApiClient.downloadTransactionsReport).toHaveBeenCalledWith({
+      initiativeId: 'init1',
+      reportId: 'report1',
+    });
+    expect(result).toBe('extracted');
   });
 });

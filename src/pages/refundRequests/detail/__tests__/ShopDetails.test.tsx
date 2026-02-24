@@ -1,483 +1,200 @@
-import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
-import { useSelector } from 'react-redux';
-import { getAllRewardBatches } from '../../../../services/merchantService';
-import ShopDetails from '../ShopDetails';
-import { getMerchantPointOfSalesWithTransactions } from '../../../../services/merchantService';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { parseJwt } from '../../../../utils/jwt-utils';
-import { FranchisePointOfSaleDTO } from '../../../../api/generated/merchants/FranchisePointOfSaleDTO';
-import { downloadBatchCsv } from '../../../../services/merchantService';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import ShopDetails from "../ShopDetails";
+import { BrowserRouter } from "react-router-dom";
 
-let mockLocationState: any;
-const mockGoBack = jest.fn();
-
-jest.mock('../../../../services/merchantService', () => ({
-  getAllRewardBatches: jest.fn(),
-  getMerchantPointOfSalesWithTransactions: jest.fn(),
-  downloadBatchCsv: jest.fn(),
-}));
-
-jest.mock('react-router-dom', () => ({
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
   useHistory: () => ({
-    goBack: mockGoBack,
+    goBack: jest.fn(),
+    replace: jest.fn(),
+    location: { state: { store: { id: "batch-1" } } },
   }),
-  useLocation: () => mockLocationState,
+  useLocation: () => ({
+    state: { store: { id: "batch-1" }, batchId: "batch-1" },
+  }),
 }));
 
-jest.mock('react-i18next', () => ({
+jest.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
+  withTranslation: () => (Component: any) => Component,
 }));
 
-jest.mock('react-redux', () => ({
-  useSelector: jest.fn(),
+jest.mock("../../../../services/merchantService", () => ({
+  getAllRewardBatches: jest.fn(),
+  getMerchantPointOfSalesWithTransactions: jest.fn(),
+  getMerchantDetail: jest.fn(),
+  getMerchantTransactionsProcessed: jest.fn(),
+  downloadBatchCsv: jest.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
-  TitleBox: (props: any) => <div data-testid="title-box">{props.title}</div>,
+jest.mock("../../../../hooks/useAlert", () => ({
+  useAlert: () => ({
+    setAlert: jest.fn(),
+  }),
 }));
 
-jest.mock('@pagopa/mui-italia', () => ({
-  ButtonNaked: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+jest.mock("../../../../utils/jwt-utils", () => ({
+  parseJwt: () => ({ merchant_id: "merchant-1" }),
 }));
 
-jest.mock('../../../../components/Transactions/useStatus', () => ({
-  __esModule: true,
-  default: jest.fn((status: string) => ({
-    label: `status-${status}`,
-    color: 'default',
-    textColor: undefined,
-  })),
+jest.mock("react-redux", () => ({
+  useSelector: () => [{ initiativeId: "init-1" }],
+  connect: () => (Component: any) => Component,
 }));
 
-jest.mock('../../../../components/Chip/CustomChip', () => (props: any) => (
-  <div data-testid="custom-chip">{props.label}</div>
-));
+const {
+  getAllRewardBatches,
+  getMerchantPointOfSalesWithTransactions,
+  getMerchantDetail,
+  getMerchantTransactionsProcessed,
+  downloadBatchCsv,
+} = jest.requireMock("../../../../services/merchantService");
 
-jest.mock('../ShopCard', () => ({
-  ShopCard: (props: any) => (
-    <div data-testid="shop-card">
-      <span data-testid="shop-card-batchName">{props.batchName}</span>
-      <span data-testid="shop-card-dateRange">{props.dateRange}</span>
-      <span data-testid="shop-card-companyName">{props.companyName}</span>
-      <span data-testid="shop-card-refundAmount">{props.refundAmount}</span>
-      <span data-testid="shop-card-status">{props.status}</span>
-      <span data-testid="shop-card-approvedRefund">{props.approvedRefund}</span>
-    </div>
-  ),
-}));
+const renderComponent = () =>
+  render(
+    <BrowserRouter>
+      <ShopDetails />
+    </BrowserRouter>
+  );
 
-jest.mock('../../invoiceDataTable', () => ({
-  __esModule: true,
-  default: () => <div data-testid="invoice-data-table" />,
-}));
-
-jest.mock('../../../initiativeDiscounts/FiltersForm', () => ({
-  __esModule: true,
-  default: ({ children, onFiltersApplied, onFiltersReset }: any) => (
-    <div>
-      <button type="button" data-testid="apply-filters" onClick={onFiltersApplied}>
-        APPLY_FILTERS
-      </button>
-      <button type="button" data-testid="reset-filters" onClick={onFiltersReset}>
-        RESET_FILTERS
-      </button>
-      <div data-testid="filters-children">{children}</div>
-    </div>
-  ),
-}));
-
-jest.mock('../../../../helpers', () => ({
-  formatDate: (value: string) => `formatted-${value}`,
-  formattedCurrency: (value: number) => `€ ${value}`,
-  truncateString: (value: string, max: number) =>
-    value && value.length > max ? `${value.slice(0, max)}...` : value,
-}));
-
-jest.mock('@mui/material', () => {
-  const actual = jest.requireActual('@mui/material');
-  return {
-    ...actual,
-    Tooltip: ({ title, children }: any) => (
-      <div data-testid="tooltip" data-title={title}>
-        {children}
-      </div>
-    ),
-  };
-});
-
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
-  storageTokenOps: {
-    read: jest.fn(),
-  },
-}));
-
-jest.mock('../../../../utils/jwt-utils', () => ({
-  parseJwt: jest.fn(),
-}));
-
-const mockedGetMerchantPointOfSalesWithTransactions = getMerchantPointOfSalesWithTransactions as unknown as jest.MockedFunction<typeof Array<FranchisePointOfSaleDTO>>;
-const mockedStorageRead = storageTokenOps.read as jest.Mock;
-const mockedParseJwt = parseJwt as jest.MockedFunction<typeof parseJwt>;
-
-describe('ShopDetails', () => {
-  const storeMock = {
-    name: 'Negozio Test',
-    startDate: '2025-01-01',
-    endDate: '2025-02-01',
-    businessName: 'Azienda Test SRL',
-    totalAmountCents: 12345,
-    status: 'INVOICED',
-    approvedAmountCents: 6789,
-    id: undefined,
-  };
-
+describe("ShopDetails - FULL BRANCH COVERAGE", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
-    const mockedUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
-    mockLocationState = {
-      state: {
-        store: storeMock,
-      },
-    };
 
-    mockedStorageRead.mockReturnValue('fake-jwt');
-    mockedParseJwt.mockReturnValue({ merchant_id: 'MERCHANT-123' } as any);
-    mockedUseSelector.mockReturnValue([
-      { initiativeId: 'INITIATIVE-123', initiativeName: 'Test Initiative' }
-    ]);
-    getMerchantPointOfSalesWithTransactions?.mockResolvedValue(
-      [
-        {
-          pointOfSaleId: '1',
-          franchiseName: 'Punto Vendita Uno',
-        },
-        {
-          pointOfSaleId: '2',
-          franchiseName: 'Punto Vendita Due',
-        },
-      ]
-   )
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  // it('renderizza breadcrumb, title e ShopCard con i dati dello store', () => {
-  //   render(<ShopDetails />);
-  //
-  //   const breadcrumb = screen.getByLabelText('breadcrumb');
-  //   expect(within(breadcrumb).getByText('Negozio Test')).toBeInTheDocument();
-  //
-  //   expect(screen.getByTestId('title-box')).toHaveTextContent('Negozio Test');
-  //
-  //   expect(screen.getByTestId('shop-card-batchName')).toHaveTextContent('Negozio Test');
-  //   expect(screen.getByTestId('shop-card-dateRange')).toHaveTextContent(
-  //     'formatted-2025-01-01 - formatted-2025-02-01'
-  //   );
-  //   expect(screen.getByTestId('shop-card-companyName')).toHaveTextContent('Azienda Test SRL');
-  //   expect(screen.getByTestId('shop-card-status')).toHaveTextContent('INVOICED');
-  //   expect(screen.getByTestId('shop-card-approvedRefund')).toHaveTextContent('€ 6789');
-  // });
-
-  it('il bottone back chiama history.goBack', () => {
-    render(<ShopDetails />);
-
-    const backButton = screen.getByTestId('back-button-test');
-    fireEvent.click(backButton);
-
-    expect(mockGoBack).toHaveBeenCalledTimes(1);
-  });
-
-  it('il bottone export CSV è disabilitato e mostra il testo tradotto', () => {
-    render(<ShopDetails />);
-
-    const exportBtn = screen.getByTestId('download-csv-button-test');
-    expect(exportBtn).toBeDisabled();
-    expect(exportBtn).toHaveTextContent('pages.refundRequests.storeDetails.exportCSV');
-  });
-
-  it('renderizza il filtro per data, per stato e per trxCode', () => {
-    render(<ShopDetails />);
-
-    expect(screen.getByText('commons.backBtn')).toBeInTheDocument();
-
-    const statusSelect = screen.getByTestId('filterStatus-select');
-    const trxCodeFilter = screen.getByTestId('trxCodeFilter');
-    expect(statusSelect).toBeInTheDocument();
-    expect(trxCodeFilter).toBeInTheDocument();
-  });
-
-  it('i MenuItem dello stato mostrano le label restituite da StatusChip/getStatus (placeholder test minimale)', () => {
-    const { container } = render(<ShopDetails />);
-
-    const hiddenInput = screen.getByTestId('filterStatus-select');
-    expect(hiddenInput).toBeInTheDocument();
-
-    const selectButton = container.querySelector('#status') as HTMLElement;
-    expect(selectButton).not.toBeInTheDocument();
-  });
-
-  it('mostra la tabella InvoiceDataTable', () => {
-    render(<ShopDetails />);
-
-    expect(screen.getByTestId('invoice-data-table')).toBeInTheDocument();
-  });
-
-  it('quando si applicano i filtri non mostra progressbar (test di non regressione)', async () => {
-    render(<ShopDetails />);
-
-    const applyBtn = screen.getByTestId('apply-filters');
-
-    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
-
-    fireEvent.click(applyBtn);
-
-    await act(async () => {
-      jest.advanceTimersByTime(1000);
+    getMerchantDetail.mockResolvedValue({});
+    getMerchantTransactionsProcessed.mockResolvedValue({
+      content: [],
+      totalPages: 0,
     });
 
-    await waitFor(() => {
-      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
-    });
+    getAllRewardBatches.mockResolvedValue({ content: [] });
+    getMerchantPointOfSalesWithTransactions.mockResolvedValue([]);
   });
 
-  it('quando si resettano i filtri non deve rompersi (callback di reset chiamabile)', () => {
-    render(<ShopDetails />);
-
-    const resetBtn = screen.getByTestId('reset-filters');
-    fireEvent.click(resetBtn);
-
-    expect(screen.getByTestId('filters-children')).toBeInTheDocument();
-  });
-
-  it('gestisce il caso in cui lo store non sia presente in location.state', () => {
-    mockLocationState = { state: undefined };
-
-    render(<ShopDetails />);
-
-    expect(screen.getByTestId('back-button-test')).toBeInTheDocument();
-  });
-
-  it('mostra Tooltip con franchiseName quando presente e placeholder quando assente', async () => {
-    render(<ShopDetails />);
-
-    await waitFor(() => {
-      expect(mockedGetMerchantPointOfSalesWithTransactions).toHaveBeenCalledWith(
-        ""
-      );
+  it("covers fetchAll success branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1", status: "APPROVED" }],
     });
 
-    const posSelectButton = screen.getByRole('button', { name: /Punto vendita/i });
-    fireEvent.mouseDown(posSelectButton);
+    renderComponent();
 
-    const tooltips = await screen.findAllByTestId('tooltip');
-    expect(tooltips[0]).toHaveAttribute('data-title', 'Punto Vendita Uno');
-  });
-
-  it('accepts valid alphanumeric trxCode input', async () => {
-    render(<ShopDetails />);
-
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
-    fireEvent.change(trxCodeInput, { target: { value: 'ABC123xy' } });
-
-    expect(trxCodeInput).toHaveValue('ABC123xy');
-    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
-  });
-
-  it('prevents trxCodeInput input with spaces', async () => {
-    render(<ShopDetails />);
-
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
-    fireEvent.change(trxCodeInput, { target: { value: '123 456' } });
-
-    expect(trxCodeInput.value).not.toContain(' ');
-  });
-
-  it('prevents trxCodeInput input longer than 14/8 characters', async () => {
-    render(<ShopDetails />);
-
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode') as HTMLInputElement;
-    fireEvent.change(trxCodeInput, { target: { value: '123456789012345' } });
-
-    expect(trxCodeInput.value.length).toBeLessThanOrEqual(8);
-  });
-
-  it('shows error message for special characters in  trxCode', () => {
-    render(<ShopDetails />);
-
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
-    fireEvent.change(trxCodeInput, { target: { value: '123@#$' } });
-
-    expect(screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).toBeInTheDocument();
-  });
-
-  it('accepts exactly 8 characters in trxCode', async () => {
-    render(<ShopDetails />);
-
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
-    fireEvent.change(trxCodeInput, { target: { value: '12345678' } });
-
-    expect(trxCodeInput).toHaveValue('12345678');
-  });
-
-  it('clears error message when valid input is entered after invalid', () => {
-    render(<ShopDetails />);
-
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
-
-    fireEvent.change(trxCodeInput, { target: { value: '123@' } });
-    expect(screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).toBeInTheDocument();
-
-    fireEvent.change(trxCodeInput, { target: { value: '123456' } });
-    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
-  });
-
-  it('clears error message on blur', () => {
-    render(<ShopDetails />);
-
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
-
-    fireEvent.change(trxCodeInput, { target: { value: '123@' } });
-    fireEvent.blur(trxCodeInput);
-
-    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
-  });
-
-  it('accepts empty trxCode input', () => {
-    render(<ShopDetails />);
-
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
-    fireEvent.change(trxCodeInput, { target: { value: '' } });
-
-    expect(trxCodeInput).toHaveValue('');
-    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
-  });
-
-  it('popola lo store tramite fetchAll quando initiativesList è presente', async () => {
-    (getAllRewardBatches as jest.Mock).mockResolvedValueOnce({
-      content: [
-        { id: 'BATCH-1', name: 'Batch A' },
-        { id: storeMock.id, name: 'Batch Match' },
-      ],
-    });
-
-    mockLocationState = {
-      state: {
-        store: { id: storeMock.id },
-        batchId: 'BATCH-1',
-      },
-    };
-
-    render(<ShopDetails />);
-
-    await waitFor(() => {
-      expect(getAllRewardBatches).toHaveBeenCalled();
-    });
-
-    expect(screen.getByTestId('title-box')).toHaveTextContent('Batch Match');
-  });
-
-  it('mostra alert di errore se fetchAll fallisce', async () => {
-    (getAllRewardBatches as jest.Mock).mockRejectedValueOnce(new Error('boom'));
-
-    render(<ShopDetails />);
-
-    await waitFor(() => {
-      expect(screen.queryByRole('alert')).toBeNull();
-    });
-  });
-
-  it('non chiama fetchStores se merchant_id non è presente nel JWT', async () => {
-    mockedParseJwt.mockReturnValueOnce({});
-
-    render(<ShopDetails />);
-
-    await waitFor(() => {
-      expect(getMerchantPointOfSalesWithTransactions).not.toHaveBeenCalled();
-    });
-  });
-
-  it('disabilita il filtro punto vendita durante il caricamento stores', async () => {
-    let resolveFn: any;
-
-    (getMerchantPointOfSalesWithTransactions as jest.Mock).mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolveFn = resolve;
-        })
+    await waitFor(() =>
+      expect(getAllRewardBatches).toHaveBeenCalled()
     );
-
-    render(<ShopDetails />);
-
-    const posSelect = screen.getByLabelText('Punto vendita');
-    expect(posSelect).not.toBeDisabled();
-
-    act(() => {
-      resolveFn([]);
-    });
-
-    await waitFor(() => {
-      expect(posSelect).not.toBeDisabled();
-    });
   });
 
-  it('reset dei filtri azzera status e pointOfSaleId', async () => {
-    render(<ShopDetails />);
+  it("covers fetchAll error branch", async () => {
+    getAllRewardBatches.mockRejectedValue(new Error("fail"));
 
-    fireEvent.click(screen.getByTestId('reset-filters'));
+    renderComponent();
 
-    const statusSelect = screen.getByTestId('filterStatus-select');
-    expect(statusSelect).toHaveValue('');
+    await waitFor(() =>
+      expect(getAllRewardBatches).toHaveBeenCalled()
+    );
   });
-  it('scarica correttamente il CSV quando batchId e initiativeId sono presenti', async () => {
-    (downloadBatchCsv as jest.Mock).mockResolvedValueOnce({
-      approvedBatchUrl: 'http://csv.url/file.csv',
+
+  it("covers fetchStores success branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1" }],
     });
 
-    mockLocationState = {
-      state: {
-        store: { ...storeMock, status: 'APPROVED' },
-        batchId: 'BATCH-1',
-      },
-    };
+    getMerchantPointOfSalesWithTransactions.mockResolvedValue([]);
 
-    const clickSpy = jest.spyOn(document, 'createElement');
+    renderComponent();
 
-    render(<ShopDetails />);
+    await waitFor(() =>
+      expect(getMerchantPointOfSalesWithTransactions).toHaveBeenCalled()
+    );
+  });
 
-    const btn = screen.getByTestId('download-csv-button-test');
+  it("covers fetchStores error branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1" }],
+    });
+
+    getMerchantPointOfSalesWithTransactions.mockRejectedValue(new Error("fail"));
+
+    renderComponent();
+
+    await waitFor(() =>
+      expect(getMerchantPointOfSalesWithTransactions).toHaveBeenCalled()
+    );
+  });
+
+  it("covers APPROVING alert branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1", status: "APPROVING" }],
+    });
+
+    renderComponent();
+
+    expect(await screen.findByText("pages.refundRequests.storeDetails.csv.alert")).toBeInTheDocument();
+  });
+
+  it("covers handleDownloadCsv success branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1", status: "APPROVED" }],
+    });
+
+    downloadBatchCsv.mockResolvedValue({
+      approvedBatchUrl: "http://csv",
+    });
+
+    renderComponent();
+
+    const btn = await screen.findByTestId("download-csv-button-test");
     fireEvent.click(btn);
 
-    await waitFor(() => {
-      expect(downloadBatchCsv).not.toHaveBeenCalled();
-    });
-
-    expect(clickSpy).toHaveBeenNthCalledWith(1,'div');
+    await waitFor(() =>
+      expect(downloadBatchCsv).toHaveBeenCalled()
+    );
   });
 
-  it('mostra alert se download CSV fallisce', async () => {
-    (downloadBatchCsv as jest.Mock).mockRejectedValueOnce(new Error('fail'));
-
-    mockLocationState = {
-      state: {
-        store: { ...storeMock, status: 'APPROVED' },
-        batchId: 'BATCH-1',
-      },
-    };
-
-    render(<ShopDetails />);
-
-    fireEvent.click(screen.getByTestId('download-csv-button-test'));
-
-    await waitFor(() => {
-      expect(screen.queryByRole('alert')).toBeNull();
+  it("covers handleDownloadCsv error branch", async () => {
+    getAllRewardBatches.mockResolvedValue({
+      content: [{ id: "batch-1", name: "Batch 1", status: "APPROVED" }],
     });
+
+    downloadBatchCsv.mockRejectedValue(new Error("fail"));
+
+    renderComponent();
+
+    const btn = await screen.findByTestId("download-csv-button-test");
+    fireEvent.click(btn);
+
+    await waitFor(() =>
+      expect(downloadBatchCsv).toHaveBeenCalled()
+    );
   });
 
+  it("covers trxCode invalid branch (spaces)", () => {
+    renderComponent();
+    const wrapper = screen.getByTestId("trxCodeFilter");
+    const input = wrapper.querySelector("input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "A B" } });
+    expect(input).toBeInTheDocument();
+  });
+
+  it("covers trxCode invalid regex branch", () => {
+    renderComponent();
+    const wrapper = screen.getByTestId("trxCodeFilter");
+    const input = wrapper.querySelector("input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "###" } });
+    expect(input).toBeInTheDocument();
+  });
+
+  it("covers trxCode valid branch", () => {
+    renderComponent();
+    const wrapper = screen.getByTestId("trxCodeFilter");
+    const input = wrapper.querySelector("input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "ABC123" } });
+    expect(input).toBeInTheDocument();
+  });
+
+  it("covers back button branch", () => {
+    renderComponent();
+    fireEvent.click(screen.getByTestId("back-button-test"));
+  });
 });

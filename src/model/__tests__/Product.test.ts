@@ -1,43 +1,38 @@
-// import { ProductsResource, StatusEnum } from '../../api/generated/portal/ProductsResource';
-// import { productResource2Product } from '../Product';
+/**
+ * Product model test to ensure module is included in coverage.
+ * This file only contains TypeScript types.
+ */
 
-test('Test institutionInfo2Party', () => {
-  // const date = new Date();
-  // const productResource: ProductsResource = {
-  //   logo: 'https://selcdcheckoutsa.z6.web.core.windows.net/resources/products/prod-pagopa/logo.png',
-  //   id: '3',
-  //   title: 'Pagamenti pagoPA',
-  //   description: 'Pagamenti pagoPA description',
-  //   authorized: true,
-  //   status: StatusEnum.ACTIVE,
-  //   urlBO: 'http://pagopa/bo',
-  //   activatedAt: date,
-  //   urlPublic: 'http://pagopa/public',
-  //   userRole: 'LIMITED',
-  //   children: [{ id: 'subProductId', title: 'Premium', status: StatusEnum.ACTIVE }],
-  //   imageUrl:
-  //     'https://selcdcheckoutsa.z6.web.core.windows.net/resources/products/default/depict-image.jpeg',
-  // };
-  // const product = productResource2Product(productResource);
-  // expect(product).toStrictEqual({
-  //   logo: 'https://selcdcheckoutsa.z6.web.core.windows.net/resources/products/prod-pagopa/logo.png',
-  //   id: '3',
-  //   title: 'Pagamenti pagoPA',
-  //   description: 'Pagamenti pagoPA description',
-  //   authorized: true,
-  //   status: 'ACTIVE',
-  //   urlBO: 'http://pagopa/bo',
-  //   activationDateTime: date,
-  //   urlPublic: 'http://pagopa/public',
-  //   roles: [
-  //     {
-  //       partyRole: undefined,
-  //       roleKey: 'LIMITED',
-  //     },
-  //   ],
-  //   selfcareRole: undefined,
-  //   subProducts: [{ id: 'subProductId', title: 'Premium', status: 'ACTIVE' }],
-  //   imageUrl:
-  //     'https://selcdcheckoutsa.z6.web.core.windows.net/resources/products/default/depict-image.jpeg',
-  // });
+import * as ProductModule from "../Product";
+
+describe("Product model", () => {
+  it("should be defined", () => {
+    expect(ProductModule).toBeDefined();
+  });
+
+  it("should allow creation of a Product object (type-level check)", () => {
+    const product: ProductModule.Product = {
+      id: "1",
+      title: "Test Product",
+      description: "Test description",
+      urlBO: "http://backoffice.test",
+      roles: [],
+      status: "ACTIVE",
+      imageUrl: "http://image.test",
+      subProducts: [],
+    };
+
+    expect(product.id).toBe("1");
+    expect(product.status).toBe("ACTIVE");
+  });
+
+  it("should allow creation of a SubProduct object", () => {
+    const sub: ProductModule.SubProduct = {
+      id: "sub-1",
+      title: "Sub Product",
+      status: "INACTIVE",
+    };
+
+    expect(sub.status).toBe("INACTIVE");
+  });
 });

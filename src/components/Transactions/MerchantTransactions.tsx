@@ -19,7 +19,6 @@ import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import EmptyList from '../../pages/components/EmptyList';
-import DetailDrawer from '../Drawer/DetailDrawer';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import CustomChip from '../Chip/CustomChip';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
@@ -57,7 +56,10 @@ const MerchantTransactions = ({
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState<boolean>(false);
-  const [codeError, setCodeError] = useState<Record<string, string>>({gtinError: "", trxCodeError: ""});
+  const [codeError, setCodeError] = useState<Record<string, string>>({
+    gtinError: '',
+    trxCodeError: '',
+  });
   // const [gtinValue, setGtinValue] = useState<string>('');
   const listItemDetail = getDetailFieldList();
 
@@ -214,16 +216,16 @@ const MerchantTransactions = ({
     setDrawerOpened(true);
   };
 
-  const handleToggleDrawer = (newOpen: boolean) => {
-    setAlert({ ...alert, isOpen: newOpen });
-    setDrawerOpened(newOpen);
+  const handleToggleDrawer = () => {
+    setAlert({ ...alert, isOpen: false });
+    setDrawerOpened(false);
   };
 
   const handleCodeChange = useCallback((event: any, length: number, code: string) => {
     const value = event.target.value;
     const codeMap: Record<string, string> = {
-      gtinError: "GTIN/EAN",
-      trxCodeError: "sconto"
+      gtinError: 'GTIN/EAN',
+      trxCodeError: 'sconto',
     };
 
     if (value.includes(' ') || value.length > length) {
@@ -233,11 +235,14 @@ const MerchantTransactions = ({
     const alphanumericRegex = /^[a-zA-Z0-9]*$/;
 
     if (!alphanumericRegex.test(value)) {
-      setCodeError(prev => ({ ...prev, [code]: `Il codice ${codeMap[code]} deve contenere al massimo ${length} caratteri alfanumerici.`}));
+      setCodeError((prev) => ({
+        ...prev,
+        [code]: `Il codice ${codeMap[code]} deve contenere al massimo ${length} caratteri alfanumerici.`,
+      }));
       return;
     }
 
-    setCodeError(prev => ({ ...prev, [code]: ""}));
+    setCodeError((prev) => ({ ...prev, [code]: '' }));
     formik.handleChange(event);
   }, []);
 
@@ -283,8 +288,8 @@ const MerchantTransactions = ({
               role="input"
               InputLabelProps={{ required: false }}
               value={formik.values.productGtin}
-              onChange={(e) => handleCodeChange(e, 14, "gtinError")}
-              onBlur={() => setCodeError(prev => ({ ...prev, gtinError: ""}))}
+              onChange={(e) => handleCodeChange(e, 14, 'gtinError')}
+              onBlur={() => setCodeError((prev) => ({ ...prev, gtinError: '' }))}
               size="small"
               inputProps={{ maxLength: 14 }}
               error={!!codeError.gtinError}
@@ -302,8 +307,8 @@ const MerchantTransactions = ({
               role="input"
               InputLabelProps={{ required: false }}
               value={formik.values.trxCode}
-              onChange={(e) => handleCodeChange(e, 8, "trxCodeError")}
-              onBlur={() => setCodeError(prev => ({ ...prev, trxCodeError: ""}))}
+              onChange={(e) => handleCodeChange(e, 8, 'trxCodeError')}
+              onBlur={() => setCodeError((prev) => ({ ...prev, trxCodeError: '' }))}
               size="small"
               inputProps={{ maxLength: 8 }}
               error={!!codeError.trxCodeError}
@@ -367,17 +372,14 @@ const MerchantTransactions = ({
       {!dataTableIsLoading && rows.length === 0 && (
         <EmptyList message={t('pages.initiativeDiscounts.emptyList')} />
       )}
-      <DetailDrawer
+      <TransactionDetail
         data-testid="detail-drawer"
-        open={drawerOpened}
-        toggleDrawer={handleToggleDrawer}
-      >
-        <TransactionDetail
-          title={'Dettaglio transazione'}
-          itemValues={rowDetail}
-          listItem={listItemDetail}
-        />
-      </DetailDrawer>
+        isOpen={drawerOpened}
+        setIsOpen={handleToggleDrawer}
+        title="Dettaglio transazione"
+        itemValues={rowDetail}
+        listItem={listItemDetail}
+      />
     </Box>
   );
 };
