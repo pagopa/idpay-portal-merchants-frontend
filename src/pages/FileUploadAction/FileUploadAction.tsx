@@ -38,7 +38,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [docNumber, setDocNumber] = useState<string>('');
 
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
 
   const [requiredFileError, setRequiredFileError] = useState<boolean>(false);
   const [docNumberError, setDocNumberError] = useState<boolean>(false);
@@ -133,7 +133,32 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       setLoadingFile(true);
 
       try {
-        await apiCall(trxId, file, pointOfSaleId, docNumber);
+        const response = (await apiCall(trxId, file, pointOfSaleId, docNumber)) as any;
+
+        if (response?.code) {
+          if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
+            setAlert({
+              text: t('modifyDocument.reverse.deniedSentError'),
+              isOpen: true,
+              severity: 'error',
+            });
+          } else if (response.code === 'REWARD_BATCH_ALREADY_SENT') {
+            setAlert({
+              text: t('modifyDocument.reverse.alreadySentError'),
+              isOpen: true,
+              severity: 'error',
+            });
+          } else {
+            setAlert({
+              text: t('modifyDocument.reverse.errorAlert'),
+              isOpen: true,
+              severity: 'error',
+            });
+          }
+
+          setLoadingFile(false);
+          return;
+        }
 
         setLoadingFile(false);
 
@@ -144,31 +169,16 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             refundUploadSuccess: true,
           },
         });
-        
-        setAlert({text: t('modifyDocument.refundSuccessUpload'), isOpen: true, severity: "success"});
 
+        setAlert({
+          text: t('modifyDocument.refundSuccessUpload'),
+          isOpen: true,
+          severity: 'success',
+        });
         history.goBack();
       } catch (error: unknown) {
-        let errorResponseCode: string | undefined;
-
-        if (
-          typeof error === 'object' &&
-          error !== null &&
-          'response' in error &&
-          typeof (error as any).response === 'object'
-        ) {
-          errorResponseCode = (error as any).response?.data?.code;
-        }
-
-        if (errorResponseCode === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
-          setAlert({text: t('modifyDocument.reverse.deniedSentError'), isOpen: true, severity: "error"});
-        } else if (errorResponseCode === 'REWARD_BATCH_ALREADY_SENT') {
-          setAlert({text: t('modifyDocument.reverse.alreadySentError'), isOpen: true, severity: "error"});
-        } else {
-          setAlert({text: t('modifyDocument.reverse.errorAlert'), isOpen: true, severity: "error"});
-        }
-
-        console.error('API Error:', error);
+        console.error('Unexpected API Error:', error);
+        setAlert({ text: t('modifyDocument.reverse.errorAlert'), isOpen: true, severity: 'error' });
         setLoadingFile(false);
       }
     }
