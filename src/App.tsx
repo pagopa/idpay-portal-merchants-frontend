@@ -49,7 +49,7 @@ const SecuredRoutes = withLogin(
             ROUTES.STORES_DETAIL,
             ROUTES.REFUND_REQUESTS,
             ROUTES.REFUND_REQUESTS_STORE,
-            ROUTES.EXPORT_REPORT
+            ROUTES.EXPORT_REPORT,
           ],
           exact: true,
           strict: false,
@@ -97,7 +97,7 @@ const SecuredRoutes = withLogin(
               <InsertReportedUser />
             </Route>
             <Route path={routes.EXPORT_REPORT} exact={true}>
-                <ExportReport />
+              <ExportReport />
             </Route>
             <Route path={routes.STORES_DETAIL} exact={true}>
               <StoreProvider>
@@ -119,6 +119,9 @@ const SecuredRoutes = withLogin(
               </StoreProvider>
             </Route>
             <Route path={routes.MODIFY_DOCUMENT} exact={true}>
+              <ModifyDocument />
+            </Route>
+            <Route path={routes.REFUNDS_MANAGEMENT} exact={true}>
               <ModifyDocument />
             </Route>
             <Route path="*">
