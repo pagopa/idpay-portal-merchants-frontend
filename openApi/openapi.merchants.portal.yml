@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: IDPAY ITN Welfare Portal Merchant API
   description: IDPAY ITN Welfare Portal Merchant
