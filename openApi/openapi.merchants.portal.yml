@@ -2022,6 +2022,136 @@ paths:
               example:
                 code: "PAYMENT_GENERIC_ERROR"
                 message: "Application error"
+  /transactions/{transactionId}/reversal-invoiced:
+    post:
+      tags:
+        - transaction
+      summary: Reverse an invoiced transaction
+      description: >
+        Allows the merchant to refound a transaction from a batch.
+      operationId: reversalTransactionInvoiced
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 50
+            pattern: '^[A-Za-z0-9\-]+$'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  maxLength: 2147483647
+                  description: Reversal file
+                docNumber:
+                  type: string
+                  nullable: true
+                  maxLength: 50
+                  pattern: '^[A-Za-z0-9\-]*$'
+                  description: Optional document number linked to the   reversal
+      responses:
+        "204":
+          description: Ok - no content
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+        "400":
+          description: Bad request
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
+              example:
+                code: "PAYMENT_INVALID_REQUEST"
+                message: "Something went wrong handling the request"
+        "401":
+          description: Authentication failed
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+        "403":
+          description: "Forbidden"
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
+        "404":
+          description: The requested resource was not found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
+        "429":
+          description: Too many requests
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+            Retry-After:
+              $ref: "#/components/headers/Retry-After"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
 components:
   responses:
     GET_download_reward_batch_file_200_Response:
@@ -3628,6 +3758,20 @@ components:
         - startPeriod
         - endPeriod
         - reportType
+    ErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          maxLength: 255
+          pattern: .*
+        message:
+          type: string
+          maxLength: 255
+          pattern: .*
   securitySchemes:
     Bearer:
       type: apiKey
