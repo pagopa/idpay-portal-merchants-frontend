@@ -1,5 +1,5 @@
-import FileUploadAction from '../../FileUploadAction/FileUploadAction';
-import { reversalTransactionInvoiced } from '../../../services/merchantService';
+import FileUploadAction from '../FileUploadAction/FileUploadAction';
+import { reversalTransactionInvoiced } from '../../services/merchantService';
 
 const Reverse = () => {
   const apiCall = async (trxId: string, _file: File, _pointOfSaleId: string, _docNumber?: string) =>

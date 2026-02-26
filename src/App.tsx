@@ -31,6 +31,7 @@ import { useInitiativesList } from './hooks/useInitiativesList';
 import ShopDetails from './pages/refundRequests/detail/ShopDetails';
 import ModifyDocument from './pages/modifyDocument/ModifyDocument';
 import ExportReport from './pages/exportReport/ExportReport';
+import Reverse from './pages/reverse/Reverse';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -121,8 +122,8 @@ const SecuredRoutes = withLogin(
             <Route path={routes.MODIFY_DOCUMENT} exact={true}>
               <ModifyDocument />
             </Route>
-            <Route path={routes.REFUNDS_MANAGEMENT} exact={true}>
-              <ModifyDocument />
+            <Route path={routes.REVERSE} exact={true}>
+              <Reverse />
             </Route>
             <Route path="*">
               <Redirect to={routes.HOME} />

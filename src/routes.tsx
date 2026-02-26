@@ -25,7 +25,8 @@ const ROUTES = {
   REFUND_REQUESTS_STORE: `${BASE_ROUTE}/:id/richieste-di-rimborso/punto-vendita/:batch`,
   SIDE_MENU_REFUND_REQUESTS: `richieste-di-rimborso`,
   MODIFY_DOCUMENT: `${BASE_ROUTE}/:id/:pointOfSaleId/modifica-documento/:trxId/:fileDocNumber`,
-  REFUNDS_MANAGEMENT: `${BASE_ROUTE}/:id/gestione-rimborsi`,
+
+  REVERSE: `${BASE_ROUTE}/:id/:pointOfSaleId/storna-transazione/:trxId`,
   EXPORT_REPORT: `${BASE_ROUTE}/:id/esporta-report`,
   SIDE_MENU_EXPORT_REPORT: `esporta-report`,
 };
