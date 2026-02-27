@@ -67,7 +67,7 @@ jest.mock('../../../../utils/formatUtils', () => ({
 
 jest.mock('../../../../helpers', () => ({
     ...jest.requireActual('../../../../helpers'),
-    isReversable: jest.fn(() => true),
+    isReversable: jest.fn(),
 }));
 
 
@@ -75,6 +75,7 @@ import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile, postponeTransaction } from '../../../../services/merchantService';
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
+import { isReversable } from '../../../../helpers';
 
 describe('InvoiceDetail', () => {
     let mockSetAlert: jest.Mock;
@@ -608,7 +609,11 @@ describe('InvoiceDetail', () => {
             render(
                 <InvoiceDetail
                     title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED }}
+                    itemValues={{ 
+                        ...baseItemValues, 
+                        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+                        status: "REWARDED"
+                    }}
                     listItem={baseListItem}
                     batchId=""
                     storeId=""
@@ -641,15 +646,31 @@ describe('InvoiceDetail', () => {
 
     describe('Reverse button', () => {
         it('Should navigate to reverse page when reverse button is clicked', () => {
-            // override statusBatch so reverse button is actually rendered
             (useLocation as jest.Mock).mockReturnValue({
                 state: { store: { status: 'CLOSED', month: mockUseLocation.state.store.month } }
             });
+            (isReversable as jest.Mock).mockReturnValue(true);
+
+            const trxItem = {
+              id: 'trx-1',
+              pointOfSaleId: 'pos-1',
+              status: "REWARDED",
+              rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+              initiativeId: 'init-123',
+              invoiceData: {
+                docNumber: 'DOC-123',
+                filename: 'fattura.pdf',
+              },
+              rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+              additionalProperties: {
+                productName: 'Prodotto di test',
+              },
+            };
 
             render(
                 <InvoiceDetail
                     title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
+                    itemValues={trxItem}
                     listItem={baseListItem}
                     batchId=""
                     storeId=""
@@ -658,7 +679,7 @@ describe('InvoiceDetail', () => {
                 />
             );
 
-            const reverseButton = screen.getByText('Storna');
+            const reverseButton = screen.getByTestId('reverse-btn');
             fireEvent.click(reverseButton);
 
             expect(pushMock).toHaveBeenCalled();
