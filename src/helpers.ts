@@ -2,6 +2,9 @@
 /* eslint-disable functional/immutable-data */
 import { matchPath } from 'react-router-dom';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
+import { StatusEnum as TransactionStatusEnum } from './api/generated/merchants/MerchantTransactionDTO';
+import { RewardBatchTrxStatusEnum } from './api/generated/merchants/RewardBatchTrxStatus';
+import { StatusEnum } from './api/generated/merchants/RewardBatchDTO';
 
 
 export const copyTextToClipboard = (magicLink: string | undefined) => {
@@ -159,8 +162,41 @@ export function formatEuro(value: number) {
 
 export const truncateString = (str?: string, maxLength: number = 40): string => {
   if (!str) {
-    return "-";
+    return '-';
   } else {
     return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
   }
 };
+
+
+export const isReversablePV = (itemValues: any): boolean =>
+  (
+    [
+      TransactionStatusEnum.INVOICED,
+      TransactionStatusEnum.REWARDED
+    ].includes(itemValues?.status)
+    && [
+      RewardBatchTrxStatusEnum.TO_CHECK,
+      RewardBatchTrxStatusEnum.CONSULTABLE,
+      RewardBatchTrxStatusEnum.SUSPENDED,
+      RewardBatchTrxStatusEnum.REJECTED
+    ].includes(itemValues?.rewardBatchTrxStatus)
+  );
+
+export const isReversableBatch = (itemValues: any, batchStatus: StatusEnum): boolean =>
+  (
+    batchStatus !== StatusEnum.APPROVED
+    && [
+      TransactionStatusEnum.INVOICED,
+      TransactionStatusEnum.REWARDED
+    ].includes(itemValues?.status)
+    && [
+      RewardBatchTrxStatusEnum.TO_CHECK,
+      RewardBatchTrxStatusEnum.CONSULTABLE,
+      RewardBatchTrxStatusEnum.SUSPENDED,
+      RewardBatchTrxStatusEnum.REJECTED
+    ].includes(itemValues?.rewardBatchTrxStatus)
+  )
+  || (
+    itemValues?.rewardBatchTrxStatus === RewardBatchTrxStatusEnum.REJECTED
+    && batchStatus === StatusEnum.APPROVED );

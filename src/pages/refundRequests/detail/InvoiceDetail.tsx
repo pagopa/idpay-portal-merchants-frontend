@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory, useParams } from 'react-router-dom';
 import routes from '../../../routes';
 import { downloadInvoiceFile, postponeTransaction } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
@@ -14,7 +14,7 @@ import { useAlert } from '../../../hooks/useAlert';
 import ModalComponent from '../../../components/modal/ModalComponent';
 import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { formatDate } from '../../../helpers';
+import { formatDate, isReversableBatch } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
 
@@ -49,6 +49,7 @@ export default function InvoiceDetail({
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
   const history = useHistory();
+  const { id: merchantId } = useParams<{ id: string }>();
 
   useEffect(() => {
     if (
@@ -87,8 +88,6 @@ export default function InvoiceDetail({
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
               onClick: () => {
-                const merchantId = history.location.pathname.split('/')[2];
-
                 const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
                   .replace(':trxId', itemValues.id)
@@ -100,6 +99,25 @@ export default function InvoiceDetail({
           ]
         : [],
     [isVisible, itemValues?.pointOfSaleId, history]
+  );
+
+  const reverseButton: DetailDrawerProps['buttons'] = useMemo(
+    () =>
+      isReversableBatch(itemValues,statusBatch)
+        ? [
+          {
+            title: 'Storna',
+            dataTestId: 'reverse-btn',
+            onClick: () => {
+              const path = routes.REVERSE.replace(':id', merchantId)
+                .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
+                .replace(':trxId', itemValues.id);
+              history.push(path, { fromLocation: history.location });
+            },
+          },
+        ]
+        : [],
+    [isReversableBatch, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const handlePostponeTransaction = async () => {
@@ -237,6 +255,7 @@ export default function InvoiceDetail({
             title: 'Sposta al mese successivo',
             dataTestId: 'next-month-btn',
           },
+          ...reverseButton,
         ]}
       >
         {listItem.map((item, index) => (
