@@ -6,6 +6,7 @@ import {
   getMerchantInitiativeStatistics,
   getMerchantDetail,
   deleteTransaction,
+  reversalTransactionInvoiced,
   createTransaction,
   authPaymentBarCode,
   updateMerchantPointOfSales,
@@ -146,6 +147,16 @@ describe('merchantService uncovered branches', () => {
       const transactionId = 'trx-id';
       await deleteTransaction(transactionId);
       expect(mockedMerchantApi.deleteTransaction).toHaveBeenCalledWith(transactionId);
+    });
+  });
+
+  describe('reversalTransactionInvoiced', () => {
+    test('should call MerchantApi.reversalTransactionInvoiced with correct transactionId', async () => {
+      mockedMerchantApi.reversalTransactionInvoiced = jest.fn().mockResolvedValue(undefined as any);
+
+      await reversalTransactionInvoiced('trx-1');
+
+      expect(mockedMerchantApi.reversalTransactionInvoiced).toHaveBeenCalledWith('trx-1');
     });
   });
 

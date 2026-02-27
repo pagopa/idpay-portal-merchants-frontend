@@ -10,7 +10,8 @@ import {
   generateUniqueId,
   handlePromptMessage,
   truncateString,
-  formatEuro
+  formatEuro,
+  isReversable
 } from '../helpers';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 
@@ -240,5 +241,50 @@ describe('truncateString', () => {
     expect(finalText).toBe("Initial...")
     expect(fullText).toBe("Initial text excess")
     expect(emptyText).toBe("-")
+  });
+});
+
+describe('isReversable', () => {
+  const { StatusEnum } = require('../api/generated/merchants/MerchantTransactionDTO');
+  const { RewardBatchTrxStatusEnum } = require('../api/generated/merchants/RewardBatchTrxStatus');
+
+  test('returns true for INVOICED and non-APPROVED batch', () => {
+    expect(
+      isReversable({
+        status: StatusEnum.INVOICED,
+        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+      })
+    ).toBe(true);
+  });
+
+  test('returns true for REWARDED and non-APPROVED batch', () => {
+    expect(
+      isReversable({
+        status: StatusEnum.REWARDED,
+        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.SUSPENDED,
+      })
+    ).toBe(true);
+  });
+
+  test('returns false when rewardBatchTrxStatus is APPROVED', () => {
+    expect(
+      isReversable({
+        status: StatusEnum.REWARDED,
+        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
+      })
+    ).toBe(false);
+  });
+
+  test('returns false for unsupported status', () => {
+    expect(
+      isReversable({
+        status: StatusEnum.CANCELLED,
+        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+      })
+    ).toBe(false);
+  });
+
+  test('returns false for undefined input', () => {
+    expect(isReversable(undefined)).toBe(false);
   });
 });

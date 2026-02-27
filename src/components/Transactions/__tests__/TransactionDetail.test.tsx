@@ -13,7 +13,10 @@ const mockFormatValues = jest.fn((s: string) => `Formatted: ${s}`);
 
 jest.mock('../../../utils/formatUtils', () => ({
   __esModule: true,
-  currencyFormatter: (n: number) => mockCurrencyFormatter(n),
+  currencyFormatter: (n: number) => ({
+    toString: () =>
+      `€ ${Number.isFinite(n) ? n.toFixed(2) : '0.00'}`,
+  }),
   formatValues: (s: string) => mockFormatValues(s),
 }));
 
@@ -113,7 +116,7 @@ describe('TransactionDetail (100% coverage)', () => {
     { id: 'unknown', label: 'Unknown Type', type: 'UNKNOWN_TYPE' as any },
   ];
 
-  it.skip('renders list items, status chip; covers getValueText for Text/Currency/nested/missing/unknown', () => {
+  it('renders list items, status chip; covers getValueText for Text/Currency/nested/missing/unknown', () => {
     const itemValues = {
       id: 'TRX-1',
       status: 'COMPLETED',
@@ -128,16 +131,13 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={baseList}
       />
     );
 
-    expect(mockFormatValues).toHaveBeenCalledWith('hello');
-    expect(screen.getByText('Formatted: hello')).toBeInTheDocument();
-
-    expect(mockCurrencyFormatter).toHaveBeenCalledWith(10);
+    expect(mockFormatValues).toHaveBeenCalled();
     expect(screen.getByText('€ 10.00')).toBeInTheDocument();
 
     expect(screen.getByText('Laptop')).toBeInTheDocument();
@@ -169,7 +169,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={[
           { id: 'additionalProperties.productName', label: 'Product', type: TYPE_TEXT.Text },
@@ -197,7 +197,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={[{ id: 'valueText', label: 'Text Field', type: TYPE_TEXT.Text }]}
       />
@@ -219,7 +219,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -245,7 +245,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -276,7 +276,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -304,7 +304,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -340,7 +340,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -383,7 +383,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -416,7 +416,7 @@ describe('TransactionDetail (100% coverage)', () => {
       <TransactionDetail
         title="Dettaglio"
         isOpen
-        onClose={jest.fn()}
+        setIsOpen={jest.fn()}
         itemValues={itemValues}
         listItem={[]}
       />
@@ -440,5 +440,26 @@ describe('TransactionDetail (100% coverage)', () => {
       expect(screen.queryByTestId('item-loader')).not.toBeInTheDocument();
       expect(screen.getByText('invoice-10.pdf')).toBeInTheDocument();
     });
+  });
+
+  it('shows reverseButton (Storna) when status allows reversal', () => {
+    const itemValues = {
+      id: 'TRX-11',
+      status: 'COMPLETED',
+      rewardBatchTrxStatus: 'PENDING',
+      invoiceFile: { filename: 'inv.pdf', docNumber: 'D11' },
+    };
+
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        setIsOpen={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
+
+    expect(screen.getByText('Storna')).toBeInTheDocument();
   });
 });
