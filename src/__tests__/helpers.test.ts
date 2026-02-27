@@ -19,7 +19,6 @@ describe('copyTextToClipboard', () => {
   const writeTextMock = jest.fn();
 
   beforeAll(() => {
-    // Mock dell'API clipboard del browser
     Object.defineProperty(navigator, 'clipboard', {
       value: {
         writeText: writeTextMock,
@@ -45,7 +44,6 @@ describe('copyTextToClipboard', () => {
 });
 
 describe('downloadQRCodeFromURL', () => {
-  // Mock delle API globali necessarie per questa funzione
   global.fetch = jest.fn();
   global.URL.createObjectURL = jest.fn();
   const appendChildSpy = jest.spyOn(document.body, 'appendChild');
@@ -54,7 +52,6 @@ describe('downloadQRCodeFromURL', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Simula la creazione di un elemento <a> con un metodo click fittizio
     jest.spyOn(document, 'createElement').mockReturnValue({
       click: clickSpy,
       href: '',
@@ -69,13 +66,10 @@ describe('downloadQRCodeFromURL', () => {
 
     downloadQRCodeFromURL(mockUrl);
 
-    await new Promise(process.nextTick); // Attende il completamento delle promise
+    await new Promise(process.nextTick);
 
     expect(fetch).toHaveBeenCalledWith(mockUrl);
     expect(URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
-    // expect(appendChildSpy).toHaveBeenCalled();
-    //expect(clickSpy).toHaveBeenCalled();
-    //expect(removeChildSpy).toHaveBeenCalled();
   });
 
   test('should log an error if fetch fails', async () => {
@@ -100,7 +94,7 @@ describe('downloadQRCodeFromURL', () => {
 describe('mapDataForDiscoutTimeRecap', () => {
   test('should return correct expiration data when valid inputs are provided', () => {
     const date = new Date('2025-10-06T10:00:00.000Z');
-    const seconds = 86400 + 3600; // 1 giorno e 1 ora
+    const seconds = 86400 + 3600;
     const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
       seconds,
       date
@@ -108,7 +102,7 @@ describe('mapDataForDiscoutTimeRecap', () => {
 
     expect(expirationDays).toBe(1);
     expect(expirationDate).toBe('07/10/2025');
-    expect(expirationTime).toMatch(/13:00/); // Usiamo toMatch per flessibilità sul fuso orario
+    expect(expirationTime).toMatch(/13:00/);
   });
 
   test('should return undefined values if inputs are invalid', () => {
@@ -202,7 +196,6 @@ describe('generateUniqueId', () => {
   test.skip('should generate a predictable id when Date and Math are mocked', () => {
     jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
     jest.spyOn(Math, 'random').mockReturnValue(0.123456789);
-    // 0.123456789.toString(36).substring(2, 9) -> "4f25k6o"
     expect(generateUniqueId()).toBe('17000000000004f25k6o');
   });
 });

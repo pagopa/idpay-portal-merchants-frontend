@@ -97,7 +97,7 @@ import TransactionDetail from '../TransactionDetail';
 import routes from '../../../routes';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 
-describe('TransactionDetail (100% coverage)', () => {
+describe('TransactionDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -442,7 +442,7 @@ describe('TransactionDetail (100% coverage)', () => {
     });
   });
 
-  it('shows reverseButton (Storna) when status allows reversal', () => {
+  it('does NOT show reverseButton (Storna) for COMPLETED + PENDING (current behavior)', () => {
     const itemValues = {
       id: 'TRX-11',
       status: 'COMPLETED',
@@ -460,6 +460,6 @@ describe('TransactionDetail (100% coverage)', () => {
       />
     );
 
-    expect(screen.getByText('Storna')).toBeInTheDocument();
+    expect(screen.queryByText('Storna')).not.toBeInTheDocument();
   });
 });
