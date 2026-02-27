@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Container, Button, Stack, IconButton } from '@mui/material';
-import { ButtonNaked } from '@pagopa/mui-italia/dist/components/ButtonNaked';
 import { AccountDropdown } from '@pagopa/mui-italia/dist/components/AccountDropdown';
 
 /* Icons */
@@ -82,34 +81,32 @@ export const CustomHeaderAccount = ({
     <Container maxWidth={false}>
       <Stack spacing={2} direction="row" justifyContent="space-between" alignItems="center">
         {rootLink && (
-          <ButtonNaked
+          <Button
             component="a"
             size="small"
             aria-label={rootLink?.ariaLabel}
             href={rootLink?.href}
             target="_blank"
             rel="noreferrer"
-            title={rootLink?.title}
             sx={{ fontWeight: 'bold' }}
           >
             {rootLink?.label}
-          </ButtonNaked>
+          </Button>
         )}
 
         <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 3, md: 4 }}>
           {/* START Documentation MOBILE/DESKTOP */}
           {onDocumentationClick && (
             <>
-              <ButtonNaked
+              <Button
                 size="small"
-                component="button"
+                variant="text"
                 onClick={onDocumentationClick}
                 startIcon={<MenuBookIcon />}
                 sx={{ display: ['none', 'flex'] }}
-                weight="default"
               >
                 {translationsMap.documentation || defaultTranslationsMap.documentation}
-              </ButtonNaked>
+              </Button>
               <IconButton
                 size="small"
                 aria-label="Documentazione"
@@ -125,16 +122,15 @@ export const CustomHeaderAccount = ({
           {/* START Assistance MOBILE/DESKTOP */}
           {enableAssistanceButton && (
             <>
-              <ButtonNaked
+              <Button
                 size="small"
-                component="button"
+                variant="text"
                 onClick={onAssistanceClick}
                 startIcon={<HelpOutlineRoundedIcon />}
                 sx={{ display: ['none', 'flex'] }}
-                weight="default"
               >
                 {translationsMap.assistance || defaultTranslationsMap.assistance}
-              </ButtonNaked>
+              </Button>
               <IconButton
                 size="small"
                 aria-label="Assistenza"

@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import BreadcrumbsBoxUpload from '../components/BreadcrumbsBoxUpload';
 import { useAlert } from '../../hooks/useAlert';
+import { useScopedTranslation } from '../../hooks/useScopedTranslation';
 
 interface BreadcrumbsProps {
   label: string;
@@ -24,6 +25,7 @@ interface FileUploadActionProps {
   breadcrumbsProp: BreadcrumbsProps;
   manualLink: string;
   styleClass?: string;
+  i18nBlockKey: string;
 }
 
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
@@ -34,6 +36,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   breadcrumbsProp,
   manualLink,
   styleClass,
+  i18nBlockKey,
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [docNumber, setDocNumber] = useState<string>('');
@@ -50,6 +53,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   const [inputKey, setInputKey] = useState<number>(0);
 
   const { t } = useTranslation();
+  const scopedT = useScopedTranslation(i18nBlockKey);
   const history = useHistory();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,19 +142,19 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         if (response?.code) {
           if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
             setAlert({
-              text: t('modifyDocument.reverse.deniedSentError'),
+              text: t('modifyDocument.errors.deniedSentError'),
               isOpen: true,
               severity: 'error',
             });
           } else if (response.code === 'REWARD_BATCH_ALREADY_SENT') {
             setAlert({
-              text: t('modifyDocument.reverse.alreadySentError'),
+              text: t('modifyDocument.errors.alreadySentError'),
               isOpen: true,
               severity: 'error',
             });
           } else {
             setAlert({
-              text: t('modifyDocument.reverse.errorAlert'),
+              text: t('modifyDocument.errors.errorAlert'),
               isOpen: true,
               severity: 'error',
             });
@@ -178,7 +182,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         history.goBack();
       } catch (error: unknown) {
         console.error('Unexpected API Error:', error);
-        setAlert({ text: t('modifyDocument.reverse.errorAlert'), isOpen: true, severity: 'error' });
+        setAlert({ text: t('modifyDocument.errors.errorAlert'), isOpen: true, severity: 'error' });
         setLoadingFile(false);
       }
     }
@@ -195,10 +199,10 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         />
 
         <TitleBox
-          title={t('modifyDocument.title')}
+          title={scopedT('title')}
           mtTitle={3}
           variantTitle="h4"
-          subTitle={t('modifyDocument.creditNoteSubtitle')}
+          subTitle={scopedT('invoiceSubtitle')}
           variantSubTitle="body2"
         />
 
@@ -210,11 +214,11 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           borderRadius="4px"
         >
           <Typography mt={2} variant="h6" fontWeight={theme.typography.fontWeightBold}>
-            {t('modifyDocument.invoiceTitle')}
+            {scopedT('invoiceTitle')}
           </Typography>
 
           <Typography mt={2} variant="body2" fontWeight={theme.typography.fontWeightMedium}>
-            {t('modifyDocument.insertInvoice')}
+            {scopedT('insertInvoice')}
           </Typography>
 
           <TextField
@@ -227,7 +231,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
                 ? setDocNumberError(true)
                 : setDocNumberError(false)
             }
-            label={t('modifyDocument.invoiceLabel')}
+            label={scopedT('invoiceLabel')}
             size="small"
             sx={{
               mt: 2,
@@ -257,35 +261,35 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           }}
         >
           <Typography variant="h6" fontWeight={theme.typography.fontWeightBold}>
-            {t('modifyDocument.creditNote')}
+            {scopedT('creditNote')}
           </Typography>
 
           <Typography variant="body2" mt={4} mb={1} sx={{ marginTop: '32px !important' }}>
-            {t('modifyDocument.creditNoteSubtitle')}
+            {scopedT('creditNoteSubtitle')}
           </Typography>
 
           <Link
             onClick={() => window.open(manualLink || '', '_blank')}
             sx={{ cursor: 'pointer', fontWeight: theme.typography.fontWeightMedium, fontSize: 14 }}
           >
-            {t('modifyDocument.manualLink')}
+            {scopedT('manualLink')}
           </Link>
 
           {fileSizeError && (
             <Box mt={2}>
-              <Alert severity="error">{t('commons.fileSizeError')}</Alert>
+              <Alert severity="error">{scopedT('errors.fileSizeError')}</Alert>
             </Box>
           )}
 
           {fileTypeError && (
             <Box mt={2}>
-              <Alert severity="error">{t('modifyDocument.fileNotSupported')}</Alert>
+              <Alert severity="error">{scopedT('errors.fileNotSupported')}</Alert>
             </Box>
           )}
 
           {requiredFileError && (
             <Box mt={2}>
-              <Alert severity="error">{t('modifyDocument.errors.requiredFileError')}</Alert>
+              <Alert severity="error">{scopedT('errors.requiredFileError')}</Alert>
             </Box>
           )}
 
@@ -294,8 +298,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               onFileSelected={handleFileSelect}
               onFileRemoved={handleRemoveFile}
               value={file}
-              dropzoneLabel={t('modifyDocument.uploadFile')}
-              rejectedLabel={t('modifyDocument.fileNotSupported')}
+              dropzoneLabel={scopedT('uploadFile')}
+              dropzoneButton={scopedT('uploadFileButton')}
+              rejectedLabel={scopedT('errors.fileNotSupported')}
               loading={loadingFile}
             />
           </Box>
@@ -322,7 +327,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               onClick={handleButtonClick}
               sx={{ fontWeight: 'bold', fontSize: 14 }}
             >
-              {t('modifyDocument.replaceFile')}
+              {scopedT('replaceFile')}
             </Button>
           )}
 

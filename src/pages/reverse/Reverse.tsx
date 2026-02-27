@@ -14,6 +14,7 @@ const Reverse = () => {
         path: '',
       }}
       manualLink=""
+      i18nBlockKey="reverse"
     />
   );
 };

@@ -99,7 +99,7 @@ const InsertReportedUser: React.FC = () => {
   };
 
   return (
-    <Box maxWidth='75%' justifySelf='center'>
+    <Box maxWidth="75%" justifySelf="center">
       <ModalReportedUser
         open={showConfirmModal}
         title={t('pages.insertReportedUser.ModalReportedUser.title')}
@@ -139,22 +139,25 @@ const InsertReportedUser: React.FC = () => {
       <Box sx={{ width: '100%' }}>
         <Box sx={{ display: 'grid', gridColumn: 'span 8' }}>
           <Box sx={{ display: 'flex', gridColumn: 'span 12', alignItems: 'center', marginTop: 2 }}>
-            <ButtonNaked
-              component="button"
-              onClick={() => history.goBack()}
-              startIcon={<ArrowBackIcon />}
-              sx={{
-                color: 'primary.main',
-                fontSize: '1rem',
-                marginBottom: '3px',
-                marginRight: '8px',
-                fontWeight: 700,
-              }}
-              weight="default"
+            <Box
+              onClick={handleBack}
+              sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
               data-testid="back-button-test"
             >
-              {'Esci'}
-            </ButtonNaked>
+              <ButtonNaked
+                startIcon={<ArrowBackIcon />}
+                sx={{
+                  color: 'primary.main',
+                  fontSize: '1rem',
+                  marginBottom: '3px',
+                  marginRight: '8px',
+                  fontWeight: 700,
+                }}
+                weight="default"
+              >
+                {'Esci'}
+              </ButtonNaked>
+            </Box>
             <Breadcrumbs aria-label="breadcrumb" sx={{ marginBottom: '3px', marginRight: '8px' }}>
               <Typography color="text.primary" variant="body2">
                 {'Utenti segnalati'}

@@ -21,6 +21,7 @@ const ModifyDocument = () => {
         path: breadcrumbPath,
       }}
       manualLink={ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK}
+      i18nBlockKey="modifyDocument"
     />
   );
 };
