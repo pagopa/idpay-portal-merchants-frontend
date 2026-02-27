@@ -14,7 +14,7 @@ import { useAlert } from '../../../hooks/useAlert';
 import ModalComponent from '../../../components/modal/ModalComponent';
 import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { formatDate, isReversableBatch } from '../../../helpers';
+import { formatDate, isReversable } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
 
@@ -103,7 +103,7 @@ export default function InvoiceDetail({
 
   const reverseButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isReversableBatch(itemValues,statusBatch)
+      isReversable(itemValues)
         ? [
           {
             title: 'Storna',
@@ -117,7 +117,7 @@ export default function InvoiceDetail({
           },
         ]
         : [],
-    [isReversableBatch, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+    [isReversable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const handlePostponeTransaction = async () => {

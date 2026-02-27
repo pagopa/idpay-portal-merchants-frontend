@@ -11,7 +11,7 @@ import { downloadInvoiceFile } from '../../services/merchantService';
 import { useStore } from '../../pages/initiativeStores/StoreContext';
 import { useAlert } from '../../hooks/useAlert';
 import DetailDrawer, { DetailDrawerProps } from '../Drawer/DetailDrawer';
-import { isReversablePV } from '../../helpers';
+import { isReversable } from '../../helpers';
 import getStatus from './useStatus';
 
 type Props = DetailDrawerProps & {
@@ -55,7 +55,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
 
   const reverseButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isReversablePV(itemValues)
+      isReversable(itemValues)
         ? [
           {
             title: 'Storna',
@@ -69,7 +69,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
           },
         ]
         : [],
-    [isReversablePV, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+    [isReversable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const getStatusChip = () => {
