@@ -57,7 +57,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   const history = useHistory();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const secondBreadcrumbLabel = 'Modifica documento';
+  const secondBreadcrumbLabel = scopedT('breadcrumbLabel');
 
   const { pointOfSaleId, trxId, fileDocNumber } = useParams<{
     id: string;

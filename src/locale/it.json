@@ -409,6 +409,7 @@
     "uploadSuccess": "Punti vendita caricati con successo"
   },
   "modifyDocument": {
+      "breadcrumbLabel": "Modifica documento",
       "title":"Carica la fattura",
       "invoiceTitle": "Qual è il numero  della fattura?",
       "invoiceSubtitle": "",
@@ -432,6 +433,7 @@
       }
     },
   "reverse": {
+      "breadcrumbLabel": "Storna transazione",
       "title": "Storna transazione",
       "invoiceTitle": "Qual è il numero della nota di credito?",
       "invoiceSubtitle": "Inserisci il numero della nota di credito e carica la documentazione necessaria per avviare lo storno.  ",

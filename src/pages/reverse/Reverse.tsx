@@ -10,7 +10,7 @@ const Reverse = () => {
       apiCall={apiCall}
       successStateKey="reverseUploadSuccess"
       breadcrumbsProp={{
-        label: 'Storna transazione',
+        label: 'Storico rimborsi',
         path: '',
       }}
       manualLink=""
