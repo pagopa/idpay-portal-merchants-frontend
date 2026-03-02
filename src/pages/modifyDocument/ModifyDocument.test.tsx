@@ -1,6 +1,4 @@
 import { render } from '@testing-library/react';
-import * as merchantService from '../../services/merchantService';
-import ROUTES from '../../routes';
 import { ENV } from '../../utils/env';
 import ModifyDocument from './ModifyDocument';
 
