@@ -1813,7 +1813,14 @@
   resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.12.1.tgz#f828554889e6ab7345395626bb46e561c113435e"
   integrity sha512-rNiQYHtkXljcvCEnhWrJzie1ifff5O98j3uW7ZlchFgD8HWxEcz/QoxZvo+sCKC9aayAgxi9RsVn2VjCyp5CrA==
 
-"@mui/icons-material@^5.11.11", "@mui/icons-material@^5.8.2":
+"@mui/icons-material@^5.14.1":
+  version "5.18.0"
+  resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-5.18.0.tgz#97d87f1b7bee5fa7b9ba844518631de3112c1e57"
+  integrity sha512-1s0vEZj5XFXDMmz3Arl/R7IncFqJ+WQ95LDp1roHWGDE2oCO3IS4/hmiOv1/8SD9r6B7tv9GLiqVZYHo+6PkTg==
+  dependencies:
+    "@babel/runtime" "^7.23.9"
+
+"@mui/icons-material@^5.8.2":
   version "5.11.16"
   resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-5.11.16.tgz#417fa773c56672e39d6ccfed9ac55591985f0d38"
   integrity sha512-oKkx9z9Kwg40NtcIajF9uOXhxiyTZrrm9nmIJ4UjkU2IdHpd4QVLbCc/5hZN/y0C6qzi2Zlxyr9TGddQx2vx2A==
@@ -1968,10 +1975,10 @@
     fp-ts "^2.12.3"
     io-ts "^2.2.18"
 
-"@pagopa/mui-italia@^0.9.4":
-  version "0.9.4"
-  resolved "https://registry.yarnpkg.com/@pagopa/mui-italia/-/mui-italia-0.9.4.tgz#6de9b5a40387931b24471697d71c773be1c73aa8"
-  integrity sha512-JmTnu1SJMVkpZTyFVaguelOSEUB2pcuSuTME+99XKjQQHbEz786pNRU5osd2THnUg7e//Tn2URqxqgE+BDH1+g==
+"@pagopa/mui-italia@^1.6.1":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/mui-italia/-/mui-italia-1.11.0.tgz#4f6b2bdd1f5689b0e59490905bf523dc33700702"
+  integrity sha512-x9FA+2c994UMO7Y7g6ZdvpwoY+frVJPk6CPDSgFvhkzPcNafRW8PNUWn2JEQ1+5meU3rp5XvxziZoCeoRUw/HA==
   dependencies:
     "@fontsource/dm-mono" "^4.5.10"
     "@fontsource/titillium-web" "^4.5.9"
