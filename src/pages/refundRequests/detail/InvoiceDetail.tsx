@@ -73,10 +73,10 @@ export default function InvoiceDetail({
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
   const isVisible =
-    (itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
-    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED'));
+    itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
+    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED');
 
-  const isDisabled = statusBatch === "CREATED" || statusBatch === "EVALUATING";
+  const isDisabled = statusBatch === 'CREATED' || statusBatch === 'EVALUATING';
 
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
@@ -105,17 +105,17 @@ export default function InvoiceDetail({
     () =>
       isReversable(itemValues, statusBatch)
         ? [
-          {
-            title: 'Storna',
-            dataTestId: 'reverse-btn',
-            onClick: () => {
-              const path = routes.REVERSE.replace(':id', merchantId)
-                .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
-                .replace(':trxId', itemValues.id);
-              history.push(path, { fromLocation: history.location });
+            {
+              title: 'Storna',
+              dataTestId: 'reverse-btn',
+              onClick: () => {
+                const path = routes.REVERSE.replace(':id', merchantId)
+                  .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
+                  .replace(':trxId', itemValues.id);
+                history.push(path, { fromLocation: history.location });
+              },
             },
-          },
-        ]
+          ]
         : [],
     [isReversable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
@@ -377,6 +377,7 @@ export default function InvoiceDetail({
             </Typography>
             <Typography
               variant="body2"
+              component="div"
               fontWeight={600}
               sx={{
                 whiteSpace: 'pre-wrap',

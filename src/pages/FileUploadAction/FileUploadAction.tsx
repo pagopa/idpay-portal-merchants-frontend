@@ -138,11 +138,13 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       setLoadingFile(true);
 
       try {
+        const normalizedDocNumber = docNumber.trim();
         let response: any;
-        if (pointOfSaleId) {
-          response = await (apiCall as any)(trxId, file, pointOfSaleId, docNumber);
+
+        if (apiCall.length === 4) {
+          response = await (apiCall as any)(trxId, file, pointOfSaleId, normalizedDocNumber);
         } else {
-          response = await (apiCall as any)(trxId, file, docNumber);
+          response = await (apiCall as any)(trxId, file, normalizedDocNumber);
         }
 
         if (response?.code) {
