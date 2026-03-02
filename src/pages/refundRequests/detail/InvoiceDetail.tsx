@@ -103,7 +103,7 @@ export default function InvoiceDetail({
 
   const reverseButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isReversable(itemValues)
+      isReversable(itemValues, statusBatch)
         ? [
           {
             title: 'Storna',
