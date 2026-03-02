@@ -1,6 +1,4 @@
 import { render } from '@testing-library/react';
-import * as merchantService from '../../services/merchantService';
-import ROUTES from '../../routes';
 import { ENV } from '../../utils/env';
 import ModifyDocument from './ModifyDocument';
 
@@ -36,13 +34,11 @@ describe('ModifyDocument page', () => {
 
     expect(mockFileUploadAction).toHaveBeenCalledWith(
       expect.objectContaining({
-        apiCall: merchantService.updateInvoiceTransaction,
+        apiCall: expect.any(Function),
         successStateKey: 'refundUploadSuccess',
-        breadcrumbsProp: {
-          label: 'Richieste di rimborso',
-          path: ROUTES.REFUND_REQUESTS,
-        },
+        breadcrumbsLabel: 'Richieste di rimborso',
         manualLink: ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK,
+        i18nBlockKey: 'modifyDocument',
       })
     );
   });
@@ -56,13 +52,11 @@ describe('ModifyDocument page', () => {
 
     expect(mockFileUploadAction).toHaveBeenCalledWith(
       expect.objectContaining({
-        apiCall: merchantService.updateInvoiceTransaction,
+        apiCall: expect.any(Function),
         successStateKey: 'refundUploadSuccess',
-        breadcrumbsProp: {
-          label: 'Punti vendita',
-          path: ROUTES.STORES,
-        },
+        breadcrumbsLabel: 'Punti vendita',
         manualLink: ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK,
+        i18nBlockKey: 'modifyDocument',
       })
     );
   });

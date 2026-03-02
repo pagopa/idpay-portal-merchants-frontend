@@ -151,9 +151,17 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => (
-        <Typography color={theme.palette.text.secondary} fontWeight={400}>
-          {safeFormatDate(params.row.requestDate)}
-        </Typography>
+        <Tooltip
+          title={
+            params.row.requestDate && params.row.requestDate !== '' ?
+              safeFormatDate(params.row.requestDate)
+              : MISSING_DATA_PLACEHOLDER
+          }
+        >
+          <Typography color={theme.palette.text.secondary} fontWeight={400} className="ShowDots">
+            {safeFormatDate(params.row.requestDate)}
+          </Typography>
+        </Tooltip>
       ),
     },
     {
@@ -163,9 +171,17 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => (
-        <Typography color={theme.palette.text.secondary} fontWeight={400}>
-          {safeFormatDate(params.row.elaborationDate)}
-        </Typography>
+        <Tooltip
+          title={
+            params.row.elaborationDate && params.row.elaborationDate !== '' ?
+              safeFormatDate(params.row.elaborationDate)
+              : MISSING_DATA_PLACEHOLDER
+          }
+          >
+          <Typography color={theme.palette.text.secondary} fontWeight={400} className="ShowDots">
+            {safeFormatDate(params.row.elaborationDate)}
+          </Typography>
+        </Tooltip>
       ),
     },
     {
