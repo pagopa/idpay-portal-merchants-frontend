@@ -27,7 +27,6 @@ const BreadcrumbsBox = ({ backLabel, items, active, onClickBackButton, backButto
     <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
       <Breadcrumbs aria-label="breadcrumb">
         <ButtonNaked
-          component="button"
           onClick={() => active && handleBackButton()}
           startIcon={<ArrowBackIcon />}
           sx={{ color: 'primary.main', fontSize: '1rem', marginBottom: '3px' }}

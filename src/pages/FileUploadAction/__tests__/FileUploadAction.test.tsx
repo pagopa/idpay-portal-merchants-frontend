@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import FileUploadAction from "../FileUploadAction";
 
@@ -62,6 +61,7 @@ describe("FileUploadAction", () => {
     successStateKey: "refundUploadSuccess",
     breadcrumbsProp: { label: "Test", path: "/test" },
     manualLink: "http://manual",
+    i18nBlockKey: "modifyDocument",
   };
 
   beforeEach(() => {

@@ -13,16 +13,16 @@ const BreadcrumbsBox = ({ backLabel, items }: Props) => {
   return (
     <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
       <Breadcrumbs aria-label="breadcrumb">
-        <ButtonNaked
-          component="button"
-          onClick={() => history.goBack()}
-          startIcon={<ArrowBackIcon />}
-          sx={{ color: 'primary.main', fontSize: '1rem', marginBottom: '3px' }}
-          weight="default"
-          data-testid="back-btn-test"
-        >
-          {backLabel}
-        </ButtonNaked>
+        <Box onClick={() => history.goBack()} sx={{ display: 'inline-flex', cursor: 'pointer' }}>
+          <ButtonNaked
+            startIcon={<ArrowBackIcon />}
+            sx={{ color: 'primary.main', fontSize: '1rem', marginBottom: '3px' }}
+            weight="default"
+            data-testid="back-btn-test"
+          >
+            {backLabel}
+          </ButtonNaked>
+        </Box>
         {items.map((label, index) => (
           <Typography
             sx={{

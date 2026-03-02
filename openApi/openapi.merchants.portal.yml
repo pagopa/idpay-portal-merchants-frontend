@@ -1118,6 +1118,136 @@ paths:
               example:
                 code: PAYMENT_GENERIC_ERROR
                 message: Application error
+  /transactions/{transactionId}/reversal-invoiced:
+    post:
+      tags:
+        - transaction
+      summary: Reverse an invoiced transaction
+      description: >
+        Allows the merchant to refound a transaction from a batch.
+      operationId: reversalTransactionInvoiced
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 50
+            pattern: '^[A-Za-z0-9\-]+$'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  maxLength: 2147483647
+                  description: Reversal file
+                docNumber:
+                  type: string
+                  nullable: true
+                  maxLength: 50
+                  pattern: '^[A-Za-z0-9\-]*$'
+                  description: Optional document number linked to the   reversal
+      responses:
+        "204":
+          description: Ok - no content
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+        "400":
+          description: Bad request
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
+              example:
+                code: "PAYMENT_INVALID_REQUEST"
+                message: "Something went wrong handling the request"
+        "401":
+          description: Authentication failed
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+        "403":
+          description: "Forbidden"
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
+        "404":
+          description: The requested resource was not found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
+        "429":
+          description: Too many requests
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+            Retry-After:
+              $ref: "#/components/headers/Retry-After"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
+        "500":
+          description: Generic error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDTO"
   /initiatives/{initiativeId}/transactions:
     get:
       tags:
@@ -2612,35 +2742,6 @@ components:
             filename:
               type: string
               description: "ENG: Associated file name - IT: Nome del file associato"
-    MerchantTransactionsProcessedListDTO:
-      type: object
-      required:
-        - content
-        - pageNo
-        - pageSize
-        - totalElements
-        - totalPages
-      properties:
-        content:
-          type: array
-          items:
-            $ref: "#/components/schemas/MerchantTransactionProcessedDTO"
-        pageNo:
-          type: integer
-          format: int32
-          description: "ENG: The number of the page - IT: Il numero della pagina"
-        pageSize:
-          type: integer
-          format: int32
-          description: "ENG: The element size for page - IT: Il numero di elementi per pagina"
-        totalElements:
-          type: integer
-          format: int32
-          description: "ENG: The total number of the elements - IT: Il numero totale degli elementi"
-        totalPages:
-          type: integer
-          format: int32
-          description: "ENG: The total number of the pages - IT: Il numero totale delle pagine"
     RewardBatchTrxStatus:
       type: string
       description: Status of the transaction within the reward batch
@@ -2650,46 +2751,6 @@ components:
         - SUSPENDED
         - APPROVED
         - REJECTED
-    MerchantTransactionProcessedDTO:
-      type: object
-      required:
-        - trxId
-        - effectiveAmountCents
-        - status
-      properties:
-        trxId:
-          type: string
-          description: "ENG: Transaction ID - IT: L'ID della transazione"
-        fiscalCode:
-          type: string
-          description: "ENG: Citizen fiscal code - IT: Codice fiscale del cittadino"
-        effectiveAmountCents:
-          type: integer
-          format: int64
-          description: "ENG: Transaction amount - IT: Quantitativo della transazione"
-          example: 100
-        rewardAmountCents:
-          type: integer
-          format: int64
-          description: "ENG: Reward amount - IT: Premio generato"
-          example: 100
-        trxDate:
-          type: string
-          format: date-time
-          description: "ENG: The date of the transaction - IT: La data della transazione"
-        updateDate:
-          type: string
-          format: date-time
-          description: "ENG: The date of the transaction update - IT: La data di aggiornamento della transazione"
-        status:
-          type: string
-          enum:
-            - REWARDED
-            - CANCELLED
-          description: "ENG: Status of the transaction - IT: Stato della transazione"
-        channel:
-          type: string
-          description: "ENG: Channel from which the transaction takes place - IT: Canale da cui avviene la transazione"
     MerchantDetailDTO:
       type: object
       properties:
@@ -3609,6 +3670,20 @@ components:
           description: >
             ENG: Total number of available pages. <br>
             IT: Numero totale delle pagine disponibili.
+    ErrorDTO:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          maxLength: 255
+          pattern: .*
+        message:
+          type: string
+          maxLength: 255
+          pattern: .*
     ReportRequest:
       type: object
       properties:

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Container, Button, Stack, IconButton } from '@mui/material';
-import { ButtonNaked } from '@pagopa/mui-italia/dist/components/ButtonNaked';
+import { blueGrey } from '@mui/material/colors';
 import { AccountDropdown } from '@pagopa/mui-italia/dist/components/AccountDropdown';
 
 /* Icons */
@@ -77,39 +77,50 @@ export const CustomHeaderAccount = ({
       borderColor: 'divider',
       backgroundColor: 'background.paper',
       minHeight: '48px',
+      color: blueGrey[900],
     }}
   >
     <Container maxWidth={false}>
       <Stack spacing={2} direction="row" justifyContent="space-between" alignItems="center">
         {rootLink && (
-          <ButtonNaked
+          <Button
             component="a"
             size="small"
             aria-label={rootLink?.ariaLabel}
             href={rootLink?.href}
             target="_blank"
             rel="noreferrer"
-            title={rootLink?.title}
-            sx={{ fontWeight: 'bold' }}
+            sx={{
+              fontWeight: 'bold',
+              color: blueGrey[900],
+              '&:hover': {
+                color: blueGrey[700] + "!important",
+              },
+            }}
           >
             {rootLink?.label}
-          </ButtonNaked>
+          </Button>
         )}
 
         <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 3, md: 4 }}>
           {/* START Documentation MOBILE/DESKTOP */}
           {onDocumentationClick && (
             <>
-              <ButtonNaked
+              <Button
                 size="small"
-                component="button"
+                variant="text"
                 onClick={onDocumentationClick}
                 startIcon={<MenuBookIcon />}
-                sx={{ display: ['none', 'flex'] }}
-                weight="default"
+                sx={{
+                  display: ['none', 'flex'],
+                  color: blueGrey[900],
+                  '&:hover': {
+                    color: blueGrey[700] + "!important",
+                  },
+                }}
               >
                 {translationsMap.documentation || defaultTranslationsMap.documentation}
-              </ButtonNaked>
+              </Button>
               <IconButton
                 size="small"
                 aria-label="Documentazione"
@@ -125,16 +136,21 @@ export const CustomHeaderAccount = ({
           {/* START Assistance MOBILE/DESKTOP */}
           {enableAssistanceButton && (
             <>
-              <ButtonNaked
+              <Button
                 size="small"
-                component="button"
+                variant="text"
                 onClick={onAssistanceClick}
                 startIcon={<HelpOutlineRoundedIcon />}
-                sx={{ display: ['none', 'flex'] }}
-                weight="default"
+                sx={{
+                  display: ['none', 'flex'],
+                  color: blueGrey[900],
+                  '&:hover': {
+                    color: blueGrey[700] + "!important",
+                  },
+                }}
               >
                 {translationsMap.assistance || defaultTranslationsMap.assistance}
-              </ButtonNaked>
+              </Button>
               <IconButton
                 size="small"
                 aria-label="Assistenza"
