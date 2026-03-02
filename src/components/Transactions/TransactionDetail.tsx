@@ -58,7 +58,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
       isReversable(itemValues)
         ? [
           {
-            title: 'Stornaaaa',
+            title: 'Storna',
             dataTestId: 'reverse-btn',
             onClick: () => {
               const path = routes.REVERSE.replace(':id', merchantId)
