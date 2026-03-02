@@ -10,11 +10,18 @@ import { useAlert } from '../../hooks/useAlert';
 import { useScopedTranslation } from '../../hooks/useScopedTranslation';
 
 interface FileUploadActionProps {
-  apiCall: (
-    transactionId: string,
-    file: File,
-    docNumber: string
-  ) => Promise<void | { code: string; message: string }>;
+  apiCall:
+    | ((
+        transactionId: string,
+        file: File,
+        docNumber: string
+      ) => Promise<void | { code: string; message: string }>)
+    | ((
+        transactionId: string,
+        file: File,
+        pointOfSaleId: string,
+        docNumber: string
+      ) => Promise<void | { code: string; message: string }>);
   successStateKey: string;
   breadcrumbsLabel: string;
   manualLink: string;
@@ -131,7 +138,12 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       setLoadingFile(true);
 
       try {
-        const response = (await apiCall(trxId, file, docNumber)) as any;
+        let response: any;
+        if (pointOfSaleId) {
+          response = await (apiCall as any)(trxId, file, pointOfSaleId, docNumber);
+        } else {
+          response = await (apiCall as any)(trxId, file, docNumber);
+        }
 
         if (response?.code) {
           if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
