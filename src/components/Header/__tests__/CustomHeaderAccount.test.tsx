@@ -39,7 +39,7 @@ describe('CustomHeaderAccount', () => {
       />
     );
 
-    const linkBtn = screen.getAllByTestId('button-naked')[0];
+    const linkBtn = screen.getByRole('link', { name: rootLink.label });
     expect(linkBtn).toBeInTheDocument();
     expect(linkBtn).toHaveAttribute('href', rootLink.href);
     expect(linkBtn).toHaveTextContent(rootLink.label);
