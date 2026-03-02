@@ -2742,35 +2742,6 @@ components:
             filename:
               type: string
               description: "ENG: Associated file name - IT: Nome del file associato"
-    MerchantTransactionsProcessedListDTO:
-      type: object
-      required:
-        - content
-        - pageNo
-        - pageSize
-        - totalElements
-        - totalPages
-      properties:
-        content:
-          type: array
-          items:
-            $ref: "#/components/schemas/MerchantTransactionProcessedDTO"
-        pageNo:
-          type: integer
-          format: int32
-          description: "ENG: The number of the page - IT: Il numero della pagina"
-        pageSize:
-          type: integer
-          format: int32
-          description: "ENG: The element size for page - IT: Il numero di elementi per pagina"
-        totalElements:
-          type: integer
-          format: int32
-          description: "ENG: The total number of the elements - IT: Il numero totale degli elementi"
-        totalPages:
-          type: integer
-          format: int32
-          description: "ENG: The total number of the pages - IT: Il numero totale delle pagine"
     RewardBatchTrxStatus:
       type: string
       description: Status of the transaction within the reward batch
@@ -2780,46 +2751,6 @@ components:
         - SUSPENDED
         - APPROVED
         - REJECTED
-    MerchantTransactionProcessedDTO:
-      type: object
-      required:
-        - trxId
-        - effectiveAmountCents
-        - status
-      properties:
-        trxId:
-          type: string
-          description: "ENG: Transaction ID - IT: L'ID della transazione"
-        fiscalCode:
-          type: string
-          description: "ENG: Citizen fiscal code - IT: Codice fiscale del cittadino"
-        effectiveAmountCents:
-          type: integer
-          format: int64
-          description: "ENG: Transaction amount - IT: Quantitativo della transazione"
-          example: 100
-        rewardAmountCents:
-          type: integer
-          format: int64
-          description: "ENG: Reward amount - IT: Premio generato"
-          example: 100
-        trxDate:
-          type: string
-          format: date-time
-          description: "ENG: The date of the transaction - IT: La data della transazione"
-        updateDate:
-          type: string
-          format: date-time
-          description: "ENG: The date of the transaction update - IT: La data di aggiornamento della transazione"
-        status:
-          type: string
-          enum:
-            - REWARDED
-            - CANCELLED
-          description: "ENG: Status of the transaction - IT: Stato della transazione"
-        channel:
-          type: string
-          description: "ENG: Channel from which the transaction takes place - IT: Canale da cui avviene la transazione"
     MerchantDetailDTO:
       type: object
       properties:

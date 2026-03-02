@@ -115,9 +115,15 @@ export const MerchantApi = {
   },
 
   reversalTransactionInvoiced: async (
-    transactionId: string
+    transactionId: string,
+    file: File,
+    docNumber?: string
   ): Promise<void | { code: string; message: string }> => {
-    const result = await apiClient.reversalTransactionInvoiced({ transactionId } as any);
+    const result = await apiClient.reversalTransactionInvoiced({
+      transactionId,
+      file,
+      docNumber,
+    } as any);
 
     if (!isRight(result)) {
       const firstError = (result.left as any)?.[0];

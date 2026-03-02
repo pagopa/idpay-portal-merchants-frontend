@@ -9,20 +9,14 @@ import BreadcrumbsBoxUpload from '../components/BreadcrumbsBoxUpload';
 import { useAlert } from '../../hooks/useAlert';
 import { useScopedTranslation } from '../../hooks/useScopedTranslation';
 
-interface BreadcrumbsProps {
-  label: string;
-  path: string;
-}
-
 interface FileUploadActionProps {
   apiCall: (
-    trxId: string,
+    transactionId: string,
     file: File,
-    pointOfSaleId: string,
-    docNumber?: string
-  ) => Promise<unknown>;
+    docNumber: string
+  ) => Promise<void | { code: string; message: string }>;
   successStateKey: string;
-  breadcrumbsProp: BreadcrumbsProps;
+  breadcrumbsLabel: string;
   manualLink: string;
   styleClass?: string;
   i18nBlockKey: string;
@@ -33,7 +27,7 @@ const VALID_MIME_TYPES = ['application/pdf', 'application/xml', 'text/xml'];
 
 const FileUploadAction: React.FC<FileUploadActionProps> = ({
   apiCall,
-  breadcrumbsProp,
+  breadcrumbsLabel,
   manualLink,
   styleClass,
   i18nBlockKey,
@@ -137,7 +131,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       setLoadingFile(true);
 
       try {
-        const response = (await apiCall(trxId, file, pointOfSaleId, docNumber)) as any;
+        const response = (await apiCall(trxId, file, docNumber)) as any;
 
         if (response?.code) {
           if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
@@ -193,7 +187,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       <Box p={4} maxWidth="75%" justifySelf="center">
         <BreadcrumbsBoxUpload
           backLabel={t('commons.exitBtn')}
-          items={[breadcrumbsProp?.label, secondBreadcrumbLabel]}
+          items={[breadcrumbsLabel, secondBreadcrumbLabel]}
           active={true}
           onClickBackButton={handleBackNavigation}
         />

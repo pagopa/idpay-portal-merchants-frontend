@@ -61,9 +61,11 @@ export const deleteTransaction = (transactionId: string): Promise<void> =>
   MerchantApi.deleteTransaction(transactionId);
 
 export const reversalTransactionInvoiced = (
-  transactionId: string
+  transactionId: string,
+  file: File,
+  docNumber?: string
 ): Promise<void | { code: string; message: string }> =>
-  MerchantApi.reversalTransactionInvoiced(transactionId);
+  MerchantApi.reversalTransactionInvoiced(transactionId, file, docNumber);
 
 export const createTransaction = (
   amountCents: number,
