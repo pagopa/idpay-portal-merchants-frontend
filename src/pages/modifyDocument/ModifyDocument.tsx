@@ -9,10 +9,7 @@ const ModifyDocument = () => {
   const isFromStores = Boolean(location.state?.fromLocation);
   const bLabel = isFromStores ? 'Punti vendita' : 'Richieste di rimborso';
 
-  const updateInvoiceAdapter = (transactionId: string, file: File, docNumber: string) => {
-    const { pointOfSaleId } = (location as any).state ?? {};
-    return updateInvoiceTransaction(transactionId, file, pointOfSaleId, docNumber);
-  };
+  const updateInvoiceAdapter = (transactionId: string, file: File, pointOfSaleId: string, docNumber: string) => updateInvoiceTransaction(transactionId, file, pointOfSaleId, docNumber);
 
   return (
     <FileUploadAction

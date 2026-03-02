@@ -141,7 +141,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         const normalizedDocNumber = docNumber.trim();
         let response: any;
 
-        if (apiCall.length === 4) {
+        if (i18nBlockKey === "modifyDocument") {
           response = await (apiCall as any)(trxId, file, pointOfSaleId, normalizedDocNumber);
         } else {
           response = await (apiCall as any)(trxId, file, normalizedDocNumber);
