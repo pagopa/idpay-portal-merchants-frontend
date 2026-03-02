@@ -156,7 +156,7 @@ describe('merchantService uncovered branches', () => {
 
       await reversalTransactionInvoiced('trx-1');
 
-      expect(mockedMerchantApi.reversalTransactionInvoiced).toHaveBeenCalledWith('trx-1');
+      expect(mockedMerchantApi.reversalTransactionInvoiced).toHaveBeenCalledWith('trx-1', undefined, undefined);
     });
   });
 
