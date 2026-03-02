@@ -293,7 +293,24 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             </Box>
           )}
 
-          <Box mt={1} mb={2}>
+          <Box
+            mt={1}
+            mb={2}
+            sx={{
+              '& .MuiButton-root': {
+                backgroundColor: 'transparent',
+                boxShadow: 'none',
+                padding: 0,
+                minWidth: 'auto',
+                textTransform: 'none',
+                fontWeight: 'bold',
+                color: '#0073E6 !important',
+                '&:hover': {
+                  backgroundColor: 'transparent',
+                },
+              },
+            }}
+          >
             <SingleFileInput
               onFileSelected={handleFileSelect}
               onFileRemoved={handleRemoveFile}
