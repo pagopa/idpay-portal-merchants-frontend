@@ -228,6 +228,7 @@ stages:
             displayName: 'Build files'
             env:
               INLINE_RUNTIME_CHUNK: 'false'
+              NODE_OPTIONS: '--max_old_space_size=4096'
               REACT_APP_ENV: '$(environment)'
 
               REACT_APP_URL_FE_PRE_LOGIN: '$(react_app_url_fe_pre_login)'
