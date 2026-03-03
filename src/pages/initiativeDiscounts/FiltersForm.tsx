@@ -17,7 +17,7 @@ const FiltersForm = <T extends Record<string, any>>({
   formik,
   onFiltersApplied,
   onFiltersReset,
-  filtersAppliedOnce
+  filtersAppliedOnce,
 }: Props<T>) => {
   const { t } = useTranslation();
 
@@ -61,22 +61,20 @@ const FiltersForm = <T extends Record<string, any>>({
   return (
     <Grid sx={{ my: 4, width: '100%' }} container spacing={2}>
       {enhancedChildren}
-      <Grid item xs={12} sm={6} md={3} lg={1}
-      >
+      <Grid item xs={12} sm={6} md={3} lg={1}>
         {/* Bottone "Applica Filtri" */}
         <Button
-          sx={{ height: '44.5px', gridColumn: 'span 1', width: "100%" }} 
-            variant="outlined"
-            size="small"
-            onClick={handleApplyFilters}
-            disabled={!formik.dirty}
-            data-testid="apply-filters-test"
+          sx={{ height: '44.5px', gridColumn: 'span 1', width: '100%' }}
+          variant="outlined"
+          size="small"
+          onClick={handleApplyFilters}
+          disabled={!formik.dirty}
+          data-testid="apply-filters-test"
         >
           {t('commons.filterBtn')}
         </Button>
       </Grid>
-      <Grid item xs={12} sm={6} md={3} lg={1}
-      >
+      <Grid item xs={12} sm={6} md={3} lg={1}>
         {/* Bottone "Rimuovi Filtri" */}
         <ButtonNaked
           component="button"
@@ -85,9 +83,9 @@ const FiltersForm = <T extends Record<string, any>>({
             fontWeight: 600,
             fontSize: '0.875rem',
             gridColumn: 'span 1',
-            height: '44.5px'
+            height: '44.5px',
           }}
-          onClick={handleResetFilters}
+          {...({ onClick: handleResetFilters } as any)}
           disabled={!formik.dirty && !filtersAppliedOnce}
           data-testid="reset-filters-test"
         >

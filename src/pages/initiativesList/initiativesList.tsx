@@ -17,7 +17,6 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useTranslation } from 'react-i18next';
 import SearchIcon from '@mui/icons-material/Search';
 import { grey } from '@mui/material/colors';
-import { ButtonNaked } from '@pagopa/mui-italia';
 import { useEffect, useState } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -86,7 +85,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             >
               {headCell.label}
               {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
+                <Box component="span" sx={{ ...visuallyHidden }}>
                   {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                 </Box>
               ) : null}
@@ -240,13 +239,18 @@ const InitiativesList = () => {
                     return (
                       <TableRow tabIndex={-1} key={row.id} sx={{}}>
                         <TableCell id={labelId} scope="row">
-                          <ButtonNaked
+                          <Box
                             component="button"
+                            type="button"
                             sx={{
                               color: 'primary.main',
                               fontWeight: 600,
                               fontSize: '1em',
                               textAlign: 'left',
+                              background: 'none',
+                              border: 'none',
+                              padding: 0,
+                              cursor: 'pointer',
                             }}
                             onClick={() => {
                               dispatch(
@@ -260,7 +264,7 @@ const InitiativesList = () => {
                             data-testid="initiative-btn-test"
                           >
                             {row.initiativeName}
-                          </ButtonNaked>
+                          </Box>
                         </TableCell>
                         <TableCell>{row.organizationName}</TableCell>
                         <TableCell>{row.spendingPeriod}</TableCell>
