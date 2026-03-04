@@ -58,6 +58,5 @@ describe('AlertContext', () => {
         expect(alert).not.toBeInTheDocument()
       }, 3000)
     })
-
   });
 });
