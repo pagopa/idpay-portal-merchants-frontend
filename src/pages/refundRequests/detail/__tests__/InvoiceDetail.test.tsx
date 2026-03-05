@@ -1,9 +1,8 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import InvoiceDetail from '../InvoiceDetail';
-import * as formatUtils from '../../../../utils/formatUtils';
 import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
     __esModule: true,
@@ -52,7 +51,8 @@ jest.mock('../../../../redux/hooks', () => ({
 jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'),
     useLocation: jest.fn(),
-    useHistory: () => mockUseHistory()
+    useHistory: () => mockUseHistory(),
+    useParams: () => ({ id: 'merchant-1' })
 }));
 
 jest.mock('../../../../redux/slices/initiativesSlice', () => ({
@@ -65,11 +65,17 @@ jest.mock('../../../../utils/formatUtils', () => ({
     currencyFormatter: jest.fn((val: number) => ({ toString: () => `€${val.toFixed(2)}` }))
 }));
 
+jest.mock('../../../../helpers', () => ({
+    ...jest.requireActual('../../../../helpers'),
+    isReversable: jest.fn(),
+}));
+
 
 import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile, postponeTransaction } from '../../../../services/merchantService';
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
+import { isReversable } from '../../../../helpers';
 
 describe('InvoiceDetail', () => {
     let mockSetAlert: jest.Mock;
@@ -603,7 +609,11 @@ describe('InvoiceDetail', () => {
             render(
                 <InvoiceDetail
                     title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED }}
+                    itemValues={{ 
+                        ...baseItemValues, 
+                        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+                        status: "REWARDED"
+                    }}
                     listItem={baseListItem}
                     batchId=""
                     storeId=""
@@ -631,6 +641,49 @@ describe('InvoiceDetail', () => {
             const button = screen.getByTestId('change-file-btn');
             fireEvent.click(button);
             expect(pushMock).toHaveBeenCalled()
+        });
+    });
+
+    describe('Reverse button', () => {
+        it('Should navigate to reverse page when reverse button is clicked', () => {
+            (useLocation as jest.Mock).mockReturnValue({
+                state: { store: { status: 'CLOSED', month: mockUseLocation.state.store.month } }
+            });
+            (isReversable as jest.Mock).mockReturnValue(true);
+
+            const trxItem = {
+              id: 'trx-1',
+              pointOfSaleId: 'pos-1',
+              status: "REWARDED",
+              rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+              initiativeId: 'init-123',
+              invoiceData: {
+                docNumber: 'DOC-123',
+                filename: 'fattura.pdf',
+              },
+              rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+              additionalProperties: {
+                productName: 'Prodotto di test',
+              },
+            };
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={trxItem}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+
+            const reverseButton = screen.getByTestId('reverse-btn');
+            fireEvent.click(reverseButton);
+
+            expect(pushMock).toHaveBeenCalled();
+            expect(pushMock.mock.calls[0][0]).toContain('storna-transazione');
         });
     });
 });

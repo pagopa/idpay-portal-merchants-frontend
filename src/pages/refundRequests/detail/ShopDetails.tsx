@@ -72,7 +72,6 @@ const ShopDetails: React.FC = () => {
 
   useEffect(() => {
     if ((history.location.state as any)?.refundUploadSuccess) {
-
       history.replace({
         ...history.location,
         state: {
@@ -218,10 +217,18 @@ const ShopDetails: React.FC = () => {
   return (
     <Box sx={{ width: '100%' }}>
       <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
-        <Box sx={{ display: 'flex', gridColumn: 'span 12', alignItems: 'center', marginTop: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gridColumn: 'span 12',
+            alignItems: 'center',
+            marginTop: 2,
+            cursor: 'pointer',
+          }}
+          onClick={() => history.goBack()}
+        >
           <ButtonNaked
             component="button"
-            onClick={() => history.goBack()}
             startIcon={<ArrowBackIcon />}
             sx={{
               color: 'primary.main',

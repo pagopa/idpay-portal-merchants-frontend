@@ -7,7 +7,7 @@ import { formatDate, formattedCurrency } from '../../helpers';
 import { getMerchantTransactionsProcessed } from '../../services/merchantService';
 import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
-import { MerchantTransactionProcessedDTO } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
+import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
 import { useAlert } from '../../hooks/useAlert';
 import {
   TransactionsComponentProps,
@@ -22,10 +22,10 @@ import { useTableDataFiltered } from './useTableDataFiltered';
 import { useMemoInitTableData } from './useMemoInitTableData';
 
 const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
   const { t } = useTranslation();
   const [page, setPage] = useState<number>(0);
-  const [rows, setRows] = useState<Array<MerchantTransactionProcessedDTO>>([]);
+  const [rows, setRows] = useState<Array<MerchantTransactionDTO>>([]);
   const [rowsPerPage, setRowsPerPage] = useState<number>(0);
   const [totalElements, setTotalElements] = useState<number>(0);
   const [filterDataByUser, setFilterDataByUser] = useState<string | undefined>();
@@ -73,7 +73,12 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
         }
       })
       .catch(() => {
-        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
       })
       .finally(() => setLoading(false));
   };
