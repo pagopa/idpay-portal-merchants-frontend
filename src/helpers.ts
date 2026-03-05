@@ -2,6 +2,9 @@
 /* eslint-disable functional/immutable-data */
 import { matchPath } from 'react-router-dom';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
+import { StatusEnum as TransactionStatusEnum } from './api/generated/merchants/MerchantTransactionDTO';
+import { RewardBatchTrxStatusEnum } from './api/generated/merchants/RewardBatchTrxStatus';
+import { StatusEnum } from './api/generated/merchants/RewardBatchDTO';
 
 
 export const copyTextToClipboard = (magicLink: string | undefined) => {
@@ -164,3 +167,48 @@ export const truncateString = (str?: string, maxLength: number = 40): string => 
     return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
   }
 };
+
+export const isReversable = (itemValues: any, batchStatus:any=undefined): boolean =>{
+  if(!batchStatus){
+      // PV page
+     return (
+      [
+        TransactionStatusEnum.INVOICED,
+        TransactionStatusEnum.REWARDED
+      ].includes(itemValues?.status)
+      && ![
+        RewardBatchTrxStatusEnum.APPROVED,
+      ].includes(itemValues?.rewardBatchTrxStatus)
+    );
+  }
+
+  // Batch detail page
+  return (
+    impossibleStatusCombination(itemValues, batchStatus)
+    &&[
+      TransactionStatusEnum.INVOICED,
+      TransactionStatusEnum.REWARDED
+    ].includes(itemValues?.status)
+    && ![
+      RewardBatchTrxStatusEnum.APPROVED,
+    ].includes(itemValues?.rewardBatchTrxStatus)
+  );
+};
+
+const impossibleStatusCombination = (itemValues: any, batchStatus:any): boolean => (
+  !(
+    batchStatus === StatusEnum.CREATED
+    && [
+      RewardBatchTrxStatusEnum.APPROVED,
+      RewardBatchTrxStatusEnum.REJECTED
+    ].includes(itemValues?.rewardBatchTrxStatus)
+  )
+  &&
+  !(
+    batchStatus === StatusEnum.APPROVED
+    && [
+      RewardBatchTrxStatusEnum.CONSULTABLE,
+      RewardBatchTrxStatusEnum.SUSPENDED
+    ].includes(itemValues?.rewardBatchTrxStatus)
+  )
+);

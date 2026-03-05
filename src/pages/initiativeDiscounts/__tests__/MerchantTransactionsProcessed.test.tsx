@@ -1,12 +1,14 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MerchantTransactionsProcessed from '../MerchantTransactionsProcessed';
+import { MerchantTransactionDTO } from '../../../api/generated/merchants/MerchantTransactionDTO';
 import * as service from '../../../services/merchantService';
 import * as helpers from '../../../helpers';
 import * as hooks from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
 import { MerchantTransactionProcessedDTO } from '../../../api/generated/merchants/MerchantTransactionProcessedDTO';
 import { getMerchantTransactionsProcessed } from '../../../services/merchantService';
 import { formatDate, formattedCurrency } from '../../../helpers';
+import * as loadingHook from '@pagopa/selfcare-common-frontend/hooks/useLoading';
 import * as loadingHook from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
 import * as errorHook from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import * as tableDataFilteredHook from '../useTableDataFiltered';
@@ -102,7 +104,7 @@ const formattedCurrencyMock = formattedCurrency as jest.Mock;
 describe('MerchantTransactionsProcessed', () => {
   const fakeId = '123';
 
-  const fakeRows: MerchantTransactionProcessedDTO[] = [
+  const fakeRows: MerchantTransactionDTO[] = [
     {
       updateDate: new Date('2025-10-06') as any,
       fiscalCode: 'AAAAAA00A00A000A',

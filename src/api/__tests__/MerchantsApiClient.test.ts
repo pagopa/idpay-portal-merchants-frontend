@@ -798,4 +798,58 @@ describe('MerchantsApiClient uncovered branches', () => {
     });
     expect(result).toBe('extracted');
   });
+
+  describe('reversalTransactionInvoiced branches', () => {
+    it('handles left branch (not isRight)', async () => {
+      const { isRight } = require('fp-ts/Either');
+      jest.spyOn(require('fp-ts/Either'), 'isRight').mockReturnValue(false);
+
+      mockApiClient.reversalTransactionInvoiced = jest.fn().mockResolvedValue({
+        left: [
+          {
+            value: 'REV_ERR',
+            context: [{}, { actual: { code: 'REV_CODE', message: 'Rev error' } }],
+          },
+        ],
+      });
+
+      const MerchantApi = loadApi();
+      const result = await MerchantApi.reversalTransactionInvoiced('trx1');
+
+      expect(result).toEqual({ code: 'REV_CODE', message: 'Rev error' });
+    });
+
+    it('handles 400 status branch', async () => {
+      jest.spyOn(require('fp-ts/Either'), 'isRight').mockReturnValue(true);
+
+      mockApiClient.reversalTransactionInvoiced = jest.fn().mockResolvedValue({
+        right: {
+          status: 400,
+          value: { code: '400_CODE', message: 'Bad request msg' },
+        },
+      });
+
+      const MerchantApi = loadApi();
+      const result = await MerchantApi.reversalTransactionInvoiced('trx1');
+
+      expect(result).toEqual({ code: 'UNKNOWN_ERROR', message: 'Errore generico' });
+    });
+
+    it('handles success branch (204 extractResponse)', async () => {
+      mockApiClient.reversalTransactionInvoiced = jest.fn().mockResolvedValue({
+        _tag: 'Right',
+        right: { status: 204 },
+      });
+
+      const MerchantApi = loadApi();
+      const result = await MerchantApi.reversalTransactionInvoiced('trx1');
+
+      expect(extractResponse).toHaveBeenCalledWith(
+        expect.objectContaining({ right: { status: 204 } }),
+        204,
+        expect.any(Function)
+      );
+      expect(result).toBe('extracted');
+    });
+  });
 });

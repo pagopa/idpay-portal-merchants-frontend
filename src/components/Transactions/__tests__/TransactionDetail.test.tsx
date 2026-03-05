@@ -13,7 +13,10 @@ const mockFormatValues = jest.fn((s: string) => `Formatted: ${s}`);
 
 jest.mock('../../../utils/formatUtils', () => ({
   __esModule: true,
-  currencyFormatter: (n: number) => mockCurrencyFormatter(n),
+  currencyFormatter: (n: number) => ({
+    toString: () =>
+      `€ ${Number.isFinite(n) ? n.toFixed(2) : '0.00'}`,
+  }),
   formatValues: (s: string) => mockFormatValues(s),
 }));
 
@@ -440,5 +443,26 @@ describe('TransactionDetail (100% coverage)', () => {
       expect(screen.queryByTestId('item-loader')).not.toBeInTheDocument();
       expect(screen.getByText('invoice-10.pdf')).toBeInTheDocument();
     });
+  });
+
+  it('does NOT show reverseButton (Storna) for COMPLETED + PENDING (current behavior)', () => {
+    const itemValues = {
+      id: 'TRX-11',
+      status: 'COMPLETED',
+      rewardBatchTrxStatus: 'PENDING',
+      invoiceFile: { filename: 'inv.pdf', docNumber: 'D11' },
+    };
+
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        setIsOpen={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
+
+    expect(screen.queryByText('Storna')).not.toBeInTheDocument();
   });
 });

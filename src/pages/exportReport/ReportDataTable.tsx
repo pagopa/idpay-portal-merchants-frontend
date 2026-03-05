@@ -124,7 +124,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
     {
       field: 'fileName',
       headerName: 'Nome file',
-      flex: 1,
+      flex: 3,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => (
@@ -137,7 +137,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
                 : MISSING_DATA_PLACEHOLDER
             }
           >
-            <Typography variant="caption-semibold" fontSize="1rem" pl={1}>
+            <Typography variant="caption-semibold" fontSize="1rem" pl={1} sx={{ maxWidth: '100% !important' }} className="ShowDots">
               {params.row.fileName}
             </Typography>
           </Tooltip>
@@ -147,31 +147,47 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
     {
       field: 'requestDate',
       headerName: 'Data richiesta',
-      flex: 1,
+      flex: 2,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => (
-        <Typography color={theme.palette.text.secondary} fontWeight={400}>
-          {safeFormatDate(params.row.requestDate)}
-        </Typography>
+        <Tooltip
+          title={
+            params.row.requestDate && params.row.requestDate !== '' ?
+              safeFormatDate(params.row.requestDate)
+              : MISSING_DATA_PLACEHOLDER
+          }
+        >
+          <Typography color={theme.palette.text.secondary} fontWeight={400} className="ShowDots">
+            {safeFormatDate(params.row.requestDate)}
+          </Typography>
+        </Tooltip>
       ),
     },
     {
       field: 'elaborationDate',
       headerName: 'Data generazione',
-      flex: 1,
+      flex: 2,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => (
-        <Typography color={theme.palette.text.secondary} fontWeight={400}>
-          {safeFormatDate(params.row.elaborationDate)}
-        </Typography>
+        <Tooltip
+          title={
+            params.row.elaborationDate && params.row.elaborationDate !== '' ?
+              safeFormatDate(params.row.elaborationDate)
+              : MISSING_DATA_PLACEHOLDER
+          }
+          >
+          <Typography color={theme.palette.text.secondary} fontWeight={400} className="ShowDots">
+            {safeFormatDate(params.row.elaborationDate)}
+          </Typography>
+        </Tooltip>
       ),
     },
     {
       field: 'period',
       headerName: 'Periodo',
-      flex: 1,
+      flex: 2,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => {
@@ -181,7 +197,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
           safeFormatDate(params.row.endPeriod, false);
         return (
           <Tooltip title={period && period !== '' ? period : MISSING_DATA_PLACEHOLDER}>
-            <Typography variant="caption-semibold" fontSize="1rem">
+            <Typography variant="caption-semibold" fontSize="1rem" sx={{ maxWidth: '100% !important' }} className="ShowDots">
               {period}
             </Typography>
           </Tooltip>

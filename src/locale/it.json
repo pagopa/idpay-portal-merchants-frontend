@@ -409,30 +409,53 @@
     "uploadSuccess": "Punti vendita caricati con successo"
   },
   "modifyDocument": {
+      "breadcrumbLabel": "Modifica documento",
       "title":"Carica la fattura",
-      "replaceFile":"Sostituisci",
-      "creditNote": "Carica il documento",
-      "creditNoteSubtitle": "Carica il file della fattura elettronica relativa a questo acquisto. Assicurati che il documento sia in formato .xml o .pdf e conforme agli standard della fatturazione elettronica.",
-      "uploadFile": "Trascina qui il file .xml o .pdf della fattura da caricare o ",
-      "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML",
-      "manualLink": "Dubbi? Vai sul manuale",
-      "uploadFileButton": "selezionalo dal tuo computer",
       "invoiceTitle": "Qual è il numero  della fattura?",
+      "invoiceSubtitle": "",
       "insertInvoice": "Inserisci il numero della fattura",
       "invoiceLabel": "Numero della fattura",
+      "creditNote": "Carica il documento",
+      "replaceFile":"Sostituisci",
+      "creditNoteTitle":"",
+      "creditNoteSubtitle": "Carica il file della fattura elettronica relativa a questo acquisto. Assicurati che il documento sia in formato .xml o .pdf e conforme agli standard della fatturazione elettronica.",
+      "manualLink": "Dubbi? Vai sul manuale",
+      "uploadFile": "Trascina qui il file .xml o .pdf della fattura da caricare o ",
+      "uploadFileButton": "selezionalo dal tuo computer",
       "refundSuccessUpload": "Richiesta inviata correttamente",
       "errors": {
-        "requiredFileError": "Selezionare un file da caricare"
-      },
-        "reverse": {
-          "title": "Storna transazione",
-          "fileSizeError": "Il file supera la dimensione massima di 20MB",
-          "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
-          "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
-          "deniedSentError": "Non puoi modificare questo documento.",
-          "creditNoteTitle": "Qual è il numero della nota di credito?",
-          "insertCreditNote": "Inserisci il numero della nota di credito",
-          "creditNoteLabel": "Numero della nota di credito"
+        "requiredFileError": "Selezionare un file da caricare",
+        "deniedSentError": "Non puoi modificare questo documento.",
+        "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+        "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
+        "fileSizeError": "Il file supera la dimensione massima di 20MB",
+        "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
+      }
+    },
+  "reverse": {
+      "breadcrumbLabel": "Storna transazione",
+      "title": "Storna transazione",
+      "invoiceTitle": "Qual è il numero della nota di credito?",
+      "invoiceSubtitle": "Inserisci il numero della nota di credito e carica la documentazione necessaria per avviare lo storno.  ",
+      "insertInvoice": "Inserisci il numero della nota di credito",
+      "invoiceLabel": "Numero della nota di credito",
+      "creditNote": "Carica nota di credito",
+      "replaceFile": "Sostituisci",
+      "creditNoteTitle": "Qual è il numero della nota di credito?",
+      "creditNoteSubtitle": "Carica il file della nota di credito relativa a questo acquisto. ",
+      "manualLink": "Dubbi? Vai sul manuale",
+      "uploadFile": "Trascina qui il file PDF o XML della nota di credito da caricare o ",
+      "uploadFileButton": "selezionalo dal tuo computer",
+      "insertCreditNote": "Inserisci il numero della nota di credito",
+      "creditNoteLabel": "Numero della nota di credito",
+      "refundSuccessUpload": "Richiesta inviata correttamente",
+      "errors": {
+        "requiredFileError": "Selezionare un file da caricare",
+        "deniedSentError": "Non puoi modificare questo documento.",
+        "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+        "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
+        "fileSizeError": "Il file supera la dimensione massima di 20MB",
+        "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
       }
     }
 }

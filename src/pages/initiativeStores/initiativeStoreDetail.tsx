@@ -20,7 +20,7 @@ import MerchantTransactions from '../../components/Transactions/MerchantTransact
 import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail, handlePromptMessage } from '../../helpers';
-import { formatDate } from '../../utils/formatUtils';
+import { safeFormatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { POS_TYPE } from '../../utils/constants';
 import ROUTES from '../../routes';
@@ -73,7 +73,6 @@ const InitiativeStoreDetail = () => {
     }
   }, [storeDetail]);
 
-
   const fetchStoreDetail = async () => {
     try {
       const userJwt = parseJwt(storageTokenOps.read());
@@ -83,7 +82,12 @@ const InitiativeStoreDetail = () => {
         setStoreDetail(response);
       }
     } catch (error: any) {
-      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
     }
   };
 
@@ -99,15 +103,20 @@ const InitiativeStoreDetail = () => {
       if (content) {
         const responseWIthFormattedDate = content.map((transaction: any) => ({
           ...transaction,
-          trxDate: formatDate(transaction.trxDate),
-          updateDate: formatDate(transaction.updateDate),
-          trxChargeDate: formatDate(transaction.trxChargeDate),
+          trxDate: safeFormatDate(transaction.trxDate),
+          updateDate: safeFormatDate(transaction.updateDate),
+          trxChargeDate: safeFormatDate(transaction.trxChargeDate),
         }));
         setStoreTransactions([...responseWIthFormattedDate]);
       }
     } catch (error: any) {
       console.log(error, 'error');
-      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
     } finally {
       setDataTableIsLoading(false);
     }
@@ -216,8 +225,6 @@ const InitiativeStoreDetail = () => {
   //   setContactNameModal('');
   // };
 
-
-
   const handleUpdateReferent = async () => {
     let newErrors: typeof fieldErrors = {};
 
@@ -270,7 +277,12 @@ const InitiativeStoreDetail = () => {
       },
     ];
     if (storeDetail.contactEmail === contactEmailConfirmModal) {
-      setAlert({title: t('errors.duplicateEmailError'), text: `${storeDetail.contactEmail} è già associata ad altro punto vendita`, isOpen: true, severity: 'error'});
+      setAlert({
+        title: t('errors.duplicateEmailError'),
+        text: `${storeDetail.contactEmail} è già associata ad altro punto vendita`,
+        isOpen: true,
+        severity: 'error',
+      });
       setModalIsOpen(false);
       return;
     }
@@ -278,15 +290,29 @@ const InitiativeStoreDetail = () => {
     const response = await updateMerchantPointOfSales(merchantId, obj);
     if (response) {
       if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
-        setAlert({title: t('errors.duplicateEmailError'), text: `${response?.message} è già associata ad altro punto vendita`, isOpen: true, severity: 'error'});
+        setAlert({
+          title: t('errors.duplicateEmailError'),
+          text: `${response?.message} è già associata ad altro punto vendita`,
+          isOpen: true,
+          severity: 'error',
+        });
         setModalIsOpen(false);
         setFieldErrors({});
       } else {
-        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
       }
     } else {
       setModalIsOpen(false);
-      setAlert({text: t('pages.initiativeStores.referentChangeSuccess'), isOpen: true, severity: 'success'});
+      setAlert({
+        text: t('pages.initiativeStores.referentChangeSuccess'),
+        isOpen: true,
+        severity: 'success',
+      });
       void fetchStoreDetail();
     }
   };
@@ -297,27 +323,24 @@ const InitiativeStoreDetail = () => {
       page,
     }));
 
-    if(sortModel.length > 0){
+    if (sortModel.length > 0) {
       const { field, sort } = sortModel[0];
       void fetchStoreTransactions({
-      ...transactionsFilters,
-      page,
-      sort: `${
+        ...transactionsFilters,
+        page,
+        sort: `${
           field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
         },${sort}`,
-    });
-    }
-    else{
+      });
+    } else {
       void fetchStoreTransactions({
-      ...transactionsFilters,
-      page,
-    });
+        ...transactionsFilters,
+        page,
+      });
     }
-
-    
   };
 
-    const handleSortModelChange = async (newSortModel: GridSortModel) => {
+  const handleSortModelChange = async (newSortModel: GridSortModel) => {
     setSortModel(newSortModel);
     if (newSortModel.length > 0) {
       const { field, sort } = newSortModel[0];
@@ -331,7 +354,7 @@ const InitiativeStoreDetail = () => {
   };
   return (
     <Box>
-      <Prompt when={true} message={(location) => handlePromptMessage(location, ROUTES.STORES  )} />
+      <Prompt when={true} message={(location) => handlePromptMessage(location, ROUTES.STORES)} />
       <Box
         mt={2}
         sx={{

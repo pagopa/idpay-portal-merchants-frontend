@@ -11,6 +11,7 @@ import { downloadInvoiceFile } from '../../services/merchantService';
 import { useStore } from '../../pages/initiativeStores/StoreContext';
 import { useAlert } from '../../hooks/useAlert';
 import DetailDrawer, { DetailDrawerProps } from '../Drawer/DetailDrawer';
+import { isReversable } from '../../helpers';
 import getStatus from './useStatus';
 
 type Props = DetailDrawerProps & {
@@ -50,6 +51,25 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
           ]
         : [],
     [isEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+  );
+
+  const reverseButton: DetailDrawerProps['buttons'] = useMemo(
+    () =>
+      isReversable(itemValues)
+        ? [
+          {
+            title: 'Storna',
+            dataTestId: 'reverse-btn',
+            onClick: () => {
+              const path = routes.REVERSE.replace(':id', merchantId)
+                .replace(':pointOfSaleId', storeId)
+                .replace(':trxId', itemValues.id);
+              history.push(path, { fromLocation: history.location });
+            },
+          },
+        ]
+        : [],
+    [isReversable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const getStatusChip = () => {
@@ -99,7 +119,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   }
 
   return (
-    <DetailDrawer {...rest} data-testid="transaction-detail" buttons={[...editButton]}>
+    <DetailDrawer {...rest} data-testid="transaction-detail" buttons={[...editButton, ...reverseButton]}>
       {listItem.map((item, index) => (
         <Box
           key={`${item?.id}-${index}`}
@@ -139,7 +159,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
             >
               {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
             </Typography>
-            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium}>
+            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: 'break-word' }}>
               {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>

@@ -114,6 +114,44 @@ export const MerchantApi = {
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
+  reversalTransactionInvoiced: async (
+    transactionId: string,
+    file: File,
+    docNumber?: string
+  ): Promise<void | { code: string; message: string }> => {
+    const result = await apiClient.reversalTransactionInvoiced({
+      transactionId,
+      file,
+      docNumber,
+    } as any);
+
+    if (!isRight(result)) {
+      const firstError = (result.left as any)?.[0];
+      const actualError =
+        firstError?.context?.[0]?.actual ??
+        firstError?.context?.[1]?.actual;
+
+      return {
+        code:
+          actualError?.code ??
+          firstError?.value ??
+          'UNKNOWN_ERROR',
+        message:
+          actualError?.message ??
+          'Errore generico',
+      };
+    }
+
+    if ((result as any)?.right?.status === 400) {
+      return {
+        code: (result as any)?.right?.value?.code ?? '400',
+        message: (result as any)?.right?.value?.message ?? 'Bad request',
+      };
+    }
+
+    return extractResponse(result, 204, onRedirectToLogin);
+  },
+
   createTransaction: async (
     amountCents: number,
     idTrxAcquirer: string,

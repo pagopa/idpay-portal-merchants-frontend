@@ -4,7 +4,7 @@ import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
 import { FormikProps } from 'formik';
 import { Dispatch, SetStateAction } from 'react';
 import { StatusEnum as TransactionCreatedStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
-import { StatusEnum as TransactionProcessedStatusEnum } from '../../api/generated/merchants/MerchantTransactionProcessedDTO';
+import { StatusEnum as TransactionStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
 
 export enum TransactionTypeEnum {
   PROCESSED,
@@ -81,9 +81,9 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
   }
 };
 
-export const renderTrasactionProcessedStatus = (status: TransactionProcessedStatusEnum) => {
+export const renderTrasactionProcessedStatus = (status: TransactionStatusEnum) => {
   switch (status) {
-    case TransactionProcessedStatusEnum.REWARDED:
+    case TransactionStatusEnum.REWARDED:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -91,12 +91,20 @@ export const renderTrasactionProcessedStatus = (status: TransactionProcessedStat
           color="success"
         />
       );
-    case TransactionProcessedStatusEnum.CANCELLED:
+    case TransactionStatusEnum.CANCELLED:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
           label={i18n.t('commons.discountStatusEnum.cancelled')}
           color="error"
+        />
+      );
+    default:
+      return (
+        <Chip
+          sx={{ fontSize: '14px' }}
+          label={i18n.t('commons.discountStatusEnum.identified')}
+          color="default"
         />
       );
   }

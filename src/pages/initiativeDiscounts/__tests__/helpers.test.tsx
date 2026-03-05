@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import {
   renderTransactionCreatedStatus,
@@ -7,8 +6,7 @@ import {
   userCanCreateDiscount,
   resetForm,
 } from '../helpers';
-import { StatusEnum as TransactionCreatedStatusEnum } from '../../../api/generated/merchants/MerchantTransactionDTO';
-import { StatusEnum as TransactionProcessedStatusEnum } from '../../../api/generated/merchants/MerchantTransactionProcessedDTO';
+import { StatusEnum  } from '../../../api/generated/merchants/MerchantTransactionDTO';
 import { FormikProps } from 'formik';
 
 jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
@@ -18,41 +16,41 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
 describe('initiativeDiscounts/helpers', () => {
   describe('renderTransactionCreatedStatus', () => {
     it('should render AUTHORIZED status chip', () => {
-      render(renderTransactionCreatedStatus(TransactionCreatedStatusEnum.AUTHORIZED));
+      render(renderTransactionCreatedStatus(StatusEnum.AUTHORIZED));
       expect(screen.getByText('commons.discountStatusEnum.authorized')).toBeInTheDocument();
     });
 
     it('should render AUTHORIZATION_REQUESTED status chip', () => {
-      render(renderTransactionCreatedStatus(TransactionCreatedStatusEnum.AUTHORIZATION_REQUESTED));
+      render(renderTransactionCreatedStatus(StatusEnum.AUTHORIZATION_REQUESTED));
       expect(
         screen.getByText('commons.discountStatusEnum.authorizationRequested')
       ).toBeInTheDocument();
     });
 
     it('should render CREATED status as identified', () => {
-      render(renderTransactionCreatedStatus(TransactionCreatedStatusEnum.CREATED));
+      render(renderTransactionCreatedStatus(StatusEnum.CREATED));
       expect(screen.getByText('commons.discountStatusEnum.identified')).toBeInTheDocument();
     });
 
     it('should render IDENTIFIED status chip', () => {
-      render(renderTransactionCreatedStatus(TransactionCreatedStatusEnum.IDENTIFIED));
+      render(renderTransactionCreatedStatus(StatusEnum.IDENTIFIED));
       expect(screen.getByText('commons.discountStatusEnum.identified')).toBeInTheDocument();
     });
 
     it('should render REJECTED status chip', () => {
-      render(renderTransactionCreatedStatus(TransactionCreatedStatusEnum.REJECTED));
+      render(renderTransactionCreatedStatus(StatusEnum.REJECTED));
       expect(screen.getByText('commons.discountStatusEnum.invalidated')).toBeInTheDocument();
     });
   });
 
   describe('renderTrasactionProcessedStatus', () => {
     it('should render REWARDED status chip', () => {
-      render(renderTrasactionProcessedStatus(TransactionProcessedStatusEnum.REWARDED));
+      render(renderTrasactionProcessedStatus(StatusEnum.REWARDED));
       expect(screen.getByText('commons.discountStatusEnum.rewarded')).toBeInTheDocument();
     });
 
     it('should render CANCELLED status chip', () => {
-      render(renderTrasactionProcessedStatus(TransactionProcessedStatusEnum.CANCELLED));
+      render(renderTrasactionProcessedStatus(StatusEnum.CANCELLED));
       expect(screen.getByText('commons.discountStatusEnum.cancelled')).toBeInTheDocument();
     });
   });

@@ -1,9 +1,8 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-
 import InvoiceDetail from '../InvoiceDetail';
 import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
+import { useHistory, useLocation } from 'react-router-dom';
 import { getEndOfNextMonth } from '../../../../utils/formatUtils';
 
 jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
@@ -88,11 +87,17 @@ jest.mock('../../../../utils/formatUtils', () => ({
   }),
 }));
 
+jest.mock('../../../../helpers', () => ({
+    ...jest.requireActual('../../../../helpers'),
+    isReversable: jest.fn(),
+}));
+
 import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile, postponeTransaction } from '../../../../services/merchantService';
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
 import { useLocation } from 'react-router-dom';
+import { isReversable } from '../../../../helpers';
 
 describe('InvoiceDetail', () => {
   let mockSetAlert: jest.Mock;
@@ -150,7 +155,6 @@ describe('InvoiceDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSetAlert = jest.fn();
-
     (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
     (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
     (useAppSelector as jest.Mock).mockReturnValue([]);
@@ -468,7 +472,8 @@ describe('InvoiceDetail', () => {
 
       renderInvoiceDetail({ title: 'Dettaglio transazione', itemValues: noFilenameValues });
 
-      fireEvent.click(screen.getByTestId('btn-test'));
+            const button = screen.getByTestId('btn-test');
+            fireEvent.click(button);
 
       await waitFor(() => {
         expect(mockSetAlert).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));
@@ -973,4 +978,46 @@ describe('InvoiceDetail', () => {
       expect(mockSetAlert).toHaveBeenCalled();
     });
   });
+
+    describe('Reverse button', () => {
+        it('Should navigate to reverse page when reverse button is clicked', () => {
+            (useLocation as jest.Mock).mockReturnValue({
+                state: { store: { status: 'CLOSED', month: mockUseLocation.state.store.month } }
+            });
+            (isReversable as jest.Mock).mockReturnValue(true);
+
+            const trxItem = {
+              id: 'trx-1',
+              pointOfSaleId: 'pos-1',
+              status: "REWARDED",
+              rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+              initiativeId: 'init-123',
+              invoiceData: {
+                docNumber: 'DOC-123',
+                filename: 'fattura.pdf',
+              },
+              rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+              additionalProperties: {
+                productName: 'Prodotto di test',
+              },
+            };
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={trxItem}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+
+            const reverseButton = screen.getByTestId('reverse-btn');
+            fireEvent.click(reverseButton);
+
+            expect(useHistory().push).toHaveBeenCalled();
+        });
+    });
 });
