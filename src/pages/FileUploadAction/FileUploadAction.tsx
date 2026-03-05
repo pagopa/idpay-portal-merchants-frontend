@@ -327,7 +327,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               dropzoneButton={scopedT('uploadFileButton')}
               rejectedLabel={scopedT('errors.fileNotSupported')}
               loading={loadingFile}
-              dropzoneButton={t('modifyDocument.uploadFile')}
             />
           </Box>
 

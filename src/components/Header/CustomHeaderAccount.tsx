@@ -3,13 +3,9 @@
 import React from 'react';
 import { Container, Button, Stack, IconButton } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
-import { AccountDropdown } from '@pagopa/mui-italia/dist/components/AccountDropdown';
-import { ButtonNaked } from '@pagopa/mui-italia';
-import { AccountDropdown } from '@pagopa/mui-italia';
-
-/* Icons */
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import { AccountDropdown } from '@pagopa/mui-italia';
 
 export type JwtUser = {
   id: string;
