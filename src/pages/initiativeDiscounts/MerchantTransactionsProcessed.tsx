@@ -44,7 +44,7 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
         const fS = values.filterStatus.length > 0 ? values.filterStatus : undefined;
         setFilterDataByUser(fU);
         setFilterDataByStatus(fS);
-        getTableData(id, 0, fU, fS);
+        void getTableData(id, 0, fU, fS);
       }
     },
   });
@@ -54,33 +54,44 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
   //   { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
   // ];
 
-  const getTableData = (
+  const showGenericError = () =>
+    setAlert({
+      title: t('errors.genericTitle'),
+      text: t('errors.genericDescription'),
+      isOpen: true,
+      severity: 'error',
+    });
+
+  const handleTableResponse = (response: any) => {
+    setPage(response.pageNo);
+    setRowsPerPage(response.pageSize);
+    setTotalElements(response.totalElements);
+
+    setRows(response.content ?? []);
+  };
+
+  const getTableData = async (
     initiativeId: string,
     page: number,
     fiscalCode: string | undefined,
     status: string | undefined
   ) => {
     setLoading(true);
-    getMerchantTransactionsProcessed({ initiativeId, page, fiscalCode, status })
-      .then((response) => {
-        setPage(response.pageNo);
-        setRowsPerPage(response.pageSize);
-        setTotalElements(response.totalElements);
-        if (response.content.length > 0) {
-          // setRows([...response.content]);
-        } else {
-          setRows([]);
-        }
-      })
-      .catch(() => {
-        setAlert({
-          title: t('errors.genericTitle'),
-          text: t('errors.genericDescription'),
-          isOpen: true,
-          severity: 'error',
-        });
-      })
-      .finally(() => setLoading(false));
+
+    try {
+      const response = await getMerchantTransactionsProcessed({
+        initiativeId,
+        page,
+        fiscalCode,
+        status,
+      });
+
+      handleTableResponse(response);
+    } catch (error) {
+      showGenericError();
+    } finally {
+      setLoading(false);
+    }
   };
 
   useMemoInitTableData(id, setPage, setFilterDataByUser, setFilterDataByStatus);

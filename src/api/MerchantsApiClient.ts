@@ -95,7 +95,6 @@ export const MerchantApi = {
     const result = await apiClient.getMerchantTransactionsProcessed({
       ...params
     });
-    console.log("[DEBUG] getMerchantTransactionsProcessed:", result);
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
