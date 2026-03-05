@@ -8,7 +8,6 @@ import {
   FormControlLabel,
   Radio,
   Link,
-  Grid,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
@@ -16,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia';
+import Grid from '../../components/common/Grid';
 import { parseJwt } from '../../utils/jwt-utils';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';

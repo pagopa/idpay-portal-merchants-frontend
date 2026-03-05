@@ -1,7 +1,8 @@
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import { Button, ButtonProps, Grid, IconButton, Typography } from '@mui/material';
+import { Button, ButtonProps, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import Grid from '../common/Grid';
 
 export type DetailDrawerProps = {
   isOpen: boolean;

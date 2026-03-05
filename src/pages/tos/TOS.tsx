@@ -1,7 +1,8 @@
-import { Box, Grid, Paper } from '@mui/material';
+import { Box, Paper } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import Grid from '../../components/common/Grid';
 import tosHTML from './tosHTML.json';
 
 declare const OneTrust: any;

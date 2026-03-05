@@ -4,7 +4,6 @@ import {
   Typography,
   Breadcrumbs,
   FormControl,
-  Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -24,6 +23,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useSelector } from 'react-redux';
 import { Sync } from '@mui/icons-material';
+import Grid from '../../../components/common/Grid';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
@@ -367,7 +367,6 @@ const ShopDetails: React.FC = () => {
                 }}
                 name="status"
                 label={t('pages.initiativeDiscounts.filterByStatus')}
-                placeholder={t('pages.initiativeDiscounts/filterByStatus')}
                 onChange={formik.handleChange}
                 value={formik.values.status}
                 sx={{

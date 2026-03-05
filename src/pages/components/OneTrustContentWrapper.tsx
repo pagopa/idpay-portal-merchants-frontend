@@ -1,4 +1,5 @@
-import { Box, Grid, Link } from '@mui/material';
+import { Box, Link } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { useTranslation } from 'react-i18next';
 import routes from '../../routes';
 

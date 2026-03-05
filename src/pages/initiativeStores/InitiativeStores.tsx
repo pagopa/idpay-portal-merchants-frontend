@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Stack,
-  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -25,6 +24,7 @@ import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
+import Grid from '../../components/common/Grid';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
 import { GetPointOfSalesFilters } from '../../types/types';

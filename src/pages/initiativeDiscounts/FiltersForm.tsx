@@ -1,4 +1,5 @@
-import { Button, Grid } from '@mui/material';
+import { Button } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import { useTranslation } from 'react-i18next';
 import React, { cloneElement, isValidElement } from 'react';

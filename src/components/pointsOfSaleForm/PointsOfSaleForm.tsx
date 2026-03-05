@@ -7,13 +7,14 @@ import {
   FormControlLabel,
   FormControl,
   TextField,
-  Grid, Button, Alert, Slide,
+  Button, Alert, Slide,
 } from '@mui/material';
 import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { ButtonNaked, theme } from '@pagopa/mui-italia';
 import { useTranslation } from 'react-i18next';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import Grid from '../../components/common/Grid';
 import { TypeEnum, PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';

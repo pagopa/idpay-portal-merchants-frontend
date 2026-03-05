@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
-import { Box, Typography, Paper, Button, Grid, Breadcrumbs } from '@mui/material';
+import { Box, Typography, Paper, Button, Breadcrumbs } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { useTranslation, Trans } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { useHistory, useLocation } from 'react-router-dom';

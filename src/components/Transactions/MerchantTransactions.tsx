@@ -2,7 +2,6 @@ import {
   Box,
   CircularProgress,
   FormControl,
-  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -17,6 +16,7 @@ import { theme } from '@pagopa/mui-italia';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import Grid from '../common/Grid';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import EmptyList from '../../pages/components/EmptyList';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
@@ -326,7 +326,6 @@ const MerchantTransactions = ({
               }}
               name="status"
               label={t('pages.initiativeDiscounts.filterByStatus')}
-              placeholder={t('pages.initiativeDiscounts.filterByStatus')}
               onChange={formik.handleChange}
               value={formik.values.status}
               sx={{
