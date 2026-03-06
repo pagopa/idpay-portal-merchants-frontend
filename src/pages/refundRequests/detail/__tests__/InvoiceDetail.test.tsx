@@ -67,7 +67,7 @@ jest.mock('../../../../utils/formatUtils', () => ({
 
 jest.mock('../../../../helpers', () => ({
     ...jest.requireActual('../../../../helpers'),
-    isReversable: jest.fn(),
+    isReversableOrEditable: jest.fn(),
 }));
 
 
@@ -75,7 +75,7 @@ import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile, postponeTransaction } from '../../../../services/merchantService';
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
-import { isReversable } from '../../../../helpers';
+import { isReversableOrEditable } from '../../../../helpers';
 
 describe('InvoiceDetail', () => {
     let mockSetAlert: jest.Mock;
@@ -630,7 +630,7 @@ describe('InvoiceDetail', () => {
             render(
                 <InvoiceDetail
                     title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE, status: "REWARDED" }}
+                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED, status: "REWARDED", pointOfSaleId: 'pos-1', }}
                     listItem={baseListItem}
                     batchId=""
                     storeId=""
@@ -649,7 +649,7 @@ describe('InvoiceDetail', () => {
             (useLocation as jest.Mock).mockReturnValue({
                 state: { store: { status: 'CLOSED', month: mockUseLocation.state.store.month } }
             });
-            (isReversable as jest.Mock).mockReturnValue(true);
+            (isReversableOrEditable as jest.Mock).mockReturnValue(true);
 
             const trxItem = {
               id: 'trx-1',
