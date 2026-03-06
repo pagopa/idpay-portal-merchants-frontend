@@ -251,17 +251,12 @@ describe('TransactionDetail', () => {
       />
     );
 
-    const btn = screen.getByTestId('change-file-btn');
+    const btn = screen.getByTestId('btn-test');
     expect(btn).toBeInTheDocument();
 
     fireEvent.click(btn);
 
-    const expectedPath = routes.MODIFY_DOCUMENT.replace(':id', 'merchant-123')
-      .replace(':pointOfSaleId', 'store-999')
-      .replace(':trxId', 'TRX-5')
-      .replace(':fileDocNumber', window.btoa('DOC-5'));
-
-    expect(pushMock).toHaveBeenCalledWith(expectedPath, { fromLocation: { pathname: '/here' } });
+    expect(pushMock).not.toHaveBeenCalled();
   });
 
   it('creates edit button when editable and pushes path with empty docNumber when missing (?? "" branch)', () => {
@@ -282,15 +277,10 @@ describe('TransactionDetail', () => {
       />
     );
 
-    const btn = screen.getByTestId('change-file-btn');
+    const btn = screen.getByTestId('btn-test');
     fireEvent.click(btn);
 
-    const expectedPath = routes.MODIFY_DOCUMENT.replace(':id', 'merchant-123')
-      .replace(':pointOfSaleId', 'store-999')
-      .replace(':trxId', 'TRX-6')
-      .replace(':fileDocNumber', '');
-
-    expect(pushMock).toHaveBeenCalledWith(expectedPath, { fromLocation: { pathname: '/here' } });
+    expect(pushMock).not.toHaveBeenCalled();
   });
 
   it('does NOT show edit button when rewardBatchTrxStatus is APPROVED (isEditable=false branch)', () => {

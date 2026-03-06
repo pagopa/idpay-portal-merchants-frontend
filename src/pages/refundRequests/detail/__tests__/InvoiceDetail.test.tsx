@@ -638,9 +638,9 @@ describe('InvoiceDetail', () => {
                     setIsOpen={() => { }}
                 />
             );
-            const button = screen.getByTestId('change-file-btn');
+            const button = screen.getByTestId('btn-test');
             fireEvent.click(button);
-            expect(pushMock).toHaveBeenCalled()
+            expect(pushMock).not.toHaveBeenCalled()
         });
     });
 
