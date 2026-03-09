@@ -141,7 +141,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         const normalizedDocNumber = docNumber.trim();
         let response: any;
 
-        if (i18nBlockKey === "modifyDocument") {
+        if (i18nBlockKey === 'modifyDocument') {
           response = await (apiCall as any)(trxId, file, pointOfSaleId, normalizedDocNumber);
         } else {
           response = await (apiCall as any)(trxId, file, normalizedDocNumber);
@@ -190,7 +190,12 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         history.goBack();
       } catch (error: unknown) {
         console.error('Unexpected API Error:', error);
-        setAlert({ text: t('modifyDocument.errors.errorAlert'), isOpen: true, severity: 'error' });
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
         setLoadingFile(false);
       }
     }

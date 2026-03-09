@@ -252,7 +252,20 @@ export const MerchantApi = {
       'initiative-id': initiativeId,
       userFiscalCode,
     });
-    return extractResponse(result, 200, onRedirectToLogin);
+
+    if (!isRight(result)) {
+      logApiError(result, 'getReportedUser');
+      throw new Error('GET_REPORTED_USER_FAILED');
+    }
+
+    const response = result.right;
+
+    if (response.status !== 200) {
+      logApiError(response, 'getReportedUser');
+      throw new Error('GET_REPORTED_USER_FAILED');
+    }
+
+    return response.value as unknown as ReportedUserDTO;
   },
 
   createReportedUser: async (
@@ -297,7 +310,7 @@ export const MerchantApi = {
       return extractResponse(result, 200, onRedirectToLogin);
     } catch (error) {
       logApiError(error, 'userPermission');
-      return {} as RewardBatchListDTO;
+      throw error;
     }
   },
 
@@ -311,7 +324,7 @@ export const MerchantApi = {
       return extractResponse(result, 200, onRedirectToLogin);
     } catch (error) {
       logApiError(error, 'userPermission');
-      return {} as RewardBatchListDTO;
+      throw error;
     }
   },
 
