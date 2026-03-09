@@ -448,28 +448,31 @@ export const MerchantApi = {
 
 
 function logApiError(error: any, apiName?: string) {
- 
+
   const errorKey = error?.response?.data?.errorKey;
   if (errorKey) {
-    console.error(`Error Key: ${errorKey}`);
+    // console.error(`Error Key: ${errorKey}`);
   }
+  /*
   const pretty = (val: any) =>
     typeof val === "string"
       ? val
       : val !== undefined
         ? JSON.stringify(val, null, 2)
         : "N/A";
+        */
   const apiLabel = apiName ? `[API ERROR] MerchantsApi.${apiName}` : "[API ERROR] MerchantsApi";
   if (console.groupCollapsed) {
     console.groupCollapsed(apiLabel);
   } else {
-    console.error(apiLabel);
+   // console.error(apiLabel);
   }
-  console.error("Message:", pretty(error?.message));
-  console.error("Error name:", error?.name ?? "N/A");
-  console.error("Stack:", pretty(error?.stack));
-  console.error("Full error object:", pretty(error));
+  // console.error("Message:", pretty(error?.message));
+  // console.error("Error name:", error?.name ?? "N/A");
+  // console.error("Stack:", pretty(error?.stack));
+  // console.error("Full error object:", pretty(error));
   if (console.groupEnd) {
     console.groupEnd();
   }
+
 }
