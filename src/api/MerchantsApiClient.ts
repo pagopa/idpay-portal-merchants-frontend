@@ -408,14 +408,12 @@ export const MerchantApi = {
   updateInvoiceTransaction: async (
     transactionId: string,
     file: File,
-    pointOfSaleId: string,
     docNumber?: string
   ): Promise<{ code: string; message: string }> => {
     const result = await apiClient.updateInvoiceTransaction({
       transactionId,
       file,
       docNumber,
-      'x-point-of-sale-id': pointOfSaleId,
     } as any);
 
     if (!isRight(result)) {

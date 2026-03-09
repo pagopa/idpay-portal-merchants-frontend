@@ -60,9 +60,8 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
   const secondBreadcrumbLabel = scopedT('breadcrumbLabel');
 
-  const { pointOfSaleId, trxId, fileDocNumber } = useParams<{
+  const { trxId, fileDocNumber } = useParams<{
     id: string;
-    pointOfSaleId: string;
     trxId: string;
     fileDocNumber: string;
   }>();
@@ -139,13 +138,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
       try {
         const normalizedDocNumber = docNumber.trim();
-        let response: any;
-
-        if (i18nBlockKey === 'modifyDocument') {
-          response = await (apiCall as any)(trxId, file, pointOfSaleId, normalizedDocNumber);
-        } else {
-          response = await (apiCall as any)(trxId, file, normalizedDocNumber);
-        }
+        const response = await (apiCall as any)(trxId, file, normalizedDocNumber);
 
         if (response?.code) {
           if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
