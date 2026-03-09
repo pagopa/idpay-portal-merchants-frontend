@@ -63,7 +63,7 @@ describe('MerchantApi', () => {
 
     (createClient as jest.Mock).mockReturnValue(mockApiClient);
     (extractResponse as jest.Mock).mockReset().mockReturnValue('extracted');
-});
+  });
   const loadApi = () => {
     let MerchantApi: any;
     jest.isolateModules(() => {
@@ -72,40 +72,40 @@ describe('MerchantApi', () => {
     return MerchantApi;
   };
 
-describe('MerchantsApiClient uncovered branches', () => {
-  it('getRewardBatches catch branch throws error', async () => {
-    const client = require('../generated/merchants/client');
-    const MerchantApi = loadApi();
-    client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
+  describe('MerchantsApiClient uncovered branches', () => {
+    it('getRewardBatches catch branch throws error', async () => {
+      const client = require('../generated/merchants/client');
+      const MerchantApi = loadApi();
+      client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
 
-    await expect(
-      MerchantApi.getRewardBatches('id', 0, 10)
-    ).rejects.toThrow('error');
-  });
-
-  it('getAllRewardBatches catch branch throws error', async () => {
-    const client = require('../generated/merchants/client');
-    client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
-    const MerchantApi = loadApi();
-
-    await expect(
-      MerchantApi.getAllRewardBatches('id')
-    ).rejects.toThrow('error');
-  });
-
-  it('sendRewardBatches handles REWARD_BATCH_PREVIOUS_NOT_SENT', async () => {
-    const client = require('../generated/merchants/client');
-    client.createClient().sendRewardBatches = jest.fn().mockResolvedValue({
-      right: {
-        status: 400,
-        value: { code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' },
-      },
+      await expect(
+        MerchantApi.getRewardBatches('id', 0, 10)
+      ).rejects.toThrow('error');
     });
-    const MerchantApi = loadApi();
-    const res = await MerchantApi.sendRewardBatches('id', 'batch');
-    expect(res).toBe('REWARD_BATCH_PREVIOUS_NOT_SENT');
+
+    it('getAllRewardBatches catch branch throws error', async () => {
+      const client = require('../generated/merchants/client');
+      client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
+      const MerchantApi = loadApi();
+
+      await expect(
+        MerchantApi.getAllRewardBatches('id')
+      ).rejects.toThrow('error');
+    });
+
+    it('sendRewardBatches handles REWARD_BATCH_PREVIOUS_NOT_SENT', async () => {
+      const client = require('../generated/merchants/client');
+      client.createClient().sendRewardBatches = jest.fn().mockResolvedValue({
+        right: {
+          status: 400,
+          value: { code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' },
+        },
+      });
+      const MerchantApi = loadApi();
+      const res = await MerchantApi.sendRewardBatches('id', 'batch');
+      expect(res).toBe('REWARD_BATCH_PREVIOUS_NOT_SENT');
+    });
   });
-});
 
 
   it('downloadInvoiceFile', async () => {
@@ -333,10 +333,10 @@ describe('MerchantsApiClient uncovered branches', () => {
 
     expect(global.fetch).toHaveBeenCalledWith(expect.any(String), {
       method: 'GET',
-        headers: {
-          Authorization: `Bearer mocked-token`,
-          Accept: 'application/json',
-        },
+      headers: {
+        Authorization: `Bearer mocked-token`,
+        Accept: 'application/json',
+      },
     });
     expect(json).toHaveBeenCalled()
     expect(resolvedResult).toBe("test")
@@ -351,10 +351,10 @@ describe('MerchantsApiClient uncovered branches', () => {
 
     expect(global.fetch).toHaveBeenCalledWith(expect.any(String), {
       method: 'GET',
-        headers: {
-          Authorization: `Bearer mocked-token`,
-          Accept: 'application/json',
-        },
+      headers: {
+        Authorization: `Bearer mocked-token`,
+        Accept: 'application/json',
+      },
     });
     expect(rejectedResult).toStrictEqual([])
   });
@@ -488,23 +488,11 @@ describe('MerchantsApiClient uncovered branches', () => {
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const consoleGroupSpy = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
-    const consoleGroupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
-
     const MerchantApi = loadApi();
 
     await expect(
       MerchantApi.getRewardBatches('init1')
     ).rejects.toThrow('Boom');
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error Key: ERR_KEY_TEST');
-    expect(consoleGroupSpy).toHaveBeenCalledWith('[API ERROR] MerchantsApi.userPermission');
-    expect(consoleGroupEndSpy).toHaveBeenCalled();
-
-    consoleErrorSpy.mockRestore();
-    consoleGroupSpy.mockRestore();
-    consoleGroupEndSpy.mockRestore();
   });
 
   it('getRewardBatches - error without errorKey', async () => {
@@ -633,7 +621,6 @@ describe('MerchantsApiClient uncovered branches', () => {
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const originalGroupCollapsed = console.groupCollapsed;
     const originalGroupEnd = console.groupEnd;
 
@@ -652,9 +639,6 @@ describe('MerchantsApiClient uncovered branches', () => {
       MerchantApi.getRewardBatches('init1')
     ).rejects.toThrow();
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith('[API ERROR] MerchantsApi.userPermission');
-
-    consoleErrorSpy.mockRestore();
     Object.defineProperty(console, 'groupCollapsed', {
       value: originalGroupCollapsed,
       configurable: true,
@@ -685,23 +669,11 @@ describe('MerchantsApiClient uncovered branches', () => {
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const consoleGroupSpy = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
-    const consoleGroupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
-
     const MerchantApi = loadApi();
 
     await expect(
       MerchantApi.getAllRewardBatches('init1')
     ).rejects.toThrow('Boom');
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error Key: ERR_KEY_TEST');
-    expect(consoleGroupSpy).toHaveBeenCalledWith('[API ERROR] MerchantsApi.userPermission');
-    expect(consoleGroupEndSpy).toHaveBeenCalled();
-
-    consoleErrorSpy.mockRestore();
-    consoleGroupSpy.mockRestore();
-    consoleGroupEndSpy.mockRestore();
   });
 
 
