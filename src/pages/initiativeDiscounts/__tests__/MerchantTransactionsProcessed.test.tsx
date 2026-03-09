@@ -101,11 +101,14 @@ describe('MerchantTransactionsProcessed', () => {
   const fakeRows: MerchantTransactionDTO[] = [
     {
       updateDate: new Date('2025-10-06') as any,
+      trxDate: new Date('2025-10-05') as any,
+      trxId: 'trx-1',
+      trxCode: 'TRX-CODE',
       fiscalCode: 'AAAAAA00A00A000A',
       effectiveAmountCents: 1000,
       rewardAmountCents: 500,
-      status: 'REWARDED',
-    },
+      status: 'REWARDED' as any,
+    } as any,
   ];
 
   let setLoadingMock: jest.Mock;
@@ -224,11 +227,16 @@ describe('MerchantTransactionsProcessed', () => {
     expect(setLoadingMock).toHaveBeenCalledWith(false);
   });
 
-  it('gestisce l\'errore chiamando addError e spegnendo il loading', async () => {
+  it('gestisce l\'errore mostrando errore generico e spegnendo il loading', async () => {
     useTableDataFilteredMock.mockImplementation(() => {});
 
     const error = new Error('boom');
     getMerchantTransactionsProcessedMock.mockRejectedValue(error);
+
+    const setAlertMock = jest.fn();
+    jest.spyOn(require('../../../hooks/useAlert'), 'useAlert').mockReturnValue({
+      setAlert: setAlertMock,
+    });
 
     render(<MerchantTransactionsProcessed id={fakeId} />);
 
@@ -239,7 +247,45 @@ describe('MerchantTransactionsProcessed', () => {
       filterStatus: 'REWARDED',
     });
 
+    await waitFor(() => {
+      expect(setAlertMock).toHaveBeenCalledWith({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      });
+    });
+
     expect(setLoadingMock).toHaveBeenCalledWith(true);
+    expect(setLoadingMock).toHaveBeenCalledWith(false);
+  });
+
+  it('handleTableResponse sets empty array when content is undefined', async () => {
+    useTableDataFilteredMock.mockImplementation(() => {});
+
+    getMerchantTransactionsProcessedMock.mockResolvedValue({
+      pageNo: 1,
+      pageSize: 5,
+      totalElements: 10,
+      content: undefined,
+    });
+
+    render(<MerchantTransactionsProcessed id={fakeId} />);
+
+    expect(lastFormikConfig).toBeDefined();
+
+    lastFormikConfig.onSubmit({
+      searchUser: 'TEST',
+      filterStatus: 'REWARDED',
+    });
+
+    await waitFor(() =>
+      expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledTimes(1)
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('empty-list')).toBeInTheDocument()
+    );
   });
 
   it('non chiama il servizio se id non è una stringa', async () => {
