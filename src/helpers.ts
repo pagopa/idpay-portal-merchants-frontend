@@ -168,7 +168,7 @@ export const truncateString = (str?: string, maxLength: number = 40): string => 
   }
 };
 
-export const isReversable = (itemValues: any, batchStatus:any=undefined): boolean =>{
+export const isReversableOrEditable = (itemValues: any, batchStatus:any=undefined): boolean =>{
   if(!batchStatus){
       // PV page
      return (
