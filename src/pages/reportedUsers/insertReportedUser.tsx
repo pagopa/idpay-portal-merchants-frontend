@@ -10,6 +10,7 @@ import { GetReportedUsersFilters } from '../../types/types';
 import ROUTES from '../../routes';
 import { createReportedUser } from '../../services/merchantService';
 import { MerchantApi } from '../../api/MerchantsApiClient';
+import { useAlert } from '../../hooks/useAlert';
 import { isValidCF } from './helpersReportedUsers';
 import CfTextField from './CfTextField';
 import ModalReportedUser from './modalReportedUser';
@@ -28,6 +29,7 @@ const InsertReportedUser: React.FC = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [cfToReport, setCfToReport] = useState<string | null>(null);
   const { t } = useTranslation();
+  const { setAlert } = useAlert();
 
   const history = useHistory();
   const handleBack = () => history.goBack();
@@ -42,6 +44,12 @@ const InsertReportedUser: React.FC = () => {
       return Array.isArray(res) && res.length > 0;
     } catch (e) {
       setShowConfirmModal(false);
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
       console.error('Error while checking if user is already reported:', e);
       return false;
     }
@@ -131,6 +139,12 @@ const InsertReportedUser: React.FC = () => {
                 showSuccessAlert: true,
               });
             } catch (e) {
+              setAlert({
+                title: t('errors.genericTitle'),
+                text: t('errors.genericDescription'),
+                isOpen: true,
+                severity: 'error',
+              });
               console.error('Error while creating reported user:', e);
             }
           }

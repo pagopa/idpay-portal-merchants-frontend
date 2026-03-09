@@ -95,7 +95,6 @@ export const MerchantApi = {
     const result = await apiClient.getMerchantTransactionsProcessed({
       ...params
     });
-    console.log("[DEBUG] getMerchantTransactionsProcessed:", result);
     return extractResponse(result, 200, onRedirectToLogin);
   },
 
@@ -253,7 +252,20 @@ export const MerchantApi = {
       'initiative-id': initiativeId,
       userFiscalCode,
     });
-    return extractResponse(result, 200, onRedirectToLogin);
+
+    if (!isRight(result)) {
+      logApiError(result, 'getReportedUser');
+      throw new Error('GET_REPORTED_USER_FAILED');
+    }
+
+    const response = result.right;
+
+    if (response.status !== 200) {
+      logApiError(response, 'getReportedUser');
+      throw new Error('GET_REPORTED_USER_FAILED');
+    }
+
+    return response.value as unknown as ReportedUserDTO;
   },
 
   createReportedUser: async (
@@ -298,7 +310,7 @@ export const MerchantApi = {
       return extractResponse(result, 200, onRedirectToLogin);
     } catch (error) {
       logApiError(error, 'userPermission');
-      return {} as RewardBatchListDTO;
+      throw error;
     }
   },
 
@@ -312,7 +324,7 @@ export const MerchantApi = {
       return extractResponse(result, 200, onRedirectToLogin);
     } catch (error) {
       logApiError(error, 'userPermission');
-      return {} as RewardBatchListDTO;
+      throw error;
     }
   },
 
@@ -396,14 +408,12 @@ export const MerchantApi = {
   updateInvoiceTransaction: async (
     transactionId: string,
     file: File,
-    pointOfSaleId: string,
     docNumber?: string
   ): Promise<{ code: string; message: string }> => {
     const result = await apiClient.updateInvoiceTransaction({
       transactionId,
       file,
       docNumber,
-      'x-point-of-sale-id': pointOfSaleId,
     } as any);
 
     if (!isRight(result)) {
@@ -438,28 +448,31 @@ export const MerchantApi = {
 
 
 function logApiError(error: any, apiName?: string) {
- 
+
   const errorKey = error?.response?.data?.errorKey;
   if (errorKey) {
-    console.error(`Error Key: ${errorKey}`);
+    // console.error(`Error Key: ${errorKey}`);
   }
+  /*
   const pretty = (val: any) =>
     typeof val === "string"
       ? val
       : val !== undefined
         ? JSON.stringify(val, null, 2)
         : "N/A";
+        */
   const apiLabel = apiName ? `[API ERROR] MerchantsApi.${apiName}` : "[API ERROR] MerchantsApi";
   if (console.groupCollapsed) {
     console.groupCollapsed(apiLabel);
   } else {
-    console.error(apiLabel);
+   // console.error(apiLabel);
   }
-  console.error("Message:", pretty(error?.message));
-  console.error("Error name:", error?.name ?? "N/A");
-  console.error("Stack:", pretty(error?.stack));
-  console.error("Full error object:", pretty(error));
+  // console.error("Message:", pretty(error?.message));
+  // console.error("Error name:", error?.name ?? "N/A");
+  // console.error("Stack:", pretty(error?.stack));
+  // console.error("Full error object:", pretty(error));
   if (console.groupEnd) {
     console.groupEnd();
   }
+
 }

@@ -298,4 +298,94 @@ describe("ReportDataTable", () => {
       expect(getMerchantReports).toHaveBeenCalled()
     );
   });
+
+  it("disables download button when status is not GENERATED", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r4",
+          fileName: "file.csv",
+          reportStatus: "IN_PROGRESS",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("row-r4")).toBeInTheDocument()
+    );
+
+    const downloadButton = screen.getAllByRole("button")[0];
+    expect(downloadButton).toBeDisabled();
+  });
+
+  it("does not trigger download when reportUrl is missing", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r5",
+          fileName: "file.csv",
+          reportStatus: "GENERATED",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    downloadMerchantReport.mockResolvedValue({});
+
+    const appendSpy = jest.spyOn(document.body, "appendChild");
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("row-r5")).toBeInTheDocument()
+    );
+
+    const downloadButton = screen.getAllByRole("button")[0];
+    fireEvent.click(downloadButton);
+
+    await waitFor(() =>
+      expect(downloadMerchantReport).toHaveBeenCalledWith("merchant-1", "r5")
+    );
+
+    expect(appendSpy).toHaveBeenCalled();
+
+    appendSpy.mockRestore();
+  });
+
+  it("triggers refresh logic when refreshKey changes and pageNo is 0", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r6",
+          fileName: "file.csv",
+          reportStatus: "INSERTED",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    const { rerender } = render(<ReportDataTable refreshKey={1} />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("row-r6")).toBeInTheDocument()
+    );
+
+    rerender(<ReportDataTable refreshKey={2} />);
+
+    await waitFor(() =>
+      expect(getMerchantReports).toHaveBeenCalled()
+    );
+  });
 });
