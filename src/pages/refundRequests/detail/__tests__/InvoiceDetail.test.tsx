@@ -685,5 +685,55 @@ describe('InvoiceDetail', () => {
             expect(pushMock).toHaveBeenCalled();
             expect(pushMock.mock.calls[0][0]).toContain('storna-transazione');
         });
+
+        it('Should navigate to modify document when editable and pointOfSaleId is present', () => {
+            (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+            (isReversableOrEditable as jest.Mock).mockReturnValue(true);
+
+            const trxItem = {
+                ...baseItemValues,
+                pointOfSaleId: 'pos-1',
+                invoiceData: {
+                    docNumber: 'DOC-777',
+                    filename: 'fattura.pdf',
+                },
+            };
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={trxItem}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+
+            const modifyBtn = screen.getByTestId('change-file-btn');
+            fireEvent.click(modifyBtn);
+
+            expect(pushMock).toHaveBeenCalled();
+            expect(pushMock.mock.calls[0][0]).toContain('modifica-documento');
+        });
+
+        it('Should not render modify button when not editable', () => {
+            (isReversableOrEditable as jest.Mock).mockReturnValue(false);
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={{ ...baseItemValues, pointOfSaleId: 'pos-1' }}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+
+            expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
+        });
     });
 });

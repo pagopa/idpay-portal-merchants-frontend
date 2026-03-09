@@ -1,9 +1,9 @@
+import getStatus from '../useStatus';
 import { theme } from '@pagopa/mui-italia';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-import getStatus from '../useStatus';
 
-describe('getStatus', () => {
-  it('should return correct configuration for REWARDED status', () => {
+describe('useStatus', () => {
+  it('returns correct config for REWARDED', () => {
     const result = getStatus('REWARDED');
     expect(result).toEqual({
       color: '#E1F4E1',
@@ -12,7 +12,7 @@ describe('getStatus', () => {
     });
   });
 
-  it('should return correct configuration for CANCELLED status', () => {
+  it('returns correct config for CANCELLED', () => {
     const result = getStatus('CANCELLED');
     expect(result).toEqual({
       color: '#FFE0E0',
@@ -21,7 +21,7 @@ describe('getStatus', () => {
     });
   });
 
-  it('should return correct configuration for REFUNDED status', () => {
+  it('returns correct config for REFUNDED', () => {
     const result = getStatus('REFUNDED');
     expect(result).toEqual({
       color: '#C4DCF5',
@@ -30,44 +30,81 @@ describe('getStatus', () => {
     });
   });
 
-  it('should return correct configuration for CAPTURED status', () => {
-    const result = getStatus('CAPTURED');
-    expect(result).toEqual({
-      color: theme.palette.error.extraLight,
-      label: 'Da rimborsare',
-    });
-  });
-
-  it('should return correct configuration for AUTHORIZED status', () => {
-    const result = getStatus('AUTHORIZED');
-    expect(result).toEqual({
-      color: theme.palette.success.extraLight,
-      label: 'Da autorizzare',
-    });
-  });
-
-  it('should return correct configuration for APPROVING status', () => {
-    const result = getStatus('APPROVING');
+  it('returns correct config for INVOICED', () => {
+    const result = getStatus('INVOICED');
     expect(result).toEqual({
       color: '#E1F5FE',
-      label: 'In approvazione',
+      label: 'Preso in carico',
       textColor: '#215C76',
     });
   });
 
-  it('should return MISSING_DATA_PLACEHOLDER configuration for an unknown status (default case)', () => {
-    const result = getStatus('UNKNOWN_STATUS');
+  it('returns correct config for CAPTURED', () => {
+    const result = getStatus('CAPTURED');
     expect(result).toEqual({
-      color: theme.palette.action.disabled,
-      label: MISSING_DATA_PLACEHOLDER,
+      color: theme.palette.error.extraLight as string,
+      label: 'Da rimborsare',
     });
   });
 
-  it('should return MISSING_DATA_PLACEHOLDER configuration for null or undefined input', () => {
-    let result = getStatus(null);
-    expect(result.label).toBe(MISSING_DATA_PLACEHOLDER);
+  it('returns correct config for AUTHORIZED', () => {
+    const result = getStatus('AUTHORIZED');
+    expect(result).toEqual({
+      color: theme.palette.success.extraLight as string,
+      label: 'Da autorizzare',
+    });
+  });
 
-    result = getStatus(undefined);
-    expect(result.label).toBe(MISSING_DATA_PLACEHOLDER);
+  it('returns correct config for CREATED', () => {
+    const result = getStatus('CREATED');
+    expect(result).toEqual({
+      color: '#FFF5DA !important',
+      textColor: '#614C15 !important',
+      label: 'Da inviare',
+    });
+  });
+
+  it('returns correct config for EVALUATING', () => {
+    const result = getStatus('EVALUATING');
+    expect(result).toEqual({
+      color: '#EEEEEE',
+      textColor: '#17324D !important',
+      label: 'Preso in carico',
+    });
+  });
+
+  it('returns correct config for APPROVED', () => {
+    const result = getStatus('APPROVED');
+    expect(result).toEqual({
+      color: '#E1F4E1',
+      textColor: '#224021',
+      label: 'Rimborso approvato',
+    });
+  });
+
+  it('returns correct config for APPROVING', () => {
+    const result = getStatus('APPROVING');
+    expect(result).toEqual({
+      color: '#E1F5FE',
+      textColor: '#215C76',
+      label: 'In approvazione',
+    });
+  });
+
+  it('returns correct config for SENT', () => {
+    const result = getStatus('SENT');
+    expect(result).toEqual({
+      color: '#EEEEEE',
+      textColor: '#224021',
+      label: 'Inviato',
+    });
+  });
+
+  it('returns default config for unknown status', () => {
+    const result = getStatus('UNKNOWN_STATUS');
+    expect(result).toEqual({
+      color: theme.palette.action.disabled as string,
+      label: MISSING_DATA_PLACEHOLDER,
+    });
   });
 });
