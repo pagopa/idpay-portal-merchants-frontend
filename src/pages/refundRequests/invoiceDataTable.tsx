@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Stack,
@@ -56,9 +57,9 @@ const InvoiceDataTable = ({
   pointOfSaleId,
   trxCode,
   fiscalCode,
-  onDrawerClosed
+  onDrawerClosed,
 }: InvoiceDataTableProps) => {
-  const [transactions, setTransactions] = useState<MerchantTransactionsListDTO["content"]>([]);
+  const [transactions, setTransactions] = useState<MerchantTransactionsListDTO['content']>([]);
   const [pagination, setPagination] = useState({
     pageNo: 0,
     pageSize: 10,
@@ -72,6 +73,7 @@ const InvoiceDataTable = ({
   ]);
   const { id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
+  const { t } = useTranslation();
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleListButtonClick = (row: any) => {
@@ -145,32 +147,54 @@ const InvoiceDataTable = ({
     }
   };
 
-  const loadTransactions = (params?: Omit<GetMerchantTransactionsProcessedParams, "initiativeId">) => {
+  const showGenericError = () =>
+    setAlert({
+      title: t('errors.genericTitle'),
+      text: t('errors.genericDescription'),
+      isOpen: true,
+      severity: 'error',
+    });
+
+  const buildFilters = () => ({
+    ...(fiscalCode ? { fiscalCode } : {}),
+    ...(batchId ? { rewardBatchId: batchId } : {}),
+    ...(rewardBatchTrxStatus ? { rewardBatchTrxStatus } : {}),
+    ...(pointOfSaleId ? { pointOfSaleId } : {}),
+    ...(trxCode ? { trxCode } : {}),
+  });
+
+  const handleTransactionsResponse = (response: MerchantTransactionsListDTO) => {
+    const { content, ...paginationData } = response;
+    setPagination(paginationData);
+    setTransactions(content ?? []);
+  };
+
+  const loadTransactions = async (
+    params?: Omit<GetMerchantTransactionsProcessedParams, 'initiativeId'>
+  ) => {
     setLoading(true);
-    const filters = {
-      ...(fiscalCode ? { fiscalCode } : {}),
-      ...(batchId ? { rewardBatchId: batchId } : {}),
-      ...(rewardBatchTrxStatus ? { rewardBatchTrxStatus } : {}),
-      ...(pointOfSaleId ? { pointOfSaleId } : {}),
-      ...(trxCode ? { trxCode } : {}),
-    };
-    getMerchantTransactionsProcessed({ initiativeId: id, size: pagination.pageSize, ...filters, ...params })
-      .then(response => {
-        const { content, ...paginationData } = response;
-        setPagination(paginationData);
-        setTransactions([...content]);
-      }).finally(() => setLoading(false));
+
+    try {
+      const filters = buildFilters();
+
+      const response = await getMerchantTransactionsProcessed({
+        initiativeId: id,
+        size: pagination.pageSize,
+        ...filters,
+        ...params,
+      });
+
+      handleTransactionsResponse(response);
+    } catch (error) {
+      showGenericError();
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    loadTransactions();
-  }, [
-    batchId,
-    rewardBatchTrxStatus,
-    pointOfSaleId,
-    trxCode,
-    fiscalCode,
-  ]);
+    void loadTransactions();
+  }, [batchId, rewardBatchTrxStatus, pointOfSaleId, trxCode, fiscalCode]);
 
   const columns: Array<GridColDef> = [
     {
@@ -276,13 +300,15 @@ const InvoiceDataTable = ({
         (model[0].sort === 'asc' || model[0].sort === 'desc'))
     ) {
       setSortModel(model);
-      loadTransactions({ ...(model[0]?.sort ? { sort: `trxChargeDate,${model[0].sort}` } : {}) });
+      void loadTransactions({
+        ...(model[0]?.sort ? { sort: `trxChargeDate,${model[0].sort}` } : {}),
+      });
     }
   };
 
   const handlePaginationPageChange = (page: number) => {
     setPagination((prev) => ({ ...prev, page }));
-    loadTransactions({ page });
+    void loadTransactions({ page });
   };
 
   const handleRowsPerPageChange = (newPageSize: number) => {
@@ -291,7 +317,7 @@ const InvoiceDataTable = ({
       pageNo: 0,
       pageSize: newPageSize,
     }));
-    loadTransactions({ page: 0, size: newPageSize });
+    void loadTransactions({ page: 0, size: newPageSize });
   };
 
   const tableRows = transactions.map((row: any) => ({

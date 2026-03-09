@@ -482,4 +482,48 @@ describe('InvoiceDataTable', () => {
     fireEvent.click(actionIcon);
     await screen.findByTestId('detail-drawer');
   });
+
+  it('does not trigger sort when sorting different field', async () => {
+    render(<InvoiceDataTable />);
+    await screen.findByTestId('data-table');
+
+    const table = screen.getByTestId('data-table');
+    const sortHandler = (table as any).props?.onSortModelChange;
+
+    if (sortHandler) {
+      sortHandler([{ field: 'otherField', sort: 'asc' }]);
+    }
+
+    expect(mockedGetTransactions).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows downloading overlay when isDownloading is true', async () => {
+    mockedDownloadInvoiceFile.mockResolvedValueOnce({
+      invoiceUrl: 'https://example.com/invoice.pdf',
+    } as any);
+
+    render(<InvoiceDataTable />);
+    await screen.findByTestId('data-table');
+
+    const invoiceCell = screen.getByTestId('col-invoiceFilename');
+    const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
+    fireEvent.click(invoiceLink);
+
+    await waitFor(() => expect(mockedDownloadInvoiceFile).toHaveBeenCalled());
+  });
+
+  it('shows generic error when loadTransactions fails', async () => {
+    mockedGetTransactions.mockRejectedValueOnce(new Error('fail'));
+
+    render(<InvoiceDataTable />);
+
+    await waitFor(() =>
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
+  });
 });

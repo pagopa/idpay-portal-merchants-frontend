@@ -189,7 +189,6 @@ export const downloadMerchantReport = (
 export const updateInvoiceTransaction = (
   transactionId: string,
   file: File,
-  pointOfSaleId: string,
   docNumber?: string
 ): Promise<{ code: string; message: string }> =>
-  MerchantApi.updateInvoiceTransaction(transactionId, file, pointOfSaleId, docNumber);
+  MerchantApi.updateInvoiceTransaction(transactionId, file, docNumber);

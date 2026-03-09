@@ -211,7 +211,7 @@
       "zipCode": "CAP",
       "type": "Tipologia",
       "email": "E-mail",
-      "noStores": "Non ci sono punti vendita,",
+      "noStores": "Non ci sono punti vendita, ",
       "noStoresInitiative": "Non ci sono punti vendita per questa iniziativa",
       "addStoreNoResults": "aggiungili per iniziare",
       "id": "Id",
