@@ -11,7 +11,7 @@ import { downloadInvoiceFile } from '../../services/merchantService';
 import { useStore } from '../../pages/initiativeStores/StoreContext';
 import { useAlert } from '../../hooks/useAlert';
 import DetailDrawer, { DetailDrawerProps } from '../Drawer/DetailDrawer';
-import { isReversable } from '../../helpers';
+import { isReversableOrEditable } from '../../helpers';
 import getStatus from './useStatus';
 
 type Props = DetailDrawerProps & {
@@ -27,13 +27,9 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   const { id: merchantId } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const isEditable =
-    itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
-    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED');
-
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isEditable
+      isReversableOrEditable(itemValues)
         ? [
             {
               variant: 'contained',
@@ -50,12 +46,12 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
             },
           ]
         : [],
-    [isEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const reverseButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isReversable(itemValues)
+      isReversableOrEditable(itemValues)
         ? [
           {
             title: 'Storna',
@@ -69,7 +65,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
           },
         ]
         : [],
-    [isReversable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const getStatusChip = () => {

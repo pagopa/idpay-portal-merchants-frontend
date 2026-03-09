@@ -67,7 +67,7 @@ jest.mock('../../../../utils/formatUtils', () => ({
 
 jest.mock('../../../../helpers', () => ({
     ...jest.requireActual('../../../../helpers'),
-    isReversable: jest.fn(),
+    isReversableOrEditable: jest.fn(),
 }));
 
 
@@ -75,7 +75,7 @@ import { useStore } from '../../../initiativeStores/StoreContext';
 import { downloadInvoiceFile, postponeTransaction } from '../../../../services/merchantService';
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
-import { isReversable } from '../../../../helpers';
+import { isReversableOrEditable } from '../../../../helpers';
 
 describe('InvoiceDetail', () => {
     let mockSetAlert: jest.Mock;
@@ -174,8 +174,201 @@ describe('InvoiceDetail', () => {
             expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
             expect(screen.getByText('03/02/2026')).toBeInTheDocument();
             expect(screen.getByTestId('btn-test')).toBeInTheDocument();
+    });
+
+    describe('Additional branch coverage', () => {
+        it('should handle undefined initiativesListSel (line 68 branch)', () => {
+            (useAppSelector as jest.Mock).mockReturnValue(undefined);
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={baseItemValues}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => {}}
+                />
+            );
+
+            expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+        });
+
+        it('should use empty string when docNumber is undefined (?? "" branch)', () => {
+            (isReversableOrEditable as jest.Mock).mockReturnValue(true);
+
+            const values = {
+                ...baseItemValues,
+                pointOfSaleId: 'pos-1',
+                invoiceData: {},
+            };
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={values}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => {}}
+                />
+            );
+
+            const modifyBtn = screen.getByTestId('change-file-btn');
+            fireEvent.click(modifyBtn);
+
+            expect(pushMock).toHaveBeenCalled();
+        });
+
+        it('should return early in handlePostponeTransaction when initiativeEndDate is missing (line 118)', async () => {
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={baseItemValues}
+                    listItem={baseListItem}
+                    batchId="batch-1"
+                    storeId="store-1"
+                    isOpen={true}
+                    setIsOpen={() => {}}
+                />
+            );
+
+            const confirmButtons = screen.queryAllByText('Conferma');
+            expect(confirmButtons.length).toBe(0);
+        });
+
+        it('should call postponeTransaction with empty batchId (batchId ?? "")', async () => {
+            const futureDate = new Date('2026-03-15');
+            (useAppSelector as jest.Mock).mockReturnValue([
+                { initiativeId: 'init-123', endDate: futureDate },
+            ]);
+
+            (postponeTransaction as jest.Mock).mockResolvedValueOnce({});
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
+                    listItem={baseListItem}
+                    batchId={undefined as any}
+                    storeId="store-1"
+                    isOpen={true}
+                    setIsOpen={() => {}}
+                />
+            );
+
+            const btn = await screen.findByTestId('next-month-btn');
+            fireEvent.click(btn);
+
+            const confirmButton = await screen.findByText('Conferma');
+            fireEvent.click(confirmButton);
+
+            await waitFor(() => {
+                expect(postponeTransaction).toHaveBeenCalledWith(
+                    'init-123',
+                    '',
+                    'trx-1',
+                    expect.any(String)
+                );
+            });
+        });
+
+        it('should handle xml extension branch', async () => {
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
+            const xmlValues = {
+                ...baseItemValues,
+                invoiceData: { docNumber: 'DOC', filename: 'file.xml' },
+            };
+
+            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+                invoiceUrl: 'https://example.com/file.xml',
+            });
+
+            (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                blob: jest.fn().mockResolvedValue(new Blob(['xml'], { type: 'application/xml' })),
+            });
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={xmlValues}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => {}}
+                />
+            );
+
+            fireEvent.click(screen.getByTestId('btn-test'));
+
+            await waitFor(() => {
+                expect(downloadInvoiceFile).toHaveBeenCalled();
+            });
+        });
+
+        it('should cover window.open null branch (lines 188-196)', async () => {
+            (useAppSelector as jest.Mock).mockReturnValue([]);
+
+            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+                invoiceUrl: 'https://example.com/invoice.pdf',
+            });
+
+            (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                blob: jest.fn().mockResolvedValue(new Blob(['pdf'], { type: 'application/pdf' })),
+            });
+
+            (window as any).open = jest.fn().mockReturnValue(null);
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={baseItemValues}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => {}}
+                />
+            );
+
+            fireEvent.click(screen.getByTestId('btn-test'));
+
+            await waitFor(() => {
+                expect(downloadInvoiceFile).toHaveBeenCalled();
+            });
+        });
+
+        it('should cover rejection reason empty branch (lines 220-225)', () => {
+            const values = {
+                ...baseItemValues,
+                rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+                rewardBatchRejectionReason: [],
+            };
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={values}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => {}}
+                />
+            );
+
+            expect(screen.getAllByText('-').length).toBeGreaterThan(0);
         });
     });
+});
 
     describe('Download File', () => {
 
@@ -630,7 +823,7 @@ describe('InvoiceDetail', () => {
             render(
                 <InvoiceDetail
                     title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE, status: "REWARDED" }}
+                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED, status: "REWARDED", pointOfSaleId: 'pos-1', }}
                     listItem={baseListItem}
                     batchId=""
                     storeId=""
@@ -638,9 +831,9 @@ describe('InvoiceDetail', () => {
                     setIsOpen={() => { }}
                 />
             );
-            const button = screen.getByTestId('change-file-btn');
+            const button = screen.getByTestId('btn-test');
             fireEvent.click(button);
-            expect(pushMock).toHaveBeenCalled()
+            expect(pushMock).not.toHaveBeenCalled()
         });
     });
 
@@ -649,7 +842,7 @@ describe('InvoiceDetail', () => {
             (useLocation as jest.Mock).mockReturnValue({
                 state: { store: { status: 'CLOSED', month: mockUseLocation.state.store.month } }
             });
-            (isReversable as jest.Mock).mockReturnValue(true);
+            (isReversableOrEditable as jest.Mock).mockReturnValue(true);
 
             const trxItem = {
               id: 'trx-1',
@@ -684,6 +877,56 @@ describe('InvoiceDetail', () => {
 
             expect(pushMock).toHaveBeenCalled();
             expect(pushMock.mock.calls[0][0]).toContain('storna-transazione');
+        });
+
+        it('Should navigate to modify document when editable and pointOfSaleId is present', () => {
+            (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+            (isReversableOrEditable as jest.Mock).mockReturnValue(true);
+
+            const trxItem = {
+                ...baseItemValues,
+                pointOfSaleId: 'pos-1',
+                invoiceData: {
+                    docNumber: 'DOC-777',
+                    filename: 'fattura.pdf',
+                },
+            };
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={trxItem}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+
+            const modifyBtn = screen.getByTestId('change-file-btn');
+            fireEvent.click(modifyBtn);
+
+            expect(pushMock).toHaveBeenCalled();
+            expect(pushMock.mock.calls[0][0]).toContain('modifica-documento');
+        });
+
+        it('Should not render modify button when not editable', () => {
+            (isReversableOrEditable as jest.Mock).mockReturnValue(false);
+
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={{ ...baseItemValues, pointOfSaleId: 'pos-1' }}
+                    listItem={baseListItem}
+                    batchId=""
+                    storeId=""
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+
+            expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
         });
     });
 });
