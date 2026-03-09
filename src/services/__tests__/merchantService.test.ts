@@ -357,12 +357,11 @@ describe('merchantService uncovered branches', () => {
 
       const file = new File(['dummy'], 'invoice.pdf', { type: 'application/pdf' });
 
-      await updateInvoiceTransaction('trx-1', file, 'pos-1', 'DOC-001');
+      await updateInvoiceTransaction('trx-1', file, 'DOC-001');
 
       expect(mockedMerchantApi.updateInvoiceTransaction).toHaveBeenCalledWith(
         'trx-1',
         file,
-        'pos-1',
         'DOC-001'
       );
     });
@@ -378,7 +377,6 @@ describe('merchantService uncovered branches', () => {
         'trx-1',
         file,
         'pos-1',
-        undefined
       );
     });
   });

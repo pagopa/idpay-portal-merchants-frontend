@@ -30,6 +30,13 @@ store.dispatch = jest.fn();
 
 describe('MerchantApi', () => {
   beforeEach(() => {
+    if (!(console as any).groupCollapsed) {
+      (console as any).groupCollapsed = jest.fn();
+    }
+    if (!(console as any).groupEnd) {
+      (console as any).groupEnd = jest.fn();
+    }
+
     mockApiClient = {
       getMerchantInitiativeList: jest.fn(),
       getMerchantTransactions: jest.fn(),
@@ -66,22 +73,24 @@ describe('MerchantApi', () => {
   };
 
 describe('MerchantsApiClient uncovered branches', () => {
-  it('getRewardBatches catch branch returns empty object', async () => {
+  it('getRewardBatches catch branch throws error', async () => {
     const client = require('../generated/merchants/client');
     const MerchantApi = loadApi();
     client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
 
-    const res = await MerchantApi.getRewardBatches('id', 0, 10);
-    expect(res).toEqual({});
+    await expect(
+      MerchantApi.getRewardBatches('id', 0, 10)
+    ).rejects.toThrow('error');
   });
 
-  it('getAllRewardBatches catch branch returns empty object', async () => {
+  it('getAllRewardBatches catch branch throws error', async () => {
     const client = require('../generated/merchants/client');
     client.createClient().getRewardBatches = jest.fn().mockRejectedValue(new Error('error'));
     const MerchantApi = loadApi();
 
-    const res = await MerchantApi.getAllRewardBatches('id');
-    expect(res).toEqual({});
+    await expect(
+      MerchantApi.getAllRewardBatches('id')
+    ).rejects.toThrow('error');
   });
 
   it('sendRewardBatches handles REWARD_BATCH_PREVIOUS_NOT_SENT', async () => {
@@ -379,8 +388,12 @@ describe('MerchantsApiClient uncovered branches', () => {
     expect(result).toBe('extracted');
   });
 
-  it('getReportedUser', async () => {
-    mockApiClient.getReportedUser.mockResolvedValue({ right: 'data' });
+  it('getReportedUser - success', async () => {
+    mockApiClient.getReportedUser.mockResolvedValue({
+      _tag: 'Right',
+      right: { status: 200, value: 'data' },
+    });
+
     const MerchantApi = loadApi();
 
     const result = await MerchantApi.getReportedUser('initA', 'AAAAAA00A00A000A');
@@ -389,8 +402,33 @@ describe('MerchantsApiClient uncovered branches', () => {
       'initiative-id': 'initA',
       userFiscalCode: 'AAAAAA00A00A000A',
     });
-    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
-    expect(result).toBe('extracted');
+    expect(result).toBe('data');
+  });
+
+  it('getReportedUser - throws when not right', async () => {
+    mockApiClient.getReportedUser.mockResolvedValue({
+      _tag: 'Left',
+      left: [],
+    });
+
+    const MerchantApi = loadApi();
+
+    await expect(
+      MerchantApi.getReportedUser('initA', 'AAAAAA00A00A000A')
+    ).rejects.toThrow('GET_REPORTED_USER_FAILED');
+  });
+
+  it('getReportedUser - throws when status not 200', async () => {
+    mockApiClient.getReportedUser.mockResolvedValue({
+      _tag: 'Right',
+      right: { status: 500, value: {} },
+    });
+
+    const MerchantApi = loadApi();
+
+    await expect(
+      MerchantApi.getReportedUser('initA', 'AAAAAA00A00A000A')
+    ).rejects.toThrow('GET_REPORTED_USER_FAILED');
   });
 
   it('createReportedUser sends fetch and extracts response', async () => {
@@ -444,17 +482,9 @@ describe('MerchantsApiClient uncovered branches', () => {
     expect(result).toBe('extracted');
   });
 
-  it('getRewardBatches - error path logs and returns empty object', async () => {
-    const error = {
-      message: 'Boom',
-      name: 'Error',
-      stack: 'stack-trace',
-      response: {
-        data: {
-          errorKey: 'ERR_KEY_TEST',
-        },
-      },
-    };
+  it('getRewardBatches - error path logs and throws', async () => {
+    const error = new Error('Boom') as any;
+    error.response = { data: { errorKey: 'ERR_KEY_TEST' } };
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
@@ -464,13 +494,13 @@ describe('MerchantsApiClient uncovered branches', () => {
 
     const MerchantApi = loadApi();
 
-    const result = await MerchantApi.getRewardBatches('init1');
+    await expect(
+      MerchantApi.getRewardBatches('init1')
+    ).rejects.toThrow('Boom');
 
-    expect(extractResponse).not.toHaveBeenCalled();
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error Key: ERR_KEY_TEST');
     expect(consoleGroupSpy).toHaveBeenCalledWith('[API ERROR] MerchantsApi.userPermission');
     expect(consoleGroupEndSpy).toHaveBeenCalled();
-    expect(result).toEqual({});
 
     consoleErrorSpy.mockRestore();
     consoleGroupSpy.mockRestore();
@@ -478,11 +508,7 @@ describe('MerchantsApiClient uncovered branches', () => {
   });
 
   it('getRewardBatches - error without errorKey', async () => {
-    const error = {
-      message: 'Boom',
-      name: 'Error',
-      stack: 'stack-trace',
-    };
+    const error = new Error('Boom');
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
@@ -492,9 +518,10 @@ describe('MerchantsApiClient uncovered branches', () => {
 
     const MerchantApi = loadApi();
 
-    const result = await MerchantApi.getRewardBatches('init1');
+    await expect(
+      MerchantApi.getRewardBatches('init1')
+    ).rejects.toThrow('Boom');
 
-    expect(result).toEqual({});
     expect(consoleGroupSpy).toHaveBeenCalled();
 
     consoleErrorSpy.mockRestore();
@@ -602,11 +629,7 @@ describe('MerchantsApiClient uncovered branches', () => {
   });
 
   it('logApiError - without console.groupCollapsed', async () => {
-    const error = {
-      message: 'Error message',
-      name: 'CustomError',
-      stack: 'error stack',
-    };
+    const error = new Error('Error message');
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
@@ -624,7 +647,10 @@ describe('MerchantsApiClient uncovered branches', () => {
     });
 
     const MerchantApi = loadApi();
-    await MerchantApi.getRewardBatches('init1');
+
+    await expect(
+      MerchantApi.getRewardBatches('init1')
+    ).rejects.toThrow();
 
     expect(consoleErrorSpy).toHaveBeenCalledWith('[API ERROR] MerchantsApi.userPermission');
 
@@ -653,13 +679,9 @@ describe('MerchantsApiClient uncovered branches', () => {
     expect(result).toBe('extracted');
   });
 
-  it('getAllRewardBatches - error path logs and returns empty object', async () => {
-    const error = {
-      message: 'Boom',
-      name: 'Error',
-      stack: 'stack-trace',
-      response: { data: { errorKey: 'ERR_KEY_TEST' } },
-    };
+  it('getAllRewardBatches - error path logs and throws', async () => {
+    const error = new Error('Boom') as any;
+    error.response = { data: { errorKey: 'ERR_KEY_TEST' } };
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
@@ -668,13 +690,14 @@ describe('MerchantsApiClient uncovered branches', () => {
     const consoleGroupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
 
     const MerchantApi = loadApi();
-    const result = await MerchantApi.getAllRewardBatches('init1');
 
-    expect(extractResponse).not.toHaveBeenCalled();
+    await expect(
+      MerchantApi.getAllRewardBatches('init1')
+    ).rejects.toThrow('Boom');
+
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error Key: ERR_KEY_TEST');
     expect(consoleGroupSpy).toHaveBeenCalledWith('[API ERROR] MerchantsApi.userPermission');
     expect(consoleGroupEndSpy).toHaveBeenCalled();
-    expect(result).toEqual({});
 
     consoleErrorSpy.mockRestore();
     consoleGroupSpy.mockRestore();
@@ -693,19 +716,20 @@ describe('MerchantsApiClient uncovered branches', () => {
     expect(appStateActions.addError).toHaveBeenCalled();
   });
 
-  it('getMerchantTransactionsProcessed logs debug', async () => {
+  it('getMerchantTransactionsProcessed no debug log', async () => {
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation(() => {});
+
     mockApiClient.getMerchantTransactionsProcessed.mockResolvedValue({ right: 'data' });
 
     const MerchantApi = loadApi();
     await MerchantApi.getMerchantTransactionsProcessed({ initiativeId: 'init1' });
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      '[DEBUG] getMerchantTransactionsProcessed:',
-      { right: 'data' }
-    );
+    expect(consoleLogSpy).not.toHaveBeenCalled();
+    expect(consoleDebugSpy).not.toHaveBeenCalled();
 
     consoleLogSpy.mockRestore();
+    consoleDebugSpy.mockRestore();
   });
 
   it('updateInvoiceTransaction - left branch', async () => {
