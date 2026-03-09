@@ -11,7 +11,7 @@ import {
   handlePromptMessage,
   truncateString,
   formatEuro,
-  isReversable
+  isReversableOrEditable
 } from '../helpers';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 
@@ -46,8 +46,6 @@ describe('copyTextToClipboard', () => {
 describe('downloadQRCodeFromURL', () => {
   global.fetch = jest.fn();
   global.URL.createObjectURL = jest.fn();
-  const appendChildSpy = jest.spyOn(document.body, 'appendChild');
-  const removeChildSpy = jest.spyOn(document.body, 'removeChild');
   const clickSpy = jest.fn();
 
   beforeEach(() => {
@@ -193,10 +191,10 @@ describe('generateUniqueId', () => {
     expect(id1).not.toEqual(id2);
   });
 
-  test.skip('should generate a predictable id when Date and Math are mocked', () => {
+  test('should generate a predictable id when Date and Math are mocked', () => {
     jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
     jest.spyOn(Math, 'random').mockReturnValue(0.123456789);
-    expect(generateUniqueId()).toBe('17000000000004f25k6o');
+    expect(generateUniqueId()).toBe('17000000000004fzzzxj');
   });
 });
 
@@ -243,7 +241,7 @@ describe('isReversable', () => {
 
   test('returns true for INVOICED and non-APPROVED batch', () => {
     expect(
-      isReversable({
+      isReversableOrEditable({
         status: StatusEnum.INVOICED,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
       })
@@ -252,7 +250,7 @@ describe('isReversable', () => {
 
   test('returns true for REWARDED and non-APPROVED batch', () => {
     expect(
-      isReversable({
+      isReversableOrEditable({
         status: StatusEnum.REWARDED,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.SUSPENDED,
       })
@@ -261,7 +259,7 @@ describe('isReversable', () => {
 
   test('returns false when rewardBatchTrxStatus is APPROVED', () => {
     expect(
-      isReversable({
+      isReversableOrEditable({
         status: StatusEnum.REWARDED,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
       })
@@ -270,7 +268,7 @@ describe('isReversable', () => {
 
   test('returns false for unsupported status', () => {
     expect(
-      isReversable({
+      isReversableOrEditable({
         status: StatusEnum.CANCELLED,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
       })
@@ -278,6 +276,6 @@ describe('isReversable', () => {
   });
 
   test('returns false for undefined input', () => {
-    expect(isReversable(undefined)).toBe(false);
+    expect(isReversableOrEditable(undefined)).toBe(false);
   });
 });
