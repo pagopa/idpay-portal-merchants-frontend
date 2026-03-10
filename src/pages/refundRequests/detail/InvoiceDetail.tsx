@@ -74,7 +74,7 @@ export default function InvoiceDetail({
 
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isReversableOrEditable(itemValues, statusBatch) && itemValues?.pointOfSaleId
+      isReversableOrEditable(itemValues, statusBatch)
         ? [
             {
               variant: 'contained',
@@ -91,7 +91,7 @@ export default function InvoiceDetail({
             },
           ]
         : [],
-    [isReversableOrEditable, itemValues?.pointOfSaleId, history]
+    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const reverseButton: DetailDrawerProps['buttons'] = useMemo(
