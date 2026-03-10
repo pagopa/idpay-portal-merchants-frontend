@@ -185,7 +185,8 @@ export const isReversableOrEditable = (itemValues: any, batchStatus:any=undefine
   // Batch detail page
   return (
     impossibleStatusCombination(itemValues, batchStatus)
-    &&[
+    && ![StatusEnum.SENT, StatusEnum.APPROVING].includes(batchStatus)
+    && [
       TransactionStatusEnum.INVOICED,
       TransactionStatusEnum.REWARDED
     ].includes(itemValues?.status)

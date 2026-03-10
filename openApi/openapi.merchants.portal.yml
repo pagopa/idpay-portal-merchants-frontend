@@ -3481,6 +3481,9 @@ components:
             - EVALUATING
             - APPROVING
             - APPROVED
+            - PENDING_REFUND
+            - REFUNDED
+            - NOT_REFUNDED
         partial:
           type: boolean
           description: "ENG: Indicates whether the batch is partial <br> IT: Indica se il lotto è parziale"
