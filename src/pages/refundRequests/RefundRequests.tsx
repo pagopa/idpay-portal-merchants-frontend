@@ -133,10 +133,7 @@ const RefundRequests = () => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       void fetchRewardBatches(initiativesList[0].initiativeId!);
     }
-  }, [initiativesList,
-    currentPagination.pageNo,
-    currentPagination.pageSize,
-  ]);
+  }, [currentPagination.pageNo, currentPagination.pageSize]);
 
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,

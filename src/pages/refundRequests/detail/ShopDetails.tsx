@@ -134,7 +134,7 @@ const ShopDetails: React.FC = () => {
 
   useEffect(() => {
     void fetchAll();
-  }, [initiativesList, batchId, filters, drawerRefreshKey]);
+  }, [batchId, filters, drawerRefreshKey]);
 
   const fetchStores = async (fromSort?: boolean) => {
     const userJwt = parseJwt(storageTokenOps.read());
