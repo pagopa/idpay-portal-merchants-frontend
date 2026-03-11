@@ -60,9 +60,8 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
   const secondBreadcrumbLabel = scopedT('breadcrumbLabel');
 
-  const { pointOfSaleId, trxId, fileDocNumber } = useParams<{
+  const { trxId, fileDocNumber } = useParams<{
     id: string;
-    pointOfSaleId: string;
     trxId: string;
     fileDocNumber: string;
   }>();
@@ -139,13 +138,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
       try {
         const normalizedDocNumber = docNumber.trim();
-        let response: any;
-
-        if (i18nBlockKey === "modifyDocument") {
-          response = await (apiCall as any)(trxId, file, pointOfSaleId, normalizedDocNumber);
-        } else {
-          response = await (apiCall as any)(trxId, file, normalizedDocNumber);
-        }
+        const response = await (apiCall as any)(trxId, file, normalizedDocNumber);
 
         if (response?.code) {
           if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
@@ -189,8 +182,13 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         });
         history.goBack();
       } catch (error: unknown) {
-        console.error('Unexpected API Error:', error);
-        setAlert({ text: t('modifyDocument.errors.errorAlert'), isOpen: true, severity: 'error' });
+        // console.error('Unexpected API Error:', error);
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
         setLoadingFile(false);
       }
     }

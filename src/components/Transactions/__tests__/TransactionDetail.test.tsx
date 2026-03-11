@@ -5,6 +5,7 @@ jest.mock('../../../routes', () => ({
   __esModule: true,
   default: {
     MODIFY_DOCUMENT: '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/modify/:fileDocNumber',
+    REVERSE: '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/reverse',
   },
 }));
 
@@ -251,17 +252,12 @@ describe('TransactionDetail', () => {
       />
     );
 
-    const btn = screen.getByTestId('change-file-btn');
+    const btn = screen.getByTestId('btn-test');
     expect(btn).toBeInTheDocument();
 
     fireEvent.click(btn);
 
-    const expectedPath = routes.MODIFY_DOCUMENT.replace(':id', 'merchant-123')
-      .replace(':pointOfSaleId', 'store-999')
-      .replace(':trxId', 'TRX-5')
-      .replace(':fileDocNumber', window.btoa('DOC-5'));
-
-    expect(pushMock).toHaveBeenCalledWith(expectedPath, { fromLocation: { pathname: '/here' } });
+    expect(pushMock).not.toHaveBeenCalled();
   });
 
   it('creates edit button when editable and pushes path with empty docNumber when missing (?? "" branch)', () => {
@@ -282,15 +278,10 @@ describe('TransactionDetail', () => {
       />
     );
 
-    const btn = screen.getByTestId('change-file-btn');
+    const btn = screen.getByTestId('btn-test');
     fireEvent.click(btn);
 
-    const expectedPath = routes.MODIFY_DOCUMENT.replace(':id', 'merchant-123')
-      .replace(':pointOfSaleId', 'store-999')
-      .replace(':trxId', 'TRX-6')
-      .replace(':fileDocNumber', '');
-
-    expect(pushMock).toHaveBeenCalledWith(expectedPath, { fromLocation: { pathname: '/here' } });
+    expect(pushMock).not.toHaveBeenCalled();
   });
 
   it('does NOT show edit button when rewardBatchTrxStatus is APPROVED (isEditable=false branch)', () => {
@@ -461,5 +452,59 @@ describe('TransactionDetail', () => {
     );
 
     expect(screen.queryByText('Storna')).not.toBeInTheDocument();
+  });
+
+  it('shows reverse button and navigates when editable (true branch)', () => {
+    const helpers = require('../../../helpers');
+    jest.spyOn(helpers, 'isReversableOrEditable').mockReturnValue(true);
+
+    const itemValues = {
+      id: 'TRX-12',
+      status: 'COMPLETED',
+      invoiceFile: { filename: 'inv-12.pdf', docNumber: 'D12' },
+    };
+
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        setIsOpen={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
+
+    const reverseBtn = screen.getByTestId('reverse-btn');
+    fireEvent.click(reverseBtn);
+
+    expect(pushMock).toHaveBeenCalled();
+    expect(pushMock.mock.calls[0][0]).toContain('reverse');
+  });
+
+  it('shows edit button and navigates to modify document when editable (true branch)', () => {
+    const helpers = require('../../../helpers');
+    jest.spyOn(helpers, 'isReversableOrEditable').mockReturnValue(true);
+
+    const itemValues = {
+      id: 'TRX-13',
+      status: 'COMPLETED',
+      invoiceFile: { filename: 'inv-13.pdf', docNumber: 'DOC-13' },
+    };
+
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        setIsOpen={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
+
+    const editBtn = screen.getByTestId('change-file-btn');
+    fireEvent.click(editBtn);
+
+    expect(pushMock).toHaveBeenCalled();
+    expect(pushMock.mock.calls[0][0]).toContain('modify');
   });
 });

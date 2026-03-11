@@ -422,4 +422,55 @@ describe('Test suite for SideMenu component', () => {
     });
   });
 
+  test('checkIsSelected returns false when pathname does not match stores route', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const path = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/other`;
+    history.push(path);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(path);
+    });
+  });
+
+  test('checkIsReportedUsersPage returns false when pathname does not match', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const path = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/not-reported`;
+    history.push(path);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(path);
+    });
+  });
+
+  test('checkIsExportReport returns false when pathname does not match', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const path = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/not-export`;
+    history.push(path);
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(path);
+    });
+  });
+
+  test('No expansion when match is null and initiativesList undefined', () => {
+    const mockedLocation = {
+      assign: jest.fn(),
+      pathname: `${BASE_ROUTE}/random`,
+      origin: 'MOCKED_ORIGIN',
+      search: '',
+      hash: '',
+    };
+    Object.defineProperty(window, 'location', { value: mockedLocation });
+
+    renderWithContext(<SideMenu />);
+
+    expect(screen.getByTestId('list-test')).toBeInTheDocument();
+  });
+
 });

@@ -11,7 +11,8 @@ import { GetReportedUsersFilters } from '../../types/types';
 import routes from '../../routes';
 import { getReportedUser, deleteReportedUser } from '../../services/merchantService';
 import { parseJwt } from '../../utils/jwt-utils';
-import AlertListComponent, {AlertProps} from '../../components/Alert/AlertListComponent';
+import AlertListComponent, { AlertProps } from '../../components/Alert/AlertListComponent';
+import { useAlert } from '../../hooks/useAlert';
 import { isValidCF, normalizeValue } from './helpersReportedUsers';
 import SearchTaxCode from './SearchTaxCode';
 import NoResultPaper from './NoResultPaper';
@@ -32,22 +33,23 @@ const initialValues: GetReportedUsersFilters = {
 
 const ReportedUsers: React.FC = () => {
   const { t } = useTranslation();
+  const { setAlert } = useAlert();
   const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
     valid: {
       text: t('pages.reportedUsers.cf.validCf'),
       isOpen: false,
-      severity: 'success'
+      severity: 'success',
     },
     removed: {
       text: t('pages.reportedUsers.cf.removedCf'),
       isOpen: false,
-      severity: 'success'
+      severity: 'success',
     },
     missing: {
       text: t('pages.reportedUsers.cf.noResultUser'),
       isOpen: false,
-      severity: 'error'
-    }
+      severity: 'error',
+    },
   });
   const location = useLocation<{ newCf?: string; showSuccessAlert?: boolean }>();
   const [user, setUser] = useState<
@@ -70,7 +72,7 @@ const ReportedUsers: React.FC = () => {
   const merchantId = userJwt?.merchant_id;
 
   const updateAlerts = useCallback((key: string, open: boolean) => {
-    setAlerts(prev => ({ ...prev, [key]: { ...prev[key], isOpen: open}}));
+    setAlerts((prev) => ({ ...prev, [key]: { ...prev[key], isOpen: open } }));
   }, []);
 
   React.useEffect(() => {
@@ -124,6 +126,12 @@ const ReportedUsers: React.FC = () => {
           } else {
             setUser([]);
             setError('Errore durante il recupero dell’utente segnalato');
+            setAlert({
+              title: t('errors.genericTitle'),
+              text: t('errors.genericDescription'),
+              isOpen: true,
+              severity: 'error',
+            });
             console.error('Error while fetching reported user:', e);
           }
         } finally {
@@ -258,7 +266,12 @@ const ReportedUsers: React.FC = () => {
           <NoResultPaper translationKey="pages.reportedUsers.noUsers" />
         )}
       </Box>
-      <AlertListComponent alertList={Object.entries(alerts).map(([key, value]) => ({ ...value, onClose: () => updateAlerts(key, false)}))} />
+      <AlertListComponent
+        alertList={Object.entries(alerts).map(([key, value]) => ({
+          ...value,
+          onClose: () => updateAlerts(key, false),
+        }))}
+      />
     </>
   );
 };

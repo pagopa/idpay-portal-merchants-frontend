@@ -14,7 +14,7 @@ import { useAlert } from '../../../hooks/useAlert';
 import ModalComponent from '../../../components/modal/ModalComponent';
 import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../../redux/hooks';
-import { formatDate, isReversable } from '../../../helpers';
+import { formatDate, isReversableOrEditable } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
 
@@ -72,18 +72,11 @@ export default function InvoiceDetail({
       ? true
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
-  const isVisible =
-    itemValues?.rewardBatchTrxStatus !== 'APPROVED' &&
-    !(itemValues?.status === 'CANCELLED' || itemValues?.status === 'REFUNDED');
-
-  const isDisabled = statusBatch === 'CREATED' || statusBatch === 'EVALUATING';
-
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isVisible && itemValues?.pointOfSaleId
+      isReversableOrEditable(itemValues, statusBatch)
         ? [
             {
-              disabled: !isDisabled,
               variant: 'contained',
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
@@ -98,12 +91,12 @@ export default function InvoiceDetail({
             },
           ]
         : [],
-    [isVisible, itemValues?.pointOfSaleId, history]
+    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const reverseButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
-      isReversable(itemValues, statusBatch)
+      isReversableOrEditable(itemValues, statusBatch)
         ? [
             {
               title: 'Storna',
@@ -117,7 +110,7 @@ export default function InvoiceDetail({
             },
           ]
         : [],
-    [isReversable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
 
   const handlePostponeTransaction = async () => {

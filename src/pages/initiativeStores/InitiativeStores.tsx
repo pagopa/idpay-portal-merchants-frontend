@@ -49,12 +49,12 @@ interface RouteParams {
 }
 
 const InitiativeStores: React.FC = () => {
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
   const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
   const [storesPagination, setStoresPagination] = useState({
     pageNo: 0,
     pageSize: PAGINATION_SIZE,
-    totalElements: 0
+    totalElements: 0,
   });
   const [storesLoading, setStoresLoading] = useState(false);
   const [currentSort, setCurrentSort] = useState<string>('asc');
@@ -70,24 +70,32 @@ const InitiativeStores: React.FC = () => {
   const location = useLocation<{ showSuccessAlert?: boolean }>();
   useEffect(() => {
     if (location.state?.showSuccessAlert) {
-      setAlert({text: t('pages.initiativeStores.pointOfSalesUploadSuccess'), isOpen: true, severity: 'success'});
+      setAlert({
+        text: t('pages.initiativeStores.pointOfSalesUploadSuccess'),
+        isOpen: true,
+        severity: 'success',
+      });
 
       history.replace({
         ...location,
-        state: { ...location.state, showSuccessAlert: false }
+        state: { ...location.state, showSuccessAlert: false },
       });
     }
   }, [location, history]);
 
   useEffect(() => {
     const storedPagination = sessionStorage.getItem('storesPagination');
-    if(storedPagination && JSON.parse(storedPagination)?.pageNo !== undefined && JSON.parse(storedPagination)?.initiativeId === id ) {
+    if (
+      storedPagination &&
+      JSON.parse(storedPagination)?.pageNo !== undefined &&
+      JSON.parse(storedPagination)?.initiativeId === id
+    ) {
       const parsed = JSON.parse(storedPagination);
       setStoresPagination(parsed);
-      
+
       if (parsed.sort) {
         setCurrentSort(parsed.sort);
-        
+
         // Convert sort string to GridSortModel
         const sortParts = parsed.sort.split(',');
         if (sortParts.length === 2) {
@@ -95,10 +103,10 @@ const InitiativeStores: React.FC = () => {
           setSortModel([{ field, sort: order as 'asc' | 'desc' }]);
         }
       }
-      
-      void fetchStores({...initialValues, page: parsed.pageNo, sort: parsed.sort || 'asc'});
+
+      void fetchStores({ ...initialValues, page: parsed.pageNo, sort: parsed.sort || 'asc' });
     } else {
-      void fetchStores({...initialValues});
+      void fetchStores({ ...initialValues });
     }
 
     return () => {
@@ -106,7 +114,6 @@ const InitiativeStores: React.FC = () => {
         sessionStorage.removeItem('storesPagination');
       }
     };
-    
   }, []);
 
   const infoStyles = {
@@ -115,9 +122,7 @@ const InitiativeStores: React.FC = () => {
   };
 
   const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
-    <Tooltip
-      title={value && value.length >= tooltipThreshold ? value : MISSING_DATA_PLACEHOLDER}
-    >
+    <Tooltip title={value && value.length >= tooltipThreshold ? value : MISSING_DATA_PLACEHOLDER}>
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
         {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
       </Typography>
@@ -140,7 +145,14 @@ const InitiativeStores: React.FC = () => {
       editable: false,
       disableColumnMenu: true,
       renderCell: (params: any) =>
-        renderCellWithTooltip(params.value === 'PHYSICAL' ? 'Fisico' : params.value === 'ONLINE' ? 'Online' : MISSING_DATA_PLACEHOLDER,1)
+        renderCellWithTooltip(
+          params.value === 'PHYSICAL'
+            ? 'Fisico'
+            : params.value === 'ONLINE'
+            ? 'Online'
+            : MISSING_DATA_PLACEHOLDER,
+          1
+        ),
     },
     {
       field: 'address',
@@ -174,7 +186,8 @@ const InitiativeStores: React.FC = () => {
       disableColumnMenu: true,
       renderCell: (params: any) =>
         renderCellWithTooltip(
-          `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
+          `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${
+            params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
           }`,
           1
         ),
@@ -211,7 +224,6 @@ const InitiativeStores: React.FC = () => {
       return;
     }
     try {
-
       if (!fromSort) {
         setStoresLoading(true);
       }
@@ -234,7 +246,12 @@ const InitiativeStores: React.FC = () => {
       if (!fromSort) {
         setStoresLoading(false);
       }
-      setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
     }
   };
 
@@ -270,7 +287,7 @@ const InitiativeStores: React.FC = () => {
   };
 
   const goToStoreDetail = (store: PointOfSaleDTO) => {
-     // eslint-disable-next-line functional/immutable-data
+    // eslint-disable-next-line functional/immutable-data
     isGoingToDetail.current = true;
     history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
   };
@@ -287,12 +304,12 @@ const InitiativeStores: React.FC = () => {
       const sortKey = field === 'referent' ? `contactName,${sort}` : `${field},${sort}`;
       setCurrentSort(sortKey);
       setSortModel(newSortModel);
-      
+
       // Update sessionStorage with new sort
       const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId: id };
       setStoresPagination(updatedPagination);
       sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
-      
+
       await fetchStores(
         {
           ...appliedFilters,
@@ -309,7 +326,12 @@ const InitiativeStores: React.FC = () => {
   };
 
   const handlePaginationPageChange = (page: number) => {
-    const updatedPagination = { ...storesPagination, pageNo: page, initiativeId: id, sort: currentSort };
+    const updatedPagination = {
+      ...storesPagination,
+      pageNo: page,
+      initiativeId: id,
+      sort: currentSort,
+    };
     setStoresPagination(updatedPagination);
     sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
     void fetchStores({
@@ -354,7 +376,9 @@ const InitiativeStores: React.FC = () => {
         </Box>
       ) : (
         <>
-          {(stores.length > 0 || (stores.length === 0 && filtersSetted()) || filtersAppliedOnce) && (
+          {(stores.length > 0 ||
+            (stores.length === 0 && filtersSetted()) ||
+            filtersAppliedOnce) && (
             <>
               <FiltersForm
                 onFiltersApplied={handleFiltersApplied}
@@ -434,40 +458,39 @@ const InitiativeStores: React.FC = () => {
                 />
               </Box>
             </>
-          )
-          }
+          )}
         </>
       )}
-      {
-        !storesLoading && stores?.length === 0 && (
-          <Paper
-            sx={{
-              my: 4,
-              p: 3,
-              textAlign: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Stack spacing={0.5} direction="row">
-              <Typography variant="body2">{!filtersAppliedOnce ? t('pages.initiativeStores.noStores') : t('pages.initiativeStores.noStoresInitiative')} </Typography>
-             {
-              !filtersAppliedOnce && (
+      {!storesLoading && stores?.length === 0 && (
+        <Paper
+          sx={{
+            my: 4,
+            p: 3,
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Stack spacing={0.5} direction="row">
+            <Typography variant="body2">
+              {!filtersAppliedOnce
+                ? t('pages.initiativeStores.noStores')
+                : t('pages.initiativeStores.noStoresInitiative')}
+              {!filtersAppliedOnce && (
                 <Link
-                onClick={() => goToAddStorePage()}
-                className="cursor-pointer"
-                variant="body2"
-                sx={{ fontWeight: '600' }}
-              >
-                {t('pages.initiativeStores.addStoreNoResults')}
-              </Link>
-              )
-             }
-            </Stack>
-          </Paper>
-        )
-      }
+                  onClick={() => goToAddStorePage()}
+                  className="cursor-pointer"
+                  variant="body2"
+                  sx={{ fontWeight: '600' }}
+                >
+                  {t('pages.initiativeStores.addStoreNoResults')}
+                </Link>
+              )}
+            </Typography>
+          </Stack>
+        </Paper>
+      )}
     </Box>
   );
 };

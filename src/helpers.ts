@@ -168,7 +168,7 @@ export const truncateString = (str?: string, maxLength: number = 40): string => 
   }
 };
 
-export const isReversable = (itemValues: any, batchStatus:any=undefined): boolean =>{
+export const isReversableOrEditable = (itemValues: any, batchStatus:any=undefined): boolean =>{
   if(!batchStatus){
       // PV page
      return (
@@ -185,7 +185,8 @@ export const isReversable = (itemValues: any, batchStatus:any=undefined): boolea
   // Batch detail page
   return (
     impossibleStatusCombination(itemValues, batchStatus)
-    &&[
+    && ![StatusEnum.SENT, StatusEnum.APPROVING].includes(batchStatus)
+    && [
       TransactionStatusEnum.INVOICED,
       TransactionStatusEnum.REWARDED
     ].includes(itemValues?.status)
