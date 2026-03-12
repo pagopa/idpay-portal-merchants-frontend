@@ -12,7 +12,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
 import { getRewardBatches, sendRewardBatch } from '../../services/merchantService';
-import getStatus from '../../components/Transactions/useStatus';
+import { getBatchStatus } from '../../components/Transactions/useStatus';
 import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
 import { RewardBatchDTO } from '../../api/generated/merchants/RewardBatchDTO';
 import NoResultPaper from '../reportedUsers/NoResultPaper';
@@ -191,7 +191,7 @@ const RefundRequests = () => {
   };
 
   const StatusChip = ({ status }: any) => {
-    const chipItem = getStatus(status);
+    const chipItem = getBatchStatus(status);
     return (
       <CustomChip
         label={chipItem?.label}

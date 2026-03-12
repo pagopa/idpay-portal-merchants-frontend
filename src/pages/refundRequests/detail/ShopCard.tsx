@@ -6,7 +6,7 @@ import { getMerchantDetail } from '../../../services/merchantService';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import CustomChip from '../../../components/Chip/CustomChip';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
-import getStatus from '../../../components/Transactions/useStatus';
+import { getBatchStatus } from '../../../components/Transactions/useStatus';
 import { currencyFormatter } from '../../../utils/formatUtils';
 
 type Props = {
@@ -28,7 +28,7 @@ const posTypeMapper: Record<string, string> = {
 };
 
 const StatusChip = ({ status }: any) => {
-  const chipItem = getStatus(status);
+  const chipItem = getBatchStatus(status);
   return (
     <CustomChip
       label={chipItem?.label}
