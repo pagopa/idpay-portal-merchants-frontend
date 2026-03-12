@@ -582,3 +582,50 @@ describe('Test suite for SideMenu component', () => {
   });
 
 });
+
+describe('SideMenu - extra branch coverage', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  test('Expanding a collapsed accordion covers handleChange isExpanded=true (panel branch)', async () => {
+    const fakeIdNotInList = 'fake-id-not-in-initiatives';
+
+    const pathname =
+      typeof ROUTES.OVERVIEW === 'string' && ROUTES.OVERVIEW.includes(':id')
+        ? ROUTES.OVERVIEW.replace(':id', fakeIdNotInList)
+        : `${BASE_ROUTE}/${fakeIdNotInList}/${ROUTES.SIDE_MENU_OVERVIEW}`;
+
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        assign: jest.fn(),
+        pathname,
+        origin: 'MOCKED_ORIGIN',
+        search: '',
+        hash: '',
+      },
+    });
+
+    const { store } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const user = userEvent.setup();
+
+    const accordions = await screen.findAllByTestId('accordion-click-test');
+
+    await waitFor(() => {
+      const summaryButton = within(accordions[0]).getAllByRole('button')[0];
+      expect(summaryButton).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    await user.click(within(accordions[0]).getAllByRole('button')[0]);
+
+    await waitFor(() => {
+      const refreshedAccordions = screen.getAllByTestId('accordion-click-test');
+      const refreshedSummaryButton = within(refreshedAccordions[0]).getAllByRole('button')[0];
+      expect(refreshedSummaryButton).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+});
