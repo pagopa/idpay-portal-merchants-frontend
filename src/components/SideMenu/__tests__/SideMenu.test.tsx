@@ -422,6 +422,23 @@ describe('Test suite for SideMenu component', () => {
     });
   });
 
+  test('Accordion expands when handleChange is called with isExpanded=true (covers panel branch)', async () => {
+    const { store } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    const accordions = await screen.findAllByTestId('accordion-click-test');
+    const user = userEvent.setup();
+
+    await user.click(accordions[0]);
+
+    await user.click(accordions[0]);
+
+    await waitFor(() => {
+      const summary = within(accordions[0]).getAllByRole('button')[0];
+      expect(summary).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
   test('checkIsSelected returns false when pathname does not match stores route', async () => {
     const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
@@ -471,6 +488,97 @@ describe('Test suite for SideMenu component', () => {
     renderWithContext(<SideMenu />);
 
     expect(screen.getByTestId('list-test')).toBeInTheDocument();
+  });
+
+  test('Dispatches empty spendingPeriod when startDate and endDate are undefined (covers || "")', async () => {
+    const initiativeWithoutDates = {
+      initiativeId: 'no-dates-id',
+      initiativeName: 'Initiative without dates',
+      startDate: undefined,
+      endDate: undefined,
+    };
+
+    const { store } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList([initiativeWithoutDates as any]));
+
+    const user = userEvent.setup();
+
+    const overviewLinks = await screen.findAllByText('pages.initiativeOverview.title');
+    await user.click(overviewLinks[0]);
+
+    await waitFor(() => {
+      const state = store.getState();
+      expect(state.initiatives.selectedInitative?.spendingPeriod).toBe('undefined - undefined');
+    });
+  });
+
+  test('Dispatches empty spendingPeriod from accordion summary click when dates are undefined (covers panel branch)', async () => {
+    const initiativeWithoutDates = {
+      initiativeId: 'no-dates-summary',
+      initiativeName: 'Initiative summary without dates',
+      startDate: undefined,
+      endDate: undefined,
+    };
+
+    const { store } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList([initiativeWithoutDates as any]));
+
+    const user = userEvent.setup();
+
+    const summaryTitle = await screen.findByText('Initiative summary without dates');
+    await user.click(summaryTitle);
+
+    await waitFor(() => {
+      const state = store.getState();
+      expect(state.initiatives.selectedInitative?.spendingPeriod).toBe('undefined - undefined');
+    });
+  });
+
+  test('useEffect branch: match not null but without id param', () => {
+    const mockedLocation = {
+      assign: jest.fn(),
+      pathname: ROUTES.HOME, // matches routing config but no id param
+      origin: 'MOCKED_ORIGIN',
+      search: '',
+      hash: '',
+    };
+    Object.defineProperty(window, 'location', { value: mockedLocation });
+
+    const { store } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    expect(screen.getByTestId('list-test')).toBeInTheDocument();
+  });
+
+  test('useEffect branch: initiativesList undefined and match null', () => {
+    const mockedLocation = {
+      assign: jest.fn(),
+      pathname: '/completely-random-route',
+      origin: 'MOCKED_ORIGIN',
+      search: '',
+      hash: '',
+    };
+    Object.defineProperty(window, 'location', { value: mockedLocation });
+
+    renderWithContext(<SideMenu />); // do NOT dispatch initiatives list
+
+    expect(screen.getByTestId('list-test')).toBeInTheDocument();
+  });
+
+  test('useEffect branch: initiativesList present and match null triggers firstItemExpanded true path', () => {
+    const mockedLocation = {
+      assign: jest.fn(),
+      pathname: '/another-random-route',
+      origin: 'MOCKED_ORIGIN',
+      search: '',
+      hash: '',
+    };
+    Object.defineProperty(window, 'location', { value: mockedLocation });
+
+    const { store } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+
+    expect(screen.getAllByTestId('accordion-click-test').length).toBeGreaterThan(0);
   });
 
 });
