@@ -37,12 +37,12 @@ import {
 } from '../../../services/merchantService';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { useAlert } from '../../../hooks/useAlert';
-import { RewardBatchDTO } from '../../../api/generated/merchants/RewardBatchDTO';
+import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/FranchisePointOfSaleDTO';
 import { ShopCard } from './ShopCard';
 
 const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(
-  (el) => el !== 'TO_CHECK'
+  (el) => el !== RewardBatchTrxStatusEnum.TO_CHECK
 );
 interface RouteParams {
   id: string;
@@ -113,10 +113,10 @@ const ShopDetails: React.FC = () => {
 
   const fetchAll = async () => {
     try {
-        const response = await getAllRewardBatches(id);
+      const response = await getAllRewardBatches(id);
 
-        const match = response?.content?.find((e: any) => e.id === batch_id);
-        setStore(match ?? {});
+      const match = response?.content?.find((e: any) => e.id === batch_id);
+      setStore(match ?? {});
     } catch (error: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -129,39 +129,33 @@ const ShopDetails: React.FC = () => {
 
   useEffect(() => {
     void fetchAll();
-  }, [filters, drawerRefreshKey]);
-
-  const fetchStores = async (fromSort?: boolean) => {
+  }, [drawerRefreshKey]);
+  
+  const fetchStores = async () => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     if (!merchantId) {
       return;
     }
+    setStoresLoading(true);
     try {
-      if (!fromSort) {
-        setStoresLoading(true);
-      }
       const response = await getMerchantPointOfSalesWithTransactions(batch_id);
       setStores(response);
-      if (!fromSort) {
-        setStoresLoading(false);
-      }
     } catch (error: any) {
-        setAlert({
-          title: t('errors.genericTitle'),
-          text: t('errors.genericDescription'),
-          isOpen: true,
-          severity: 'error',
-        });
-      if (!fromSort) {
-        setStoresLoading(false);
-      }
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
+    } finally {
+      setStoresLoading(false);
     }
   };
 
   useEffect(() => {
     void fetchStores();
-  }, [filters, drawerRefreshKey]);
+  }, []);
 
   const handleOnFiltersApplied = () => {
     formik.handleSubmit();
@@ -284,7 +278,7 @@ const ShopDetails: React.FC = () => {
             }}
             onClick={handleDownloadCsv}
             data-testid="download-csv-button-test"
-            disabled={store?.status !== 'APPROVED' || batchDownloadIsLoading}
+            disabled={store?.status !== StatusEnum.APPROVED || batchDownloadIsLoading}
           >
             {t('pages.refundRequests.storeDetails.exportCSV')}
             <span style={{ marginLeft: '10px' }}>
@@ -294,7 +288,7 @@ const ShopDetails: React.FC = () => {
         </Box>
       </Box>
 
-      {store?.status === 'APPROVING' && (
+      {store?.status === StatusEnum.APPROVING && (
         <Alert
           sx={{ mb: 3 }}
           variant="outlined"
@@ -332,7 +326,7 @@ const ShopDetails: React.FC = () => {
                 size="small"
                 disabled={stores?.length === 0}
               >
-                {stores.map((store) => (
+                {stores?.map((store) => (
                   <MenuItem key={store?.pointOfSaleId} value={store?.pointOfSaleId}>
                     <Tooltip title={store?.franchiseName || MISSING_DATA_PLACEHOLDER}>
                       <span>
@@ -386,7 +380,7 @@ const ShopDetails: React.FC = () => {
                 }
                 disabled={stores?.length === 0}
               >
-                {filterByStatusOptionsList.map((item) => (
+                {filterByStatusOptionsList?.map((item) => (
                   <MenuItem key={item} value={item}>
                     <StatusChip status={item} />
                   </MenuItem>
@@ -396,7 +390,6 @@ const ShopDetails: React.FC = () => {
           </Grid>
         </FiltersForm>
         <InvoiceDataTable
-          batchId={batch_id}
           onDrawerClosed={() => setDrawerRefreshKey((prev) => prev + 1)}
           rewardBatchTrxStatus={filters.status}
           pointOfSaleId={filters.pointOfSale}
