@@ -20,6 +20,7 @@ jest.mock('../../../hooks/useAlert', () => ({
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: jest.fn(),
+  useParams: () => ({ id: 'test-initiative-id' })
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend', () => ({
@@ -502,24 +503,6 @@ describe('RefundRequests', () => {
     });
   });
 
-  it('should handle missing initiativesList gracefully', async () => {
-    mockGetRewardBatches.mockResolvedValue({
-      content: [],
-      pageNo: 0,
-      pageSize: 10,
-      totalElements: 0,
-    });
-
-    const storeWithoutInitiatives = createMockStore([]);
-
-    renderWithStore(<RefundRequests />, storeWithoutInitiatives);
-
-    await waitFor(() => expect(mockGetRewardBatches).not.toHaveBeenCalled());
-
-    expect(mockGetRewardBatches).not.toHaveBeenCalledWith('', 0, 10);
-    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
-  });
-
   it('should handle pagination page change', async () => {
     const user = userEvent.setup();
     renderWithStore(<RefundRequests />);
@@ -587,50 +570,6 @@ describe('RefundRequests', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('data-table')).toBeInTheDocument();
-    });
-
-    consoleErrorSpy.mockRestore();
-  });
-  it('should log error and not call sendRewardBatch when initiativeId is missing', async () => {
-    const user = userEvent.setup();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-
-    const currentYear = new Date().getFullYear();
-    const monthAlwaysSelectable = `${currentYear}-00`;
-    const data = [
-      {
-        id: 31,
-        name: 'batch-missing-initiative-id',
-        posType: 'PHYSICAL',
-        initialAmountCents: 10000,
-        status: 'CREATED',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-      },
-    ];
-
-    mockGetRewardBatches.mockResolvedValue({
-      content: data,
-      pageNo: 0,
-      pageSize: 10,
-      totalElements: data.length,
-    });
-
-    const storeWithUndefinedInitiativeId = createMockStore([{ initiativeId: undefined } as any]);
-    renderWithStore(<RefundRequests />, storeWithUndefinedInitiativeId);
-
-    await waitFor(() => expect(screen.getByTestId('checkbox-31')).toBeInTheDocument());
-
-    await user.click(screen.getByTestId('checkbox-31'));
-
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
-    await user.click(sendButton);
-
-    const confirmButton = await screen.findByText('Invia');
-    await user.click(confirmButton);
-
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing initiativeId or batchId');
     });
 
     consoleErrorSpy.mockRestore();

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import ShopDetails from "../ShopDetails";
 import { BrowserRouter } from "react-router-dom";
 
@@ -12,6 +12,7 @@ jest.mock("react-router-dom", () => ({
   useLocation: () => ({
     state: { store: { id: "batch-1" }, batchId: "batch-1" },
   }),
+  useParams: () => ({ id: 'initiative-123', batch_id: "batch-1" }),
 }));
 
 jest.mock("react-i18next", () => ({
@@ -63,14 +64,16 @@ describe("ShopDetails - FULL BRANCH COVERAGE", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    getMerchantDetail.mockResolvedValue({});
-    getMerchantTransactionsProcessed.mockResolvedValue({
-      content: [],
-      totalPages: 0,
-    });
+    act(() => {
+      getMerchantDetail.mockResolvedValue({});
+      getMerchantTransactionsProcessed.mockResolvedValue({
+        content: [],
+        totalPages: 0,
+      });
 
-    getAllRewardBatches.mockResolvedValue({ content: [] });
-    getMerchantPointOfSalesWithTransactions.mockResolvedValue([]);
+      getAllRewardBatches.mockResolvedValue({ content: [] });
+      getMerchantPointOfSalesWithTransactions.mockResolvedValue([])
+    });
   });
 
   it("covers fetchAll success branch", async () => {
