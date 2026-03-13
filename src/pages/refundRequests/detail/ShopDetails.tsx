@@ -130,7 +130,7 @@ const ShopDetails: React.FC = () => {
   useEffect(() => {
     void fetchAll();
   }, [drawerRefreshKey]);
-  
+
   const fetchStores = async () => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
@@ -140,7 +140,7 @@ const ShopDetails: React.FC = () => {
     setStoresLoading(true);
     try {
       const response = await getMerchantPointOfSalesWithTransactions(batch_id);
-      setStores(response);
+      setStores(response || []);
     } catch (error: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -317,6 +317,7 @@ const ShopDetails: React.FC = () => {
             <FormControl fullWidth size="small" disabled={storesLoading}>
               <InputLabel id="point-of-sale-label">Punto vendita</InputLabel>
               <Select
+                data-testid="point-of-sale-test"
                 labelId="point-of-sale-label"
                 id="pointOfSaleId"
                 name="pointOfSaleId"
@@ -362,6 +363,7 @@ const ShopDetails: React.FC = () => {
             <FormControl size="small" fullWidth>
               <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
               <Select
+                data-testid="status-test"
                 id="rewardBatchTrxStatus"
                 inputProps={{
                   'data-testid': 'filterStatus-select',
