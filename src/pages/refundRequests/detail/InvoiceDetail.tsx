@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { theme } from '@pagopa/mui-italia';
 import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import routes from '../../../routes';
 import { downloadInvoiceFile, postponeTransaction } from '../../../services/merchantService';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
@@ -21,8 +21,6 @@ import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/Deta
 type Props = DetailDrawerProps & {
   itemValues: Record<string, any>;
   listItem: Array<any>;
-  batchId: string;
-  storeId: string;
   onSuccess?: () => void;
   onCloseDrawer?: () => void;
 };
@@ -30,7 +28,6 @@ type Props = DetailDrawerProps & {
 export default function InvoiceDetail({
   itemValues,
   listItem,
-  batchId,
   onSuccess,
   onCloseDrawer,
   isOpen,
@@ -41,7 +38,6 @@ export default function InvoiceDetail({
   const [isLoading, setLoading] = useState(false);
   const [initiativeEndDate, setInitiativeEndDate] = useState<string>('');
   const [nextMonthInitiativeEndDate, setNextMonthInitiativeEndDate] = useState<Date | undefined>();
-  const [initiativeId, setInitiativeId] = useState<string>('');
   const [invoiceTransactionModal, setInvoiceTransactionModal] = useState(false);
   const location = useLocation<{ store: any }>();
   const batchMonth = location.state?.store?.month;
@@ -49,7 +45,7 @@ export default function InvoiceDetail({
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
   const history = useHistory();
-  const { id: merchantId } = useParams<{ id: string }>();
+  const { id, batch_id } = useParams<{ id: string; batch_id: string }>();
 
   useEffect(() => {
     if (
@@ -59,9 +55,6 @@ export default function InvoiceDetail({
       const endOfNextMonth = getEndOfNextMonth(initiativesListSel?.[0]?.endDate);
       setNextMonthInitiativeEndDate(endOfNextMonth);
       setInitiativeEndDate(initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]);
-    }
-    if (initiativesListSel?.[0]?.initiativeId) {
-      setInitiativeId(initiativesListSel?.[0]?.initiativeId);
     }
   }, [initiativesListSel]);
 
@@ -81,7 +74,7 @@ export default function InvoiceDetail({
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
               onClick: () => {
-                const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
+                const path = routes.MODIFY_DOCUMENT.replace(':id', id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
                   .replace(':trxId', itemValues.id)
                   .replace(':fileDocNumber', window.btoa(itemValues?.invoiceData?.docNumber ?? ''));
@@ -102,7 +95,7 @@ export default function InvoiceDetail({
               title: 'Storna',
               dataTestId: 'reverse-btn',
               onClick: () => {
-                const path = routes.REVERSE.replace(':id', merchantId)
+                const path = routes.REVERSE.replace(':id', id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
                   .replace(':trxId', itemValues.id);
                 history.push(path, { fromLocation: history.location });
@@ -120,7 +113,7 @@ export default function InvoiceDetail({
 
     setLoading(true);
     try {
-      await postponeTransaction(initiativeId, batchId ?? '', itemValues.id, initiativeEndDate);
+      await postponeTransaction(id, batch_id, itemValues.id, initiativeEndDate);
       setAlert({
         title: 'Successo',
         text: 'Transazione spostata al mese successivo',

@@ -372,11 +372,9 @@ const InvoiceDataTable = ({
           onCloseDrawer={() => handleCloseDrawer(false)}
           isOpen={drawerOpened}
           setIsOpen={handleToggleDrawer}
-          batchId={batch_id}
           onSuccess={loadTransactions}
           title="Dettaglio transazione"
           itemValues={rowDetail}
-          storeId={rowDetail?.pointOfSaleId || ''}
           listItem={[
             {
               label: 'Data e ora',

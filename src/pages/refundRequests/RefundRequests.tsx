@@ -106,7 +106,10 @@ const RefundRequests = () => {
       renderCell: (params: any) => (
         <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
           <IconButton
-            onClick={() => {history.push(`${BASE_ROUTE}/${id}/richieste-di-rimborso/${params.row?.id}`);
+            onClick={() => {
+              history.push(`${BASE_ROUTE}/${id}/richieste-di-rimborso/${params.row?.id}`,
+                {store: params.row}
+              );
             }}
             size="small"
           >
