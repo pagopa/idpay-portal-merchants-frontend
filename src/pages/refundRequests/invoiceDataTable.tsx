@@ -27,10 +27,10 @@ import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
   id: string;
+  batch_id: string;
 }
 
 interface InvoiceDataTableProps {
-  batchId?: string;
   rewardBatchTrxStatus?: string;
   pointOfSaleId?: string;
   trxCode?: string;
@@ -52,7 +52,6 @@ const renderCellWithTooltip = (value: string | JSX.Element) => (
 );
 
 const InvoiceDataTable = ({
-  batchId,
   rewardBatchTrxStatus,
   pointOfSaleId,
   trxCode,
@@ -71,7 +70,7 @@ const InvoiceDataTable = ({
   const [sortModel, setSortModel] = useState<GridSortModel>([
     { field: 'trxChargeDate', sort: 'desc' },
   ]);
-  const { id } = useParams<RouteParams>();
+  const { id, batch_id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
   const { t } = useTranslation();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -147,46 +146,34 @@ const InvoiceDataTable = ({
     }
   };
 
-  const showGenericError = () =>
-    setAlert({
-      title: t('errors.genericTitle'),
-      text: t('errors.genericDescription'),
-      isOpen: true,
-      severity: 'error',
-    });
-
-  const buildFilters = () => ({
-    ...(fiscalCode ? { fiscalCode } : {}),
-    ...(batchId ? { rewardBatchId: batchId } : {}),
-    ...(rewardBatchTrxStatus ? { rewardBatchTrxStatus } : {}),
-    ...(pointOfSaleId ? { pointOfSaleId } : {}),
-    ...(trxCode ? { trxCode } : {}),
-  });
-
-  const handleTransactionsResponse = (response: MerchantTransactionsListDTO) => {
-    const { content, ...paginationData } = response;
-    setPagination(paginationData);
-    setTransactions(content ?? []);
-  };
-
   const loadTransactions = async (
     params?: Omit<GetMerchantTransactionsProcessedParams, 'initiativeId'>
   ) => {
     setLoading(true);
-
+    const filters = {
+      ...(fiscalCode ? { fiscalCode } : {}),
+      ...(rewardBatchTrxStatus ? { rewardBatchTrxStatus } : {}),
+      ...(pointOfSaleId ? { pointOfSaleId } : {}),
+      ...(trxCode ? { trxCode } : {}),
+    };
     try {
-      const filters = buildFilters();
-
       const response = await getMerchantTransactionsProcessed({
         initiativeId: id,
         size: pagination.pageSize,
+        rewardBatchId: batch_id,
         ...filters,
-        ...params,
+        ...params
       });
-
-      handleTransactionsResponse(response);
-    } catch (error) {
-      showGenericError();
+      const { content, ...paginationData } = response;
+      setPagination(paginationData);
+      setTransactions(content ?? []);
+    } catch {
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
     } finally {
       setLoading(false);
     }
@@ -194,7 +181,7 @@ const InvoiceDataTable = ({
 
   useEffect(() => {
     void loadTransactions();
-  }, [batchId, rewardBatchTrxStatus, pointOfSaleId, trxCode, fiscalCode]);
+  }, [rewardBatchTrxStatus, pointOfSaleId, trxCode, fiscalCode]);
 
   const columns: Array<GridColDef> = [
     {
@@ -385,11 +372,9 @@ const InvoiceDataTable = ({
           onCloseDrawer={() => handleCloseDrawer(false)}
           isOpen={drawerOpened}
           setIsOpen={handleToggleDrawer}
-          batchId={batchId ?? ''}
           onSuccess={loadTransactions}
           title="Dettaglio transazione"
           itemValues={rowDetail}
-          storeId={rowDetail?.pointOfSaleId || ''}
           listItem={[
             {
               label: 'Data e ora',
