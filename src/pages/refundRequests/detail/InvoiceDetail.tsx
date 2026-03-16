@@ -17,6 +17,7 @@ import { useAppSelector } from '../../../redux/hooks';
 import { formatDate, isReversableOrEditable } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
+import { StatusEnum } from '../../../api/generated/merchants/MerchantTransactionDTO';
 
 type Props = DetailDrawerProps & {
   itemValues: Record<string, any>;
@@ -61,7 +62,7 @@ export default function InvoiceDetail({
   const endOfNextBatchMonth = batchMonth ? getEndOfNextMonth(batchMonth) : undefined;
 
   const isNextMonthDisabled =
-    !endOfNextBatchMonth || !nextMonthInitiativeEndDate || statusBatch !== 'CREATED'
+    !endOfNextBatchMonth || !nextMonthInitiativeEndDate || statusBatch !== StatusEnum.CREATED
       ? true
       : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 

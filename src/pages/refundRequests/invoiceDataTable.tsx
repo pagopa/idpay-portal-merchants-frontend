@@ -166,7 +166,7 @@ const InvoiceDataTable = ({
       });
       const { content, ...paginationData } = response;
       setPagination(paginationData);
-      setTransactions(content);
+      setTransactions(content ?? []);
     } catch {
       setAlert({
         title: t('errors.genericTitle'),
