@@ -22,14 +22,6 @@ jest.mock('../../../../components/Chip/StatusChipInvoice', () => (props: any) =>
     <div data-testid="status-chip">{props.status}</div>
 ));
 
-// jest.mock('../../../../components/modal/ModalComponent', () => (props: any) =>
-//     props.open ? (
-//         <div data-testid="modal-component">
-//             {props.children}
-//         </div>
-//     ) : null
-// );
-
 jest.mock('../../../../hooks/useAlert', () => ({
     useAlert: jest.fn(),
 }));
@@ -52,7 +44,7 @@ jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'),
     useLocation: jest.fn(),
     useHistory: () => mockUseHistory(),
-    useParams: () => ({ id: 'merchant-1' })
+    useParams: () => ({ id: 'init-1', batch_id: "batch-1" })
 }));
 
 jest.mock('../../../../redux/slices/initiativesSlice', () => ({
@@ -77,301 +69,99 @@ import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
 import { isReversableOrEditable } from '../../../../helpers';
 
-describe('InvoiceDetail', () => {
-    let mockSetAlert: jest.Mock;
+let mockSetAlert: jest.Mock;
 
-    const baseItemValues = {
-        id: 'trx-1',
-        pointOfSaleId: 'pos-1',
-        status: 'APPROVED',
-        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
-        initiativeId: 'init-123',
-        invoiceData: {
-            docNumber: 'DOC-123',
-            filename: 'fattura.pdf',
-        },
-        rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
-        additionalProperties: {
-            productName: 'Prodotto di test',
-        },
-    };
+const baseItemValues = {
+    id: 'trx-1',
+    pointOfSaleId: 'pos-1',
+    status: 'APPROVED',
+    rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
+    invoiceData: {
+        docNumber: 'DOC-123',
+        filename: 'fattura.pdf',
+    },
+    rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+    additionalProperties: {
+        productName: 'Prodotto di test',
+    },
+};
 
-    const baseListItem = [
-        {
-            id: 'additionalProperties.productName',
-            label: 'Elettrodomestico',
-            format: (value: string) => `formatted-${value}`,
-        },
-        {
-            id: 'amount',
-            label: 'Importo',
-            type: 'Currency',
-        },
-        {
-            id: 'description',
-            label: 'Descrizione',
-            type: 'Text',
-        },
-    ];
+const baseListItem = [
+    {
+        id: 'additionalProperties.productName',
+        label: 'Elettrodomestico',
+        format: (value: string) => `formatted-${value}`,
+    },
+    {
+        id: 'amount',
+        label: 'Importo',
+        type: 'Currency',
+    },
+    {
+        id: 'description',
+        label: 'Descrizione',
+        type: 'Text',
+    },
+];
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-        mockSetAlert = jest.fn();
-        mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/merchants/merchant-1/refunds', state: {} }});
-        (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
-        (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
-        (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
-        (useAppSelector as jest.Mock).mockReset();
-        (window as any).open = jest.fn();
-        global.fetch = jest.fn();
-    });
-
-    describe('Render component', () => {
-
-        it('should render component', () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
-            expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
-            expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
-            expect(screen.getByText('Numero fattura')).toBeInTheDocument();
-            expect(screen.queryByText('Motivo di rifiuto')).not.toBeInTheDocument();
-            expect(screen.queryByText('Nota ufficiale')).not.toBeInTheDocument();
-            expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
-            expect(screen.getByTestId('btn-test')).toBeInTheDocument();
-        });
-        it('should render component', () => {
-            (useAppSelector as jest.Mock).mockReturnValue([])
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: 'SUSPENDED' }}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
-            expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
-            expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
-            expect(screen.getByText('Numero fattura')).toBeInTheDocument();
-            expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
-            expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
-            expect(screen.getByText('03/02/2026')).toBeInTheDocument();
-            expect(screen.getByTestId('btn-test')).toBeInTheDocument();
-    });
-
-    describe('Additional branch coverage', () => {
-        it('should handle undefined initiativesListSel (line 68 branch)', () => {
-            (useAppSelector as jest.Mock).mockReturnValue(undefined);
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
-        });
-
-        it('should use empty string when docNumber is undefined (?? "" branch)', () => {
-            (isReversableOrEditable as jest.Mock).mockReturnValue(true);
-
-            const values = {
-                ...baseItemValues,
-                pointOfSaleId: 'pos-1',
-                invoiceData: {},
-            };
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={values}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            const modifyBtn = screen.getByTestId('change-file-btn');
-            fireEvent.click(modifyBtn);
-
-            expect(pushMock).toHaveBeenCalled();
-        });
-
-        it('should return early in handlePostponeTransaction when initiativeEndDate is missing (line 118)', async () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId="batch-1"
-                    storeId="store-1"
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            const confirmButtons = screen.queryAllByText('Conferma');
-            expect(confirmButtons.length).toBe(0);
-        });
-
-        it('should call postponeTransaction with empty batchId (batchId ?? "")', async () => {
-            const futureDate = new Date('2026-03-15');
-            (useAppSelector as jest.Mock).mockReturnValue([
-                { initiativeId: 'init-123', endDate: futureDate },
-            ]);
-
-            (postponeTransaction as jest.Mock).mockResolvedValueOnce({});
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
-                    listItem={baseListItem}
-                    batchId={undefined as any}
-                    storeId="store-1"
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            const btn = await screen.findByTestId('next-month-btn');
-            fireEvent.click(btn);
-
-            const confirmButton = await screen.findByText('Conferma');
-            fireEvent.click(confirmButton);
-
-            await waitFor(() => {
-                expect(postponeTransaction).toHaveBeenCalledWith(
-                    'init-123',
-                    '',
-                    'trx-1',
-                    expect.any(String)
-                );
-            });
-        });
-
-        it('should handle xml extension branch', async () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            const xmlValues = {
-                ...baseItemValues,
-                invoiceData: { docNumber: 'DOC', filename: 'file.xml' },
-            };
-
-            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
-                invoiceUrl: 'https://example.com/file.xml',
-            });
-
-            (global.fetch as jest.Mock).mockResolvedValueOnce({
-                ok: true,
-                blob: jest.fn().mockResolvedValue(new Blob(['xml'], { type: 'application/xml' })),
-            });
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={xmlValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            fireEvent.click(screen.getByTestId('btn-test'));
-
-            await waitFor(() => {
-                expect(downloadInvoiceFile).toHaveBeenCalled();
-            });
-        });
-
-        it('should cover window.open null branch (lines 188-196)', async () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
-                invoiceUrl: 'https://example.com/invoice.pdf',
-            });
-
-            (global.fetch as jest.Mock).mockResolvedValueOnce({
-                ok: true,
-                blob: jest.fn().mockResolvedValue(new Blob(['pdf'], { type: 'application/pdf' })),
-            });
-
-            (window as any).open = jest.fn().mockReturnValue(null);
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            fireEvent.click(screen.getByTestId('btn-test'));
-
-            await waitFor(() => {
-                expect(downloadInvoiceFile).toHaveBeenCalled();
-            });
-        });
-
-        it('should cover rejection reason empty branch (lines 220-225)', () => {
-            const values = {
-                ...baseItemValues,
-                rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
-                rewardBatchRejectionReason: [],
-            };
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={values}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            expect(screen.getAllByText('-').length).toBeGreaterThan(0);
-        });
-    });
+beforeEach(() => {
+    jest.clearAllMocks();
+    mockSetAlert = jest.fn();
+    mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/merchants/init-1/refunds/batch-1', state: {} } });
+    (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
+    (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
+    (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+    (useAppSelector as jest.Mock).mockReset();
+    (window as any).open = jest.fn();
+    global.fetch = jest.fn();
 });
 
-    describe('Download File', () => {
+describe('Render component', () => {
+    it('should render component', () => {
+        (useAppSelector as jest.Mock).mockReturnValue([]);
 
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={baseItemValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+        expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
+        expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
+        expect(screen.getByText('Numero fattura')).toBeInTheDocument();
+        expect(screen.queryByText('Motivo di rifiuto')).not.toBeInTheDocument();
+        expect(screen.queryByText('Nota ufficiale')).not.toBeInTheDocument();
+        expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
+        expect(screen.getByTestId('btn-test')).toBeInTheDocument();
+    });
+    it('should render component', () => {
+        (useAppSelector as jest.Mock).mockReturnValue([])
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={{ ...baseItemValues, rewardBatchTrxStatus: 'SUSPENDED' }}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+        expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
+        expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
+        expect(screen.getByText('Numero fattura')).toBeInTheDocument();
+        expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
+        expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
+        expect(screen.getByText('03/02/2026')).toBeInTheDocument();
+        expect(screen.getByTestId('btn-test')).toBeInTheDocument();
+    });
+
+    describe('Download File', () => {
         it('should successfully download file', async () => {
             (useAppSelector as jest.Mock).mockReturnValue([]);
 
@@ -391,8 +181,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={baseItemValues}
                     listItem={baseListItem}
-                    batchId=""
-                    storeId=""
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
@@ -413,7 +201,7 @@ describe('InvoiceDetail', () => {
                 });
             });
         });
-        
+
         it('should handle fetch fail', async () => {
             (useAppSelector as jest.Mock).mockReturnValue([]);
 
@@ -429,8 +217,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={baseItemValues}
                     listItem={baseListItem}
-                    batchId=""
-                    storeId=""
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
@@ -479,8 +265,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={unsupportedValues}
                     listItem={baseListItem}
-                    batchId=""
-                    storeId=""
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
@@ -525,8 +309,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={noFilenameValues}
                     listItem={baseListItem}
-                    batchId=""
-                    storeId=""
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
@@ -556,8 +338,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={baseItemValues}
                     listItem={baseListItem}
-                    batchId=""
-                    storeId=""
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
@@ -589,8 +369,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={baseItemValues}
                     listItem={baseListItem}
-                    batchId=""
-                    storeId=""
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
@@ -604,7 +382,6 @@ describe('InvoiceDetail', () => {
     });
 
     describe('Postpone Transaction Logic', () => {
-
         it('should disable button when isNextMonthDisabled is true', async () => {
             const pastDate = new Date('2026-01-15');
 
@@ -628,8 +405,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={consultableValues}
                     listItem={baseListItem}
-                    batchId="batch-1"
-                    storeId="store-1"
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
@@ -662,8 +437,6 @@ describe('InvoiceDetail', () => {
                 title="Dettaglio transazione"
                 itemValues={consultableValues}
                 listItem={baseListItem}
-                batchId="batch-1"
-                storeId="store-1"
                 isOpen={true}
                 setIsOpen={() => { }}
             />
@@ -715,8 +488,6 @@ describe('InvoiceDetail', () => {
                 title="Dettaglio transazione"
                 itemValues={consultableValues}
                 listItem={baseListItem}
-                batchId="batch-1"
-                storeId="store-1"
                 isOpen={true}
                 setIsOpen={() => { }}
             />
@@ -765,8 +536,6 @@ describe('InvoiceDetail', () => {
                 title="Dettaglio transazione"
                 itemValues={consultableValues}
                 listItem={baseListItem}
-                batchId="batch-1"
-                storeId="store-1"
                 isOpen={true}
                 setIsOpen={() => { }}
             />
@@ -797,45 +566,6 @@ describe('InvoiceDetail', () => {
             });
         });
     });
-    describe('Status Chip Display', () => {
-        it('Should show correct StatusChip state', () => {
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={{ 
-                        ...baseItemValues, 
-                        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
-                        status: "REWARDED"
-                    }}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            expect(screen.getByTestId('status-chip')).toBeInTheDocument();
-        });
-    });
-    describe('Modify file', () => {
-        it('Should navigate', () => {
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED, status: "REWARDED", pointOfSaleId: 'pos-1', }}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-            const button = screen.getByTestId('btn-test');
-            fireEvent.click(button);
-            expect(pushMock).not.toHaveBeenCalled()
-        });
-    });
 
     describe('Reverse button', () => {
         it('Should navigate to reverse page when reverse button is clicked', () => {
@@ -845,19 +575,19 @@ describe('InvoiceDetail', () => {
             (isReversableOrEditable as jest.Mock).mockReturnValue(true);
 
             const trxItem = {
-              id: 'trx-1',
-              pointOfSaleId: 'pos-1',
-              status: "REWARDED",
-              rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
-              initiativeId: 'init-123',
-              invoiceData: {
-                docNumber: 'DOC-123',
-                filename: 'fattura.pdf',
-              },
-              rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
-              additionalProperties: {
-                productName: 'Prodotto di test',
-              },
+                id: 'trx-1',
+                pointOfSaleId: 'pos-1',
+                status: "REWARDED",
+                rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+                initiativeId: 'init-123',
+                invoiceData: {
+                    docNumber: 'DOC-123',
+                    filename: 'fattura.pdf',
+                },
+                rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+                additionalProperties: {
+                    productName: 'Prodotto di test',
+                },
             };
 
             render(
@@ -865,8 +595,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={trxItem}
                     listItem={baseListItem}
-                    batchId=""
-                    storeId=""
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
@@ -877,6 +605,21 @@ describe('InvoiceDetail', () => {
 
             expect(pushMock).toHaveBeenCalled();
             expect(pushMock.mock.calls[0][0]).toContain('storna-transazione');
+        });
+
+        it('Should navigate', () => {
+            render(
+                <InvoiceDetail
+                    title="Dettaglio transazione"
+                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED, status: "REWARDED", pointOfSaleId: 'pos-1', }}
+                    listItem={baseListItem}
+                    isOpen={true}
+                    setIsOpen={() => { }}
+                />
+            );
+            const button = screen.getByTestId('btn-test');
+            fireEvent.click(button);
+            expect(pushMock).not.toHaveBeenCalled()
         });
 
         it('Should navigate to modify document when editable and pointOfSaleId is present', () => {
@@ -897,8 +640,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={trxItem}
                     listItem={baseListItem}
-                    batchId=""
-                    storeId=""
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
@@ -919,8 +660,6 @@ describe('InvoiceDetail', () => {
                     title="Dettaglio transazione"
                     itemValues={{ ...baseItemValues, pointOfSaleId: 'pos-1' }}
                     listItem={baseListItem}
-                    batchId=""
-                    storeId=""
                     isOpen={true}
                     setIsOpen={() => { }}
                 />
