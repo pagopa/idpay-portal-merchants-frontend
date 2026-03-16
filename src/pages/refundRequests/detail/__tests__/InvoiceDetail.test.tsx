@@ -51,11 +51,11 @@ jest.mock('../../../../redux/slices/initiativesSlice', () => ({
     intiativesListSelector: (state: any) => state,
 }));
 
-jest.mock('../../../../utils/formatUtils', () => ({
-    ...jest.requireActual('../../../../utils/formatUtils'),
-    formatValues: jest.fn((val: string) => `formatted-${val}`),
-    currencyFormatter: jest.fn((val: number) => ({ toString: () => `€${val.toFixed(2)}` }))
-}));
+// jest.mock('../../../../utils/formatUtils', () => ({
+//     ...jest.requireActual('../../../../utils/formatUtils'),
+//     formatValues: jest.fn((val: string) => val ? `formatted-${val}` : MISSING_DATA_PLACEHOLDER),
+//     currencyFormatter: jest.fn((val: number) => ({ toString: () => `€${val.toFixed(2)}` }))
+// }));
 
 jest.mock('../../../../helpers', () => ({
     ...jest.requireActual('../../../../helpers'),
@@ -68,6 +68,8 @@ import { downloadInvoiceFile, postponeTransaction } from '../../../../services/m
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
 import { isReversableOrEditable } from '../../../../helpers';
+import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../../../utils/constants';
+import { safeFormatDate } from '../../../../utils/formatUtils';
 
 let mockSetAlert: jest.Mock;
 
@@ -88,20 +90,48 @@ const baseItemValues = {
 
 const baseListItem = [
     {
-        id: 'additionalProperties.productName',
-        label: 'Elettrodomestico',
-        format: (value: string) => `formatted-${value}`,
-    },
-    {
-        id: 'amount',
-        label: 'Importo',
-        type: 'Currency',
-    },
-    {
-        id: 'description',
-        label: 'Descrizione',
-        type: 'Text',
-    },
+              label: 'Data e ora',
+              id: 'trxChargeDate',
+              type: TYPE_TEXT.Text,
+              format: (val: any) => safeFormatDate(val),
+            },
+            {
+              label: 'Elettrodomestico',
+              id: 'additionalProperties.productName',
+              type: TYPE_TEXT.Text,
+            },
+            {
+              label: 'Codice Fiscale Beneficiario',
+              id: 'fiscalCode',
+              type: TYPE_TEXT.Text,
+            },
+            {
+              label: 'ID transazione',
+              id: 'trxId',
+              type: TYPE_TEXT.Text,
+              bold: true,
+            },
+            {
+              label: 'Codice sconto',
+              id: 'trxCode',
+              type: TYPE_TEXT.Text,
+            },
+            {
+              label: 'Totale della spesa',
+              id: 'effectiveAmountCents',
+              type: TYPE_TEXT.Currency,
+              bold: true,
+            },
+            {
+              label: 'Sconto applicato',
+              id: 'rewardAmountCents',
+              type: TYPE_TEXT.Currency,
+            },
+            {
+              label: 'Importo autorizzato',
+              id: 'authorizedAmountCents',
+              type: TYPE_TEXT.Currency,
+            }
 ];
 
 beforeEach(() => {
@@ -132,7 +162,7 @@ describe('Render component', () => {
 
         expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
         expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
-        expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
+        expect(screen.getByText('Prodotto di test')).toBeInTheDocument();
         expect(screen.getByText('Numero fattura')).toBeInTheDocument();
         expect(screen.queryByText('Motivo di rifiuto')).not.toBeInTheDocument();
         expect(screen.queryByText('Nota ufficiale')).not.toBeInTheDocument();
@@ -144,7 +174,7 @@ describe('Render component', () => {
         render(
             <InvoiceDetail
                 title="Dettaglio transazione"
-                itemValues={{ ...baseItemValues, rewardBatchTrxStatus: 'SUSPENDED' }}
+                itemValues={{ ...baseItemValues, rewardBatchTrxStatus: 'SUSPENDED', additionalProperties: {productName: undefined} }}
                 listItem={baseListItem}
                 isOpen={true}
                 setIsOpen={() => { }}
@@ -153,12 +183,12 @@ describe('Render component', () => {
 
         expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
         expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
-        expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
         expect(screen.getByText('Numero fattura')).toBeInTheDocument();
         expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
         expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
         expect(screen.getByText('03/02/2026')).toBeInTheDocument();
         expect(screen.getByTestId('btn-test')).toBeInTheDocument();
+        expect(screen.getAllByText(MISSING_DATA_PLACEHOLDER)).toHaveLength(5);
     });
     it('should handle undefined initiativesListSel (line 68 branch)', () => {
         (useAppSelector as jest.Mock).mockReturnValue(undefined);
