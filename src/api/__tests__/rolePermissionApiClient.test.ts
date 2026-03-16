@@ -14,6 +14,14 @@ jest.mock('@pagopa/selfcare-common-frontend/utils/api-utils', () => ({
   extractResponse: jest.fn(),
 }));
 
+jest.mock('@pagopa/selfcare-common-frontend/locale/locale-utils', () => ({
+  t: jest.fn((key) => key),
+}));
+
+jest.mock('../../redux/store', () => ({
+  store: { dispatch: jest.fn() },
+}));
+
 jest.mock('../generated/role-permission/client', () => ({
   createClient: jest.fn(),
 }));
@@ -71,10 +79,7 @@ describe('RolePermissionApi', () => {
   it('savePortalConsent calls client and extractResponse with versionId', async () => {
     mockRolePermissionClient.savePortalConsent.mockResolvedValue({ right: 'saved' });
 
-    let RolePermissionApi: any;
-    jest.isolateModules(() => {
-      RolePermissionApi = require('../rolePermissionApiClient').RolePermissionApi;
-    });
+    const RolePermissionApi = loadApi();
 
     const result = await RolePermissionApi.savePortalConsent('v1');
 
@@ -83,5 +88,35 @@ describe('RolePermissionApi', () => {
     });
     expect(extractResponse).toHaveBeenCalledWith({ right: 'saved' }, 200, expect.any(Function));
     expect(result).toBe('extracted');
+  });
+
+  it('savePortalConsent supports undefined versionId', async () => {
+    mockRolePermissionClient.savePortalConsent.mockResolvedValue({ right: 'saved' });
+
+    const RolePermissionApi = loadApi();
+
+    await RolePermissionApi.savePortalConsent(undefined);
+
+    expect(mockRolePermissionClient.savePortalConsent).toHaveBeenCalledWith({
+      body: { versionId: undefined },
+    });
+  });
+
+  it('calls redirect callback when extractResponse triggers it', async () => {
+    const { store } = require('../../redux/store');
+    store.dispatch = jest.fn();
+
+    (extractResponse as jest.Mock).mockImplementation(async (_res, _status, callback) => {
+      callback();
+      return 'extracted';
+    });
+
+    mockRolePermissionClient.userPermission.mockResolvedValue({ right: 'data' });
+
+    const RolePermissionApi = loadApi();
+
+    await RolePermissionApi.userPermission();
+
+    expect(store.dispatch).toHaveBeenCalled();
   });
 });

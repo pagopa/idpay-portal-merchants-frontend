@@ -388,4 +388,175 @@ describe("ReportDataTable", () => {
       expect(getMerchantReports).toHaveBeenCalled()
     );
   });
+
+  it("renders GENERATED status icon and enables download when not downloading", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r7",
+          fileName: "file.csv",
+          reportStatus: "GENERATED",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("row-r7")).toBeInTheDocument()
+    );
+
+    const downloadButton = screen.getAllByRole("button")[0];
+    expect(downloadButton).not.toBeDisabled();
+  });
+
+  it("does not render table when reports is undefined", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: undefined,
+      page: 0,
+      size: 10,
+      totalElements: 0,
+      totalPages: 0,
+    });
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(getMerchantReports).toHaveBeenCalled()
+    );
+
+    expect(
+      screen.getByText("pages.reportExport.noReportFound")
+    ).toBeInTheDocument();
+  });
+
+  it("handles pagination reset when refreshKey changes and pageNo is not 0", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r8",
+          fileName: "file.csv",
+          reportStatus: "INSERTED",
+        },
+      ],
+      page: 1,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    render(<ReportDataTable refreshKey={1} />);
+
+    await waitFor(() =>
+      expect(getMerchantReports).toHaveBeenCalledWith(
+        "merchant-1",
+        0,
+        10
+      )
+    );
+  });
+
+  it("covers IN_PROGRESS status icon branch", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r9",
+          fileName: "file.csv",
+          reportStatus: "IN_PROGRESS",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("row-r9")).toBeInTheDocument()
+    );
+  });
+
+  it("covers nullish coalescing in pagination mapping", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [],
+      page: undefined,
+      size: undefined,
+      totalElements: undefined,
+      totalPages: 0,
+    });
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(getMerchantReports).toHaveBeenCalled()
+    );
+  });
+
+  it("returns empty string for FAILED action column", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r10",
+          fileName: "file.csv",
+          reportStatus: "FAILED",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("row-r10")).toBeInTheDocument()
+    );
+
+    const buttons = screen.getAllByRole("button");
+    expect(buttons.length).toBe(2);
+  });
+
+  it("disables button while downloading same id", async () => {
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: "r11",
+          fileName: "file.csv",
+          reportStatus: "GENERATED",
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    let resolvePromise;
+    downloadMerchantReport.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePromise = resolve;
+        })
+    );
+
+    render(<ReportDataTable />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("row-r11")).toBeInTheDocument()
+    );
+
+    const downloadButton = screen.getAllByRole("button")[0];
+    fireEvent.click(downloadButton);
+
+    expect(downloadButton).toBeDisabled();
+
+    resolvePromise({ reportUrl: "url" });
+  });
 });

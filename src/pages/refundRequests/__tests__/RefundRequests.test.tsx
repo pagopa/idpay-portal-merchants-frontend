@@ -93,6 +93,11 @@ jest.mock('../../../components/Transactions/useStatus', () => ({
     color: 'primary',
     textColor: 'white',
   }),
+  getBatchStatus: (status: string) => ({
+    label: status,
+    color: 'primary',
+    textColor: 'white',
+  }),
 }));
 
 jest.mock('../../../components/Transactions/CurrencyColumn', () => ({
