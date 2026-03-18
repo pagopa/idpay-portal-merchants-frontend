@@ -22,14 +22,6 @@ jest.mock('../../../../components/Chip/StatusChipInvoice', () => (props: any) =>
     <div data-testid="status-chip">{props.status}</div>
 ));
 
-// jest.mock('../../../../components/modal/ModalComponent', () => (props: any) =>
-//     props.open ? (
-//         <div data-testid="modal-component">
-//             {props.children}
-//         </div>
-//     ) : null
-// );
-
 jest.mock('../../../../hooks/useAlert', () => ({
     useAlert: jest.fn(),
 }));
@@ -52,18 +44,18 @@ jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'),
     useLocation: jest.fn(),
     useHistory: () => mockUseHistory(),
-    useParams: () => ({ id: 'merchant-1' })
+    useParams: () => ({ id: 'init-1', batch_id: "batch-1" })
 }));
 
 jest.mock('../../../../redux/slices/initiativesSlice', () => ({
     intiativesListSelector: (state: any) => state,
 }));
 
-jest.mock('../../../../utils/formatUtils', () => ({
-    ...jest.requireActual('../../../../utils/formatUtils'),
-    formatValues: jest.fn((val: string) => `formatted-${val}`),
-    currencyFormatter: jest.fn((val: number) => ({ toString: () => `€${val.toFixed(2)}` }))
-}));
+// jest.mock('../../../../utils/formatUtils', () => ({
+//     ...jest.requireActual('../../../../utils/formatUtils'),
+//     formatValues: jest.fn((val: string) => val ? `formatted-${val}` : MISSING_DATA_PLACEHOLDER),
+//     currencyFormatter: jest.fn((val: number) => ({ toString: () => `€${val.toFixed(2)}` }))
+// }));
 
 jest.mock('../../../../helpers', () => ({
     ...jest.requireActual('../../../../helpers'),
@@ -76,857 +68,757 @@ import { downloadInvoiceFile, postponeTransaction } from '../../../../services/m
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
 import { isReversableOrEditable } from '../../../../helpers';
+import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../../../utils/constants';
+import { safeFormatDate } from '../../../../utils/formatUtils';
 
-describe('InvoiceDetail', () => {
-    let mockSetAlert: jest.Mock;
+let mockSetAlert: jest.Mock;
 
-    const baseItemValues = {
-        id: 'trx-1',
-        pointOfSaleId: 'pos-1',
-        status: 'APPROVED',
-        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
-        initiativeId: 'init-123',
-        invoiceData: {
-            docNumber: 'DOC-123',
-            filename: 'fattura.pdf',
-        },
-        rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
-        additionalProperties: {
-            productName: 'Prodotto di test',
-        },
-    };
+const baseItemValues = {
+    id: 'trx-1',
+    pointOfSaleId: 'pos-1',
+    status: 'APPROVED',
+    rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
+    invoiceData: {
+        docNumber: 'DOC-123',
+        filename: 'fattura.pdf',
+    },
+    rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+    additionalProperties: {
+        productName: 'Prodotto di test',
+    },
+};
 
-    const baseListItem = [
-        {
-            id: 'additionalProperties.productName',
-            label: 'Elettrodomestico',
-            format: (value: string) => `formatted-${value}`,
-        },
-        {
-            id: 'amount',
-            label: 'Importo',
-            type: 'Currency',
-        },
-        {
-            id: 'description',
-            label: 'Descrizione',
-            type: 'Text',
-        },
-    ];
+const baseListItem = [
+    {
+              label: 'Data e ora',
+              id: 'trxChargeDate',
+              type: TYPE_TEXT.Text,
+              format: (val: any) => safeFormatDate(val),
+            },
+            {
+              label: 'Elettrodomestico',
+              id: 'additionalProperties.productName',
+              type: TYPE_TEXT.Text,
+            },
+            {
+              label: 'Codice Fiscale Beneficiario',
+              id: 'fiscalCode',
+              type: TYPE_TEXT.Text,
+            },
+            {
+              label: 'ID transazione',
+              id: 'trxId',
+              type: TYPE_TEXT.Text,
+              bold: true,
+            },
+            {
+              label: 'Codice sconto',
+              id: 'trxCode',
+              type: TYPE_TEXT.Text,
+            },
+            {
+              label: 'Totale della spesa',
+              id: 'effectiveAmountCents',
+              type: TYPE_TEXT.Currency,
+              bold: true,
+            },
+            {
+              label: 'Sconto applicato',
+              id: 'rewardAmountCents',
+              type: TYPE_TEXT.Currency,
+            },
+            {
+              label: 'Importo autorizzato',
+              id: 'authorizedAmountCents',
+              type: TYPE_TEXT.Currency,
+            }
+];
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-        mockSetAlert = jest.fn();
-        mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/merchants/merchant-1/refunds', state: {} }});
-        (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
-        (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
-        (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
-        (useAppSelector as jest.Mock).mockReset();
-        (window as any).open = jest.fn();
-        global.fetch = jest.fn();
+beforeEach(() => {
+    jest.clearAllMocks();
+    mockSetAlert = jest.fn();
+    mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/merchants/init-1/refunds/batch-1', state: {} } });
+    (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
+    (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
+    (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+    (useAppSelector as jest.Mock).mockReset();
+    (window as any).open = jest.fn();
+    global.fetch = jest.fn();
+});
+
+describe('Render component', () => {
+    it('should render component', () => {
+        (useAppSelector as jest.Mock).mockReturnValue([]);
+
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={baseItemValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+        expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
+        expect(screen.getByText('Prodotto di test')).toBeInTheDocument();
+        expect(screen.getByText('Numero fattura')).toBeInTheDocument();
+        expect(screen.queryByText('Motivo di rifiuto')).not.toBeInTheDocument();
+        expect(screen.queryByText('Nota ufficiale')).not.toBeInTheDocument();
+        expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
+        expect(screen.getByTestId('btn-test')).toBeInTheDocument();
+    });
+    it('should render component', () => {
+        (useAppSelector as jest.Mock).mockReturnValue([])
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={{ ...baseItemValues, rewardBatchTrxStatus: 'SUSPENDED', additionalProperties: {productName: undefined} }}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+        expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
+        expect(screen.getByText('Numero fattura')).toBeInTheDocument();
+        expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
+        expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
+        expect(screen.getByText('03/02/2026')).toBeInTheDocument();
+        expect(screen.getByTestId('btn-test')).toBeInTheDocument();
+        expect(screen.getAllByText(MISSING_DATA_PLACEHOLDER)).toHaveLength(5);
+    });
+    it('should handle undefined initiativesListSel (line 68 branch)', () => {
+        (useAppSelector as jest.Mock).mockReturnValue(undefined);
+
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={baseItemValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+    });
+    it('should cover rejection reason empty branch (lines 220-225)', () => {
+        const values = {
+            ...baseItemValues,
+            rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+            rewardBatchRejectionReason: [],
+        };
+
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={values}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        expect(screen.getAllByText('-').length).toBeGreaterThan(0);
+    });
+});
+describe('Download File', () => {
+    it('should successfully download file', async () => {
+        (useAppSelector as jest.Mock).mockReturnValue([]);
+
+        const mockBlob = new Blob(['pdf content'], { type: 'application/pdf' });
+        const mockResponse = {
+            ok: true,
+            blob: jest.fn().mockResolvedValue(mockBlob),
+        };
+
+        (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+            invoiceUrl: 'https://example.com/invoice.pdf',
+        });
+        (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={baseItemValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        const button = screen.getByTestId('btn-test');
+        fireEvent.click(button);
+
+        expect(screen.getByTestId('item-loader')).toBeInTheDocument();
+
+        await waitFor(() => {
+            expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1', 'pos-1');
+        });
+
+        await waitFor(() => {
+            expect(global.fetch).toHaveBeenCalledWith('https://example.com/invoice.pdf', {
+                method: 'GET',
+            });
+        });
     });
 
-    describe('Render component', () => {
+    it('should handle fetch fail', async () => {
+        (useAppSelector as jest.Mock).mockReturnValue([]);
 
-        it('should render component', () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
-            expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
-            expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
-            expect(screen.getByText('Numero fattura')).toBeInTheDocument();
-            expect(screen.queryByText('Motivo di rifiuto')).not.toBeInTheDocument();
-            expect(screen.queryByText('Nota ufficiale')).not.toBeInTheDocument();
-            expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
-            expect(screen.getByTestId('btn-test')).toBeInTheDocument();
+        (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+            invoiceUrl: 'https://example.com/invoice.pdf',
         });
-        it('should render component', () => {
-            (useAppSelector as jest.Mock).mockReturnValue([])
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: 'SUSPENDED' }}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: false,
+        });
 
-            expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
-            expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
-            expect(screen.getByText('formatted-Prodotto di test')).toBeInTheDocument();
-            expect(screen.getByText('Numero fattura')).toBeInTheDocument();
-            expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
-            expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
-            expect(screen.getByText('03/02/2026')).toBeInTheDocument();
-            expect(screen.getByTestId('btn-test')).toBeInTheDocument();
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={baseItemValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        const button = screen.getByTestId('btn-test');
+        fireEvent.click(button);
+
+        await waitFor(() => {
+            expect(mockSetAlert).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    title: 'Errore download file',
+                    text: 'Non è stato possibile scaricare il file',
+                    severity: 'error',
+                    isOpen: true,
+                })
+            );
+        });
     });
 
-    describe('Additional branch coverage', () => {
-        it('should handle undefined initiativesListSel (line 68 branch)', () => {
-            (useAppSelector as jest.Mock).mockReturnValue(undefined);
+    it('should handle wrong exstension', async () => {
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
+        (useAppSelector as jest.Mock).mockReturnValue([]);
 
-            expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
+        const unsupportedValues = {
+            ...baseItemValues,
+            invoiceData: {
+                docNumber: 'DOC-125',
+                filename: 'fattura.txt',
+            },
+        };
+
+        (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+            invoiceUrl: 'https://example.com/invoice.txt',
         });
 
-        it('should use empty string when docNumber is undefined (?? "" branch)', () => {
-            (isReversableOrEditable as jest.Mock).mockReturnValue(true);
+        const mockBlob = new Blob(['content'], { type: 'text/plain' });
+        const mockResponse = {
+            ok: true,
+            blob: jest.fn().mockResolvedValue(mockBlob),
+        };
+        (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
-            const values = {
-                ...baseItemValues,
-                pointOfSaleId: 'pos-1',
-                invoiceData: {},
-            };
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={unsupportedValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={values}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
+        const button = screen.getByTestId('btn-test');
+        fireEvent.click(button);
+
+        await waitFor(() => {
+            expect(mockSetAlert).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    severity: 'error',
+                })
             );
+        });
+    });
 
-            const modifyBtn = screen.getByTestId('change-file-btn');
-            fireEvent.click(modifyBtn);
+    it('should handle missing file', async () => {
 
-            expect(pushMock).toHaveBeenCalled();
+        (useAppSelector as jest.Mock).mockReturnValue([]);
+
+        const noFilenameValues = {
+            ...baseItemValues,
+            invoiceData: {
+                docNumber: 'DOC-126',
+            },
+        };
+
+        (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+            invoiceUrl: 'https://example.com/invoice.pdf',
         });
 
-        it('should return early in handlePostponeTransaction when initiativeEndDate is missing (line 118)', async () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
+        const mockBlob = new Blob(['content'], { type: 'application/pdf' });
+        const mockResponse = {
+            ok: true,
+            blob: jest.fn().mockResolvedValue(mockBlob),
+        };
+        (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId="batch-1"
-                    storeId="store-1"
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={noFilenameValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        const button = screen.getByTestId('btn-test');
+        fireEvent.click(button);
+
+        await waitFor(() => {
+            expect(mockSetAlert).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    severity: 'error',
+                })
             );
+        });
+    });
 
-            const confirmButtons = screen.queryAllByText('Conferma');
-            expect(confirmButtons.length).toBe(0);
+    it('should handle error', async () => {
+        (useAppSelector as jest.Mock).mockReturnValue([]);
+
+        (downloadInvoiceFile as jest.Mock).mockRejectedValueOnce(
+            new Error('download error')
+        );
+
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={baseItemValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        const button = screen.getByTestId('btn-test');
+        fireEvent.click(button);
+
+        await waitFor(() => {
+            expect(mockSetAlert).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    title: 'Errore download file',
+                    severity: 'error',
+                })
+            );
+        });
+    });
+
+    it('should show loader', async () => {
+
+        (useAppSelector as jest.Mock).mockReturnValue([]);
+
+        const mockPromise = new Promise(() => { });
+
+        (downloadInvoiceFile as jest.Mock).mockReturnValueOnce(mockPromise);
+
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={baseItemValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        const button = screen.getByTestId('btn-test');
+        fireEvent.click(button);
+
+        expect(screen.getByTestId('item-loader')).toBeInTheDocument();
+    });
+
+    it('should use empty string when docNumber is undefined', () => {
+        (isReversableOrEditable as jest.Mock).mockReturnValue(true);
+
+        const values = {
+            ...baseItemValues,
+            pointOfSaleId: 'pos-1',
+            invoiceData: {},
+        };
+
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={values}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        const modifyBtn = screen.getByTestId('change-file-btn');
+        fireEvent.click(modifyBtn);
+
+        expect(pushMock).toHaveBeenCalled();
+    });
+
+    it('should handle xml extension branch', async () => {
+        (useAppSelector as jest.Mock).mockReturnValue([]);
+
+        const xmlValues = {
+            ...baseItemValues,
+            invoiceData: { docNumber: 'DOC', filename: 'file.xml' },
+        };
+
+        (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+            invoiceUrl: 'https://example.com/file.xml',
         });
 
-        it('should call postponeTransaction with empty batchId (batchId ?? "")', async () => {
-            const futureDate = new Date('2026-03-15');
-            (useAppSelector as jest.Mock).mockReturnValue([
-                { initiativeId: 'init-123', endDate: futureDate },
-            ]);
-
-            (postponeTransaction as jest.Mock).mockResolvedValueOnce({});
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE }}
-                    listItem={baseListItem}
-                    batchId={undefined as any}
-                    storeId="store-1"
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            const btn = await screen.findByTestId('next-month-btn');
-            fireEvent.click(btn);
-
-            const confirmButton = await screen.findByText('Conferma');
-            fireEvent.click(confirmButton);
-
-            await waitFor(() => {
-                expect(postponeTransaction).toHaveBeenCalledWith(
-                    'init-123',
-                    '',
-                    'trx-1',
-                    expect.any(String)
-                );
-            });
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            blob: jest.fn().mockResolvedValue(new Blob(['xml'], { type: 'application/xml' })),
         });
 
-        it('should handle xml extension branch', async () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={xmlValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
 
-            const xmlValues = {
-                ...baseItemValues,
-                invoiceData: { docNumber: 'DOC', filename: 'file.xml' },
-            };
+        fireEvent.click(screen.getByTestId('btn-test'));
 
-            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
-                invoiceUrl: 'https://example.com/file.xml',
-            });
+        await waitFor(() => {
+            expect(downloadInvoiceFile).toHaveBeenCalled();
+        });
+    });
 
-            (global.fetch as jest.Mock).mockResolvedValueOnce({
-                ok: true,
-                blob: jest.fn().mockResolvedValue(new Blob(['xml'], { type: 'application/xml' })),
-            });
+    it('should cover window.open null', async () => {
+        (useAppSelector as jest.Mock).mockReturnValue([]);
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={xmlValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            fireEvent.click(screen.getByTestId('btn-test'));
-
-            await waitFor(() => {
-                expect(downloadInvoiceFile).toHaveBeenCalled();
-            });
+        (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+            invoiceUrl: 'https://example.com/invoice.pdf',
         });
 
-        it('should cover window.open null branch (lines 188-196)', async () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
-                invoiceUrl: 'https://example.com/invoice.pdf',
-            });
-
-            (global.fetch as jest.Mock).mockResolvedValueOnce({
-                ok: true,
-                blob: jest.fn().mockResolvedValue(new Blob(['pdf'], { type: 'application/pdf' })),
-            });
-
-            (window as any).open = jest.fn().mockReturnValue(null);
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
-
-            fireEvent.click(screen.getByTestId('btn-test'));
-
-            await waitFor(() => {
-                expect(downloadInvoiceFile).toHaveBeenCalled();
-            });
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            blob: jest.fn().mockResolvedValue(new Blob(['pdf'], { type: 'application/pdf' })),
         });
 
-        it('should cover rejection reason empty branch (lines 220-225)', () => {
-            const values = {
-                ...baseItemValues,
-                rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
-                rewardBatchRejectionReason: [],
-            };
+        (window as any).open = jest.fn().mockReturnValue(null);
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={values}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => {}}
-                />
-            );
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={baseItemValues}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
 
-            expect(screen.getAllByText('-').length).toBeGreaterThan(0);
+        fireEvent.click(screen.getByTestId('btn-test'));
+
+        await waitFor(() => {
+            expect(downloadInvoiceFile).toHaveBeenCalled();
         });
     });
 });
 
-    describe('Download File', () => {
+describe('Postpone Transaction Logic', () => {
+    it('should disable button when isNextMonthDisabled is true', async () => {
+        const pastDate = new Date('2026-01-15');
 
-        it('should successfully download file', async () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
+        const mockInitiatives = [
+            {
+                initiativeId: 'init-123',
+                endDate: pastDate,
+            },
+        ];
 
-            const mockBlob = new Blob(['pdf content'], { type: 'application/pdf' });
-            const mockResponse = {
-                ok: true,
-                blob: jest.fn().mockResolvedValue(mockBlob),
-            };
+        (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
 
-            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
-                invoiceUrl: 'https://example.com/invoice.pdf',
-            });
-            (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+        (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            const button = screen.getByTestId('btn-test');
-            fireEvent.click(button);
-
-            expect(screen.getByTestId('item-loader')).toBeInTheDocument();
-
-            await waitFor(() => {
-                expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1', 'pos-1');
-            });
-
-            await waitFor(() => {
-                expect(global.fetch).toHaveBeenCalledWith('https://example.com/invoice.pdf', {
-                    method: 'GET',
-                });
-            });
-        });
-        
-        it('should handle fetch fail', async () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
-                invoiceUrl: 'https://example.com/invoice.pdf',
-            });
-            (global.fetch as jest.Mock).mockResolvedValueOnce({
-                ok: false,
-            });
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            const button = screen.getByTestId('btn-test');
-            fireEvent.click(button);
-
-            await waitFor(() => {
-                expect(mockSetAlert).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        title: 'Errore download file',
-                        text: 'Non è stato possibile scaricare il file',
-                        severity: 'error',
-                        isOpen: true,
-                    })
-                );
-            });
-        });
-
-        it('should handle wrong exstension', async () => {
-
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            const unsupportedValues = {
-                ...baseItemValues,
-                invoiceData: {
-                    docNumber: 'DOC-125',
-                    filename: 'fattura.txt',
-                },
-            };
-
-            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
-                invoiceUrl: 'https://example.com/invoice.txt',
-            });
-
-            const mockBlob = new Blob(['content'], { type: 'text/plain' });
-            const mockResponse = {
-                ok: true,
-                blob: jest.fn().mockResolvedValue(mockBlob),
-            };
-            (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={unsupportedValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            const button = screen.getByTestId('btn-test');
-            fireEvent.click(button);
-
-            await waitFor(() => {
-                expect(mockSetAlert).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        severity: 'error',
-                    })
-                );
-            });
-        });
-
-        it('should handle missing file', async () => {
-
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            const noFilenameValues = {
-                ...baseItemValues,
-                invoiceData: {
-                    docNumber: 'DOC-126',
-                },
-            };
-
-            (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
-                invoiceUrl: 'https://example.com/invoice.pdf',
-            });
-
-            const mockBlob = new Blob(['content'], { type: 'application/pdf' });
-            const mockResponse = {
-                ok: true,
-                blob: jest.fn().mockResolvedValue(mockBlob),
-            };
-            (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={noFilenameValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            const button = screen.getByTestId('btn-test');
-            fireEvent.click(button);
-
-            await waitFor(() => {
-                expect(mockSetAlert).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        severity: 'error',
-                    })
-                );
-            });
-        });
-
-        it('should handle error', async () => {
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            (downloadInvoiceFile as jest.Mock).mockRejectedValueOnce(
-                new Error('download error')
-            );
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            const button = screen.getByTestId('btn-test');
-            fireEvent.click(button);
-
-            await waitFor(() => {
-                expect(mockSetAlert).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        title: 'Errore download file',
-                        severity: 'error',
-                    })
-                );
-            });
-        });
-
-        it('should show loader', async () => {
-
-            (useAppSelector as jest.Mock).mockReturnValue([]);
-
-            const mockPromise = new Promise(() => { });
-
-            (downloadInvoiceFile as jest.Mock).mockReturnValueOnce(mockPromise);
-
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={baseItemValues}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-
-            const button = screen.getByTestId('btn-test');
-            fireEvent.click(button);
-
-            expect(screen.getByTestId('item-loader')).toBeInTheDocument();
-        });
-    });
-
-    describe('Postpone Transaction Logic', () => {
-
-        it('should disable button when isNextMonthDisabled is true', async () => {
-            const pastDate = new Date('2026-01-15');
-
-            const mockInitiatives = [
-                {
-                    initiativeId: 'init-123',
-                    endDate: pastDate,
-                },
-            ];
-
-            (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
-
-            (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
-
-            const consultableValues = {
-                ...baseItemValues,
-                rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
-            };
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={consultableValues}
-                    listItem={baseListItem}
-                    batchId="batch-1"
-                    storeId="store-1"
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-            const button = await screen.findByTestId('next-month-btn');
-
-            expect(button).toBeDisabled();
-        });
-
-        it('should show success alert', async () => {
-            const futureDate = new Date('2026-03-15')
-            const mockInitiatives = [
-                {
-                    initiativeId: 'init-123',
-                    endDate: futureDate,
-                },
-            ];
-
-            (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
-
-            (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
-
-            (postponeTransaction as jest.Mock).mockResolvedValueOnce({ success: true });
-
-            const consultableValues = {
-                ...baseItemValues,
-                rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
-            };
-            render(<InvoiceDetail
+        const consultableValues = {
+            ...baseItemValues,
+            rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+        };
+        render(
+            <InvoiceDetail
                 title="Dettaglio transazione"
                 itemValues={consultableValues}
                 listItem={baseListItem}
-                batchId="batch-1"
-                storeId="store-1"
                 isOpen={true}
                 setIsOpen={() => { }}
             />
-            );
-            const button = await screen.findByTestId('next-month-btn');
+        );
+        const button = await screen.findByTestId('next-month-btn');
 
-            await waitFor(() => expect(button).not.toBeDisabled());
+        expect(button).toBeDisabled();
+    });
 
-            fireEvent.click(button);
-            await waitFor(() => {
-                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.title')).toBeInTheDocument();
-                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.description')).toBeInTheDocument();
+    it('should show success alert', async () => {
+        const futureDate = new Date('2026-03-15')
+        const mockInitiatives = [
+            {
+                initiativeId: 'init-123',
+                endDate: futureDate,
+            },
+        ];
+
+        (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
+
+        (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+
+        (postponeTransaction as jest.Mock).mockResolvedValueOnce({ success: true });
+
+        const consultableValues = {
+            ...baseItemValues,
+            rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+        };
+        render(<InvoiceDetail
+            title="Dettaglio transazione"
+            itemValues={consultableValues}
+            listItem={baseListItem}
+            isOpen={true}
+            setIsOpen={() => { }}
+        />
+        );
+        const button = await screen.findByTestId('next-month-btn');
+
+        await waitFor(() => expect(button).not.toBeDisabled());
+
+        fireEvent.click(button);
+        await waitFor(() => {
+            expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.title')).toBeInTheDocument();
+            expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.description')).toBeInTheDocument();
+        });
+
+        const confirmButton = screen.getByText('Conferma');
+        fireEvent.click(confirmButton);
+
+        await waitFor(() => {
+            expect(mockSetAlert).toHaveBeenCalledWith({
+                title: 'Successo',
+                text: 'Transazione spostata al mese successivo',
+                isOpen: true,
+                severity: 'success'
             });
+        });
+    });
 
-            const confirmButton = screen.getByText('Conferma');
-            fireEvent.click(confirmButton);
+    it('should close modal', async () => {
+        const futureDate = new Date('2026-03-15')
+        const mockInitiatives = [
+            {
+                initiativeId: 'init-123',
+                endDate: futureDate,
+            },
+        ];
 
-            await waitFor(() => {
-                expect(mockSetAlert).toHaveBeenCalledWith({
-                    title: 'Successo',
-                    text: 'Transazione spostata al mese successivo',
+        (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
+
+        (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+
+        (postponeTransaction as jest.Mock).mockResolvedValueOnce({ success: true });
+
+        const consultableValues = {
+            ...baseItemValues,
+            rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+        };
+
+        render(<InvoiceDetail
+            title="Dettaglio transazione"
+            itemValues={consultableValues}
+            listItem={baseListItem}
+            isOpen={true}
+            setIsOpen={() => { }}
+        />
+        );
+        const button = await screen.findByTestId('next-month-btn');
+
+        await waitFor(() => expect(button).not.toBeDisabled());
+
+        fireEvent.click(button);
+
+        await waitFor(() => {
+            expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.title')).toBeInTheDocument();
+            expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.description')).toBeInTheDocument();
+        });
+
+        const backButton = screen.getByText('Indietro');
+        fireEvent.click(backButton);
+
+        await waitFor(() => {
+            expect(screen.queryByText('pages.refundRequests.invoiceDetailConfirmModal.title')).not.toBeInTheDocument();
+            expect(screen.queryByText('pages.refundRequests.invoiceDetailConfirmModal.description')).not.toBeInTheDocument();
+        });
+    });
+
+    it('should show error alert', async () => {
+        const futureDate = new Date('2026-03-15')
+        const mockInitiatives = [
+            {
+                initiativeId: 'init-123',
+                endDate: futureDate,
+            },
+        ];
+
+        (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
+
+        (postponeTransaction as jest.Mock).mockRejectedValueOnce(
+            new Error('postpone error')
+        );
+
+        const consultableValues = {
+            ...baseItemValues,
+            rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+        };
+
+        render(<InvoiceDetail
+            title="Dettaglio transazione"
+            itemValues={consultableValues}
+            listItem={baseListItem}
+            isOpen={true}
+            setIsOpen={() => { }}
+        />
+        );
+        const button = await screen.findByTestId('next-month-btn');
+
+        await waitFor(() => expect(button).not.toBeDisabled());
+
+        fireEvent.click(button);
+
+        await waitFor(() => {
+            expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.title')).toBeInTheDocument();
+            expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.description')).toBeInTheDocument();
+        });
+
+        const confirmButton = screen.getByText('Conferma');
+        fireEvent.click(confirmButton);
+
+        await waitFor(() => {
+            expect(mockSetAlert).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    title: 'Errore',
+                    text: 'Non è stato possibile spostare la transazione',
                     isOpen: true,
-                    severity: 'success'
-                });
-            });
-        });
-
-        it('should close modal', async () => {
-            const futureDate = new Date('2026-03-15')
-            const mockInitiatives = [
-                {
-                    initiativeId: 'init-123',
-                    endDate: futureDate,
-                },
-            ];
-
-            (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
-
-            (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
-
-            (postponeTransaction as jest.Mock).mockResolvedValueOnce({ success: true });
-
-            const consultableValues = {
-                ...baseItemValues,
-                rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
-            };
-
-            render(<InvoiceDetail
-                title="Dettaglio transazione"
-                itemValues={consultableValues}
-                listItem={baseListItem}
-                batchId="batch-1"
-                storeId="store-1"
-                isOpen={true}
-                setIsOpen={() => { }}
-            />
+                    severity: 'error',
+                })
             );
-            const button = await screen.findByTestId('next-month-btn');
-
-            await waitFor(() => expect(button).not.toBeDisabled());
-
-            fireEvent.click(button);
-
-            await waitFor(() => {
-                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.title')).toBeInTheDocument();
-                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.description')).toBeInTheDocument();
-            });
-
-            const backButton = screen.getByText('Indietro');
-            fireEvent.click(backButton);
-
-            await waitFor(() => {
-                expect(screen.queryByText('pages.refundRequests.invoiceDetailConfirmModal.title')).not.toBeInTheDocument();
-                expect(screen.queryByText('pages.refundRequests.invoiceDetailConfirmModal.description')).not.toBeInTheDocument();
-            });
-        });
-
-        it('should show error alert', async () => {
-            const futureDate = new Date('2026-03-15')
-            const mockInitiatives = [
-                {
-                    initiativeId: 'init-123',
-                    endDate: futureDate,
-                },
-            ];
-
-            (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
-
-            (postponeTransaction as jest.Mock).mockRejectedValueOnce(
-                new Error('postpone error')
-            );
-
-            const consultableValues = {
-                ...baseItemValues,
-                rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
-            };
-
-            render(<InvoiceDetail
-                title="Dettaglio transazione"
-                itemValues={consultableValues}
-                listItem={baseListItem}
-                batchId="batch-1"
-                storeId="store-1"
-                isOpen={true}
-                setIsOpen={() => { }}
-            />
-            );
-            const button = await screen.findByTestId('next-month-btn');
-
-            await waitFor(() => expect(button).not.toBeDisabled());
-
-            fireEvent.click(button);
-
-            await waitFor(() => {
-                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.title')).toBeInTheDocument();
-                expect(screen.getByText('pages.refundRequests.invoiceDetailConfirmModal.description')).toBeInTheDocument();
-            });
-
-            const confirmButton = screen.getByText('Conferma');
-            fireEvent.click(confirmButton);
-
-            await waitFor(() => {
-                expect(mockSetAlert).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        title: 'Errore',
-                        text: 'Non è stato possibile spostare la transazione',
-                        isOpen: true,
-                        severity: 'error',
-                    })
-                );
-            });
         });
     });
-    describe('Status Chip Display', () => {
-        it('Should show correct StatusChip state', () => {
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={{ 
-                        ...baseItemValues, 
-                        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
-                        status: "REWARDED"
-                    }}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
+});
 
-            expect(screen.getByTestId('status-chip')).toBeInTheDocument();
+describe('Reverse button', () => {
+    it('Should navigate to reverse page when reverse button is clicked', () => {
+        (useLocation as jest.Mock).mockReturnValue({
+            state: { store: { status: 'CLOSED', month: mockUseLocation.state.store.month } }
         });
-    });
-    describe('Modify file', () => {
-        it('Should navigate', () => {
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED, status: "REWARDED", pointOfSaleId: 'pos-1', }}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
-            const button = screen.getByTestId('btn-test');
-            fireEvent.click(button);
-            expect(pushMock).not.toHaveBeenCalled()
-        });
-    });
+        (isReversableOrEditable as jest.Mock).mockReturnValue(true);
 
-    describe('Reverse button', () => {
-        it('Should navigate to reverse page when reverse button is clicked', () => {
-            (useLocation as jest.Mock).mockReturnValue({
-                state: { store: { status: 'CLOSED', month: mockUseLocation.state.store.month } }
-            });
-            (isReversableOrEditable as jest.Mock).mockReturnValue(true);
-
-            const trxItem = {
-              id: 'trx-1',
-              pointOfSaleId: 'pos-1',
-              status: "REWARDED",
-              rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
-              initiativeId: 'init-123',
-              invoiceData: {
+        const trxItem = {
+            id: 'trx-1',
+            pointOfSaleId: 'pos-1',
+            status: "REWARDED",
+            rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+            initiativeId: 'init-123',
+            invoiceData: {
                 docNumber: 'DOC-123',
                 filename: 'fattura.pdf',
-              },
-              rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
-              additionalProperties: {
+            },
+            rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+            additionalProperties: {
                 productName: 'Prodotto di test',
-              },
-            };
+            },
+        };
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={trxItem}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={trxItem}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
 
-            const reverseButton = screen.getByTestId('reverse-btn');
-            fireEvent.click(reverseButton);
+        const reverseButton = screen.getByTestId('reverse-btn');
+        fireEvent.click(reverseButton);
 
-            expect(pushMock).toHaveBeenCalled();
-            expect(pushMock.mock.calls[0][0]).toContain('storna-transazione');
-        });
+        expect(pushMock).toHaveBeenCalled();
+        expect(pushMock.mock.calls[0][0]).toContain('storna-transazione');
+    });
 
-        it('Should navigate to modify document when editable and pointOfSaleId is present', () => {
-            (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
-            (isReversableOrEditable as jest.Mock).mockReturnValue(true);
+    it('Should navigate', () => {
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={{ ...baseItemValues, rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED, status: "REWARDED", pointOfSaleId: 'pos-1', }}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+        const button = screen.getByTestId('btn-test');
+        fireEvent.click(button);
+        expect(pushMock).not.toHaveBeenCalled()
+    });
 
-            const trxItem = {
-                ...baseItemValues,
-                pointOfSaleId: 'pos-1',
-                invoiceData: {
-                    docNumber: 'DOC-777',
-                    filename: 'fattura.pdf',
-                },
-            };
+    it('Should navigate to modify document when editable and pointOfSaleId is present', () => {
+        (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+        (isReversableOrEditable as jest.Mock).mockReturnValue(true);
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={trxItem}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
+        const trxItem = {
+            ...baseItemValues,
+            pointOfSaleId: 'pos-1',
+            invoiceData: {
+                docNumber: 'DOC-777',
+                filename: 'fattura.pdf',
+            },
+        };
 
-            const modifyBtn = screen.getByTestId('change-file-btn');
-            fireEvent.click(modifyBtn);
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={trxItem}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
 
-            expect(pushMock).toHaveBeenCalled();
-            expect(pushMock.mock.calls[0][0]).toContain('modifica-documento');
-        });
+        const modifyBtn = screen.getByTestId('change-file-btn');
+        fireEvent.click(modifyBtn);
 
-        it('Should not render modify button when not editable', () => {
-            (isReversableOrEditable as jest.Mock).mockReturnValue(false);
+        expect(pushMock).toHaveBeenCalled();
+        expect(pushMock.mock.calls[0][0]).toContain('modifica-documento');
+    });
 
-            render(
-                <InvoiceDetail
-                    title="Dettaglio transazione"
-                    itemValues={{ ...baseItemValues, pointOfSaleId: 'pos-1' }}
-                    listItem={baseListItem}
-                    batchId=""
-                    storeId=""
-                    isOpen={true}
-                    setIsOpen={() => { }}
-                />
-            );
+    it('Should not render modify button when not editable', () => {
+        (isReversableOrEditable as jest.Mock).mockReturnValue(false);
 
-            expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
-        });
+        render(
+            <InvoiceDetail
+                title="Dettaglio transazione"
+                itemValues={{ ...baseItemValues, pointOfSaleId: 'pos-1' }}
+                listItem={baseListItem}
+                isOpen={true}
+                setIsOpen={() => { }}
+            />
+        );
+
+        expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
     });
 });

@@ -14,6 +14,14 @@ jest.mock('@pagopa/selfcare-common-frontend/utils/api-utils', () => ({
   extractResponse: jest.fn(),
 }));
 
+jest.mock('@pagopa/selfcare-common-frontend/locale/locale-utils', () => ({
+  t: jest.fn((key) => key),
+}));
+
+jest.mock('../../redux/store', () => ({
+  store: { dispatch: jest.fn() },
+}));
+
 jest.mock('../generated/email-notification/client', () => ({
   createClient: jest.fn(),
 }));
@@ -67,5 +75,26 @@ describe('EmailNotificationApi', () => {
     });
     expect(extractResponse).toHaveBeenCalledWith({ right: 'sent' }, 204, expect.any(Function));
     expect(result).toBe('extracted');
+  });
+
+  it('calls redirect callback when extractResponse triggers it', async () => {
+    const { store } = require('../../redux/store');
+    store.dispatch = jest.fn();
+
+    (extractResponse as jest.Mock).mockImplementation(async (_res, _status, callback) => {
+      callback();
+      return 'extracted';
+    });
+
+    mockEmailNotificationClient.getInstitutionProductUserInfo.mockResolvedValue({ right: 'data' });
+
+    let EmailNotificationApi: any;
+    jest.isolateModules(() => {
+      EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
+    });
+
+    await EmailNotificationApi.getInstitutionProductUserInfo();
+
+    expect(store.dispatch).toHaveBeenCalled();
   });
 });

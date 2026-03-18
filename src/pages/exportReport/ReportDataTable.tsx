@@ -33,7 +33,7 @@ const getStatusIcon = (status: string) => {
 
 interface ReportDataTableProps {
   updateAlerts: (key: string, open: boolean) => void;
-  refreshKey?: number;
+  refreshKey: number;
 }
 
 const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refreshKey }) => {
@@ -78,7 +78,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
   }, [pagination.pageNo, pagination.pageSize]);
 
   useEffect(() => {
-    if (refreshKey !== undefined) {
+    if (refreshKey) {
       setPagination((prev) => {
         if (prev.pageNo === 0) {
           loadReports();

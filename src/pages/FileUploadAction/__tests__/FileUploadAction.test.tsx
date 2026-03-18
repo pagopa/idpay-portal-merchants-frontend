@@ -59,7 +59,7 @@ describe("FileUploadAction", () => {
   const baseProps = {
     apiCall: jest.fn().mockResolvedValue({}),
     successStateKey: "refundUploadSuccess",
-    breadcrumbsProp: { label: "Test", path: "/test" },
+    breadcrumbsLabel: "Test breadcrumb",
     manualLink: "http://manual",
     i18nBlockKey: "modifyDocument",
   };
@@ -78,7 +78,12 @@ describe("FileUploadAction", () => {
   it("shows required file error", async () => {
     render(<FileUploadAction {...baseProps} />);
     fireEvent.click(screen.getByText("commons.continueBtn"));
-    expect(true).toBe(true);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("modifyDocument.errors.requiredFileError")
+      ).toBeInTheDocument();
+    });
   });
 
   it("validates doc number length", async () => {
@@ -88,8 +93,10 @@ describe("FileUploadAction", () => {
       target: { value: "A" },
     });
     fireEvent.click(screen.getByText("commons.continueBtn"));
-    // branch executed
-    expect(true).toBe(true);
+
+    await waitFor(() => {
+      expect(screen.getByText("Lunghezza minima 2 caratteri")).toBeInTheDocument();
+    });
   });
 
   it("calls api successfully", async () => {
@@ -142,7 +149,7 @@ describe("FileUploadAction", () => {
 
   it("handles file type error branch", async () => {
     render(<FileUploadAction {...baseProps} />);
-    
+
     const hiddenInput = document.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;
@@ -155,13 +162,16 @@ describe("FileUploadAction", () => {
       target: { files: [badFile] },
     });
 
-    // branch executed
-    expect(true).toBe(true);
+    await waitFor(() => {
+      expect(
+        screen.getByText("modifyDocument.errors.fileNotSupported")
+      ).toBeInTheDocument();
+    });
   });
 
   it("handles file size error branch", async () => {
     render(<FileUploadAction {...baseProps} />);
-    
+
     const hiddenInput = document.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;
@@ -176,8 +186,11 @@ describe("FileUploadAction", () => {
       target: { files: [largeFile] },
     });
 
-    // branch executed
-    expect(true).toBe(true);
+    await waitFor(() => {
+      expect(
+        screen.getByText("modifyDocument.errors.fileSizeError")
+      ).toBeInTheDocument();
+    });
   });
 
   it("opens manual link", () => {
@@ -247,14 +260,15 @@ describe("FileUploadAction", () => {
     expect(screen.getByRole("textbox")).toBeInTheDocument();
   });
 
-  it("covers docNumber onBlur validation branch", () => {
+  it("covers docNumber onBlur validation branch", async () => {
     render(<FileUploadAction {...baseProps} />);
     const input = screen.getByRole("textbox");
 
     fireEvent.change(input, { target: { value: "" } });
     fireEvent.blur(input);
 
-    // branch executed
-    expect(true).toBe(true);
+    await waitFor(() => {
+      expect(screen.getByText("validation.requiredField")).toBeInTheDocument();
+    });
   });
 });

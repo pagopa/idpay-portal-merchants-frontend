@@ -1,9 +1,9 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ShopCard } from '../ShopCard';
 import { MISSING_DATA_PLACEHOLDER } from '../../../../utils/constants';
 import { getMerchantDetail } from '../../../../services/merchantService';
-import getStatus from '../../../../components/Transactions/useStatus';
+import { getBatchStatus } from '../../../../components/Transactions/useStatus';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -30,6 +30,7 @@ jest.mock('../../../../services/merchantService', () => ({
 jest.mock('../../../../components/Transactions/useStatus', () => ({
   __esModule: true,
   default: jest.fn(),
+  getBatchStatus: jest.fn(),
 }));
 
 jest.mock('../../../../components/Chip/CustomChip', () => ({
@@ -42,7 +43,7 @@ jest.mock('../../../../components/Chip/CustomChip', () => ({
 }));
 
 const mockedGetMerchantDetail = getMerchantDetail as jest.MockedFunction<typeof getMerchantDetail>;
-const mockedGetStatus = getStatus as jest.MockedFunction<typeof getStatus>;
+const mockedGetStatus = getBatchStatus as jest.MockedFunction<typeof getBatchStatus>;
 
 describe('ShopCard', () => {
   beforeEach(() => {

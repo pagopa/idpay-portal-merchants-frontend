@@ -183,6 +183,15 @@ export const isReversableOrEditable = (itemValues: any, batchStatus:any=undefine
   }
 
   // Batch detail page
+  if (
+    [
+      StatusEnum.PENDING_REFUND,
+      StatusEnum.REFUNDED,
+      StatusEnum.NOT_REFUNDED
+    ].includes(batchStatus)
+  ) {
+    return itemValues?.rewardBatchTrxStatus === RewardBatchTrxStatusEnum.REJECTED;
+  }
   return (
     impossibleStatusCombination(itemValues, batchStatus)
     && ![StatusEnum.SENT, StatusEnum.APPROVING].includes(batchStatus)

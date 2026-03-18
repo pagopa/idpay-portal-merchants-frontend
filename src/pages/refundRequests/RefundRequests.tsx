@@ -6,19 +6,17 @@ import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
 import { GridColDef } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia';
-import { useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
 import { getRewardBatches, sendRewardBatch } from '../../services/merchantService';
-import getStatus from '../../components/Transactions/useStatus';
+import { getBatchStatus } from '../../components/Transactions/useStatus';
 import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
 import { RewardBatchDTO } from '../../api/generated/merchants/RewardBatchDTO';
 import NoResultPaper from '../reportedUsers/NoResultPaper';
-import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAlert } from '../../hooks/useAlert';
-import routes from '../../routes';
+import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RefundRequestsModal } from './RefundRequestModal';
 
@@ -41,7 +39,6 @@ const RefundRequests = () => {
   const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
   const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
   const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
-  const initiativesList = useSelector(intiativesListSelector);
   const columns: Array<GridColDef> = [
     {
       field: 'spacer',
@@ -110,12 +107,8 @@ const RefundRequests = () => {
         <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
           <IconButton
             onClick={() => {
-              history.push(
-                routes.REFUND_REQUESTS_STORE.replace(':id', id).replace(':batch', params.row?.name),
-                {
-                  store: params.row,
-                  batchId: params.row?.id?.toString() as string,
-                }
+              history.push(`${BASE_ROUTE}/${id}/richieste-di-rimborso/${params.row?.id}`,
+                {store: params.row}
               );
             }}
             size="small"
@@ -129,14 +122,8 @@ const RefundRequests = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (initiativesList && initiativesList.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      void fetchRewardBatches(initiativesList[0].initiativeId!);
-    }
-  }, [initiativesList,
-    currentPagination.pageNo,
-    currentPagination.pageSize,
-  ]);
+      void fetchRewardBatches(id);
+  }, [currentPagination.pageNo, currentPagination.pageSize]);
 
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
@@ -191,7 +178,7 @@ const RefundRequests = () => {
   };
 
   const StatusChip = ({ status }: any) => {
-    const chipItem = getStatus(status);
+    const chipItem = getBatchStatus(status);
     return (
       <CustomChip
         label={chipItem?.label}
@@ -222,15 +209,13 @@ const RefundRequests = () => {
 
   const handleSentBatches = async () => {
     setSendBatchIsLoading(true);
-    const initiativeId =
-      initiativesList && initiativesList.length > 0 ? initiativesList[0].initiativeId : '';
     try {
       const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0]?.id : '';
-      if (!initiativeId || !batchId) {
+      if (!batchId) {
         console.error('Missing initiativeId or batchId');
         return;
       }
-      const result = (await sendRewardBatch(initiativeId, batchId.toString())) as any;
+      const result = (await sendRewardBatch(id, batchId.toString())) as any;
       if ('code' in result && result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
         setAlert({
           title: t('errors.genericTitle'),
@@ -247,7 +232,7 @@ const RefundRequests = () => {
           severity: 'success',
         });
       }, 1000);
-      await fetchRewardBatches(initiativeId);
+      await fetchRewardBatches(id);
     } catch (e: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -255,9 +240,7 @@ const RefundRequests = () => {
         isOpen: true,
         severity: 'error',
       });
-      if (initiativeId) {
-        await fetchRewardBatches(initiativeId.toString());
-      }
+        await fetchRewardBatches(id);
     } finally {
       setSendBatchIsLoading(false);
       setIsModalOpen(false);

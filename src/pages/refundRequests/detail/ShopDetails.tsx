@@ -16,13 +16,12 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { useSelector } from 'react-redux';
 import { Sync } from '@mui/icons-material';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
@@ -37,22 +36,23 @@ import {
   getMerchantPointOfSalesWithTransactions,
 } from '../../../services/merchantService';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
-import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
 import { useAlert } from '../../../hooks/useAlert';
-import { RewardBatchDTO } from '../../../api/generated/merchants/RewardBatchDTO';
+import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/FranchisePointOfSaleDTO';
 import { ShopCard } from './ShopCard';
 
 const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(
-  (el) => el !== 'TO_CHECK'
+  (el) => el !== RewardBatchTrxStatusEnum.TO_CHECK
 );
+interface RouteParams {
+  id: string;
+  batch_id: string;
+}
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
-  const location = useLocation<{ store: any; batchId?: string }>();
-  const staticStore = location.state?.store;
+  const { id, batch_id } = useParams<RouteParams>();
   const [store, setStore] = useState({} as RewardBatchDTO);
-  const batchId = location.state?.batchId;
   const history = useHistory();
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [stores, setStores] = useState<Array<FranchisePointOfSaleDTO>>([]);
@@ -66,7 +66,6 @@ const ShopDetails: React.FC = () => {
     trxCode: '',
     status: '',
   });
-  const initiativesList = useSelector(intiativesListSelector);
 
   const { setAlert } = useAlert();
 
@@ -114,14 +113,10 @@ const ShopDetails: React.FC = () => {
 
   const fetchAll = async () => {
     try {
-      let response: any;
-      if (initiativesList) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        response = await getAllRewardBatches(initiativesList[0].initiativeId!);
+      const response = await getAllRewardBatches(id);
 
-        const match = response.content.find((e: any) => e.id === staticStore.id);
-        setStore(match);
-      }
+      const match = response?.content?.find((e: any) => e.id === batch_id);
+      setStore(match ?? {});
     } catch (error: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -134,33 +129,32 @@ const ShopDetails: React.FC = () => {
 
   useEffect(() => {
     void fetchAll();
-  }, [initiativesList, batchId, filters, drawerRefreshKey]);
+  }, [drawerRefreshKey]);
 
-  const fetchStores = async (fromSort?: boolean) => {
+  const fetchStores = async () => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     if (!merchantId) {
       return;
     }
+    setStoresLoading(true);
     try {
-      if (!fromSort) {
-        setStoresLoading(true);
-      }
-      const response = await getMerchantPointOfSalesWithTransactions(batchId || '');
-      setStores(response as any);
-      if (!fromSort) {
-        setStoresLoading(false);
-      }
+      const response = await getMerchantPointOfSalesWithTransactions(batch_id);
+      setStores(response || []);
     } catch (error: any) {
-      if (!fromSort) {
-        setStoresLoading(false);
-      }
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
+    } finally {
+      setStoresLoading(false);
     }
   };
 
   useEffect(() => {
     void fetchStores();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleOnFiltersApplied = () => {
@@ -173,10 +167,10 @@ const ShopDetails: React.FC = () => {
   };
 
   const handleDownloadCsv = async () => {
-    if (batchId && initiativesList?.[0].initiativeId) {
+    if (batch_id && id) {
       try {
         setBatchDownloadIsLoading(true);
-        const response = await downloadBatchCsv(initiativesList[0].initiativeId, batchId as string);
+        const response = await downloadBatchCsv(id, batch_id);
         const { approvedBatchUrl } = response;
         const filename = 'lotto.csv';
 
@@ -284,7 +278,7 @@ const ShopDetails: React.FC = () => {
             }}
             onClick={handleDownloadCsv}
             data-testid="download-csv-button-test"
-            disabled={store?.status !== 'APPROVED' || batchDownloadIsLoading}
+            disabled={store?.status !== StatusEnum.APPROVED || batchDownloadIsLoading}
           >
             {t('pages.refundRequests.storeDetails.exportCSV')}
             <span style={{ marginLeft: '10px' }}>
@@ -294,7 +288,7 @@ const ShopDetails: React.FC = () => {
         </Box>
       </Box>
 
-      {store?.status === 'APPROVING' && (
+      {store?.status === StatusEnum.APPROVING && (
         <Alert
           sx={{ mb: 3 }}
           variant="outlined"
@@ -323,6 +317,7 @@ const ShopDetails: React.FC = () => {
             <FormControl fullWidth size="small" disabled={storesLoading}>
               <InputLabel id="point-of-sale-label">Punto vendita</InputLabel>
               <Select
+                data-testid="point-of-sale-test"
                 labelId="point-of-sale-label"
                 id="pointOfSaleId"
                 name="pointOfSaleId"
@@ -332,7 +327,7 @@ const ShopDetails: React.FC = () => {
                 size="small"
                 disabled={stores?.length === 0}
               >
-                {stores.map((store) => (
+                {stores?.map((store) => (
                   <MenuItem key={store?.pointOfSaleId} value={store?.pointOfSaleId}>
                     <Tooltip title={store?.franchiseName || MISSING_DATA_PLACEHOLDER}>
                       <span>
@@ -368,6 +363,7 @@ const ShopDetails: React.FC = () => {
             <FormControl size="small" fullWidth>
               <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
               <Select
+                data-testid="status-test"
                 id="rewardBatchTrxStatus"
                 inputProps={{
                   'data-testid': 'filterStatus-select',
@@ -386,7 +382,7 @@ const ShopDetails: React.FC = () => {
                 }
                 disabled={stores?.length === 0}
               >
-                {filterByStatusOptionsList.map((item) => (
+                {filterByStatusOptionsList?.map((item) => (
                   <MenuItem key={item} value={item}>
                     <StatusChip status={item} />
                   </MenuItem>
@@ -396,7 +392,6 @@ const ShopDetails: React.FC = () => {
           </Grid>
         </FiltersForm>
         <InvoiceDataTable
-          batchId={batchId}
           onDrawerClosed={() => setDrawerRefreshKey((prev) => prev + 1)}
           rewardBatchTrxStatus={filters.status}
           pointOfSaleId={filters.pointOfSale}

@@ -8,7 +8,7 @@ import { useAlert } from '../../../hooks/useAlert';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ id: 'initiative-123' }),
+  useParams: () => ({ id: 'initiative-123', batch_id: "batch-1" }),
 }));
 
 jest.mock('../../../services/merchantService', () => ({
@@ -173,7 +173,6 @@ describe('InvoiceDataTable', () => {
   it('applies filters and calls service with additional params', async () => {
     render(
       <InvoiceDataTable
-        batchId="batch-1"
         rewardBatchTrxStatus="ELIGIBLE"
         pointOfSaleId="POS-2"
         fiscalCode="BBBBBB00B00B000B"
@@ -475,7 +474,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('reloads transactions when onSuccess is called from detail drawer', async () => {
-    render(<InvoiceDataTable batchId="batch-1" />);
+    render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
     expect(mockedGetTransactions).toHaveBeenCalledTimes(1);
     const actionIcon = screen.getByTestId('trx-1');
