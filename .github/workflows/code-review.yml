@@ -12,12 +12,17 @@ on:
       - edited
       - synchronize
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae8
         with:
           fetch-depth: 0
 
@@ -30,7 +35,7 @@ jobs:
         run: yarn generate
 
       - name: Jest Coverage Report
-        uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
+        uses: ArtiomTr/jest-coverage-report-action@c7c2c6c0c8c7f1b0a2d9f3a1b8e4d6f9c1a0b7e2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           test-script: yarn test:coverage
@@ -39,7 +44,7 @@ jobs:
           package-manager: yarn
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v5.0.0
+        uses: SonarSource/sonarcloud-github-action@b42848bfdabac7fefc656c08af7a7864240124a3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
