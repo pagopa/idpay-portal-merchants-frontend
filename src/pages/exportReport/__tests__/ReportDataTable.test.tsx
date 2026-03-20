@@ -1,58 +1,50 @@
 // @ts-nocheck
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import ReportDataTable from "../ReportDataTable";
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import ReportDataTable from '../ReportDataTable';
 
-jest.mock("react-router-dom", () => ({
-  useParams: () => ({ id: "merchant-1" }),
+jest.mock('react-router-dom', () => ({
+  useParams: () => ({ initiative_id: 'merchant-1' }),
 }));
 
-jest.mock("react-i18next", () => ({
+jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     // @ts-ignore
     t: (key) => key,
   }),
 }));
 
-jest.mock("../../../services/merchantService", () => ({
+jest.mock('../../../services/merchantService', () => ({
   getMerchantReports: jest.fn(),
   downloadMerchantReport: jest.fn(),
 }));
 
-jest.mock("../../../components/dataTable/DataTable", () => (props) => {
+jest.mock('../../../components/dataTable/DataTable', () => (props) => {
   return (
     <div>
       {props.rows?.map((row) => (
         <div key={row.id} data-testid={`row-${row.id}`}>
           {props.columns.map((col, idx) =>
-            col.renderCell ? (
-              <div key={idx}>{col.renderCell({ row })}</div>
-            ) : null
+            col.renderCell ? <div key={idx}>{col.renderCell({ row })}</div> : null
           )}
         </div>
       ))}
-      <button
-        onClick={() => props.onPaginationPageChange(1)}
-        data-testid="page-change"
-      />
-      <button
-        onClick={() => props.onRowsPerPageChange(20)}
-        data-testid="rows-change"
-      />
+      <button onClick={() => props.onPaginationPageChange(1)} data-testid="page-change" />
+      <button onClick={() => props.onRowsPerPageChange(20)} data-testid="rows-change" />
     </div>
   );
 });
 
 const { getMerchantReports, downloadMerchantReport } = jest.requireMock(
-  "../../../services/merchantService"
+  '../../../services/merchantService'
 );
 
-describe("ReportDataTable", () => {
+describe('ReportDataTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
   });
 
-  it("renders empty state when no reports", async () => {
+  it('renders empty state when no reports', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [],
       page: 0,
@@ -63,26 +55,18 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(getMerchantReports).toHaveBeenCalledWith(
-        "merchant-1",
-        0,
-        10
-      )
-    );
+    await waitFor(() => expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10));
 
-    expect(
-      screen.getByText("pages.reportExport.noReportFound")
-    ).toBeInTheDocument();
+    expect(screen.getByText('pages.reportExport.noReportFound')).toBeInTheDocument();
   });
 
-  it("renders reports when available", async () => {
+  it('renders reports when available', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r1",
-          fileName: "report.csv",
-          reportStatus: "INSERTED",
+          id: 'r1',
+          fileName: 'report.csv',
+          reportStatus: 'INSERTED',
         },
       ],
       page: 0,
@@ -93,20 +77,18 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r1")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r1')).toBeInTheDocument());
 
-    expect(screen.getByText("pages.reportExport.reportTitle")).toBeInTheDocument();
+    expect(screen.getByText('pages.reportExport.reportTitle')).toBeInTheDocument();
   });
 
-  it("handles pagination change", async () => {
+  it('handles pagination change', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r1",
-          fileName: "file.csv",
-          reportStatus: "INSERTED",
+          id: 'r1',
+          fileName: 'file.csv',
+          reportStatus: 'INSERTED',
         },
       ],
       page: 0,
@@ -117,28 +99,20 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId(/row-/)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId(/row-/)).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId("page-change"));
+    fireEvent.click(screen.getByTestId('page-change'));
 
-    await waitFor(() =>
-      expect(getMerchantReports).toHaveBeenLastCalledWith(
-        "merchant-1",
-        1,
-        10
-      )
-    );
+    await waitFor(() => expect(getMerchantReports).toHaveBeenLastCalledWith('merchant-1', 1, 10));
   });
 
-  it("downloads report successfully and triggers blob flow", async () => {
+  it('downloads report successfully and triggers blob flow', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r1",
-          fileName: "file.csv",
-          reportStatus: "GENERATED",
+          id: 'r1',
+          fileName: 'file.csv',
+          reportStatus: 'GENERATED',
         },
       ],
       page: 0,
@@ -147,31 +121,25 @@ describe("ReportDataTable", () => {
       totalPages: 1,
     });
 
-    downloadMerchantReport.mockResolvedValue("csv-content");
+    downloadMerchantReport.mockResolvedValue('csv-content');
 
     if (!window.URL.createObjectURL) window.URL.createObjectURL = jest.fn();
     if (!window.URL.revokeObjectURL) window.URL.revokeObjectURL = jest.fn();
 
     const createObjectURLSpy = jest
-      .spyOn(window.URL, "createObjectURL")
-      .mockReturnValue("blob:url");
+      .spyOn(window.URL, 'createObjectURL')
+      .mockReturnValue('blob:url');
 
-    const revokeSpy = jest
-      .spyOn(window.URL, "revokeObjectURL")
-      .mockImplementation(() => { });
+    const revokeSpy = jest.spyOn(window.URL, 'revokeObjectURL').mockImplementation(() => {});
 
     render(<ReportDataTable refreshKey={0} />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r1")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r1')).toBeInTheDocument());
 
-    const downloadButton = screen.getAllByRole("button")[0];
+    const downloadButton = screen.getAllByRole('button')[0];
     fireEvent.click(downloadButton);
 
-    await waitFor(() =>
-      expect(downloadMerchantReport).toHaveBeenCalledWith("merchant-1", "r1")
-    );
+    await waitFor(() => expect(downloadMerchantReport).toHaveBeenCalledWith('merchant-1', 'r1'));
 
     expect(createObjectURLSpy).not.toHaveBeenCalled();
     expect(revokeSpy).not.toHaveBeenCalled();
@@ -180,23 +148,21 @@ describe("ReportDataTable", () => {
     revokeSpy.mockRestore();
   });
 
-  it("renders loading state", async () => {
-    getMerchantReports.mockImplementation(
-      () => new Promise(() => { })
-    );
+  it('renders loading state', async () => {
+    getMerchantReports.mockImplementation(() => new Promise(() => {}));
 
     render(<ReportDataTable />);
 
-    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it("handles rows per page change", async () => {
+  it('handles rows per page change', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r10",
-          fileName: "file.csv",
-          reportStatus: "INSERTED",
+          id: 'r10',
+          fileName: 'file.csv',
+          reportStatus: 'INSERTED',
         },
       ],
       page: 0,
@@ -207,29 +173,21 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId(/row-/)).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId(/row-/)).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId("rows-change"));
+    fireEvent.click(screen.getByTestId('rows-change'));
 
-    await waitFor(() =>
-      expect(getMerchantReports).toHaveBeenLastCalledWith(
-        "merchant-1",
-        0,
-        20
-      )
-    );
+    await waitFor(() => expect(getMerchantReports).toHaveBeenLastCalledWith('merchant-1', 0, 20));
   });
 
-  it("handles download error branch and resets state", async () => {
+  it('handles download error branch and resets state', async () => {
     const updateAlerts = jest.fn();
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r2",
-          fileName: "file.csv",
-          reportStatus: "GENERATED",
+          id: 'r2',
+          fileName: 'file.csv',
+          reportStatus: 'GENERATED',
         },
       ],
       page: 0,
@@ -238,33 +196,29 @@ describe("ReportDataTable", () => {
       totalPages: 1,
     });
 
-    downloadMerchantReport.mockRejectedValue(new Error("fail"));
+    downloadMerchantReport.mockRejectedValue(new Error('fail'));
 
     render(<ReportDataTable updateAlerts={updateAlerts} />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r2")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r2')).toBeInTheDocument());
 
-    const downloadButton = screen.getAllByRole("button")[0];
+    const downloadButton = screen.getAllByRole('button')[0];
     fireEvent.click(downloadButton);
 
-    await waitFor(() =>
-      expect(downloadMerchantReport).toHaveBeenCalledWith("merchant-1", "r2")
-    );
+    await waitFor(() => expect(downloadMerchantReport).toHaveBeenCalledWith('merchant-1', 'r2'));
 
-    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith("error", true));
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('error', true));
     jest.runAllTimers();
-    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith("error", false));
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('error', false));
   });
 
-  it("renders FAILED status branch (no download button)", async () => {
+  it('renders FAILED status branch (no download button)', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r3",
-          fileName: "",
-          reportStatus: "FAILED",
+          id: 'r3',
+          fileName: '',
+          reportStatus: 'FAILED',
         },
       ],
       page: 0,
@@ -275,15 +229,13 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r3")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r3')).toBeInTheDocument());
 
-    const buttons = screen.getAllByRole("button");
+    const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBe(2);
   });
 
-  it("covers id missing branch in loadReports and download", async () => {
+  it('covers id missing branch in loadReports and download', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [],
       page: 0,
@@ -294,18 +246,16 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(getMerchantReports).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
   });
 
-  it("disables download button when status is not GENERATED", async () => {
+  it('disables download button when status is not GENERATED', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r4",
-          fileName: "file.csv",
-          reportStatus: "IN_PROGRESS",
+          id: 'r4',
+          fileName: 'file.csv',
+          reportStatus: 'IN_PROGRESS',
         },
       ],
       page: 0,
@@ -316,21 +266,19 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r4")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r4')).toBeInTheDocument());
 
-    const downloadButton = screen.getAllByRole("button")[0];
+    const downloadButton = screen.getAllByRole('button')[0];
     expect(downloadButton).toBeDisabled();
   });
 
-  it("does not trigger download when reportUrl is missing", async () => {
+  it('does not trigger download when reportUrl is missing', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r5",
-          fileName: "file.csv",
-          reportStatus: "GENERATED",
+          id: 'r5',
+          fileName: 'file.csv',
+          reportStatus: 'GENERATED',
         },
       ],
       page: 0,
@@ -341,33 +289,29 @@ describe("ReportDataTable", () => {
 
     downloadMerchantReport.mockResolvedValue({});
 
-    const appendSpy = jest.spyOn(document.body, "appendChild");
+    const appendSpy = jest.spyOn(document.body, 'appendChild');
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r5")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r5')).toBeInTheDocument());
 
-    const downloadButton = screen.getAllByRole("button")[0];
+    const downloadButton = screen.getAllByRole('button')[0];
     fireEvent.click(downloadButton);
 
-    await waitFor(() =>
-      expect(downloadMerchantReport).toHaveBeenCalledWith("merchant-1", "r5")
-    );
+    await waitFor(() => expect(downloadMerchantReport).toHaveBeenCalledWith('merchant-1', 'r5'));
 
     expect(appendSpy).toHaveBeenCalled();
 
     appendSpy.mockRestore();
   });
 
-  it("triggers refresh logic when refreshKey changes and pageNo is 0", async () => {
+  it('triggers refresh logic when refreshKey changes and pageNo is 0', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r6",
-          fileName: "file.csv",
-          reportStatus: "INSERTED",
+          id: 'r6',
+          fileName: 'file.csv',
+          reportStatus: 'INSERTED',
         },
       ],
       page: 0,
@@ -378,24 +322,20 @@ describe("ReportDataTable", () => {
 
     const { rerender } = render(<ReportDataTable refreshKey={1} />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r6")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r6')).toBeInTheDocument());
 
     rerender(<ReportDataTable refreshKey={2} />);
 
-    await waitFor(() =>
-      expect(getMerchantReports).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
   });
 
-  it("renders GENERATED status icon and enables download when not downloading", async () => {
+  it('renders GENERATED status icon and enables download when not downloading', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r7",
-          fileName: "file.csv",
-          reportStatus: "GENERATED",
+          id: 'r7',
+          fileName: 'file.csv',
+          reportStatus: 'GENERATED',
         },
       ],
       page: 0,
@@ -406,15 +346,13 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r7")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r7')).toBeInTheDocument());
 
-    const downloadButton = screen.getAllByRole("button")[0];
+    const downloadButton = screen.getAllByRole('button')[0];
     expect(downloadButton).not.toBeDisabled();
   });
 
-  it("does not render table when reports is undefined", async () => {
+  it('does not render table when reports is undefined', async () => {
     getMerchantReports.mockResolvedValue({
       reports: undefined,
       page: 0,
@@ -425,22 +363,18 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(getMerchantReports).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
 
-    expect(
-      screen.getByText("pages.reportExport.noReportFound")
-    ).toBeInTheDocument();
+    expect(screen.getByText('pages.reportExport.noReportFound')).toBeInTheDocument();
   });
 
-  it("handles pagination reset when refreshKey changes and pageNo is not 0", async () => {
+  it('handles pagination reset when refreshKey changes and pageNo is not 0', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r8",
-          fileName: "file.csv",
-          reportStatus: "INSERTED",
+          id: 'r8',
+          fileName: 'file.csv',
+          reportStatus: 'INSERTED',
         },
       ],
       page: 1,
@@ -451,22 +385,16 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable refreshKey={1} />);
 
-    await waitFor(() =>
-      expect(getMerchantReports).toHaveBeenCalledWith(
-        "merchant-1",
-        0,
-        10
-      )
-    );
+    await waitFor(() => expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10));
   });
 
-  it("covers IN_PROGRESS status icon branch", async () => {
+  it('covers IN_PROGRESS status icon branch', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r9",
-          fileName: "file.csv",
-          reportStatus: "IN_PROGRESS",
+          id: 'r9',
+          fileName: 'file.csv',
+          reportStatus: 'IN_PROGRESS',
         },
       ],
       page: 0,
@@ -477,12 +405,10 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r9")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r9')).toBeInTheDocument());
   });
 
-  it("covers nullish coalescing in pagination mapping", async () => {
+  it('covers nullish coalescing in pagination mapping', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [],
       page: undefined,
@@ -493,18 +419,16 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(getMerchantReports).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
   });
 
-  it("returns empty string for FAILED action column", async () => {
+  it('returns empty string for FAILED action column', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r10",
-          fileName: "file.csv",
-          reportStatus: "FAILED",
+          id: 'r10',
+          fileName: 'file.csv',
+          reportStatus: 'FAILED',
         },
       ],
       page: 0,
@@ -515,21 +439,19 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r10")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r10')).toBeInTheDocument());
 
-    const buttons = screen.getAllByRole("button");
+    const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBe(2);
   });
 
-  it("disables button while downloading same id", async () => {
+  it('disables button while downloading same id', async () => {
     getMerchantReports.mockResolvedValue({
       reports: [
         {
-          id: "r11",
-          fileName: "file.csv",
-          reportStatus: "GENERATED",
+          id: 'r11',
+          fileName: 'file.csv',
+          reportStatus: 'GENERATED',
         },
       ],
       page: 0,
@@ -548,15 +470,13 @@ describe("ReportDataTable", () => {
 
     render(<ReportDataTable />);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("row-r11")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('row-r11')).toBeInTheDocument());
 
-    const downloadButton = screen.getAllByRole("button")[0];
+    const downloadButton = screen.getAllByRole('button')[0];
     fireEvent.click(downloadButton);
 
     expect(downloadButton).toBeDisabled();
 
-    resolvePromise({ reportUrl: "url" });
+    resolvePromise({ reportUrl: 'url' });
   });
 });

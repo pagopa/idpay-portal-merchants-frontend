@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  TextField,
-} from '@mui/material';
+import { Box, Button, Card, CardContent, Typography, Stack, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import dayjs, { Dayjs } from 'dayjs';
@@ -23,7 +15,7 @@ type FormValues = {
 };
 
 type RouteParams = {
-  id: string;
+  initiative_id: string;
 };
 
 type Props = {
@@ -33,7 +25,7 @@ type Props = {
 
 const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
   const { t } = useTranslation();
-  const { id } = useParams<RouteParams>();
+  const { initiative_id } = useParams<RouteParams>();
 
   const yesterday = dayjs().subtract(1, 'day').startOf('day');
   const yesterdayStr = yesterday.format('YYYY-MM-DD');
@@ -50,29 +42,39 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
       ...(!values.endDate && {
         endDate: t('pages.reportExport.form.validation.required'),
       }),
-      ...(values.startDate && dayjs(values.startDate).isAfter(yesterday, 'day') && {
-        startDate: t('pages.reportExport.form.validation.invalidRange'),
-      }),
-      ...(values.endDate && dayjs(values.endDate).isAfter(yesterday, 'day') && {
-        endDate: t('pages.reportExport.form.validation.invalidRange'),
-      }),
-      ...(values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 0 && {
-        endDate: t('pages.reportExport.form.validation.invalidRange'),
-      }),
-      ...(values.startDate && values.endDate && dayjs(values.endDate).diff(dayjs(values.startDate), 'day') > 90 && {
-        endDate: t('pages.reportExport.form.validation.maxRange'),
-      }),
+      ...(values.startDate &&
+        dayjs(values.startDate).isAfter(yesterday, 'day') && {
+          startDate: t('pages.reportExport.form.validation.invalidRange'),
+        }),
+      ...(values.endDate &&
+        dayjs(values.endDate).isAfter(yesterday, 'day') && {
+          endDate: t('pages.reportExport.form.validation.invalidRange'),
+        }),
+      ...(values.startDate &&
+        values.endDate &&
+        dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 0 && {
+          endDate: t('pages.reportExport.form.validation.invalidRange'),
+        }),
+      ...(values.startDate &&
+        values.endDate &&
+        dayjs(values.endDate).diff(dayjs(values.startDate), 'day') > 90 && {
+          endDate: t('pages.reportExport.form.validation.maxRange'),
+        }),
     }),
     onSubmit: async (values) => {
-      if (!id) {
+      if (!initiative_id) {
         return;
-      };
+      }
       try {
-        const response = await generateMerchantReport(id, {
-          startPeriod: dayjs(values.startDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
-          endPeriod: dayjs(values.endDate).endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
+        const response = (await generateMerchantReport(initiative_id, {
+          startPeriod: dayjs(values.startDate)
+            .startOf('day')
+            .format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
+          endPeriod: dayjs(values.endDate)
+            .endOf('day')
+            .format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
           reportType: ReportTypeEnum.MERCHANT_TRANSACTIONS,
-        }) as any;
+        })) as any;
         const status: ReportStatusEnum = response?.reportStatus;
         updateAlerts(status, true);
         setTimeout(() => updateAlerts(status, false), 3000);
@@ -83,13 +85,12 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
         formik.resetForm();
         onReportGenerated?.();
       }
-    }
+    },
   });
 
-  const minEndDateStr =
-    formik.values.startDate
-      ? dayjs(formik.values.startDate).add(0, 'day').format('YYYY-MM-DD')
-      : MIN_START_DATE;
+  const minEndDateStr = formik.values.startDate
+    ? dayjs(formik.values.startDate).add(0, 'day').format('YYYY-MM-DD')
+    : MIN_START_DATE;
 
   return (
     <Card sx={{ width: '100%' }}>

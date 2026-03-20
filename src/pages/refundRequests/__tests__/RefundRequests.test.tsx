@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Route, useHistory } from 'react-router-dom';
-import RefundRequests from '../RefundRequests'
+import RefundRequests from '../RefundRequests';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -20,7 +20,7 @@ jest.mock('../../../hooks/useAlert', () => ({
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: jest.fn(),
-  useParams: () => ({ id: 'test-initiative-id' })
+  useParams: () => ({ initiative_id: 'test-initiative-id' }),
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend', () => ({
@@ -253,9 +253,12 @@ describe('RefundRequests', () => {
 
   it('should show loading spinner while fetching data', async () => {
     let resolvePromise: any;
-    mockGetRewardBatches.mockImplementation(() => new Promise((resolve) => {
-      resolvePromise = resolve;
-    }));
+    mockGetRewardBatches.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePromise = resolve;
+        })
+    );
 
     renderWithStore(<RefundRequests />);
 
@@ -322,7 +325,9 @@ describe('RefundRequests', () => {
       expect(screen.getByTestId('data-table')).toBeInTheDocument();
     });
 
-    expect(screen.queryByRole('button', { name: /pages.refundRequests.sendRequests/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /pages.refundRequests.sendRequests/i })
+    ).not.toBeInTheDocument();
   });
 
   it('should show send button when rows are selected', async () => {
@@ -337,7 +342,9 @@ describe('RefundRequests', () => {
     await user.click(checkbox);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /pages.refundRequests.sendRequests/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /pages.refundRequests.sendRequests/i })
+      ).toBeInTheDocument();
     });
   });
 
@@ -353,7 +360,9 @@ describe('RefundRequests', () => {
     await user.click(checkbox);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /pages.refundRequests.sendRequests/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /pages.refundRequests.sendRequests/i })
+      ).toBeInTheDocument();
     });
 
     const sendButton = screen.getByRole('button', { name: /pages.refundRequests.sendRequests/i });
@@ -375,7 +384,9 @@ describe('RefundRequests', () => {
     const checkbox = screen.getByTestId('checkbox-1');
     await user.click(checkbox);
 
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    const sendButton = await screen.findByRole('button', {
+      name: /pages.refundRequests.sendRequests/i,
+    });
     await user.click(sendButton);
 
     const cancelButton = await screen.findByText('Indietro');
@@ -397,7 +408,9 @@ describe('RefundRequests', () => {
     const checkbox = screen.getByTestId('checkbox-1');
     await user.click(checkbox);
 
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    const sendButton = await screen.findByRole('button', {
+      name: /pages.refundRequests.sendRequests/i,
+    });
     await user.click(sendButton);
 
     const confirmButton = await screen.findByText('Invia');
@@ -426,7 +439,9 @@ describe('RefundRequests', () => {
     const checkbox = screen.getByTestId('checkbox-1');
     await user.click(checkbox);
 
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    const sendButton = await screen.findByRole('button', {
+      name: /pages.refundRequests.sendRequests/i,
+    });
     await user.click(sendButton);
 
     const confirmButton = await screen.findByText('Invia');
@@ -491,14 +506,16 @@ describe('RefundRequests', () => {
   });
 
   it('should display tooltip text correctly with dash when value is empty', async () => {
-    const emptyDataMock = [{
-      id: 4,
-      name: '',
-      posType: 'PHYSICAL',
-      initialAmountCents: 10000,
-      status: 'CREATED',
-      month: getPreviousMonth(),
-    }];
+    const emptyDataMock = [
+      {
+        id: 4,
+        name: '',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: getPreviousMonth(),
+      },
+    ];
 
     mockGetRewardBatches.mockResolvedValue({ content: emptyDataMock });
     renderWithStore(<RefundRequests />);
@@ -523,9 +540,12 @@ describe('RefundRequests', () => {
 
   it('should show loading state in modal when sending batch', async () => {
     let resolvePromise: any;
-    mockSendRewardBatch.mockImplementation(() => new Promise((resolve) => {
-      resolvePromise = resolve;
-    }));
+    mockSendRewardBatch.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePromise = resolve;
+        })
+    );
 
     const user = userEvent.setup();
     renderWithStore(<RefundRequests />);
@@ -537,7 +557,9 @@ describe('RefundRequests', () => {
     const checkbox = screen.getByTestId('checkbox-1');
     await user.click(checkbox);
 
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    const sendButton = await screen.findByRole('button', {
+      name: /pages.refundRequests.sendRequests/i,
+    });
     await user.click(sendButton);
 
     const confirmButton = await screen.findByText('Invia');
@@ -555,7 +577,7 @@ describe('RefundRequests', () => {
     });
   });
 
- it('should handle missing initiativeId when sending batch', async () => {
+  it('should handle missing initiativeId when sending batch', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     const storeWithoutInitiatives = createMockStore([]);
 
@@ -611,7 +633,9 @@ describe('RefundRequests', () => {
 
     await user.click(screen.getByTestId('checkbox-0'));
 
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    const sendButton = await screen.findByRole('button', {
+      name: /pages.refundRequests.sendRequests/i,
+    });
     await user.click(sendButton);
 
     const confirmButton = await screen.findByText('Invia');
@@ -769,7 +793,7 @@ describe('RefundRequests', () => {
       content: data,
       pageNo: 0,
       pageSize: 10,
-      totalElements: data.length
+      totalElements: data.length,
     });
     mockSendRewardBatch.mockResolvedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
 
@@ -779,7 +803,9 @@ describe('RefundRequests', () => {
 
     await user.click(screen.getByTestId('checkbox-41'));
 
-    const sendButton = await screen.findByRole('button', { name: /pages.refundRequests.sendRequests/i });
+    const sendButton = await screen.findByRole('button', {
+      name: /pages.refundRequests.sendRequests/i,
+    });
     await user.click(sendButton);
 
     const confirmButton = await screen.findByText('Invia');
@@ -853,11 +879,17 @@ describe('RefundRequests', () => {
     expect(screen.getByText('Rimborso approvato')).toBeInTheDocument();
     expect(screen.getByText('Rimborso sospeso')).toBeInTheDocument();
 
-    expect(screen.getByText((t) => t.replace(/\s+/g, ' ').includes('123.45 €'))).toBeInTheDocument();
+    expect(
+      screen.getByText((t) => t.replace(/\s+/g, ' ').includes('123.45 €'))
+    ).toBeInTheDocument();
     expect(screen.getByText((t) => t.replace(/\s+/g, ' ').includes('2.00 €'))).toBeInTheDocument();
 
-    expect(screen.queryByText((t) => t.replace(/\s+/g, ' ').includes('99.99 €'))).not.toBeInTheDocument();
-    expect(screen.queryByText((t) => t.replace(/\s+/g, ' ').includes('88.88 €'))).not.toBeInTheDocument();
+    expect(
+      screen.queryByText((t) => t.replace(/\s+/g, ' ').includes('99.99 €'))
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText((t) => t.replace(/\s+/g, ' ').includes('88.88 €'))
+    ).not.toBeInTheDocument();
 
     const nanValues = screen.getAllByText((t) => t.replace(/\s+/g, ' ').includes('NaN €'));
     expect(nanValues.length).toBeGreaterThanOrEqual(2);
@@ -869,7 +901,7 @@ describe('RefundRequests', () => {
       content: [],
       pageNo: 0,
       pageSize: 10,
-      totalElements: 0
+      totalElements: 0,
     });
     renderWithStore(<RefundRequests />);
 

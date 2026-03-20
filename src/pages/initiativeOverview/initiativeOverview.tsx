@@ -14,7 +14,7 @@ import { useAlert } from '../../hooks/useAlert';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
 
 interface MatchParams {
-  id: string;
+  initiative_id: string;
 }
 
 const InitiativeOverview = () => {
@@ -25,8 +25,8 @@ const InitiativeOverview = () => {
     exact: true,
     strict: false,
   });
-  const { id } = (match?.params as MatchParams) || {};
-  const {setAlert} = useAlert();
+  const { initiative_id } = (match?.params as MatchParams) || {};
+  const { setAlert } = useAlert();
   // const [amount, setAmount] = useState<number | undefined>(undefined);
   // const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
@@ -34,16 +34,21 @@ const InitiativeOverview = () => {
   const [onboardingDate, setOnboardingDate] = useState<string | undefined>();
 
   useEffect(() => {
-    getMerchantDetail(id)
+    getMerchantDetail(initiative_id)
       .then((response) => {
         setIban(response?.iban);
         setIbanHolder(response?.ibanHolder);
         setOnboardingDate(formatDate(response?.activationDate));
       })
       .catch(() =>
-        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'})
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        })
       );
-  }, [id]);
+  }, [initiative_id]);
 
   // useEffect(() => {
   //   getMerchantInitiativeStatistics(id)
@@ -177,7 +182,7 @@ const InitiativeOverview = () => {
                   variant="contained"
                   startIcon={<StoreIcon />}
                   onClick={() => {
-                    history.push(generatePath(ROUTES.STORES_UPLOAD, { id }));
+                    history.push(generatePath(ROUTES.STORES_UPLOAD, { initiative_id }));
                   }}
                   // onClick={() => { history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`); }}
                   size="large"

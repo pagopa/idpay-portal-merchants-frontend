@@ -14,7 +14,7 @@ import { downloadMerchantReport, getMerchantReports } from '../../services/merch
 import { ReportDTO, ReportStatusEnum } from '../../api/generated/merchants/ReportDTO';
 
 type RouteParams = {
-  id: string;
+  initiative_id: string;
 };
 
 const getStatusIcon = (status: string) => {
@@ -30,7 +30,6 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-
 interface ReportDataTableProps {
   updateAlerts: (key: string, open: boolean) => void;
   refreshKey: number;
@@ -38,7 +37,7 @@ interface ReportDataTableProps {
 
 const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refreshKey }) => {
   const { t } = useTranslation();
-  const { id } = useParams<RouteParams>();
+  const { initiative_id } = useParams<RouteParams>();
   const [reports, setReports] = useState<any>({
     reports: [],
     page: 0,
@@ -55,13 +54,13 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const loadReports = () => {
-    if (!id) {
+    if (!initiative_id) {
       return;
     }
 
     setLoading(true);
 
-    void getMerchantReports(id, pagination.pageNo, pagination.pageSize)
+    void getMerchantReports(initiative_id, pagination.pageNo, pagination.pageSize)
       .then((response) => {
         setReports(response);
         setPagination({
@@ -93,13 +92,13 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
   }, [refreshKey]);
 
   const handleDownload = async (reportId: string, fileName: string) => {
-    if (!id) {
+    if (!initiative_id) {
       return;
     }
     setDownloadingId(reportId);
 
     try {
-      const response = await downloadMerchantReport(id, reportId);
+      const response = await downloadMerchantReport(initiative_id, reportId);
       const reportUrl = (response as any)?.reportUrl;
 
       if (reportUrl) {
@@ -137,7 +136,13 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
                 : MISSING_DATA_PLACEHOLDER
             }
           >
-            <Typography variant="caption-semibold" fontSize="1rem" pl={1} sx={{ maxWidth: '100% !important' }} className="ShowDots">
+            <Typography
+              variant="caption-semibold"
+              fontSize="1rem"
+              pl={1}
+              sx={{ maxWidth: '100% !important' }}
+              className="ShowDots"
+            >
               {params.row.fileName}
             </Typography>
           </Tooltip>
@@ -153,8 +158,8 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
       renderCell: (params: any) => (
         <Tooltip
           title={
-            params.row.requestDate && params.row.requestDate !== '' ?
-              safeFormatDate(params.row.requestDate)
+            params.row.requestDate && params.row.requestDate !== ''
+              ? safeFormatDate(params.row.requestDate)
               : MISSING_DATA_PLACEHOLDER
           }
         >
@@ -173,11 +178,11 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
       renderCell: (params: any) => (
         <Tooltip
           title={
-            params.row.elaborationDate && params.row.elaborationDate !== '' ?
-              safeFormatDate(params.row.elaborationDate)
+            params.row.elaborationDate && params.row.elaborationDate !== ''
+              ? safeFormatDate(params.row.elaborationDate)
               : MISSING_DATA_PLACEHOLDER
           }
-          >
+        >
           <Typography color={theme.palette.text.secondary} fontWeight={400} className="ShowDots">
             {safeFormatDate(params.row.elaborationDate)}
           </Typography>
@@ -197,7 +202,12 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
           safeFormatDate(params.row.endPeriod, false);
         return (
           <Tooltip title={period && period !== '' ? period : MISSING_DATA_PLACEHOLDER}>
-            <Typography variant="caption-semibold" fontSize="1rem" sx={{ maxWidth: '100% !important' }} className="ShowDots">
+            <Typography
+              variant="caption-semibold"
+              fontSize="1rem"
+              sx={{ maxWidth: '100% !important' }}
+              className="ShowDots"
+            >
               {period}
             </Typography>
           </Tooltip>
@@ -218,14 +228,12 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
                 params.row.reportStatus !== ReportStatusEnum.GENERATED ||
                 downloadingId === params.row.id
               }
-              onClick={() =>
-                handleDownload(params.row.id, params.row.fileName)
-              }
+              onClick={() => handleDownload(params.row.id, params.row.fileName)}
             >
               <DownloadIcon
                 color={
                   params.row.reportStatus === ReportStatusEnum.GENERATED &&
-                    downloadingId !== params.row.id
+                  downloadingId !== params.row.id
                     ? 'primary'
                     : 'disabled'
                 }
@@ -289,9 +297,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
                   textAlign: 'center',
                 }}
               >
-                <Typography variant="body2">
-                  {t('pages.reportExport.noReportFound')}
-                </Typography>
+                <Typography variant="body2">{t('pages.reportExport.noReportFound')}</Typography>
               </Paper>
             )}
           </>

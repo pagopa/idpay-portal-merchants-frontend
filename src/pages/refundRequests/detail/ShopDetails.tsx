@@ -45,13 +45,13 @@ const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter
   (el) => el !== RewardBatchTrxStatusEnum.TO_CHECK
 );
 interface RouteParams {
-  id: string;
+  initiative_id: string;
   batch_id: string;
 }
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
-  const { id, batch_id } = useParams<RouteParams>();
+  const { initiative_id, batch_id } = useParams<RouteParams>();
   const [store, setStore] = useState({} as RewardBatchDTO);
   const history = useHistory();
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
@@ -113,7 +113,7 @@ const ShopDetails: React.FC = () => {
 
   const fetchAll = async () => {
     try {
-      const response = await getAllRewardBatches(id);
+      const response = await getAllRewardBatches(initiative_id);
 
       const match = response?.content?.find((e: any) => e.id === batch_id);
       setStore(match ?? {});
@@ -167,10 +167,10 @@ const ShopDetails: React.FC = () => {
   };
 
   const handleDownloadCsv = async () => {
-    if (batch_id && id) {
+    if (batch_id && initiative_id) {
       try {
         setBatchDownloadIsLoading(true);
-        const response = await downloadBatchCsv(id, batch_id);
+        const response = await downloadBatchCsv(initiative_id, batch_id);
         const { approvedBatchUrl } = response;
         const filename = 'lotto.csv';
 
