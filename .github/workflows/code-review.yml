@@ -1,29 +1,28 @@
 name: 'coverage'
 
 on:
-  push:
+  pull_request:
     branches:
+      - main
+      - uat
+      - develop
+    types:
+      - opened
       - synchronize
+      - edited
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-      - main
-      - uat
-      - develop
-  pull_request:
-    types:
-      - opened
-      - edited
-  sonarcloud:
+  release:
+    name: Release
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@dc12339a9823e6625f5410a45b24fcbc55a33ded #v6.0.2
-        with:
+        with: 
           fetch-depth: 0
 
       - name: Install dependencies
@@ -43,7 +42,7 @@ jobs:
           annotations: none
           package-manager: yarn
 
-      - name: SonarCloud Scan
+      - name: SonarCloud Scan (PR Analysis)
         uses: SonarSource/sonarcloud-github-action@91eed767a59d6bbce22fc5651d0317561f627355 #v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,3 +52,6 @@ jobs:
             -Dsonar.organization=${{ vars.SONARCLOUD_ORG }}
             -Dsonar.projectKey=${{ vars.SONARCLOUD_PROJECT_KEY }}
             -Dsonar.projectName="${{ vars.SONARCLOUD_PROJECT_NAME }}"
+            -Dsonar.pullrequest.provider=github
+            -Dsonar.pullrequest.github.repository=${{ github.repository }}
+            -Dsonar.qualitygate.wait=true
