@@ -26,6 +26,7 @@ import { DownloadRewardBatchResponseDTO } from './generated/merchants/DownloadRe
 import { FranchisePointOfSaleDTO } from './generated/merchants/FranchisePointOfSaleDTO';
 import { ReportListDTO } from './generated/merchants/ReportListDTO';
 import { ReportRequest } from './generated/merchants/ReportRequest';
+import { RewardBatchDTO } from './generated/merchants/RewardBatchDTO';
 
 const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
   const token = storageTokenOps.read();
@@ -328,6 +329,28 @@ export const MerchantApi = {
     }
   },
 
+  // WIP
+  getRewardBatchById: async (
+    initiativeId: string,
+    batchId: string
+  ): Promise<RewardBatchDTO> => {
+    // const result = await apiClient.getRewardBatchById({ initiativeId, batchId });
+    // return extractResponse(result, 200, onRedirectToLogin);
+    try {
+      const result = await apiClient.getRewardBatches({
+        initiativeId,
+        size: 1000,
+      });
+      const response: RewardBatchListDTO = await extractResponse(result, 200, onRedirectToLogin);
+      // @ts-expect-error wip
+      const rewardBatch: RewardBatchDTO = response?.content?.find((e: any) => e.id === batchId);
+      return rewardBatch;
+    } catch (error) {
+      logApiError(error, 'userPermission');
+      throw error;
+    }
+  },
+
   sendRewardBatches: async (initiativeId: string, batchId: string): Promise<any> => {
     let result: any = await apiClient.sendRewardBatches({
       initiativeId,
@@ -465,7 +488,7 @@ function logApiError(error: any, apiName?: string) {
   if (console.groupCollapsed) {
     console.groupCollapsed(apiLabel);
   } else {
-   // console.error(apiLabel);
+    // console.error(apiLabel);
   }
   // console.error("Message:", pretty(error?.message));
   // console.error("Error name:", error?.name ?? "N/A");

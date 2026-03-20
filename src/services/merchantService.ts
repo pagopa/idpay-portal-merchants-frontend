@@ -19,6 +19,7 @@ import { DownloadRewardBatchResponseDTO } from '../api/generated/merchants/Downl
 import { FranchisePointOfSaleDTO } from '../api/generated/merchants/FranchisePointOfSaleDTO';
 import { ReportListDTO } from '../api/generated/merchants/ReportListDTO';
 import { ReportRequest } from '../api/generated/merchants/ReportRequest';
+import { RewardBatchDTO } from '../api/generated/merchants/RewardBatchDTO';
 
 export type GetMerchantTransactionsProcessedParams = {
   initiativeId: string;
@@ -141,6 +142,12 @@ export const getAllRewardBatches = (
   initiativeId: string
 ): Promise<RewardBatchListDTO> =>
   MerchantApi.getAllRewardBatches(initiativeId);
+
+export const getRewardBatchById = (
+  initiativeId: string,
+  batchId: string
+): Promise<RewardBatchDTO> =>
+  MerchantApi.getRewardBatchById(initiativeId, batchId);
 
 export const sendRewardBatch = (
   initiativeId: string,

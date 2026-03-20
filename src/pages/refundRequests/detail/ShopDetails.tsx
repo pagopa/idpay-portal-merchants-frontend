@@ -32,7 +32,7 @@ import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/Rewar
 import { parseJwt } from '../../../utils/jwt-utils';
 import {
   downloadBatchCsv,
-  getAllRewardBatches,
+  getRewardBatchById,
   getMerchantPointOfSalesWithTransactions,
 } from '../../../services/merchantService';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
@@ -111,12 +111,10 @@ const ShopDetails: React.FC = () => {
     },
   });
 
-  const fetchAll = async () => {
+  const fetchBatch = async () => {
     try {
-      const response = await getAllRewardBatches(id);
-
-      const match = response?.content?.find((e: any) => e.id === batch_id);
-      setStore(match ?? {});
+      const response = await getRewardBatchById(id, batch_id);
+      setStore(response);
     } catch (error: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -128,7 +126,7 @@ const ShopDetails: React.FC = () => {
   };
 
   useEffect(() => {
-    void fetchAll();
+    void fetchBatch();
   }, [drawerRefreshKey]);
 
   const fetchStores = async () => {
