@@ -4,7 +4,11 @@ import * as merchantService from '../../../services/merchantService';
 import { StatusEnum } from '../../../api/generated/merchants/InitiativeDTO';
 import { setInitiativesList } from '../../slices/initiativesSlice';
 
-jest.mock('../../../services/merchantService');
+/**
+ * NOTE:
+ * We use jest.spyOn instead of jest.mock factory because
+ * initiativesApi imports the function directly.
+ */
 
 describe('initiativesApi - getInitiatives', () => {
   const createTestStore = () =>
@@ -16,18 +20,24 @@ describe('initiativesApi - getInitiatives', () => {
     });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
 
   it('should return empty array and NOT call service if enabled is false', async () => {
     const store = createTestStore();
 
+    const spy = jest.spyOn(
+      merchantService,
+      'getMerchantInitiativeList'
+    );
+
     const result = await store.dispatch(
       initiativesApi.endpoints.getInitiatives.initiate({ enabled: false })
     );
 
     expect(result.data).toEqual([]);
-    expect(merchantService.getMerchantInitiativeList).not.toHaveBeenCalled();
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it('should call service, filter by PUBLISHED and CLOSED and dispatch setInitiativesList', async () => {
@@ -40,9 +50,9 @@ describe('initiativesApi - getInitiatives', () => {
       { id: '3', status: StatusEnum.DRAFT },
     ];
 
-    (
-      merchantService.getMerchantInitiativeList as jest.Mock
-    ).mockResolvedValue(mockResponse);
+    const spy = jest
+      .spyOn(merchantService, 'getMerchantInitiativeList')
+      .mockResolvedValue(mockResponse);
 
     const result = await store.dispatch(
       initiativesApi.endpoints.getInitiatives.initiate({ enabled: true })
@@ -53,7 +63,7 @@ describe('initiativesApi - getInitiatives', () => {
       { id: '2', status: StatusEnum.CLOSED },
     ];
 
-    expect(merchantService.getMerchantInitiativeList).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledTimes(1);
     expect(result.data).toEqual(expectedFiltered);
 
     expect(dispatchSpy).toHaveBeenCalledWith(
@@ -66,15 +76,15 @@ describe('initiativesApi - getInitiatives', () => {
 
     const mockError = new Error('API error');
 
-    (
-      merchantService.getMerchantInitiativeList as jest.Mock
-    ).mockRejectedValue(mockError);
+    const spy = jest
+      .spyOn(merchantService, 'getMerchantInitiativeList')
+      .mockRejectedValue(mockError);
 
     const result = await store.dispatch(
       initiativesApi.endpoints.getInitiatives.initiate({ enabled: true })
     );
 
-    expect(merchantService.getMerchantInitiativeList).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledTimes(1);
     expect(result.error).toBeDefined();
   });
 });
