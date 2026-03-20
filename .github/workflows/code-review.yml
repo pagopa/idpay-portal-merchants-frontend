@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae8
+        uses: actions/checkout@e2a5a1afd5d7305b13671410c52a31819ab9fad9
         with:
           fetch-depth: 0
 
