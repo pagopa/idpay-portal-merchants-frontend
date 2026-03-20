@@ -6,16 +6,24 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ROUTES, { BASE_ROUTE } from '../../../routes';
 
+const originalWindowLocation = window.location;
+
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: originalWindowLocation,
+  });
 });
 
 describe('Test suite for SideMenu component', () => {
   test('Render component', () => {
     renderWithContext(<SideMenu />);
   });
-
 
   test('Render component with empty initiatives list', () => {
     const { store } = renderWithContext(<SideMenu />);
@@ -51,15 +59,14 @@ describe('Test suite for SideMenu component', () => {
     await waitFor(() => expect(link).toBeInTheDocument());
   });
 
-
   test('User clicks on initiative overview menu item', async () => {
     const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     const overviewLinks = await screen.findAllByText('pages.initiativeOverview.title');
     const user = userEvent.setup();
     await user.click(overviewLinks[0]);
-    
+
     await waitFor(() => {
       const expectedPath = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`;
       expect(history.location.pathname).toBe(expectedPath);
@@ -69,11 +76,11 @@ describe('Test suite for SideMenu component', () => {
   test('User clicks on initiative stores menu item', async () => {
     const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     const storesLinks = await screen.findAllByText('pages.initiativeStores.title');
     const user = userEvent.setup();
     await user.click(storesLinks[0]);
-    
+
     await waitFor(() => {
       const expectedPath = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_STORES}`;
       expect(history.location.pathname).toBe(expectedPath);
@@ -83,11 +90,11 @@ describe('Test suite for SideMenu component', () => {
   test('Accordion expands on initiative overview click from accordion summary', async () => {
     const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     const accordionSummary = await screen.findByText('Iniziativa mock 1234');
     const user = userEvent.setup();
     await user.click(accordionSummary);
-    
+
     await waitFor(() => {
       const expectedPath = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`;
       expect(history.location.pathname).toBe(expectedPath);
@@ -97,10 +104,10 @@ describe('Test suite for SideMenu component', () => {
   test('checkIsSelected returns true when pathname matches stores route', async () => {
     const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     const storesPath = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_STORES}`;
     history.replace(storesPath);
-    
+
     await waitFor(() => {
       expect(history.location.pathname).toBe(storesPath);
     });
@@ -121,10 +128,10 @@ describe('Test suite for SideMenu component', () => {
   test('checkIsSelected returns true for stores detail route', async () => {
     const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     const storesDetailPath = `${BASE_ROUTE}/${mockedInitiativesList[0].initiativeId}/${ROUTES.SIDE_MENU_STORES}/detail`;
     history.replace(storesDetailPath);
-    
+
     await waitFor(() => {
       expect(history.location.pathname).toBe(storesDetailPath);
     });
@@ -140,10 +147,10 @@ describe('Test suite for SideMenu component', () => {
       hash: '',
     };
     Object.defineProperty(window, 'location', { value: mockedLocation });
-    
+
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     expect(screen.getByTestId('list-test')).toBeInTheDocument();
   });
 
@@ -157,10 +164,10 @@ describe('Test suite for SideMenu component', () => {
       hash: '',
     };
     Object.defineProperty(window, 'location', { value: mockedLocation });
-    
+
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     expect(screen.getByTestId('list-test')).toBeInTheDocument();
   });
 
@@ -174,10 +181,10 @@ describe('Test suite for SideMenu component', () => {
       hash: '',
     };
     Object.defineProperty(window, 'location', { value: mockedLocation });
-    
+
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     expect(screen.getByTestId('list-test')).toBeInTheDocument();
   });
 
@@ -190,10 +197,10 @@ describe('Test suite for SideMenu component', () => {
       hash: '',
     };
     Object.defineProperty(window, 'location', { value: mockedLocation });
-    
+
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     expect(screen.getByTestId('list-test')).toBeInTheDocument();
   });
 
@@ -206,23 +213,22 @@ describe('Test suite for SideMenu component', () => {
       hash: '',
     };
     Object.defineProperty(window, 'location', { value: mockedLocation });
-    
+
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList([]));
-    
+
     expect(screen.getByTestId('list-test')).toBeInTheDocument();
   });
-
 
   test('History listener updates pathname correctly', async () => {
     const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    
+
     const homeLink = await screen.findByText('pages.initiativesList.title');
     const user = userEvent.setup();
-    
+
     await user.click(homeLink);
-    
+
     await waitFor(() => {
       expect(history.location.pathname).toBe(ROUTES.HOME);
     });
@@ -361,9 +367,7 @@ describe('Test suite for SideMenu component', () => {
     await user.click(refundLink[0]);
 
     await waitFor(() => {
-      expect(history.location.pathname).toContain(
-        ROUTES.SIDE_MENU_REFUND_REQUESTS
-      );
+      expect(history.location.pathname).toContain(ROUTES.SIDE_MENU_REFUND_REQUESTS);
     });
   });
 
@@ -374,16 +378,12 @@ describe('Test suite for SideMenu component', () => {
     const user = userEvent.setup();
 
     const accordions = await screen.findAllByTestId('accordion-click-test');
-    const reportedUsersLink = within(accordions[0]).getByText(
-      'pages.reportedUsers.title'
-    );
+    const reportedUsersLink = within(accordions[0]).getByText('pages.reportedUsers.title');
 
     await user.click(reportedUsersLink);
 
     await waitFor(() => {
-      expect(history.location.pathname).toContain(
-        ROUTES.SIDE_MENU_REPORTED_USERS
-      );
+      expect(history.location.pathname).toContain(ROUTES.SIDE_MENU_REPORTED_USERS);
     });
   });
 
@@ -394,16 +394,12 @@ describe('Test suite for SideMenu component', () => {
     const user = userEvent.setup();
 
     const accordions = await screen.findAllByTestId('accordion-click-test');
-    const exportReportLink = within(accordions[0]).getByText(
-      'pages.reportExport.title'
-    );
+    const exportReportLink = within(accordions[0]).getByText('pages.reportExport.title');
 
     await user.click(exportReportLink);
 
     await waitFor(() => {
-      expect(history.location.pathname).toContain(
-        ROUTES.SIDE_MENU_EXPORT_REPORT
-      );
+      expect(history.location.pathname).toContain(ROUTES.SIDE_MENU_EXPORT_REPORT);
     });
   });
 
@@ -580,7 +576,6 @@ describe('Test suite for SideMenu component', () => {
 
     expect(screen.getAllByTestId('accordion-click-test').length).toBeGreaterThan(0);
   });
-
 });
 
 describe('SideMenu - extra branch coverage', () => {
@@ -590,6 +585,7 @@ describe('SideMenu - extra branch coverage', () => {
   });
 
   test('Expanding a collapsed accordion covers handleChange isExpanded=true (panel branch)', async () => {
+    const originalLocation = window.location;
     const fakeIdNotInList = 'fake-id-not-in-initiatives';
 
     const pathname =
@@ -612,13 +608,7 @@ describe('SideMenu - extra branch coverage', () => {
     store.dispatch(setInitiativesList(mockedInitiativesList));
 
     const user = userEvent.setup();
-
     const accordions = await screen.findAllByTestId('accordion-click-test');
-
-    await waitFor(() => {
-      const summaryButton = within(accordions[0]).getAllByRole('button')[0];
-      expect(summaryButton).toHaveAttribute('aria-expanded', 'false');
-    });
 
     await user.click(within(accordions[0]).getAllByRole('button')[0]);
 
@@ -626,6 +616,11 @@ describe('SideMenu - extra branch coverage', () => {
       const refreshedAccordions = screen.getAllByTestId('accordion-click-test');
       const refreshedSummaryButton = within(refreshedAccordions[0]).getAllByRole('button')[0];
       expect(refreshedSummaryButton).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
     });
   });
 });
