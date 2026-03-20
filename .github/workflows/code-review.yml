@@ -42,8 +42,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          corepack enable
-          yarn install --immutable --check-cache || yarn install --force
+          yarn install --ignore-scripts
+          YARN_ENABLE_SCRIPTS=false yarn install
+
 
       - name: Genera client API
         run: yarn generate
