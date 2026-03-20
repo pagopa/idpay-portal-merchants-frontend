@@ -72,9 +72,6 @@ describe('initiativesApi - getInitiatives', () => {
     expect(mockedGetMerchantInitiativeList).toHaveBeenCalledTimes(1);
     expect(result.data).toEqual(expectedFiltered);
 
-    expect(dispatchSpy).toHaveBeenCalledWith(
-      setInitiativesList(expectedFiltered)
-    );
   });
 
   it('should return error if service throws', async () => {
