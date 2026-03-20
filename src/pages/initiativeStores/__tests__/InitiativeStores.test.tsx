@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 const mockId = 'initiative-123';
 const mockHistory = {
   replace: jest.fn(),
-  push: jest.fn()
+  push: jest.fn(),
 };
 
 jest.mock('react-i18next', () => ({
@@ -22,7 +22,7 @@ jest.mock('react-i18next', () => ({
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({ ...mockHistory }),
-  useParams: () => ({ id: mockId }),
+  useParams: () => ({ initiative_id: mockId }),
   useLocation: jest.fn(),
 }));
 
@@ -189,7 +189,15 @@ describe('<InitiativeStores />', () => {
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
         'merchant-id-01',
-        expect.objectContaining({address: "", city: "", contactName: "", page: 0, size: 10, sort: "asc", type: undefined})
+        expect.objectContaining({
+          address: '',
+          city: '',
+          contactName: '',
+          page: 0,
+          size: 10,
+          sort: 'asc',
+          type: undefined,
+        })
       );
     });
   });
@@ -229,7 +237,15 @@ describe('<InitiativeStores />', () => {
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
         'merchant-id-01',
-        expect.objectContaining({address: "", city: "", contactName: "", page: 0, size: 10, sort: "asc", type: undefined})
+        expect.objectContaining({
+          address: '',
+          city: '',
+          contactName: '',
+          page: 0,
+          size: 10,
+          sort: 'asc',
+          type: undefined,
+        })
       );
     });
   });
@@ -295,10 +311,10 @@ describe('<InitiativeStores />', () => {
     );
   });
 
-  test('mostra l\'alert di successo quando showSuccessAlert è true', async () => {
+  test("mostra l'alert di successo quando showSuccessAlert è true", async () => {
     (useLocation as jest.Mock).mockReturnValue({
       state: { showSuccessAlert: true },
-      pathname: '/'
+      pathname: '/',
     });
     renderWithContext(<InitiativeStores />);
     await waitFor(() => {
@@ -470,9 +486,11 @@ describe('Column rendering logic', () => {
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(referentColumn.renderCell({
-      row: { contactName: 'Mario', contactSurname: 'Rossi' }
-    }));
+    const cell = render(
+      referentColumn.renderCell({
+        row: { contactName: 'Mario', contactSurname: 'Rossi' },
+      })
+    );
     expect(cell.container.textContent).toContain('Mario Rossi');
   });
 
@@ -481,9 +499,11 @@ describe('Column rendering logic', () => {
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(referentColumn.renderCell({
-      row: { contactSurname: 'Rossi' }
-    }));
+    const cell = render(
+      referentColumn.renderCell({
+        row: { contactSurname: 'Rossi' },
+      })
+    );
     expect(cell.container.textContent).toContain('Rossi');
   });
 
@@ -492,9 +512,11 @@ describe('Column rendering logic', () => {
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(referentColumn.renderCell({
-      row: { contactName: 'Mario' }
-    }));
+    const cell = render(
+      referentColumn.renderCell({
+        row: { contactName: 'Mario' },
+      })
+    );
     expect(cell.container.textContent).toContain('Mario');
   });
 
@@ -647,9 +669,7 @@ describe('Column rendering logic', () => {
       renderWithContext(<InitiativeStores />);
 
       await waitFor(() => {
-        expect(dataTableProps.sortModel).toEqual([
-          { field: 'franchiseName', sort: 'asc' },
-        ]);
+        expect(dataTableProps.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
       });
     });
 
@@ -709,7 +729,7 @@ describe('Column rendering logic', () => {
       });
     });
 
-    test('aggiorna sessionStorage quando cambia l\'ordinamento', async () => {
+    test("aggiorna sessionStorage quando cambia l'ordinamento", async () => {
       renderWithContext(<InitiativeStores />);
 
       await waitFor(() => {

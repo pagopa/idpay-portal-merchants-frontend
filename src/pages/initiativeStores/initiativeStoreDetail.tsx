@@ -28,7 +28,7 @@ import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
 interface RouteParams {
-  id: string;
+  initiative_id: string;
   store_id: string;
 }
 
@@ -53,7 +53,7 @@ const InitiativeStoreDetail = () => {
     contactNameModal?: string;
   }>({});
   const { t } = useTranslation();
-  const { id, store_id } = useParams<RouteParams>();
+  const { initiative_id, store_id } = useParams<RouteParams>();
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { setStoreId } = useStore();
 
@@ -61,7 +61,7 @@ const InitiativeStoreDetail = () => {
     void fetchStoreDetail();
     void fetchStoreTransactions();
     setStoreId(store_id);
-  }, [id, store_id]);
+  }, [initiative_id, store_id]);
 
   useEffect(() => {
     if (storeDetail) {
@@ -93,7 +93,7 @@ const InitiativeStoreDetail = () => {
   const fetchStoreTransactions = async (filters?: any) => {
     setDataTableIsLoading(true);
     try {
-      const response = await getMerchantPointOfSaleTransactionsProcessed(id, store_id, {
+      const response = await getMerchantPointOfSaleTransactionsProcessed(initiative_id, store_id, {
         size: 10,
         ...filters,
       });

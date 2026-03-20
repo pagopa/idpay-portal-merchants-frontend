@@ -26,7 +26,7 @@ import { MerchantTransactionsListDTO } from '../../api/generated/merchants/Merch
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
-  id: string;
+  initiative_id: string;
   batch_id: string;
 }
 
@@ -70,7 +70,7 @@ const InvoiceDataTable = ({
   const [sortModel, setSortModel] = useState<GridSortModel>([
     { field: 'trxChargeDate', sort: 'desc' },
   ]);
-  const { id, batch_id } = useParams<RouteParams>();
+  const { initiative_id, batch_id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
   const { t } = useTranslation();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -158,11 +158,11 @@ const InvoiceDataTable = ({
     };
     try {
       const response = await getMerchantTransactionsProcessed({
-        initiativeId: id,
+        initiativeId: initiative_id,
         size: pagination.pageSize,
         rewardBatchId: batch_id,
         ...filters,
-        ...params
+        ...params,
       });
       const { content, ...paginationData } = response;
       setPagination(paginationData);
