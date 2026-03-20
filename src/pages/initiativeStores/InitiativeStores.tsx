@@ -45,7 +45,7 @@ const initialValues: GetPointOfSalesFilters = {
   sort: 'asc',
 };
 interface RouteParams {
-  id: string;
+  initiative_id: string;
 }
 
 const InitiativeStores: React.FC = () => {
@@ -65,7 +65,7 @@ const InitiativeStores: React.FC = () => {
   const isGoingToDetail = useRef(false);
   const { t } = useTranslation();
   const history = useHistory();
-  const { id } = useParams<RouteParams>();
+  const { initiative_id } = useParams<RouteParams>();
 
   const location = useLocation<{ showSuccessAlert?: boolean }>();
   useEffect(() => {
@@ -88,7 +88,7 @@ const InitiativeStores: React.FC = () => {
     if (
       storedPagination &&
       JSON.parse(storedPagination)?.pageNo !== undefined &&
-      JSON.parse(storedPagination)?.initiativeId === id
+      JSON.parse(storedPagination)?.initiativeId === initiative_id
     ) {
       const parsed = JSON.parse(storedPagination);
       setStoresPagination(parsed);
@@ -283,13 +283,13 @@ const InitiativeStores: React.FC = () => {
   };
 
   const goToAddStorePage = () => {
-    history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`);
+    history.push(`${BASE_ROUTE}/${initiative_id}/punti-vendita/censisci/`);
   };
 
   const goToStoreDetail = (store: PointOfSaleDTO) => {
     // eslint-disable-next-line functional/immutable-data
     isGoingToDetail.current = true;
-    history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
+    history.push(`${BASE_ROUTE}/${initiative_id}/punti-vendita/${store.id}/`);
   };
 
   const filtersSetted = () =>
@@ -306,7 +306,7 @@ const InitiativeStores: React.FC = () => {
       setSortModel(newSortModel);
 
       // Update sessionStorage with new sort
-      const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId: id };
+      const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId: initiative_id };
       setStoresPagination(updatedPagination);
       sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
 
@@ -329,7 +329,7 @@ const InitiativeStores: React.FC = () => {
     const updatedPagination = {
       ...storesPagination,
       pageNo: page,
-      initiativeId: id,
+      initiativeId: initiative_id,
       sort: currentSort,
     };
     setStoresPagination(updatedPagination);

@@ -21,7 +21,7 @@ jest.mock('../../../services/merchantService');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ id: 'initiative-123' }),
+  useParams: () => ({ initiative_id: 'initiative-123' }),
 }));
 
 const mockHistory = createMemoryHistory();
@@ -48,7 +48,6 @@ const mockMerchantStatistics: MerchantStatisticsDTO = {
 };
 
 describe('InitiativeOverview', () => {
-
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(helperFunctions, 'formatDate');

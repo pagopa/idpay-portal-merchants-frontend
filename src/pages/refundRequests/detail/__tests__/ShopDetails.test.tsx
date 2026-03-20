@@ -1,28 +1,28 @@
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ShopDetails from "../ShopDetails";
-import { BrowserRouter } from "react-router-dom";
+import ShopDetails from '../ShopDetails';
+import { BrowserRouter } from 'react-router-dom';
 
-const mockHandleSubmit = jest.fn()
-const mockResetForm = jest.fn()
-const mockHandleChange = jest.fn()
-const mockReplace = jest.fn()
-const mockGoBack = jest.fn()
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
+const mockHandleSubmit = jest.fn();
+const mockResetForm = jest.fn();
+const mockHandleChange = jest.fn();
+const mockReplace = jest.fn();
+const mockGoBack = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
   useHistory: () => ({
     goBack: mockGoBack,
     replace: mockReplace,
-    location: { state: { store: { id: "batch-1" }, refundUploadSuccess: true } },
+    location: { state: { store: { id: 'batch-1' }, refundUploadSuccess: true } },
   }),
   useLocation: () => ({
-    state: { store: { id: "batch-1" }, batchId: "batch-1" },
+    state: { store: { id: 'batch-1' }, batchId: 'batch-1' },
   }),
-  useParams: () => ({ id: 'initiative-123', batch_id: "batch-1" }),
+  useParams: () => ({ initiative_id: 'initiative-123', batch_id: 'batch-1' }),
 }));
 
-jest.mock("formik", () => ({
-  ...jest.requireActual("formik"),
+jest.mock('formik', () => ({
+  ...jest.requireActual('formik'),
   useFormik: () => ({
     values: {
       status: '',
@@ -33,11 +33,11 @@ jest.mock("formik", () => ({
     handleSubmit: mockHandleSubmit,
     resetForm: mockResetForm,
     handleChange: mockHandleChange,
-    dirty: true
-  })
-}))
+    dirty: true,
+  }),
+}));
 
-jest.mock("react-i18next", () => ({
+jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
@@ -49,18 +49,18 @@ jest.mock("../../../../services/merchantService", () => ({
   getMerchantPointOfSalesWithTransactions: jest.fn(),
   getMerchantDetail: jest.fn(),
   getMerchantTransactionsProcessed: jest.fn(),
-  downloadBatchCsv: jest.fn()
+  downloadBatchCsv: jest.fn(),
 }));
 
 const mockSetAlert = jest.fn();
-jest.mock("../../../../hooks/useAlert", () => ({
+jest.mock('../../../../hooks/useAlert', () => ({
   useAlert: () => ({
     setAlert: mockSetAlert,
   }),
 }));
 
-jest.mock("../../../../utils/jwt-utils", () => ({
-  parseJwt: () => ({ merchant_id: "merchant-1" }),
+jest.mock('../../../../utils/jwt-utils', () => ({
+  parseJwt: () => ({ merchant_id: 'merchant-1' }),
 }));
 
 const {
@@ -69,7 +69,7 @@ const {
   getMerchantDetail,
   getMerchantTransactionsProcessed,
   downloadBatchCsv,
-} = jest.requireMock("../../../../services/merchantService");
+} = jest.requireMock('../../../../services/merchantService');
 
 const renderComponent = () =>
   render(
@@ -78,12 +78,15 @@ const renderComponent = () =>
     </BrowserRouter>
   );
 
-describe("ShopDetails", () => {
+describe('ShopDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     act(() => {
-      getMerchantDetail.mockResolvedValue({});
+      getMerchantDetail.mockResolvedValue({
+        iban: 'IT60X0542811101000000123456',
+        ibanHolder: 'Mario Rossi',
+      });
       getMerchantTransactionsProcessed.mockResolvedValue({
         content: [],
         totalPages: 0,
@@ -91,36 +94,36 @@ describe("ShopDetails", () => {
     });
   });
 
-  it("should render component", async () => {
+  it('should render component', async () => {
     act(() => {
       getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
       getMerchantPointOfSalesWithTransactions.mockResolvedValue([{ franchiseName: "Shop 1", pointOfSaleId: "shop-1" }])
     })
 
-    renderComponent()
+    renderComponent();
 
     await waitFor(() =>
       expect(getRewardBatchById).toHaveBeenCalled()
     );
 
-    expect(mockReplace).toHaveBeenCalled()
+    expect(mockReplace).toHaveBeenCalled();
 
-    expect(screen.getByText('commons.backBtn')).toBeInTheDocument()
-    expect(screen.getByText('Bonus Elettrodomestici')).toBeInTheDocument()
-    expect(screen.getByText('pages.refundRequests.storeDetails.exportCSV')).toBeInTheDocument()
-    expect(screen.getByTestId('download-csv-button-test')).toHaveProperty("disabled", false)
-    fireEvent.click(screen.getByText('commons.backBtn'))
-    expect(mockGoBack).toHaveBeenCalled()
-  })
+    expect(screen.getByText('commons.backBtn')).toBeInTheDocument();
+    expect(screen.getByText('Bonus Elettrodomestici')).toBeInTheDocument();
+    expect(screen.getByText('pages.refundRequests.storeDetails.exportCSV')).toBeInTheDocument();
+    expect(screen.getByTestId('download-csv-button-test')).toHaveProperty('disabled', false);
+    fireEvent.click(screen.getByText('commons.backBtn'));
+    expect(mockGoBack).toHaveBeenCalled();
+  });
 
-  it("should handle getMerchantPointOfSalesWithTransactions error", async () => {
-    const mockError = new Error("fail")
+  it('should handle getMerchantPointOfSalesWithTransactions error', async () => {
+    const mockError = new Error('fail');
     act(() => {
       getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
       getMerchantPointOfSalesWithTransactions.mockRejectedValue(mockError)
     })
 
-    renderComponent()
+    renderComponent();
 
     await waitFor(() =>
       expect(getRewardBatchById).toHaveBeenCalled()
@@ -131,16 +134,16 @@ describe("ShopDetails", () => {
       text: 'errors.genericDescription',
       isOpen: true,
       severity: 'error',
-    })
-  })
+    });
+  });
 
-  it("should handle getAllRewardBatches error", async () => {
-    const mockError = new Error("fail")
+  it('should handle getAllRewardBatches error', async () => {
+    const mockError = new Error('fail');
     act(() => {
       getRewardBatchById.mockRejectedValue(mockError)
     })
 
-    renderComponent()
+    renderComponent();
 
     await waitFor(() =>
       expect(getRewardBatchById).toHaveBeenCalled()
@@ -151,32 +154,32 @@ describe("ShopDetails", () => {
       text: 'errors.genericDescription',
       isOpen: true,
       severity: 'error',
-    })
-  })
+    });
+  });
 
   it("should show approving alert", async () => {
     getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVING" });
 
     renderComponent();
 
-    expect(await screen.findByText("pages.refundRequests.storeDetails.csv.alert")).toBeInTheDocument();
+    expect(
+      await screen.findByText('pages.refundRequests.storeDetails.csv.alert')
+    ).toBeInTheDocument();
   });
 
   it("should call handleDownloadCsv", async () => {
     getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" },);
 
     downloadBatchCsv.mockResolvedValue({
-      approvedBatchUrl: "http://csv",
+      approvedBatchUrl: 'http://csv',
     });
 
     renderComponent();
 
-    const btn = await screen.findByTestId("download-csv-button-test");
+    const btn = await screen.findByTestId('download-csv-button-test');
     fireEvent.click(btn);
 
-    await waitFor(() =>
-      expect(downloadBatchCsv).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(downloadBatchCsv).toHaveBeenCalled());
   });
 
   it("should handle handleDownloadCsv error", async () => {
@@ -188,23 +191,20 @@ describe("ShopDetails", () => {
 
     renderComponent();
 
-    const btn = await screen.findByTestId("download-csv-button-test");
+    const btn = await screen.findByTestId('download-csv-button-test');
     fireEvent.click(btn);
 
-    await waitFor(() =>
-      expect(downloadBatchCsv).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(downloadBatchCsv).toHaveBeenCalled());
 
-    expect(consoleSpy).toHaveBeenCalledWith(mockError)
     expect(mockSetAlert).toHaveBeenCalledWith({
       title: 'errors.genericTitle',
       text: 'errors.genericDescription',
       isOpen: true,
       severity: 'error',
-    })
+    });
   });
 
-  it("should handle trxCode input change", async () => {
+  it('should handle trxCode input change', async () => {
     act(() => {
       getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
       getMerchantPointOfSalesWithTransactions.mockResolvedValue([{ franchiseName: "Shop 1", pointOfSaleId: "shop-1" }])
@@ -217,24 +217,28 @@ describe("ShopDetails", () => {
     const filtersBtn = screen.getByText('commons.filterBtn')
     const removeFiltersBtn = screen.getByText('commons.removeFiltersBtn')
 
-    await act(() => userEvent.type(input!, " "))
-    await waitFor(() => expect(mockHandleChange).not.toHaveBeenCalled())
+    await act(() => userEvent.type(input!, ' '));
+    await waitFor(() => expect(mockHandleChange).not.toHaveBeenCalled());
 
-    await act(() => userEvent.type(input!, "test#"))
-    expect(screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).toBeInTheDocument()
-    fireEvent.blur(input!)
-    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument()
+    await act(() => userEvent.type(input!, 'test#'));
+    expect(
+      screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')
+    ).toBeInTheDocument();
+    fireEvent.blur(input!);
+    expect(
+      screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')
+    ).not.toBeInTheDocument();
 
-    await act(() => userEvent.type(input!, "test"))
+    await act(() => userEvent.type(input!, 'test'));
     act(() => {
-      fireEvent.select(posSelect, { franchiseName: "Shop 1", pointOfSaleId: "shop-1" })
-      fireEvent.select(statusSelect, "CONSULTABLE")
-    })
+      fireEvent.select(posSelect, { franchiseName: 'Shop 1', pointOfSaleId: 'shop-1' });
+      fireEvent.select(statusSelect, 'CONSULTABLE');
+    });
 
-    await waitFor(() => expect(mockHandleChange).toHaveBeenCalled())
-    fireEvent.click(filtersBtn)
-    await waitFor(() => expect(mockHandleSubmit).toHaveBeenCalled())
-    fireEvent.click(removeFiltersBtn)
-    await waitFor(() => expect(mockResetForm).toHaveBeenCalled())
-  })
+    await waitFor(() => expect(mockHandleChange).toHaveBeenCalled());
+    fireEvent.click(filtersBtn);
+    await waitFor(() => expect(mockHandleSubmit).toHaveBeenCalled());
+    fireEvent.click(removeFiltersBtn);
+    await waitFor(() => expect(mockResetForm).toHaveBeenCalled());
+  });
 });

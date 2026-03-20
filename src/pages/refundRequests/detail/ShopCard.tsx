@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia';
 import { Box, Grid, Paper, Tooltip, Typography } from '@mui/material';
-import { getMerchantDetail } from '../../../services/merchantService';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import CustomChip from '../../../components/Chip/CustomChip';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
@@ -20,11 +19,13 @@ type Props = {
     posType: string;
     suspendedAmountCents: number;
   };
+  iban?: string;
+  ibanHolder?: string;
 };
 
 const posTypeMapper: Record<string, string> = {
-  'PHYSICAL': 'Fisico',
-  'ONLINE': 'Online'
+  PHYSICAL: 'Fisico',
+  ONLINE: 'Online',
 };
 
 const StatusChip = ({ status }: any) => {
@@ -39,11 +40,9 @@ const StatusChip = ({ status }: any) => {
   );
 };
 
-export const ShopCard = ({ store }: Props) => {
+export const ShopCard = ({ store, iban, ibanHolder }: Props) => {
   const { t } = useTranslation();
   const boldStyle = { fontWeight: theme.typography.fontWeightBold };
-  const [iban, setIban] = useState<string | undefined>();
-  const [ibanHolder, setIbanHolder] = useState<string | undefined>();
 
   const {
     batchName,
@@ -53,84 +52,89 @@ export const ShopCard = ({ store }: Props) => {
     status,
     approvedRefund,
     posType,
-    suspendedAmountCents } = store;
+    suspendedAmountCents,
+  } = store;
 
-  useEffect(() => {
-    getMerchantDetail('68dd003ccce8c534d1da22bc')
-      .then((response) => {
-        setIban(response?.iban);
-        setIbanHolder(response?.ibanHolder);
-      })
-      .catch((error) => console.log(error));
-  }, []);
+  const formatCurrency = useCallback(
+    (value: number) =>
+      isNaN(value) || !value.toString()
+        ? MISSING_DATA_PLACEHOLDER
+        : currencyFormatter(Number(value)).toString(),
+    []
+  );
 
-  const formatCurrency = useCallback((value: number) => isNaN(value) || (!value.toString()) ? MISSING_DATA_PLACEHOLDER : currencyFormatter(Number(value)).toString(), []);
-
-  const details = useMemo(() => ({
-    detailsSx: [
-      {
-        label: t('pages.refundRequests.storeDetails.referredBatch'),
-        value: batchName || MISSING_DATA_PLACEHOLDER,
-        minWidth: '180px',
-        marginBottom: 2,
-      },
-      {
-        label: t('pages.refundRequests.storeDetails.referencePeriod'),
-        value: dateRange || MISSING_DATA_PLACEHOLDER,
-        minWidth: '180px',
-        marginBottom: 2,
-      },
-      {
-        label: t('pages.refundRequests.storeDetails.posType'),
-        value: posTypeMapper[posType] || MISSING_DATA_PLACEHOLDER,
-        minWidth: '180px',
-        marginBottom: 2,
-      },
-      {
-        label: t('pages.refundRequests.storeDetails.companyName'),
-        value: companyName,
-        minWidth: '180px',
-        marginBottom: 2,
-      },
-      {
-        label: t('pages.refundRequests.storeDetails.requestedRefund'),
-        value: formatCurrency(refundAmount / 100),
-        minWidth: '180px',
-        marginBottom: 2,
-      },
-      {
-        label: t('pages.refundRequests.storeDetails.approvedRefund'),
-        value: status === 'APPROVED' ? formatCurrency(approvedRefund / 100) : MISSING_DATA_PLACEHOLDER,
-        minWidth: '180px',
-        marginBottom: 2,
-      },
-      {
-        label: t('pages.refundRequests.storeDetails.suspendedRefund'),
-        value: status === 'APPROVED' ? formatCurrency(suspendedAmountCents / 100) : MISSING_DATA_PLACEHOLDER,
-        minWidth: '180px',
-      },
-    ],
-    detailsDx: [
-      {
-        label: t('pages.refundRequests.storeDetails.holder'),
-        value: ibanHolder || MISSING_DATA_PLACEHOLDER,
-        minWidth: '180px',
-        marginTop: 1,
-      },
-      {
-        label: t('pages.refundRequests.storeDetails.iban'),
-        value: iban || MISSING_DATA_PLACEHOLDER,
-        minWidth: '180px',
-        marginBottom: 6,
-      },
-      {
-        label: t('pages.refundRequests.batchTransactionsDetails.state'),
-        value: <StatusChip status={status as RewardBatchTrxStatusEnum} />,
-        minWidth: '180px',
-        isStatus: true,
-      },
-    ]
-  }), [store]);
+  const details = useMemo(
+    () => ({
+      detailsSx: [
+        {
+          label: t('pages.refundRequests.storeDetails.referredBatch'),
+          value: batchName || MISSING_DATA_PLACEHOLDER,
+          minWidth: '180px',
+          marginBottom: 2,
+        },
+        {
+          label: t('pages.refundRequests.storeDetails.referencePeriod'),
+          value: dateRange || MISSING_DATA_PLACEHOLDER,
+          minWidth: '180px',
+          marginBottom: 2,
+        },
+        {
+          label: t('pages.refundRequests.storeDetails.posType'),
+          value: posTypeMapper[posType] || MISSING_DATA_PLACEHOLDER,
+          minWidth: '180px',
+          marginBottom: 2,
+        },
+        {
+          label: t('pages.refundRequests.storeDetails.companyName'),
+          value: companyName,
+          minWidth: '180px',
+          marginBottom: 2,
+        },
+        {
+          label: t('pages.refundRequests.storeDetails.requestedRefund'),
+          value: formatCurrency(refundAmount / 100),
+          minWidth: '180px',
+          marginBottom: 2,
+        },
+        {
+          label: t('pages.refundRequests.storeDetails.approvedRefund'),
+          value:
+            status === 'APPROVED' ? formatCurrency(approvedRefund / 100) : MISSING_DATA_PLACEHOLDER,
+          minWidth: '180px',
+          marginBottom: 2,
+        },
+        {
+          label: t('pages.refundRequests.storeDetails.suspendedRefund'),
+          value:
+            status === 'APPROVED'
+              ? formatCurrency(suspendedAmountCents / 100)
+              : MISSING_DATA_PLACEHOLDER,
+          minWidth: '180px',
+        },
+      ],
+      detailsDx: [
+        {
+          label: t('pages.refundRequests.storeDetails.holder'),
+          value: ibanHolder || MISSING_DATA_PLACEHOLDER,
+          minWidth: '180px',
+          marginTop: 1,
+        },
+        {
+          label: t('pages.refundRequests.storeDetails.iban'),
+          value: iban || MISSING_DATA_PLACEHOLDER,
+          minWidth: '180px',
+          marginBottom: 6,
+        },
+        {
+          label: t('pages.refundRequests.batchTransactionsDetails.state'),
+          value: <StatusChip status={status as RewardBatchTrxStatusEnum} />,
+          minWidth: '180px',
+          isStatus: true,
+        },
+      ],
+    }),
+    [store, iban, ibanHolder, status]
+  );
 
   return (
     <Paper sx={{ p: 3 }}>
@@ -146,7 +150,8 @@ export const ShopCard = ({ store }: Props) => {
                   item?.value?.trim() === '' || !item?.value
                     ? MISSING_DATA_PLACEHOLDER
                     : item?.value
-                }>
+                }
+              >
                 <Typography variant="body1" sx={{ ...boldStyle, height: 'fit-content' }}>
                   {item.value?.trim() === '' || !item.value
                     ? MISSING_DATA_PLACEHOLDER

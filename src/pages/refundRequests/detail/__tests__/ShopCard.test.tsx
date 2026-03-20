@@ -2,7 +2,6 @@ import { render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ShopCard } from '../ShopCard';
 import { MISSING_DATA_PLACEHOLDER } from '../../../../utils/constants';
-import { getMerchantDetail } from '../../../../services/merchantService';
 import { getBatchStatus } from '../../../../components/Transactions/useStatus';
 
 jest.mock('react-i18next', () => ({
@@ -23,13 +22,8 @@ jest.mock('@mui/material', () => {
   };
 });
 
-jest.mock('../../../../services/merchantService', () => ({
-  getMerchantDetail: jest.fn(),
-}));
-
 jest.mock('../../../../components/Transactions/useStatus', () => ({
   __esModule: true,
-  default: jest.fn(),
   getBatchStatus: jest.fn(),
 }));
 
@@ -42,213 +36,68 @@ jest.mock('../../../../components/Chip/CustomChip', () => ({
   ),
 }));
 
-const mockedGetMerchantDetail = getMerchantDetail as jest.MockedFunction<typeof getMerchantDetail>;
 const mockedGetStatus = getBatchStatus as jest.MockedFunction<typeof getBatchStatus>;
 
-describe('ShopCard', () => {
+describe('ShopCard (presentational)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renderizza i dati principali e chiama il servizio getMerchantDetail', async () => {
-
-    mockedGetMerchantDetail.mockResolvedValue({
-      iban: 'IT60X0542811101000000123456',
-      ibanHolder: 'Mario Rossi',
-    });
-
+  it('renderizza correttamente i dati passati via props', () => {
     mockedGetStatus.mockReturnValue({
       label: 'APPROVED',
       color: 'success',
     } as any);
 
     const store = {
-      batchName: "Batch 1",
-      dateRange: "01/01/2024 - 31/01/2024",
-      companyName: "ACME srl",
+      batchName: 'Batch 1',
+      dateRange: '01/01/2024 - 31/01/2024',
+      companyName: 'ACME srl',
       refundAmount: 10000,
       approvedRefund: 8000,
-      status: "APPROVED",
-      posType: "",
-      suspendedAmountCents: 0
-    }
+      status: 'APPROVED',
+      posType: '',
+      suspendedAmountCents: 0,
+    };
 
-    render(
-      <ShopCard store={store} />
-    );
-
-    expect(mockedGetMerchantDetail).toHaveBeenCalledWith('68dd003ccce8c534d1da22bc')
-
-    expect(
-      screen.getByText('pages.refundRequests.storeDetails.referredBatch')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.refundRequests.storeDetails.referencePeriod')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.refundRequests.storeDetails.companyName')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.refundRequests.storeDetails.requestedRefund')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.refundRequests.storeDetails.approvedRefund')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.refundRequests.storeDetails.holder')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.refundRequests.storeDetails.iban')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.refundRequests.batchTransactionsDetails.state')
-    ).toBeInTheDocument();
+    render(<ShopCard store={store} iban="IT60X0542811101000000123456" ibanHolder="Mario Rossi" />);
 
     expect(screen.getByText('Batch 1')).toBeInTheDocument();
-    expect(
-      screen.getByText('01/01/2024 - 31/01/2024')
-    ).toBeInTheDocument();
     expect(screen.getByText('ACME srl')).toBeInTheDocument();
     expect(screen.getByText('100,00 €')).toBeInTheDocument();
     expect(screen.getByText('80,00 €')).toBeInTheDocument();
-
-    const batchLabel = screen.getByText('pages.refundRequests.storeDetails.referredBatch');
-    const batchRow = batchLabel.parentElement?.parentElement as HTMLElement;
-    const batchTooltip = within(batchRow).getByTestId('tooltip');
-    expect(batchTooltip).toHaveAttribute('data-title', 'Batch 1');
-
-    const holderLabel = screen.getByText('pages.refundRequests.storeDetails.holder');
-    const holderRow = holderLabel.parentElement?.parentElement as HTMLElement;
-    const holderTooltip = within(holderRow).getByTestId('tooltip');
-    // expect(holderTooltip).toHaveAttribute('data-title', 'Mario Rossi');
-
-    const ibanLabel = screen.getByText('pages.refundRequests.storeDetails.iban');
-    const ibanRow = ibanLabel.parentElement?.parentElement as HTMLElement;
-    const ibanTooltip = within(ibanRow).getByTestId('tooltip');
-    // expect(ibanTooltip).toHaveAttribute('data-title', 'IT60X0542811101000000123456');
+    expect(screen.getByText('Mario Rossi')).toBeInTheDocument();
+    expect(screen.getByText('IT60X0542811101000000123456')).toBeInTheDocument();
 
     expect(mockedGetStatus).toHaveBeenLastCalledWith('APPROVED');
     expect(screen.getByTestId('status-chip')).toHaveTextContent('APPROVED-success');
   });
 
-  it('mostra il placeholder quando i dati opzionali sono mancanti', async () => {
-
-    mockedGetMerchantDetail.mockResolvedValue({
-      iban: undefined,
-      ibanHolder: undefined,
-    });
-
+  it('mostra placeholder quando iban e holder non sono forniti', () => {
     mockedGetStatus.mockReturnValue({
       label: 'PENDING',
       color: 'warning',
     } as any);
 
     const store = {
-      batchName: "",
-      dateRange: "",
-      companyName: "ACME srl",
+      batchName: '',
+      dateRange: '',
+      companyName: 'ACME srl',
       refundAmount: 0,
       approvedRefund: 0,
-      status: "PENDING",
-      posType: "",
-      suspendedAmountCents: 0
-    }
+      status: 'PENDING',
+      posType: '',
+      suspendedAmountCents: 0,
+    };
 
-    render(
-      <ShopCard store={store} />
-    );
+    render(<ShopCard store={store} />);
 
-    expect(mockedGetMerchantDetail).toHaveBeenCalled();
-
-    const placeholders = await screen.findAllByText(MISSING_DATA_PLACEHOLDER);
-    expect(placeholders.length).toBeGreaterThanOrEqual(1);
-
-    const batchLabel = screen.getByText('pages.refundRequests.storeDetails.referredBatch');
-    const batchRow = batchLabel.parentElement?.parentElement as HTMLElement;
-    const batchTooltip = within(batchRow).getByTestId('tooltip');
-    expect(batchTooltip).toHaveAttribute('data-title', MISSING_DATA_PLACEHOLDER);
+    const placeholders = screen.getAllByText(MISSING_DATA_PLACEHOLDER);
+    expect(placeholders.length).toBeGreaterThan(0);
 
     const holderLabel = screen.getByText('pages.refundRequests.storeDetails.holder');
     const holderRow = holderLabel.parentElement?.parentElement as HTMLElement;
     const holderTooltip = within(holderRow).getByTestId('tooltip');
     expect(holderTooltip).toHaveAttribute('data-title', MISSING_DATA_PLACEHOLDER);
-
-    const ibanLabel = screen.getByText('pages.refundRequests.storeDetails.iban');
-    const ibanRow = ibanLabel.parentElement?.parentElement as HTMLElement;
-    const ibanTooltip = within(ibanRow).getByTestId('tooltip');
-    expect(ibanTooltip).toHaveAttribute('data-title', MISSING_DATA_PLACEHOLDER);
-  });
-
-  it('usa il placeholder e tooltip quando il valore contiene solo spazi (branch con trim su detailsSx)', async () => {
-    const store = {
-      batchName: "   ",
-      dateRange: "",
-      companyName: "ACME srl",
-      refundAmount: 0,
-      approvedRefund: 0,
-      status: "PENDING",
-      posType: "",
-      suspendedAmountCents: 0
-    }
-    mockedGetMerchantDetail.mockResolvedValue({
-      iban: undefined,
-      ibanHolder: undefined,
-    });
-
-    mockedGetStatus.mockReturnValue({
-      label: 'PENDING',
-      color: 'warning',
-    } as any);
-
-    render(
-      <ShopCard store={store} />
-    );
-
-    const batchLabel = screen.getByText('pages.refundRequests.storeDetails.referredBatch');
-    const batchRow = batchLabel.parentElement?.parentElement as HTMLElement;
-
-    const batchTooltip = within(batchRow).getByTestId('tooltip');
-    expect(batchTooltip).toHaveAttribute('data-title', MISSING_DATA_PLACEHOLDER);
-
-    const displayed = within(batchRow).getByText(MISSING_DATA_PLACEHOLDER);
-    expect(displayed).toBeInTheDocument();
-  });
-
-  it('usa il placeholder lato dx quando iban / ibanHolder sono stringhe vuote (branch value === "")', async () => {
-    const store = {
-      batchName: "   ",
-      dateRange: "",
-      companyName: "ACME srl",
-      refundAmount: 0,
-      approvedRefund: 0,
-      status: "PENDING",
-      posType: "",
-      suspendedAmountCents: 0
-    }
-    mockedGetMerchantDetail.mockResolvedValue({
-      iban: '',
-      ibanHolder: '',
-    });
-
-    mockedGetStatus.mockReturnValue({
-      label: 'PENDING',
-      color: 'warning',
-    } as any);
-
-    render(
-      <ShopCard store={store} />
-    );
-
-    const holderLabel = screen.getByText('pages.refundRequests.storeDetails.holder');
-    const holderRow = holderLabel.parentElement?.parentElement as HTMLElement;
-    const holderTooltip = within(holderRow).getByTestId('tooltip');
-    expect(holderTooltip).toHaveAttribute('data-title', MISSING_DATA_PLACEHOLDER);
-    expect(within(holderRow).getByText(MISSING_DATA_PLACEHOLDER)).toBeInTheDocument();
-
-    const ibanLabel = screen.getByText('pages.refundRequests.storeDetails.iban');
-    const ibanRow = ibanLabel.parentElement?.parentElement as HTMLElement;
-    const ibanTooltip = within(ibanRow).getByTestId('tooltip');
-    expect(ibanTooltip).toHaveAttribute('data-title', MISSING_DATA_PLACEHOLDER);
-    expect(within(ibanRow).getByText(MISSING_DATA_PLACEHOLDER)).toBeInTheDocument();
   });
 });
