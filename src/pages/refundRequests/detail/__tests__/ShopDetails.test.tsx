@@ -83,7 +83,10 @@ describe('ShopDetails', () => {
     jest.clearAllMocks();
 
     act(() => {
-      getMerchantDetail.mockResolvedValue({});
+      getMerchantDetail.mockResolvedValue({
+        iban: 'IT60X0542811101000000123456',
+        ibanHolder: 'Mario Rossi',
+      });
       getMerchantTransactionsProcessed.mockResolvedValue({
         content: [],
         totalPages: 0,
@@ -184,7 +187,6 @@ describe('ShopDetails', () => {
   });
 
   it('should handle handleDownloadCsv error', async () => {
-    const consoleSpy = jest.spyOn(console, 'log');
     const mockError = new Error('fail');
     getAllRewardBatches.mockResolvedValue({
       content: [{ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' }],
@@ -199,7 +201,6 @@ describe('ShopDetails', () => {
 
     await waitFor(() => expect(downloadBatchCsv).toHaveBeenCalled());
 
-    expect(consoleSpy).toHaveBeenCalledWith(mockError);
     expect(mockSetAlert).toHaveBeenCalledWith({
       title: 'errors.genericTitle',
       text: 'errors.genericDescription',

@@ -23,7 +23,7 @@ import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
 import { Sync } from '@mui/icons-material';
-import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, MOCK_USER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
 import InvoiceDataTable from '../invoiceDataTable';
@@ -34,11 +34,13 @@ import {
   downloadBatchCsv,
   getAllRewardBatches,
   getMerchantPointOfSalesWithTransactions,
+  getMerchantDetail,
 } from '../../../services/merchantService';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { useAlert } from '../../../hooks/useAlert';
 import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/FranchisePointOfSaleDTO';
+import { MerchantDetailDTO } from '../../../api/generated/merchants/MerchantDetailDTO';
 import { ShopCard } from './ShopCard';
 
 const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(
@@ -53,6 +55,7 @@ const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
   const { initiative_id, batch_id } = useParams<RouteParams>();
   const [store, setStore] = useState({} as RewardBatchDTO);
+  const [merchantDetail, setMerchantDetail] = useState<MerchantDetailDTO | null>(null);
   const history = useHistory();
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [stores, setStores] = useState<Array<FranchisePointOfSaleDTO>>([]);
@@ -131,6 +134,26 @@ const ShopDetails: React.FC = () => {
     void fetchAll();
   }, [drawerRefreshKey]);
 
+  useEffect(() => {
+    const fetchMerchantDetail = async () => {
+      try {
+        const response = await getMerchantDetail(initiative_id);
+        setMerchantDetail(response);
+      } catch (error: any) {
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
+      }
+    };
+
+    if (initiative_id) {
+      void fetchMerchantDetail();
+    }
+  }, [initiative_id]);
+
   const fetchStores = async () => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
@@ -181,7 +204,9 @@ const ShopDetails: React.FC = () => {
         link.download = filename;
         link.click();
       } catch (e) {
-        console.log(e);
+        if (MOCK_USER) {
+          console.log(e);
+        }
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),
@@ -299,7 +324,11 @@ const ShopDetails: React.FC = () => {
         </Alert>
       )}
 
-      <ShopCard store={mappedStore} />
+      <ShopCard
+        store={mappedStore}
+        iban={merchantDetail?.iban}
+        ibanHolder={merchantDetail?.ibanHolder}
+      />
       <Box
         sx={{
           height: 'auto',
