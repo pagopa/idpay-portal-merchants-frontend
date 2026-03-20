@@ -19,6 +19,7 @@ import {
   deleteReportedUser,
   getRewardBatches,
   sendRewardBatch,
+  getRewardBatchById,
   downloadBatchCsv,
   postponeTransaction,
   getMerchantPointOfSalesWithTransactions,
@@ -51,6 +52,7 @@ jest.mock('../../api/MerchantsApiClient', () => ({
     postponeTransaction: jest.fn(),
     getMerchantPointOfSalesWithTransactions: jest.fn(),
     getAllRewardBatches: jest.fn(),
+    getRewardBatchById: jest.fn(),
     updateInvoiceTransaction: jest.fn(),
   },
 }));
@@ -348,6 +350,15 @@ describe('merchantService uncovered branches', () => {
       await getAllRewardBatches('init-1');
 
       expect(mockedMerchantApi.getAllRewardBatches).toHaveBeenCalledWith('init-1');
+    });
+  });
+
+  describe('getRewardBatchById', () => {
+    test('should call MerchantApi.getRewardBatchById with correct initiativeId and batchId', async () => {
+      mockedMerchantApi.getRewardBatchById.mockResolvedValue({} as any);
+      await getRewardBatchById('init-1', 'batch-1');
+
+      expect(mockedMerchantApi.getRewardBatchById).toHaveBeenCalledWith('init-1', 'batch-1');
     });
   });
 
