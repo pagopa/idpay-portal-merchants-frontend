@@ -35,7 +35,7 @@ jobs:
         run: yarn generate
 
       - name: Jest Coverage Report
-        uses: ArtiomTr/jest-coverage-report-action@c7c2c6c0c8c7f1b0a2d9f3a1b8e4d6f9c1a0b7e2
+        uses: ArtiomTr/jest-coverage-report-action@67373b5dc2578305a5330b6594a32db492ac3695
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           test-script: yarn test:coverage
