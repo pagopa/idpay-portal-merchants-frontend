@@ -61,11 +61,21 @@ export default function InvoiceDetail({
 
   const endOfNextBatchMonth = batchMonth ? getEndOfNextMonth(batchMonth) : undefined;
 
-  const isNextMonthDisabled =
-    !endOfNextBatchMonth || !nextMonthInitiativeEndDate || statusBatch !== StatusEnum.CREATED
-      ? true
-      : endOfNextBatchMonth > nextMonthInitiativeEndDate;
+  const isNextMonthDisabled = !endOfNextBatchMonth || !nextMonthInitiativeEndDate ? true : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
+  const postponeButton: DetailDrawerProps['buttons'] = useMemo(() =>
+    statusBatch === StatusEnum.CREATED
+      ? [
+        {
+          disabled: isNextMonthDisabled,
+          onClick: () => setInvoiceTransactionModal(true),
+          variant: 'contained',
+          title: 'Sposta al mese successivo',
+          dataTestId: 'next-month-btn',
+        }
+      ] : [],
+    [isNextMonthDisabled, statusBatch]
+  );
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
       isReversableOrEditable(itemValues, statusBatch)
@@ -235,13 +245,7 @@ export default function InvoiceDetail({
         setIsOpen={setIsOpen}
         buttons={[
           ...editButton,
-          {
-            disabled: isNextMonthDisabled,
-            onClick: () => setInvoiceTransactionModal(true),
-            variant: 'contained',
-            title: 'Sposta al mese successivo',
-            dataTestId: 'next-month-btn',
-          },
+          ...postponeButton,
           ...reverseButton,
         ]}
       >
