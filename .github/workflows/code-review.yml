@@ -3,13 +3,6 @@ name: 'coverage'
 on:
   push:
     branches:
-      - main
-      - uat
-      - develop
-  pull_request:
-    types:
-      - opened
-      - edited
       - synchronize
 
 permissions:
@@ -17,6 +10,13 @@ permissions:
   pull-requests: write
 
 jobs:
+      - main
+      - uat
+      - develop
+  pull_request:
+    types:
+      - opened
+      - edited
   sonarcloud:
     runs-on: ubuntu-latest
 
@@ -35,7 +35,7 @@ jobs:
         run: yarn generate
 
       - name: Jest Coverage Report
-        uses: ArtiomTr/jest-coverage-report-action@67373b5dc2578305a5330b6594a32db492ac3695 #v2.0.1
+        uses: ArtiomTr/jest-coverage-report-action@82bc34a0347019ba8f6d2808cd96cec42ef9620e #v2.3.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           test-script: yarn test:coverage
