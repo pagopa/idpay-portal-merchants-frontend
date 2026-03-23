@@ -46,7 +46,7 @@ export default function InvoiceDetail({
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
   const history = useHistory();
-  const { id, batch_id } = useParams<{ id: string; batch_id: string }>();
+  const { initiative_id, batch_id } = useParams<{ initiative_id: string; batch_id: string }>();
 
   useEffect(() => {
     if (
@@ -61,19 +61,24 @@ export default function InvoiceDetail({
 
   const endOfNextBatchMonth = batchMonth ? getEndOfNextMonth(batchMonth) : undefined;
 
-  const isNextMonthDisabled = !endOfNextBatchMonth || !nextMonthInitiativeEndDate ? true : endOfNextBatchMonth > nextMonthInitiativeEndDate;
+  const isNextMonthDisabled =
+    !endOfNextBatchMonth || !nextMonthInitiativeEndDate
+      ? true
+      : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
-  const postponeButton: DetailDrawerProps['buttons'] = useMemo(() =>
-    statusBatch === StatusEnum.CREATED
-      ? [
-        {
-          disabled: isNextMonthDisabled,
-          onClick: () => setInvoiceTransactionModal(true),
-          variant: 'contained',
-          title: 'Sposta al mese successivo',
-          dataTestId: 'next-month-btn',
-        }
-      ] : [],
+  const postponeButton: DetailDrawerProps['buttons'] = useMemo(
+    () =>
+      statusBatch === StatusEnum.CREATED
+        ? [
+            {
+              disabled: isNextMonthDisabled,
+              onClick: () => setInvoiceTransactionModal(true),
+              variant: 'contained',
+              title: 'Sposta al mese successivo',
+              dataTestId: 'next-month-btn',
+            },
+          ]
+        : [],
     [isNextMonthDisabled, statusBatch]
   );
   const editButton: DetailDrawerProps['buttons'] = useMemo(
@@ -85,7 +90,7 @@ export default function InvoiceDetail({
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
               onClick: () => {
-                const path = routes.MODIFY_DOCUMENT.replace(':id', id)
+                const path = routes.MODIFY_DOCUMENT.replace(':initiative_id', initiative_id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
                   .replace(':trxId', itemValues.id)
                   .replace(':fileDocNumber', window.btoa(itemValues?.invoiceData?.docNumber ?? ''));
@@ -106,7 +111,7 @@ export default function InvoiceDetail({
               title: 'Storna',
               dataTestId: 'reverse-btn',
               onClick: () => {
-                const path = routes.REVERSE.replace(':id', id)
+                const path = routes.REVERSE.replace(':initiative_id', initiative_id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
                   .replace(':trxId', itemValues.id);
                 history.push(path, { fromLocation: history.location });
@@ -124,7 +129,7 @@ export default function InvoiceDetail({
 
     setLoading(true);
     try {
-      await postponeTransaction(id, batch_id, itemValues.id, initiativeEndDate);
+      await postponeTransaction(initiative_id, batch_id, itemValues.id, initiativeEndDate);
       setAlert({
         title: 'Successo',
         text: 'Transazione spostata al mese successivo',
@@ -243,11 +248,7 @@ export default function InvoiceDetail({
         data-testid="transaction-detail"
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        buttons={[
-          ...editButton,
-          ...postponeButton,
-          ...reverseButton,
-        ]}
+        buttons={[...editButton, ...postponeButton, ...reverseButton]}
       >
         {listItem.map((item, index) => (
           <Box key={`${item?.id}-${index}`}>

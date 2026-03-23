@@ -20,8 +20,8 @@ jest.mock('react-router-dom', () => ({
     push: mockPush,
     goBack: mockGoBack,
   }),
-  useParams: () => ({ id: 'INITIATIVE_ID' }),
-  matchPath: () => ({ params: { id: 'INITIATIVE_ID' } }),
+  useParams: () => ({ initiative_id: 'INITIATIVE_ID' }),
+  matchPath: () => ({ params: { initiative_id: 'INITIATIVE_ID' } }),
   useLocation: () => mockUseLocation(),
 }));
 
@@ -224,7 +224,10 @@ describe('InsertReportedUser', () => {
 
   it('gestisce correttamente handleKOError per CF già presente', async () => {
     mockGetReportedUser.mockResolvedValueOnce([]);
-    mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: "CF doesn't match initiative or merchant" });
+    mockCreateReportedUser.mockResolvedValueOnce({
+      status: 'KO',
+      errorKey: "CF doesn't match initiative or merchant",
+    });
 
     render(<InsertReportedUser />);
     fireEvent.change(screen.getByTestId('cf-input'), {
@@ -294,5 +297,4 @@ describe('InsertReportedUser', () => {
       expect(mockCreateReportedUser).toHaveBeenCalled();
     });
   });
-
 });
