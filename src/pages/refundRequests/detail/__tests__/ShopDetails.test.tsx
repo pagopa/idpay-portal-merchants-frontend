@@ -21,6 +21,14 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ initiative_id: 'initiative-123', batch_id: 'batch-1' }),
 }));
 
+    jest.mock("../../../../utils/constants", () => {
+      const actual = jest.requireActual("../../../../utils/constants");
+      return {
+        ...actual,
+        MOCK_USER: true,
+      };
+    });
+
 jest.mock('formik', () => ({
   ...jest.requireActual('formik'),
   useFormik: () => ({
@@ -59,8 +67,9 @@ jest.mock('../../../../hooks/useAlert', () => ({
   }),
 }));
 
+let mockJWT: string | undefined = 'merchant-1'
 jest.mock('../../../../utils/jwt-utils', () => ({
-  parseJwt: () => ({ merchant_id: 'merchant-1' }),
+  parseJwt: () => ({ merchant_id: mockJWT }),
 }));
 
 const {
@@ -81,21 +90,20 @@ const renderComponent = () =>
 describe('ShopDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
 
     act(() => {
-      getMerchantDetail.mockResolvedValue({
-        iban: 'IT60X0542811101000000123456',
-        ibanHolder: 'Mario Rossi',
-      });
       getMerchantTransactionsProcessed.mockResolvedValue({
         content: [],
         totalPages: 0,
       });
     });
-  });
-
   it('should render component', async () => {
     act(() => {
+      getMerchantDetail.mockResolvedValue({
+        iban: 'IT60X0542811101000000123456',
+        ibanHolder: 'Mario Rossi',
+      });
       getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
       getMerchantPointOfSalesWithTransactions.mockResolvedValue([{ franchiseName: "Shop 1", pointOfSaleId: "shop-1" }])
     })
@@ -119,6 +127,10 @@ describe('ShopDetails', () => {
   it('should handle getMerchantPointOfSalesWithTransactions error', async () => {
     const mockError = new Error('fail');
     act(() => {
+      getMerchantDetail.mockResolvedValue({
+        iban: 'IT60X0542811101000000123456',
+        ibanHolder: 'Mario Rossi',
+      });
       getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
       getMerchantPointOfSalesWithTransactions.mockRejectedValue(mockError)
     })
@@ -137,9 +149,31 @@ describe('ShopDetails', () => {
     });
   });
 
+  it('should not call getMerchantPointOfSalesWithTransactions if merchantId does not exist', async () => {
+    mockJWT = undefined;
+    act(() => {
+      getMerchantDetail.mockResolvedValue({
+        iban: 'IT60X0542811101000000123456',
+        ibanHolder: 'Mario Rossi',
+      });
+      getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
+      getMerchantPointOfSalesWithTransactions.mockResolvedValue([{ franchiseName: "Shop 1", pointOfSaleId: "shop-1" }])
+    })
+
+    renderComponent();
+
+    await waitFor(() =>
+      expect(getMerchantPointOfSalesWithTransactions).not.toHaveBeenCalled()
+    );
+  });
+
   it('should handle getAllRewardBatches error', async () => {
     const mockError = new Error('fail');
     act(() => {
+      getMerchantDetail.mockResolvedValue({
+        iban: 'IT60X0542811101000000123456',
+        ibanHolder: 'Mario Rossi',
+      });
       getRewardBatchById.mockRejectedValue(mockError)
     })
 
@@ -147,6 +181,27 @@ describe('ShopDetails', () => {
 
     await waitFor(() =>
       expect(getRewardBatchById).toHaveBeenCalled()
+    );
+
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      title: 'errors.genericTitle',
+      text: 'errors.genericDescription',
+      isOpen: true,
+      severity: 'error',
+    });
+  });
+
+  it('should handle getMerchantDetail error', async () => {
+    const mockError = new Error('fail');
+    act(() => {
+      getMerchantDetail.mockRejectedValue(mockError);
+      getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
+    })
+
+    renderComponent();
+
+    await waitFor(() =>
+      expect(getMerchantDetail).toHaveBeenCalled()
     );
 
     expect(mockSetAlert).toHaveBeenCalledWith({
@@ -196,6 +251,7 @@ describe('ShopDetails', () => {
 
     await waitFor(() => expect(downloadBatchCsv).toHaveBeenCalled());
 
+    expect(consoleSpy).toHaveBeenCalledWith(mockError)
     expect(mockSetAlert).toHaveBeenCalledWith({
       title: 'errors.genericTitle',
       text: 'errors.genericDescription',
@@ -206,6 +262,10 @@ describe('ShopDetails', () => {
 
   it('should handle trxCode input change', async () => {
     act(() => {
+      getMerchantDetail.mockResolvedValue({
+        iban: 'IT60X0542811101000000123456',
+        ibanHolder: 'Mario Rossi',
+      });
       getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
       getMerchantPointOfSalesWithTransactions.mockResolvedValue([{ franchiseName: "Shop 1", pointOfSaleId: "shop-1" }])
     })
