@@ -329,26 +329,12 @@ export const MerchantApi = {
     }
   },
 
-  // WIP
   getRewardBatchById: async (
     initiativeId: string,
-    batchId: string
+    rewardBatchId: string
   ): Promise<RewardBatchDTO> => {
-    // const result = await apiClient.getRewardBatchById({ initiativeId, batchId });
-    // return extractResponse(result, 200, onRedirectToLogin);
-    try {
-      const result = await apiClient.getRewardBatches({
-        initiativeId,
-        size: 1000,
-      });
-      const response: RewardBatchListDTO = await extractResponse(result, 200, onRedirectToLogin);
-      // @ts-expect-error wip
-      const rewardBatch: RewardBatchDTO = response?.content?.find((e: any) => e.id === batchId);
-      return rewardBatch;
-    } catch (error) {
-      logApiError(error, 'userPermission');
-      throw error;
-    }
+    const result = await apiClient.getRewardBatchById({ initiativeId, rewardBatchId });
+    return extractResponse(result, 200, onRedirectToLogin);
   },
 
   sendRewardBatches: async (initiativeId: string, batchId: string): Promise<any> => {
