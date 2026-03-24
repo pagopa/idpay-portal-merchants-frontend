@@ -55,6 +55,7 @@ describe('MerchantApi', () => {
       getReportedUser: jest.fn(),
       deleteReportedUser: jest.fn(),
       getRewardBatches: jest.fn(),
+      getRewardBatchById: jest.fn(),
       sendRewardBatches: jest.fn(),
       postponeTransaction: jest.fn(),
       approveDownloadRewardBatch: jest.fn(),
@@ -848,4 +849,17 @@ describe('MerchantApi', () => {
       expect(result).toBe('extracted');
     });
   });
+
+  describe("getRewardBatchById", () => {
+    it("should get batch by id", async () => {
+    mockApiClient.getRewardBatchById.mockResolvedValue({ right: 'data' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.getRewardBatchById('init-1', 'batch-2');
+
+    expect(mockApiClient.getRewardBatchById).toHaveBeenCalledWith({initiativeId: "init-1", rewardBatchId: "batch-2"});
+    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
+    expect(result).toBe('extracted');
+    })
+  })
 });
