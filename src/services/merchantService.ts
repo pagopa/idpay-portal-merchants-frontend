@@ -145,9 +145,9 @@ export const getAllRewardBatches = (
 
 export const getRewardBatchById = (
   initiativeId: string,
-  batchId: string
+  rewardBatchId: string
 ): Promise<RewardBatchDTO> =>
-  MerchantApi.getRewardBatchById(initiativeId, batchId);
+  MerchantApi.getRewardBatchById(initiativeId, rewardBatchId);
 
 export const sendRewardBatch = (
   initiativeId: string,
