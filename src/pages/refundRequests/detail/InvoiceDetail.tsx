@@ -61,24 +61,21 @@ export default function InvoiceDetail({
 
   const endOfNextBatchMonth = batchMonth ? getEndOfNextMonth(batchMonth) : undefined;
 
-  const isNextMonthDisabled =
-    !endOfNextBatchMonth || !nextMonthInitiativeEndDate
-      ? true
-      : endOfNextBatchMonth > nextMonthInitiativeEndDate;
+  const isNextMonthDisabled = !endOfNextBatchMonth || !nextMonthInitiativeEndDate ? true : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
-  const postponeButton: DetailDrawerProps['buttons'] = useMemo(
-    () =>
-      statusBatch === StatusEnum.CREATED
-        ? [
-            {
-              disabled: isNextMonthDisabled,
-              onClick: () => setInvoiceTransactionModal(true),
-              variant: 'contained',
-              title: 'Sposta al mese successivo',
-              dataTestId: 'next-month-btn',
-            },
-          ]
-        : [],
+  const isPostponeBtnVisible = statusBatch === StatusEnum.CREATED && (itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatusEnum.APPROVED && itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatusEnum.REJECTED);
+
+  const postponeButton: DetailDrawerProps['buttons'] = useMemo(() =>
+    isPostponeBtnVisible
+      ? [
+        {
+          disabled: isNextMonthDisabled,
+          onClick: () => setInvoiceTransactionModal(true),
+          variant: 'contained',
+          title: 'Sposta al mese successivo',
+          dataTestId: 'next-month-btn',
+        }
+      ] : [],
     [isNextMonthDisabled, statusBatch]
   );
   const editButton: DetailDrawerProps['buttons'] = useMemo(
@@ -248,7 +245,11 @@ export default function InvoiceDetail({
         data-testid="transaction-detail"
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        buttons={[...editButton, ...postponeButton, ...reverseButton]}
+        buttons={[
+          ...editButton,
+          ...postponeButton,
+          ...reverseButton,
+        ]}
       >
         {listItem.map((item, index) => (
           <Box key={`${item?.id}-${index}`}>
