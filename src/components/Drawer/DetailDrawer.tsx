@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import { Button, ButtonProps, Grid, IconButton, Typography } from '@mui/material';
+import { Button, ButtonProps, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 export type DetailDrawerProps = {
@@ -39,9 +39,9 @@ export default function DetailDrawer({
           flexDirection: 'column',
         }}
       >
-        <Grid item xs={12} pb="1.5rem" bgcolor="white">
+        <Box pb="1.5rem" bgcolor="white">
           <Typography variant="h6">{title}</Typography>
-        </Grid>
+        </Box>
         <Box
           sx={{
             display: 'flex',

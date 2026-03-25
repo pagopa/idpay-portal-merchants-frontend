@@ -1,7 +1,8 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia';
-import { Box, Grid, Paper, Tooltip, Typography } from '@mui/material';
+import { Box, Paper, Tooltip, Typography } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import CustomChip from '../../../components/Chip/CustomChip';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';

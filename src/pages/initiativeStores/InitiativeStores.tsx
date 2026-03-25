@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Stack,
-  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -16,6 +15,7 @@ import {
   Tooltip,
   IconButton,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from 'react-i18next';

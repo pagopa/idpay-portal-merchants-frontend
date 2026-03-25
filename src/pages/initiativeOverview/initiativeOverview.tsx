@@ -1,4 +1,5 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

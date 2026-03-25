@@ -1,15 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import {
-  Box,
-  Button,
-  Typography,
-  Paper,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Link,
-  Grid,
-} from '@mui/material';
+import { Box, Button, Typography, Paper, RadioGroup, FormControlLabel, Radio, Link } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useTranslation } from 'react-i18next';

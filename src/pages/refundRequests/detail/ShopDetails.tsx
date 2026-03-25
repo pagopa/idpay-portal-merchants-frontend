@@ -4,7 +4,6 @@ import {
   Typography,
   Breadcrumbs,
   FormControl,
-  Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -14,6 +13,7 @@ import {
   Alert as MuiAlert,
   TextField,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory, useParams } from 'react-router-dom';
@@ -398,7 +398,6 @@ const ShopDetails: React.FC = () => {
                 }}
                 name="status"
                 label={t('pages.initiativeDiscounts.filterByStatus')}
-                placeholder={t('pages.initiativeDiscounts/filterByStatus')}
                 onChange={formik.handleChange}
                 value={formik.values.status}
                 sx={{

@@ -7,8 +7,11 @@ import {
   FormControlLabel,
   FormControl,
   TextField,
-  Grid, Button, Alert, Slide,
+  Button,
+  Alert,
+  Slide,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked, theme } from '@pagopa/mui-italia';
