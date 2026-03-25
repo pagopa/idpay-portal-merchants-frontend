@@ -2,12 +2,12 @@ import {
   Footer as MuiItaliaFooter,
   FooterLinksType,
   PreLoginFooterLinksType,
-} from '@pagopa/mui-italia/dist/components/Footer/Footer';
+} from '@pagopa/mui-italia';
 import { Trans, useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { LangCode } from '@pagopa/mui-italia';
-import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
-import { CONFIG } from '@pagopa/selfcare-common-frontend/config/env';
+import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
+import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import ROUTES from '../../routes';
 import { ENV } from '../../utils/env';
 import { LANGUAGES, pagoPALink } from './FooterConfig';

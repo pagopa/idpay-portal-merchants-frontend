@@ -11,17 +11,17 @@ import {
   Button,
   Tooltip,
   CircularProgress,
-  Alert,
+  Alert as MuiAlert,
   TextField,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory, useParams } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Sync } from '@mui/icons-material';
 import { MISSING_DATA_PLACEHOLDER, MOCK_USER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
@@ -314,14 +314,14 @@ const ShopDetails: React.FC = () => {
       </Box>
 
       {store?.status === StatusEnum.APPROVING && (
-        <Alert
+        <MuiAlert
           sx={{ mb: 3 }}
           variant="outlined"
-          color="info"
+          severity="info"
           icon={<Sync sx={{ color: '#6BCFFB' }} />}
         >
           {t('pages.refundRequests.storeDetails.csv.alert')}
-        </Alert>
+        </MuiAlert>
       )}
 
       <ShopCard
@@ -375,7 +375,6 @@ const ShopDetails: React.FC = () => {
                 placeholder={t('pages.pointOfSaleTransactions.searchByTrxCode')}
                 name="trxCode"
                 aria-label="searchTrxCode"
-                role="input"
                 InputLabelProps={{ required: false }}
                 value={formik.values.trxCode}
                 onChange={handleTrxCodeChange}

@@ -7,3 +7,6 @@ Dangerfile.ts
 src/reportWebVitals.ts
 **/generated/**
 openApi/scripts/**
+craco.config.js
+src/shims/agentkeepalive-browser.js
+src/shims/node-fetch-browser.js

@@ -4,7 +4,7 @@ import MerchantTransactionsProcessed from '../MerchantTransactionsProcessed';
 import { MerchantTransactionDTO } from '../../../api/generated/merchants/MerchantTransactionDTO';
 import { getMerchantTransactionsProcessed } from '../../../services/merchantService';
 import { formatDate, formattedCurrency } from '../../../helpers';
-import * as loadingHook from '@pagopa/selfcare-common-frontend/hooks/useLoading';
+import * as loadingHook from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
 import * as tableDataFilteredHook from '../useTableDataFiltered';
 
 window.scrollTo = jest.fn();

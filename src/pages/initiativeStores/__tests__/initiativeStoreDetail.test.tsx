@@ -10,7 +10,7 @@ import {
   updateMerchantPointOfSales,
 } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { isValidEmail } from '../../../helpers';
 import { POS_TYPE } from '../../../utils/constants';
 import { StoreProvider } from '../StoreContext';
@@ -31,7 +31,7 @@ jest.mock('../../../services/merchantService', () => ({
   updateMerchantPointOfSales: jest.fn(),
 }));
 jest.mock('../../../utils/jwt-utils');
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage');
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
 jest.mock('../../../helpers');
 jest.mock('../../components/BreadcrumbsBox', () => () => <div data-testid="breadcrumbs-box" />);
 jest.mock('../../../components/Transactions/MerchantTransactions', () => (props: any) => (

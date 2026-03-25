@@ -1,11 +1,11 @@
 import isEmpty from 'lodash/isEmpty';
 import { useDispatch } from 'react-redux';
-import { CONFIG } from '@pagopa/selfcare-common-frontend/config/env';
-import { User } from '@pagopa/selfcare-common-frontend/model/User';
-import { userActions } from '@pagopa/selfcare-common-frontend/redux/slices/userSlice';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
+import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
+import { userActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
+import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Dispatch } from 'react';
-import useErrorDispatcher from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { useTranslation } from 'react-i18next';
 import { parseJwt } from '../utils/jwt-utils';
 import { JWTUser } from '../model/JwtUser';
