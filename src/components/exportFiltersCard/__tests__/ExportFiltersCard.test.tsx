@@ -11,11 +11,11 @@ import { generateMerchantReport } from '../../../services/merchantService';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ id: 'test-id' }),
+  useParams: () => ({ initiative_id: 'test-id' }),
 }));
 
 let lastFormikConfig: any;
-const mockSetFormFieldValue = jest.fn()
+const mockSetFormFieldValue = jest.fn();
 
 jest.mock('formik', () => ({
   useFormik: (config: any) => {
@@ -69,15 +69,9 @@ describe('ExportFiltersCard', () => {
 
   it('renders correctly', () => {
     renderComponent();
-    expect(
-      screen.getByText('pages.reportExport.form.submit')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.reportExport.form.title')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.reportExport.form.subtitle')
-    ).toBeInTheDocument();
+    expect(screen.getByText('pages.reportExport.form.submit')).toBeInTheDocument();
+    expect(screen.getByText('pages.reportExport.form.title')).toBeInTheDocument();
+    expect(screen.getByText('pages.reportExport.form.subtitle')).toBeInTheDocument();
   });
 
   it('handles INSERTED status', async () => {
@@ -87,9 +81,7 @@ describe('ExportFiltersCard', () => {
     renderComponent(updateAlerts);
     clickSubmit();
 
-    await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true)
-    );
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true));
 
     jest.runAllTimers();
     expect(updateAlerts).toHaveBeenCalledWith('INSERTED', false);
@@ -102,9 +94,7 @@ describe('ExportFiltersCard', () => {
     renderComponent(updateAlerts);
     clickSubmit();
 
-    await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('GENERATED', true)
-    );
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('GENERATED', true));
 
     jest.runAllTimers();
     expect(updateAlerts).toHaveBeenCalledWith('GENERATED', false);
@@ -117,9 +107,7 @@ describe('ExportFiltersCard', () => {
     renderComponent(updateAlerts);
     clickSubmit();
 
-    await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('FAILED', true)
-    );
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('FAILED', true));
 
     jest.runAllTimers();
     expect(updateAlerts).toHaveBeenCalledWith('FAILED', false);
@@ -132,9 +120,7 @@ describe('ExportFiltersCard', () => {
     renderComponent(updateAlerts);
     clickSubmit();
 
-    await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('FAILED', true)
-    );
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('FAILED', true));
 
     jest.runAllTimers();
     expect(updateAlerts).toHaveBeenCalledWith('FAILED', false);
@@ -142,9 +128,7 @@ describe('ExportFiltersCard', () => {
 
   it('does nothing if id is missing', async () => {
     const reactRouter = require('react-router-dom');
-    jest
-      .spyOn(reactRouter, 'useParams')
-      .mockReturnValue({ id: undefined });
+    jest.spyOn(reactRouter, 'useParams').mockReturnValue({ initiative_id: undefined });
 
     const updateAlerts = jest.fn();
 
@@ -167,18 +151,13 @@ describe('ExportFiltersCard', () => {
 
     render(
       <BrowserRouter>
-        <ExportFiltersCard
-          updateAlerts={updateAlerts}
-          onReportGenerated={onReportGenerated}
-        />
+        <ExportFiltersCard updateAlerts={updateAlerts} onReportGenerated={onReportGenerated} />
       </BrowserRouter>
     );
 
     clickSubmit();
 
-    await waitFor(() =>
-      expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true)
-    );
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true));
 
     expect(onReportGenerated).toHaveBeenCalled();
   });
@@ -190,17 +169,17 @@ describe('ExportFiltersCard', () => {
         <ExportFiltersCard updateAlerts={updateAlerts} />
       </BrowserRouter>
     );
-    
+
     const result = lastFormikConfig.validate({
       startDate: null,
       endDate: null,
     });
-    const inputDal = screen.getByLabelText('Dal')
-    const inputAl = screen.getByLabelText('Al')
+    const inputDal = screen.getByLabelText('Dal');
+    const inputAl = screen.getByLabelText('Al');
 
-    fireEvent.change(inputDal, result.startDate)
-    fireEvent.change(inputAl, result.endDate)
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
+    fireEvent.change(inputDal, result.startDate);
+    fireEvent.change(inputAl, result.endDate);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     expect(result.startDate).toBe('pages.reportExport.form.validation.required');
     expect(result.endDate).toBe('pages.reportExport.form.validation.required');
   });
@@ -220,15 +199,16 @@ describe('ExportFiltersCard', () => {
       startDate: startDate,
       endDate: endDate,
     });
-    const inputDal = screen.getByLabelText('Dal')
-    const inputAl = screen.getByLabelText('Al')
+    const inputDal = screen.getByLabelText('Dal');
+    const inputAl = screen.getByLabelText('Al');
 
-    fireEvent.change(inputDal, result.startDate)
-    fireEvent.change(inputAl, result.endDate)
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
-    clickSubmit()
-    await waitFor(() => expect(result.endDate).toBe('pages.reportExport.form.validation.invalidRange'))
-
+    fireEvent.change(inputDal, result.startDate);
+    fireEvent.change(inputAl, result.endDate);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    clickSubmit();
+    await waitFor(() =>
+      expect(result.endDate).toBe('pages.reportExport.form.validation.invalidRange')
+    );
   });
 
   it('covers validate maxRange branch (>90 days)', async () => {
@@ -247,14 +227,14 @@ describe('ExportFiltersCard', () => {
       endDate: endDate,
     });
 
-    const inputDal = screen.getByLabelText('Dal')
-    const inputAl = screen.getByLabelText('Al')
+    const inputDal = screen.getByLabelText('Dal');
+    const inputAl = screen.getByLabelText('Al');
 
-    fireEvent.change(inputDal, result.startDate)
-    fireEvent.change(inputAl, result.endDate)
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
-    clickSubmit()
-    await waitFor(() => expect(result.endDate).toBe('pages.reportExport.form.validation.maxRange'))
+    fireEvent.change(inputDal, result.startDate);
+    fireEvent.change(inputAl, result.endDate);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    clickSubmit();
+    await waitFor(() => expect(result.endDate).toBe('pages.reportExport.form.validation.maxRange'));
   });
 
   it('covers validate success branch (no errors)', async () => {
@@ -273,17 +253,17 @@ describe('ExportFiltersCard', () => {
       endDate: mockDay,
     });
 
-    const inputDal = screen.getByLabelText('Dal')
-    const inputAl = screen.getByLabelText('Al')
+    const inputDal = screen.getByLabelText('Dal');
+    const inputAl = screen.getByLabelText('Al');
 
-    fireEvent.change(inputDal, result.startDate)
-    fireEvent.change(inputAl, result.endDate)
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
+    fireEvent.change(inputDal, result.startDate);
+    fireEvent.change(inputAl, result.endDate);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
 
-    clickSubmit()
-    await waitFor(()=> expect(result).toEqual({}))
-    await waitFor(() => expect(inputDal).not.toHaveAttribute('helperText'))
-    await waitFor(() => expect(inputAl).not.toHaveAttribute('helperText'))
+    clickSubmit();
+    await waitFor(() => expect(result).toEqual({}));
+    await waitFor(() => expect(inputDal).not.toHaveAttribute('helperText'));
+    await waitFor(() => expect(inputAl).not.toHaveAttribute('helperText'));
   });
 
   it('covers validate future startDate invalidRange branch', async () => {
@@ -302,14 +282,16 @@ describe('ExportFiltersCard', () => {
       endDate: validEndDate,
     });
 
-    const inputDal = screen.getByLabelText('Dal')
-    const inputAl = screen.getByLabelText('Al')
+    const inputDal = screen.getByLabelText('Dal');
+    const inputAl = screen.getByLabelText('Al');
 
-    fireEvent.change(inputDal, result.startDate)
-    fireEvent.change(inputAl, result.endDate)
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
-    clickSubmit()
-    await waitFor(() => expect(result.startDate).toBe('pages.reportExport.form.validation.invalidRange'))
+    fireEvent.change(inputDal, result.startDate);
+    fireEvent.change(inputAl, result.endDate);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    clickSubmit();
+    await waitFor(() =>
+      expect(result.startDate).toBe('pages.reportExport.form.validation.invalidRange')
+    );
   });
 
   it('covers validate future endDate invalidRange branch', async () => {
@@ -328,13 +310,15 @@ describe('ExportFiltersCard', () => {
       endDate: futureDate,
     });
 
-    const inputDal = screen.getByLabelText('Dal')
-    const inputAl = screen.getByLabelText('Al')
+    const inputDal = screen.getByLabelText('Dal');
+    const inputAl = screen.getByLabelText('Al');
 
-    fireEvent.change(inputDal, result.startDate)
-    fireEvent.change(inputAl, result.endDate)
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3)
-    clickSubmit()
-    await waitFor(() => expect(result.endDate).toBe('pages.reportExport.form.validation.invalidRange'))
+    fireEvent.change(inputDal, result.startDate);
+    fireEvent.change(inputAl, result.endDate);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    clickSubmit();
+    await waitFor(() =>
+      expect(result.endDate).toBe('pages.reportExport.form.validation.invalidRange')
+    );
   });
 });

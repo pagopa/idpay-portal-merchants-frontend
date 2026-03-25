@@ -259,7 +259,11 @@ const InitiativesList = () => {
                                   initiativeName: row.initiativeName,
                                 })
                               );
-                              history.push(generatePath(ROUTES.OVERVIEW, { id: row.initiativeId }));
+                              history.push(
+                                generatePath(ROUTES.OVERVIEW, {
+                                  initiative_id: row.initiativeId,
+                                })
+                              );
                             }}
                             data-testid="initiative-btn-test"
                           >

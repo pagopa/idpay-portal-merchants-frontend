@@ -248,7 +248,7 @@ const optionsAutocomplete = [
 describe('InitiativeStoresUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useParams as jest.Mock).mockReturnValue({ id: 'test-initiative' });
+    (useParams as jest.Mock).mockReturnValue({ initiative_id: 'test-initiative' });
     (useHistory as jest.Mock).mockReturnValue({ push: pushMock });
     mockUsePlacesAutocomplete.mockReturnValue({
       options: optionsAutocomplete,
@@ -386,7 +386,7 @@ describe('InitiativeStoresUpload', () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue();
+    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(undefined);
 
     const rendered = await render(<InitiativeStoresUpload />);
     await fillFormForSuccess(screen);

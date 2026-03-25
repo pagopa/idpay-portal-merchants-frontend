@@ -8,7 +8,7 @@ import { useAlert } from '../../../hooks/useAlert';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ id: 'initiative-123', batch_id: "batch-1" }),
+  useParams: () => ({ initiative_id: 'initiative-123', batch_id: 'batch-1' }),
 }));
 
 jest.mock('../../../services/merchantService', () => ({
@@ -267,7 +267,9 @@ describe('InvoiceDataTable', () => {
     expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'true');
     const closeButton = screen.getByTestId('close-drawer');
     fireEvent.click(closeButton);
-    await waitFor(() => expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'false'));
+    await waitFor(() =>
+      expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'false')
+    );
   });
 
   it('downloads invoice file PDF and opens new window', async () => {
@@ -460,7 +462,9 @@ describe('InvoiceDataTable', () => {
     expect(screen.getByTestId('detail-drawer')).toHaveAttribute('data-open', 'true');
     const closeButton = screen.getByTestId('close-drawer');
     fireEvent.click(closeButton);
-    await waitFor(() => expect(screen.queryByTestId('detail-drawer')).toHaveAttribute('data-open', 'false'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('detail-drawer')).toHaveAttribute('data-open', 'false')
+    );
     await waitFor(() => expect(mockSetAlert).toHaveBeenCalled());
   });
 

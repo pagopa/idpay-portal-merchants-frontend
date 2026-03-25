@@ -21,7 +21,7 @@ import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RefundRequestsModal } from './RefundRequestModal';
 
 interface RouteParams {
-  id: string;
+  initiative_id: string;
 }
 
 const posTypeMapper: Record<string, string> = {
@@ -31,14 +31,18 @@ const posTypeMapper: Record<string, string> = {
 
 const RefundRequests = () => {
   const { setAlert } = useAlert();
-  const { id } = useParams<RouteParams>();
+  const { initiative_id } = useParams<RouteParams>();
   const history = useHistory();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
   const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
   const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
   const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
-  const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
+  const [currentPagination, setCurrentPagination] = useState({
+    pageNo: 0,
+    pageSize: 10,
+    totalElements: 0,
+  });
   const columns: Array<GridColDef> = [
     {
       field: 'spacer',
@@ -107,8 +111,9 @@ const RefundRequests = () => {
         <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
           <IconButton
             onClick={() => {
-              history.push(`${BASE_ROUTE}/${id}/richieste-di-rimborso/${params.row?.id}`,
-                {store: params.row}
+              history.push(
+                `${BASE_ROUTE}/${initiative_id}/richieste-di-rimborso/${params.row?.id}`,
+                { store: params.row }
               );
             }}
             size="small"
@@ -122,7 +127,7 @@ const RefundRequests = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-      void fetchRewardBatches(id);
+    void fetchRewardBatches(initiative_id);
   }, [currentPagination.pageNo, currentPagination.pageSize]);
 
   const infoStyles = {
@@ -133,7 +138,11 @@ const RefundRequests = () => {
   const fetchRewardBatches = async (initiativeId: string): Promise<void> => {
     setRewardBatchesLoading(true);
     try {
-      const response = await getRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
+      const response = await getRewardBatches(
+        initiativeId,
+        currentPagination.pageNo,
+        currentPagination.pageSize
+      );
       if (response?.content) {
         const mappedResponse = response.content.map((value) => ({
           ...value,
@@ -215,7 +224,7 @@ const RefundRequests = () => {
         console.error('Missing initiativeId or batchId');
         return;
       }
-      const result = (await sendRewardBatch(id, batchId.toString())) as any;
+      const result = (await sendRewardBatch(initiative_id, batchId.toString())) as any;
       if ('code' in result && result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
         setAlert({
           title: t('errors.genericTitle'),
@@ -232,7 +241,7 @@ const RefundRequests = () => {
           severity: 'success',
         });
       }, 1000);
-      await fetchRewardBatches(id);
+      await fetchRewardBatches(initiative_id);
     } catch (e: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -240,7 +249,7 @@ const RefundRequests = () => {
         isOpen: true,
         severity: 'error',
       });
-        await fetchRewardBatches(id);
+      await fetchRewardBatches(initiative_id);
     } finally {
       setSendBatchIsLoading(false);
       setIsModalOpen(false);
@@ -307,7 +316,7 @@ const RefundRequests = () => {
             paginationModel={{
               pageNo: currentPagination.pageNo,
               pageSize: currentPagination.pageSize,
-              totalElements: currentPagination.totalElements
+              totalElements: currentPagination.totalElements,
             }}
             onPaginationPageChange={handlePaginationPageChange}
             onRowSelectionChange={handleRowSelectionChange}

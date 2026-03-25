@@ -16,7 +16,7 @@ import MerchantTransactionsProcessed from './MerchantTransactionsProcessed';
 import { mapDatesFromPeriod, userCanCreateDiscount } from './helpers';
 
 interface MatchParams {
-  id: string;
+  initiative_id: string;
 }
 
 const InitiativeDiscounts = () => {
@@ -31,14 +31,14 @@ const InitiativeDiscounts = () => {
     exact: true,
     strict: false,
   });
-  const { id } = (match?.params as MatchParams) || {};
+  const { initiative_id } = (match?.params as MatchParams) || {};
 
   useEffect(() => {
     const dates = mapDatesFromPeriod(selectedInitiative?.spendingPeriod);
     setStartDate(dates?.startDate);
     setEndDate(dates?.endDate);
     setValue(0);
-  }, [id, JSON.stringify(selectedInitiative)]);
+  }, [initiative_id, JSON.stringify(selectedInitiative)]);
 
   interface TabPanelProps {
     children?: React.ReactNode;
@@ -107,7 +107,7 @@ const InitiativeDiscounts = () => {
                 size="small"
                 startIcon={<ConfirmationNumberIcon />}
                 onClick={() => {
-                  history.replace(`${BASE_ROUTE}/accetta-sconto/${id}`);
+                  history.replace(`${BASE_ROUTE}/accetta-sconto/${initiative_id}`);
                 }}
                 data-testid="goToAuthorizationWizard-btn-test"
                 sx={{ mr: 2 }}
@@ -121,7 +121,7 @@ const InitiativeDiscounts = () => {
                 size="small"
                 startIcon={<QrCodeIcon />}
                 onClick={() => {
-                  history.replace(`${BASE_ROUTE}/crea-sconto/${id}`);
+                  history.replace(`${BASE_ROUTE}/crea-sconto/${initiative_id}`);
                 }}
                 data-testid="goToWizard-btn-test"
               >
@@ -131,7 +131,7 @@ const InitiativeDiscounts = () => {
           </Box>
         </Box>
       </Box>
-      <InitiativeDiscountsSummary id={id} />
+      <InitiativeDiscountsSummary id={initiative_id} />
       <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 4, mb: 3 }}>
         <Typography variant="h6">{t('pages.initiativeDiscounts.listTitle')}</Typography>
       </Box>
@@ -161,7 +161,7 @@ const InitiativeDiscounts = () => {
               <MerchantTransactions id={id} />
             </TabPanel> */}
             <TabPanel value={value} index={1}>
-              <MerchantTransactionsProcessed id={id} />
+              <MerchantTransactionsProcessed id={initiative_id} />
             </TabPanel>
           </Box>
         </Box>
