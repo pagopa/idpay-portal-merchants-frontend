@@ -63,7 +63,7 @@ export default function InvoiceDetail({
 
   const isNextMonthDisabled = !endOfNextBatchMonth || !nextMonthInitiativeEndDate ? true : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
-  const isPostponeBtnVisible = statusBatch === StatusEnum.CREATED && (itemValues?.rewardBatchTrxStatus === RewardBatchTrxStatusEnum.CONSULTABLE || itemValues?.rewardBatchTrxStatus === RewardBatchTrxStatusEnum.SUSPENDED);
+  const isPostponeBtnVisible = statusBatch === StatusEnum.CREATED && (itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatusEnum.APPROVED && itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatusEnum.REJECTED);
 
   const postponeButton: DetailDrawerProps['buttons'] = useMemo(() =>
     isPostponeBtnVisible
