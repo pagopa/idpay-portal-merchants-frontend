@@ -4,7 +4,7 @@ module.exports = {
       module: {
         rules: [
           {
-            test: /\.m?js/,
+            test: /\.m?js$/,
             resolve: {
               fullySpecified: false,
             },
@@ -16,11 +16,23 @@ module.exports = {
   },
   jest: {
     configure: {
+      transform: {
+        '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
+      },
       transformIgnorePatterns: [
-        "node_modules/(?!(?:@pagopa|@standard-schema|@reduxjs)/)",
+        'node_modules/(?!(@pagopa|@standard-schema|@mui)/)',
       ],
       moduleNameMapper: {
-        "\\\\.(css|less|scss|sass)$": "identity-obj-proxy",
+        '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+        '^@standard-schema/utils$': '<rootDir>/__mocks__/@standard-schema/utils.js',
+        '^@reduxjs/toolkit/query/react$':
+          '@reduxjs/toolkit/dist/query/react/cjs/index.js',
+        '^@reduxjs/toolkit/query$':
+          '@reduxjs/toolkit/dist/query/cjs/index.js',
+        '@pagopa/selfcare-common-frontend/consentManagementConfigure':
+          '@pagopa/selfcare-common-frontend/lib/consentManagementConfigure',
+        '@pagopa/selfcare-common-frontend/config/env':
+          '@pagopa/selfcare-common-frontend/lib/config/env',
       },
     },
   },
