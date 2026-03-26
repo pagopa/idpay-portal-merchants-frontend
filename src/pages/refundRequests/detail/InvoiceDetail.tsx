@@ -17,7 +17,7 @@ import { useAppSelector } from '../../../redux/hooks';
 import { formatDate, isReversableOrEditable } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
-import { StatusEnum } from '../../../api/generated/merchants/MerchantTransactionDTO';
+import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
 
 type Props = DetailDrawerProps & {
   itemValues: Record<string, any>;
@@ -40,7 +40,7 @@ export default function InvoiceDetail({
   const [initiativeEndDate, setInitiativeEndDate] = useState<string>('');
   const [nextMonthInitiativeEndDate, setNextMonthInitiativeEndDate] = useState<Date | undefined>();
   const [invoiceTransactionModal, setInvoiceTransactionModal] = useState(false);
-  const location = useLocation<{ store: any }>();
+  const location = useLocation<{ store: RewardBatchDTO }>();
   const batchMonth = location.state?.store?.month;
   const statusBatch = location.state?.store?.status;
   const { t } = useTranslation();
@@ -76,7 +76,7 @@ export default function InvoiceDetail({
           dataTestId: 'next-month-btn',
         }
       ] : [],
-    [isNextMonthDisabled, statusBatch]
+    [isNextMonthDisabled, isPostponeBtnVisible]
   );
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>

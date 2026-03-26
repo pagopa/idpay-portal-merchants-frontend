@@ -118,6 +118,7 @@ const ShopDetails: React.FC = () => {
     try {
       const response = await getRewardBatchById(initiative_id, batch_id);
       setStore(response);
+      history.replace({ ...history.location, state: {store: response}});
     } catch (error: any) {
       setAlert({
         title: t('errors.genericTitle'),
