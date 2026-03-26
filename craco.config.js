@@ -22,6 +22,14 @@ module.exports = {
       transformIgnorePatterns: [
         'node_modules/(?!(@pagopa|@standard-schema|@mui)/)',
       ],
+      collectCoverageFrom: [
+        'src/**/*.{ts,tsx}',
+        '!src/**/*.d.ts',
+        '!src/api/generated/**',
+        '!src/index.js',
+        '!src/reportWebVitals.ts',
+      ],
+      forceCoverageMatch: ['**/src/__mocks__/@standard-schema/utils.ts'],
       coveragePathIgnorePatterns: [
         '/node_modules/',
         '<rootDir>/babel\\.config\\.js$',
