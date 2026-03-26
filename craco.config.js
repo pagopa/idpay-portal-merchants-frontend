@@ -24,11 +24,11 @@ module.exports = {
       ],
       coveragePathIgnorePatterns: [
         '/node_modules/',
-        'babel.config.js',
-        '__mocks__/@standard-schema/utils.js',
-        'src/index.js',
-        'src/reportWebVitals.ts',
-        'src/api/generated',
+        '<rootDir>/babel\\.config\\.js$',
+        '<rootDir>/__mocks__/@standard-schema/utils\\.js$',
+        '<rootDir>/src/index\\.js$',
+        '<rootDir>/src/reportWebVitals\\.ts$',
+        '<rootDir>/src/api/generated/',
       ],
       moduleNameMapper: {
         '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
