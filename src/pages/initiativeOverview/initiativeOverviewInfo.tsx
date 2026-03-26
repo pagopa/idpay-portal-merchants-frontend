@@ -1,6 +1,6 @@
 import { Box, Typography, Button, Modal, Fade, Divider } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { useState } from 'react';
 
 export const InitiativeOverviewInfo = () => {

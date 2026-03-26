@@ -4,7 +4,7 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, Prompt } from 'react-router-dom';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Edit } from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';

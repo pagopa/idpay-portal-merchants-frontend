@@ -5,7 +5,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { GridColDef } from '@mui/x-data-grid';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { useHistory, useParams } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DataTable from '../../components/dataTable/DataTable';

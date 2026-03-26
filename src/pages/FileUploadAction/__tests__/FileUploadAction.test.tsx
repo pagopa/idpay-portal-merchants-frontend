@@ -21,7 +21,7 @@ jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (k: any) => k }),
 }));
 
-jest.mock("@pagopa/selfcare-common-frontend", () => ({
+jest.mock("@pagopa/selfcare-common-frontend/lib", () => ({
   TitleBox: ({ title }: any) => <div>{title}</div>,
 }));
 

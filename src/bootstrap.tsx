@@ -5,7 +5,7 @@ import '@pagopa/selfcare-common-frontend/index.css';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import App from './App';
 import reportWebVitals from './reportWebVitals';

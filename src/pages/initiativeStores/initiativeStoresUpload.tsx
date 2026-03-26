@@ -6,7 +6,7 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useTranslation } from 'react-i18next';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { generatePath, useParams, useHistory } from 'react-router-dom';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { parseJwt } from '../../utils/jwt-utils';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';

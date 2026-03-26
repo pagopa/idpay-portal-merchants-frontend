@@ -84,7 +84,7 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
   },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/config/env', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     FOOTER: {
       LINK: {

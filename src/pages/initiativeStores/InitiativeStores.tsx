@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import {
   Box,
   Button,

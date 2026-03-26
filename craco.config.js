@@ -14,4 +14,14 @@ module.exports = {
       ignoreWarnings: [/Failed to parse source map/],
     },
   },
+  jest: {
+    configure: {
+      transformIgnorePatterns: [
+        "node_modules/(?!(?:@pagopa|@standard-schema|@reduxjs)/)",
+      ],
+      moduleNameMapper: {
+        "\\\\.(css|less|scss|sass)$": "identity-obj-proxy",
+      },
+    },
+  },
 };

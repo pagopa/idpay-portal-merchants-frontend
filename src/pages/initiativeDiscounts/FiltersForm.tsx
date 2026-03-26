@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { ButtonNaked } from '@pagopa/mui-italia';
+import { ButtonNaked } from '@pagopa/mui-italia/components';
 import { useTranslation } from 'react-i18next';
 import React, { cloneElement, isValidElement } from 'react';
 import { FormikProps } from 'formik';

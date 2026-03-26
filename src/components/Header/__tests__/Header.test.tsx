@@ -1,5 +1,5 @@
 jest.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService');
-jest.mock('@pagopa/selfcare-common-frontend/config/env', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     HEADER: {
       LINK: {
@@ -14,7 +14,7 @@ let mockOnDocumentationClick = jest.fn();
 let mockOnSelectedProduct = jest.fn();
 let mockOnSelectedParty = jest.fn();
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
   Header: (props: any) => {
     if (props.onDocumentationClick) {
       mockOnDocumentationClick = props.onDocumentationClick;

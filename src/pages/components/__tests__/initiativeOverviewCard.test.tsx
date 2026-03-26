@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import InitiativeOverviewCard from '../initiativeOverviewCard';
 
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
   TitleBox: ({ title, subTitle, variantTitle, variantSubTitle, ...props }: any) => (
     <div data-testid="title-box" {...props}>
       <h1 data-testid="title" data-variant={variantTitle}>{title}</h1>

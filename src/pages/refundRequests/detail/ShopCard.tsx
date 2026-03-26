@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { Box, Paper, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';

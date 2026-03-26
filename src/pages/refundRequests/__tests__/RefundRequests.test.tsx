@@ -23,7 +23,7 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ initiative_id: 'test-initiative-id' }),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
   TitleBox: ({ title, subTitle }: any) => (
     <div>
       <h4>{title}</h4>

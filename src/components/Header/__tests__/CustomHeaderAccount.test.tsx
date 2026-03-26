@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CustomHeaderAccount, JwtUser, RootLinkType } from '../CustomHeaderAccount';
 
-jest.mock('@pagopa/mui-italia/dist/components/ButtonNaked', () => ({
+jest.mock('@pagopa/mui-italia/components/ButtonNaked', () => ({
   ButtonNaked: ({ children, ...props }: any) => (
     <button data-testid="button-naked" {...props}>
       {children}

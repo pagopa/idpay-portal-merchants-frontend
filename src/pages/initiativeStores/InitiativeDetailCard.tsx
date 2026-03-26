@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { ReactNode } from 'react';
 
 interface Props {

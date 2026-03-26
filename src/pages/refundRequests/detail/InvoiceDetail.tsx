@@ -1,6 +1,6 @@
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useEffect, useState, useMemo } from 'react';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
