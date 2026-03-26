@@ -28,6 +28,24 @@ jest.mock('../generated/autocomplete/client', () => ({
 
 let mockAutocompleteClient: any;
 
+const loadApi = () => {
+  let AutocompleteApi: any;
+  jest.isolateModules(() => {
+    AutocompleteApi = require('../AutocompleteApiClient').AutocompleteApi;
+  });
+  return AutocompleteApi;
+};
+
+const setupMockAndCallApi = async (
+  mockResolvedValue: any,
+  request: { query: string }
+) => {
+  mockAutocompleteClient.autocomplete.mockResolvedValue(mockResolvedValue);
+  const AutocompleteApi = loadApi();
+  const result = await AutocompleteApi.getAddresses(request);
+  return { result, AutocompleteApi };
+};
+
 describe('AutocompleteApiClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,20 +58,8 @@ describe('AutocompleteApiClient', () => {
     (extractResponse as jest.Mock).mockResolvedValue('extracted');
   });
 
-  const loadApi = () => {
-    let AutocompleteApi: any;
-    jest.isolateModules(() => {
-      AutocompleteApi = require('../AutocompleteApiClient').AutocompleteApi;
-    });
-    return AutocompleteApi;
-  };
-
   it('chiama apiClient.autocomplete con Bearer token corretto', async () => {
-    mockAutocompleteClient.autocomplete.mockResolvedValue({ right: 'data' });
-    const AutocompleteApi = loadApi();
-
-    const request = { query: 'via roma' };
-    const result = await AutocompleteApi.getAddresses(request);
+    const { result } = await setupMockAndCallApi({ right: 'data' }, { query: 'via roma' });
 
     expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
     expect(result).toBe('extracted');
@@ -63,10 +69,7 @@ describe('AutocompleteApiClient', () => {
     const { storageTokenOps } = require('@pagopa/selfcare-common-frontend/lib/utils/storage');
     (storageTokenOps.read as jest.Mock).mockReturnValueOnce('');
 
-    mockAutocompleteClient.autocomplete.mockResolvedValue({ right: 'data' });
-    const AutocompleteApi = loadApi();
-
-    await AutocompleteApi.getAddresses({ query: 'via milano' });
+    await setupMockAndCallApi({ right: 'data' }, { query: 'via milano' });
   });
 
   it('invoca onRedirectToLogin se extractResponse richiama callback', async () => {
@@ -78,9 +81,6 @@ describe('AutocompleteApiClient', () => {
       return 'extracted';
     });
 
-    mockAutocompleteClient.autocomplete.mockResolvedValue({ right: 'data' });
-    const AutocompleteApi = loadApi();
-
-    await AutocompleteApi.getAddresses({ query: 'via torino' });
+    await setupMockAndCallApi({ right: 'data' }, { query: 'via torino' });
   });
 });
