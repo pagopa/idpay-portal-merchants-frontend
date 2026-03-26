@@ -128,12 +128,6 @@
     "restoreMocks": true,
     "clearMocks": true,
     "resetMocks": true,
-    "coveragePathIgnorePatterns": [
-      "src/index.js",
-      "src/bootstrap.tsx",
-      "src/reportWebVitals.ts",
-      "src/api/generated"
-    ],
     "transformIgnorePatterns": [
       "node_modules/(?!(@pagopa|@standard-schema|@mui)/)"
     ],

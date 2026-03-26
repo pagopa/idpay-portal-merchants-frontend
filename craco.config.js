@@ -22,6 +22,14 @@ module.exports = {
       transformIgnorePatterns: [
         'node_modules/(?!(@pagopa|@standard-schema|@mui)/)',
       ],
+      coveragePathIgnorePatterns: [
+        '/node_modules/',
+        'babel.config.js',
+        '__mocks__/@standard-schema/utils.js',
+        'src/index.js',
+        'src/reportWebVitals.ts',
+        'src/api/generated',
+      ],
       moduleNameMapper: {
         '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
         '^@standard-schema/utils$': '<rootDir>/__mocks__/@standard-schema/utils.js',
