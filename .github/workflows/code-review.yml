@@ -4,33 +4,60 @@ on:
   push:
     branches:
       - main
-      - uat
       - develop
+      - uat
+
   pull_request:
+    branches:
+      - main
+      - develop
+      - uat
     types:
       - opened
-      - edited
       - synchronize
+      - reopened
+      - edited
+    paths-ignore:
+      - "CODEOWNERS"
+      - "**.md"
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
 
 jobs:
-  sonarcloud:
+  release:
+    name: Release & Analysis
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@dc12339a9823e6625f5410a45b24fcbc55a33ded # v6.0.2
         with:
           fetch-depth: 0
-
+          
+      - name: Cache Yarn
+        uses: actions/cache@e34039626f957d3e3e50843d15c1b20547fc90e2 #v5.0.4
+        with:
+          path: |
+            .yarn/cache
+            .yarn/install-state.gz
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+            
       - name: Install dependencies
         run: |
           corepack enable
-          yarn install --immutable --check-cache || yarn install --force
+          yarn install --immutable --check-cache --ignore-scripts
 
-      - name: Genera client API
+      - name: Generate API client
         run: yarn generate
 
       - name: Jest Coverage Report
-        uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
+        uses: ArtiomTr/jest-coverage-report-action@82bc34a0347019ba8f6d2808cd96cec42ef9620e # v2.3.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           test-script: yarn test:coverage
@@ -38,13 +65,20 @@ jobs:
           annotations: none
           package-manager: yarn
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v5.0.0
+      - name: SonarCloud Scan (PR Analysis)
+        uses: SonarSource/sonarqube-scan-action@e9a1c4e09a5eddb7db5d045b83807904bf8f67fc # v7.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
         with:
           args: >
             -Dsonar.organization=${{ vars.SONARCLOUD_ORG }}
             -Dsonar.projectKey=${{ vars.SONARCLOUD_PROJECT_KEY }}
             -Dsonar.projectName="${{ vars.SONARCLOUD_PROJECT_NAME }}"
+            -Dsonar.pullrequest.provider=github
+            -Dsonar.pullrequest.github.repository=${{ github.repository }}
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx,**/__tests__/**/*.*
+            -Dsonar.qualitygate.wait=true
