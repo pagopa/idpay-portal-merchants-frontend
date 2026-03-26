@@ -15,7 +15,7 @@ import Grid from '@mui/material/GridLegacy';
 import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked } from '@pagopa/mui-italia/components';
-import { theme } from '@pagopa/mui-italia/theme'
+import { theme } from '@pagopa/mui-italia/theme';
 import { useTranslation } from 'react-i18next';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { TypeEnum, PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
