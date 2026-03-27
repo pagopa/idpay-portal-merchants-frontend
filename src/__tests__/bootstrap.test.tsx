@@ -1,16 +1,16 @@
 jest.mock('../utils/env', () => ({
   ENV: {
     URL_FE: {
-      LOGIN: "https://selfcare/auth/login",
-      LOGOUT: "https://selfcare/auth/logout",
-      ASSISTANCE_MERCHANT: "https://selfcare/assistance",
-    }
-  }
+      LOGIN: 'https://selfcare/auth/login',
+      LOGOUT: 'https://selfcare/auth/logout',
+      ASSISTANCE_MERCHANT: 'https://selfcare/assistance',
+    },
+  },
 }));
 
 jest.mock('../routes', () => ({
   __esModule: true,
-  default: { HOME: "/portale-esercenti" }
+  default: { HOME: '/portale-esercenti' },
 }));
 
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
@@ -93,7 +93,11 @@ describe('bootstrap', () => {
   });
 
   describe('React application bootstrapping', () => {
-    it.skip('should successfully import and execute bootstrap module', () => {
+    beforeEach(() => {
+      jest.resetModules();
+    });
+
+    it('should successfully import and execute bootstrap module', () => {
       bootstrapModule = require('../bootstrap');
       expect(bootstrapModule).toBeDefined();
 
