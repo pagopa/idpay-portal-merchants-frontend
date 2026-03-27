@@ -93,12 +93,10 @@ describe('bootstrap', () => {
   });
 
   describe('React application bootstrapping', () => {
-    beforeEach(() => {
-      jest.resetModules();
-    });
-
     it('should successfully import and execute bootstrap module', () => {
-      bootstrapModule = require('../bootstrap');
+      jest.isolateModules(() => {
+        bootstrapModule = require('../bootstrap');
+      });
       expect(bootstrapModule).toBeDefined();
 
       expect(CONFIG.MOCKS.MOCK_USER).toBe(MOCK_USER);
