@@ -94,9 +94,7 @@ describe('bootstrap', () => {
 
   describe('React application bootstrapping', () => {
     it('should successfully import and execute bootstrap module', () => {
-      jest.isolateModules(() => {
-        bootstrapModule = require('../bootstrap');
-      });
+      bootstrapModule = require('../bootstrap');
       expect(bootstrapModule).toBeDefined();
 
       expect(CONFIG.MOCKS.MOCK_USER).toBe(MOCK_USER);
