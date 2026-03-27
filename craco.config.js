@@ -32,8 +32,6 @@ module.exports = {
       forceCoverageMatch: ['**/src/__mocks__/@standard-schema/utils.ts'],
       coveragePathIgnorePatterns: [
         '/node_modules/',
-        '<rootDir>/babel\\.config\\.js$',
-        '<rootDir>/__mocks__/@standard-schema/utils\\.js$',
         '<rootDir>/src/index\\.js$',
         '<rootDir>/src/reportWebVitals\\.ts$',
         '<rootDir>/src/api/generated/',
