@@ -1,9 +1,9 @@
 jest.mock('../utils/env', () => ({
   ENV: {
     URL_FE: {
-      LOGIN: "http://selfcare/auth/login",
-      LOGOUT: "http://selfcare/auth/logout",
-      ASSISTANCE_MERCHANT: "http://selfcare/assistance",
+      LOGIN: "https://selfcare/auth/login",
+      LOGOUT: "https://selfcare/auth/logout",
+      ASSISTANCE_MERCHANT: "https://selfcare/assistance",
     }
   }
 }));
@@ -52,9 +52,9 @@ describe('bootstrap', () => {
     document.body.appendChild(mockRoot);
 
     CONFIG.MOCKS.MOCK_USER = false;
-    CONFIG.URL_FE.LOGIN = 'http://selfcare/auth/login';
-    CONFIG.URL_FE.LOGOUT = 'http://selfcare/auth/logout';
-    CONFIG.URL_FE.ASSISTANCE = 'http://selfcare/assistance';
+    CONFIG.URL_FE.LOGIN = 'https://selfcare/auth/login';
+    CONFIG.URL_FE.LOGOUT = 'https://selfcare/auth/logout';
+    CONFIG.URL_FE.ASSISTANCE = 'https://selfcare/assistance';
     CONFIG.TEST.JWT = '';
     CONFIG.HEADER.LINK.PRODUCTURL = '/portale-esercenti';
   });
