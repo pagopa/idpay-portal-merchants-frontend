@@ -28,9 +28,6 @@ module.exports = {
         '!src/api/generated/**',
         '!src/index.js',
         '!src/reportWebVitals.ts',
-        '!src/**/*.test.ts',
-        '!src/**/*.test.tsx',
-        '!src/**/__tests__/**/*'
       ],
       forceCoverageMatch: ['**/src/__mocks__/@standard-schema/utils.ts'],
       coveragePathIgnorePatterns: [
