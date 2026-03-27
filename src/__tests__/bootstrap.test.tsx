@@ -22,7 +22,11 @@ const mockRender = jest.fn();
 const mockCreateRoot = jest.fn(() => ({ render: mockRender }));
 
 jest.mock('react-dom/client', () => ({
+  __esModule: true,
   createRoot: mockCreateRoot,
+  default: {
+    createRoot: mockCreateRoot,
+  },
 }));
 
 jest.mock('../App', () => ({
