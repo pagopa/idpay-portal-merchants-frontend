@@ -42,8 +42,6 @@ describe('bootstrap', () => {
     CONFIG.URL_FE.ASSISTANCE = '';
     CONFIG.TEST.JWT = '';
     CONFIG.HEADER.LINK.PRODUCTURL = '';
-
-    bootstrapModule = require('../bootstrap');
   });
 
   afterAll(() => {
@@ -81,7 +79,22 @@ describe('bootstrap', () => {
 
   describe('React application bootstrapping', () => {
     it('should successfully import and execute bootstrap module', () => {
+      // Importing this way ensures coverage for all top-level lines
+      bootstrapModule = require('../bootstrap');
       expect(bootstrapModule).toBeDefined();
+
+      // Check each top-level assignment and call
+      expect(CONFIG.MOCKS.MOCK_USER).toBe(MOCK_USER);
+      expect(CONFIG.URL_FE.LOGIN).toBe(ENV.URL_FE.LOGIN);
+      expect(CONFIG.URL_FE.LOGOUT).toBe(ENV.URL_FE.LOGOUT);
+      expect(CONFIG.URL_FE.ASSISTANCE).toBe(ENV.URL_FE.ASSISTANCE_MERCHANT);
+      expect(CONFIG.TEST.JWT).toBe(testToken);
+      expect(CONFIG.HEADER.LINK.PRODUCTURL).toBe(ROUTES.HOME);
+
+      // root.render and reportWebVitals should have been called
+      expect(mockCreateRoot).toHaveBeenCalledWith(expect.any(HTMLElement));
+      expect(mockRender).toHaveBeenCalled();
+      expect(mockReportWebVitals).toHaveBeenCalled();
     });
 
     it('should have initialized the application', () => {
