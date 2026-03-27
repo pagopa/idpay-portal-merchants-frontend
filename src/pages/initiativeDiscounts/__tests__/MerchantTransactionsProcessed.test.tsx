@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MerchantTransactionsProcessed from '../MerchantTransactionsProcessed';
 import { MerchantTransactionDTO } from '../../../api/generated/merchants/MerchantTransactionDTO';
@@ -173,9 +173,11 @@ describe('MerchantTransactionsProcessed', () => {
 
     expect(lastFormikConfig).toBeDefined();
 
-    lastFormikConfig.onSubmit({
-      searchUser: 'TEST_FISCAL_CODE',
-      filterStatus: 'REWARDED',
+    act(() => {
+      lastFormikConfig.onSubmit({
+        searchUser: 'TEST_FISCAL_CODE',
+        filterStatus: 'REWARDED',
+      });
     });
 
     await waitFor(() =>
@@ -207,9 +209,11 @@ describe('MerchantTransactionsProcessed', () => {
 
     expect(lastFormikConfig).toBeDefined();
 
-    lastFormikConfig.onSubmit({
-      searchUser: '',
-      filterStatus: '',
+    act(() => {
+      lastFormikConfig.onSubmit({
+        searchUser: '',
+        filterStatus: '',
+      });
     });
 
     await waitFor(() =>
@@ -242,9 +246,11 @@ describe('MerchantTransactionsProcessed', () => {
 
     expect(lastFormikConfig).toBeDefined();
 
-    lastFormikConfig.onSubmit({
-      searchUser: 'ANY',
-      filterStatus: 'REWARDED',
+    act(() => {
+      lastFormikConfig.onSubmit({
+        searchUser: 'ANY',
+        filterStatus: 'REWARDED',
+      });
     });
 
     await waitFor(() => {
@@ -274,9 +280,11 @@ describe('MerchantTransactionsProcessed', () => {
 
     expect(lastFormikConfig).toBeDefined();
 
-    lastFormikConfig.onSubmit({
-      searchUser: 'TEST',
-      filterStatus: 'REWARDED',
+    act(() => {
+      lastFormikConfig.onSubmit({
+        searchUser: 'TEST',
+        filterStatus: 'REWARDED',
+      });
     });
 
     await waitFor(() =>
@@ -302,9 +310,11 @@ describe('MerchantTransactionsProcessed', () => {
 
     expect(lastFormikConfig).toBeDefined();
 
-    lastFormikConfig.onSubmit({
-      searchUser: 'TEST_FISCAL_CODE',
-      filterStatus: 'REWARDED',
+    act(() => {
+      lastFormikConfig.onSubmit({
+        searchUser: 'TEST_FISCAL_CODE',
+        filterStatus: 'REWARDED',
+      });
     });
 
     await waitFor(() =>
