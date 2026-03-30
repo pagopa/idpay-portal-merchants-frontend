@@ -9,7 +9,7 @@ let mockedMuiFooterProps: any;
 
 const mockedPagoPALink = { ...pagoPALink };
 
-jest.mock('@pagopa/mui-italia/dist/components/Footer/Footer', () => ({
+jest.mock('@pagopa/mui-italia', () => ({
   Footer: (props: {
     loggedUser: {
       toString: () =>
@@ -77,14 +77,14 @@ jest.mock('react-i18next', () => ({
   ),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/locale/locale-utils', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
   __esModule: true,
   default: {
     changeLanguage: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/config/env', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     FOOTER: {
       LINK: {
@@ -224,7 +224,7 @@ describe('<Footer />', () => {
   });
 
   test('should call i18n.changeLanguage when onLanguageChanged is triggered', async () => {
-    const i18nModule = require('@pagopa/selfcare-common-frontend/locale/locale-utils');
+    const i18nModule = require('@pagopa/selfcare-common-frontend/lib/locale/locale-utils');
     render(<Footer loggedUser={false} />);
 
     expect(mockedMuiFooterProps.onLanguageChanged).toBeDefined();
@@ -466,7 +466,7 @@ describe('<Footer />', () => {
   });
 
   test('should handle multiple language changes', async () => {
-    const i18nModule = require('@pagopa/selfcare-common-frontend/locale/locale-utils');
+    const i18nModule = require('@pagopa/selfcare-common-frontend/lib/locale/locale-utils');
     const { rerender } = render(<Footer loggedUser={false} />);
 
     await act(async () => {

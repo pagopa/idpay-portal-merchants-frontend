@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import {
   Box,
   Button,
   Stack,
-  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -16,14 +15,15 @@ import {
   Tooltip,
   IconButton,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from 'react-i18next';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import StoreIcon from '@mui/icons-material/Store';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';

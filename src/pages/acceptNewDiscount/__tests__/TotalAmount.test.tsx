@@ -1,24 +1,16 @@
-import React, { useState as useStateMock } from 'react';
+import React from 'react';
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import { BASE_ROUTE } from '../../../routes';
 import TotalAmount from '../TotalAmount';
 
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useState: jest.fn(),
-}));
 const setActiveStep = jest.fn();
-const setOpenExitModal = jest.fn();
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
-  // @ts-ignore
-  useStateMock.mockImplementation((init: any) => [init, setActiveStep]);
-  // @ts-ignore
-  useStateMock.mockImplementation((init: any) => [init, setOpenExitModal]);
+  setActiveStep.mockClear();
 });
 
 const oldWindowLocation = global.window.location;
@@ -66,13 +58,12 @@ describe('Test suite for TotalAmount component', () => {
         setActiveStep={jest.fn()}
       />
     );
-    // @ts-ignore
-    useStateMock.mockImplementationOnce(() => [0, setActiveStep]);
     const backButton = screen.getByTestId('back-action-test') as HTMLButtonElement;
-    const oldLocationPathname = history.location.pathname;
     fireEvent.click(backButton);
-    // @ts-ignore
-    useStateMock.mockImplementationOnce(() => [true, setOpenExitModal]);
+    // Exit modal should appear
+    await waitFor(() => {
+      expect(screen.getByText('pages.acceptNewDiscount.exitModalTitle')).toBeInTheDocument();
+    });
   });
 
   test('Render component', () => {
@@ -89,24 +80,36 @@ describe('Test suite for TotalAmount component', () => {
   });
 
   test('Form filling and submit OK', async () => {
+    const setAmount = jest.fn();
     renderWithContext(
       <TotalAmount
         id={'1234'}
         amount={undefined}
-        setAmount={jest.fn()}
+        setAmount={setAmount}
         steps={2}
         activeStep={0}
-        setActiveStep={jest.fn()}
+        setActiveStep={setActiveStep}
       />
     );
     const user = userEvent.setup();
     const spendingAmountField = screen.getByLabelText(
       'pages.newDiscount.spendingAmountLabel'
     ) as HTMLInputElement;
+    
     await user.type(spendingAmountField, '100');
-    await user.click(screen.getByTestId('continue-action-test'));
-    // @ts-ignore
-    useStateMock.mockImplementationOnce(() => [1, setActiveStep]);
+    
+    // Wait for the button to be enabled after formik validation
+    const continueButton = screen.getByTestId('continue-action-test') as HTMLButtonElement;
+    await waitFor(() => {
+      expect(continueButton).not.toBeDisabled();
+    }, { timeout: 3000 });
+    
+    await user.click(continueButton);
+    
+    // Verify setActiveStep was called
+    await waitFor(() => {
+      expect(setActiveStep).toHaveBeenCalled();
+    });
   });
 
   // test('Render component with id prop undefined', async () => {

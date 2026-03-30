@@ -1,7 +1,7 @@
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { ReceiptLong } from '@mui/icons-material';
 import routes from '../../routes';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';

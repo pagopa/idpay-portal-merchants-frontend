@@ -4,7 +4,7 @@ import InvoiceDetail from '../InvoiceDetail';
 import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
 import { useLocation } from 'react-router-dom';
 
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
   __esModule: true,
   default: jest.fn(),
 }));

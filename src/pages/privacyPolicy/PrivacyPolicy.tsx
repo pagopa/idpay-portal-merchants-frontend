@@ -1,7 +1,8 @@
-import { Grid, Paper, Box } from '@mui/material';
+import { Paper, Box } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import privacyHTML from './privacyHTML.json';
 
 const PrivacyPolicy = () => {

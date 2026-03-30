@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useParams } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
@@ -13,8 +13,8 @@ jest.mock('react-i18next', () => ({
   withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
     <Component {...props} />,
 }));
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: { read: jest.fn() },
 }));
 jest.mock('../../../services/merchantService', () => ({

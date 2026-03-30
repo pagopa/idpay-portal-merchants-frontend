@@ -1,6 +1,6 @@
 import { DataGrid,GridSortModel } from '@mui/x-data-grid';
 import { useEffect, useState, useCallback } from 'react';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import {MISSING_DATA_PLACEHOLDER} from '../../utils/constants';
 
 export interface DataTableProps {

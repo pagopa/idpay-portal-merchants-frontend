@@ -1,5 +1,5 @@
 import getStatus, { getBatchStatus } from '../useStatus';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
 

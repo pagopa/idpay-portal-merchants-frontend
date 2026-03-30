@@ -1,5 +1,5 @@
-jest.mock('@pagopa/selfcare-common-frontend/services/analyticsService');
-jest.mock('@pagopa/selfcare-common-frontend/config/env', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService');
+jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     HEADER: {
       LINK: {
@@ -14,7 +14,7 @@ let mockOnDocumentationClick = jest.fn();
 let mockOnSelectedProduct = jest.fn();
 let mockOnSelectedParty = jest.fn();
 
-jest.mock('@pagopa/selfcare-common-frontend', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
   Header: (props: any) => {
     if (props.onDocumentationClick) {
       mockOnDocumentationClick = props.onDocumentationClick;
@@ -53,7 +53,7 @@ import CustomHeader from '../Header';
 import { mockedUser } from '../../../decorators/__mocks__/withLogin';
 import { Party } from '../../../model/Party';
 import { partiesSlice } from '../../../redux/slices/partiesSlice';
-import * as analyticsService from '@pagopa/selfcare-common-frontend/services/analyticsService';
+import * as analyticsService from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
 
 function createMockStore(preloadedState?: PreloadedState<any>) {
   return configureStore({

@@ -1,20 +1,20 @@
-import { extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
+import { extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
 import { createClient } from '../generated/email-notification/client';
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/redux/slices/appStateSlice', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
   appStateActions: { addError: jest.fn((e) => e) },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/api-utils', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/api-utils', () => ({
   buildFetchApi: jest.fn(),
   extractResponse: jest.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/locale/locale-utils', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
   t: jest.fn((key) => key),
 }));
 
@@ -28,6 +28,27 @@ jest.mock('../generated/email-notification/client', () => ({
 
 let mockEmailNotificationClient: any;
 
+const getEmailNotificationApi = () => {
+  let EmailNotificationApi: any;
+  jest.isolateModules(() => {
+    EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
+  });
+  return EmailNotificationApi;
+};
+
+const setupMockAndCallApi = async (
+  methodName: 'getInstitutionProductUserInfo' | 'sendEmail',
+  mockResolvedValue: any,
+  callArgs?: any
+) => {
+  mockEmailNotificationClient[methodName].mockResolvedValue(mockResolvedValue);
+  const EmailNotificationApi = getEmailNotificationApi();
+  const result = callArgs
+    ? await EmailNotificationApi[methodName](callArgs)
+    : await EmailNotificationApi[methodName]();
+  return { result, EmailNotificationApi };
+};
+
 describe('EmailNotificationApi', () => {
   beforeEach(() => {
     mockEmailNotificationClient = {
@@ -40,14 +61,7 @@ describe('EmailNotificationApi', () => {
   });
 
   it('getInstitutionProductUserInfo calls client and extractResponse', async () => {
-    mockEmailNotificationClient.getInstitutionProductUserInfo.mockResolvedValue({ right: 'data' });
-
-    let EmailNotificationApi: any;
-    jest.isolateModules(() => {
-      EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
-    });
-
-    const result = await EmailNotificationApi.getInstitutionProductUserInfo();
+    const { result } = await setupMockAndCallApi('getInstitutionProductUserInfo', { right: 'data' });
 
     expect(mockEmailNotificationClient.getInstitutionProductUserInfo).toHaveBeenCalledWith({});
     expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
@@ -55,20 +69,13 @@ describe('EmailNotificationApi', () => {
   });
 
   it('sendEmail calls client with body and extractResponse', async () => {
-    mockEmailNotificationClient.sendEmail.mockResolvedValue({ right: 'sent' });
-
-    let EmailNotificationApi: any;
-    jest.isolateModules(() => {
-      EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
-    });
-
     const emailData = {
       subject: 'Test',
       content: 'Hello world',
       recipients: ['test@example.com'],
     };
 
-    const result = await EmailNotificationApi.sendEmail(emailData);
+    const { result } = await setupMockAndCallApi('sendEmail', { right: 'sent' }, emailData);
 
     expect(mockEmailNotificationClient.sendEmail).toHaveBeenCalledWith({
       body: { ...emailData },
@@ -86,14 +93,7 @@ describe('EmailNotificationApi', () => {
       return 'extracted';
     });
 
-    mockEmailNotificationClient.getInstitutionProductUserInfo.mockResolvedValue({ right: 'data' });
-
-    let EmailNotificationApi: any;
-    jest.isolateModules(() => {
-      EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
-    });
-
-    await EmailNotificationApi.getInstitutionProductUserInfo();
+    await setupMockAndCallApi('getInstitutionProductUserInfo', { right: 'data' });
 
     expect(store.dispatch).toHaveBeenCalled();
   });

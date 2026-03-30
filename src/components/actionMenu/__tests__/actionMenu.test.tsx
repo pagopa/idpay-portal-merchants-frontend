@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { useTranslation } from 'react-i18next';
 import { ThemeProvider, createTheme } from '@mui/material';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableRow from '@mui/material/TableRow';
 import ActionMenu from '../actionMenu';
 import {
   MerchantTransactionDTO,
@@ -62,7 +64,13 @@ describe('ActionMenu', () => {
   it('should render the actions button and handle menu open/close', () => {
     render(
       <Wrapper>
-        <ActionMenu status={mockBaseData.data.status} {...mockBaseData} />
+        <Table>
+          <TableBody>
+            <TableRow>
+              <ActionMenu status={mockBaseData.data.status} {...mockBaseData} />
+            </TableRow>
+          </TableBody>
+        </Table>
       </Wrapper>
     );
 
@@ -79,7 +87,13 @@ describe('ActionMenu', () => {
     ])('should show Authorize button for status: $status', ({ status }) => {
       render(
         <Wrapper>
-          <ActionMenu {...mockBaseData} status={status} data={{ ...mockBaseData.data, status }} />
+          <Table>
+            <TableBody>
+              <TableRow>
+                <ActionMenu {...mockBaseData} status={status} data={{ ...mockBaseData.data, status }} />
+              </TableRow>
+            </TableBody>
+          </Table>
         </Wrapper>
       );
       fireEvent.click(screen.getByTestId('actions_button'));
@@ -98,11 +112,17 @@ describe('ActionMenu', () => {
     it('should NOT show Authorize button for REJECTED status', () => {
       render(
         <Wrapper>
-          <ActionMenu
-            {...mockBaseData}
-            status={TransactionStatusEnum.REJECTED}
-            data={{ ...mockBaseData.data, status: TransactionStatusEnum.REJECTED }}
-          />
+          <Table>
+            <TableBody>
+              <TableRow>
+                <ActionMenu
+                  {...mockBaseData}
+                  status={TransactionStatusEnum.REJECTED}
+                  data={{ ...mockBaseData.data, status: TransactionStatusEnum.REJECTED }}
+                />
+              </TableRow>
+            </TableBody>
+          </Table>
         </Wrapper>
       );
       fireEvent.click(screen.getByTestId('actions_button'));
