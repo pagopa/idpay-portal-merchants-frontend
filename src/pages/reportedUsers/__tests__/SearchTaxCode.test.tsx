@@ -69,7 +69,7 @@ describe('SearchTaxCode', () => {
   });
 
   it('calls onSearch with cleaned cf if valid', () => {
-    const { formik, onSearch } = setup({
+    const { onSearch } = setup({
       values: { cf: 'abcDEF12g34h567i' },
     });
     fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), {
@@ -79,11 +79,66 @@ describe('SearchTaxCode', () => {
     expect(onSearch).toHaveBeenCalledWith({ cf: 'ABCDEF12G34H567I' });
   });
 
-  it('resets cf field on Cancel click', () => {
-    const { formik } = setup({
+  it('resets cf field on Cancel click (fallback when onReset is not provided)', () => {
+    const setFieldValue = jest.fn();
+
+    setup({
       values: { cf: 'SOMECF' },
+      setFieldValue,
     });
+
     fireEvent.click(screen.getByTestId('btn-cancel-cf'));
-    expect(formik.setFieldValue).toHaveBeenCalledWith('cf', '');
+    expect(setFieldValue).toHaveBeenCalledWith('cf', '');
+  });
+
+  it('calls onReset on Cancel click when onReset is provided', () => {
+    const onReset = jest.fn();
+    const setFieldValue = jest.fn();
+
+    const formik = {
+      values: { cf: 'SOMECF' },
+      errors: { cf: '' },
+      setFieldValue,
+      setFieldError: jest.fn(),
+      touched: {},
+      isSubmitting: false,
+      isValidating: false,
+      submitCount: 0,
+      handleChange: jest.fn(),
+      handleBlur: jest.fn(),
+      handleSubmit: jest.fn(),
+      handleReset: jest.fn(),
+      setTouched: jest.fn(),
+      setValues: jest.fn(),
+      setErrors: jest.fn(),
+      validateForm: jest.fn(),
+      validateField: jest.fn(),
+      resetForm: jest.fn(),
+      initialValues: { cf: '' },
+      initialErrors: {},
+      initialTouched: {},
+      initialStatus: undefined,
+      status: undefined,
+      dirty: false,
+      isValid: true,
+      registerField: jest.fn(),
+      unregisterField: jest.fn(),
+      setStatus: jest.fn(),
+      setSubmitting: jest.fn(),
+      setFieldTouched: jest.fn(),
+      getFieldProps: jest.fn(),
+      getFieldMeta: jest.fn(),
+      getFieldHelpers: jest.fn(),
+      submitForm: jest.fn(),
+      setFormikState: jest.fn(),
+    } as any;
+
+    const onSearch = jest.fn();
+    render(<SearchTaxCode formik={formik} onSearch={onSearch} onReset={onReset} />);
+
+    fireEvent.click(screen.getByTestId('btn-cancel-cf'));
+
+    expect(onReset).toHaveBeenCalledTimes(1);
+    expect(setFieldValue).not.toHaveBeenCalledWith('cf', '');
   });
 });
