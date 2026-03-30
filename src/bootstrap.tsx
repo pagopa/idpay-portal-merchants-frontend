@@ -12,7 +12,7 @@ import reportWebVitals from './reportWebVitals';
 import { store } from './redux/store';
 import { MOCK_USER, testToken } from './utils/constants';
 import { ENV } from './utils/env';
-import './consentAndAnalyticsConfiguration.ts';
+import './consentAndAnalyticsConfiguration';
 import './locale';
 import ROUTES from './routes';
 

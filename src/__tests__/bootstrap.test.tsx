@@ -1,9 +1,9 @@
 const mockRender = jest.fn();
-const mockCreateRoot = jest.fn(() => ({ render: mockRender }));
+const mockCreateRoot = jest.fn((..._args: Array<unknown>) => ({ render: mockRender }));
 
 jest.mock('react-dom/client', () => ({
   __esModule: true,
-  createRoot: (...args: Array<unknown>) => mockCreateRoot(...args),
+  createRoot: (...args: Array<unknown>) => mockCreateRoot(...(args as [unknown])),
 }));
 
 jest.mock('../utils/env', () => ({
@@ -36,7 +36,7 @@ jest.mock('../redux/store', () => ({
   store: { getState: jest.fn(), dispatch: jest.fn(), subscribe: jest.fn() },
 }));
 
-jest.mock('../consentAndAnalyticsConfiguration.ts', () => ({}));
+jest.mock('../consentAndAnalyticsConfiguration', () => ({}));
 jest.mock('../locale', () => ({}));
 
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
