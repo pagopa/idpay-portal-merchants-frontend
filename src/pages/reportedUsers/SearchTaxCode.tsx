@@ -36,7 +36,7 @@ function SearchTaxCode<T extends { cf: string }>({
       .replace(/[^A-Za-z0-9]/g, '')
       .toUpperCase()
       .trim();
-    formik.setFieldValue('cf', cleaned, false);
+    void formik.setFieldValue('cf', cleaned, false);
     if (!cleaned) {
       formik.setFieldError('cf', t('pages.reportedUsers.cf.insertCf'));
       return;
@@ -105,7 +105,7 @@ function SearchTaxCode<T extends { cf: string }>({
               if (onReset) {
                 onReset();
               } else {
-                formik.setFieldValue('cf', '');
+                void formik.setFieldValue('cf', '');
               }
             }}
             data-testid="btn-cancel-cf"

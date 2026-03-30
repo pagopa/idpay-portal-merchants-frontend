@@ -1,5 +1,5 @@
 import { Box, Card, CardContent } from '@mui/material';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { ReactNode } from 'react';
 
 

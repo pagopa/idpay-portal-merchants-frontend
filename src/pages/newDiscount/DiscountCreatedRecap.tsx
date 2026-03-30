@@ -4,7 +4,7 @@
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { Alert, Box, Button, FormControl, Paper, TextField, Typography } from '@mui/material';
-import { Toast } from '@pagopa/selfcare-common-frontend';
+import { Toast } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';

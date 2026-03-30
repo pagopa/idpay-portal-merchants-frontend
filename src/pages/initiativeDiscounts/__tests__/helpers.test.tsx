@@ -9,7 +9,7 @@ import {
 import { StatusEnum  } from '../../../api/generated/merchants/MerchantTransactionDTO';
 import { FormikProps } from 'formik';
 
-jest.mock('@pagopa/selfcare-common-frontend/locale/locale-utils', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
   t: (key: string) => key,
 }));
 

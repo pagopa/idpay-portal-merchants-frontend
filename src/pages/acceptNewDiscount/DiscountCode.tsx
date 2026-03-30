@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useHistory } from 'react-router-dom';
-import { Toast } from '@pagopa/selfcare-common-frontend';
+import { Toast } from '@pagopa/selfcare-common-frontend/lib';
 import { authPaymentBarCode } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
@@ -153,7 +153,6 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
               name={`discountCode`}
               label={t('pages.acceptNewDiscount.discountCodeLabel')}
               size="small"
-              focused
               value={formik.values.discountCode}
               onChange={(e) => {
                 formik.handleChange(e);

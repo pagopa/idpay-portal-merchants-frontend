@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import Table from '@mui/material/Table';
 import TableHeader from '../TableHeader';
 
 jest.mock('react-i18next', () => ({
@@ -16,7 +17,11 @@ describe('TableHeader', () => {
       { width: '50%', label: 'header.third' },
     ];
 
-    render(<TableHeader data={data} />);
+    render(
+      <Table>
+        <TableHeader data={data} />
+      </Table>
+    );
 
     data.forEach((d) => {
       const cell = screen.getByText(`translated_${d.label}`);
@@ -30,7 +35,11 @@ describe('TableHeader', () => {
       { width: '30%', label: '' },
     ];
 
-    render(<TableHeader data={data} />);
+    render(
+      <Table>
+        <TableHeader data={data} />
+      </Table>
+    );
 
     expect(screen.getByText('translated_header.first')).toBeInTheDocument();
 
@@ -46,7 +55,11 @@ describe('TableHeader', () => {
       { width: '40%', label: 'header.second' },
     ];
 
-    render(<TableHeader data={data} />);
+    render(
+      <Table>
+        <TableHeader data={data} />
+      </Table>
+    );
 
     const headerRow = screen.getByRole('row');
     const cells = within(headerRow).getAllByRole('columnheader');

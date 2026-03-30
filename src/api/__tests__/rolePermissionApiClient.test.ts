@@ -1,20 +1,20 @@
-import { extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
+import { extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
 import { createClient } from '../generated/role-permission/client';
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/redux/slices/appStateSlice', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
   appStateActions: { addError: jest.fn((e) => e) },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/api-utils', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/api-utils', () => ({
   buildFetchApi: jest.fn(),
   extractResponse: jest.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/locale/locale-utils', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
   t: jest.fn((key) => key),
 }));
 
@@ -28,6 +28,28 @@ jest.mock('../generated/role-permission/client', () => ({
 
 let mockRolePermissionClient: any;
 
+const loadApi = () => {
+  let RolePermissionApi: any;
+  jest.isolateModules(() => {
+    RolePermissionApi = require('../rolePermissionApiClient').RolePermissionApi;
+  });
+  return RolePermissionApi;
+};
+
+const setupMockAndCallApi = async (
+  methodName: 'userPermission' | 'getPortalConsent' | 'savePortalConsent',
+  mockResolvedValue: any,
+  callArgs?: any
+) => {
+  mockRolePermissionClient[methodName].mockResolvedValue(mockResolvedValue);
+  const RolePermissionApi = loadApi();
+  const result =
+    callArgs !== undefined
+      ? await RolePermissionApi[methodName](callArgs)
+      : await RolePermissionApi[methodName]();
+  return { result, RolePermissionApi };
+};
+
 describe('RolePermissionApi', () => {
   beforeEach(() => {
     mockRolePermissionClient = {
@@ -40,20 +62,8 @@ describe('RolePermissionApi', () => {
     (extractResponse as jest.Mock).mockReset().mockReturnValue('extracted');
   });
 
-  const loadApi = () => {
-    let RolePermissionApi: any;
-    jest.isolateModules(() => {
-      RolePermissionApi = require('../rolePermissionApiClient').RolePermissionApi;
-    });
-    return RolePermissionApi;
-  };
-
   it('userPermission calls client and extractResponse', async () => {
-    mockRolePermissionClient.userPermission.mockResolvedValue({ right: 'data' });
-
-    const RolePermissionApi = loadApi();
-
-    const result = await RolePermissionApi.userPermission();
+    const { result } = await setupMockAndCallApi('userPermission', { right: 'data' });
 
     expect(mockRolePermissionClient.userPermission).toHaveBeenCalledWith({});
     expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
@@ -61,11 +71,7 @@ describe('RolePermissionApi', () => {
   });
 
   it('getPortalConsent calls client and extractResponse', async () => {
-    mockRolePermissionClient.getPortalConsent.mockResolvedValue({ right: 'consent-data' });
-
-    const RolePermissionApi = loadApi();
-
-    const result = await RolePermissionApi.getPortalConsent();
+    const { result } = await setupMockAndCallApi('getPortalConsent', { right: 'consent-data' });
 
     expect(mockRolePermissionClient.getPortalConsent).toHaveBeenCalledWith({});
     expect(extractResponse).toHaveBeenCalledWith(
@@ -77,11 +83,7 @@ describe('RolePermissionApi', () => {
   });
 
   it('savePortalConsent calls client and extractResponse with versionId', async () => {
-    mockRolePermissionClient.savePortalConsent.mockResolvedValue({ right: 'saved' });
-
-    const RolePermissionApi = loadApi();
-
-    const result = await RolePermissionApi.savePortalConsent('v1');
+    const { result } = await setupMockAndCallApi('savePortalConsent', { right: 'saved' }, 'v1');
 
     expect(mockRolePermissionClient.savePortalConsent).toHaveBeenCalledWith({
       body: { versionId: 'v1' },
@@ -91,11 +93,7 @@ describe('RolePermissionApi', () => {
   });
 
   it('savePortalConsent supports undefined versionId', async () => {
-    mockRolePermissionClient.savePortalConsent.mockResolvedValue({ right: 'saved' });
-
-    const RolePermissionApi = loadApi();
-
-    await RolePermissionApi.savePortalConsent(undefined);
+    await setupMockAndCallApi('savePortalConsent', { right: 'saved' }, undefined);
 
     expect(mockRolePermissionClient.savePortalConsent).toHaveBeenCalledWith({
       body: { versionId: undefined },
@@ -111,11 +109,7 @@ describe('RolePermissionApi', () => {
       return 'extracted';
     });
 
-    mockRolePermissionClient.userPermission.mockResolvedValue({ right: 'data' });
-
-    const RolePermissionApi = loadApi();
-
-    await RolePermissionApi.userPermission();
+    await setupMockAndCallApi('userPermission', { right: 'data' });
 
     expect(store.dispatch).toHaveBeenCalled();
   });

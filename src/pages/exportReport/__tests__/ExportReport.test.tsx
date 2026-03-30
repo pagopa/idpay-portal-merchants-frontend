@@ -7,7 +7,7 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
-jest.mock("@pagopa/selfcare-common-frontend", () => ({
+jest.mock("@pagopa/selfcare-common-frontend/lib/", () => ({
   TitleBox: ({ title, subTitle }: any) => (
     <div>
       <div>{title}</div>

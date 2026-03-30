@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { Provider } from 'react-redux';
 import { store } from '../../redux/store';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { trackEvent } from '@pagopa/selfcare-common-frontend/services/analyticsService';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import { trackEvent } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
 import { useSelectedParty, retrieveSelectedPartyIdConfig } from '../useSelectedParty';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import * as partyService from '../../services/partyService';
@@ -17,10 +17,10 @@ jest.mock('../../redux/hooks');
 const mockedUseAppDispatch = useAppDispatch as jest.Mock;
 const mockedUseAppSelector = useAppSelector as jest.Mock;
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage');
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
 const mockedStorageTokenOps = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
 
-jest.mock('@pagopa/selfcare-common-frontend/services/analyticsService');
+jest.mock('@pagopa/selfcare-common-frontend/lib/services/analyticsService');
 const mockedTrackEvent = trackEvent as jest.Mock;
 
 jest.mock('../../services/partyService');

@@ -1,10 +1,11 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { Box, Button, Typography } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, matchPath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
 import { getMerchantDetail } from '../../services/merchantService';

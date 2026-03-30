@@ -2,7 +2,6 @@ import {
   Box,
   CircularProgress,
   FormControl,
-  Grid,
   IconButton,
   InputLabel,
   MenuItem,
@@ -11,9 +10,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -326,7 +326,6 @@ const MerchantTransactions = ({
               }}
               name="status"
               label={t('pages.initiativeDiscounts.filterByStatus')}
-              placeholder={t('pages.initiativeDiscounts.filterByStatus')}
               onChange={formik.handleChange}
               value={formik.values.status}
               sx={{

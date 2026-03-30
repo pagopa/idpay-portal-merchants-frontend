@@ -65,11 +65,25 @@ describe('CfTextField', () => {
   });
 
   it('resets errors and showErrors if input is empty', () => {
-    const { formik, setShowErrors } = setup({ showErrors: true });
+    const setFieldError = jest.fn();
+    const setShowErrors = jest.fn();
+
+    setup({
+      showErrors: true,
+      setShowErrors,
+      formik: {
+        values: { cf: 'A' },
+        errors: { cf: 'err' },
+        setFieldValue: jest.fn(),
+        setFieldError,
+      } as any,
+    });
+
     const input = screen.getByLabelText(/codice fiscale/i);
     fireEvent.change(input, { target: { value: '' } });
-    expect(setShowErrors).not.toHaveBeenCalledWith();
-    expect(formik.setFieldError).not.toHaveBeenCalledWith('cf', '');
+
+    expect(setShowErrors).toHaveBeenCalledWith(false);
+    expect(setFieldError).toHaveBeenCalledWith('cf', '');
   });
 
   it('shows helperText and error state if showErrors is true and there is an error', () => {
@@ -164,11 +178,13 @@ describe('CfTextField', () => {
   });
 
   it('uses the name prop if provided', () => {
-    const { formik } = setup({
+    const setFieldValue = jest.fn();
+
+    setup({
       formik: {
         values: { custom: '' },
         errors: { custom: '' },
-        setFieldValue: jest.fn(),
+        setFieldValue,
         setFieldError: jest.fn(),
         touched: {},
         isSubmitting: false,
@@ -201,11 +217,13 @@ describe('CfTextField', () => {
         getFieldHelpers: jest.fn(),
         submitForm: jest.fn(),
         setFormikState: jest.fn(),
-      },
+      } as any,
       name: 'custom',
     });
+
     const input = screen.getByLabelText(/codice fiscale/i);
     fireEvent.change(input, { target: { value: 'abc' } });
-    expect(formik.setFieldValue).not.toHaveBeenCalledWith('custom', 'ABC', false);
+
+    expect(setFieldValue).toHaveBeenCalledWith('custom', 'ABC', false);
   });
 });
