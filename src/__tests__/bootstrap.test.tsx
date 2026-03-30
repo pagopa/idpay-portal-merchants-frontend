@@ -1,3 +1,11 @@
+const mockRender = jest.fn();
+const mockCreateRoot = jest.fn(() => ({ render: mockRender }));
+
+jest.mock('react-dom/client', () => ({
+  __esModule: true,
+  createRoot: (...args: Array<unknown>) => mockCreateRoot(...args),
+}));
+
 jest.mock('../utils/env', () => ({
   ENV: {
     URL_FE: {
@@ -11,22 +19,6 @@ jest.mock('../utils/env', () => ({
 jest.mock('../routes', () => ({
   __esModule: true,
   default: { HOME: '/portale-esercenti' },
-}));
-
-import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
-import { MOCK_USER, testToken } from '../utils/constants';
-import ROUTES from '../routes';
-import { ENV } from '../utils/env';
-
-const mockRender = jest.fn();
-const mockCreateRoot = jest.fn(() => ({ render: mockRender }));
-
-jest.mock('react-dom/client', () => ({
-  __esModule: true,
-  createRoot: mockCreateRoot,
-  default: {
-    createRoot: mockCreateRoot,
-  },
 }));
 
 jest.mock('../App', () => ({
@@ -47,13 +39,24 @@ jest.mock('../redux/store', () => ({
 jest.mock('../consentAndAnalyticsConfiguration.ts', () => ({}));
 jest.mock('../locale', () => ({}));
 
+import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
+import { MOCK_USER, testToken } from '../utils/constants';
+import ROUTES from '../routes';
+import { ENV } from '../utils/env';
+
 describe('bootstrap', () => {
   let bootstrapModule: any;
 
-  beforeAll(() => {
-    const mockRoot = document.createElement('div');
-    mockRoot.id = 'root';
-    document.body.appendChild(mockRoot);
+  const importBootstrapIsolated = (): void => {
+    jest.isolateModules(() => {
+      bootstrapModule = require('../bootstrap');
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCreateRoot.mockImplementation(() => ({ render: mockRender }));
+    document.body.innerHTML = '<div id="root"></div>';
 
     CONFIG.MOCKS.MOCK_USER = false;
     CONFIG.URL_FE.LOGIN = 'https://selfcare/auth/login';
@@ -63,14 +66,15 @@ describe('bootstrap', () => {
     CONFIG.HEADER.LINK.PRODUCTURL = '/portale-esercenti';
   });
 
-  afterAll(() => {
-    const rootElement = document.getElementById('root');
-    if (rootElement) {
-      document.body.removeChild(rootElement);
-    }
+  afterEach(() => {
+    document.body.innerHTML = '';
   });
 
   describe('CONFIG initialization', () => {
+    beforeEach(() => {
+      importBootstrapIsolated();
+    });
+
     it('should set MOCK_USER correctly', () => {
       expect(CONFIG.MOCKS.MOCK_USER).toBe(MOCK_USER);
     });
@@ -98,30 +102,29 @@ describe('bootstrap', () => {
 
   describe('React application bootstrapping', () => {
     it('should successfully import and execute bootstrap module', () => {
-      bootstrapModule = require('../bootstrap');
-      expect(bootstrapModule).toBeDefined();
+      importBootstrapIsolated();
 
+      expect(bootstrapModule).toBeDefined();
       expect(CONFIG.MOCKS.MOCK_USER).toBe(MOCK_USER);
       expect(CONFIG.URL_FE.LOGIN).toBe(ENV.URL_FE.LOGIN);
       expect(CONFIG.URL_FE.LOGOUT).toBe(ENV.URL_FE.LOGOUT);
       expect(CONFIG.URL_FE.ASSISTANCE).toBe(ENV.URL_FE.ASSISTANCE_MERCHANT);
       expect(CONFIG.TEST.JWT).toBe(testToken);
       expect(CONFIG.HEADER.LINK.PRODUCTURL).toBe(ROUTES.HOME);
-
       expect(mockCreateRoot).toHaveBeenCalledWith(expect.any(HTMLElement));
       expect(mockRender).toHaveBeenCalled();
       expect(mockReportWebVitals).toHaveBeenCalled();
     });
 
     it('should have initialized the application', () => {
+      importBootstrapIsolated();
       expect(CONFIG.MOCKS.MOCK_USER).toBeDefined();
     });
   });
 
   describe('Application structure', () => {
     it('should have created the root element in the DOM', () => {
-      const rootElement = document.getElementById('root');
-      expect(rootElement).not.toBeNull();
+      expect(document.getElementById('root')).not.toBeNull();
     });
   });
 });
