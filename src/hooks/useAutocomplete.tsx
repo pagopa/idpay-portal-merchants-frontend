@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { autocompleteService} from "../services/autocompleteService";
+import { browserConsole } from "../utils/consoleLogger";
 import { AddressAutocompleteResponseDTO } from '../api/generated/autocomplete/AddressAutocompleteResponseDTO';
 import { AddressDTO } from '../api/generated/autocomplete/AddressDTO';
 
@@ -23,7 +24,7 @@ export function usePlacesAutocomplete() {
       });
       setOptions([...(res?.ResultItems ?? [])]);
     } catch (err: any) {
-      console.error("Autocomplete error", err);
+      browserConsole.error("Autocomplete error", err);
       setError("Errore nella ricerca");
     } finally {
       setLoading(false);

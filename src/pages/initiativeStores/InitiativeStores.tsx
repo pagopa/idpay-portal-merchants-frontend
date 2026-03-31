@@ -34,6 +34,7 @@ import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
+import { browserConsole } from '../../utils/consoleLogger';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -258,7 +259,7 @@ const InitiativeStores: React.FC = () => {
   const formik = useFormik<GetPointOfSalesFilters>({
     initialValues,
     onSubmit: (values) => {
-      console.log('Eseguo ricerca con filtri:', values);
+      browserConsole.log('Eseguo ricerca con filtri:', values);
     },
   });
 
@@ -271,12 +272,12 @@ const InitiativeStores: React.FC = () => {
     setAppliedFilters(values);
     setFiltersAppliedOnce(true);
     fetchStores(filtersWithSort).catch((error) => {
-      console.error('Error fetching stores:', error);
+      browserConsole.error('Error fetching stores:', error);
     });
   };
 
   const handleFiltersReset = () => {
-    console.log('Callback dopo reset filtri');
+    browserConsole.log('Callback dopo reset filtri');
     setFiltersAppliedOnce(false);
     setAppliedFilters(initialValues);
     void fetchStores(initialValues);
@@ -319,7 +320,7 @@ const InitiativeStores: React.FC = () => {
         true
       );
     } else {
-      console.log('Ordinamento rimosso.');
+      browserConsole.log('Ordinamento rimosso.');
       setCurrentSort('asc');
       setSortModel([]);
     }

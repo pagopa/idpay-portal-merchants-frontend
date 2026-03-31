@@ -2,6 +2,7 @@ const IS_DEVELOP = process.env.NODE_ENV === 'development';
 
 export const testToken = '';
 
+export const DEBUG_CONSOLE = false;
 export const MOCK_USER = IS_DEVELOP;
 export const LOG_REDUX_ACTIONS = IS_DEVELOP;
 

@@ -2,6 +2,7 @@
 /* eslint-disable functional/immutable-data */
 import { matchPath } from 'react-router-dom';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
+import { browserConsole } from './utils/consoleLogger';
 import { StatusEnum as TransactionStatusEnum } from './api/generated/merchants/MerchantTransactionDTO';
 import { RewardBatchTrxStatusEnum } from './api/generated/merchants/RewardBatchTrxStatus';
 import { StatusEnum } from './api/generated/merchants/RewardBatchDTO';
@@ -45,7 +46,7 @@ export const downloadQRCodeFromURL = (url: string | undefined) => {
         a.click();
         document.body.removeChild(a);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => browserConsole.error(error));
   }
 };
 
