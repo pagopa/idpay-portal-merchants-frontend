@@ -21,7 +21,7 @@ import SidenavItem from './SidenavItem';
 import { config } from './config';
 
 interface MatchParams {
-  id: string;
+  initiative_id: string;
 }
 
 /** The side menu of the application */
@@ -52,9 +52,9 @@ export default function SideMenu() {
 
   useEffect(() => {
     // eslint-disable-next-line no-prototype-builtins
-    if (match !== null && match.params.hasOwnProperty('id')) {
-      const { id } = match.params as MatchParams;
-      const itemExpanded = `panel-${id}`;
+    if (match !== null && match.params.hasOwnProperty('initiative_id')) {
+      const { initiative_id } = match.params as MatchParams;
+      const itemExpanded = `panel-${initiative_id}`;
       setExpanded(itemExpanded);
     } else {
       const firstItemExpanded =
