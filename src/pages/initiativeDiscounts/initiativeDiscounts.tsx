@@ -2,22 +2,19 @@ import { Box, Button, Tab, Tabs, Typography } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { matchPath, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { useAppSelector } from '../../redux/hooks';
 import { initiativeSelector } from '../../redux/slices/initiativesSlice';
-import ROUTES, { BASE_ROUTE } from '../../routes';
+import { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle, pagesTableContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import InitiativeDiscountsSummary from './InitiativeDiscountsSummary';
 // import MerchantTransactions from './MerchantTransactions';
 import MerchantTransactionsProcessed from './MerchantTransactionsProcessed';
 import { mapDatesFromPeriod, userCanCreateDiscount } from './helpers';
-
-interface MatchParams {
-  initiative_id: string;
-}
 
 const InitiativeDiscounts = () => {
   const { t } = useTranslation();
@@ -26,19 +23,18 @@ const InitiativeDiscounts = () => {
   const selectedInitiative = useAppSelector(initiativeSelector);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS],
-    exact: true,
-    strict: false,
-  });
-  const { initiative_id } = (match?.params as MatchParams) || {};
+  const { initiativeId } = useCurrentInitiativeId();
+
+  if (!initiativeId) {
+    return null;
+  }
 
   useEffect(() => {
     const dates = mapDatesFromPeriod(selectedInitiative?.spendingPeriod);
     setStartDate(dates?.startDate);
     setEndDate(dates?.endDate);
     setValue(0);
-  }, [initiative_id, JSON.stringify(selectedInitiative)]);
+  }, [initiativeId, selectedInitiative]);
 
   interface TabPanelProps {
     children?: React.ReactNode;
@@ -107,7 +103,7 @@ const InitiativeDiscounts = () => {
                 size="small"
                 startIcon={<ConfirmationNumberIcon />}
                 onClick={() => {
-                  history.replace(`${BASE_ROUTE}/accetta-sconto/${initiative_id}`);
+                  history.replace(`${BASE_ROUTE}/accetta-sconto/${initiativeId}`);
                 }}
                 data-testid="goToAuthorizationWizard-btn-test"
                 sx={{ mr: 2 }}
@@ -121,7 +117,7 @@ const InitiativeDiscounts = () => {
                 size="small"
                 startIcon={<QrCodeIcon />}
                 onClick={() => {
-                  history.replace(`${BASE_ROUTE}/crea-sconto/${initiative_id}`);
+                  history.replace(`${BASE_ROUTE}/crea-sconto/${initiativeId}`);
                 }}
                 data-testid="goToWizard-btn-test"
               >
@@ -131,7 +127,7 @@ const InitiativeDiscounts = () => {
           </Box>
         </Box>
       </Box>
-      <InitiativeDiscountsSummary id={initiative_id} />
+      <InitiativeDiscountsSummary id={initiativeId!} />
       <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 4, mb: 3 }}>
         <Typography variant="h6">{t('pages.initiativeDiscounts.listTitle')}</Typography>
       </Box>
@@ -161,7 +157,7 @@ const InitiativeDiscounts = () => {
               <MerchantTransactions id={id} />
             </TabPanel> */}
             <TabPanel value={value} index={1}>
-              <MerchantTransactionsProcessed id={initiative_id} />
+              <MerchantTransactionsProcessed id={initiativeId!} />
             </TabPanel>
           </Box>
         </Box>

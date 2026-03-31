@@ -24,7 +24,8 @@ import StoreIcon from '@mui/icons-material/Store';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
 import { GetPointOfSalesFilters } from '../../types/types';
@@ -44,9 +45,6 @@ const initialValues: GetPointOfSalesFilters = {
   size: PAGINATION_SIZE,
   sort: 'asc',
 };
-interface RouteParams {
-  initiative_id: string;
-}
 
 const InitiativeStores: React.FC = () => {
   const { setAlert } = useAlert();
@@ -65,7 +63,7 @@ const InitiativeStores: React.FC = () => {
   const isGoingToDetail = useRef(false);
   const { t } = useTranslation();
   const history = useHistory();
-  const { initiative_id } = useParams<RouteParams>();
+  const { initiativeId } = useCurrentInitiativeId();
 
   const location = useLocation<{ showSuccessAlert?: boolean }>();
   useEffect(() => {
@@ -84,11 +82,15 @@ const InitiativeStores: React.FC = () => {
   }, [location, history]);
 
   useEffect(() => {
+    if (!initiativeId) {
+      return;
+    }
+
     const storedPagination = sessionStorage.getItem('storesPagination');
     if (
       storedPagination &&
       JSON.parse(storedPagination)?.pageNo !== undefined &&
-      JSON.parse(storedPagination)?.initiativeId === initiative_id
+      JSON.parse(storedPagination)?.initiativeId === initiativeId
     ) {
       const parsed = JSON.parse(storedPagination);
       setStoresPagination(parsed);
@@ -114,7 +116,7 @@ const InitiativeStores: React.FC = () => {
         sessionStorage.removeItem('storesPagination');
       }
     };
-  }, []);
+  }, [initiativeId]);
 
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
@@ -283,13 +285,13 @@ const InitiativeStores: React.FC = () => {
   };
 
   const goToAddStorePage = () => {
-    history.push(`${BASE_ROUTE}/${initiative_id}/punti-vendita/censisci/`);
+    history.push(`${BASE_ROUTE}/${initiativeId}/punti-vendita/censisci/`);
   };
 
   const goToStoreDetail = (store: PointOfSaleDTO) => {
     // eslint-disable-next-line functional/immutable-data
     isGoingToDetail.current = true;
-    history.push(`${BASE_ROUTE}/${initiative_id}/punti-vendita/${store.id}/`);
+    history.push(`${BASE_ROUTE}/${initiativeId}/punti-vendita/${store.id}/`);
   };
 
   const filtersSetted = () =>
@@ -306,7 +308,7 @@ const InitiativeStores: React.FC = () => {
       setSortModel(newSortModel);
 
       // Update sessionStorage with new sort
-      const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId: initiative_id };
+      const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId };
       setStoresPagination(updatedPagination);
       sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
 
@@ -329,7 +331,7 @@ const InitiativeStores: React.FC = () => {
     const updatedPagination = {
       ...storesPagination,
       pageNo: page,
-      initiativeId: initiative_id,
+      initiativeId,
       sort: currentSort,
     };
     setStoresPagination(updatedPagination);
