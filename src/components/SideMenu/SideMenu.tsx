@@ -12,17 +12,13 @@ import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/lib/hooks
 import { useTranslation } from 'react-i18next';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListAltIcon from '@mui/icons-material/ListAlt';
-import StoreIcon from '@mui/icons-material/Store';
-import ReportIcon from '@mui/icons-material/Report';
-import EuroIcon from '@mui/icons-material/Euro';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
 import ROUTES, { BASE_ROUTE } from '../../routes';
 import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import SidenavItem from './SidenavItem';
+import { config } from './config';
 
 interface MatchParams {
   id: string;
@@ -45,10 +41,11 @@ export default function SideMenu() {
     history.listen(() => setPathName(history.location.pathname));
     return history.location.pathname;
   });
+  const [firstInitiativePage] = config;
 
   const match = matchPath(location.pathname, {
     path: [ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS,
-      ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS, ROUTES.REFUND_REQUESTS_STORE, ROUTES.EXPORT_REPORT],
+    ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS, ROUTES.REFUND_REQUESTS_STORE, ROUTES.EXPORT_REPORT],
     exact: true,
     strict: false,
   });
@@ -71,18 +68,6 @@ export default function SideMenu() {
   const handleChange = (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false);
   };
-
-  const checkIsSelected = (item: any) => pathname.startsWith(
-    `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
-  );
-
-  const checkIsReportedUsersPage = (item: any) => pathname.startsWith(
-    `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
-  );
-
-  const checkIsExportReport = (item: any) => pathname.startsWith(
-    `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`
-  );
 
   return (
     <Box display="grid" mt={1}>
@@ -128,7 +113,7 @@ export default function SideMenu() {
                       })
                     );
                     history.replace(
-                      `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
+                      `${BASE_ROUTE}/${item.initiativeId}/${firstInitiativePage.route}`
                     );
                     setExpanded(`panel-${item.initiativeId}`);
                   });
@@ -138,8 +123,8 @@ export default function SideMenu() {
               </AccordionSummary>
               <AccordionDetails sx={{ p: 0 }}>
                 <List disablePadding>
-                  <SidenavItem
-                    title={t('pages.initiativeOverview.title')}
+                  {config.map(({ title, route, icon, dataTestId }) => (<SidenavItem key={title}
+                    title={t(title)}
                     handleClick={() =>
                       onExit(() => {
                         dispatch(
@@ -152,111 +137,17 @@ export default function SideMenu() {
                           })
                         );
                         history.replace(
-                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
+                          `${BASE_ROUTE}/${item.initiativeId}/${route}`
                         );
                       })
                     }
                     isSelected={pathname.startsWith(
-                      `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
+                      `${BASE_ROUTE}/${item.initiativeId}/${route}`
                     )}
-                    icon={DashboardIcon}
+                    icon={icon}
                     level={2}
-                    data-testid="initiativeOverviewTitle-click-test"
-                  />
-                  <SidenavItem
-                    title={t('pages.initiativeStores.title')}
-                    handleClick={() =>
-                      onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
-                        history.replace(
-                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
-                        );
-                      })
-                    }
-                    isSelected={checkIsSelected(item)}
-                    icon={StoreIcon}
-                    level={2}
-                    data-testid="initiativeStoresTitle-click-test"
-                  />
-                  <SidenavItem
-                    title={t('pages.refundRequests.title')}
-                    handleClick={() =>
-                      onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
-                        history.replace(
-                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REFUND_REQUESTS}`
-                        );
-                      })
-                    }
-                    isSelected={pathname.startsWith(
-                      `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REFUND_REQUESTS}`
-                    )}
-                    icon={EuroIcon}
-                    level={2}
-                    data-testid="refundRequestsTitle-click-test"
-                  />
-                  <SidenavItem
-                    title={t('pages.reportedUsers.title')}
-                    handleClick={() =>
-                      onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
-                        history.replace(
-                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
-                        );
-                      })
-                    }
-                    isSelected={checkIsReportedUsersPage(item)}
-                    icon={ReportIcon}
-                    level={2}
-                    data-testid="reportedUsers-click-test"
-                  />
-                  <SidenavItem
-                    title={t('pages.reportExport.title')}
-                    handleClick={() =>
-                      onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
-                        history.replace(
-                          `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`
-                        );
-                      })
-                    }
-                    isSelected={checkIsExportReport(item)}
-                    icon={FileDownloadIcon}
-                    level={2}
-                    data-testid="export-report-click-test"
-                  />
+                    data-testid={dataTestId}
+                  />))}
                 </List>
               </AccordionDetails>
             </Accordion>
