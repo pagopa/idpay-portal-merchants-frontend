@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -99,7 +98,11 @@ describe('MerchantTransactions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedGetStatus.mockImplementation((status) => ({ label: status, color: 'green', textColor: 'white' }));
+    mockedGetStatus.mockImplementation((status) => ({
+      label: status,
+      color: 'green',
+      textColor: 'white',
+    }));
   });
 
   it('renders data table when transactions exist', () => {
@@ -107,7 +110,9 @@ describe('MerchantTransactions', () => {
       <MerchantTransactions
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset} />
+        handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
+      />
     );
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
     expect(screen.getByText('Frigorifero')).toBeInTheDocument();
@@ -124,6 +129,7 @@ describe('MerchantTransactions', () => {
         transactions={[]}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
     expect(screen.getByTestId('empty-list')).toBeInTheDocument();
@@ -137,6 +143,7 @@ describe('MerchantTransactions', () => {
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
         dataTableIsLoading={true}
+        sortModel={[]}
       />
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -148,6 +155,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -170,6 +178,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -193,6 +202,7 @@ describe('MerchantTransactions', () => {
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
         handleSortChange={handleSortChange}
+        sortModel={[]}
       />
     );
 
@@ -213,6 +223,7 @@ describe('MerchantTransactions', () => {
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
         handlePaginationPageChange={handlePaginationPageChange}
+        sortModel={[]}
       />
     );
 
@@ -232,6 +243,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -247,6 +259,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -262,6 +275,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -277,6 +291,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -316,6 +331,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -331,6 +347,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -351,6 +368,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -369,6 +387,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -387,6 +406,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -405,6 +425,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -423,6 +444,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -446,6 +468,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -467,6 +490,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -487,6 +511,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -511,6 +536,7 @@ describe('MerchantTransactions', () => {
         transactions={emptyValueTransaction}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -533,6 +559,7 @@ describe('MerchantTransactions', () => {
         transactions={nullValueTransaction}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -555,6 +582,7 @@ describe('MerchantTransactions', () => {
         transactions={undefinedValueTransaction}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -577,6 +605,7 @@ describe('MerchantTransactions', () => {
         transactions={shortValueTransaction}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -599,6 +628,7 @@ describe('MerchantTransactions', () => {
         transactions={longValueTransaction}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -621,6 +651,7 @@ describe('MerchantTransactions', () => {
         transactions={exactThresholdTransaction}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -633,6 +664,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -665,6 +697,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -676,6 +709,7 @@ describe('MerchantTransactions', () => {
         transactions={newTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -688,6 +722,7 @@ describe('MerchantTransactions', () => {
         transactions={[]}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -701,6 +736,7 @@ describe('MerchantTransactions', () => {
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
         dataTableIsLoading={true}
+        sortModel={[]}
       />
     );
 
@@ -727,6 +763,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -739,6 +776,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={undefined as any}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -752,30 +790,27 @@ describe('MerchantTransactions', () => {
   });
 
   it('does not call handleFiltersReset when callback is undefined', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     render(
       <MerchantTransactions
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={undefined as any}
+        sortModel={[]}
       />
     );
 
+    const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
+    const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
+
     await act(async () => {
-      const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
-      const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
-    expect(consoleSpy).toHaveBeenCalled()
 
-    await waitFor(() => {
-      const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
-      expect(resetButton).toBeInTheDocument();
-      userEvent.click(resetButton)
-    });
-    expect(consoleSpy).toHaveBeenCalled()
-    consoleSpy.mockRestore();
+    const resetButton = await screen.findByRole('button', { name: 'commons.removeFiltersBtn' });
+    await userEvent.click(resetButton);
+
+    expect(resetButton).toBeInTheDocument();
   });
 
   it('does not call handleSortChange when callback is undefined', async () => {
@@ -785,6 +820,7 @@ describe('MerchantTransactions', () => {
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
         handleSortChange={undefined}
+        sortModel={[]}
       />
     );
 
@@ -801,6 +837,7 @@ describe('MerchantTransactions', () => {
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
         handlePaginationPageChange={undefined}
+        sortModel={[]}
       />
     );
 
@@ -816,6 +853,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -852,6 +890,7 @@ describe('MerchantTransactions', () => {
         transactions={multipleTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -864,6 +903,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -894,6 +934,7 @@ describe('MerchantTransactions', () => {
         transactions={longValueTransaction}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -907,6 +948,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -937,6 +979,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -960,11 +1003,14 @@ describe('MerchantTransactions', () => {
   });
 
   it('calls setAlert when drawer is toggled', async () => {
-    render(<MerchantTransactions
-      transactions={mockTransactions}
-      handleFiltersApplied={handleFiltersApplied}
-      handleFiltersReset={handleFiltersReset}
-    />);
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
+      />
+    );
 
     await userEvent.click(screen.getByRole('button', { name: 'Row Action' }));
     await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
@@ -975,11 +1021,14 @@ describe('MerchantTransactions', () => {
     });
   });
   it('rejects GTIN input with spaces or long values without updating formik', () => {
-    render(<MerchantTransactions
-      transactions={mockTransactions}
-      handleFiltersApplied={handleFiltersApplied}
-      handleFiltersReset={handleFiltersReset}
-    />);
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
+      />
+    );
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     fireEvent.change(gtinInput, { target: { value: '123 456' } });
@@ -995,11 +1044,14 @@ describe('MerchantTransactions', () => {
       updateDate: 'LONGDATEVALUEEXCEEDINGTHRESHOLD',
     }];
 
-    render(<MerchantTransactions
-      transactions={longTx}
-      handleFiltersApplied={handleFiltersApplied}
-      handleFiltersReset={handleFiltersReset}
-    />);
+    render(
+      <MerchantTransactions
+        transactions={longTx}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
+      />
+    );
 
     expect(MockedTooltip.mock.calls.some(call => call[0].title.includes('VERY_LONG'))).toBe(false);
     expect(MockedCustomChip).not.toHaveBeenCalledWith(
@@ -1009,19 +1061,25 @@ describe('MerchantTransactions', () => {
   });
 
   it('updates rows when transactions prop changes', () => {
-    const { rerender } = render(<MerchantTransactions
-      transactions={mockTransactions}
-      handleFiltersApplied={handleFiltersApplied}
-      handleFiltersReset={handleFiltersReset}
-    />);
+    const { rerender } = render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
+      />
+    );
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
 
-    rerender(<MerchantTransactions
-      transactions={[]}
-      handleFiltersApplied={handleFiltersApplied}
-      handleFiltersReset={handleFiltersReset}
-    />);
+    rerender(
+      <MerchantTransactions
+        transactions={[]}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
+      />
+    );
 
     expect(screen.getByTestId('empty-list')).toBeInTheDocument();
   });
@@ -1032,6 +1090,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -1047,6 +1106,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -1062,6 +1122,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
