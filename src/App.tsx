@@ -32,6 +32,7 @@ import ShopDetails from './pages/refundRequests/detail/ShopDetails';
 import ModifyDocument from './pages/modifyDocument/ModifyDocument';
 import ExportReport from './pages/exportReport/ExportReport';
 import Reverse from './pages/reverse/Reverse';
+import WithInitiativeGuard from './decorators/withInitiativeGuard';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -84,47 +85,73 @@ const SecuredRoutes = withLogin(
             <InitiativeDiscounts />
           </Route> */}
             <Route path={routes.OVERVIEW} exact={true}>
-              <InitiativeOverview />
+              <WithInitiativeGuard>
+                <InitiativeOverview />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.STORES_UPLOAD} exact={true}>
-              <InitiativeStoresUpload />
+              <WithInitiativeGuard>
+                <InitiativeStoresUpload />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.STORES} exact={true}>
-              <InitiativeStores />
+              <WithInitiativeGuard>
+                <InitiativeStores />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.REPORTED_USERS} exact={true}>
-              <ReportedUsers />
+              <WithInitiativeGuard>
+                <ReportedUsers />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.REPORTED_USERS_INSERT} exact={true}>
-              <InsertReportedUser />
+              <WithInitiativeGuard>
+                <InsertReportedUser />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.EXPORT_REPORT} exact={true}>
-              <ExportReport />
+              <WithInitiativeGuard>
+                <ExportReport />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.STORES_DETAIL} exact={true}>
-              <StoreProvider>
-                <InitiativeStoreDetail />
-              </StoreProvider>
+              <WithInitiativeGuard>
+                <StoreProvider>
+                  <InitiativeStoreDetail />
+                </StoreProvider>
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.NEW_DISCOUNT} exact={true}>
-              <NewDiscount />
+              <WithInitiativeGuard>
+                <NewDiscount />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.ACCEPT_NEW_DISCOUNT} exact={true}>
-              <AcceptNewDiscount />
+              <WithInitiativeGuard>
+                <AcceptNewDiscount />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.REFUND_REQUESTS} exact={true}>
-              <RefundRequests />
+              <WithInitiativeGuard>
+                <RefundRequests />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.REFUND_REQUESTS_STORE} exact={true}>
-              <StoreProvider>
-                <ShopDetails />
-              </StoreProvider>
+              <WithInitiativeGuard>
+                <StoreProvider>
+                  <ShopDetails />
+                </StoreProvider>
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.MODIFY_DOCUMENT} exact={true}>
-              <ModifyDocument />
+              <WithInitiativeGuard>
+                <ModifyDocument />
+              </WithInitiativeGuard>
             </Route>
             <Route path={routes.REVERSE} exact={true}>
-              <Reverse />
+              <WithInitiativeGuard>
+                <Reverse />
+              </WithInitiativeGuard>
             </Route>
             <Route path="*">
               <Redirect to={routes.HOME} />
