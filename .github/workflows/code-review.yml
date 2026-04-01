@@ -65,6 +65,14 @@ jobs:
           annotations: none
           package-manager: yarn
 
+      # Sonar scanner runs on Linux, but sometimes lcov contains Windows-style backslashes (e.g. SF:src\utils\consoleLogger.ts)
+      # which leads to "inconsistencies in coverage report" and missing coverage on SonarCloud.
+      - name: Normalize lcov paths (Windows \\ -> POSIX /)
+        shell: bash
+        run: |
+          test -f coverage/lcov.info
+          sed -i 's|\\|/|g' coverage/lcov.info
+
       - name: SonarCloud Scan (PR Analysis)
         uses: SonarSource/sonarqube-scan-action@e9a1c4e09a5eddb7db5d045b83807904bf8f67fc # v7.0.0
         env:
