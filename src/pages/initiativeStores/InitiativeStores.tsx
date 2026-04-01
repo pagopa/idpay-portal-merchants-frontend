@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
 import {
   Box,
@@ -61,6 +61,7 @@ const InitiativeStores: React.FC = () => {
   const [appliedFilters, setAppliedFilters] = useState<GetPointOfSalesFilters>(initialValues);
 
   const isGoingToDetail = useRef(false);
+  const requestIdRef = useRef(0);
   const { t } = useTranslation();
   const history = useHistory();
   const { initiativeId } = useCurrentInitiativeId();
@@ -98,17 +99,20 @@ const InitiativeStores: React.FC = () => {
       if (parsed.sort) {
         setCurrentSort(parsed.sort);
 
-        // Convert sort string to GridSortModel
         const sortParts = parsed.sort.split(',');
         if (sortParts.length === 2) {
           const [field, order] = sortParts;
           setSortModel([{ field, sort: order as 'asc' | 'desc' }]);
         }
       }
-
-      void fetchStores({ ...initialValues, page: parsed.pageNo, sort: parsed.sort || 'asc' });
     } else {
-      void fetchStores({ ...initialValues });
+      setStoresPagination({
+        pageNo: 0,
+        pageSize: PAGINATION_SIZE,
+        totalElements: 0,
+      });
+      setCurrentSort('asc');
+      setSortModel([]);
     }
 
     return () => {
@@ -123,112 +127,124 @@ const InitiativeStores: React.FC = () => {
     fontSize: theme.typography.fontSize,
   };
 
-  const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
-    <Tooltip title={value && value.length >= tooltipThreshold ? value : MISSING_DATA_PLACEHOLDER}>
-      <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-        {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
-      </Typography>
-    </Tooltip>
+  const renderCellWithTooltip = useCallback(
+    (value: string, tooltipThreshold: number) => (
+      <Tooltip title={value && value.length >= tooltipThreshold ? value : MISSING_DATA_PLACEHOLDER}>
+        <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
+          {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
+        </Typography>
+      </Tooltip>
+    ),
+    []
   );
 
-  const columns: Array<GridColDef> = [
-    {
-      field: 'franchiseName',
-      headerName: t('pages.initiativeStores.franchiseName'),
-      flex: 1,
-      editable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-    },
-    {
-      field: 'type',
-      headerName: t('pages.initiativeStores.type'),
-      flex: 0.8,
-      editable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) =>
-        renderCellWithTooltip(
-          params.value === 'PHYSICAL'
-            ? 'Fisico'
-            : params.value === 'ONLINE'
-            ? 'Online'
-            : MISSING_DATA_PLACEHOLDER,
-          1
+  const columns: Array<GridColDef> = useMemo(
+    () => [
+      {
+        field: 'franchiseName',
+        headerName: t('pages.initiativeStores.franchiseName'),
+        flex: 1,
+        editable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
+      },
+      {
+        field: 'type',
+        headerName: t('pages.initiativeStores.type'),
+        flex: 0.8,
+        editable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) =>
+          renderCellWithTooltip(
+            params.value === 'PHYSICAL'
+              ? 'Fisico'
+              : params.value === 'ONLINE'
+              ? 'Online'
+              : MISSING_DATA_PLACEHOLDER,
+            1
+          ),
+      },
+      {
+        field: 'address',
+        headerName: t('pages.initiativeStores.address'),
+        flex: 1,
+        editable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
+      },
+      {
+        field: 'website',
+        headerName: t('pages.initiativeStores.addressURL'),
+        flex: 1.2,
+        editable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
+      },
+      {
+        field: 'city',
+        headerName: t('pages.initiativeStores.city'),
+        flex: 1,
+        editable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
+      },
+      {
+        field: 'contactName',
+        headerName: t('pages.initiativeStores.referent'),
+        flex: 1.2,
+        editable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) =>
+          renderCellWithTooltip(
+            `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${
+              params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
+            }`,
+            1
+          ),
+      },
+      {
+        field: 'contactEmail',
+        headerName: t('pages.initiativeStores.email'),
+        flex: 1.5,
+        editable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
+      },
+      {
+        field: 'actions',
+        headerName: '',
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        flex: 0.3,
+        renderCell: (params: any) => (
+          <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+            <IconButton onClick={() => goToStoreDetail(params.row)} size="small">
+              <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
+            </IconButton>
+          </Box>
         ),
-    },
-    {
-      field: 'address',
-      headerName: t('pages.initiativeStores.address'),
-      flex: 1,
-      editable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-    },
-    {
-      field: 'website',
-      headerName: t('pages.initiativeStores.addressURL'),
-      flex: 1.2,
-      editable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-    },
-    {
-      field: 'city',
-      headerName: t('pages.initiativeStores.city'),
-      flex: 1,
-      editable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-    },
-    {
-      field: 'contactName',
-      headerName: t('pages.initiativeStores.referent'),
-      flex: 1.2,
-      editable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) =>
-        renderCellWithTooltip(
-          `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${
-            params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
-          }`,
-          1
-        ),
-    },
-    {
-      field: 'contactEmail',
-      headerName: t('pages.initiativeStores.email'),
-      flex: 1.5,
-      editable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-    },
-    {
-      field: 'actions',
-      headerName: '',
-      sortable: false,
-      filterable: false,
-      disableColumnMenu: true,
-      flex: 0.3,
-      renderCell: (params: any) => (
-        <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
-          <IconButton onClick={() => goToStoreDetail(params.row)} size="small">
-            <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
-          </IconButton>
-        </Box>
-      ),
-    },
-  ];
+      },
+    ],
+    [t, renderCellWithTooltip]
+  );
 
   const fetchStores = async (filters: GetPointOfSalesFilters, fromSort?: boolean) => {
+    const currentRequestId = requestIdRef.current + 1;
+    // eslint-disable-next-line functional/immutable-data
+    requestIdRef.current = currentRequestId;
+
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     if (!merchantId) {
       return;
     }
+
     try {
       if (!fromSort) {
         setStoresLoading(true);
       }
+
       const response = await getMerchantPointOfSales(merchantId, {
         type: filters.type,
         city: filters.city,
@@ -238,16 +254,27 @@ const InitiativeStores: React.FC = () => {
         page: filters.page ?? 0,
         size: PAGINATION_SIZE,
       });
+
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
+
       const { content, ...paginationData } = response;
       setStores(content);
       setStoresPagination(paginationData);
+
       if (!fromSort) {
         setStoresLoading(false);
       }
     } catch (error: any) {
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
+
       if (!fromSort) {
         setStoresLoading(false);
       }
+
       setAlert({
         title: t('errors.genericTitle'),
         text: t('errors.genericDescription'),
@@ -264,24 +291,39 @@ const InitiativeStores: React.FC = () => {
     },
   });
 
+  useEffect(() => {
+    if (!initiativeId) {
+      return;
+    }
+
+    formik.resetForm();
+    setAppliedFilters(initialValues);
+    setFiltersAppliedOnce(false);
+    setSortModel([]);
+    setCurrentSort('asc');
+    setStoresPagination({
+      pageNo: 0,
+      pageSize: PAGINATION_SIZE,
+      totalElements: 0,
+    });
+  }, [initiativeId]);
+
   const handleFiltersApplied = (values: GetPointOfSalesFilters) => {
-    const filtersWithSort = {
-      ...values,
-      sort: currentSort,
-      page: 0,
-    };
     setAppliedFilters(values);
     setFiltersAppliedOnce(true);
-    fetchStores(filtersWithSort).catch((error) => {
-      console.error('Error fetching stores:', error);
-    });
+    setStoresPagination((prev) => ({
+      ...prev,
+      pageNo: 0,
+    }));
   };
 
   const handleFiltersReset = () => {
-    console.log('Callback dopo reset filtri');
     setFiltersAppliedOnce(false);
     setAppliedFilters(initialValues);
-    void fetchStores(initialValues);
+    setStoresPagination((prev) => ({
+      ...prev,
+      pageNo: 0,
+    }));
   };
 
   const goToAddStorePage = () => {
@@ -327,21 +369,32 @@ const InitiativeStores: React.FC = () => {
     }
   };
 
-  const handlePaginationPageChange = (page: number) => {
-    const updatedPagination = {
-      ...storesPagination,
-      pageNo: page,
-      initiativeId,
-      sort: currentSort,
-    };
-    setStoresPagination(updatedPagination);
-    sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
+  const handlePaginationPageChange = useCallback(
+    (page: number) => {
+      const updatedPagination = {
+        ...storesPagination,
+        pageNo: page,
+        initiativeId,
+        sort: currentSort,
+      };
+      setStoresPagination(updatedPagination);
+      sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
+    },
+    [storesPagination, initiativeId, currentSort]
+  );
+
+  // STEP 2 – Effetto deterministico unico di fetch
+  useEffect(() => {
+    if (!initiativeId) {
+      return;
+    }
+
     void fetchStores({
       ...appliedFilters,
-      page,
       sort: currentSort,
+      page: storesPagination.pageNo,
     });
-  };
+  }, [initiativeId, storesPagination.pageNo, currentSort, appliedFilters]);
 
   return (
     <Box sx={{ my: 2 }}>

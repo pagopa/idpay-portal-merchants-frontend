@@ -31,20 +31,37 @@ const InitiativeOverview = () => {
       return;
     }
 
-    getMerchantDetail(initiativeId)
-      .then((response) => {
+    let active = true;
+
+    const load = async () => {
+      try {
+        const response = await getMerchantDetail(initiativeId);
+        if (!active) {
+          return;
+        }
+
         setIban(response?.iban);
         setIbanHolder(response?.ibanHolder);
         setOnboardingDate(formatDate(response?.activationDate));
-      })
-      .catch(() =>
+      } catch {
+        if (!active) {
+          return;
+        }
+
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),
           isOpen: true,
           severity: 'error',
-        })
-      );
+        });
+      }
+    };
+
+    void load();
+
+    return () => {
+      active = false;
+    };
   }, [initiativeId]);
 
   // useEffect(() => {

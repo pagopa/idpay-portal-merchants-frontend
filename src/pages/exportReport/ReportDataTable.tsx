@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { Box, Card, CircularProgress, IconButton, Paper, Tooltip, Typography } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useTranslation } from 'react-i18next';
@@ -19,14 +19,15 @@ type RouteParams = {
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case ReportStatusEnum.INSERTED || ReportStatusEnum.IN_PROGRESS:
+    case ReportStatusEnum.INSERTED:
+    case ReportStatusEnum.IN_PROGRESS:
       return <CachedIcon color="info" />;
     case ReportStatusEnum.FAILED:
       return <ErrorIcon color="error" />;
     case ReportStatusEnum.GENERATED:
       return <CheckCircleIcon color="success" />;
     default:
-      return <CachedIcon name="default" color="info" />;
+      return <CachedIcon color="info" />;
   }
 };
 
@@ -38,6 +39,7 @@ interface ReportDataTableProps {
 const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refreshKey }) => {
   const { t } = useTranslation();
   const { initiative_id } = useParams<RouteParams>();
+
   const [reports, setReports] = useState<any>({
     reports: [],
     page: 0,
@@ -45,219 +47,248 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
     totalElements: 0,
     totalPages: 0,
   });
+
   const [pagination, setPagination] = useState({
     pageNo: 0,
     pageSize: 10,
     totalElements: 0,
   });
+
   const [loading, setLoading] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const requestIdRef = useRef<number>(0);
 
-  const loadReports = () => {
+  const loadReports = async (pageNo: number, pageSize: number) => {
     if (!initiative_id) {
       return;
     }
+
+    const currentRequestId = requestIdRef.current + 1;
+    // eslint-disable-next-line functional/immutable-data
+    requestIdRef.current = currentRequestId;
 
     setLoading(true);
 
-    void getMerchantReports(initiative_id, pagination.pageNo, pagination.pageSize)
-      .then((response) => {
-        setReports(response);
-        setPagination({
-          pageNo: response.page ?? 0,
-          pageSize: response.size ?? 10,
-          totalElements: response.totalElements ?? 0,
-        });
-      })
-      .finally(() => setLoading(false));
+    try {
+      const response = await getMerchantReports(initiative_id, pageNo, pageSize);
+
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
+
+      setReports(response);
+      setPagination({
+        pageNo: response.page ?? 0,
+        pageSize: response.size ?? 10,
+        totalElements: response.totalElements ?? 0,
+      });
+    } finally {
+      if (currentRequestId === requestIdRef.current) {
+        setLoading(false);
+      }
+    }
   };
 
   useEffect(() => {
-    loadReports();
-  }, [pagination.pageNo, pagination.pageSize]);
-
-  useEffect(() => {
-    if (refreshKey) {
-      setPagination((prev) => {
-        if (prev.pageNo === 0) {
-          loadReports();
-          return prev;
-        }
-        return {
-          ...prev,
-          pageNo: 0,
-        };
-      });
-    }
-  }, [refreshKey]);
-
-  const handleDownload = async (reportId: string, fileName: string) => {
     if (!initiative_id) {
       return;
     }
-    setDownloadingId(reportId);
+    void loadReports(pagination.pageNo, pagination.pageSize);
+  }, [initiative_id, pagination.pageNo, pagination.pageSize]);
 
-    try {
-      const response = await downloadMerchantReport(initiative_id, reportId);
-      const reportUrl = (response as any)?.reportUrl;
-
-      if (reportUrl) {
-        const link = document.createElement('a');
-        // eslint-disable-next-line functional/immutable-data
-        link.href = reportUrl;
-        link.setAttribute('download', fileName || 'report.csv');
-        document.body.appendChild(link);
-        link.click();
-        link.parentNode?.removeChild(link);
-      }
-    } catch (error) {
-      console.error('Error downloading report', error);
-      updateAlerts('error', true);
-      setTimeout(() => updateAlerts('error', false), 3000);
-    } finally {
-      setDownloadingId(null);
+  // STEP 1 – Reset deterministico su refresh
+  useEffect(() => {
+    if (!initiative_id) {
+      return;
     }
-  };
 
-  const columns = [
-    {
-      field: 'fileName',
-      headerName: 'Nome file',
-      flex: 3,
-      sortable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) => (
-        <>
-          {getStatusIcon(params.row.reportStatus)}
+    if (refreshKey) {
+      setPagination((prev) => ({
+        ...prev,
+        pageNo: 0,
+      }));
+    }
+  }, [refreshKey, initiative_id]);
+
+  const handleDownload = useCallback(
+    async (reportId: string, fileName: string) => {
+      if (!initiative_id) {
+        return;
+      }
+
+      setDownloadingId(reportId);
+
+      try {
+        const response = await downloadMerchantReport(initiative_id, reportId);
+        const reportUrl = (response as any)?.reportUrl;
+
+        if (reportUrl) {
+          const link = document.createElement('a');
+          // eslint-disable-next-line functional/immutable-data
+          link.href = reportUrl;
+          link.setAttribute('download', fileName || 'report.csv');
+          document.body.appendChild(link);
+          link.click();
+          link.parentNode?.removeChild(link);
+        }
+      } catch (error) {
+        console.error('Error downloading report', error);
+        updateAlerts('error', true);
+        setTimeout(() => updateAlerts('error', false), 3000);
+      } finally {
+        setDownloadingId(null);
+      }
+    },
+    [initiative_id, updateAlerts]
+  );
+
+  const columns = useMemo(
+    () => [
+      {
+        field: 'fileName',
+        headerName: 'Nome file',
+        flex: 3,
+        sortable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) => (
+          <>
+            {getStatusIcon(params.row.reportStatus)}
+            <Tooltip
+              title={
+                params.row.fileName && params.row.fileName !== ''
+                  ? params.row.fileName
+                  : MISSING_DATA_PLACEHOLDER
+              }
+            >
+              <Typography
+                variant="caption-semibold"
+                fontSize="1rem"
+                pl={1}
+                sx={{ maxWidth: '100% !important' }}
+                className="ShowDots"
+              >
+                {params.row.fileName}
+              </Typography>
+            </Tooltip>
+          </>
+        ),
+      },
+      {
+        field: 'requestDate',
+        headerName: 'Data richiesta',
+        flex: 2,
+        sortable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) => (
           <Tooltip
             title={
-              params.row.fileName && params.row.fileName !== ''
-                ? params.row.fileName
+              params.row.requestDate && params.row.requestDate !== ''
+                ? safeFormatDate(params.row.requestDate)
                 : MISSING_DATA_PLACEHOLDER
             }
           >
-            <Typography
-              variant="caption-semibold"
-              fontSize="1rem"
-              pl={1}
-              sx={{ maxWidth: '100% !important' }}
-              className="ShowDots"
-            >
-              {params.row.fileName}
+            <Typography color={theme.palette.text.secondary} fontWeight={400} className="ShowDots">
+              {safeFormatDate(params.row.requestDate)}
             </Typography>
           </Tooltip>
-        </>
-      ),
-    },
-    {
-      field: 'requestDate',
-      headerName: 'Data richiesta',
-      flex: 2,
-      sortable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) => (
-        <Tooltip
-          title={
-            params.row.requestDate && params.row.requestDate !== ''
-              ? safeFormatDate(params.row.requestDate)
-              : MISSING_DATA_PLACEHOLDER
-          }
-        >
-          <Typography color={theme.palette.text.secondary} fontWeight={400} className="ShowDots">
-            {safeFormatDate(params.row.requestDate)}
-          </Typography>
-        </Tooltip>
-      ),
-    },
-    {
-      field: 'elaborationDate',
-      headerName: 'Data generazione',
-      flex: 2,
-      sortable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) => (
-        <Tooltip
-          title={
-            params.row.elaborationDate && params.row.elaborationDate !== ''
-              ? safeFormatDate(params.row.elaborationDate)
-              : MISSING_DATA_PLACEHOLDER
-          }
-        >
-          <Typography color={theme.palette.text.secondary} fontWeight={400} className="ShowDots">
-            {safeFormatDate(params.row.elaborationDate)}
-          </Typography>
-        </Tooltip>
-      ),
-    },
-    {
-      field: 'period',
-      headerName: 'Periodo',
-      flex: 2,
-      sortable: false,
-      disableColumnMenu: true,
-      renderCell: (params: any) => {
-        const period =
-          safeFormatDate(params.row.startPeriod, false) +
-          ' - ' +
-          safeFormatDate(params.row.endPeriod, false);
-        return (
-          <Tooltip title={period && period !== '' ? period : MISSING_DATA_PLACEHOLDER}>
-            <Typography
-              variant="caption-semibold"
-              fontSize="1rem"
-              sx={{ maxWidth: '100% !important' }}
-              className="ShowDots"
-            >
-              {period}
-            </Typography>
-          </Tooltip>
-        );
+        ),
       },
-    },
-    {
-      field: 'actions',
-      headerName: '',
-      sortable: false,
-      disableColumnMenu: true,
-      align: 'right' as const,
-      renderCell: (params: any) => {
-        if (params.row.reportStatus !== ReportStatusEnum.FAILED) {
+      {
+        field: 'elaborationDate',
+        headerName: 'Data generazione',
+        flex: 2,
+        sortable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) => (
+          <Tooltip
+            title={
+              params.row.elaborationDate && params.row.elaborationDate !== ''
+                ? safeFormatDate(params.row.elaborationDate)
+                : MISSING_DATA_PLACEHOLDER
+            }
+          >
+            <Typography color={theme.palette.text.secondary} fontWeight={400} className="ShowDots">
+              {safeFormatDate(params.row.elaborationDate)}
+            </Typography>
+          </Tooltip>
+        ),
+      },
+      {
+        field: 'period',
+        headerName: 'Periodo',
+        flex: 2,
+        sortable: false,
+        disableColumnMenu: true,
+        renderCell: (params: any) => {
+          const period =
+            safeFormatDate(params.row.startPeriod, false) +
+            ' - ' +
+            safeFormatDate(params.row.endPeriod, false);
+
           return (
-            <IconButton
-              disabled={
-                params.row.reportStatus !== ReportStatusEnum.GENERATED ||
-                downloadingId === params.row.id
-              }
-              onClick={() => handleDownload(params.row.id, params.row.fileName)}
-            >
-              <DownloadIcon
-                color={
-                  params.row.reportStatus === ReportStatusEnum.GENERATED &&
-                  downloadingId !== params.row.id
-                    ? 'primary'
-                    : 'disabled'
-                }
-              />
-            </IconButton>
+            <Tooltip title={period && period !== '' ? period : MISSING_DATA_PLACEHOLDER}>
+              <Typography
+                variant="caption-semibold"
+                fontSize="1rem"
+                sx={{ maxWidth: '100% !important' }}
+                className="ShowDots"
+              >
+                {period}
+              </Typography>
+            </Tooltip>
           );
-        }
-        return '';
+        },
       },
-    },
-  ];
+      {
+        field: 'actions',
+        headerName: '',
+        sortable: false,
+        disableColumnMenu: true,
+        align: 'right' as const,
+        renderCell: (params: any) => {
+          if (params.row.reportStatus !== ReportStatusEnum.FAILED) {
+            return (
+              <IconButton
+                disabled={
+                  params.row.reportStatus !== ReportStatusEnum.GENERATED ||
+                  downloadingId === params.row.id
+                }
+                onClick={() => handleDownload(params.row.id, params.row.fileName)}
+              >
+                <DownloadIcon
+                  color={
+                    params.row.reportStatus === ReportStatusEnum.GENERATED &&
+                    downloadingId !== params.row.id
+                      ? 'primary'
+                      : 'disabled'
+                  }
+                />
+              </IconButton>
+            );
+          }
+          return null;
+        },
+      },
+    ],
+    [downloadingId, handleDownload]
+  );
 
-  const tableRows = reports?.reports?.map((row: ReportDTO) => ({
-    ...row,
-    id: row.id,
-  }));
+  const tableRows = useMemo(
+    () =>
+      reports?.reports?.map((row: ReportDTO) => ({
+        ...row,
+        id: row.id,
+      })),
+    [reports]
+  );
 
-  const handlePaginationPageChange = (page: number) => {
+  const handlePaginationPageChange = useCallback((page: number) => {
     setPagination((prev) => ({ ...prev, pageNo: page }));
-  };
+  }, []);
 
-  const handleRowsPerPageChange = (pageSize: number) => {
+  const handleRowsPerPageChange = useCallback((pageSize: number) => {
     setPagination((prev) => ({ ...prev, pageNo: 0, pageSize }));
-  };
+  }, []);
 
   return (
     <Card>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { Box, Stack, Tooltip, Typography, CircularProgress, IconButton } from '@mui/material';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
@@ -6,8 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { GridColDef } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia/theme';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
 import { getRewardBatches, sendRewardBatch } from '../../services/merchantService';
@@ -20,10 +21,6 @@ import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RefundRequestsModal } from './RefundRequestModal';
 
-interface RouteParams {
-  initiative_id: string;
-}
-
 const posTypeMapper: Record<string, string> = {
   PHYSICAL: 'Fisico',
   ONLINE: 'Online',
@@ -31,7 +28,7 @@ const posTypeMapper: Record<string, string> = {
 
 const RefundRequests = () => {
   const { setAlert } = useAlert();
-  const { initiative_id } = useParams<RouteParams>();
+  const { initiativeId } = useCurrentInitiativeId();
   const history = useHistory();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
@@ -43,106 +40,134 @@ const RefundRequests = () => {
     pageSize: 10,
     totalElements: 0,
   });
-  const columns: Array<GridColDef> = [
-    {
-      field: 'spacer',
-      headerName: '',
-      flex: 1,
-      sortable: false,
-      disableColumnMenu: true,
-      renderCell: () => '',
-    },
-    {
-      field: 'name',
-      headerName: 'Lotto',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(params.value),
-    },
-    {
-      field: 'posType',
-      headerName: 'Tipologia',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => renderCellWithTooltip(posTypeMapper[params.value]),
-    },
-    {
-      field: 'initialAmountCents',
-      headerName: 'Rimborso richiesto',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
-    },
-    {
-      field: 'approvedAmountCents',
-      headerName: 'Rimborso approvato',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
-    },
-    {
-      field: 'suspendedAmountCents',
-      headerName: 'Rimborso sospeso',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
-    },
-    {
-      field: 'status',
-      headerName: 'Stato',
-      disableColumnMenu: true,
-      flex: 2,
-      sortable: false,
-      renderCell: (params: any) => <StatusChip status={params.value} />,
-    },
-    {
-      field: 'actions',
-      headerName: '',
-      sortable: false,
-      filterable: false,
-      disableColumnMenu: true,
-      flex: 0.3,
-      renderCell: (params: any) => (
-        <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
-          <IconButton
-            onClick={() => {
-              history.push(
-                `${BASE_ROUTE}/${initiative_id}/richieste-di-rimborso/${params.row?.id}`,
-                { store: params.row }
-              );
-            }}
-            size="small"
-          >
-            <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
-          </IconButton>
-        </Box>
-      ),
-    },
-  ];
+  const requestIdRef = useRef<number>(0);
+  const columns: Array<GridColDef> = useMemo(
+    () => [
+      {
+        field: 'spacer',
+        headerName: '',
+        flex: 1,
+        sortable: false,
+        disableColumnMenu: true,
+        renderCell: () => '',
+      },
+      {
+        field: 'name',
+        headerName: 'Lotto',
+        disableColumnMenu: true,
+        flex: 2,
+        sortable: false,
+        renderCell: (params: any) => renderCellWithTooltip(params.value),
+      },
+      {
+        field: 'posType',
+        headerName: 'Tipologia',
+        disableColumnMenu: true,
+        flex: 2,
+        sortable: false,
+        renderCell: (params: any) => renderCellWithTooltip(posTypeMapper[params.value]),
+      },
+      {
+        field: 'initialAmountCents',
+        headerName: 'Rimborso richiesto',
+        disableColumnMenu: true,
+        flex: 2,
+        sortable: false,
+        renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+      },
+      {
+        field: 'approvedAmountCents',
+        headerName: 'Rimborso approvato',
+        disableColumnMenu: true,
+        flex: 2,
+        sortable: false,
+        renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
+      },
+      {
+        field: 'suspendedAmountCents',
+        headerName: 'Rimborso sospeso',
+        disableColumnMenu: true,
+        flex: 2,
+        sortable: false,
+        renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
+      },
+      {
+        field: 'status',
+        headerName: 'Stato',
+        disableColumnMenu: true,
+        flex: 2,
+        sortable: false,
+        renderCell: (params: any) => <StatusChip status={params.value} />,
+      },
+      {
+        field: 'actions',
+        headerName: '',
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        flex: 0.3,
+        renderCell: (params: any) => (
+          <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
+            <IconButton
+              onClick={() => {
+                if (!initiativeId) {
+                  return;
+                }
+                history.push(
+                  `${BASE_ROUTE}/${initiativeId}/richieste-di-rimborso/${params.row?.id}`,
+                  { store: params.row }
+                );
+              }}
+              size="small"
+            >
+              <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
+            </IconButton>
+          </Box>
+        ),
+      },
+    ],
+    [initiativeId]
+  );
   const { t } = useTranslation();
 
+  // STEP 1 – Reset deterministico su cambio iniziativa
   useEffect(() => {
-    void fetchRewardBatches(initiative_id);
-  }, [currentPagination.pageNo, currentPagination.pageSize]);
+    if (!initiativeId) {
+      return;
+    }
+
+    setSelectedRows([]);
+    setIsModalOpen(false);
+    setCurrentPagination({
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 0,
+    });
+  }, [initiativeId]);
 
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
     fontSize: theme.typography.fontSize,
   };
 
-  const fetchRewardBatches = async (initiativeId: string): Promise<void> => {
+  const fetchRewardBatches = async (
+    initiativeId: string,
+    pageNo: number,
+    pageSize: number
+  ): Promise<void> => {
+    const currentRequestId = requestIdRef.current + 1;
+    // eslint-disable-next-line functional/immutable-data
+    requestIdRef.current = currentRequestId;
+
     setRewardBatchesLoading(true);
+
     try {
-      const response = await getRewardBatches(
-        initiativeId,
-        currentPagination.pageNo,
-        currentPagination.pageSize
-      );
+      const response = await getRewardBatches(initiativeId, pageNo, pageSize);
+
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
+
       if (response?.content) {
         const mappedResponse = response.content.map((value) => ({
           ...value,
@@ -150,15 +175,26 @@ const RefundRequests = () => {
           suspendedAmountCents:
             value.status === 'APPROVED' ? value.suspendedAmountCents : undefined,
         }));
+
         setRewardBatches(mappedResponse);
-        setCurrentPagination({
-          pageNo: response?.pageNo as number,
-          pageSize: response?.pageSize as number,
-          totalElements: response?.totalElements as number,
-        });
+        if (
+          response?.pageNo !== pageNo ||
+          response?.pageSize !== pageSize ||
+          response?.totalElements !== currentPagination.totalElements
+        ) {
+          setCurrentPagination({
+            pageNo: response?.pageNo as number,
+            pageSize: response?.pageSize as number,
+            totalElements: response?.totalElements as number,
+          });
+        }
         setSelectedRows([]);
       }
     } catch (error: any) {
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
+
       setAlert({
         title: t('errors.genericTitle'),
         text: t('errors.genericDescription'),
@@ -166,25 +202,39 @@ const RefundRequests = () => {
         severity: 'error',
       });
     } finally {
-      setRewardBatchesLoading(false);
+      if (currentRequestId === requestIdRef.current) {
+        setRewardBatchesLoading(false);
+      }
     }
   };
 
-  const renderCellWithTooltip = (value: string) => (
-    <Tooltip title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}>
-      <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-        {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
-      </Typography>
-    </Tooltip>
+  const renderCellWithTooltip = useCallback(
+    (value: string) => (
+      <Tooltip title={value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}>
+        <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
+          {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
+        </Typography>
+      </Tooltip>
+    ),
+    []
   );
 
-  const handlePaginationPageChange = (page: number) => {
+  const handlePaginationPageChange = useCallback((page: number) => {
     setCurrentPagination((prev) => ({ ...prev, pageNo: page }));
-  };
+  }, []);
 
-  const handleRowSelectionChange = (rows: Array<number>) => {
+  const handleRowSelectionChange = useCallback((rows: Array<number>) => {
     setSelectedRows(rows);
-  };
+  }, []);
+
+  // STEP 3 – Effetto deterministico unico di fetch
+  useEffect(() => {
+    if (!initiativeId) {
+      return;
+    }
+
+    void fetchRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
+  }, [initiativeId, currentPagination.pageNo, currentPagination.pageSize]);
 
   const StatusChip = ({ status }: any) => {
     const chipItem = getBatchStatus(status);
@@ -224,7 +274,10 @@ const RefundRequests = () => {
         console.error('Missing initiativeId or batchId');
         return;
       }
-      const result = (await sendRewardBatch(initiative_id, batchId.toString())) as any;
+      if (!initiativeId) {
+        return;
+      }
+      const result = (await sendRewardBatch(initiativeId, batchId.toString())) as any;
       if ('code' in result && result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
         setAlert({
           title: t('errors.genericTitle'),
@@ -241,7 +294,13 @@ const RefundRequests = () => {
           severity: 'success',
         });
       }, 1000);
-      await fetchRewardBatches(initiative_id);
+      if (initiativeId) {
+        await fetchRewardBatches(
+          initiativeId,
+          currentPagination.pageNo,
+          currentPagination.pageSize
+        );
+      }
     } catch (e: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -249,7 +308,13 @@ const RefundRequests = () => {
         isOpen: true,
         severity: 'error',
       });
-      await fetchRewardBatches(initiative_id);
+      if (initiativeId) {
+        await fetchRewardBatches(
+          initiativeId,
+          currentPagination.pageNo,
+          currentPagination.pageSize
+        );
+      }
     } finally {
       setSendBatchIsLoading(false);
       setIsModalOpen(false);
