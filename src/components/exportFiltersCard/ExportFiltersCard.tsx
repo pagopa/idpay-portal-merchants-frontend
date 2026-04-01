@@ -1,6 +1,7 @@
 import { Box, Button, Card, CardContent, Typography, Stack, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
+import { useRef, useMemo, useCallback } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/it';
 import { useParams } from 'react-router-dom';
@@ -26,9 +27,10 @@ type Props = {
 const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
   const { t } = useTranslation();
   const { initiative_id } = useParams<RouteParams>();
+  const requestIdRef = useRef<number>(0);
 
-  const yesterday = dayjs().subtract(1, 'day').startOf('day');
-  const yesterdayStr = yesterday.format('YYYY-MM-DD');
+  const yesterday = useMemo(() => dayjs().subtract(1, 'day').startOf('day'), []);
+  const yesterdayStr = useMemo(() => yesterday.format('YYYY-MM-DD'), [yesterday]);
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -65,6 +67,11 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
       if (!initiative_id) {
         return;
       }
+
+      const currentRequestId = requestIdRef.current + 1;
+      // eslint-disable-next-line functional/immutable-data
+      requestIdRef.current = currentRequestId;
+
       try {
         const response = (await generateMerchantReport(initiative_id, {
           startPeriod: dayjs(values.startDate)
@@ -75,22 +82,37 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
             .format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
           reportType: ReportTypeEnum.MERCHANT_TRANSACTIONS,
         })) as any;
+
+        if (currentRequestId !== requestIdRef.current) {
+          return;
+        }
+
         const status: ReportStatusEnum = response?.reportStatus;
         updateAlerts(status, true);
         setTimeout(() => updateAlerts(status, false), 3000);
       } catch (error) {
+        if (currentRequestId !== requestIdRef.current) {
+          return;
+        }
+
         updateAlerts(ReportStatusEnum.FAILED, true);
         setTimeout(() => updateAlerts(ReportStatusEnum.FAILED, false), 3000);
       } finally {
-        formik.resetForm();
-        onReportGenerated?.();
+        if (currentRequestId === requestIdRef.current) {
+          formik.resetForm();
+          onReportGenerated?.();
+        }
       }
     },
   });
 
-  const minEndDateStr = formik.values.startDate
-    ? dayjs(formik.values.startDate).add(0, 'day').format('YYYY-MM-DD')
-    : MIN_START_DATE;
+  const minEndDateStr = useMemo(
+    () =>
+      formik.values.startDate
+        ? dayjs(formik.values.startDate).add(0, 'day').format('YYYY-MM-DD')
+        : MIN_START_DATE,
+    [formik.values.startDate]
+  );
 
   return (
     <Card sx={{ width: '100%' }}>
@@ -152,7 +174,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
           <Button
             variant="contained"
             disabled={formik.isSubmitting}
-            onClick={() => formik.handleSubmit()}
+            onClick={useCallback(() => formik.handleSubmit(), [formik])}
           >
             {t('pages.reportExport.form.submit')}
           </Button>

@@ -20,8 +20,8 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useEffect, useState } from 'react';
 import { matchPath } from 'react-router';
 import ROUTES, { BASE_ROUTE } from '../../routes';
-import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
+import { useAppSelector } from '../../redux/hooks';
 import SidenavItem from './SidenavItem';
 
 interface MatchParams {
@@ -35,7 +35,6 @@ export default function SideMenu() {
   const history = useHistory();
   const onExit = useUnloadEventOnExit();
   const [expanded, setExpanded] = useState<string | false>(false);
-  const dispatch = useAppDispatch();
   const [pathname, setPathName] = useState(() => {
     /*
     For some reason, push on history will not notify this component.
@@ -47,8 +46,16 @@ export default function SideMenu() {
   });
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS,
-      ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS, ROUTES.REFUND_REQUESTS_STORE, ROUTES.EXPORT_REPORT],
+    path: [
+      ROUTES.DISCOUNTS,
+      ROUTES.OVERVIEW,
+      ROUTES.STORES,
+      ROUTES.REPORTED_USERS,
+      ROUTES.STORES_DETAIL,
+      ROUTES.REFUND_REQUESTS,
+      ROUTES.REFUND_REQUESTS_STORE,
+      ROUTES.EXPORT_REPORT,
+    ],
     exact: true,
     strict: false,
   });
@@ -72,17 +79,14 @@ export default function SideMenu() {
     setExpanded(isExpanded ? panel : false);
   };
 
-  const checkIsSelected = (item: any) => pathname.startsWith(
-    `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
-  );
+  const checkIsSelected = (item: any) =>
+    pathname.startsWith(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
 
-  const checkIsReportedUsersPage = (item: any) => pathname.startsWith(
-    `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
-  );
+  const checkIsReportedUsersPage = (item: any) =>
+    pathname.startsWith(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`);
 
-  const checkIsExportReport = (item: any) => pathname.startsWith(
-    `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`
-  );
+  const checkIsExportReport = (item: any) =>
+    pathname.startsWith(`${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`);
 
   return (
     <Box display="grid" mt={1}>
@@ -118,15 +122,6 @@ export default function SideMenu() {
                 onClick={(e) => {
                   e.stopPropagation();
                   onExit(() => {
-                    dispatch(
-                      setSelectedInitative({
-                        spendingPeriod:
-                          `${item.startDate?.toLocaleDateString(
-                            'fr-FR'
-                          )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                        initiativeName: item.initiativeName,
-                      })
-                    );
                     history.replace(
                       `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
                     );
@@ -142,15 +137,6 @@ export default function SideMenu() {
                     title={t('pages.initiativeOverview.title')}
                     handleClick={() =>
                       onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
                         history.replace(
                           `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`
                         );
@@ -167,15 +153,6 @@ export default function SideMenu() {
                     title={t('pages.initiativeStores.title')}
                     handleClick={() =>
                       onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
                         history.replace(
                           `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_STORES}`
                         );
@@ -190,15 +167,6 @@ export default function SideMenu() {
                     title={t('pages.refundRequests.title')}
                     handleClick={() =>
                       onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
                         history.replace(
                           `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REFUND_REQUESTS}`
                         );
@@ -215,15 +183,6 @@ export default function SideMenu() {
                     title={t('pages.reportedUsers.title')}
                     handleClick={() =>
                       onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
                         history.replace(
                           `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_REPORTED_USERS}`
                         );
@@ -238,15 +197,6 @@ export default function SideMenu() {
                     title={t('pages.reportExport.title')}
                     handleClick={() =>
                       onExit(() => {
-                        dispatch(
-                          setSelectedInitative({
-                            spendingPeriod:
-                              `${item.startDate?.toLocaleDateString(
-                                'fr-FR'
-                              )} - ${item.endDate?.toLocaleDateString('fr-FR')}` || '',
-                            initiativeName: item.initiativeName,
-                          })
-                        );
                         history.replace(
                           `${BASE_ROUTE}/${item.initiativeId}/${ROUTES.SIDE_MENU_EXPORT_REPORT}`
                         );

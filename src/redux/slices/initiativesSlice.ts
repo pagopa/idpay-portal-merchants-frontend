@@ -1,12 +1,16 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
 import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOArray';
+import { InitiativeDTO } from '../../api/generated/merchants/InitiativeDTO';
 
 interface InitiativesState {
   list?: InitiativeDTOArray;
   selectedInitative?:
-    | { initiativeName?: string | undefined; spendingPeriod?: string | undefined }
+    | {
+        initiativeName?: string;
+        spendingPeriod?: string;
+      }
     | undefined;
 }
 
@@ -24,13 +28,15 @@ export const initiativesSlice = createSlice({
       state,
       action: PayloadAction<
         | {
-            initiativeName?: string | undefined;
-            spendingPeriod?: string | undefined;
+            initiativeName?: string;
+            spendingPeriod?: string;
           }
         | undefined
       >
     ) => {
-      state.selectedInitative = { ...action.payload };
+      state.selectedInitative = action.payload
+        ? { ...action.payload }
+        : undefined;
     },
   },
 });
@@ -43,5 +49,44 @@ export const intiativesListSelector = (state: RootState): InitiativeDTOArray | u
 
 export const initiativeSelector = (
   state: RootState
-): { initiativeName?: string | undefined; spendingPeriod?: string | undefined } | undefined =>
+): { initiativeName?: string; spendingPeriod?: string } | undefined =>
   state.initiatives.selectedInitative;
+
+export type InitiativeExtended = InitiativeDTO & {
+  spendingPeriod: string;
+};
+
+export const currentInitiativeSelector = createSelector(
+  [
+    intiativesListSelector,
+    (_: RootState, initiativeId: string | undefined) => initiativeId,
+  ],
+  (
+    initiatives,
+    initiativeId
+  ): InitiativeExtended | undefined => {
+    if (!initiatives || !initiativeId) {
+      return undefined;
+    }
+
+    const initiative = initiatives.find(
+      (i) => i.initiativeId === initiativeId
+    );
+
+    if (!initiative) {
+      return undefined;
+    }
+
+    const spendingPeriod =
+      initiative.startDate && initiative.endDate
+        ? `${new Date(initiative.startDate).toLocaleDateString(
+            'fr-FR'
+          )} - ${new Date(initiative.endDate).toLocaleDateString('fr-FR')}`
+        : '';
+
+    return {
+      ...initiative,
+      spendingPeriod,
+    };
+  }
+);

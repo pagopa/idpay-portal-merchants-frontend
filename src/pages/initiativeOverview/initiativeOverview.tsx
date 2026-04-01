@@ -3,7 +3,7 @@ import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { generatePath, matchPath, useHistory } from 'react-router-dom';
+import { generatePath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import { theme } from '@pagopa/mui-italia/theme';
 import ROUTES from '../../routes';
@@ -12,21 +12,13 @@ import { getMerchantDetail } from '../../services/merchantService';
 import { formatDate, formatIban } from '../../helpers';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
-
-interface MatchParams {
-  initiative_id: string;
-}
 
 const InitiativeOverview = () => {
   const history = useHistory();
   const { t } = useTranslation();
-  const match = matchPath(location.pathname, {
-    path: [ROUTES.OVERVIEW],
-    exact: true,
-    strict: false,
-  });
-  const { initiative_id } = (match?.params as MatchParams) || {};
+  const { initiativeId } = useCurrentInitiativeId();
   const { setAlert } = useAlert();
   // const [amount, setAmount] = useState<number | undefined>(undefined);
   // const [refunded, setRefunded] = useState<number | undefined>(undefined);
@@ -35,21 +27,42 @@ const InitiativeOverview = () => {
   const [onboardingDate, setOnboardingDate] = useState<string | undefined>();
 
   useEffect(() => {
-    getMerchantDetail(initiative_id)
-      .then((response) => {
+    if (!initiativeId) {
+      return;
+    }
+
+    let active = true;
+
+    const load = async () => {
+      try {
+        const response = await getMerchantDetail(initiativeId);
+        if (!active) {
+          return;
+        }
+
         setIban(response?.iban);
         setIbanHolder(response?.ibanHolder);
         setOnboardingDate(formatDate(response?.activationDate));
-      })
-      .catch(() =>
+      } catch {
+        if (!active) {
+          return;
+        }
+
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),
           isOpen: true,
           severity: 'error',
-        })
-      );
-  }, [initiative_id]);
+        });
+      }
+    };
+
+    void load();
+
+    return () => {
+      active = false;
+    };
+  }, [initiativeId]);
 
   // useEffect(() => {
   //   getMerchantInitiativeStatistics(id)
@@ -183,7 +196,9 @@ const InitiativeOverview = () => {
                   variant="contained"
                   startIcon={<StoreIcon />}
                   onClick={() => {
-                    history.push(generatePath(ROUTES.STORES_UPLOAD, { initiative_id }));
+                    history.push(
+                      generatePath(ROUTES.STORES_UPLOAD, { initiative_id: initiativeId })
+                    );
                   }}
                   // onClick={() => { history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`); }}
                   size="large"
