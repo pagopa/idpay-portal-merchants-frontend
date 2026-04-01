@@ -1,21 +1,33 @@
 import { browserConsole } from '../consoleLogger';
 
 describe('consoleLogger', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('should execute callback in whenEnabled (covers branch with DEBUG_CONSOLE=true in test env)', () => {
+  it('when DEBUG_CONSOLE is disabled, whenEnabled must not execute callback', async () => {
+    jest.doMock('../constants', () => ({ DEBUG_CONSOLE: false }));
+    const { browserConsole: disabledConsole } = await import('../consoleLogger');
+
     const fn = jest.fn();
-    browserConsole.whenEnabled(fn);
+    disabledConsole.whenEnabled(fn);
+    expect(fn).not.toHaveBeenCalled();
+    expect(disabledConsole.enabled).toBe(false);
+  });
+
+  it('when DEBUG_CONSOLE is enabled, whenEnabled executes callback and methods delegate to native console', async () => {
+    jest.doMock('../constants', () => ({ DEBUG_CONSOLE: true }));
+    const { browserConsole: enabledConsole } = await import('../consoleLogger');
+
+    const fn = jest.fn();
+    enabledConsole.whenEnabled(fn);
     expect(fn).toHaveBeenCalledTimes(1);
-  });
+    expect(enabledConsole.enabled).toBe(true);
 
-  it('enabled getter should return boolean (covers getter line)', () => {
-    expect(typeof browserConsole.enabled).toBe('boolean');
-  });
-
-  it('should delegate log methods when enabled', () => {
     const logSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     const debugSpy = jest.spyOn(console, 'debug').mockImplementation(() => undefined);
     const infoSpy = jest.spyOn(console, 'info').mockImplementation(() => undefined);
@@ -23,12 +35,12 @@ describe('consoleLogger', () => {
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const traceSpy = jest.spyOn(console, 'trace').mockImplementation(() => undefined);
 
-    browserConsole.log('a');
-    browserConsole.debug('b');
-    browserConsole.info('c');
-    browserConsole.warn('d');
-    browserConsole.error('e');
-    browserConsole.trace('f');
+    enabledConsole.log('a');
+    enabledConsole.debug('b');
+    enabledConsole.info('c');
+    enabledConsole.warn('d');
+    enabledConsole.error('e');
+    enabledConsole.trace('f');
 
     expect(logSpy).toHaveBeenCalled();
     expect(debugSpy).toHaveBeenCalled();
@@ -38,7 +50,10 @@ describe('consoleLogger', () => {
     expect(traceSpy).toHaveBeenCalled();
   });
 
-  it('group methods should fall back gracefully when console group APIs are missing', () => {
+  it('group methods fall back when console group APIs are missing (DEBUG_CONSOLE enabled)', async () => {
+    jest.doMock('../constants', () => ({ DEBUG_CONSOLE: true }));
+    const { browserConsole: enabledConsole } = await import('../consoleLogger');
+
     const originalGroup = console.group;
     const originalGroupCollapsed = console.groupCollapsed;
     const originalGroupEnd = console.groupEnd;
@@ -52,9 +67,9 @@ describe('consoleLogger', () => {
 
     const logSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
 
-    browserConsole.group('g1');
-    browserConsole.groupCollapsed('g2');
-    browserConsole.groupEnd();
+    enabledConsole.group('g1');
+    enabledConsole.groupCollapsed('g2');
+    enabledConsole.groupEnd();
 
     expect(logSpy).toHaveBeenCalled();
 
