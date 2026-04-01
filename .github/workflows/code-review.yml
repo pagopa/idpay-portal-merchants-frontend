@@ -65,13 +65,15 @@ jobs:
           annotations: none
           package-manager: yarn
 
-      # Sonar scanner runs on Linux, but sometimes lcov contains Windows-style backslashes (e.g. SF:src\utils\consoleLogger.ts)
-      # which leads to "inconsistencies in coverage report" and missing coverage on SonarCloud.
-      - name: Normalize lcov paths (Windows \\ -> POSIX /)
+      - name: Normalize lcov paths make SF - paths resolvable on Linux
         shell: bash
         run: |
           test -f coverage/lcov.info
-          sed -i 's|\\|/|g' coverage/lcov.info
+          # 1) normalize Windows separators to POSIX
+          # 2) strip any absolute prefix up to /src/ so SF entries become relative (SF:src/...)
+          sed -i 's|\\|/|g; s|.*/src/|src/|g' coverage/lcov.info
+          echo '--- lcov sample (SF lines) ---'
+          grep '^SF:' coverage/lcov.info | head -n 20
 
       - name: SonarCloud Scan (PR Analysis)
         uses: SonarSource/sonarqube-scan-action@e9a1c4e09a5eddb7db5d045b83807904bf8f67fc # v7.0.0
@@ -88,5 +90,6 @@ jobs:
             -Dsonar.pullrequest.github.repository=${{ github.repository }}
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx,**/__tests__/**/*.*,src/bootstrap.tsx,src/__mocks__/**/*
-            -Dsonar.qualitygate.wait=true
+            "-Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx,**/__tests__/**/*.*,src/bootstrap.tsx,src/__mocks__/**/*"
+            "-X"
+            "-Dsonar.qualitygate.wait=true"
