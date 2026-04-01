@@ -56,11 +56,11 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row: any) => (
-            <tr key={row.id}>
+          {rows.map((row: any, index: number) => (
+            <tr key={row.id ?? index}>
               <td>
                 <button
-                  data-testid={`select-row-${row.id}`}
+                  data-testid={`select-row-${row.id ?? index}`}
                   onClick={() => onRowSelectionChange?.([row])}
                   disabled={isRowSelectable ? !isRowSelectable({ row }) : false}
                 >
@@ -449,15 +449,38 @@ describe('RefundRequests', () => {
     const { browserConsole } = require('../../../utils/consoleLogger');
     const consoleErrorSpy = jest.spyOn(browserConsole, 'error').mockImplementation(() => {});
 
+    // row without id => selection exists (DataTable mock), but handleSentBatches should treat it as missing batchId
+    const dataWithMissingId = [
+      {
+        id: undefined,
+        name: 'no-id-batch',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: getPreviousMonth(),
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: dataWithMissingId,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: dataWithMissingId.length,
+    });
+
     renderWithStore(<RefundRequests />);
 
     await waitFor(() => {
       expect(screen.getByTestId('data-table')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('select-row-3'));
+    // select the only row (index 0 in DataTable mock)
+    fireEvent.click(screen.getByTestId('select-row-0'));
 
-    const sendBtn = await screen.findByRole('button', { name: 'pages.refundRequests.sendRequests' });
+    const sendBtn = await screen.findByRole('button', {
+      name: /pages\.refundRequests\.sendRequests/i,
+    });
     fireEvent.click(sendBtn);
 
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
