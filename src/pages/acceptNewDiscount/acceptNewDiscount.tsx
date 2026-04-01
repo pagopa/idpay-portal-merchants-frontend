@@ -4,8 +4,7 @@ import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useState, useEffect } from 'react';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
-import { useAppSelector } from '../../redux/hooks';
-import { initiativeSelector } from '../../redux/slices/initiativesSlice';
+import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 import { genericContainerStyle } from '../../styles';
 import TotalAmount from './TotalAmount';
 import DiscountCode from './DiscountCode';
@@ -13,7 +12,7 @@ import DiscountCode from './DiscountCode';
 const AcceptNewDiscount = () => {
   const { t } = useTranslation();
   const { initiativeId } = useCurrentInitiativeId();
-  const selectedInitiative = useAppSelector(initiativeSelector);
+  const currentInitiative = useCurrentInitiative();
   const [activeStep, setActiveStep] = useState(0);
   const [amount, setAmount] = useState<number | undefined>();
   const [code, setCode] = useState<string | undefined>();
@@ -81,7 +80,7 @@ const AcceptNewDiscount = () => {
         backLabel={t('commons.backBtn')}
         items={[
           t('pages.initiativesList.title'),
-          selectedInitiative?.initiativeName,
+          currentInitiative?.initiativeName,
           t('pages.initiativeDiscounts.acceptBtn'),
         ]}
       />

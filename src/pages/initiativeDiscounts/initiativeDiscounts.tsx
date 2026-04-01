@@ -6,8 +6,7 @@ import { useHistory } from 'react-router-dom';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
-import { useAppSelector } from '../../redux/hooks';
-import { initiativeSelector } from '../../redux/slices/initiativesSlice';
+import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 import { BASE_ROUTE } from '../../routes';
 import { genericContainerStyle, pagesTableContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
@@ -20,7 +19,7 @@ const InitiativeDiscounts = () => {
   const { t } = useTranslation();
   const [value, setValue] = useState(0);
   const history = useHistory();
-  const selectedInitiative = useAppSelector(initiativeSelector);
+  const currentInitiative = useCurrentInitiative();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const { initiativeId } = useCurrentInitiativeId();
@@ -30,11 +29,11 @@ const InitiativeDiscounts = () => {
   }
 
   useEffect(() => {
-    const dates = mapDatesFromPeriod(selectedInitiative?.spendingPeriod);
+    const dates = mapDatesFromPeriod(currentInitiative?.spendingPeriod);
     setStartDate(dates?.startDate);
     setEndDate(dates?.endDate);
     setValue(0);
-  }, [initiativeId, selectedInitiative]);
+  }, [initiativeId, currentInitiative]);
 
   interface TabPanelProps {
     children?: React.ReactNode;
@@ -78,7 +77,7 @@ const InitiativeDiscounts = () => {
           backLabel={t('commons.backBtn')}
           items={[
             t('pages.initiativesList.title'),
-            selectedInitiative?.initiativeName,
+            currentInitiative?.initiativeName,
             t('pages.initiativeDiscounts.title'),
           ]}
         />
@@ -127,7 +126,7 @@ const InitiativeDiscounts = () => {
           </Box>
         </Box>
       </Box>
-      <InitiativeDiscountsSummary id={initiativeId!} />
+      <InitiativeDiscountsSummary id={initiativeId} />
       <Box sx={{ display: 'grid', gridColumn: 'span 12', mt: 4, mb: 3 }}>
         <Typography variant="h6">{t('pages.initiativeDiscounts.listTitle')}</Typography>
       </Box>
@@ -157,7 +156,7 @@ const InitiativeDiscounts = () => {
               <MerchantTransactions id={id} />
             </TabPanel> */}
             <TabPanel value={value} index={1}>
-              <MerchantTransactionsProcessed id={initiativeId!} />
+              <MerchantTransactionsProcessed id={initiativeId} />
             </TabPanel>
           </Box>
         </Box>

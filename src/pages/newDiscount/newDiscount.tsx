@@ -6,15 +6,14 @@ import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { genericContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
-import { useAppSelector } from '../../redux/hooks';
-import { initiativeSelector } from '../../redux/slices/initiativesSlice';
+import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 import CreateForm from './CreateForm';
 import DiscountCreatedRecap from './DiscountCreatedRecap';
 
 const NewDiscount = () => {
   const [discountCreated, setDiscountCreated] = useState(false);
   const [discountResponse, setDiscountResponse] = useState<TransactionResponse | undefined>();
-  const selectedInitiative = useAppSelector(initiativeSelector);
+  const currentInitiative = useCurrentInitiative();
   const { t } = useTranslation();
 
   const { initiativeId } = useCurrentInitiativeId();
@@ -46,7 +45,7 @@ const NewDiscount = () => {
         backLabel={t('commons.backBtn')}
         items={[
           t('pages.initiativesList.title'),
-          selectedInitiative?.initiativeName,
+          currentInitiative?.initiativeName,
           t('pages.initiativeDiscounts.createBtn'),
         ]}
       />
