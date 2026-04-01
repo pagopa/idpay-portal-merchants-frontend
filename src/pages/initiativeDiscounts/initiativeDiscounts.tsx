@@ -24,16 +24,16 @@ const InitiativeDiscounts = () => {
   const [endDate, setEndDate] = useState<Date>();
   const { initiativeId } = useCurrentInitiativeId();
 
-  if (!initiativeId) {
-    return null;
-  }
-
   useEffect(() => {
     const dates = mapDatesFromPeriod(currentInitiative?.spendingPeriod);
     setStartDate(dates?.startDate);
     setEndDate(dates?.endDate);
     setValue(0);
   }, [initiativeId, currentInitiative]);
+
+  if (!initiativeId) {
+    return null;
+  }
 
   interface TabPanelProps {
     children?: React.ReactNode;
