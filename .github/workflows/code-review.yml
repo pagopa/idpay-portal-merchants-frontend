@@ -65,6 +65,17 @@ jobs:
           annotations: none
           package-manager: yarn
 
+      - name: Debug coverage presence (target files)
+        shell: bash
+        run: |
+          test -f coverage/lcov.info
+          echo '--- lcov grep: consoleLogger ---'
+          grep -n 'consoleLogger' coverage/lcov.info | head -n 50 || true
+          echo '--- lcov grep: src/utils/consoleLogger.ts ---'
+          grep -n 'src.*/consoleLogger.ts' coverage/lcov.info | head -n 20 || true
+          echo '--- lcov SF sample ---'
+          grep '^SF:' coverage/lcov.info | head -n 50 || true
+
       - name: Normalize lcov paths
         shell: bash
         run: |
