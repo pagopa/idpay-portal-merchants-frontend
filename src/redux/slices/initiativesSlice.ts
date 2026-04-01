@@ -7,7 +7,10 @@ import { InitiativeDTO } from '../../api/generated/merchants/InitiativeDTO';
 interface InitiativesState {
   list?: InitiativeDTOArray;
   selectedInitative?:
-    | { initiativeName?: string | undefined; spendingPeriod?: string | undefined }
+    | {
+        initiativeName?: string;
+        spendingPeriod?: string;
+      }
     | undefined;
 }
 
@@ -25,13 +28,15 @@ export const initiativesSlice = createSlice({
       state,
       action: PayloadAction<
         | {
-            initiativeName?: string | undefined;
-            spendingPeriod?: string | undefined;
+            initiativeName?: string;
+            spendingPeriod?: string;
           }
         | undefined
       >
     ) => {
-      state.selectedInitative = { ...action.payload };
+      state.selectedInitative = action.payload
+        ? { ...action.payload }
+        : undefined;
     },
   },
 });
@@ -44,15 +49,11 @@ export const intiativesListSelector = (state: RootState): InitiativeDTOArray | u
 
 export const initiativeSelector = (
   state: RootState
-): { initiativeName?: string | undefined; spendingPeriod?: string | undefined } | undefined =>
+): { initiativeName?: string; spendingPeriod?: string } | undefined =>
   state.initiatives.selectedInitative;
 
-/**
- * FE2.7 – Derived Extended Initiative (Non-breaking)
- */
-
 export type InitiativeExtended = InitiativeDTO & {
-  spendingPeriod: string | undefined;
+  spendingPeriod: string;
 };
 
 export const currentInitiativeSelector = createSelector(
@@ -81,7 +82,7 @@ export const currentInitiativeSelector = createSelector(
         ? `${new Date(initiative.startDate).toLocaleDateString(
             'fr-FR'
           )} - ${new Date(initiative.endDate).toLocaleDateString('fr-FR')}`
-        : undefined;
+        : '';
 
     return {
       ...initiative,

@@ -40,7 +40,12 @@ const WithInitiativeGuard: React.FC<Props> = ({ children }) => {
       dispatch(
         setSelectedInitative({
           initiativeName: found.initiativeName ?? undefined,
-          spendingPeriod: undefined,
+          spendingPeriod:
+            found.startDate && found.endDate
+              ? `${found.startDate.toLocaleDateString(
+                  'fr-FR'
+                )} - ${found.endDate.toLocaleDateString('fr-FR')}`
+              : '',
         })
       );
     }
