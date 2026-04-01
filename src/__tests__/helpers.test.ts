@@ -48,10 +48,15 @@ describe('downloadQRCodeFromURL', () => {
 
   beforeEach(() => {
     fetchSpy = jest.spyOn(global, 'fetch');
+    Object.defineProperty(URL, 'createObjectURL', {
+      value: jest.fn(() => 'blob:mock-url'),
+      writable: true,
+    });
   });
 
   afterEach(() => {
     fetchSpy.mockRestore();
+    (URL.createObjectURL as jest.Mock).mockClear();
   });
 
   it('should log an error if fetch fails', async () => {
