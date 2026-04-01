@@ -12,12 +12,11 @@ import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
 import { useAlert } from '../../../hooks/useAlert';
 import ModalComponent from '../../../components/modal/ModalComponent';
-import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
-import { useAppSelector } from '../../../redux/hooks';
 import { formatDate, isReversableOrEditable } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
 import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
+import { useCurrentInitiative } from '../../../hooks/useCurrentInitiative';
 
 type Props = DetailDrawerProps & {
   itemValues: Record<string, any>;
@@ -44,20 +43,20 @@ export default function InvoiceDetail({
   const batchMonth = location.state?.store?.month;
   const statusBatch = location.state?.store?.status;
   const { t } = useTranslation();
-  const initiativesListSel = useAppSelector(intiativesListSelector);
+  const currentInitiative = useCurrentInitiative();
   const history = useHistory();
   const { initiative_id, batch_id } = useParams<{ initiative_id: string; batch_id: string }>();
 
   useEffect(() => {
     if (
-      initiativesListSel?.[0]?.endDate &&
-      initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]
+      currentInitiative?.endDate &&
+      currentInitiative?.endDate.toISOString().split('T')[0]
     ) {
-      const endOfNextMonth = getEndOfNextMonth(initiativesListSel?.[0]?.endDate);
+      const endOfNextMonth = getEndOfNextMonth(currentInitiative?.endDate);
       setNextMonthInitiativeEndDate(endOfNextMonth);
-      setInitiativeEndDate(initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]);
+      setInitiativeEndDate(currentInitiative?.endDate.toISOString().split('T')[0]);
     }
-  }, [initiativesListSel]);
+  }, [currentInitiative]);
 
   const endOfNextBatchMonth = batchMonth ? getEndOfNextMonth(batchMonth) : undefined;
 
