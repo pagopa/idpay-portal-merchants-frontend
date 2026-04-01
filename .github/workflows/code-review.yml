@@ -65,14 +65,6 @@ jobs:
           annotations: none
           package-manager: yarn
 
-      - name: Normalize lcov paths
-        shell: bash
-        run: |
-          test -f coverage/lcov.info
-          sed -i 's|\\|/|g; s|.*/src/|src/|g' coverage/lcov.info
-          echo '--- lcov sample (SF lines) ---'
-          grep '^SF:' coverage/lcov.info | head -n 20 || true
-
       - name: SonarCloud Scan (PR Analysis)
         uses: SonarSource/sonarqube-scan-action@e9a1c4e09a5eddb7db5d045b83807904bf8f67fc # v7.0.0
         env:
