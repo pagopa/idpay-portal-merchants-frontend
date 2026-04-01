@@ -501,7 +501,6 @@ describe('MerchantApi', () => {
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
-    // MerchantsApiClient logs via browserConsole (src/utils/consoleLogger.ts), not via the raw console object.
     const MerchantApi = loadApi();
 
     await expect(MerchantApi.getRewardBatches('init1', 0, 10)).rejects.toThrow('Boom');

@@ -44,48 +44,47 @@ describe('copyTextToClipboard', () => {
 });
 
 describe('downloadQRCodeFromURL', () => {
-  global.fetch = jest.fn();
-  global.URL.createObjectURL = jest.fn();
-  const clickSpy = jest.fn();
+  let fetchSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(document, 'createElement').mockReturnValue({
-      click: clickSpy,
-      href: '',
-      download: '',
-    } as any);
+    fetchSpy = jest.spyOn(global, 'fetch');
   });
 
-  test('should perform fetch and trigger download on success', async () => {
-    const mockUrl = 'https://example.com/qrcode.png';
-    const mockBlob = new Blob(['qrcode-data'], { type: 'image/png' });
-    (fetch as jest.Mock).mockResolvedValue({ blob: () => Promise.resolve(mockBlob) });
-
-    downloadQRCodeFromURL(mockUrl);
-
-    await new Promise(process.nextTick);
-
-    expect(fetch).toHaveBeenCalledWith(mockUrl);
-    expect(URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
+  afterEach(() => {
+    fetchSpy.mockRestore();
   });
 
-  test('should log an error if fetch fails', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  it('should log an error if fetch fails', async () => {
     const mockError = new Error('Network error');
-    (fetch as jest.Mock).mockRejectedValue(mockError);
+    fetchSpy.mockRejectedValue(mockError);
 
-    downloadQRCodeFromURL('https://example.com/qrcode.png');
+    const { browserConsole } = require('../utils/consoleLogger');
+    const consoleSpy = jest.spyOn(browserConsole, 'error').mockImplementation(() => {});
 
+    downloadQRCodeFromURL('https://example.com/qrcode');
     await new Promise(process.nextTick);
 
     expect(consoleSpy).toHaveBeenCalledWith(mockError);
     consoleSpy.mockRestore();
   });
 
-  test('should do nothing if URL is not a string', () => {
+  it('should perform fetch and trigger download on success', async () => {
+    const mockUrl = 'https://example.com/qrcode.png';
+    const mockBlob = new Blob(['qrcode-data'], { type: 'image/png' });
+
+    fetchSpy.mockResolvedValue({ blob: () => Promise.resolve(mockBlob) } as any);
+
+    downloadQRCodeFromURL(mockUrl);
+
+    await new Promise(process.nextTick);
+
+    expect(fetchSpy).toHaveBeenCalledWith(mockUrl);
+    expect(URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
+  });
+
+  it('should do nothing if URL is not a string', () => {
     downloadQRCodeFromURL(undefined);
-    expect(fetch).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
 

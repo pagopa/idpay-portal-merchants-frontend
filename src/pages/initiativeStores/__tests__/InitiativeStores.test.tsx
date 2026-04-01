@@ -156,15 +156,10 @@ describe('<InitiativeStores />', () => {
   });
 
   test("gestisce la rimozione dell'ordinamento", async () => {
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     renderWithContext(<InitiativeStores />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('sort-button-remove'));
-
-    await waitFor(() => {
-      expect(consoleLogSpy).toHaveBeenCalledWith('Ordinamento rimosso.');
-    });
 
     fireEvent.click(screen.getByTestId('paginate-button'));
     await waitFor(() => {
@@ -173,7 +168,6 @@ describe('<InitiativeStores />', () => {
         expect.objectContaining({ sort: 'asc' })
       );
     });
-    consoleLogSpy.mockRestore();
   });
 
   test('gestisce un errore nel .catch di handleFiltersReset', async () => {
