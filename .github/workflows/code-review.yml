@@ -65,6 +65,18 @@ jobs:
           annotations: none
           package-manager: yarn
 
+      - name: Normalize lcov paths
+        shell: bash
+        run: |
+          test -f coverage/lcov.info
+          sed -i 's|\\|/|g' coverage/lcov.info
+          echo '--- lcov check: consoleLogger ---'
+          grep '^SF:' coverage/lcov.info | grep 'src/utils/consoleLogger.ts' || true
+          echo '--- lcov check: RefundRequests ---'
+          grep '^SF:' coverage/lcov.info | grep 'src/pages/refundRequests/RefundRequests.tsx' || true
+          echo '--- lcov check: InitiativeStores ---'
+          grep '^SF:' coverage/lcov.info | grep 'src/pages/initiativeStores/InitiativeStores.tsx' || true
+
       - name: SonarCloud Scan (PR Analysis)
         uses: SonarSource/sonarqube-scan-action@e9a1c4e09a5eddb7db5d045b83807904bf8f67fc # v7.0.0
         env:
@@ -80,6 +92,7 @@ jobs:
             -Dsonar.pullrequest.github.repository=${{ github.repository }}
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
             "-Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx,**/__tests__/**/*.*,src/bootstrap.tsx,src/__mocks__/**/*"
             "-X"
             "-Dsonar.qualitygate.wait=false"
