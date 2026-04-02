@@ -106,14 +106,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('renders data table when transactions exist', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
     expect(screen.getByText('Frigorifero')).toBeInTheDocument();
     expect(screen.getByText('AAAAAA00A00A000A')).toBeInTheDocument();
@@ -124,40 +117,18 @@ describe('MerchantTransactions', () => {
   });
 
   it('renders empty list when no transactions exist', () => {
-    render(
-      <MerchantTransactions
-        transactions={[]}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ transactions: [] });
     expect(screen.getByTestId('empty-list')).toBeInTheDocument();
     expect(screen.queryByTestId('transaction-data-table')).not.toBeInTheDocument();
   });
 
   it('renders loading spinner when dataTableIsLoading is true', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        dataTableIsLoading={true}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ dataTableIsLoading: true });
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('handles filter application', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
     const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
@@ -173,14 +144,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('handles filter reset', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     await act(async () => {
       const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
@@ -196,15 +160,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('handles sort change', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        handleSortChange={handleSortChange}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ handleSortChange });
 
     await act(async () => {
       const sortButton = screen.getByRole('button', { name: 'Sort Action' });
@@ -217,15 +173,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('handles pagination change', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        handlePaginationPageChange={handlePaginationPageChange}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ handlePaginationPageChange });
 
     await act(async () => {
       const paginationButton = screen.getByRole('button', { name: 'Pagination Action' });
@@ -238,14 +186,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('does not throw error when sort is triggered without handler', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const sortButton = screen.getByRole('button', { name: 'Sort Action' });
     await userEvent.click(sortButton);
@@ -254,14 +195,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('does not throw error when pagination is triggered without handler', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const paginationButton = screen.getByRole('button', { name: 'Pagination Action' });
     await userEvent.click(paginationButton);
@@ -270,14 +204,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('opens drawer when row action is clicked', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
@@ -286,14 +213,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('closes drawer when toggle is called', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
@@ -305,14 +225,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('calls setAlert when the drawer is closed', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
@@ -327,14 +240,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('updates fiscal code input on user input', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
     await userEvent.type(fiscalCodeInput, 'TESTCF');
@@ -343,14 +249,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('accepts valid alphanumeric GTIN and trxCode input', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
@@ -364,14 +263,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('prevents GTIN and trxCodeInput input with spaces', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin') as HTMLInputElement;
     const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
@@ -379,18 +271,11 @@ describe('MerchantTransactions', () => {
     fireEvent.change(trxCodeInput, { target: { value: '123 456' } });
 
     expect(gtinInput.value).not.toContain(' ');
-    expect(trxCodeInput.value).not.toContain(' ');
+    expect((trxCodeInput as HTMLInputElement).value).not.toContain(' ');
   });
 
   it('prevents GTIN and trxCodeInput input longer than 14/8 characters', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin') as HTMLInputElement;
     const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode') as HTMLInputElement;
@@ -402,14 +287,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('shows error message for special characters in GTIN and trxCode', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
@@ -421,14 +299,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('accepts exactly 14 characters in GTIN and trxCode', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
@@ -440,14 +311,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('clears error message when valid input is entered after invalid', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
@@ -464,14 +328,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('clears error message on blur', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
@@ -486,14 +343,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('accepts empty GTIN and trxCode input', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
@@ -506,126 +356,96 @@ describe('MerchantTransactions', () => {
     expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
   });
 
-  it('renders form with all filter fields', () => {
+  const renderComponent = (overrideProps?: Partial<React.ComponentProps<typeof MerchantTransactions>>) =>
     render(
       <MerchantTransactions
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
         sortModel={[]}
+        {...overrideProps}
       />
     );
 
+  const renderAndExpectTable = (transactions: Array<PointOfSaleTransactionProcessedDTO>) => {
+    renderComponent({ transactions });
+    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  };
+
+  it('renders form with all filter fields', () => {
+    renderComponent();
     expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode')).toBeInTheDocument();
     expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode')).toBeInTheDocument();
     expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin')).toBeInTheDocument();
   });
 
-  const renderAndExpectTable = (transactions: Array<PointOfSaleTransactionProcessedDTO>) => {
-    render(
-      <MerchantTransactions
-        transactions={transactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
-    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
-  };
-
-  it('renders transactions with empty values', () => {
-    renderAndExpectTable([
-      {
-        trxId: '1',
-        updateDate: '',
-        fiscalCode: '',
-        effectiveAmountCents: 5000,
-        rewardAmountCents: 500,
-        status: 'REWARDED',
-        additionalProperties: { productName: '' },
-      } as any,
-    ]);
-  });
-
-  it('renders transactions with null values', () => {
-    renderAndExpectTable([
-      {
-        trxId: '1',
-        updateDate: null,
-        fiscalCode: null,
-        effectiveAmountCents: 5000,
-        rewardAmountCents: 500,
-        status: 'REWARDED',
-        additionalProperties: { productName: null },
-      } as any,
-    ]);
-  });
-
-  it('renders transactions with undefined values', () => {
-    renderAndExpectTable([
-      {
-        trxId: '1',
-        updateDate: undefined,
-        fiscalCode: undefined,
-        effectiveAmountCents: 5000,
-        rewardAmountCents: 500,
-        status: 'REWARDED',
-        additionalProperties: { productName: undefined },
-      } as any,
-    ]);
-  });
-
-  it('renders transaction with short values', () => {
-    renderAndExpectTable([
-      {
-        trxId: '1',
-        updateDate: 'SHORT',
-        fiscalCode: 'ABC',
-        effectiveAmountCents: 5000,
-        rewardAmountCents: 500,
-        status: 'REWARDED',
-        additionalProperties: { productName: 'Test' },
-      } as any,
-    ]);
-  });
-
-  it('renders transaction with long values', () => {
-    renderAndExpectTable([
-      {
-        trxId: '1',
-        updateDate: 'VERYLONGVALUE123456789',
-        fiscalCode: 'VERYLONGFISCALCODE123',
-        effectiveAmountCents: 5000,
-        rewardAmountCents: 500,
-        status: 'REWARDED',
-        additionalProperties: { productName: 'VERYLONGPRODUCTNAME123' },
-      } as any,
-    ]);
-  });
-
-  it('renders transaction with value exactly at threshold length', () => {
-    renderAndExpectTable([
-      {
-        trxId: '1',
-        updateDate: '12345678901',
-        fiscalCode: '12345678901',
-        effectiveAmountCents: 5000,
-        rewardAmountCents: 500,
-        status: 'REWARDED',
-        additionalProperties: { productName: '12345678901' },
-      } as any,
-    ]);
+  describe('renders transactions with variant values', () => {
+    it.each([
+      [
+        'empty',
+        {
+          updateDate: '',
+          fiscalCode: '',
+          productName: '',
+        },
+      ],
+      [
+        'null',
+        {
+          updateDate: null,
+          fiscalCode: null,
+          productName: null,
+        },
+      ],
+      [
+        'undefined',
+        {
+          updateDate: undefined,
+          fiscalCode: undefined,
+          productName: undefined,
+        },
+      ],
+      [
+        'short',
+        {
+          updateDate: 'SHORT',
+          fiscalCode: 'ABC',
+          productName: 'Test',
+        },
+      ],
+      [
+        'long',
+        {
+          updateDate: 'VERYLONGVALUE123456789',
+          fiscalCode: 'VERYLONGFISCALCODE123',
+          productName: 'VERYLONGPRODUCTNAME123',
+        },
+      ],
+      [
+        'exact-threshold',
+        {
+          updateDate: '12345678901',
+          fiscalCode: '12345678901',
+          productName: '12345678901',
+        },
+      ],
+    ])('renders transactions with %s values', (_label, { updateDate, fiscalCode, productName }) => {
+      renderAndExpectTable([
+        {
+          trxId: '1',
+          updateDate,
+          fiscalCode,
+          effectiveAmountCents: 5000,
+          rewardAmountCents: 500,
+          status: 'REWARDED',
+          additionalProperties: { productName },
+        } as any,
+      ]);
+    });
   });
 
   it('displays transaction detail component when drawer is opened', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
@@ -651,14 +471,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('updates transactions when props change', () => {
-    const { rerender } = render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    const { rerender } = renderComponent();
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
 
@@ -676,55 +489,26 @@ describe('MerchantTransactions', () => {
   });
 
   it('displays correct empty message', () => {
-    render(
-      <MerchantTransactions
-        transactions={[]}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ transactions: [] });
 
     expect(screen.getByTestId('empty-list')).toBeInTheDocument();
   });
 
   it('displays loading when both loading and transactions are present', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        dataTableIsLoading={true}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ dataTableIsLoading: true });
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
     expect(screen.queryByTestId('transaction-data-table')).not.toBeInTheDocument();
   });
 
   it('handles undefined sortModel', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
   });
 
   it('handles undefined paginationModel', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
   });
@@ -773,15 +557,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('does not call handleSortChange when callback is undefined', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        handleSortChange={undefined}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ handleSortChange });
 
     await act(async () => {
       const sortButton = screen.getByRole('button', { name: 'Sort Action' });
@@ -790,15 +566,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('does not call handlePaginationPageChange when callback is undefined', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        handlePaginationPageChange={undefined}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ handlePaginationPageChange });
 
     await act(async () => {
       const paginationButton = screen.getByRole('button', { name: 'Pagination Action' });
@@ -807,14 +575,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('validates GTIN with only numbers', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     await userEvent.type(gtinInput, '1234567890123');
@@ -844,27 +605,13 @@ describe('MerchantTransactions', () => {
       },
     ];
 
-    render(
-      <MerchantTransactions
-        transactions={multipleTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ transactions: multipleTransactions });
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
   });
 
   it('opens drawer with correct data when row is clicked', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
 
@@ -888,28 +635,14 @@ describe('MerchantTransactions', () => {
       additionalProperties: { productName: 'VERYLONGPRODUCTNAME12345678901234567890' },
     }];
 
-    render(
-      <MerchantTransactions
-        transactions={longValueTransaction}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ transactions: longValueTransaction });
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
     expect(MockedTooltip.mock.calls.some(call => call[0].title.includes('VERYLONGPRODUCTNAME'))).toBe(false);
   });
 
   it('handles close drawer correctly', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
 
@@ -933,14 +666,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('passes status label to CustomChip', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     expect(MockedCustomChip).not.toHaveBeenCalledWith(
       expect.objectContaining({ label: 'REWARDED' }),
@@ -962,14 +688,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('calls setAlert when drawer is toggled', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     await userEvent.click(screen.getByRole('button', { name: 'Row Action' }));
     await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
@@ -980,14 +699,7 @@ describe('MerchantTransactions', () => {
     });
   });
   it('rejects GTIN input with spaces or long values without updating formik', () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     fireEvent.change(gtinInput, { target: { value: '123 456' } });
@@ -1003,14 +715,7 @@ describe('MerchantTransactions', () => {
       updateDate: 'LONGDATEVALUEEXCEEDINGTHRESHOLD',
     }];
 
-    render(
-      <MerchantTransactions
-        transactions={longTx}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent({ transactions: longTx });
 
     expect(MockedTooltip.mock.calls.some(call => call[0].title.includes('VERY_LONG'))).toBe(false);
     expect(MockedCustomChip).not.toHaveBeenCalledWith(
@@ -1020,14 +725,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('updates rows when transactions prop changes', () => {
-    const { rerender } = render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    const { rerender } = renderComponent();
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
 
@@ -1044,14 +742,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('accepts GTIN input of exactly 14 characters', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
     await userEvent.type(gtinInput, '12345678901234');
@@ -1060,14 +751,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('handles multiple row action updates correctly', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const rowButton = screen.getByRole('button', { name: 'Row Action' });
     await userEvent.click(rowButton);
@@ -1076,14 +760,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('clears input fields on filter reset', async () => {
-    render(
-      <MerchantTransactions
-        transactions={mockTransactions}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
+    renderComponent();
 
     const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
     await userEvent.type(fiscalCodeInput, 'TEST');

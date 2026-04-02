@@ -382,22 +382,16 @@ describe('<InitiativeStores />', () => {
     );
   });
 
-  test('seleziona tipo PHYSICAL nel dropdown', async () => {
+  test.each([
+    ['PHYSICAL', 'pages.initiativeStores.physical'],
+    ['ONLINE', 'pages.initiativeStores.online'],
+  ])('seleziona tipo %s nel dropdown', async (_type, i18nOptionKey) => {
     await renderAndWaitStoreA();
 
     const typeSelect = screen.getByLabelText('pages.initiativeStores.pointOfSaleType');
     fireEvent.mouseDown(typeSelect);
-    const physicalOption = screen.getByText('pages.initiativeStores.physical');
-    fireEvent.click(physicalOption);
-  });
-
-  test('seleziona tipo ONLINE nel dropdown', async () => {
-    await renderAndWaitStoreA();
-
-    const typeSelect = screen.getByLabelText('pages.initiativeStores.pointOfSaleType');
-    fireEvent.mouseDown(typeSelect);
-    const onlineOption = screen.getByText('pages.initiativeStores.online');
-    fireEvent.click(onlineOption);
+    const option = screen.getByText(i18nOptionKey);
+    fireEvent.click(option);
   });
 
   test('inserisce valore nel campo address', async () => {
