@@ -39,7 +39,13 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () =>
 
 jest.mock('../../../components/dataTable/DataTable', () => ({
   __esModule: true,
-  default: ({ columns, rows, onPaginationPageChange }: any) => (
+  default: ({
+    columns,
+    rows,
+    onPaginationPageChange,
+    onRowSelectionChange,
+    isRowSelectable,
+  }: any) => (
     <div data-testid="data-table">
       <table>
         <thead>
@@ -50,8 +56,17 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row: any) => (
-            <tr key={row.id}>
+          {rows.map((row: any, index: number) => (
+            <tr key={row.id ?? index}>
+              <td>
+                <button
+                  data-testid={`select-row-${row.id ?? index}`}
+                  onClick={() => onRowSelectionChange?.([row])}
+                  disabled={isRowSelectable ? !isRowSelectable({ row }) : false}
+                >
+                  Select
+                </button>
+              </td>
               {columns.map((col: any) => (
                 <td key={col.field}>
                   {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
@@ -383,10 +398,38 @@ describe('RefundRequests', () => {
     });
   });
 
-  it('should show loading state in modal when sending batch', async () => {
-    // With the real DataTable, selection UI is an implementation detail.
-    // Keeping this test focused on "sending triggers loading state" would require
-    // a higher-level integration test; removed to avoid coupling to DataTable internals.
+  it('should open modal and send batch successfully', async () => {
+    jest.useFakeTimers();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('select-row-1'));
+
+    const sendBtn = await screen.findByRole('button', { name: 'pages.refundRequests.sendRequests' });
+    fireEvent.click(sendBtn);
+
+    expect(screen.getByTestId('refund-modal')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
+
+    await waitFor(() => {
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '1');
+    });
+
+    jest.advanceTimersByTime(1000);
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'pages.refundRequests.rewardBatchSentSuccess',
+          isOpen: true,
+          severity: 'success',
+        })
+      );
+    });
+
+    jest.useRealTimers();
   });
 
   it('should handle missing initiativeId when sending batch', async () => {
@@ -403,7 +446,28 @@ describe('RefundRequests', () => {
   });
 
   it('should handle missing batchId when sending batch', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const { browserConsole } = require('../../../utils/consoleLogger');
+    const consoleErrorSpy = jest.spyOn(browserConsole, 'error').mockImplementation(() => {});
+
+    // row without id => selection exists (DataTable mock), but handleSentBatches should treat it as missing batchId
+    const dataWithMissingId = [
+      {
+        id: undefined,
+        name: 'no-id-batch',
+        posType: 'PHYSICAL',
+        initialAmountCents: 10000,
+        status: 'CREATED',
+        month: getPreviousMonth(),
+        numberOfTransactions: 1,
+      },
+    ];
+
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: dataWithMissingId,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: dataWithMissingId.length,
+    });
 
     renderWithStore(<RefundRequests />);
 
@@ -411,12 +475,22 @@ describe('RefundRequests', () => {
       expect(screen.getByTestId('data-table')).toBeInTheDocument();
     });
 
-    consoleErrorSpy.mockRestore();
-  });
+    // select the only row (index 0 in DataTable mock)
+    fireEvent.click(screen.getByTestId('select-row-0'));
 
-  it('should log error and not call sendRewardBatch when batchId is missing', async () => {
-    // This scenario is driven by row selection and modal confirm flow.
-    // Since selection lives in DataTable, it is skipped here to avoid coupling to DataTable internals.
+    const sendBtn = await screen.findByRole('button', {
+      name: /pages\.refundRequests\.sendRequests/i,
+    });
+    fireEvent.click(sendBtn);
+
+    fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing initiativeId or batchId');
+    });
+    expect(mockSendRewardBatch).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('should handle null response from getRewardBatches', async () => {
@@ -463,13 +537,32 @@ describe('RefundRequests', () => {
   });
 
   it('should apply isRowSelectable rules for month/year, numberOfTransactions, and missing month', async () => {
-    // isRowSelectable is part of DataTable behavior; keep that unit-tested in DataTable tests.
-    // RefundRequests is covered by service calls / mapping tests in this suite.
   });
 
   it('should show specific error alert when backend says previous month batch was not sent (REWARD_BATCH_PREVIOUS_NOT_SENT)', async () => {
-    // This scenario depends on selecting a row and confirming in the modal.
-    // Since selection lives in DataTable, it is covered by DataTable tests; kept out here.
+    mockSendRewardBatch.mockResolvedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('select-row-1'));
+
+    const sendBtn = await screen.findByRole('button', { name: 'pages.refundRequests.sendRequests' });
+    fireEvent.click(sendBtn);
+
+    fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'errors.genericTitle',
+          text: 'errors.sendTheBatchForPreviousMonth',
+          isOpen: true,
+          severity: 'error',
+        })
+      );
+    });
   });
 
   it('should map approved/suspended amounts only for APPROVED batches (others become undefined)', async () => {

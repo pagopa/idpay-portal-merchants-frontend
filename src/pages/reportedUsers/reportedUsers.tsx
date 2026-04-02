@@ -13,6 +13,7 @@ import { getReportedUser, deleteReportedUser } from '../../services/merchantServ
 import { parseJwt } from '../../utils/jwt-utils';
 import AlertListComponent, { AlertProps } from '../../components/Alert/AlertListComponent';
 import { useAlert } from '../../hooks/useAlert';
+import { browserConsole } from '../../utils/consoleLogger';
 import { isValidCF, normalizeValue } from './helpersReportedUsers';
 import SearchTaxCode from './SearchTaxCode';
 import NoResultPaper from './NoResultPaper';
@@ -122,7 +123,7 @@ const ReportedUsers: React.FC = () => {
           }
         } catch (e: any) {
           if (e?.status === 404 || e?.response?.status === 404) {
-            console.error('Reported user not found (404):', e);
+            browserConsole.error('Reported user not found (404):', e);
           } else {
             setUser([]);
             setError('Errore durante il recupero dell’utente segnalato');
@@ -132,7 +133,7 @@ const ReportedUsers: React.FC = () => {
               isOpen: true,
               severity: 'error',
             });
-            console.error('Error while fetching reported user:', e);
+            browserConsole.error('Error while fetching reported user:', e);
           }
         } finally {
           setLoading(false);
@@ -153,7 +154,7 @@ const ReportedUsers: React.FC = () => {
       updateAlerts('removed', true);
       setTimeout(() => updateAlerts('removed', false), 3000);
     } catch (e) {
-      console.error('Error while deleting reported user:', e);
+      browserConsole.error('Error while deleting reported user:', e);
     }
   };
 

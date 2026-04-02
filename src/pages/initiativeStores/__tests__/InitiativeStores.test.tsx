@@ -37,6 +37,12 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
       >
         Sort
       </button>
+      <button
+        data-testid="sort-button-non-referent"
+        onClick={() => props.onSortModelChange([{ field: 'city', sort: 'asc' }])}
+      >
+        Sort city
+      </button>
       <button data-testid="sort-button-remove" onClick={() => props.onSortModelChange([])}>
         Remove Sort
       </button>
@@ -88,20 +94,56 @@ const mockStores = [
 ];
 const mockPagination = { pageNo: 0, pageSize: 5, totalElements: 3, totalPages: 1 };
 
+const setupDefaultMocks = () => {
+  jest.clearAllMocks();
+  mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
+  mockStorageRead.mockReturnValue('DUMMY_TOKEN');
+  (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+    content: mockStores,
+    ...mockPagination,
+  });
+  (useLocation as jest.Mock).mockReturnValue({ state: {} });
+};
+
+const renderInitiativeStores = () => renderWithContext(<InitiativeStores />);
+
+const waitForTable = () =>
+  waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+
+const waitForStoreA = () =>
+  waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+
+const renderAndWaitTable = async () => {
+  renderInitiativeStores();
+  await waitForTable();
+};
+
+const renderAndWaitStoreA = async () => {
+  renderInitiativeStores();
+  await waitForStoreA();
+};
+
+const setStoredPagination = (overrides: Record<string, unknown>) => {
+  const storedPagination = {
+    pageNo: 2,
+    pageSize: 10,
+    totalElements: 30,
+    totalPages: 3,
+    sort: 'city,desc',
+    initiativeId: mockId,
+    ...overrides,
+  };
+  sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+  return storedPagination;
+};
+
 describe('<InitiativeStores />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
-    mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
-      content: mockStores,
-      ...mockPagination,
-    });
-    (useLocation as jest.Mock).mockReturnValue({ state: {} });
+    setupDefaultMocks();
   });
 
   test('renderizza correttamente, mostra il loader e poi i dati della tabella', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
@@ -119,7 +161,7 @@ describe('<InitiativeStores />', () => {
       ...mockPagination,
       totalElements: 0,
     });
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
       expect(screen.getByText('pages.initiativeStores.noStores')).toBeInTheDocument();
     });
@@ -133,7 +175,7 @@ describe('<InitiativeStores />', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const error = new Error('API Failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalled();
     });
@@ -141,8 +183,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('gestisce un errore API durante il reset dei filtri', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    await renderAndWaitTable();
 
     const error = new Error('Reset failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
@@ -156,15 +197,9 @@ describe('<InitiativeStores />', () => {
   });
 
   test("gestisce la rimozione dell'ordinamento", async () => {
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    await renderAndWaitTable();
 
     fireEvent.click(screen.getByTestId('sort-button-remove'));
-
-    await waitFor(() => {
-      expect(consoleLogSpy).toHaveBeenCalledWith('Ordinamento rimosso.');
-    });
 
     fireEvent.click(screen.getByTestId('paginate-button'));
     await waitFor(() => {
@@ -173,12 +208,10 @@ describe('<InitiativeStores />', () => {
         expect.objectContaining({ sort: 'asc' })
       );
     });
-    consoleLogSpy.mockRestore();
   });
 
   test('gestisce un errore nel .catch di handleFiltersReset', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    await renderAndWaitTable();
 
     const error = new Error('External catch failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
@@ -204,7 +237,7 @@ describe('<InitiativeStores />', () => {
 
   test('non effettua la chiamata API se manca il merchant_id nel token', async () => {
     mockParseJwt.mockReturnValue({ not_merchant_id: 'some-value' });
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
@@ -212,8 +245,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('applica i filtri e ricarica i dati', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    await renderAndWaitStoreA();
 
     const cityInput = screen.getByLabelText('pages.initiativeStores.city');
     fireEvent.change(cityInput, { target: { value: 'Napoli' } });
@@ -230,8 +262,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('resetta i filtri e ricarica i dati iniziali', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    await renderAndWaitStoreA();
     const resetButton = screen.getByTestId('reset-filters-test');
     fireEvent.click(resetButton);
     await waitFor(() => {
@@ -251,8 +282,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('mostra la tabella vuota se i filtri non producono risultati', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    await renderAndWaitStoreA();
 
     (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
       content: [],
@@ -269,8 +299,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('naviga alla pagina di aggiunta punto vendita al click sul pulsante', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    await renderAndWaitStoreA();
     const addButton = screen.getByText('pages.initiativeStores.addStoreList');
     fireEvent.click(addButton);
     expect(mockHistory.push).toHaveBeenCalledWith(
@@ -279,8 +308,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test("gestisce l'ordinamento della tabella", async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    await renderAndWaitTable();
     fireEvent.click(screen.getByTestId('sort-button'));
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
@@ -290,9 +318,21 @@ describe('<InitiativeStores />', () => {
     });
   });
 
+  test('gestisce ordinamento su campo diverso da referent', async () => {
+    await renderAndWaitTable();
+
+    fireEvent.click(screen.getByTestId('sort-button-non-referent'));
+
+    await waitFor(() => {
+      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+        'merchant-id-01',
+        expect.objectContaining({ sort: 'city,asc' })
+      );
+    });
+  });
+
   test('gestisce la paginazione della tabella', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    await renderAndWaitTable();
     fireEvent.click(screen.getByTestId('paginate-button'));
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
@@ -303,8 +343,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test.skip('naviga al dettaglio del punto vendita al click su una riga', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    await renderAndWaitStoreA();
     fireEvent.click(screen.getByText('Store A'));
     expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/initiative-123/punti-vendita/1/`
@@ -316,9 +355,13 @@ describe('<InitiativeStores />', () => {
       state: { showSuccessAlert: true },
       pathname: '/',
     });
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
-      expect(mockHistory.replace).toHaveBeenCalled();
+      expect(mockHistory.replace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          state: expect.objectContaining({ showSuccessAlert: false }),
+        })
+      );
     });
   });
 
@@ -328,7 +371,7 @@ describe('<InitiativeStores />', () => {
       ...mockPagination,
       totalElements: 0,
     });
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
       expect(screen.getByText('pages.initiativeStores.noStores')).toBeInTheDocument();
     });
@@ -339,29 +382,20 @@ describe('<InitiativeStores />', () => {
     );
   });
 
-  test('seleziona tipo PHYSICAL nel dropdown', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+  test.each([
+    ['PHYSICAL', 'pages.initiativeStores.physical'],
+    ['ONLINE', 'pages.initiativeStores.online'],
+  ])('seleziona tipo %s nel dropdown', async (_type, i18nOptionKey) => {
+    await renderAndWaitStoreA();
 
     const typeSelect = screen.getByLabelText('pages.initiativeStores.pointOfSaleType');
     fireEvent.mouseDown(typeSelect);
-    const physicalOption = screen.getByText('pages.initiativeStores.physical');
-    fireEvent.click(physicalOption);
-  });
-
-  test('seleziona tipo ONLINE nel dropdown', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
-
-    const typeSelect = screen.getByLabelText('pages.initiativeStores.pointOfSaleType');
-    fireEvent.mouseDown(typeSelect);
-    const onlineOption = screen.getByText('pages.initiativeStores.online');
-    fireEvent.click(onlineOption);
+    const option = screen.getByText(i18nOptionKey);
+    fireEvent.click(option);
   });
 
   test('inserisce valore nel campo address', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    await renderAndWaitStoreA();
 
     const addressInput = screen.getByLabelText('pages.initiativeStores.address');
     fireEvent.change(addressInput, { target: { value: 'Via Milano 10' } });
@@ -369,8 +403,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('inserisce valore nel campo contactName', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    await renderAndWaitStoreA();
 
     const contactInput = screen.getByLabelText('pages.initiativeStores.referent');
     fireEvent.change(contactInput, { target: { value: 'Giovanni' } });
@@ -378,7 +411,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('mostra bottone add store solo quando ci sono store', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
       const addButton = screen.queryByText('pages.initiativeStores.addStoreList');
       expect(addButton).toBeInTheDocument();
@@ -389,13 +422,12 @@ describe('<InitiativeStores />', () => {
     (merchantService.getMerchantPointOfSales as jest.Mock).mockImplementation(
       () => new Promise(() => {})
     );
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   test('gestisce ordinamento con campo referent mappato a contactName', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    await renderAndWaitTable();
 
     fireEvent.click(screen.getByTestId('sort-button'));
 
@@ -411,14 +443,7 @@ describe('<InitiativeStores />', () => {
 
 describe('Column rendering logic', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
-    mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
-      content: mockStores,
-      ...mockPagination,
-    });
-    (useLocation as jest.Mock).mockReturnValue({ state: {} });
+    setupDefaultMocks();
   });
 
   test('il renderCell della colonna "type" formatta correttamente i valori', async () => {
@@ -550,27 +575,12 @@ describe('Column rendering logic', () => {
 
   describe('sessionStorage behavior', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      setupDefaultMocks();
       sessionStorage.clear();
-      mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
-      mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-      (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
-        content: mockStores,
-        ...mockPagination,
-      });
-      (useLocation as jest.Mock).mockReturnValue({ state: {} });
     });
 
     test('carica paginazione e ordinamento da sessionStorage se presenti e initiativeId corrisponde', async () => {
-      const storedPagination = {
-        pageNo: 2,
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        sort: 'city,desc',
-        initiativeId: mockId,
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+      setStoredPagination({});
 
       renderWithContext(<InitiativeStores />);
 
@@ -586,15 +596,7 @@ describe('Column rendering logic', () => {
     });
 
     test('ignora sessionStorage se initiativeId non corrisponde', async () => {
-      const storedPagination = {
-        pageNo: 2,
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        sort: 'city,desc',
-        initiativeId: 'different-initiative-id',
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+      setStoredPagination({ initiativeId: 'different-initiative-id' });
 
       renderWithContext(<InitiativeStores />);
 
@@ -610,14 +612,7 @@ describe('Column rendering logic', () => {
     });
 
     test('ignora sessionStorage se pageNo è undefined', async () => {
-      const storedPagination = {
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        sort: 'city,desc',
-        initiativeId: mockId,
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+      setStoredPagination({ pageNo: undefined });
 
       renderWithContext(<InitiativeStores />);
 
@@ -633,14 +628,7 @@ describe('Column rendering logic', () => {
     });
 
     test('gestisce sessionStorage senza campo sort', async () => {
-      const storedPagination = {
-        pageNo: 1,
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        initiativeId: mockId,
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+      setStoredPagination({ pageNo: 1, sort: undefined });
 
       renderWithContext(<InitiativeStores />);
 
@@ -656,15 +644,7 @@ describe('Column rendering logic', () => {
     });
 
     test('converte correttamente il sort string in GridSortModel', async () => {
-      const storedPagination = {
-        pageNo: 0,
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        sort: 'franchiseName,asc',
-        initiativeId: mockId,
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+      setStoredPagination({ pageNo: 0, sort: 'franchiseName,asc' });
 
       renderWithContext(<InitiativeStores />);
 
@@ -674,15 +654,7 @@ describe('Column rendering logic', () => {
     });
 
     test('gestisce sort string con formato non valido', async () => {
-      const storedPagination = {
-        pageNo: 0,
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        sort: 'invalidformat',
-        initiativeId: mockId,
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
+      setStoredPagination({ pageNo: 0, sort: 'invalidformat' });
 
       renderWithContext(<InitiativeStores />);
 

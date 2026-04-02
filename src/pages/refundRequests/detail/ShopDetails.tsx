@@ -41,6 +41,7 @@ import { useAlert } from '../../../hooks/useAlert';
 import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/FranchisePointOfSaleDTO';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/MerchantDetailDTO';
+import { browserConsole } from '../../../utils/consoleLogger';
 import { ShopCard } from './ShopCard';
 
 const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(
@@ -204,7 +205,7 @@ const ShopDetails: React.FC = () => {
         link.click();
       } catch (e) {
         if (MOCK_USER) {
-          console.log(e);
+          browserConsole.log(e);
         }
         setAlert({
           title: t('errors.genericTitle'),

@@ -1,14 +1,18 @@
 import { buildRoute } from "../routeBuilder";
+import { browserConsole } from "../consoleLogger";
+
+jest.mock("../consoleLogger", () => ({
+  browserConsole: {
+    warn: jest.fn(),
+    error: jest.fn(),
+    groupCollapsed: jest.fn(),
+    groupEnd: jest.fn(),
+    log: jest.fn(),
+  },
+}));
 
 describe("buildRoute", () => {
-  const originalWarn = console.warn;
-
   beforeEach(() => {
-    console.warn = jest.fn();
-  });
-
-  afterEach(() => {
-    console.warn = originalWarn;
     jest.clearAllMocks();
   });
 
@@ -20,7 +24,7 @@ describe("buildRoute", () => {
     });
 
     expect(result).toBe("/123/456/modifica/789");
-    expect(console.warn).not.toHaveBeenCalled();
+    expect(browserConsole.warn).not.toHaveBeenCalled();
   });
 
   it("encodes parameter values", () => {
@@ -37,18 +41,17 @@ describe("buildRoute", () => {
       section: null as unknown as string,
     });
 
-    expect(console.warn).toHaveBeenCalledTimes(3);
-    expect((console.warn as jest.Mock).mock.calls[0][0]).toContain(
+    expect(browserConsole.warn).toHaveBeenCalledTimes(3);
+    expect((browserConsole.warn as jest.Mock).mock.calls[0][0]).toContain(
       'Param "id" is undefined'
     );
-    expect((console.warn as jest.Mock).mock.calls[1][0]).toContain(
+    expect((browserConsole.warn as jest.Mock).mock.calls[1][0]).toContain(
       'Param "section" is null'
     );
-    expect((console.warn as jest.Mock).mock.calls[2][0]).toContain(
+    expect((browserConsole.warn as jest.Mock).mock.calls[2][0]).toContain(
       "Unresolved params"
     );
 
-    // unresolved params remain in path
     expect(result).toBe("/user/:id/:section");
   });
 
@@ -59,10 +62,10 @@ describe("buildRoute", () => {
     });
 
     expect(result).toBe("/user/123/:section");
-    expect(console.warn).toHaveBeenCalledWith(
+    expect(browserConsole.warn).toHaveBeenCalledWith(
       expect.stringContaining('Param "section" is undefined')
     );
-    expect(console.warn).toHaveBeenCalledWith(
+    expect(browserConsole.warn).toHaveBeenCalledWith(
       expect.stringContaining("Unresolved params :section")
     );
   });

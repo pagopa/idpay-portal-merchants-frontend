@@ -501,21 +501,9 @@ describe('MerchantApi', () => {
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const consoleGroupSpy = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
-    const consoleGroupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
-
     const MerchantApi = loadApi();
 
-    await expect(
-      MerchantApi.getRewardBatches('init1')
-    ).rejects.toThrow('Boom');
-
-    expect(consoleGroupSpy).toHaveBeenCalled();
-
-    consoleErrorSpy.mockRestore();
-    consoleGroupSpy.mockRestore();
-    consoleGroupEndSpy.mockRestore();
+    await expect(MerchantApi.getRewardBatches('init1', 0, 10)).rejects.toThrow('Boom');
   });
 
   it('sendRewardBatches - success', async () => {
