@@ -37,6 +37,12 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
       >
         Sort
       </button>
+      <button
+        data-testid="sort-button-non-referent"
+        onClick={() => props.onSortModelChange([{ field: 'city', sort: 'asc' }])}
+      >
+        Sort city
+      </button>
       <button data-testid="sort-button-remove" onClick={() => props.onSortModelChange([])}>
         Remove Sort
       </button>
@@ -284,6 +290,20 @@ describe('<InitiativeStores />', () => {
     });
   });
 
+  test('gestisce ordinamento su campo diverso da referent', async () => {
+    renderWithContext(<InitiativeStores />);
+    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('sort-button-non-referent'));
+
+    await waitFor(() => {
+      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+        'merchant-id-01',
+        expect.objectContaining({ sort: 'city,asc' })
+      );
+    });
+  });
+
   test('gestisce la paginazione della tabella', async () => {
     renderWithContext(<InitiativeStores />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
@@ -312,7 +332,11 @@ describe('<InitiativeStores />', () => {
     });
     renderWithContext(<InitiativeStores />);
     await waitFor(() => {
-      expect(mockHistory.replace).toHaveBeenCalled();
+      expect(mockHistory.replace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          state: expect.objectContaining({ showSuccessAlert: false }),
+        })
+      );
     });
   });
 
