@@ -94,16 +94,20 @@ const mockStores = [
 ];
 const mockPagination = { pageNo: 0, pageSize: 5, totalElements: 3, totalPages: 1 };
 
+const setupDefaultMocks = () => {
+  jest.clearAllMocks();
+  mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
+  mockStorageRead.mockReturnValue('DUMMY_TOKEN');
+  (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+    content: mockStores,
+    ...mockPagination,
+  });
+  (useLocation as jest.Mock).mockReturnValue({ state: {} });
+};
+
 describe('<InitiativeStores />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
-    mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
-      content: mockStores,
-      ...mockPagination,
-    });
-    (useLocation as jest.Mock).mockReturnValue({ state: {} });
+    setupDefaultMocks();
   });
 
   test('renderizza correttamente, mostra il loader e poi i dati della tabella', async () => {
@@ -429,14 +433,7 @@ describe('<InitiativeStores />', () => {
 
 describe('Column rendering logic', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
-    mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
-      content: mockStores,
-      ...mockPagination,
-    });
-    (useLocation as jest.Mock).mockReturnValue({ state: {} });
+    setupDefaultMocks();
   });
 
   test('il renderCell della colonna "type" formatta correttamente i valori', async () => {
@@ -568,15 +565,8 @@ describe('Column rendering logic', () => {
 
   describe('sessionStorage behavior', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      setupDefaultMocks();
       sessionStorage.clear();
-      mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
-      mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-      (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
-        content: mockStores,
-        ...mockPagination,
-      });
-      (useLocation as jest.Mock).mockReturnValue({ state: {} });
     });
 
     test('carica paginazione e ordinamento da sessionStorage se presenti e initiativeId corrisponde', async () => {
