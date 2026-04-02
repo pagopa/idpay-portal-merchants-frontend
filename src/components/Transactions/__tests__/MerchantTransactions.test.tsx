@@ -310,6 +310,7 @@ describe('MerchantTransactions', () => {
         transactions={mockTransactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
       />
     );
 
@@ -396,8 +397,8 @@ describe('MerchantTransactions', () => {
     fireEvent.change(gtinInput, { target: { value: '123456789012345' } });
     fireEvent.change(trxCodeInput, { target: { value: '123456789012345' } });
 
-    expect(gtinInput.value.length).toBeLessThanOrEqual(14);
-    expect(trxCodeInput.value.length).toBeLessThanOrEqual(8);
+    expect((gtinInput as HTMLInputElement).value.length).toBeLessThanOrEqual(14);
+    expect((trxCodeInput as HTMLInputElement).value.length).toBeLessThanOrEqual(8);
   });
 
   it('shows error message for special characters in GTIN and trxCode', () => {
@@ -520,142 +521,100 @@ describe('MerchantTransactions', () => {
     expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin')).toBeInTheDocument();
   });
 
-  it('renders transactions with empty values', () => {
-    const emptyValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
-      trxId: '1',
-      updateDate: '',
-      fiscalCode: '',
-      effectiveAmountCents: 5000,
-      rewardAmountCents: 500,
-      status: 'REWARDED',
-      additionalProperties: { productName: '' },
-    }];
-
+  const renderAndExpectTable = (transactions: Array<PointOfSaleTransactionProcessedDTO>) => {
     render(
       <MerchantTransactions
-        transactions={emptyValueTransaction}
+        transactions={transactions}
         handleFiltersApplied={handleFiltersApplied}
         handleFiltersReset={handleFiltersReset}
         sortModel={[]}
       />
     );
-
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  };
+
+  it('renders transactions with empty values', () => {
+    renderAndExpectTable([
+      {
+        trxId: '1',
+        updateDate: '',
+        fiscalCode: '',
+        effectiveAmountCents: 5000,
+        rewardAmountCents: 500,
+        status: 'REWARDED',
+        additionalProperties: { productName: '' },
+      } as any,
+    ]);
   });
 
   it('renders transactions with null values', () => {
-    const nullValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
-      trxId: '1',
-      updateDate: null as any,
-      fiscalCode: null as any,
-      effectiveAmountCents: 5000,
-      rewardAmountCents: 500,
-      status: 'REWARDED',
-      additionalProperties: { productName: null as any },
-    }];
-
-    render(
-      <MerchantTransactions
-        transactions={nullValueTransaction}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
-
-    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+    renderAndExpectTable([
+      {
+        trxId: '1',
+        updateDate: null,
+        fiscalCode: null,
+        effectiveAmountCents: 5000,
+        rewardAmountCents: 500,
+        status: 'REWARDED',
+        additionalProperties: { productName: null },
+      } as any,
+    ]);
   });
 
   it('renders transactions with undefined values', () => {
-    const undefinedValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
-      trxId: '1',
-      updateDate: undefined as any,
-      fiscalCode: undefined as any,
-      effectiveAmountCents: 5000,
-      rewardAmountCents: 500,
-      status: 'REWARDED',
-      additionalProperties: { productName: undefined as any },
-    }];
-
-    render(
-      <MerchantTransactions
-        transactions={undefinedValueTransaction}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
-
-    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+    renderAndExpectTable([
+      {
+        trxId: '1',
+        updateDate: undefined,
+        fiscalCode: undefined,
+        effectiveAmountCents: 5000,
+        rewardAmountCents: 500,
+        status: 'REWARDED',
+        additionalProperties: { productName: undefined },
+      } as any,
+    ]);
   });
 
   it('renders transaction with short values', () => {
-    const shortValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
-      trxId: '1',
-      updateDate: 'SHORT',
-      fiscalCode: 'ABC',
-      effectiveAmountCents: 5000,
-      rewardAmountCents: 500,
-      status: 'REWARDED',
-      additionalProperties: { productName: 'Test' },
-    }];
-
-    render(
-      <MerchantTransactions
-        transactions={shortValueTransaction}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
-
-    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+    renderAndExpectTable([
+      {
+        trxId: '1',
+        updateDate: 'SHORT',
+        fiscalCode: 'ABC',
+        effectiveAmountCents: 5000,
+        rewardAmountCents: 500,
+        status: 'REWARDED',
+        additionalProperties: { productName: 'Test' },
+      } as any,
+    ]);
   });
 
   it('renders transaction with long values', () => {
-    const longValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
-      trxId: '1',
-      updateDate: 'VERYLONGVALUE123456789',
-      fiscalCode: 'VERYLONGFISCALCODE123',
-      effectiveAmountCents: 5000,
-      rewardAmountCents: 500,
-      status: 'REWARDED',
-      additionalProperties: { productName: 'VERYLONGPRODUCTNAME123' },
-    }];
-
-    render(
-      <MerchantTransactions
-        transactions={longValueTransaction}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
-
-    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+    renderAndExpectTable([
+      {
+        trxId: '1',
+        updateDate: 'VERYLONGVALUE123456789',
+        fiscalCode: 'VERYLONGFISCALCODE123',
+        effectiveAmountCents: 5000,
+        rewardAmountCents: 500,
+        status: 'REWARDED',
+        additionalProperties: { productName: 'VERYLONGPRODUCTNAME123' },
+      } as any,
+    ]);
   });
 
   it('renders transaction with value exactly at threshold length', () => {
-    const exactThresholdTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
-      trxId: '1',
-      updateDate: '12345678901',
-      fiscalCode: '12345678901',
-      effectiveAmountCents: 5000,
-      rewardAmountCents: 500,
-      status: 'REWARDED',
-      additionalProperties: { productName: '12345678901' },
-    }];
-
-    render(
-      <MerchantTransactions
-        transactions={exactThresholdTransaction}
-        handleFiltersApplied={handleFiltersApplied}
-        handleFiltersReset={handleFiltersReset}
-        sortModel={[]}
-      />
-    );
-
-    expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+    renderAndExpectTable([
+      {
+        trxId: '1',
+        updateDate: '12345678901',
+        fiscalCode: '12345678901',
+        effectiveAmountCents: 5000,
+        rewardAmountCents: 500,
+        status: 'REWARDED',
+        additionalProperties: { productName: '12345678901' },
+      } as any,
+    ]);
   });
 
   it('displays transaction detail component when drawer is opened', async () => {
@@ -675,7 +634,7 @@ describe('MerchantTransactions', () => {
   });
 
   it('passes correct props to transaction data table', () => {
-    const sortModel = [{ field: 'updateDate', sort: 'desc' }];
+    const sortModel = [{ field: 'updateDate', sort: 'desc' as const }];
     const paginationModel = { page: 0, pageSize: 10 };
 
     render(
@@ -864,23 +823,23 @@ describe('MerchantTransactions', () => {
   });
 
   it('displays multiple transactions in data table', () => {
-    const multipleTransactions: Array<PointOfSaleTransactionProcessedDTO> = [
+    const multipleTransactions = [
       {
         trxId: '1',
-        updateDate: '2025-10-06T10:00:00Z',
+        updateDate: '2025-10-06T10:00:00Z' as any,
         fiscalCode: 'AAAAAA00A00A000A',
-        effectiveAmountCents: 5000,
-        rewardAmountCents: 500,
-        status: 'REWARDED',
+        effectiveAmountCents: 5000 as any,
+        rewardAmountCents: 500 as any,
+        status: 'REWARDED' as any,
         additionalProperties: { productName: 'Frigorifero' },
       },
       {
         trxId: '2',
-        updateDate: '2025-10-07T11:00:00Z',
+        updateDate: '2025-10-07T11:00:00Z' as any,
         fiscalCode: 'BBBBBB00B00B000B',
-        effectiveAmountCents: 6000,
-        rewardAmountCents: 600,
-        status: 'INVOICED',
+        effectiveAmountCents: 6000 as any,
+        rewardAmountCents: 600 as any,
+        status: 'INVOICED' as any,
         additionalProperties: { productName: 'Forno' },
       },
     ];
@@ -919,13 +878,13 @@ describe('MerchantTransactions', () => {
   });
 
   it('handles tooltip rendering with long values', () => {
-    const longValueTransaction: Array<PointOfSaleTransactionProcessedDTO> = [{
+    const longValueTransaction = [{
       trxId: '1',
-      updateDate: 'VERY_LONG_VALUE_THAT_EXCEEDS_THRESHOLD_LENGTH_12345',
+      updateDate: 'VERY_LONG_VALUE_THAT_EXCEEDS_THRESHOLD_LENGTH_12345' as any,
       fiscalCode: 'VERYLONGFISCALCODE12345678901234567890',
-      effectiveAmountCents: 5000,
-      rewardAmountCents: 500,
-      status: 'REWARDED',
+      effectiveAmountCents: 5000 as any,
+      rewardAmountCents: 500 as any,
+      status: 'REWARDED' as any,
       additionalProperties: { productName: 'VERYLONGPRODUCTNAME12345678901234567890' },
     }];
 
@@ -1035,7 +994,7 @@ describe('MerchantTransactions', () => {
     expect(gtinInput).toHaveValue('');
 
     fireEvent.change(gtinInput, { target: { value: '1'.repeat(15) } });
-    expect(gtinInput.value.length).toBeLessThanOrEqual(14);
+    expect((gtinInput as HTMLInputElement).value.length).toBeLessThanOrEqual(14);
   });
   it('passes long values to Tooltip title and feeds status label to CustomChip', () => {
     const longTx = [{
