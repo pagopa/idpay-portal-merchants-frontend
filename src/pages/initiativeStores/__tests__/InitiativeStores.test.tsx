@@ -105,13 +105,21 @@ const setupDefaultMocks = () => {
   (useLocation as jest.Mock).mockReturnValue({ state: {} });
 };
 
+const renderInitiativeStores = () => renderWithContext(<InitiativeStores />);
+
+const waitForTable = () =>
+  waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+
+const waitForStoreA = () =>
+  waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+
 describe('<InitiativeStores />', () => {
   beforeEach(() => {
     setupDefaultMocks();
   });
 
   test('renderizza correttamente, mostra il loader e poi i dati della tabella', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
@@ -129,7 +137,7 @@ describe('<InitiativeStores />', () => {
       ...mockPagination,
       totalElements: 0,
     });
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
       expect(screen.getByText('pages.initiativeStores.noStores')).toBeInTheDocument();
     });
@@ -143,7 +151,7 @@ describe('<InitiativeStores />', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const error = new Error('API Failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalled();
     });
@@ -151,7 +159,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('gestisce un errore API durante il reset dei filtri', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     const error = new Error('Reset failure');
@@ -166,7 +174,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test("gestisce la rimozione dell'ordinamento", async () => {
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('sort-button-remove'));
@@ -181,8 +189,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('gestisce un errore nel .catch di handleFiltersReset', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForTable();
 
     const error = new Error('External catch failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
@@ -208,7 +216,7 @@ describe('<InitiativeStores />', () => {
 
   test('non effettua la chiamata API se manca il merchant_id nel token', async () => {
     mockParseJwt.mockReturnValue({ not_merchant_id: 'some-value' });
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
@@ -216,8 +224,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('applica i filtri e ricarica i dati', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForStoreA();
 
     const cityInput = screen.getByLabelText('pages.initiativeStores.city');
     fireEvent.change(cityInput, { target: { value: 'Napoli' } });
@@ -234,8 +242,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('resetta i filtri e ricarica i dati iniziali', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForStoreA();
     const resetButton = screen.getByTestId('reset-filters-test');
     fireEvent.click(resetButton);
     await waitFor(() => {
@@ -255,8 +263,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('mostra la tabella vuota se i filtri non producono risultati', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForStoreA();
 
     (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
       content: [],
@@ -273,8 +281,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('naviga alla pagina di aggiunta punto vendita al click sul pulsante', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForStoreA();
     const addButton = screen.getByText('pages.initiativeStores.addStoreList');
     fireEvent.click(addButton);
     expect(mockHistory.push).toHaveBeenCalledWith(
@@ -283,8 +291,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test("gestisce l'ordinamento della tabella", async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForTable();
     fireEvent.click(screen.getByTestId('sort-button'));
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
@@ -295,8 +303,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('gestisce ordinamento su campo diverso da referent', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForTable();
 
     fireEvent.click(screen.getByTestId('sort-button-non-referent'));
 
@@ -309,8 +317,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('gestisce la paginazione della tabella', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForTable();
     fireEvent.click(screen.getByTestId('paginate-button'));
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
@@ -321,8 +329,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test.skip('naviga al dettaglio del punto vendita al click su una riga', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForStoreA();
     fireEvent.click(screen.getByText('Store A'));
     expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/initiative-123/punti-vendita/1/`
@@ -334,7 +342,7 @@ describe('<InitiativeStores />', () => {
       state: { showSuccessAlert: true },
       pathname: '/',
     });
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
       expect(mockHistory.replace).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -350,7 +358,7 @@ describe('<InitiativeStores />', () => {
       ...mockPagination,
       totalElements: 0,
     });
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
       expect(screen.getByText('pages.initiativeStores.noStores')).toBeInTheDocument();
     });
@@ -362,8 +370,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('seleziona tipo PHYSICAL nel dropdown', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForStoreA();
 
     const typeSelect = screen.getByLabelText('pages.initiativeStores.pointOfSaleType');
     fireEvent.mouseDown(typeSelect);
@@ -372,8 +380,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('seleziona tipo ONLINE nel dropdown', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForStoreA();
 
     const typeSelect = screen.getByLabelText('pages.initiativeStores.pointOfSaleType');
     fireEvent.mouseDown(typeSelect);
@@ -382,8 +390,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('inserisce valore nel campo address', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForStoreA();
 
     const addressInput = screen.getByLabelText('pages.initiativeStores.address');
     fireEvent.change(addressInput, { target: { value: 'Via Milano 10' } });
@@ -391,8 +399,8 @@ describe('<InitiativeStores />', () => {
   });
 
   test('inserisce valore nel campo contactName', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForStoreA();
 
     const contactInput = screen.getByLabelText('pages.initiativeStores.referent');
     fireEvent.change(contactInput, { target: { value: 'Giovanni' } });
@@ -400,7 +408,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('mostra bottone add store solo quando ci sono store', async () => {
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     await waitFor(() => {
       const addButton = screen.queryByText('pages.initiativeStores.addStoreList');
       expect(addButton).toBeInTheDocument();
@@ -411,13 +419,13 @@ describe('<InitiativeStores />', () => {
     (merchantService.getMerchantPointOfSales as jest.Mock).mockImplementation(
       () => new Promise(() => {})
     );
-    renderWithContext(<InitiativeStores />);
+    renderInitiativeStores();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   test('gestisce ordinamento con campo referent mappato a contactName', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+    renderInitiativeStores();
+    await waitForTable();
 
     fireEvent.click(screen.getByTestId('sort-button'));
 
