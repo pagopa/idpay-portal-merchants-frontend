@@ -9,6 +9,8 @@
  *   trxId: "789"
  * })
  */
+import { browserConsole } from './consoleLogger';
+
 export function buildRoute(
   template: string,
   params: Record<string, string | number | undefined>
@@ -17,7 +19,7 @@ export function buildRoute(
 
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === null) {
-      console.warn(`[routeBuilder] Param "${key}" is ${value} for template "${template}"`);
+      browserConsole.warn(`[routeBuilder] Param "${key}" is ${value} for template "${template}"`);
       return;
     }
     path = path.replace(`:${key}`, encodeURIComponent(String(value)));
@@ -25,7 +27,7 @@ export function buildRoute(
 
   const unresolvedParams = path.match(/:\w+/g);
   if (unresolvedParams) {
-    console.warn(
+    browserConsole.warn(
       `[routeBuilder] Unresolved params ${unresolvedParams.join(
         ', '
       )} in generated path "${path}" from template "${template}"`

@@ -18,6 +18,7 @@ import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { useAlert } from '../../hooks/useAlert';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { browserConsole } from '../../utils/consoleLogger';
 import { RefundRequestsModal } from './RefundRequestModal';
 
 interface RouteParams {
@@ -221,7 +222,7 @@ const RefundRequests = () => {
     try {
       const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0]?.id : '';
       if (!batchId) {
-        console.error('Missing initiativeId or batchId');
+        browserConsole.error('Missing initiativeId or batchId');
         return;
       }
       const result = (await sendRewardBatch(initiative_id, batchId.toString())) as any;

@@ -12,6 +12,7 @@ import { safeFormatDate } from '../../utils/formatUtils';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { downloadMerchantReport, getMerchantReports } from '../../services/merchantService';
 import { ReportDTO, ReportStatusEnum } from '../../api/generated/merchants/ReportDTO';
+import { browserConsole } from '../../utils/consoleLogger';
 
 type RouteParams = {
   initiative_id: string;
@@ -111,7 +112,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
         link.parentNode?.removeChild(link);
       }
     } catch (error) {
-      console.error('Error downloading report', error);
+      browserConsole.error('Error downloading report', error);
       updateAlerts('error', true);
       setTimeout(() => updateAlerts('error', false), 3000);
     } finally {

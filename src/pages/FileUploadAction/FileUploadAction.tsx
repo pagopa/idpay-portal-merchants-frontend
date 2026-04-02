@@ -183,7 +183,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         });
         history.goBack();
       } catch (error: unknown) {
-        // console.error('Unexpected API Error:', error);
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),

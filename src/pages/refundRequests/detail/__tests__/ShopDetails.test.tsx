@@ -238,7 +238,8 @@ describe('ShopDetails', () => {
   });
 
   it("should handle handleDownloadCsv error", async () => {
-    const consoleSpy = jest.spyOn(console, "log")
+    const { browserConsole } = require("../../../../utils/consoleLogger");
+    const consoleSpy = jest.spyOn(browserConsole, "log").mockImplementation(() => {});
     const mockError = new Error("fail")
     getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
 
@@ -258,6 +259,7 @@ describe('ShopDetails', () => {
       isOpen: true,
       severity: 'error',
     });
+    consoleSpy.mockRestore();
   });
 
   it('should handle trxCode input change', async () => {

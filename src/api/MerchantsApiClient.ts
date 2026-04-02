@@ -5,11 +5,13 @@ import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
 import { isRight } from 'fp-ts/Either';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
+import { browserConsole } from '../utils/consoleLogger';
 import {
   GetPointOfSalesFilters,
   GetPointOfSalesResponse,
   GetPointOfSaleTransactionsFilters,
 } from '../types/types';
+import { cleanupOnLogout } from '../utils/logoutCleanup';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
 import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
 import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsDTO';
@@ -44,6 +46,7 @@ const apiClient = createClient({
 });
 
 const onRedirectToLogin = () => {
+  cleanupOnLogout();
   store.dispatch(
     appStateActions.addError({
       id: 'tokenNotValid',
@@ -454,34 +457,21 @@ export const MerchantApi = {
 
 };
 
-
-
 function logApiError(error: any, apiName?: string) {
 
   const errorKey = error?.response?.data?.errorKey;
   if (errorKey) {
-    // console.error(`Error Key: ${errorKey}`);
+    browserConsole.error(`Error Key: ${errorKey}`);
   }
-  /*
-  const pretty = (val: any) =>
-    typeof val === "string"
-      ? val
-      : val !== undefined
-        ? JSON.stringify(val, null, 2)
-        : "N/A";
-        */
+
   const apiLabel = apiName ? `[API ERROR] MerchantsApi.${apiName}` : "[API ERROR] MerchantsApi";
-  if (console.groupCollapsed) {
-    console.groupCollapsed(apiLabel);
+  if (browserConsole.groupCollapsed) {
+    browserConsole.groupCollapsed(apiLabel);
   } else {
-    // console.error(apiLabel);
+    browserConsole.error(apiLabel);
   }
-  // console.error("Message:", pretty(error?.message));
-  // console.error("Error name:", error?.name ?? "N/A");
-  // console.error("Stack:", pretty(error?.stack));
-  // console.error("Full error object:", pretty(error));
-  if (console.groupEnd) {
-    console.groupEnd();
+  if (browserConsole.groupEnd) {
+    browserConsole.groupEnd();
   }
 
 }
