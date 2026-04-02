@@ -59,29 +59,6 @@ jobs:
       - name: Run tests with coverage
         run: yarn test:coverage
 
-      - name: Debug coverage presence (target files)
-        shell: bash
-        run: |
-          test -f coverage/lcov.info
-          echo '--- lcov grep: consoleLogger ---'
-          grep -n 'consoleLogger' coverage/lcov.info | head -n 50 || true
-          echo '--- lcov grep: src/utils/consoleLogger.ts ---'
-          grep -n 'src.*/consoleLogger.ts' coverage/lcov.info | head -n 20 || true
-          echo '--- lcov SF sample ---'
-          grep '^SF:' coverage/lcov.info | head -n 50 || true
-
-      - name: Normalize lcov paths
-        shell: bash
-        run: |
-          test -f coverage/lcov.info
-          sed -i 's|\\|/|g' coverage/lcov.info
-          echo '--- lcov check: consoleLogger ---'
-          grep '^SF:' coverage/lcov.info | grep 'src/utils/consoleLogger.ts' || true
-          echo '--- lcov check: RefundRequests ---'
-          grep '^SF:' coverage/lcov.info | grep 'src/pages/refundRequests/RefundRequests.tsx' || true
-          echo '--- lcov check: InitiativeStores ---'
-          grep '^SF:' coverage/lcov.info | grep 'src/pages/initiativeStores/InitiativeStores.tsx' || true
-
       - name: SonarCloud Scan (PR Analysis)
         uses: SonarSource/sonarqube-scan-action@e9a1c4e09a5eddb7db5d045b83807904bf8f67fc # v7.0.0
         env:
