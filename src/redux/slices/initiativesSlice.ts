@@ -6,12 +6,6 @@ import { InitiativeDTO } from '../../api/generated/merchants/InitiativeDTO';
 
 interface InitiativesState {
   list?: InitiativeDTOArray;
-  selectedInitative?:
-    | {
-        initiativeName?: string;
-        spendingPeriod?: string;
-      }
-    | undefined;
 }
 
 const initialState: InitiativesState = {};
@@ -24,33 +18,14 @@ export const initiativesSlice = createSlice({
     setInitiativesList: (state, action: PayloadAction<InitiativeDTOArray>) => {
       state.list = [...action.payload];
     },
-    setSelectedInitative: (
-      state,
-      action: PayloadAction<
-        | {
-            initiativeName?: string;
-            spendingPeriod?: string;
-          }
-        | undefined
-      >
-    ) => {
-      state.selectedInitative = action.payload
-        ? { ...action.payload }
-        : undefined;
-    },
   },
 });
 
-export const { setInitiativesList, setSelectedInitative } = initiativesSlice.actions;
+export const { setInitiativesList } = initiativesSlice.actions;
 export const initiativesReducer = initiativesSlice.reducer;
 
 export const intiativesListSelector = (state: RootState): InitiativeDTOArray | undefined =>
   state.initiatives.list;
-
-export const initiativeSelector = (
-  state: RootState
-): { initiativeName?: string; spendingPeriod?: string } | undefined =>
-  state.initiatives.selectedInitative;
 
 export type InitiativeExtended = InitiativeDTO & {
   spendingPeriod: string;

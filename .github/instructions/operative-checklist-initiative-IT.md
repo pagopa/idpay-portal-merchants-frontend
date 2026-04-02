@@ -184,11 +184,11 @@ Le evidenze devono essere riportate nel report.
 
 ### Verifiche obbligatorie
 
-- Presenza di lista iniziative come fonte primaria.
-- Assenza di salvataggio DTO completo iniziativa come fonte primaria.
-- Assenza di duplicazione dominio.
-- Verifica uso di `selectedInitative`.
-- Verifica presenza di `currentInitiativeSelector`.
+- Presenza di lista iniziative come unica fonte primaria del dominio.
+- Assenza totale di stato derivato persistito (es. `selectedInitative` o equivalenti).
+- Assenza di qualsiasi DTO "Extended" salvato nello store.
+- Assenza di azioni di sincronizzazione route → store.
+- Presenza e utilizzo coerente di `currentInitiativeSelector` come unico punto di derivazione dominio.
 
 ### Evidenze richieste
 
@@ -207,7 +207,8 @@ Le evidenze devono essere riportate nel report.
 
 - Tutti i fetch multiniziativa includono `initiativeId` nelle dependency.
 - Nessun useEffect con dependency `[]` in contesto multiniziativa.
-- Nessun find manuale fuori selector memoizzato.
+- Nessun `find` o derivazione manuale su iniziative in componenti, guard o useEffect.
+- Nessuna logica di formattazione dominio (es. spendingPeriod) fuori dai selector memoizzati.
 
 ### Evidenze richieste
 
@@ -239,10 +240,10 @@ File obbligatorio da analizzare:
 
 ### Verifiche obbligatorie
 
-- Lettura initiativeId solo da route.
-- Nessuna sincronizzazione DTO derivato nello store.
-- Nessun find manuale fuori selector.
-- Nessuna duplicazione dominio.
+- Lettura initiativeId esclusivamente da route.
+- Nessuna sincronizzazione imperativa route → store.
+- Nessuna derivazione dominio nel guard (no `find`, no formattazioni, no logica DTO).
+- Nessuna conoscenza della struttura interna di InitiativeDTO oltre alla validazione di esistenza.
 
 ✅ Regola:
 > La validazione deve essere centralizzata e non duplicare dominio.
@@ -266,7 +267,9 @@ File obbligatorio da analizzare:
 
 ### Verifiche obbligatorie
 
-- Nessun find manuale su iniziative fuori selector.
+- Nessun `find` manuale su iniziative fuori dai selector ufficiali.
+- Nessuna reintroduzione di stato derivato persistito nello store.
+- Nessuna action di sincronizzazione tra route e Redux.
 - Nessuna duplicazione dominio in Redux.
 - Nessun effetto senza initiativeId.
 - Nessuna rotta non uniforme.

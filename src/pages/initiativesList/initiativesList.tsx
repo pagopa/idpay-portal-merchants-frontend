@@ -19,8 +19,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { intiativesListSelector, setSelectedInitative } from '../../redux/slices/initiativesSlice';
+import { useAppSelector } from '../../redux/hooks';
+import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import EmptyList from '../components/EmptyList';
 import { StatusEnum } from '../../api/generated/merchants/InitiativeDTO';
 import ROUTES from '../../routes';
@@ -105,7 +105,6 @@ const InitiativesList = () => {
   const history = useHistory();
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
-  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (Array.isArray(initiativesListSel)) {
@@ -253,12 +252,6 @@ const InitiativesList = () => {
                               cursor: 'pointer',
                             }}
                             onClick={() => {
-                              dispatch(
-                                setSelectedInitative({
-                                  spendingPeriod: row.spendingPeriod,
-                                  initiativeName: row.initiativeName,
-                                })
-                              );
                               history.push(
                                 generatePath(ROUTES.OVERVIEW, {
                                   initiative_id: row.initiativeId,

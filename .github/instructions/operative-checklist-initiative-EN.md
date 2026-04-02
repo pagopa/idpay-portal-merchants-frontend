@@ -188,11 +188,11 @@ All findings must be documented in the report.
 
 ### Mandatory checks
 
-- Presence of initiatives list as primary source.
-- Absence of storing complete initiative DTO as primary source.
-- Absence of domain duplication.
-- Verification of `selectedInitative` usage.
-- Verification of `currentInitiativeSelector` presence.
+- Presence of initiatives list as the only primary domain source.
+- Complete absence of persisted derived state (e.g. `selectedInitative` or equivalents).
+- Absence of storing any "Extended" DTO inside the store.
+- Absence of route → store synchronization actions.
+- Presence and consistent usage of `currentInitiativeSelector` as the single domain derivation point.
 
 ### Required evidence
 
@@ -211,7 +211,8 @@ All findings must be documented in the report.
 
 - All multi‑initiative fetches include `initiativeId` in dependency arrays.
 - No `useEffect` with dependency `[]` in multi‑initiative context.
-- No manual `find` outside memoized selector.
+- No manual `find` or domain derivation on initiatives in components, guards, or `useEffect`.
+- No domain formatting logic (e.g. spendingPeriod) outside memoized selectors.
 
 ### Required evidence
 
@@ -243,10 +244,10 @@ Mandatory file to analyze:
 
 ### Mandatory checks
 
-- `initiativeId` is read only from the route.
-- No derived DTO synchronization into the store.
-- No manual `find` outside selector.
-- No domain duplication.
+- `initiativeId` is read exclusively from the route.
+- No imperative route → store synchronization.
+- No domain derivation inside the guard (no `find`, no formatting, no DTO logic).
+- No knowledge of InitiativeDTO internal structure beyond existence validation.
 
 ✅ Rule:
 > Validation must be centralized and must not duplicate domain logic.
@@ -270,7 +271,9 @@ Mandatory file to analyze:
 
 ### Mandatory checks
 
-- No manual `find` on initiatives outside selector.
+- No manual `find` on initiatives outside official selectors.
+- No reintroduction of persisted derived state into the store.
+- No route → Redux synchronization actions.
 - No domain duplication in Redux.
 - No effect without `initiativeId`.
 - No non‑uniform route.

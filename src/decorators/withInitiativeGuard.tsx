@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { RootState } from '../redux/store';
-import { intiativesListSelector, setSelectedInitative } from '../redux/slices/initiativesSlice';
+import { intiativesListSelector } from '../redux/slices/initiativesSlice';
 import { useCurrentInitiativeId } from '../hooks/useCurrentInitiativeId';
 import ROUTES from '../routes';
 
@@ -24,32 +24,9 @@ type Props = {
  * - No navigation triggered by Redux
  */
 const WithInitiativeGuard: React.FC<Props> = ({ children }) => {
-  const dispatch = useDispatch();
   const initiatives = useSelector((state: RootState) => intiativesListSelector(state));
 
   const { initiativeId, isValid, isListLoaded } = useCurrentInitiativeId();
-
-  useEffect(() => {
-    if (!initiativeId || !initiatives) {
-      return;
-    }
-
-    const found = initiatives.find((i) => i.initiativeId === initiativeId);
-
-    if (found) {
-      dispatch(
-        setSelectedInitative({
-          ...found,
-          spendingPeriod:
-            found.startDate && found.endDate
-              ? `${found.startDate.toLocaleDateString(
-                  'fr-FR'
-                )} - ${found.endDate.toLocaleDateString('fr-FR')}`
-              : '',
-        })
-      );
-    }
-  }, [initiativeId, initiatives, dispatch]);
 
   /**
    * HARDENING – Production Safe Flow
@@ -60,22 +37,22 @@ const WithInitiativeGuard: React.FC<Props> = ({ children }) => {
     return <div style={{ padding: '2rem', textAlign: 'center' }}>Caricamento iniziative...</div>;
   }
 
-  // 2️⃣ Lista vuota
+  // 2️⃣ Empty list
   if (Array.isArray(initiatives) && initiatives.length === 0) {
     return <Redirect to={ROUTES.HOME} />;
   }
 
-  // 3️⃣ initiativeId mancante
+  // 3️⃣ initiativeId missing
   if (!initiativeId) {
     return <Redirect to={ROUTES.HOME} />;
   }
 
-  // 4️⃣ initiativeId invalido
+  // 4️⃣ initiativeId invalid
   if (!isValid) {
     return <Redirect to={ROUTES.HOME} />;
   }
 
-  // 5️⃣ Stato valido
+  // 5️⃣ State OK
   return <>{children}</>;
 };
 
