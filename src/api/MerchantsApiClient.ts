@@ -11,6 +11,7 @@ import {
   GetPointOfSalesResponse,
   GetPointOfSaleTransactionsFilters,
 } from '../types/types';
+import { cleanupOnLogout } from '../utils/logoutCleanup';
 import { createClient, WithDefaultsT } from './generated/merchants/client';
 import { MerchantTransactionsListDTO } from './generated/merchants/MerchantTransactionsListDTO';
 import { MerchantStatisticsDTO } from './generated/merchants/MerchantStatisticsDTO';
@@ -45,6 +46,7 @@ const apiClient = createClient({
 });
 
 const onRedirectToLogin = () => {
+  cleanupOnLogout();
   store.dispatch(
     appStateActions.addError({
       id: 'tokenNotValid',
