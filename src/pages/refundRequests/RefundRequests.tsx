@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Box, Stack, Tooltip, Typography, CircularProgress, IconButton } from '@mui/material';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { GridColDef } from '@mui/x-data-grid';
+import { GridColDef, GridSelectionModel } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia/theme';
 import { useHistory, useParams } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -36,6 +36,7 @@ const RefundRequests = () => {
   const history = useHistory();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
+  const [singleSelectionModel, setSingleSelectionModel] = useState<GridSelectionModel>([]);
   const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
   const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
   const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
@@ -183,9 +184,25 @@ const RefundRequests = () => {
     setCurrentPagination((prev) => ({ ...prev, pageNo: page }));
   };
 
-  const handleRowSelectionChange = (rows: Array<number>) => {
-    setSelectedRows(rows);
-  };
+  const handleRowSelectionChange = useCallback((newSelectionModel: GridSelectionModel) => {
+    const invalidRow = rewardBatches.find((row: RewardBatchDTO) =>  newSelectionModel.includes(row.id) ? !row?.numberOfTransactions : undefined);
+    const finalModel = newSelectionModel.filter((item) => item !== invalidRow?.id);
+    if (finalModel.length > 0) {
+      setSingleSelectionModel([finalModel[finalModel.length - 1]]);
+    } else {
+      setSingleSelectionModel([]);
+    }
+    if (invalidRow) {
+      setAlert({
+        title: t('pages.refundRequests.errors.emptyBatch.title'),
+        text: t('pages.refundRequests.errors.emptyBatch.description'),
+        isOpen: true,
+        severity: 'error',
+      });
+    }
+    const selectedRowObjects = rewardBatches.filter((row: any) => finalModel.includes(row.id));
+    setSelectedRows(selectedRowObjects);
+  }, [rewardBatches]);
 
   const StatusChip = ({ status }: any) => {
     const chipItem = getBatchStatus(status);
@@ -200,7 +217,7 @@ const RefundRequests = () => {
   };
 
   const isRowSelectable = (params: any) => {
-    if (params?.row?.status !== 'CREATED' || params?.row?.numberOfTransactions === 0) {
+    if (params?.row?.status !== 'CREATED') {
       return false;
     }
 
@@ -214,7 +231,7 @@ const RefundRequests = () => {
       return true;
     }
 
-    return !!(batchYear === currentYear && batchMonth < currentMonth);
+    return (batchYear === currentYear && batchMonth < currentMonth);
   };
 
   const handleSentBatches = async () => {
@@ -313,16 +330,17 @@ const RefundRequests = () => {
             columns={columns}
             rows={rewardBatches}
             rowsPerPage={currentPagination.pageSize}
-            checkable={true}
+            checkable
             paginationModel={{
               pageNo: currentPagination.pageNo,
               pageSize: currentPagination.pageSize,
               totalElements: currentPagination.totalElements,
             }}
             onPaginationPageChange={handlePaginationPageChange}
-            onRowSelectionChange={handleRowSelectionChange}
             isRowSelectable={isRowSelectable}
             singleSelect
+            singleSelectionModel={singleSelectionModel}
+            onSelectionModelChange={handleRowSelectionChange}
           />
         )}
         {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (

@@ -1,5 +1,5 @@
-import { DataGrid, GridSortModel, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
-import { useCallback, useState } from 'react';
+import { DataGrid, GridSortModel, GridColDef, GridSelectionModel, GridInputSelectionModel } from '@mui/x-data-grid';
+import { useCallback } from 'react';
 import { ELEMENT_PER_PAGE } from '../../utils/constants';
 
 /**
@@ -30,6 +30,8 @@ export interface DataTableProps {
   isRowSelectable?: (params: { row: any }) => boolean;
   isTransactionsPage?: boolean;
   onRowsPerPageChange?: (pageSize: number) => void;
+  onSelectionModelChange?: (selectionModel: GridSelectionModel) => void;
+  singleSelectionModel?: GridInputSelectionModel
 }
 
 const DataTable = ({
@@ -42,12 +44,12 @@ const DataTable = ({
   checkable,
   singleSelect,
   sortModel = [],
-  onRowSelectionChange,
+  onSelectionModelChange,
   isRowSelectable,
   isTransactionsPage = false,
-  onRowsPerPageChange
+  onRowsPerPageChange,
+  singleSelectionModel
 }: DataTableProps) => {
-  const [singleSelectionModel, setSingleSelectionModel] = useState<GridSelectionModel>([]);
 
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
@@ -60,31 +62,10 @@ const DataTable = ({
     [onSortModelChange]
   );
 
-  const handleRowSelectionChange = (newSelectionModel: GridSelectionModel) => {
-    let finalModel = newSelectionModel;
-
-    if (checkable && singleSelect) {
-      if (newSelectionModel.length > 0) {
-        finalModel = [newSelectionModel[newSelectionModel.length - 1]];
-      } else {
-        finalModel = [];
-      }
-
-      setSingleSelectionModel(finalModel);
-    }
-
-    const modelToMap = checkable && singleSelect ? finalModel : newSelectionModel;
-    const selectedRowObjects = rows.filter((row: any) => modelToMap.includes(row.id));
-
-    onRowSelectionChange?.(selectedRowObjects);
-
-  };
-
   const selectionProps = {
     checkboxSelection: checkable,
     isRowSelectable,
     selectionModel: singleSelect ? singleSelectionModel : undefined,
-    onSelectionModelChange: handleRowSelectionChange,
   };
 
 
@@ -98,6 +79,7 @@ const DataTable = ({
 
           {...selectionProps}
 
+          onSelectionModelChange={onSelectionModelChange}
           disableSelectionOnClick
           autoHeight
           sortingOrder={['asc', 'desc']}
