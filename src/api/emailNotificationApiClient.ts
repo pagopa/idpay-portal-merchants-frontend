@@ -1,9 +1,11 @@
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
-import { buildFetchApi, extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
+import { buildFetchApi } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
 import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
 import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
+import { extractResponseWith401 as extractResponse } from '../utils/extractResponseWith401';
 import { ENV } from '../utils/env';
 import { store } from '../redux/store';
+import { cleanupOnLogout } from '../utils/logoutCleanup';
 import { createClient, WithDefaultsT } from './generated/email-notification/client';
 import { UserInstitutionInfoDTO } from './generated/email-notification/UserInstitutionInfoDTO';
 import { EmailMessageDTO } from './generated/email-notification/EmailMessageDTO';
@@ -23,7 +25,8 @@ const apiClient = createClient({
   withDefaults: withBearerAndPartyId,
 });
 
-const onRedirectToLogin = () =>
+const onRedirectToLogin = () => {
+  cleanupOnLogout();
   store.dispatch(
     appStateActions.addError({
       id: 'tokenNotValid',
@@ -35,6 +38,7 @@ const onRedirectToLogin = () =>
       displayableDescription: i18n.t('errors.sessionExpiredMessage'),
     })
   );
+};
 
 export const EmailNotificationApi = {
   getInstitutionProductUserInfo: async (): Promise<UserInstitutionInfoDTO> => {
