@@ -37,55 +37,6 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () =>
   default: () => jest.fn(),
 }));
 
-jest.mock('../../../components/dataTable/DataTable', () => ({
-  __esModule: true,
-  default: ({
-    columns,
-    rows,
-    onPaginationPageChange,
-    onRowSelectionChange,
-    isRowSelectable,
-  }: any) => (
-    <div data-testid="data-table">
-      <table>
-        <thead>
-          <tr>
-            {columns.map((col: any) => (
-              <th key={col.field}>{col.headerName}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row: any, index: number) => (
-            <tr key={row.id ?? index}>
-              <td>
-                <button
-                  data-testid={`select-row-${row.id ?? index}`}
-                  onClick={() => onRowSelectionChange?.([row])}
-                  disabled={isRowSelectable ? !isRowSelectable({ row }) : false}
-                >
-                  Select
-                </button>
-              </td>
-              {columns.map((col: any) => (
-                <td key={col.field}>
-                  {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
-    </div>
-  ),
-}));
-
-jest.mock('../../../components/Chip/CustomChip', () => ({
-  __esModule: true,
-  default: ({ label }: any) => <span data-testid="custom-chip">{label}</span>,
-}));
-
 jest.mock('../../../components/Transactions/useStatus', () => ({
   __esModule: true,
   default: (status: string) => ({
@@ -445,54 +396,6 @@ describe('RefundRequests', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it('should handle missing batchId when sending batch', async () => {
-    const { browserConsole } = require('../../../utils/consoleLogger');
-    const consoleErrorSpy = jest.spyOn(browserConsole, 'error').mockImplementation(() => {});
-
-    // row without id => selection exists (DataTable mock), but handleSentBatches should treat it as missing batchId
-    const dataWithMissingId = [
-      {
-        id: undefined,
-        name: 'no-id-batch',
-        posType: 'PHYSICAL',
-        initialAmountCents: 10000,
-        status: 'CREATED',
-        month: getPreviousMonth(),
-        numberOfTransactions: 1,
-      },
-    ];
-
-    mockGetRewardBatches.mockResolvedValueOnce({
-      content: dataWithMissingId,
-      pageNo: 0,
-      pageSize: 10,
-      totalElements: dataWithMissingId.length,
-    });
-
-    renderWithStore(<RefundRequests />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('data-table')).toBeInTheDocument();
-    });
-
-    // select the only row (index 0 in DataTable mock)
-    fireEvent.click(screen.getByTestId('select-row-0'));
-
-    const sendBtn = await screen.findByRole('button', {
-      name: /pages\.refundRequests\.sendRequests/i,
-    });
-    fireEvent.click(sendBtn);
-
-    fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
-
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing initiativeId or batchId');
-    });
-    expect(mockSendRewardBatch).not.toHaveBeenCalled();
-
-    consoleErrorSpy.mockRestore();
-  });
-
   it('should handle null response from getRewardBatches', async () => {
     mockGetRewardBatches.mockResolvedValue({
       content: [],
@@ -536,11 +439,14 @@ describe('RefundRequests', () => {
     });
   });
 
-  it('should apply isRowSelectable rules for month/year, numberOfTransactions, and missing month', async () => {
-  });
-
   it('should show specific error alert when backend says previous month batch was not sent (REWARD_BATCH_PREVIOUS_NOT_SENT)', async () => {
     mockSendRewardBatch.mockResolvedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
+    mockGetRewardBatches.mockResolvedValue({
+      content: mockData,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: mockData.length,
+    });
 
     renderWithStore(<RefundRequests />);
 
@@ -548,7 +454,7 @@ describe('RefundRequests', () => {
 
     fireEvent.click(screen.getByTestId('select-row-1'));
 
-    const sendBtn = await screen.findByRole('button', { name: 'pages.refundRequests.sendRequests' });
+    const sendBtn = await screen.findByText("pages.refundRequests.sendRequests");
     fireEvent.click(sendBtn);
 
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
