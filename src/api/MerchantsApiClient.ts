@@ -1,8 +1,9 @@
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
-import { buildFetchApi, extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
+import { buildFetchApi } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
 import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
 import { isRight } from 'fp-ts/Either';
+import { extractResponseWith401 as extractResponse } from '../utils/extractResponseWith401';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
 import { browserConsole } from '../utils/consoleLogger';
