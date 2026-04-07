@@ -63,6 +63,15 @@ const mockData = [
     month: getPreviousMonth(),
     numberOfTransactions: 1,
   },
+  {
+    id: 4,
+    name: '004-20251125 226',
+    posType: 'ONLINE',
+    initialAmountCents: 300000,
+    status: 'CREATED',
+    month: getPreviousMonth(),
+    numberOfTransactions: 0,
+  },
 ];
 
 jest.mock('../../../components/dataTable/DataTable', () => ({
@@ -71,7 +80,7 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
     columns,
     rows,
     onPaginationPageChange,
-    onRowSelectionChange,
+    onSelectionModelChange,
     isRowSelectable,
   }: any) => (
     <div data-testid="data-table">
@@ -89,7 +98,7 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
               <td>
                 <button
                   data-testid={`select-row-${row.id ?? index}`}
-                  onClick={() => onRowSelectionChange?.([row])}
+                  onClick={() => onSelectionModelChange?.([row.id])}
                   disabled={isRowSelectable ? !isRowSelectable({ row }) : false}
                 >
                   Select
@@ -107,6 +116,29 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
       <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
     </div>
   ),
+}));
+
+jest.mock('../RefundRequestModal', () => ({
+  RefundRequestsModal: ({
+    isOpen,
+    setIsOpen,
+    title,
+    description,
+    warning,
+    cancelBtn,
+    confirmBtn,
+  }: any) =>
+    isOpen ? (
+      <div data-testid="refund-modal">
+        <h2>{title}</h2>
+        <p>{description}</p>
+        <p>{warning}</p>
+        <button onClick={setIsOpen}>{cancelBtn}</button>
+        <button onClick={confirmBtn.onConfirm} disabled={confirmBtn.loading}>
+          {confirmBtn.text}
+        </button>
+      </div>
+    ) : null,
 }));
 
 
@@ -205,6 +237,7 @@ describe('RefundRequests', () => {
 
     expect(screen.getByText('002-20251125 224')).toBeInTheDocument();
     expect(screen.getByText('003-20251125 225')).toBeInTheDocument();
+    expect(screen.getByText('004-20251125 226')).toBeInTheDocument();
   });
 
   it('should show no result paper when there is no data', async () => {
@@ -274,7 +307,7 @@ describe('RefundRequests', () => {
     });
 
     const onlineTexts = screen.getAllByText('Online');
-    expect(onlineTexts).toHaveLength(2);
+    expect(onlineTexts).toHaveLength(3);
   });
 
   it('should display tooltip text correctly with dash when value is empty', async () => {
@@ -321,7 +354,7 @@ describe('RefundRequests', () => {
     await waitFor(() => expect(screen.getByText("pages.refundRequests.sendRequests")).toBeInTheDocument())
     fireEvent.click(screen.getByText("pages.refundRequests.sendRequests"));
 
-    expect(screen.getByTestId('refund-modal')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('refund-modal')).toBeInTheDocument());
 
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
@@ -342,6 +375,26 @@ describe('RefundRequests', () => {
     });
 
     jest.useRealTimers();
+  });
+
+  it('should show error message on empty batch select', async () => {
+    jest.useFakeTimers();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('select-row-4'));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'pages.refundRequests.errors.emptyBatch.title',
+          text: 'pages.refundRequests.errors.emptyBatch.description',
+          isOpen: true,
+          severity: 'error',
+        })
+      );
+    });
   });
 
   it('should handle missing initiativeId when sending batch', async () => {
