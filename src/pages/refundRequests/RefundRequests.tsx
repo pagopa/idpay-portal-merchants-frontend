@@ -252,6 +252,7 @@ const RefundRequests = () => {
         });
         return;
       }
+      handleRowSelectionChange([]);
       setTimeout(() => {
         setAlert({
           text: t('pages.refundRequests.rewardBatchSentSuccess'),
