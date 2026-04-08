@@ -187,12 +187,15 @@ const RefundRequests = () => {
   const handleRowSelectionChange = useCallback((newSelectionModel: GridSelectionModel) => {
     const invalidRow = rewardBatches.find((row: RewardBatchDTO) =>  newSelectionModel.includes(row.id) ? !row?.numberOfTransactions : undefined);
     const finalModel = newSelectionModel.filter((item) => item !== invalidRow?.id);
-    if (finalModel.length > 0) {
-      setSingleSelectionModel([finalModel[finalModel.length - 1]]);
+    if (newSelectionModel.length > 0) {
+      setSingleSelectionModel([newSelectionModel[newSelectionModel.length - 1]]);
     } else {
       setSingleSelectionModel([]);
     }
     if (invalidRow) {
+      setTimeout(() => {
+      setSingleSelectionModel([]);
+      }, 300);
       setAlert({
         title: t('pages.refundRequests.errors.emptyBatch.title'),
         text: t('pages.refundRequests.errors.emptyBatch.description'),
