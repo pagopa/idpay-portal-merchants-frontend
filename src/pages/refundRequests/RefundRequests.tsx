@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Box, Stack, Tooltip, Typography, CircularProgress, IconButton } from '@mui/material';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { GridColDef, GridSelectionModel } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia/theme';
@@ -34,10 +34,19 @@ const RefundRequests = () => {
   const { setAlert } = useAlert();
   const { initiative_id } = useParams<RouteParams>();
   const history = useHistory();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [disabledRows, setDisabledRows] = useState<Array<string>>([]);
+  const [modal, setModal] = useState<Record<string, any>>({
+    isOpen: false,
+    title: "",
+    description: "",
+    cancelBtn: {text: "", vaiant: "outlined"},
+    confirmBtn: false,
+    setIsOpen: () => { }
+  });
   const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
   const [singleSelectionModel, setSingleSelectionModel] = useState<GridSelectionModel>([]);
   const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
+  // const [columns, setColumns] = useState<Array<GridColDef>>();
   const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
   const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
   const [currentPagination, setCurrentPagination] = useState({
@@ -45,6 +54,7 @@ const RefundRequests = () => {
     pageSize: 10,
     totalElements: 0,
   });
+
   const columns: Array<GridColDef> = [
     {
       field: 'spacer',
@@ -185,19 +195,31 @@ const RefundRequests = () => {
   };
 
   const handleRowSelectionChange = useCallback((newSelectionModel: GridSelectionModel) => {
-    const invalidRow = rewardBatches.find((row: RewardBatchDTO) =>  newSelectionModel.includes(row.id) ? !row?.numberOfTransactions : undefined);
+    const invalidRow = rewardBatches.find((row: RewardBatchDTO) => newSelectionModel.includes(row.id) ? !row?.numberOfTransactions : undefined);
     const finalModel = newSelectionModel.filter((item) => item !== invalidRow?.id);
-    if (finalModel.length > 0) {
-      setSingleSelectionModel([finalModel[finalModel.length - 1]]);
+    if (newSelectionModel.length > 0) {
+      setSingleSelectionModel(prev => [...(invalidRow ? prev : []), newSelectionModel[newSelectionModel.length - 1]]);
     } else {
       setSingleSelectionModel([]);
     }
     if (invalidRow) {
-      setAlert({
-        title: t('pages.refundRequests.errors.emptyBatch.title'),
-        text: t('pages.refundRequests.errors.emptyBatch.description'),
+      setTimeout(() => {
+        setSingleSelectionModel([finalModel[finalModel.length - 1]]);
+      }, 300);
+      setModal({
+        title: t('pages.refundRequests.emptyBatchModal.title'),
+        description: <Trans
+          i18nKey='pages.refundRequests.emptyBatchModal.description'
+          values={{ name: invalidRow.name }}
+          components={{ b: <b /> }}
+        />,
         isOpen: true,
-        severity: 'error',
+        confirmBtn: false,
+        cancelBtn: {text: "Chiudi", variant: "contained"},
+        setIsOpen: () => {
+          setDisabledRows(prev => [ ...prev, invalidRow.id]);
+          setModal(prev => ({ ...prev, isOpen: false }));
+        }
       });
     }
     const selectedRowObjects = rewardBatches.filter((row: any) => finalModel.includes(row.id));
@@ -217,7 +239,7 @@ const RefundRequests = () => {
   };
 
   const isRowSelectable = (params: any) => {
-    if (params?.row?.status !== 'CREATED') {
+    if (params?.row?.status !== 'CREATED' || disabledRows.includes(params?.row?.id)) {
       return false;
     }
 
@@ -271,19 +293,19 @@ const RefundRequests = () => {
       await fetchRewardBatches(initiative_id);
     } finally {
       setSendBatchIsLoading(false);
-      setIsModalOpen(false);
+      setModal(prev => ({ ...prev, isOpen: false }));
     }
   };
 
   return (
     <Box p={1.5}>
       <RefundRequestsModal
-        isOpen={isModalOpen}
-        setIsOpen={() => setIsModalOpen(false)}
-        title={t('pages.refundRequests.ModalRefundRequests.title')}
-        description={t('pages.refundRequests.ModalRefundRequests.description')}
-        cancelBtn="Indietro"
-        confirmBtn={{ text: `Invia`, onConfirm: handleSentBatches, loading: sendBatchIsLoading }}
+        isOpen={modal.isOpen}
+        setIsOpen={modal.setIsOpen}
+        title={modal.title}
+        description={modal.description}
+        cancelBtn={modal.cancelBtn}
+        confirmBtn={modal.confirmBtn ? { text: "Invia", onConfirm: handleSentBatches, loading: sendBatchIsLoading } : undefined}
       />
       <Stack
         direction={{ xs: 'column', md: 'row' }}
@@ -302,7 +324,14 @@ const RefundRequests = () => {
           <Button
             variant="contained"
             size="small"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setModal({
+              isOpen: true,
+              title: t('pages.refundRequests.ModalRefundRequests.title'),
+              description: t('pages.refundRequests.ModalRefundRequests.description'),
+              cancelBtn: {text: "Indietro", variant: "outlined"},
+              confirmBtn: true,
+              setIsOpen: () => setModal(prev => ({ ...prev, isOpen: false }))
+            })}
             startIcon={<SendIcon />}
             sx={{
               width: {

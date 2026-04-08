@@ -17,7 +17,7 @@ type Props = {
     description: string;
     descriptionTwo?: string;
     warning?: string;
-    cancelBtn?: string;
+    cancelBtn?: {text: string, variant: "text" | "outlined" | "contained"};
     confirmBtn?: {
         text: string;
         onConfirm: () => void;
@@ -56,8 +56,8 @@ export const RefundRequestsModal = ({ isOpen, setIsOpen, title, description, des
             </Alert>}
         </DialogContent>
         <DialogActions sx={{ mb: 3, mr: 3 }}>
-            {cancelBtn && <Button variant="outlined" onClick={setIsOpen}>
-                {cancelBtn}
+            {cancelBtn && <Button variant={cancelBtn.variant} onClick={setIsOpen}>
+                {cancelBtn.text}
             </Button>}
             {confirmBtn && <Button variant="contained" color="primary" onClick={confirmBtn.onConfirm} disabled={confirmBtn.loading}>
                 {confirmBtn.loading ? <CircularProgress size={20} /> : confirmBtn.text}
