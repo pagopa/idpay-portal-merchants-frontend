@@ -336,11 +336,9 @@
       "sendRequests": "Invia",
       "noData": "Nessun dato disponibile",
       "rewardBatchSentSuccess": "Lotto inviato con successo",
-      "errors": {
-        "emptyBatch": {
-          "title": "Il lotto è vuoto",
-          "description": "Non è possibile inviare un lotto senza transazioni all'interno"
-        }
+      "emptyBatchModal": {
+          "title": "Stai selezionando un lotto vuoto",
+          "description": "Il lotto <b>{{name}}</b> non può essere selezionato perchè non contiene transazioni."
       },
       "ModalRefundRequests": {
         "title": "Invia richieste di rimborso",
