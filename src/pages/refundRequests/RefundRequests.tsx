@@ -39,7 +39,7 @@ const RefundRequests = () => {
     isOpen: false,
     title: "",
     description: "",
-    cancelBtn: "",
+    cancelBtn: {text: "", vaiant: "outlined"},
     confirmBtn: false,
     setIsOpen: () => { }
   });
@@ -215,7 +215,7 @@ const RefundRequests = () => {
         />,
         isOpen: true,
         confirmBtn: false,
-        cancelBtn: "Chiudi",
+        cancelBtn: {text: "Chiudi", variant: "contained"},
         setIsOpen: () => {
           setDisabledRows(prev => [ ...prev, invalidRow.id]);
           setModal(prev => ({ ...prev, isOpen: false }));
@@ -328,7 +328,7 @@ const RefundRequests = () => {
               isOpen: true,
               title: t('pages.refundRequests.ModalRefundRequests.title'),
               description: t('pages.refundRequests.ModalRefundRequests.description'),
-              cancelBtn: "Indietro",
+              cancelBtn: {text: "Indietro", variant: "outlined"},
               confirmBtn: true,
               setIsOpen: () => setModal(prev => ({ ...prev, isOpen: false }))
             })}

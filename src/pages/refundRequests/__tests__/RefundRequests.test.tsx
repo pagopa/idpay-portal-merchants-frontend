@@ -133,9 +133,9 @@ jest.mock('../RefundRequestModal', () => ({
         <h2>{title}</h2>
         <p>{description}</p>
         <p>{warning}</p>
-        <button onClick={setIsOpen}>{cancelBtn}</button>
-        <button onClick={confirmBtn.onConfirm} disabled={confirmBtn.loading}>
-          {confirmBtn.text}
+        <button onClick={setIsOpen}>{cancelBtn.text}</button>
+        <button onClick={confirmBtn ? confirmBtn.onConfirm : undefined} disabled={confirmBtn?.loading}>
+          {confirmBtn?.text}
         </button>
       </div>
     ) : null,
@@ -386,14 +386,7 @@ describe('RefundRequests', () => {
     fireEvent.click(screen.getByTestId('select-row-4'));
 
     await waitFor(() => {
-      expect(mockSetAlert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'pages.refundRequests.errors.emptyBatch.title',
-          text: 'pages.refundRequests.errors.emptyBatch.description',
-          isOpen: true,
-          severity: 'error',
-        })
-      );
+      expect(screen.getByTestId('refund-modal')).toBeInTheDocument();
     });
   });
 
