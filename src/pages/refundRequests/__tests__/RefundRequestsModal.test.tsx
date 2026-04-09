@@ -10,7 +10,7 @@ describe('RefundRequestsModal', () => {
     description: "Test description",
     descriptionTwo: "Test description two",
     warning: "Test warning",
-    cancelBtn: "Test cancel",
+    cancelBtn: {text: "Test cancel"},
     confirmBtn: {
         text: "Test confirm",
         onConfirm: jest.fn()

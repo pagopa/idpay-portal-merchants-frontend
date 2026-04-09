@@ -336,6 +336,10 @@
       "sendRequests": "Invia",
       "noData": "Nessun dato disponibile",
       "rewardBatchSentSuccess": "Lotto inviato con successo",
+      "emptyBatchModal": {
+          "title": "Stai selezionando un lotto vuoto",
+          "description": "Il lotto <b>{{name}}</b> non può essere selezionato perchè non contiene transazioni."
+      },
       "ModalRefundRequests": {
         "title": "Invia richieste di rimborso",
         "description": "Il lotto di transazioni verrà inviato a Invitalia S.p.A., che procederà alla verifica dei dati e al successivo rimborso all’IBAN da te indicato in fase di adesione.",
