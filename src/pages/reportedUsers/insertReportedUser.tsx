@@ -94,7 +94,7 @@ const InsertReportedUser: React.FC = () => {
         break;
       case 'Service unavailable':
         browserConsole.error('Service unavailable');
-        history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
+        history.push(ROUTES.REPORTED_USERS.replace(':initiative_id', initiativeID), {
           newCf: undefined,
           showSuccessAlert: false,
         });
@@ -136,7 +136,7 @@ const InsertReportedUser: React.FC = () => {
               }
 
               setShowConfirmModal(false);
-              history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
+              history.push(ROUTES.REPORTED_USERS.replace(':initiative_id', initiativeID), {
                 newCf: cfToReport,
                 showSuccessAlert: true,
               });
