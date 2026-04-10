@@ -46,7 +46,6 @@ const RefundRequests = () => {
   const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
   const [singleSelectionModel, setSingleSelectionModel] = useState<GridSelectionModel>([]);
   const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
-  // const [columns, setColumns] = useState<Array<GridColDef>>();
   const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
   const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
   const [currentPagination, setCurrentPagination] = useState({
@@ -222,8 +221,8 @@ const RefundRequests = () => {
         }
       });
     }
-    const selectedRowObjects = rewardBatches.filter((row: any) => finalModel.includes(row.id));
-    setSelectedRows(selectedRowObjects);
+    const selectedRowObjects = rewardBatches.find(({id}) => id === finalModel[finalModel.length - 1]);
+    setSelectedRows(selectedRowObjects ? [selectedRowObjects] : []);
   }, [rewardBatches]);
 
   const StatusChip = ({ status }: any) => {
