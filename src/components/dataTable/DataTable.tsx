@@ -66,6 +66,7 @@ const DataTable = ({
     checkboxSelection: checkable,
     isRowSelectable,
     selectionModel: singleSelect ? singleSelectionModel : undefined,
+    disableMultipleSelection: singleSelect
   };
 
 
@@ -78,7 +79,6 @@ const DataTable = ({
           rowsPerPageOptions={isTransactionsPage ? ELEMENT_PER_PAGE :[rowsPerPage]}
 
           {...selectionProps}
-
           onSelectionModelChange={onSelectionModelChange}
           disableSelectionOnClick
           autoHeight
