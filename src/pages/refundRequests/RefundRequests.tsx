@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Stack, Tooltip, Typography, CircularProgress, IconButton } from '@mui/material';
+import { Box, Stack, Tooltip, Typography, CircularProgress, IconButton, RadioGroup, Radio } from '@mui/material';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import { Trans, useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { GridColDef, GridSelectionModel } from '@mui/x-data-grid';
+import { GridColDef } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia/theme';
 import { useHistory, useParams } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -39,12 +39,12 @@ const RefundRequests = () => {
     isOpen: false,
     title: "",
     description: "",
-    cancelBtn: {text: "", vaiant: "outlined"},
+    cancelBtn: { text: "", vaiant: "outlined" },
     confirmBtn: false,
     setIsOpen: () => { }
   });
-  const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
-  const [singleSelectionModel, setSingleSelectionModel] = useState<GridSelectionModel>([]);
+  const [selectedRow, setSelectedRow] = useState<string>('');
+  const [selectedRadio, setSelectedRadio] = useState<string>('');
   const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
   const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
   const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
@@ -54,7 +54,67 @@ const RefundRequests = () => {
     totalElements: 0,
   });
 
+  const isRowSelectable = (params: any) => {
+    if (params?.row?.status !== 'CREATED' || disabledRows.includes(params?.row?.id)) {
+      return false;
+    }
+
+    const yearMonth = new Date().toISOString().slice(0, 7);
+    const currentMonth = Number(yearMonth.split('-')[1]);
+    const currentYear = Number(yearMonth.split('-')[0]);
+    const batchMonth = Number(params?.row?.month?.split('-')[1]);
+    const batchYear = Number(params?.row?.month?.split('-')[0]);
+
+    if (batchYear < currentYear) {
+      return true;
+    }
+
+    return (batchYear === currentYear && batchMonth < currentMonth);
+  };
+
+  const handleRadioButtonChange = useCallback((rowId: string) => {
+    const invalidRow = rewardBatches.find((row: RewardBatchDTO) => rowId === row.id ? !row?.numberOfTransactions : undefined);
+    if (invalidRow) {
+      setTimeout(() => {
+        handleRadioButtonChange('');
+      }, 300);
+      setModal({
+        title: t('pages.refundRequests.emptyBatchModal.title'),
+        description: <Trans
+          i18nKey='pages.refundRequests.emptyBatchModal.description'
+          values={{ name: invalidRow.name }}
+          components={{ b: <b /> }}
+        />,
+        isOpen: true,
+        confirmBtn: false,
+        cancelBtn: { text: "Chiudi", variant: "contained" },
+        setIsOpen: () => {
+          setDisabledRows(prev => [...prev, invalidRow.id]);
+          setModal(prev => ({ ...prev, isOpen: false }));
+        }
+      });
+    }
+    const selectedRowObjects = rewardBatches.find(({ id }) => id === rowId);
+    setSelectedRow((!invalidRow && selectedRowObjects?.id) ?? '');
+    setSelectedRadio(selectedRowObjects?.id ?? '');
+  }, [rewardBatches]);
   const columns: Array<GridColDef> = [
+    {
+      field: 'id',
+      headerName: '',
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      flex: 0.5,
+      renderCell: (params: any) => (<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+        <Radio
+          disabled={!isRowSelectable(params)}
+          onClick={() => handleRadioButtonChange(params.value === selectedRow ? '' : params.value)}
+          value={params.value}
+          data-testid={`radio-btn-${params.value}`}
+        />
+      </Box>),
+    },
     {
       field: 'spacer',
       headerName: '',
@@ -167,7 +227,7 @@ const RefundRequests = () => {
           pageSize: response?.pageSize as number,
           totalElements: response?.totalElements as number,
         });
-        setSelectedRows([]);
+        setSelectedRow('');
       }
     } catch (error: any) {
       setAlert({
@@ -193,38 +253,6 @@ const RefundRequests = () => {
     setCurrentPagination((prev) => ({ ...prev, pageNo: page }));
   };
 
-  const handleRowSelectionChange = useCallback((newSelectionModel: GridSelectionModel) => {
-    const invalidRow = rewardBatches.find((row: RewardBatchDTO) => newSelectionModel.includes(row.id) ? !row?.numberOfTransactions : undefined);
-    const finalModel = newSelectionModel.filter((item) => item !== invalidRow?.id);
-    if (newSelectionModel.length > 0) {
-      setSingleSelectionModel(prev => [...(invalidRow ? prev : []), newSelectionModel[newSelectionModel.length - 1]]);
-    } else {
-      setSingleSelectionModel([]);
-    }
-    if (invalidRow) {
-      setTimeout(() => {
-        setSingleSelectionModel([finalModel[finalModel.length - 1]]);
-      }, 300);
-      setModal({
-        title: t('pages.refundRequests.emptyBatchModal.title'),
-        description: <Trans
-          i18nKey='pages.refundRequests.emptyBatchModal.description'
-          values={{ name: invalidRow.name }}
-          components={{ b: <b /> }}
-        />,
-        isOpen: true,
-        confirmBtn: false,
-        cancelBtn: {text: "Chiudi", variant: "contained"},
-        setIsOpen: () => {
-          setDisabledRows(prev => [ ...prev, invalidRow.id]);
-          setModal(prev => ({ ...prev, isOpen: false }));
-        }
-      });
-    }
-    const selectedRowObjects = rewardBatches.find(({id}) => id === finalModel[finalModel.length - 1]);
-    setSelectedRows(selectedRowObjects ? [selectedRowObjects] : []);
-  }, [rewardBatches]);
-
   const StatusChip = ({ status }: any) => {
     const chipItem = getBatchStatus(status);
     return (
@@ -237,28 +265,10 @@ const RefundRequests = () => {
     );
   };
 
-  const isRowSelectable = (params: any) => {
-    if (params?.row?.status !== 'CREATED' || disabledRows.includes(params?.row?.id)) {
-      return false;
-    }
-
-    const yearMonth = new Date().toISOString().slice(0, 7);
-    const currentMonth = Number(yearMonth.split('-')[1]);
-    const currentYear = Number(yearMonth.split('-')[0]);
-    const batchMonth = Number(params?.row?.month?.split('-')[1]);
-    const batchYear = Number(params?.row?.month?.split('-')[0]);
-
-    if (batchYear < currentYear) {
-      return true;
-    }
-
-    return (batchYear === currentYear && batchMonth < currentMonth);
-  };
-
   const handleSentBatches = async () => {
     setSendBatchIsLoading(true);
     try {
-      const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0]?.id : '';
+      const batchId = selectedRow ? selectedRow : '';
       if (!batchId) {
         browserConsole.error('Missing initiativeId or batchId');
         return;
@@ -273,7 +283,6 @@ const RefundRequests = () => {
         });
         return;
       }
-      handleRowSelectionChange([]);
       setTimeout(() => {
         setAlert({
           text: t('pages.refundRequests.rewardBatchSentSuccess'),
@@ -291,6 +300,7 @@ const RefundRequests = () => {
       });
       await fetchRewardBatches(initiative_id);
     } finally {
+      handleRadioButtonChange('');
       setSendBatchIsLoading(false);
       setModal(prev => ({ ...prev, isOpen: false }));
     }
@@ -319,7 +329,7 @@ const RefundRequests = () => {
           variantTitle="h4"
           variantSubTitle="body1"
         />
-        {selectedRows.length > 0 && (
+        {selectedRow && (
           <Button
             variant="contained"
             size="small"
@@ -327,7 +337,7 @@ const RefundRequests = () => {
               isOpen: true,
               title: t('pages.refundRequests.ModalRefundRequests.title'),
               description: t('pages.refundRequests.ModalRefundRequests.description'),
-              cancelBtn: {text: "Indietro", variant: "outlined"},
+              cancelBtn: { text: "Indietro", variant: "outlined" },
               confirmBtn: true,
               setIsOpen: () => setModal(prev => ({ ...prev, isOpen: false }))
             })}
@@ -355,22 +365,19 @@ const RefundRequests = () => {
         )}
 
         {!rewardBatchesLoading && rewardBatches && rewardBatches.length > 0 && (
-          <DataTable
-            columns={columns}
-            rows={rewardBatches}
-            rowsPerPage={currentPagination.pageSize}
-            checkable
-            paginationModel={{
-              pageNo: currentPagination.pageNo,
-              pageSize: currentPagination.pageSize,
-              totalElements: currentPagination.totalElements,
-            }}
-            onPaginationPageChange={handlePaginationPageChange}
-            isRowSelectable={isRowSelectable}
-            singleSelect
-            singleSelectionModel={singleSelectionModel}
-            onSelectionModelChange={handleRowSelectionChange}
-          />
+          <RadioGroup value={selectedRadio}>
+            <DataTable
+              columns={columns}
+              rows={rewardBatches}
+              rowsPerPage={currentPagination.pageSize}
+              paginationModel={{
+                pageNo: currentPagination.pageNo,
+                pageSize: currentPagination.pageSize,
+                totalElements: currentPagination.totalElements,
+              }}
+              onPaginationPageChange={handlePaginationPageChange}
+            />
+          </RadioGroup>
         )}
         {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (
           <NoResultPaper translationKey="pages.refundRequests.noData" />
