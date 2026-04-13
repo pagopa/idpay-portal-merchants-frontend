@@ -1,8 +1,9 @@
-import { PointOfSaleDTO, TypeEnum } from '../api/generated/merchants/PointOfSaleDTO';
-
+import {
+  PointOfSaleDTO,
+} from '../api/generated/merchants/data-contracts';
 
 export interface GetPointOfSalesFilters {
-    type?: TypeEnum.PHYSICAL | TypeEnum.ONLINE;
+    type?: "PHYSICAL" | "ONLINE";
     city?: string;
     address?: string;
     contactName?: string;

@@ -21,7 +21,7 @@ import { PAGINATION_SIZE } from '../../utils/constants';
 import EmptyList from '../../pages/components/EmptyList';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import CustomChip from '../Chip/CustomChip';
-import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
+import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/data-contracts';
 import { useAlert } from '../../hooks/useAlert';
 import TransactionDataTable from './TransactionDataTable';
 import TransactionDetail from './TransactionDetail';
@@ -80,8 +80,8 @@ const MerchantTransactions = ({
       status: '',
       page: 0,
     },
-    onSubmit: (values) => {
-      console.log(values);
+    onSubmit: () => {
+      /* no-op: filters handled via onFiltersApplied */
     },
   });
 
@@ -184,7 +184,6 @@ const MerchantTransactions = ({
   ];
 
   const handleOnFiltersApplied = (filters: any) => {
-    console.log('Callback dopo applicazione filtri', filters);
     setFiltersAppliedOnce(true);
     if (handleFiltersApplied) {
       handleFiltersApplied(filters);
@@ -192,7 +191,6 @@ const MerchantTransactions = ({
   };
 
   const handleOnFiltersReset = () => {
-    console.log('Callback dopo reset filtri');
     setFiltersAppliedOnce(false);
     if (handleFiltersReset) {
       handleFiltersReset();

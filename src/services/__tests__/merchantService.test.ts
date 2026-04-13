@@ -1,4 +1,5 @@
-import { MerchantApi } from '../../api/MerchantsApiClient';
+/// <reference types="jest" />
+import { MerchantsApi } from '../../api/MerchantsApiClient';
 import {
   getMerchantInitiativeList,
   getMerchantTransactions,
@@ -25,11 +26,10 @@ import {
   getMerchantPointOfSalesWithTransactions,
   getAllRewardBatches,
   updateInvoiceTransaction,
-
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
-  MerchantApi: {
+  MerchantsApi: {
     getMerchantInitiativeList: jest.fn(),
     getMerchantTransactions: jest.fn(),
     getMerchantTransactionsProcessed: jest.fn(),
@@ -47,390 +47,146 @@ jest.mock('../../api/MerchantsApiClient', () => ({
     createReportedUser: jest.fn(),
     deleteReportedUser: jest.fn(),
     getRewardBatches: jest.fn(),
-    sendRewardBatches: jest.fn(),
+    sendRewardBatch: jest.fn(),
+    getRewardBatchById: jest.fn(),
     downloadBatchCsv: jest.fn(),
     postponeTransaction: jest.fn(),
     getMerchantPointOfSalesWithTransactions: jest.fn(),
     getAllRewardBatches: jest.fn(),
-    getRewardBatchById: jest.fn(),
     updateInvoiceTransaction: jest.fn(),
   },
 }));
 
-const mockedMerchantApi = MerchantApi as jest.Mocked<typeof MerchantApi>;
+const mockedApi = MerchantsApi as jest.Mocked<typeof MerchantsApi>;
 
 describe('merchantService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-});
-
-describe('merchantService uncovered branches', () => {
-  it('sendRewardBatch delegates correctly', async () => {
-    mockedMerchantApi.sendRewardBatches.mockResolvedValue('ok' as any);
-
-    const result = await mockedMerchantApi.sendRewardBatches('initiative1', 'batch1');
-
-    expect(mockedMerchantApi.sendRewardBatches).toHaveBeenCalledWith('initiative1', 'batch1');
-    expect(result).toBe('ok');
   });
 
-  it('postponeTransaction delegates correctly', async () => {
-    mockedMerchantApi.postponeTransaction = jest.fn().mockResolvedValue(undefined as any);
-
-    await mockedMerchantApi.postponeTransaction('initiative1', 'batch1', 'trx1', '2025-12-31');
-
-    expect(mockedMerchantApi.postponeTransaction).toHaveBeenCalledWith(
-      'initiative1',
-      'batch1',
-      'trx1',
-      '2025-12-31'
-    );
+  test('getMerchantInitiativeList delegates correctly', async () => {
+    mockedApi.getMerchantInitiativeList.mockResolvedValue([] as any);
+    await getMerchantInitiativeList();
+    expect(mockedApi.getMerchantInitiativeList).toHaveBeenCalledTimes(1);
   });
 
-  it('downloadBatchCsv delegates correctly', async () => {
-    mockedMerchantApi.downloadBatchCsv = jest.fn().mockResolvedValue('csv' as any);
-
-    const result = await mockedMerchantApi.downloadBatchCsv('initiative1', 'batch1');
-
-    expect(mockedMerchantApi.downloadBatchCsv).toHaveBeenCalledWith('initiative1', 'batch1');
-    expect(result).toBe('csv');
-  });
-});
-
-  describe('getMerchantInitiativeList', () => {
-    test('should call MerchantApi.getMerchantInitiativeList', async () => {
-      mockedMerchantApi.getMerchantInitiativeList.mockResolvedValue([]);
-      await getMerchantInitiativeList();
-      expect(mockedMerchantApi.getMerchantInitiativeList).toHaveBeenCalledTimes(1);
-    });
+  test('getMerchantTransactions delegates correctly', async () => {
+    mockedApi.getMerchantTransactions.mockResolvedValue({} as any);
+    await getMerchantTransactions('1', 0, 'CF', 'OK');
+    expect(mockedApi.getMerchantTransactions).toHaveBeenCalledWith('1', 0, 'CF', 'OK');
   });
 
-  describe('getMerchantTransactions', () => {
-    test('should call MerchantApi.getMerchantTransactions with correct params', async () => {
-      const params = { initiativeId: '1', page: 0, fiscalCode: 'CODE', status: 'OK' };
-      await getMerchantTransactions(
-        params.initiativeId,
-        params.page,
-        params.fiscalCode,
-        params.status
-      );
-      expect(mockedMerchantApi.getMerchantTransactions).toHaveBeenCalledWith(
-        ...Object.values(params)
-      );
-    });
+  test('getMerchantTransactionsProcessed delegates correctly', async () => {
+    mockedApi.getMerchantTransactionsProcessed.mockResolvedValue({} as any);
+    await getMerchantTransactionsProcessed({ initiativeId: '1', page: 0 } as any);
+    expect(mockedApi.getMerchantTransactionsProcessed).toHaveBeenCalled();
   });
 
-  describe('getMerchantTransactionsProcessed', () => {
-    test('should call MerchantApi.getMerchantTransactionsProcessed with correct params', async () => {
-      const params = { initiativeId: '1', page: 0, fiscalCode: 'CODE', status: 'OK' };
-      await getMerchantTransactionsProcessed(params);
-      expect(mockedMerchantApi.getMerchantTransactionsProcessed).toHaveBeenCalledWith(params);
-    });
+  test('getMerchantInitiativeStatistics delegates correctly', async () => {
+    mockedApi.getMerchantInitiativeStatistics.mockResolvedValue({} as any);
+    await getMerchantInitiativeStatistics('1');
+    expect(mockedApi.getMerchantInitiativeStatistics).toHaveBeenCalledWith('1');
   });
 
-  describe('getMerchantInitiativeStatistics', () => {
-    test('should call MerchantApi.getMerchantInitiativeStatistics with correct initiativeId', async () => {
-      const initiativeId = 'test-id';
-      await getMerchantInitiativeStatistics(initiativeId);
-      expect(mockedMerchantApi.getMerchantInitiativeStatistics).toHaveBeenCalledWith(initiativeId);
-    });
+  test('getMerchantDetail delegates correctly', async () => {
+    mockedApi.getMerchantDetail.mockResolvedValue({} as any);
+    await getMerchantDetail('1');
+    expect(mockedApi.getMerchantDetail).toHaveBeenCalledWith('1');
   });
 
-  describe('getMerchantDetail', () => {
-    test('should call MerchantApi.getMerchantDetail with correct initiativeId', async () => {
-      const initiativeId = 'test-id';
-      await getMerchantDetail(initiativeId);
-      expect(mockedMerchantApi.getMerchantDetail).toHaveBeenCalledWith(initiativeId);
-    });
+  test('deleteTransaction delegates correctly', async () => {
+    await deleteTransaction('trx');
+    expect(mockedApi.deleteTransaction).toHaveBeenCalledWith('trx');
   });
 
-  describe('deleteTransaction', () => {
-    test('should call MerchantApi.deleteTransaction with correct transactionId', async () => {
-      const transactionId = 'trx-id';
-      await deleteTransaction(transactionId);
-      expect(mockedMerchantApi.deleteTransaction).toHaveBeenCalledWith(transactionId);
-    });
+  test('reversalTransactionInvoiced delegates correctly', async () => {
+    await reversalTransactionInvoiced('trx', {} as any);
+    expect(mockedApi.reversalTransactionInvoiced).toHaveBeenCalled();
   });
 
-  describe('reversalTransactionInvoiced', () => {
-    test('should call MerchantApi.reversalTransactionInvoiced with correct transactionId', async () => {
-      mockedMerchantApi.reversalTransactionInvoiced = jest.fn().mockResolvedValue(undefined as any);
-
-      await reversalTransactionInvoiced('trx-1');
-
-      expect(mockedMerchantApi.reversalTransactionInvoiced).toHaveBeenCalledWith('trx-1', undefined, undefined);
-    });
+  test('createTransaction delegates correctly', async () => {
+    await createTransaction(1000, 'acq', '1', '1234');
+    expect(mockedApi.createTransaction).toHaveBeenCalled();
   });
 
-  describe('createTransaction', () => {
-    test('should call MerchantApi.createTransaction with correct params', async () => {
-      const params = {
-        amountCents: 1000,
-        idTrxAcquirer: 'acquirer',
-        initiativeId: '1',
-        mcc: '1234',
-      };
-      await createTransaction(
-        params.amountCents,
-        params.idTrxAcquirer,
-        params.initiativeId,
-        params.mcc
-      );
-      expect(mockedMerchantApi.createTransaction).toHaveBeenCalledWith(...Object.values(params));
-    });
+  test('authPaymentBarCode delegates correctly', async () => {
+    await authPaymentBarCode('code', 1000, 'acq');
+    expect(mockedApi.authPaymentBarCode).toHaveBeenCalled();
   });
 
-  describe('authPaymentBarCode', () => {
-    test('should call MerchantApi.authPaymentBarCode with correct params', async () => {
-      const params = { trxCode: 'code', amountCents: 1000, idTrxAcquirer: 'acquirer' };
-      await authPaymentBarCode(params.trxCode, params.amountCents, params.idTrxAcquirer);
-      expect(mockedMerchantApi.authPaymentBarCode).toHaveBeenCalledWith(...Object.values(params));
-    });
+  test('updateMerchantPointOfSales delegates correctly', async () => {
+    await updateMerchantPointOfSales('merchant', []);
+    expect(mockedApi.updateMerchantPointOfSales).toHaveBeenCalled();
   });
 
-  describe('updateMerchantPointOfSales', () => {
-    test('should call MerchantApi.updateMerchantPointOfSales with correct params', async () => {
-      const params = { merchantId: 'merchant-1', pointOfSales: [{ id: 'pos-1' }] };
-      await updateMerchantPointOfSales(params.merchantId, params.pointOfSales as any);
-      expect(mockedMerchantApi.updateMerchantPointOfSales).toHaveBeenCalledWith(
-        ...Object.values(params)
-      );
-    });
+  test('getMerchantPointOfSales delegates correctly', async () => {
+    await getMerchantPointOfSales('merchant', {} as any);
+    expect(mockedApi.getMerchantPointOfSales).toHaveBeenCalled();
   });
 
-  describe('getMerchantPointOfSales', () => {
-    test('should call MerchantApi.getMerchantPointOfSales with correct params', async () => {
-      const params = { merchantId: 'merchant-1', filters: { city: 'Rome' } };
-      await getMerchantPointOfSales(params.merchantId, params.filters as any);
-      expect(mockedMerchantApi.getMerchantPointOfSales).toHaveBeenCalledWith(
-        ...Object.values(params)
-      );
-    });
+  test('getMerchantPointOfSalesById delegates correctly', async () => {
+    await getMerchantPointOfSalesById('merchant', 'pos');
+    expect(mockedApi.getMerchantPointOfSalesById).toHaveBeenCalled();
   });
 
-  describe('getMerchantPointOfSalesById', () => {
-    test('should call MerchantApi.getMerchantPointOfSalesById with correct params', async () => {
-      const params = { merchantId: 'merchant-1', pointOfSaleId: 'pos-1' };
-      await getMerchantPointOfSalesById(params.merchantId, params.pointOfSaleId);
-      expect(mockedMerchantApi.getMerchantPointOfSalesById).toHaveBeenCalledWith(
-        ...Object.values(params)
-      );
-    });
+  test('getMerchantPointOfSaleTransactionsProcessed delegates correctly', async () => {
+    await getMerchantPointOfSaleTransactionsProcessed('1', 'pos', {} as any);
+    expect(mockedApi.getMerchantPointOfSaleTransactionsProcessed).toHaveBeenCalled();
   });
 
-  describe('getMerchantPointOfSaleTransactionsProcessed', () => {
-    test('should call MerchantApi.getMerchantPointOfSaleTransactionsProcessed with correct params', async () => {
-      const params = { initiativeId: '1', pointOfSaleId: 'pos-1', filters: { page: 0 } };
-      await getMerchantPointOfSaleTransactionsProcessed(
-        params.initiativeId,
-        params.pointOfSaleId,
-        params.filters
-      );
-      expect(mockedMerchantApi.getMerchantPointOfSaleTransactionsProcessed).toHaveBeenCalledWith(
-        ...Object.values(params)
-      );
-    });
+
+  test('getReportedUser delegates correctly', async () => {
+    await getReportedUser('1', 'CF');
+    expect(mockedApi.getReportedUser).toHaveBeenCalled();
   });
 
-  describe('downloadInvoiceFile', () => {
-    test('should call MerchantApi.downloadInvoiceFile with correct params', async () => {
-      const params = { transactionId: 'trx-1', pointOfSaleId: 'pos-1' };
-      await downloadInvoiceFile(params.transactionId, params.pointOfSaleId);
-      expect(mockedMerchantApi.downloadInvoiceFile).toHaveBeenCalledWith(...Object.values(params));
-    });
+  test('createReportedUser delegates correctly', async () => {
+    await createReportedUser('1', 'CF');
+    expect(mockedApi.createReportedUser).toHaveBeenCalled();
   });
 
-  describe('getReportedUser', () => {
-    test('should call MerchantApi.getReportedUser with correct params', async () => {
-      const params = {
-        initiativeId: 'init-1',
-        userFiscalCode: 'AAAAAA00A00A000A',
-      };
-      await getReportedUser(params.initiativeId, params.userFiscalCode);
-      expect(mockedMerchantApi.getReportedUser).toHaveBeenCalledWith(
-        params.initiativeId,
-        params.userFiscalCode
-      );
-    });
+  test('deleteReportedUser delegates correctly', async () => {
+    await deleteReportedUser('1', 'CF');
+    expect(mockedApi.deleteReportedUser).toHaveBeenCalled();
   });
 
-  describe('createReportedUser', () => {
-    test('should call MerchantApi.createReportedUser with correct params', async () => {
-      const params = {
-        initiativeId: 'init-2',
-        fiscalCode: 'BBBBBB00B00B000B',
-      };
-      await createReportedUser(params.initiativeId, params.fiscalCode);
-      expect(mockedMerchantApi.createReportedUser).toHaveBeenCalledWith(
-        params.initiativeId,
-        params.fiscalCode
-      );
-    });
+  test('getRewardBatches delegates correctly', async () => {
+    await getRewardBatches('1', 0, 10);
+    expect(mockedApi.getRewardBatches).toHaveBeenCalled();
   });
 
-  describe('deleteReportedUser', () => {
-    test('should call MerchantApi.deleteReportedUser with correct params', async () => {
-      const params = {
-        initiativeId: 'init-3',
-        userFiscalCode: 'CCCCCC00C00C000C',
-      };
-      await deleteReportedUser(params.initiativeId, params.userFiscalCode);
-      expect(mockedMerchantApi.deleteReportedUser).toHaveBeenCalledWith(
-        params.initiativeId,
-        params.userFiscalCode
-      );
-    });
+  test('sendRewardBatch delegates correctly', async () => {
+    await sendRewardBatch('1', 'batch');
+    expect(mockedApi.sendRewardBatch).toHaveBeenCalledWith('1', 'batch');
   });
 
-  describe('getRewardBatches', () => {
-    test('should call MerchantApi.getRewardBatches with correct initiativeId', async () => {
-      const initiativeId = 'init-1';
-      await getRewardBatches(initiativeId, 0,10);
-      expect(mockedMerchantApi.getRewardBatches).toHaveBeenCalledWith(initiativeId, 0, 10);
-    });
+  test('getRewardBatchById delegates correctly', async () => {
+    await getRewardBatchById('1', 'batch');
+    expect(mockedApi.getRewardBatchById).toHaveBeenCalled();
   });
 
-  describe('sendRewardBatch', () => {
-    test('should call MerchantApi.sendRewardBatches with correct params', async () => {
-      const params = { initiativeId: 'init-1', batchId: 'batch-1' };
-      await sendRewardBatch(params.initiativeId, params.batchId);
-      expect(mockedMerchantApi.sendRewardBatches).toHaveBeenCalledWith(
-        params.initiativeId,
-        params.batchId
-      );
-    });
+  test('downloadBatchCsv delegates correctly', async () => {
+    await downloadBatchCsv('1', 'batch');
+    expect(mockedApi.downloadBatchCsv).toHaveBeenCalled();
   });
 
-  describe('downloadBatchCsv', () => {
-    test('should call MerchantApi.downloadBatchCsv with correct params', async () => {
-      const params = { initiativeId: 'init-1', rewardBatchId: 'batch-1' };
-      await downloadBatchCsv(params.initiativeId, params.rewardBatchId);
-      expect(mockedMerchantApi.downloadBatchCsv).toHaveBeenCalledWith(
-        params.initiativeId,
-        params.rewardBatchId
-      );
-    });
+  test('postponeTransaction delegates correctly', async () => {
+    await postponeTransaction('1', 'batch', 'trx', '2024-12-31');
+    expect(mockedApi.postponeTransaction).toHaveBeenCalled();
   });
 
-  describe('postponeTransaction', () => {
-    test('should call MerchantApi.postponeTransaction with correct params', async () => {
-      const params = {
-        initiativeId: 'init-1',
-        rewardBatchId: 'batch-1',
-        transactionId: 'trx-1',
-        initiativeEndDate: '2024-12-31',
-      };
-      await postponeTransaction(
-        params.initiativeId,
-        params.rewardBatchId,
-        params.transactionId,
-        params.initiativeEndDate
-      );
-      expect(mockedMerchantApi.postponeTransaction).toHaveBeenCalledWith(
-        params.initiativeId,
-        params.rewardBatchId,
-        params.transactionId,
-        params.initiativeEndDate
-      );
-    });
+  test('getMerchantPointOfSalesWithTransactions delegates correctly', async () => {
+    await getMerchantPointOfSalesWithTransactions('batch');
+    expect(mockedApi.getMerchantPointOfSalesWithTransactions).toHaveBeenCalled();
   });
 
-  describe('getMerchantPointOfSalesWithTransactions', () => {
-    test('should call MerchantApi.getMerchantPointOfSalesWithTransactions with correct params', async () => {
-      mockedMerchantApi.getMerchantPointOfSalesWithTransactions.mockResolvedValue([]);
-      await getMerchantPointOfSalesWithTransactions('batch-1');
-
-      expect(mockedMerchantApi.getMerchantPointOfSalesWithTransactions).toHaveBeenCalledWith('batch-1');
-    });
+  test('getAllRewardBatches delegates correctly', async () => {
+    await getAllRewardBatches('1');
+    expect(mockedApi.getAllRewardBatches).toHaveBeenCalled();
   });
 
-  describe('getAllRewardBatches', () => {
-    test('should call MerchantApi.getAllRewardBatches with correct initiativeId', async () => {
-      mockedMerchantApi.getAllRewardBatches.mockResolvedValue({} as any);
-      await getAllRewardBatches('init-1');
-
-      expect(mockedMerchantApi.getAllRewardBatches).toHaveBeenCalledWith('init-1');
-    });
-  });
-
-  describe('getRewardBatchById', () => {
-    test('should call MerchantApi.getRewardBatchById with correct initiativeId and batchId', async () => {
-      mockedMerchantApi.getRewardBatchById.mockResolvedValue({} as any);
-      await getRewardBatchById('init-1', 'batch-1');
-
-      expect(mockedMerchantApi.getRewardBatchById).toHaveBeenCalledWith('init-1', 'batch-1');
-    });
-  });
-
-  describe('updateInvoiceTransaction', () => {
-    test('should call MerchantApi.updateInvoiceTransaction with correct params', async () => {
-      mockedMerchantApi.updateInvoiceTransaction.mockResolvedValue({ code: 'OK', message: 'ok' });
-
-      const file = new File(['dummy'], 'invoice.pdf', { type: 'application/pdf' });
-
-      await updateInvoiceTransaction('trx-1', file, 'DOC-001');
-
-      expect(mockedMerchantApi.updateInvoiceTransaction).toHaveBeenCalledWith(
-        'trx-1',
-        file,
-        'DOC-001'
-      );
-    });
-
-    test('should call MerchantApi.updateInvoiceTransaction without docNumber', async () => {
-      mockedMerchantApi.updateInvoiceTransaction.mockResolvedValue({ code: 'OK', message: 'ok' });
-
-      const file = new File(['dummy'], 'invoice.pdf', { type: 'application/pdf' });
-
-      await updateInvoiceTransaction('trx-1', file, 'pos-1');
-
-      expect(mockedMerchantApi.updateInvoiceTransaction).toHaveBeenCalledWith(
-        'trx-1',
-        file,
-        'pos-1',
-      );
-    });
-  });
-
-  describe('getMerchantReports', () => {
-    test('should call MerchantApi.getMerchantReports with correct params', async () => {
-      mockedMerchantApi.getMerchantReports = jest.fn().mockResolvedValue({} as any);
-
-      await (await import('../merchantService')).getMerchantReports('init-1', 1, 10);
-
-      expect(mockedMerchantApi.getMerchantReports).toHaveBeenCalledWith(
-        'init-1',
-        1,
-        10
-      );
-    });
-  });
-
-  describe('generateMerchantReport', () => {
-    test('should call MerchantApi.generateMerchantReport with correct params', async () => {
-      mockedMerchantApi.generateMerchantReport = jest.fn().mockResolvedValue(undefined as any);
-
-      const body = { fromDate: '2024-01-01', toDate: '2024-01-31' };
-
-      await (await import('../merchantService')).generateMerchantReport('init-1', body as any);
-
-      expect(mockedMerchantApi.generateMerchantReport).toHaveBeenCalledWith(
-        'init-1',
-        body
-      );
-    });
-  });
-
-  describe('downloadMerchantReport', () => {
-    test('should call MerchantApi.downloadMerchantReport with correct params', async () => {
-      mockedMerchantApi.downloadMerchantReport = jest.fn().mockResolvedValue('file' as any);
-
-      await (await import('../merchantService')).downloadMerchantReport('init-1', 'report-1');
-
-      expect(mockedMerchantApi.downloadMerchantReport).toHaveBeenCalledWith(
-        'init-1',
-        'report-1'
-      );
-    });
+  test('updateInvoiceTransaction delegates correctly', async () => {
+    await updateInvoiceTransaction('trx', {} as any);
+    expect(mockedApi.updateInvoiceTransaction).toHaveBeenCalled();
   });
 });

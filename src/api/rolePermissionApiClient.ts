@@ -1,54 +1,69 @@
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
-import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
-import { buildFetchApi, extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
-import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
-import { store } from '../redux/store';
-import { ENV } from '../utils/env';
-import { createClient, WithDefaultsT } from './generated/role-permission/client';
-import { UserPermissionDTO } from './generated/role-permission/UserPermissionDTO';
-import { PortalConsentDTO } from './generated/role-permission/PortalConsentDTO';
+import { ENV } from "../utils/env";
+import { BaseApiClient } from "./BaseApiClient";
+import {
+  PortalConsentDTO,
+  UserPermissionDTO,
+} from "./generated/role-permission/data-contracts";
 
-const withBearerAndPartyId: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
-  const token = storageTokenOps.read();
-  return wrappedOperation({
-    ...params,
-    Bearer: `Bearer ${token}`,
-  });
-};
+/**
+ * RolePermissionApiClient
+ *
+ * ✅ Modern implementation
+ * ✅ Uses BaseApiClient
+ * ✅ No Redux coupling
+ * ✅ No storageTokenOps
+ * ✅ No extractResponse
+ * ✅ Security handled by BaseApiClient
+ */
+class RolePermissionApiClient {
+  private baseClient: BaseApiClient;
 
-const rolePermissionClient = createClient({
-  baseUrl: ENV.URL_API.ROLE_PERMISSION,
-  basePath: '',
-  fetchApi: buildFetchApi(ENV.API_TIMEOUT_MS.ROLE_PERMISSION),
-  withDefaults: withBearerAndPartyId,
-});
+  constructor() {
+    this.baseClient = new BaseApiClient({
+      baseUrl: ENV.URL_API.ROLE_PERMISSION,
+    });
+  }
 
-const onRedirectToLogin = () =>
-  store.dispatch(
-    appStateActions.addError({
-      id: 'tokenNotValid',
-      error: new Error(),
-      techDescription: 'token expired or not valid',
-      toNotify: false,
-      blocking: false,
-      displayableTitle: i18n.t('errors.sessionExpiredTitle'),
-      displayableDescription: i18n.t('errors.sessionExpiredMessage'),
-    })
-  );
+  public async userPermission(): Promise<UserPermissionDTO> {
+    const response = await this.baseClient.safeRequest<UserPermissionDTO>({
+      path: "/permissions",
+      method: "GET",
+      secure: true,
+      format: "json",
+    });
+
+    return response.data;
+  }
+
+  public async getPortalConsent(): Promise<PortalConsentDTO> {
+    const response = await this.baseClient.safeRequest<PortalConsentDTO>({
+      path: "/consent",
+      method: "GET",
+      secure: true,
+      format: "json",
+    });
+
+    return response.data;
+  }
+
+  public async savePortalConsent(
+    versionId?: string
+  ): Promise<void> {
+    await this.baseClient.safeRequest<void>({
+      path: "/consent",
+      method: "POST",
+      secure: true,
+      format: "json",
+      body: { versionId },
+    });
+  }
+}
+
+const client = new RolePermissionApiClient();
 
 export const RolePermissionApi = {
-  userPermission: async (): Promise<UserPermissionDTO> => {
-    const result = await rolePermissionClient.userPermission({});
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
-
-  getPortalConsent: async (): Promise<PortalConsentDTO> => {
-    const result = await rolePermissionClient.getPortalConsent({});
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
-
-  savePortalConsent: async (versionId: string | undefined): Promise<void> => {
-    const result = await rolePermissionClient.savePortalConsent({ body: { versionId } });
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
+  userPermission: () => client.userPermission(),
+  getPortalConsent: () => client.getPortalConsent(),
+  savePortalConsent: (versionId?: string) =>
+    client.savePortalConsent(versionId),
 };

@@ -14,7 +14,7 @@ import CustomChip from '../../components/Chip/CustomChip';
 import { getRewardBatches, sendRewardBatch } from '../../services/merchantService';
 import { getBatchStatus } from '../../components/Transactions/useStatus';
 import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
-import { RewardBatchDTO } from '../../api/generated/merchants/RewardBatchDTO';
+import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
 import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { useAlert } from '../../hooks/useAlert';
 import { BASE_ROUTE } from '../../routes';
@@ -31,7 +31,7 @@ const RefundRequests = () => {
   const { initiativeId } = useCurrentInitiativeId();
   const history = useHistory();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
+  const [selectedRows, setSelectedRows] = useState<Array<number>>([]);
   const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
   const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
   const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
@@ -269,7 +269,7 @@ const RefundRequests = () => {
   const handleSentBatches = async () => {
     setSendBatchIsLoading(true);
     try {
-      const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0]?.id : '';
+      const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0] : '';
       if (!batchId) {
         console.error('Missing initiativeId or batchId');
         return;

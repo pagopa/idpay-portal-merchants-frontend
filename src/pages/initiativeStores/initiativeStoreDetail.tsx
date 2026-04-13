@@ -21,7 +21,7 @@ import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail, handlePromptMessage } from '../../helpers';
 import { safeFormatDate } from '../../utils/formatUtils';
-import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
+import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/data-contracts';
 import { POS_TYPE } from '../../utils/constants';
 import ROUTES from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
@@ -110,7 +110,6 @@ const InitiativeStoreDetail = () => {
         setStoreTransactions([...responseWIthFormattedDate]);
       }
     } catch (error: any) {
-      console.log(error, 'error');
       setAlert({
         title: t('errors.genericTitle'),
         text: t('errors.genericDescription'),
@@ -162,7 +161,6 @@ const InitiativeStoreDetail = () => {
   };
 
   const handleFiltersReset = () => {
-    console.log('Callback dopo reset filtri');
     setTransactionsFilters({});
     void fetchStoreTransactions({});
   };

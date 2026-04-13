@@ -1,6 +1,8 @@
 import { mockedInstitutionInfo } from '../../services/__mocks__/emailNotificationService';
-import { EmailMessageDTO } from '../generated/email-notification/EmailMessageDTO';
-import { UserInstitutionInfoDTO } from '../generated/email-notification/UserInstitutionInfoDTO';
+import {
+  EmailMessageDTO,
+  UserInstitutionInfoDTO,
+} from '../generated/email-notification/data-contracts';
 
 export const EmailNotificationApiMocked = {
   getInstitutionProductUserInfo: async (): Promise<UserInstitutionInfoDTO> =>

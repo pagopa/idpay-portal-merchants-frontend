@@ -1,5 +1,7 @@
-import { EmailMessageDTO } from '../../api/generated/email-notification/EmailMessageDTO';
-import { UserInstitutionInfoDTO } from '../../api/generated/email-notification/UserInstitutionInfoDTO';
+import {
+  EmailMessageDTO,
+  UserInstitutionInfoDTO,
+} from '../../api/generated/email-notification/data-contracts';
 import { EmailNotificationApiMocked } from '../../api/__mocks__/emailNotificationApiClient';
 
 export const mockedBody: EmailMessageDTO = {

@@ -1,8 +1,10 @@
 
 // import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { AutocompleteApi } from '../api/AutocompleteApiClient';
-import { AddressAutocompleteRequestDTO } from '../api/generated/autocomplete/AddressAutocompleteRequestDTO';
-import { AddressAutocompleteResponseDTO } from '../api/generated/autocomplete/AddressAutocompleteResponseDTO';
+import {
+  AddressAutocompleteRequestDTO,
+  AddressAutocompleteResponseDTO,
+} from '../api/generated/autocomplete/data-contracts';
 
 
 // export interface AutocompleteRequest {
@@ -72,6 +74,5 @@ export const autocompleteService = {
   getAddresses: async (
     payload: AddressAutocompleteRequestDTO
   ): Promise<AddressAutocompleteResponseDTO> =>
-     AutocompleteApi.getAddresses(payload)
-  ,
+    AutocompleteApi.getAddresses(payload),
 };

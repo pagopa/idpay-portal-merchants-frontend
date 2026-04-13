@@ -88,17 +88,19 @@ const Header = ({ withSecondHeader, onExit, loggedUser }: /* , parties */ Props)
       }
       assistanceEmail={ENV.ASSISTANCE.EMAIL}
       enableLogin={true}
-      onSelectedProduct={(p) =>
-        onExit(() => console.log(`TODO: perform token exchange to change Product and set ${p}`))
+      onSelectedProduct={() =>
+        onExit(() => {
+          /* TODO: implement token exchange for product switch */
+        })
       }
       onSelectedParty={(selectedParty: any) => {
         if (selectedParty) {
           trackEvent('PARTY_SELECTION', {
             party_id: selectedParty.id,
           });
-          onExit(() =>
-            console.log(`TODO: perform token exchange to change Party and set ${selectedParty}`)
-          );
+          onExit(() => {
+            /* TODO: implement token exchange for party switch */
+          });
         }
       }}
     />

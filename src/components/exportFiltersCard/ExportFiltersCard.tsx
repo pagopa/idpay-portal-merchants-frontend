@@ -6,9 +6,15 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/it';
 import { useParams } from 'react-router-dom';
 import { generateMerchantReport } from '../../services/merchantService';
-import { ReportTypeEnum } from '../../api/generated/merchants/ReportRequest';
+import { ReportRequest } from '../../api/generated/merchants/data-contracts';
+
+type ReportTypeEnum = ReportRequest['reportType'];
+const MERCHANT_TRANSACTIONS: ReportTypeEnum = 'MERCHANT_TRANSACTIONS';
 import { MIN_START_DATE } from '../../utils/constants';
-import { ReportStatusEnum } from '../../api/generated/merchants/ReportDTO';
+import { ReportDTO } from '../../api/generated/merchants/data-contracts';
+
+type ReportStatusEnum = ReportDTO['reportStatus'];
+const FAILED: ReportStatusEnum = 'FAILED';
 
 type FormValues = {
   startDate: Dayjs | null;
@@ -74,29 +80,25 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
 
       try {
         const response = (await generateMerchantReport(initiative_id, {
-          startPeriod: dayjs(values.startDate)
-            .startOf('day')
-            .format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
-          endPeriod: dayjs(values.endDate)
-            .endOf('day')
-            .format('YYYY-MM-DDTHH:mm:ss.SSS') as unknown as Date,
-          reportType: ReportTypeEnum.MERCHANT_TRANSACTIONS,
+          startPeriod: dayjs(values.startDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS'),
+          endPeriod: dayjs(values.endDate).endOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS'),
+          reportType: MERCHANT_TRANSACTIONS,
         })) as any;
 
         if (currentRequestId !== requestIdRef.current) {
           return;
         }
 
-        const status: ReportStatusEnum = response?.reportStatus;
-        updateAlerts(status, true);
-        setTimeout(() => updateAlerts(status, false), 3000);
+        const status: ReportStatusEnum = response?.reportStatus ?? FAILED;
+        updateAlerts(status as string, true);
+        setTimeout(() => updateAlerts(status as string, false), 3000);
       } catch (error) {
         if (currentRequestId !== requestIdRef.current) {
           return;
         }
 
-        updateAlerts(ReportStatusEnum.FAILED, true);
-        setTimeout(() => updateAlerts(ReportStatusEnum.FAILED, false), 3000);
+        updateAlerts(FAILED as string, true);
+        setTimeout(() => updateAlerts(FAILED as string, false), 3000);
       } finally {
         if (currentRequestId === requestIdRef.current) {
           formik.resetForm();

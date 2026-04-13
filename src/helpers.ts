@@ -2,9 +2,11 @@
 /* eslint-disable functional/immutable-data */
 import { matchPath } from 'react-router-dom';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
-import { StatusEnum as TransactionStatusEnum } from './api/generated/merchants/MerchantTransactionDTO';
-import { RewardBatchTrxStatusEnum } from './api/generated/merchants/RewardBatchTrxStatus';
-import { StatusEnum } from './api/generated/merchants/RewardBatchDTO';
+import {
+  RewardBatchTrxStatus,
+} from './api/generated/merchants/data-contracts';
+
+const RewardBatchTrxStatusEnum = RewardBatchTrxStatus;
 
 
 export const copyTextToClipboard = (magicLink: string | undefined) => {
@@ -45,7 +47,9 @@ export const downloadQRCodeFromURL = (url: string | undefined) => {
         a.click();
         document.body.removeChild(a);
       })
-      .catch((error) => console.log(error));
+      .catch(() => {
+        /* intentionally swallowed to avoid logging sensitive data */
+      });
   }
 };
 
@@ -173,8 +177,8 @@ export const isReversableOrEditable = (itemValues: any, batchStatus:any=undefine
       // PV page
      return (
       [
-        TransactionStatusEnum.INVOICED,
-        TransactionStatusEnum.REWARDED
+        "INVOICED",
+        "REWARDED"
       ].includes(itemValues?.status)
       && ![
         RewardBatchTrxStatusEnum.APPROVED,
@@ -185,19 +189,19 @@ export const isReversableOrEditable = (itemValues: any, batchStatus:any=undefine
   // Batch detail page
   if (
     [
-      StatusEnum.PENDING_REFUND,
-      StatusEnum.REFUNDED,
-      StatusEnum.NOT_REFUNDED
+      "PENDING_REFUND",
+      "REFUNDED",
+      "NOT_REFUNDED"
     ].includes(batchStatus)
   ) {
     return itemValues?.rewardBatchTrxStatus === RewardBatchTrxStatusEnum.REJECTED;
   }
   return (
     impossibleStatusCombination(itemValues, batchStatus)
-    && ![StatusEnum.SENT, StatusEnum.APPROVING].includes(batchStatus)
+    && !["SENT", "APPROVING"].includes(batchStatus)
     && [
-      TransactionStatusEnum.INVOICED,
-      TransactionStatusEnum.REWARDED
+      "INVOICED",
+      "REWARDED"
     ].includes(itemValues?.status)
     && ![
       RewardBatchTrxStatusEnum.APPROVED,
@@ -207,7 +211,7 @@ export const isReversableOrEditable = (itemValues: any, batchStatus:any=undefine
 
 const impossibleStatusCombination = (itemValues: any, batchStatus:any): boolean => (
   !(
-    batchStatus === StatusEnum.CREATED
+    batchStatus === "CREATED"
     && [
       RewardBatchTrxStatusEnum.APPROVED,
       RewardBatchTrxStatusEnum.REJECTED
@@ -215,7 +219,7 @@ const impossibleStatusCombination = (itemValues: any, batchStatus:any): boolean 
   )
   &&
   !(
-    batchStatus === StatusEnum.APPROVED
+    batchStatus === "APPROVED"
     && [
       RewardBatchTrxStatusEnum.CONSULTABLE,
       RewardBatchTrxStatusEnum.SUSPENDED

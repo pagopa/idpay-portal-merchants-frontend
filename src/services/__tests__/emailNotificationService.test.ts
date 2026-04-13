@@ -1,16 +1,19 @@
-import { EmailNotificationApi } from '../../api/emailNotificationApiClient';
+import { EmailNotificationApiNew } from '../../api/EmailNotificationApiClientNew';
 import { getInstitutionProductUserInfo, sendEmail } from '../emailNotificationService';
-import { EmailMessageDTO } from '../../api/generated/email-notification/EmailMessageDTO';
-import { UserInstitutionInfoDTO } from '../../api/generated/email-notification/UserInstitutionInfoDTO';
+import {
+  EmailMessageDTO,
+  UserInstitutionInfoDTO,
+} from '../../api/generated/email-notification/data-contracts';
 
-jest.mock('../../api/emailNotificationApiClient', () => ({
-  EmailNotificationApi: {
+jest.mock('../../api/EmailNotificationApiClientNew', () => ({
+  EmailNotificationApiNew: {
     getInstitutionProductUserInfo: jest.fn(),
     sendEmail: jest.fn(),
   },
 }));
 
-const mockedEmailNotificationApi = EmailNotificationApi as jest.Mocked<typeof EmailNotificationApi>;
+const mockedEmailNotificationApi =
+  EmailNotificationApiNew as jest.Mocked<typeof EmailNotificationApiNew>;
 
 describe('emailNotificationService', () => {
   beforeEach(() => {
@@ -19,11 +22,9 @@ describe('emailNotificationService', () => {
 
   describe('getInstitutionProductUserInfo', () => {
     test('should call the API and return user info on success', async () => {
-      const mockResponse: UserInstitutionInfoDTO = {
-        name: 'Mario',
-        surname: 'Rossi',
+      const mockResponse = {
         email: 'mario.rossi@example.com',
-      };
+      } as UserInstitutionInfoDTO;
       mockedEmailNotificationApi.getInstitutionProductUserInfo.mockResolvedValue(mockResponse);
 
       const result = await getInstitutionProductUserInfo();

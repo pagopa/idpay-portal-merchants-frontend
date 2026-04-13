@@ -22,7 +22,7 @@ import {
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
-import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
+import { MerchantTransactionsListDTO } from '../../api/generated/merchants/data-contracts';
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {

@@ -1,3 +1,5 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
@@ -318,7 +320,7 @@ describe('InitiativeStoresUpload', () => {
   });
 
   it('test complete flow - physical store - error Merchant ID not found', async () => {
-    console.log('1');
+    /* removed debug log */
     mockUsePlacesAutocomplete.mockReturnValue({
       options: optionsAutocomplete,
       loading: false,
@@ -334,7 +336,7 @@ describe('InitiativeStoresUpload', () => {
   }, 10000);
 
   it('test complete flow - physical store - error duplicated entry', async () => {
-    console.log('2');
+    /* removed debug log */
     mockUsePlacesAutocomplete.mockReturnValue({
       options: optionsAutocomplete,
       loading: false,
@@ -355,7 +357,7 @@ describe('InitiativeStoresUpload', () => {
   }, 10000);
 
   it('test complete flow - physical store - other error', async () => {
-    console.log('3');
+    /* removed debug log */
     mockUsePlacesAutocomplete.mockReturnValue({
       options: optionsAutocomplete,
       loading: false,
@@ -376,7 +378,7 @@ describe('InitiativeStoresUpload', () => {
   }, 10000);
 
   it('test complete flow - physical store - success', async () => {
-    console.log('4');
+    /* removed debug log */
     mockUsePlacesAutocomplete.mockReturnValue({
       options: optionsAutocomplete,
       loading: false,

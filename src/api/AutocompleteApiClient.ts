@@ -1,43 +1,41 @@
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
-import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
-import { buildFetchApi, extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
-import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
-import { store } from '../redux/store';
-import { ENV } from '../utils/env';
-import { createClient, WithDefaultsT } from './generated/autocomplete/client';
-import { AddressAutocompleteRequestDTO } from './generated/autocomplete/AddressAutocompleteRequestDTO';
-import { AddressAutocompleteResponseDTO } from './generated/autocomplete/AddressAutocompleteResponseDTO';
+import { ENV } from "../utils/env";
+import { BaseApiClient } from "./BaseApiClient";
+import {
+  AddressAutocompleteRequestDTO,
+  AddressAutocompleteResponseDTO,
+} from "./generated/autocomplete/data-contracts";
 
-const withBearer: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
-  const token = storageTokenOps.read();
-  return wrappedOperation({
-    ...params,
-    Bearer: `Bearer ${token}`,
-  });
-};
-const apiClient = createClient({
-  baseUrl: ENV.URL_API.MERCHANTS,
-  basePath: '/address-search',
-  fetchApi: buildFetchApi(ENV.API_TIMEOUT_MS.MERCHANTS),
-  withDefaults: withBearer,
-});
+class AutocompleteApiClient {
+  private baseClient: BaseApiClient;
 
-const onRedirectToLogin = () =>
-  store.dispatch(
-    appStateActions.addError({
-      id: 'tokenNotValid',
-      error: new Error(),
-      techDescription: 'token expired or not valid',
-      toNotify: false,
-      blocking: false,
-      displayableTitle: i18n.t('errors.sessionExpiredTitle'),
-      displayableDescription: i18n.t('errors.sessionExpiredMessage'),
-    })
-  );
+  constructor() {
+    this.baseClient = new BaseApiClient({
+      baseUrl: `${ENV.URL_API.MERCHANTS}/address-search`,
+    });
+  }
+
+  public async getAddresses(
+    request: AddressAutocompleteRequestDTO
+  ): Promise<AddressAutocompleteResponseDTO> {
+    const httpResponse = await this.baseClient.safeRequest<
+      AddressAutocompleteResponseDTO
+    >({
+      path: "/autocomplete",
+      method: "POST",
+      body: request,
+      format: "json",
+      secure: true,
+    });
+
+    return httpResponse.data;
+  }
+}
+
+const client = new AutocompleteApiClient();
 
 export const AutocompleteApi = {
-  getAddresses: async (request: AddressAutocompleteRequestDTO): Promise<AddressAutocompleteResponseDTO> => {
-    const result = await apiClient.autocomplete({ body: request });
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
+  getAddresses: (
+    request: AddressAutocompleteRequestDTO
+  ): Promise<AddressAutocompleteResponseDTO> =>
+    client.getAddresses(request),
 };

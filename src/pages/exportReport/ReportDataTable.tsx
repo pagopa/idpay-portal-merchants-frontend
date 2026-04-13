@@ -11,7 +11,13 @@ import DataTable from '../../components/dataTable/DataTable';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { downloadMerchantReport, getMerchantReports } from '../../services/merchantService';
-import { ReportDTO, ReportStatusEnum } from '../../api/generated/merchants/ReportDTO';
+import { ReportDTO } from '../../api/generated/merchants/data-contracts';
+
+type ReportStatusEnum = ReportDTO['reportStatus'];
+const INSERTED: ReportStatusEnum = 'INSERTED';
+const IN_PROGRESS: ReportStatusEnum = 'IN_PROGRESS';
+const FAILED: ReportStatusEnum = 'FAILED';
+const GENERATED: ReportStatusEnum = 'GENERATED';
 
 type RouteParams = {
   initiative_id: string;
@@ -19,12 +25,12 @@ type RouteParams = {
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case ReportStatusEnum.INSERTED:
-    case ReportStatusEnum.IN_PROGRESS:
+    case INSERTED:
+    case IN_PROGRESS:
       return <CachedIcon color="info" />;
-    case ReportStatusEnum.FAILED:
+    case FAILED:
       return <ErrorIcon color="error" />;
-    case ReportStatusEnum.GENERATED:
+    case GENERATED:
       return <CheckCircleIcon color="success" />;
     default:
       return <CachedIcon color="info" />;
@@ -246,19 +252,15 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
         disableColumnMenu: true,
         align: 'right' as const,
         renderCell: (params: any) => {
-          if (params.row.reportStatus !== ReportStatusEnum.FAILED) {
+          if (params.row.reportStatus !== FAILED) {
             return (
               <IconButton
-                disabled={
-                  params.row.reportStatus !== ReportStatusEnum.GENERATED ||
-                  downloadingId === params.row.id
-                }
+                disabled={params.row.reportStatus !== GENERATED || downloadingId === params.row.id}
                 onClick={() => handleDownload(params.row.id, params.row.fileName)}
               >
                 <DownloadIcon
                   color={
-                    params.row.reportStatus === ReportStatusEnum.GENERATED &&
-                    downloadingId !== params.row.id
+                    params.row.reportStatus === GENERATED && downloadingId !== params.row.id
                       ? 'primary'
                       : 'disabled'
                   }

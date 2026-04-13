@@ -1,7 +1,9 @@
 import { Backdrop, Box, Button, Fade, Modal, Typography } from '@mui/material';
 import { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StatusEnum as TransactionStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
+import { MerchantTransactionDTO } from '../../api/generated/merchants/data-contracts';
+
+type TransactionStatusEnum = MerchantTransactionDTO['status'];
 import { deleteTransaction } from '../../services/merchantService';
 import { useAlert } from '../../hooks/useAlert';
 
@@ -19,7 +21,7 @@ const CancelTransactionModal = ({
   trxId,
   status,
 }: Props) => {
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
   const { t } = useTranslation();
 
   const handleCancelTransaction = (trxId: string) => {
@@ -28,7 +30,12 @@ const CancelTransactionModal = ({
         window.location.reload();
       })
       .catch(() => {
-        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
       });
   };
 
@@ -62,7 +69,7 @@ const CancelTransactionModal = ({
             {t('pages.initiativeDiscounts.cancelDiscountModalTitle')}
           </Typography>
           <Typography variant="body1" sx={{ my: 2 }}>
-            {status === TransactionStatusEnum.AUTHORIZED
+            {status === ('AUTHORIZED' as TransactionStatusEnum)
               ? t('pages.initiativeDiscounts.cancelDiscountAuthorizedModalBody')
               : t('pages.initiativeDiscounts.cancelDiscountNotAuthorizedModalBody')}
           </Typography>

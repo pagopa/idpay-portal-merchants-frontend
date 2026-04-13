@@ -1,15 +1,19 @@
-import { AutocompleteApi } from '../../api/AutocompleteApiClient';
-import { AddressAutocompleteRequestDTO } from '../../api/generated/autocomplete/AddressAutocompleteRequestDTO';
-import { AddressAutocompleteResponseDTO } from '../../api/generated/autocomplete/AddressAutocompleteResponseDTO';
+import { AutocompleteApi } from "../../api/AutocompleteApiClient";
+import {
+  AddressAutocompleteRequestDTO,
+  AddressAutocompleteResponseDTO,
+} from '../../api/generated/autocomplete/data-contracts';
 import { autocompleteService } from '../autocompleteService';
 
-jest.mock('../../api/AutocompleteApiClient', () => ({
+jest.mock("../../api/AutocompleteApiClient", () => ({
   AutocompleteApi: {
     getAddresses: jest.fn(),
   },
 }));
 
-const mockedAutocompleteApi = AutocompleteApi as jest.Mocked<typeof AutocompleteApi>;
+const mockedAutocompleteApi = AutocompleteApi as jest.Mocked<
+  typeof AutocompleteApi
+>;
 
 describe('autocompleteService', () => {
   beforeEach(() => {
@@ -22,7 +26,17 @@ describe('autocompleteService', () => {
         QueryText: 'via roma',
       };
       const mockResponse: AddressAutocompleteResponseDTO = {
-        ResultItems: [{ FullAddress: 'Via Roma 1, Roma' }],
+        ResultItems: [
+          {
+            PlaceId: '1',
+            Address: {
+              Street: 'Via Roma',
+              AddressNumber: '1',
+              Locality: 'Roma',
+              PostalCode: '00100',
+            },
+          },
+        ],
       };
       mockedAutocompleteApi.getAddresses.mockResolvedValue(mockResponse);
 

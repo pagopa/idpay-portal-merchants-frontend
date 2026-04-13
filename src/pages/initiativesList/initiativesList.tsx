@@ -22,7 +22,11 @@ import { generatePath, useHistory } from 'react-router-dom';
 import { useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import EmptyList from '../components/EmptyList';
-import { StatusEnum } from '../../api/generated/merchants/InitiativeDTO';
+import { InitiativeDTO } from '../../api/generated/merchants/data-contracts';
+
+type StatusEnum = InitiativeDTO['status'];
+const PUBLISHED: StatusEnum = 'PUBLISHED';
+const CLOSED: StatusEnum = 'CLOSED';
 import ROUTES from '../../routes';
 import { Data, EnhancedTableProps, HeadCell, Order, getComparator, stableSort } from './helpers';
 
@@ -112,11 +116,11 @@ const InitiativesList = () => {
         initiativeId: item.initiativeId || '',
         initiativeName: item.initiativeName || '',
         organizationName: item.organizationName || '',
-        spendingPeriod: `${item.startDate?.toLocaleDateString(
-          'fr-FR'
-        )} - ${item.endDate?.toLocaleDateString('fr-FR')}`,
+        spendingPeriod: `${
+          item.startDate ? new Date(item.startDate).toLocaleDateString('fr-FR') : ''
+        } - ${item.endDate ? new Date(item.endDate).toLocaleDateString('fr-FR') : ''}`,
         serviceId: item.serviceId || '',
-        status: item.status || '',
+        status: (item.status as StatusEnum) ?? '',
         id: index,
       }));
       setInitiativeList(mappedInitativeList);
@@ -148,9 +152,9 @@ const InitiativesList = () => {
     setOrderBy(property);
   };
 
-  const renderInitiativeStatus = (status: string) => {
+  const renderInitiativeStatus = (status?: StatusEnum) => {
     switch (status) {
-      case StatusEnum.PUBLISHED:
+      case PUBLISHED:
         return (
           <Chip
             sx={{ fontSize: '14px' }}
@@ -158,7 +162,7 @@ const InitiativesList = () => {
             color="success"
           />
         );
-      case StatusEnum.CLOSED:
+      case CLOSED:
         return (
           <Chip
             sx={{ fontSize: '14px' }}

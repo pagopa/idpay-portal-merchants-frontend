@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { genericContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
-import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
+import { TransactionResponse } from '../../api/generated/merchants/data-contracts';
 import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 import CreateForm from './CreateForm';
 import DiscountCreatedRecap from './DiscountCreatedRecap';

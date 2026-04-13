@@ -1,100 +1,69 @@
-import { extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
-import { createClient } from '../generated/email-notification/client';
+/// <reference types="jest" />
+import { EmailNotificationApi } from "../EmailNotificationApiClient";
+import { BaseApiClient } from "../BaseApiClient";
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
-  storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
-}));
+describe("EmailNotificationApiClient", () => {
+  const mockInstitutionInfo = {
+    email: "test@example.com",
+  };
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
-  appStateActions: { addError: jest.fn((e) => e) },
-}));
+  const mockEmailMessage = {
+    subject: "Test",
+    content: "Hello",
+    recipients: ["test@example.com"],
+  };
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/api-utils', () => ({
-  buildFetchApi: jest.fn(),
-  extractResponse: jest.fn(),
-}));
-
-jest.mock('@pagopa/selfcare-common-frontend/lib/locale/locale-utils', () => ({
-  t: jest.fn((key) => key),
-}));
-
-jest.mock('../../redux/store', () => ({
-  store: { dispatch: jest.fn() },
-}));
-
-jest.mock('../generated/email-notification/client', () => ({
-  createClient: jest.fn(),
-}));
-
-let mockEmailNotificationClient: any;
-
-const getEmailNotificationApi = () => {
-  let EmailNotificationApi: any;
-  jest.isolateModules(() => {
-    EmailNotificationApi = require('../emailNotificationApiClient').EmailNotificationApi;
-  });
-  return EmailNotificationApi;
-};
-
-const setupMockAndCallApi = async (
-  methodName: 'getInstitutionProductUserInfo' | 'sendEmail',
-  mockResolvedValue: any,
-  callArgs?: any
-) => {
-  mockEmailNotificationClient[methodName].mockResolvedValue(mockResolvedValue);
-  const EmailNotificationApi = getEmailNotificationApi();
-  const result = callArgs
-    ? await EmailNotificationApi[methodName](callArgs)
-    : await EmailNotificationApi[methodName]();
-  return { result, EmailNotificationApi };
-};
-
-describe('EmailNotificationApi', () => {
   beforeEach(() => {
-    mockEmailNotificationClient = {
-      getInstitutionProductUserInfo: jest.fn(),
-      sendEmail: jest.fn(),
-    };
-
-    (createClient as jest.Mock).mockReturnValue(mockEmailNotificationClient);
-    (extractResponse as jest.Mock).mockReset().mockReturnValue('extracted');
+    jest.clearAllMocks();
   });
 
-  it('getInstitutionProductUserInfo calls client and extractResponse', async () => {
-    const { result } = await setupMockAndCallApi('getInstitutionProductUserInfo', { right: 'data' });
+  it("should call safeRequest with GET /users and return data", async () => {
+    const safeRequestSpy = jest
+      .spyOn(BaseApiClient.prototype, "safeRequest")
+      .mockResolvedValue({
+        data: mockInstitutionInfo,
+      } as any);
 
-    expect(mockEmailNotificationClient.getInstitutionProductUserInfo).toHaveBeenCalledWith({});
-    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
-    expect(result).toBe('extracted');
-  });
+    const result =
+      await EmailNotificationApi.getInstitutionProductUserInfo();
 
-  it('sendEmail calls client with body and extractResponse', async () => {
-    const emailData = {
-      subject: 'Test',
-      content: 'Hello world',
-      recipients: ['test@example.com'],
-    };
-
-    const { result } = await setupMockAndCallApi('sendEmail', { right: 'sent' }, emailData);
-
-    expect(mockEmailNotificationClient.sendEmail).toHaveBeenCalledWith({
-      body: { ...emailData },
-    });
-    expect(extractResponse).toHaveBeenCalledWith({ right: 'sent' }, 204, expect.any(Function));
-    expect(result).toBe('extracted');
-  });
-
-  it('calls redirect callback when extractResponse triggers it', async () => {
-    const { store } = require('../../redux/store');
-    store.dispatch = jest.fn();
-
-    (extractResponse as jest.Mock).mockImplementation(async (_res, _status, callback) => {
-      callback();
-      return 'extracted';
+    expect(safeRequestSpy).toHaveBeenCalledWith({
+      path: "/users",
+      method: "GET",
+      secure: true,
+      format: "json",
     });
 
-    await setupMockAndCallApi('getInstitutionProductUserInfo', { right: 'data' });
+    expect(result).toEqual(mockInstitutionInfo);
+  });
 
-    expect(store.dispatch).toHaveBeenCalled();
+  it("should call safeRequest with POST /notify", async () => {
+    const safeRequestSpy = jest
+      .spyOn(BaseApiClient.prototype, "safeRequest")
+      .mockResolvedValue({} as any);
+
+    await EmailNotificationApi.sendEmail(
+      mockEmailMessage as any
+    );
+
+    expect(safeRequestSpy).toHaveBeenCalledWith({
+      path: "/notify",
+      method: "POST",
+      body: mockEmailMessage,
+      secure: true,
+      format: "json",
+    });
+  });
+
+  it("should propagate errors from safeRequest", async () => {
+    const error = new Error("Network error");
+
+    jest
+      .spyOn(BaseApiClient.prototype, "safeRequest")
+      .mockRejectedValue(error);
+
+    await expect(
+      EmailNotificationApi.getInstitutionProductUserInfo()
+    ).rejects.toThrow("Network error");
   });
 });

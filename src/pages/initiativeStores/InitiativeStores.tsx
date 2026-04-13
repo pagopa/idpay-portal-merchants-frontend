@@ -29,7 +29,7 @@ import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
 import { GetPointOfSalesFilters } from '../../types/types';
-import { PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
+import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
 import { parseJwt } from '../../utils/jwt-utils';
 import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
@@ -286,8 +286,8 @@ const InitiativeStores: React.FC = () => {
 
   const formik = useFormik<GetPointOfSalesFilters>({
     initialValues,
-    onSubmit: (values) => {
-      console.log('Eseguo ricerca con filtri:', values);
+    onSubmit: () => {
+      /* no-op: filters handled via handleFiltersApplied */
     },
   });
 
@@ -363,7 +363,6 @@ const InitiativeStores: React.FC = () => {
         true
       );
     } else {
-      console.log('Ordinamento rimosso.');
       setCurrentSort('asc');
       setSortModel([]);
     }

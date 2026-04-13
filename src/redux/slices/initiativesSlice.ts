@@ -1,8 +1,11 @@
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
-import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOArray';
-import { InitiativeDTO } from '../../api/generated/merchants/InitiativeDTO';
+import {
+  InitiativeDTO,
+} from '../../api/generated/merchants/data-contracts';
+
+type InitiativeDTOArray = Array<InitiativeDTO>;
 
 interface InitiativesState {
   list?: InitiativeDTOArray;
