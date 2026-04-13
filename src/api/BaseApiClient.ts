@@ -8,8 +8,8 @@ type RequestConfig = {
   method: string;
   secure?: boolean;
   format?: "json" | "blob" | "formData";
-  query?: Record<string, any>;
-  body?: any;
+  query?: Record<string, unknown>;
+  body?: unknown;
   headers?: Record<string, string>;
 };
 
@@ -32,7 +32,7 @@ export class BaseApiClient {
     this.baseUrl = config.baseUrl;
   }
 
-  private buildQueryString(query?: Record<string, any>): string {
+  private buildQueryString(query?: Record<string, unknown>): string {
     if (!query) {
       return "";
     }
@@ -76,7 +76,7 @@ export class BaseApiClient {
     return headers;
   }
 
-  public async safeRequest<T = any>(
+  public async safeRequest<T>(
     config: RequestConfig
   ): Promise<{ data: T }> {
     const { path, method, secure, format, query, body, headers } = config;
@@ -95,7 +95,7 @@ export class BaseApiClient {
       headers: requestHeaders,
       body:
         body && format === "formData"
-          ? body
+          ? (body as BodyInit)
           : body
           ? JSON.stringify(body)
           : undefined,
@@ -123,8 +123,8 @@ export class BaseApiClient {
 
     const data =
       format === "blob"
-        ? await response.blob()
-        : await response.json();
+        ? (await response.blob()) as T
+        : (await response.json()) as T;
 
     return { data };
   }

@@ -1,6 +1,3 @@
-import {
-  PointOfSaleDTO,
-} from '../api/generated/merchants/data-contracts';
 
 export interface GetPointOfSalesFilters {
     type?: "PHYSICAL" | "ONLINE";
@@ -21,14 +18,6 @@ export interface GetReportedUsersFilters {
   sort: string;
 }
 
-export interface GetPointOfSalesResponse {
-    content: Array<PointOfSaleDTO>;
-    number: number;
-    pageSize: number;
-    pageNo: number;
-    totalElements: number;
-    totalPages: number;
-}
 
 export interface GetPointOfSaleTransactionsFilters {
     page?: number;

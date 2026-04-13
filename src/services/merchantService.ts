@@ -18,7 +18,6 @@ import {
 } from "../api/generated/merchants/data-contracts";
 import {
   GetPointOfSalesFilters,
-  GetPointOfSalesResponse,
   GetPointOfSaleTransactionsFilters,
 } from "../types/types";
 
@@ -105,29 +104,63 @@ export const authPaymentBarCode = (
   trxCode: string,
   amountCents: number,
   idTrxAcquirer: string
-): Promise<any> =>
+): Promise<unknown> =>
   getMerchantsApi().authPaymentBarCode(trxCode, {
     amountCents,
     idTrxAcquirer,
   });
 
-export const updateMerchantPointOfSales = (
+export const updateMerchantPointOfSales = async (
   merchantId: string,
-  pointOfSales: Array<any>
-): Promise<any> =>
-  getMerchantsApi().updateMerchantPointOfSales(
-    merchantId,
-    pointOfSales
-  );
+  pointOfSales: Array<
+    import("../api/generated/merchants/data-contracts").PointOfSaleDTO
+  >
+): Promise<void | { code?: string; message?: string }> => {
+  try {
+    await getMerchantsApi().updateMerchantPointOfSales(
+      merchantId,
+      pointOfSales
+    );
+    return;
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "response" in error
+    ) {
+      const err = error as {
+        response?: { data?: { code?: string; message?: string } };
+      };
+      return err.response?.data;
+    }
+    return;
+  }
+};
 
-export const getMerchantPointOfSales = (
+export const getMerchantPointOfSales = async (
   merchantId: string,
   filters: GetPointOfSalesFilters
-): Promise<GetPointOfSalesResponse> =>
-  getMerchantsApi().getMerchantPointOfSales(
-    merchantId,
-    filters
-  );
+): Promise<{
+  content: Array<
+    import("../api/generated/merchants/data-contracts").PointOfSaleDTO
+  >;
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+}> => {
+  const response =
+    await getMerchantsApi().getMerchantPointOfSales(
+      merchantId,
+      filters as unknown as Record<string, unknown>
+    );
+
+  return {
+    content: response?.content ?? [],
+    pageNo: response?.pageNumber ?? 0,
+    pageSize: response?.pageSize ?? 0,
+    totalElements: response?.totalElements ?? 0,
+  };
+};
 
 export const getMerchantPointOfSalesWithTransactions = (
   rewardBatchId: string
@@ -153,7 +186,7 @@ export const getMerchantPointOfSaleTransactionsProcessed = (
   getMerchantsApi().getMerchantPointOfSaleTransactionsProcessed(
     initiativeId,
     pointOfSaleId,
-    filters
+    filters as unknown as Record<string, unknown> | undefined
   );
 
 export const downloadInvoiceFile = (

@@ -1,5 +1,6 @@
 /// <reference types="jest" />
-import { MerchantsApi } from '../../api/MerchantsApiClient';
+
+import { getMerchantsApi } from '../../api/MerchantsApiClient';
 import {
   getMerchantInitiativeList,
   getMerchantTransactions,
@@ -29,67 +30,69 @@ import {
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
-  MerchantsApi: {
-    getMerchantInitiativeList: jest.fn(),
-    getMerchantTransactions: jest.fn(),
-    getMerchantTransactionsProcessed: jest.fn(),
-    getMerchantInitiativeStatistics: jest.fn(),
-    getMerchantDetail: jest.fn(),
-    deleteTransaction: jest.fn(),
-    createTransaction: jest.fn(),
-    authPaymentBarCode: jest.fn(),
-    updateMerchantPointOfSales: jest.fn(),
-    getMerchantPointOfSales: jest.fn(),
-    getMerchantPointOfSalesById: jest.fn(),
-    getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
-    downloadInvoiceFile: jest.fn(),
-    getReportedUser: jest.fn(),
-    createReportedUser: jest.fn(),
-    deleteReportedUser: jest.fn(),
-    getRewardBatches: jest.fn(),
-    sendRewardBatch: jest.fn(),
-    getRewardBatchById: jest.fn(),
-    downloadBatchCsv: jest.fn(),
-    postponeTransaction: jest.fn(),
-    getMerchantPointOfSalesWithTransactions: jest.fn(),
-    getAllRewardBatches: jest.fn(),
-    updateInvoiceTransaction: jest.fn(),
-  },
+  getMerchantsApi: jest.fn(),
 }));
 
-const mockedApi = MerchantsApi as jest.Mocked<typeof MerchantsApi>;
+const mockedApi = {
+  getMerchantInitiativeList: jest.fn(),
+  getMerchantTransactions: jest.fn(),
+  getMerchantTransactionsProcessed: jest.fn(),
+  getMerchantInitiativeStatistics: jest.fn(),
+  getMerchantDetail: jest.fn(),
+  deleteTransaction: jest.fn(),
+  reversalTransactionInvoiced: jest.fn(),
+  createTransaction: jest.fn(),
+  authPaymentBarCode: jest.fn(),
+  updateMerchantPointOfSales: jest.fn(),
+  getMerchantPointOfSales: jest.fn(),
+  getMerchantPointOfSalesById: jest.fn(),
+  getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
+  downloadInvoiceFile: jest.fn(),
+  getReportedUser: jest.fn(),
+  createReportedUser: jest.fn(),
+  deleteReportedUser: jest.fn(),
+  getRewardBatches: jest.fn(),
+  sendRewardBatch: jest.fn(),
+  getRewardBatchById: jest.fn(),
+  downloadBatchCsv: jest.fn(),
+  postponeTransaction: jest.fn(),
+  getMerchantPointOfSalesWithTransactions: jest.fn(),
+  getAllRewardBatches: jest.fn(),
+  updateInvoiceTransaction: jest.fn(),
+};
 
 describe('merchantService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getMerchantsApi as jest.Mock).mockReturnValue(mockedApi);
   });
 
   test('getMerchantInitiativeList delegates correctly', async () => {
-    mockedApi.getMerchantInitiativeList.mockResolvedValue([] as any);
+    mockedApi.getMerchantInitiativeList.mockResolvedValue([]);
     await getMerchantInitiativeList();
     expect(mockedApi.getMerchantInitiativeList).toHaveBeenCalledTimes(1);
   });
 
   test('getMerchantTransactions delegates correctly', async () => {
-    mockedApi.getMerchantTransactions.mockResolvedValue({} as any);
+    mockedApi.getMerchantTransactions.mockResolvedValue({});
     await getMerchantTransactions('1', 0, 'CF', 'OK');
     expect(mockedApi.getMerchantTransactions).toHaveBeenCalledWith('1', 0, 'CF', 'OK');
   });
 
   test('getMerchantTransactionsProcessed delegates correctly', async () => {
-    mockedApi.getMerchantTransactionsProcessed.mockResolvedValue({} as any);
+    mockedApi.getMerchantTransactionsProcessed.mockResolvedValue({});
     await getMerchantTransactionsProcessed({ initiativeId: '1', page: 0 } as any);
     expect(mockedApi.getMerchantTransactionsProcessed).toHaveBeenCalled();
   });
 
   test('getMerchantInitiativeStatistics delegates correctly', async () => {
-    mockedApi.getMerchantInitiativeStatistics.mockResolvedValue({} as any);
+    mockedApi.getMerchantInitiativeStatistics.mockResolvedValue({});
     await getMerchantInitiativeStatistics('1');
     expect(mockedApi.getMerchantInitiativeStatistics).toHaveBeenCalledWith('1');
   });
 
   test('getMerchantDetail delegates correctly', async () => {
-    mockedApi.getMerchantDetail.mockResolvedValue({} as any);
+    mockedApi.getMerchantDetail.mockResolvedValue({});
     await getMerchantDetail('1');
     expect(mockedApi.getMerchantDetail).toHaveBeenCalledWith('1');
   });
@@ -120,6 +123,7 @@ describe('merchantService', () => {
   });
 
   test('getMerchantPointOfSales delegates correctly', async () => {
+    mockedApi.getMerchantPointOfSales.mockResolvedValue({});
     await getMerchantPointOfSales('merchant', {} as any);
     expect(mockedApi.getMerchantPointOfSales).toHaveBeenCalled();
   });
@@ -130,10 +134,10 @@ describe('merchantService', () => {
   });
 
   test('getMerchantPointOfSaleTransactionsProcessed delegates correctly', async () => {
+    mockedApi.getMerchantPointOfSaleTransactionsProcessed.mockResolvedValue({});
     await getMerchantPointOfSaleTransactionsProcessed('1', 'pos', {} as any);
     expect(mockedApi.getMerchantPointOfSaleTransactionsProcessed).toHaveBeenCalled();
   });
-
 
   test('getReportedUser delegates correctly', async () => {
     await getReportedUser('1', 'CF');

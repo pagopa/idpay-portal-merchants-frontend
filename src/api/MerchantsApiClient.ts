@@ -80,7 +80,7 @@ class MerchantsApiClient {
 
   public getMerchantTransactionsProcessed(
     initiativeId: string,
-    query?: Record<string, any>
+    query?: Record<string, unknown>
   ): Promise<MerchantTransactionsListDTO> {
     return this.request<MerchantTransactionsListDTO>({
       path: `/initiatives/${initiativeId}/transactions/processed`,
@@ -202,7 +202,14 @@ class MerchantsApiClient {
     });
   }
 
-  public createTransaction(body: any): Promise<TransactionResponse> {
+  public createTransaction(
+    body: {
+      amountCents: number;
+      idTrxAcquirer: string;
+      initiativeId: string;
+      mcc?: string;
+    }
+  ): Promise<TransactionResponse> {
     return this.request<TransactionResponse>({
       path: `/transactions`,
       method: "POST",
@@ -213,9 +220,12 @@ class MerchantsApiClient {
 
   public authPaymentBarCode(
     trxCode: string,
-    body: any
-  ): Promise<any> {
-    return this.request<any>({
+    body: {
+      amountCents: number;
+      idTrxAcquirer: string;
+    }
+  ): Promise<unknown> {
+    return this.request<unknown>({
       path: `/transactions/bar-code/${trxCode}/authorize`,
       method: "PUT",
       format: "json",
@@ -274,9 +284,11 @@ class MerchantsApiClient {
 
   public getMerchantPointOfSales(
     merchantId: string,
-    query?: Record<string, any>
-  ): Promise<any> {
-    return this.request<any>({
+    query?: Record<string, unknown>
+  ): Promise<import("./generated/merchants/data-contracts").ListPointOfSaleDTO> {
+    return this.request<
+      import("./generated/merchants/data-contracts").ListPointOfSaleDTO
+    >({
       path: `/${merchantId}/point-of-sales`,
       method: "GET",
       format: "json",
@@ -287,8 +299,10 @@ class MerchantsApiClient {
   public getMerchantPointOfSalesById(
     merchantId: string,
     pointOfSaleId: string
-  ): Promise<any> {
-    return this.request<any>({
+  ): Promise<import("./generated/merchants/data-contracts").PointOfSaleDTO> {
+    return this.request<
+      import("./generated/merchants/data-contracts").PointOfSaleDTO
+    >({
       path: `/${merchantId}/point-of-sales/${pointOfSaleId}`,
       method: "GET",
       format: "json",
@@ -297,9 +311,11 @@ class MerchantsApiClient {
 
   public updateMerchantPointOfSales(
     merchantId: string,
-    body: any
-  ): Promise<any> {
-    return this.request<any>({
+    body: Array<
+      import("./generated/merchants/data-contracts").PointOfSaleDTO
+    >
+  ): Promise<void> {
+    return this.request<void>({
       path: `/${merchantId}/point-of-sales`,
       method: "PUT",
       format: "json",
@@ -310,7 +326,7 @@ class MerchantsApiClient {
   public getMerchantPointOfSaleTransactionsProcessed(
     initiativeId: string,
     pointOfSaleId: string,
-    query?: Record<string, any>
+    query?: Record<string, unknown>
   ): Promise<PointOfSaleTransactionsProcessedListDTO> {
     return this.request<PointOfSaleTransactionsProcessedListDTO>({
       path: `/initiatives/${initiativeId}/point-of-sales/${pointOfSaleId}/transactions/processed`,
@@ -324,7 +340,7 @@ class MerchantsApiClient {
     rewardBatchId: string
   ): Promise<Array<FranchisePointOfSaleDTO>> {
     return this.request<Array<FranchisePointOfSaleDTO>>({
-      path: `/reward-batches/${rewardBatchId}/point-of-sales`,
+      path: `/point-of-sales/${rewardBatchId}`,
       method: "GET",
       format: "json",
     });
