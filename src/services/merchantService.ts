@@ -123,16 +123,13 @@ export const updateMerchantPointOfSales = async (
     );
     return;
   } catch (error: unknown) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "response" in error
-    ) {
-      const err = error as {
-        response?: { data?: { code?: string; message?: string } };
+    if (error instanceof Error && "details" in error) {
+      const apiError = error as {
+        details?: { code?: string; message?: string };
       };
-      return err.response?.data;
+      return apiError.details;
     }
+
     return;
   }
 };

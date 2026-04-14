@@ -138,7 +138,12 @@ const ReportedUsers: React.FC = () => {
           return;
         }
 
-        if (e?.status === 404 || e?.response?.status === 404) {
+        const status =
+          e?.status ??
+          (e instanceof Object && 'status' in e ? (e as any).status : undefined) ??
+          e?.response?.status;
+
+        if (status === 404) {
           console.error('Reported user not found (404):', e);
         } else {
           setUser([]);

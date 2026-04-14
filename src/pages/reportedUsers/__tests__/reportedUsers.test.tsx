@@ -1,9 +1,11 @@
+import '@testing-library/jest-dom';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import ReportedUsers from '../reportedUsers';
 import { getReportedUser, deleteReportedUser } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
+import { ApiError } from '../../../api/ApiError';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 
 jest.mock('../../../services/merchantService', () => ({
@@ -62,13 +64,10 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
       {rows.map((row: any) => (
         <div key={row.id} data-testid={`row-${row.cf}`}>
           {row.cf}
-          {columns.map((col: any, idx: number) => (
-            col.renderCell && (
-              <div key={idx}>
-                {col.renderCell({ row })}
-              </div>
-            )
-          ))}
+          {columns.map(
+            (col: any, idx: number) =>
+              col.renderCell && <div key={idx}>{col.renderCell({ row })}</div>
+          )}
         </div>
       ))}
     </div>
@@ -96,7 +95,7 @@ jest.mock('../SearchTaxCode', () => ({
 
 jest.mock('../../../components/Alert/AlertComponent', () => ({
   __esModule: true,
-  default: ({ text, isOpen }: any) => isOpen && <div data-testid='msg-alert'>{text}</div>,
+  default: ({ text, isOpen }: any) => isOpen && <div data-testid="msg-alert">{text}</div>,
 }));
 
 jest.mock('../NoResultPaper', () => ({
@@ -140,10 +139,12 @@ jest.mock('../columnsReportedUser', () => ({
   ],
 }));
 
-const mockGetReportedUser = getReportedUser as jest.MockedFunction<typeof getReportedUser>;
-const mockDeleteReportedUser = deleteReportedUser as jest.MockedFunction<typeof deleteReportedUser>;
-const mockParseJwt = parseJwt as jest.MockedFunction<typeof parseJwt>;
-const mockStorageTokenOps = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
+import type { MockedFunction, Mocked } from 'jest-mock';
+
+const mockGetReportedUser = getReportedUser as MockedFunction<typeof getReportedUser>;
+const mockDeleteReportedUser = deleteReportedUser as MockedFunction<typeof deleteReportedUser>;
+const mockParseJwt = parseJwt as MockedFunction<typeof parseJwt>;
+const mockStorageTokenOps = storageTokenOps as Mocked<typeof storageTokenOps>;
 
 describe('ReportedUsers Component', () => {
   let history: any;
@@ -193,12 +194,14 @@ describe('ReportedUsers Component', () => {
 
   describe('Ricerca utente', () => {
     it('deve eseguire la ricerca e mostrare i risultati con array valido', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -253,7 +256,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire errore 404 senza mostrare alert', async () => {
-      mockGetReportedUser.mockRejectedValueOnce({ status: 404 });
+      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
 
       renderComponent();
 
@@ -269,7 +272,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire errore 404 con response.status', async () => {
-      mockGetReportedUser.mockRejectedValueOnce({ response: { status: 404 } });
+      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
 
       renderComponent();
 
@@ -328,12 +331,14 @@ describe('ReportedUsers Component', () => {
 
   describe('Eliminazione utente', () => {
     it('deve aprire il modale di conferma eliminazione', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -356,12 +361,14 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve eliminare utente dopo conferma', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
       mockDeleteReportedUser.mockResolvedValueOnce(undefined as any);
@@ -396,12 +403,14 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve chiudere il modale se si annulla', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -433,12 +442,14 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire errori durante eliminazione', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
       mockDeleteReportedUser.mockRejectedValueOnce(new Error('Delete Error'));
@@ -471,12 +482,14 @@ describe('ReportedUsers Component', () => {
     it('non deve eliminare se merchantId non è presente', async () => {
       mockParseJwt.mockReturnValue({});
 
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -508,12 +521,14 @@ describe('ReportedUsers Component', () => {
 
   describe('Reset funzionalità', () => {
     it('deve resettare la ricerca', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -556,12 +571,14 @@ describe('ReportedUsers Component', () => {
 
   describe('Location state', () => {
     it('deve gestire newCf da location state senza showSuccessAlert', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -573,12 +590,14 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire newCf da location state con showSuccessAlert', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -598,12 +617,14 @@ describe('ReportedUsers Component', () => {
 
   describe('Alert temporizzati', () => {
     it('deve nascondere alert di successo dopo 3 secondi', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -621,12 +642,14 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve nascondere alert di eliminazione dopo 3 secondi', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
       mockDeleteReportedUser.mockResolvedValueOnce(undefined as any);

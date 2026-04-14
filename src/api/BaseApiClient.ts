@@ -17,14 +17,8 @@ type ApiClientConfig = {
   baseUrl: string;
 };
 
-/**
- * BaseApiClient
- *
- * ✅ Native fetch based
- * ✅ Centralized Authorization
- * ✅ 401 interception
- * ✅ No swagger dependency
- */
+import { ApiError } from "./ApiError";
+
 export class BaseApiClient {
   private baseUrl: string;
 
@@ -118,7 +112,24 @@ export class BaseApiClient {
     }
 
     if (!response.ok) {
-      throw new Error(`API Error - ${response.status}`);
+      let errorBody: any;
+      try {
+        errorBody = await response.json();
+      } catch {
+        // ignore if no json body
+      }
+
+      throw new ApiError(
+        response.status,
+        errorBody?.message || `API Error - ${response.status}`,
+        errorBody?.code,
+        errorBody
+      );
+    }
+
+    // ✅ Handle 204 No Content correctly
+    if (response.status === 204) {
+      return { data: undefined as T };
     }
 
     const data =
