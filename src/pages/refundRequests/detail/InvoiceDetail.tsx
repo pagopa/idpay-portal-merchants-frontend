@@ -1,6 +1,6 @@
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useEffect, useState, useMemo } from 'react';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
@@ -17,7 +17,7 @@ import { useAppSelector } from '../../../redux/hooks';
 import { formatDate, isReversableOrEditable } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
-import { StatusEnum } from '../../../api/generated/merchants/MerchantTransactionDTO';
+import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
 
 type Props = DetailDrawerProps & {
   itemValues: Record<string, any>;
@@ -40,13 +40,13 @@ export default function InvoiceDetail({
   const [initiativeEndDate, setInitiativeEndDate] = useState<string>('');
   const [nextMonthInitiativeEndDate, setNextMonthInitiativeEndDate] = useState<Date | undefined>();
   const [invoiceTransactionModal, setInvoiceTransactionModal] = useState(false);
-  const location = useLocation<{ store: any }>();
+  const location = useLocation<{ store: RewardBatchDTO }>();
   const batchMonth = location.state?.store?.month;
   const statusBatch = location.state?.store?.status;
   const { t } = useTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
   const history = useHistory();
-  const { id, batch_id } = useParams<{ id: string; batch_id: string }>();
+  const { initiative_id, batch_id } = useParams<{ initiative_id: string; batch_id: string }>();
 
   useEffect(() => {
     if (
@@ -61,11 +61,23 @@ export default function InvoiceDetail({
 
   const endOfNextBatchMonth = batchMonth ? getEndOfNextMonth(batchMonth) : undefined;
 
-  const isNextMonthDisabled =
-    !endOfNextBatchMonth || !nextMonthInitiativeEndDate || statusBatch !== StatusEnum.CREATED
-      ? true
-      : endOfNextBatchMonth > nextMonthInitiativeEndDate;
+  const isNextMonthDisabled = !endOfNextBatchMonth || !nextMonthInitiativeEndDate ? true : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
+  const isPostponeBtnVisible = statusBatch === StatusEnum.CREATED && (itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatusEnum.APPROVED && itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatusEnum.REJECTED);
+
+  const postponeButton: DetailDrawerProps['buttons'] = useMemo(() =>
+    isPostponeBtnVisible
+      ? [
+        {
+          disabled: isNextMonthDisabled,
+          onClick: () => setInvoiceTransactionModal(true),
+          variant: 'contained',
+          title: 'Sposta al mese successivo',
+          dataTestId: 'next-month-btn',
+        }
+      ] : [],
+    [isNextMonthDisabled, isPostponeBtnVisible]
+  );
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
       isReversableOrEditable(itemValues, statusBatch)
@@ -75,7 +87,7 @@ export default function InvoiceDetail({
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
               onClick: () => {
-                const path = routes.MODIFY_DOCUMENT.replace(':id', id)
+                const path = routes.MODIFY_DOCUMENT.replace(':initiative_id', initiative_id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
                   .replace(':trxId', itemValues.id)
                   .replace(':fileDocNumber', window.btoa(itemValues?.invoiceData?.docNumber ?? ''));
@@ -96,7 +108,7 @@ export default function InvoiceDetail({
               title: 'Storna',
               dataTestId: 'reverse-btn',
               onClick: () => {
-                const path = routes.REVERSE.replace(':id', id)
+                const path = routes.REVERSE.replace(':initiative_id', initiative_id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
                   .replace(':trxId', itemValues.id);
                 history.push(path, { fromLocation: history.location });
@@ -114,7 +126,7 @@ export default function InvoiceDetail({
 
     setLoading(true);
     try {
-      await postponeTransaction(id, batch_id, itemValues.id, initiativeEndDate);
+      await postponeTransaction(initiative_id, batch_id, itemValues.id, initiativeEndDate);
       setAlert({
         title: 'Successo',
         text: 'Transazione spostata al mese successivo',
@@ -130,14 +142,6 @@ export default function InvoiceDetail({
         text: 'Non è stato possibile spostare la transazione',
         isOpen: true,
         severity: 'error',
-        containerStyle: {
-          height: 'fit-content',
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          zIndex: '1300',
-        },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setInvoiceTransactionModal(false);
       onCloseDrawer?.();
@@ -235,13 +239,7 @@ export default function InvoiceDetail({
         setIsOpen={setIsOpen}
         buttons={[
           ...editButton,
-          {
-            disabled: isNextMonthDisabled,
-            onClick: () => setInvoiceTransactionModal(true),
-            variant: 'contained',
-            title: 'Sposta al mese successivo',
-            dataTestId: 'next-month-btn',
-          },
+          ...postponeButton,
           ...reverseButton,
         ]}
       >

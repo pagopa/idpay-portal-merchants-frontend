@@ -1,6 +1,6 @@
 /* eslint-disable functional/immutable-data */
 import { Chip } from '@mui/material';
-import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
+import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
 import { FormikProps } from 'formik';
 import { Dispatch, SetStateAction } from 'react';
 import { StatusEnum as TransactionCreatedStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
@@ -17,7 +17,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.authorized')}
+          label={String(i18n.t('commons.discountStatusEnum.authorized'))}
           color="info"
         />
       );
@@ -25,7 +25,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.authorizationRequested')}
+          label={String(i18n.t('commons.discountStatusEnum.authorizationRequested'))}
           color="default"
         />
       );
@@ -34,7 +34,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.identified')}
+          label={String(i18n.t('commons.discountStatusEnum.identified'))}
           color="default"
         />
       );
@@ -42,7 +42,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.invalidated')}
+          label={String(i18n.t('commons.discountStatusEnum.invalidated'))}
           color="error"
         />
       );
@@ -50,7 +50,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.rewarded')}
+          label={String(i18n.t('commons.discountStatusEnum.rewarded'))}
           color="success"
         />
       );
@@ -58,7 +58,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.cancelled')}
+          label={String(i18n.t('commons.discountStatusEnum.cancelled'))}
           color="error"
         />
       );
@@ -66,7 +66,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.refunded')}
+          label={String(i18n.t('commons.discountStatusEnum.refunded'))}
           color="warning"
         />
       );
@@ -74,7 +74,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.invoiced')}
+          label={String(i18n.t('commons.discountStatusEnum.invoiced'))}
           color="primary"
         />
       );
@@ -87,7 +87,7 @@ export const renderTrasactionProcessedStatus = (status: TransactionStatusEnum) =
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.rewarded')}
+          label={String(i18n.t('commons.discountStatusEnum.rewarded'))}
           color="success"
         />
       );
@@ -95,7 +95,7 @@ export const renderTrasactionProcessedStatus = (status: TransactionStatusEnum) =
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.cancelled')}
+          label={String(i18n.t('commons.discountStatusEnum.cancelled'))}
           color="error"
         />
       );
@@ -103,7 +103,7 @@ export const renderTrasactionProcessedStatus = (status: TransactionStatusEnum) =
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={i18n.t('commons.discountStatusEnum.identified')}
+          label={String(i18n.t('commons.discountStatusEnum.identified'))}
           color="default"
         />
       );

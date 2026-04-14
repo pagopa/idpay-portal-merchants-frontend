@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Box, Stack, Tooltip, Typography, CircularProgress, IconButton } from '@mui/material';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
-import { useTranslation } from 'react-i18next';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
-import { GridColDef } from '@mui/x-data-grid';
-import { theme } from '@pagopa/mui-italia';
+import { Trans, useTranslation } from 'react-i18next';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
+import { GridColDef, GridSelectionModel } from '@mui/x-data-grid';
+import { theme } from '@pagopa/mui-italia/theme';
 import { useHistory, useParams } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DataTable from '../../components/dataTable/DataTable';
@@ -18,10 +18,11 @@ import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { useAlert } from '../../hooks/useAlert';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { browserConsole } from '../../utils/consoleLogger';
 import { RefundRequestsModal } from './RefundRequestModal';
 
 interface RouteParams {
-  id: string;
+  initiative_id: string;
 }
 
 const posTypeMapper: Record<string, string> = {
@@ -31,14 +32,28 @@ const posTypeMapper: Record<string, string> = {
 
 const RefundRequests = () => {
   const { setAlert } = useAlert();
-  const { id } = useParams<RouteParams>();
+  const { initiative_id } = useParams<RouteParams>();
   const history = useHistory();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [disabledRows, setDisabledRows] = useState<Array<string>>([]);
+  const [modal, setModal] = useState<Record<string, any>>({
+    isOpen: false,
+    title: "",
+    description: "",
+    cancelBtn: {text: "", vaiant: "outlined"},
+    confirmBtn: false,
+    setIsOpen: () => { }
+  });
   const [selectedRows, setSelectedRows] = useState<Array<RewardBatchDTO>>([]);
+  const [singleSelectionModel, setSingleSelectionModel] = useState<GridSelectionModel>([]);
   const [rewardBatches, setRewardBatches] = useState<Array<RewardBatchDTO>>([]);
   const [rewardBatchesLoading, setRewardBatchesLoading] = useState<boolean>(false);
   const [sendBatchIsLoading, setSendBatchIsLoading] = useState<boolean>(false);
-  const [currentPagination, setCurrentPagination] = useState({ pageNo: 0, pageSize: 10, totalElements: 0 });
+  const [currentPagination, setCurrentPagination] = useState({
+    pageNo: 0,
+    pageSize: 10,
+    totalElements: 0,
+  });
+
   const columns: Array<GridColDef> = [
     {
       field: 'spacer',
@@ -107,8 +122,9 @@ const RefundRequests = () => {
         <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
           <IconButton
             onClick={() => {
-              history.push(`${BASE_ROUTE}/${id}/richieste-di-rimborso/${params.row?.id}`,
-                {store: params.row}
+              history.push(
+                `${BASE_ROUTE}/${initiative_id}/richieste-di-rimborso/${params.row?.id}`,
+                { store: params.row }
               );
             }}
             size="small"
@@ -122,7 +138,7 @@ const RefundRequests = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-      void fetchRewardBatches(id);
+    void fetchRewardBatches(initiative_id);
   }, [currentPagination.pageNo, currentPagination.pageSize]);
 
   const infoStyles = {
@@ -133,7 +149,11 @@ const RefundRequests = () => {
   const fetchRewardBatches = async (initiativeId: string): Promise<void> => {
     setRewardBatchesLoading(true);
     try {
-      const response = await getRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
+      const response = await getRewardBatches(
+        initiativeId,
+        currentPagination.pageNo,
+        currentPagination.pageSize
+      );
       if (response?.content) {
         const mappedResponse = response.content.map((value) => ({
           ...value,
@@ -173,9 +193,37 @@ const RefundRequests = () => {
     setCurrentPagination((prev) => ({ ...prev, pageNo: page }));
   };
 
-  const handleRowSelectionChange = (rows: Array<number>) => {
-    setSelectedRows(rows);
-  };
+  const handleRowSelectionChange = useCallback((newSelectionModel: GridSelectionModel) => {
+    const invalidRow = rewardBatches.find((row: RewardBatchDTO) => newSelectionModel.includes(row.id) ? !row?.numberOfTransactions : undefined);
+    const finalModel = newSelectionModel.filter((item) => item !== invalidRow?.id);
+    if (newSelectionModel.length > 0) {
+      setSingleSelectionModel(prev => [...(invalidRow ? prev : []), newSelectionModel[newSelectionModel.length - 1]]);
+    } else {
+      setSingleSelectionModel([]);
+    }
+    if (invalidRow) {
+      setTimeout(() => {
+        setSingleSelectionModel([finalModel[finalModel.length - 1]]);
+      }, 300);
+      setModal({
+        title: t('pages.refundRequests.emptyBatchModal.title'),
+        description: <Trans
+          i18nKey='pages.refundRequests.emptyBatchModal.description'
+          values={{ name: invalidRow.name }}
+          components={{ b: <b /> }}
+        />,
+        isOpen: true,
+        confirmBtn: false,
+        cancelBtn: {text: "Chiudi", variant: "contained"},
+        setIsOpen: () => {
+          setDisabledRows(prev => [ ...prev, invalidRow.id]);
+          setModal(prev => ({ ...prev, isOpen: false }));
+        }
+      });
+    }
+    const selectedRowObjects = rewardBatches.find(({id}) => id === finalModel[finalModel.length - 1]);
+    setSelectedRows(selectedRowObjects ? [selectedRowObjects] : []);
+  }, [rewardBatches]);
 
   const StatusChip = ({ status }: any) => {
     const chipItem = getBatchStatus(status);
@@ -190,7 +238,7 @@ const RefundRequests = () => {
   };
 
   const isRowSelectable = (params: any) => {
-    if (params?.row?.status !== 'CREATED' || params?.row?.numberOfTransactions === 0) {
+    if (params?.row?.status !== 'CREATED' || disabledRows.includes(params?.row?.id)) {
       return false;
     }
 
@@ -204,7 +252,7 @@ const RefundRequests = () => {
       return true;
     }
 
-    return !!(batchYear === currentYear && batchMonth < currentMonth);
+    return (batchYear === currentYear && batchMonth < currentMonth);
   };
 
   const handleSentBatches = async () => {
@@ -212,10 +260,10 @@ const RefundRequests = () => {
     try {
       const batchId = selectedRows && selectedRows?.length > 0 ? selectedRows[0]?.id : '';
       if (!batchId) {
-        console.error('Missing initiativeId or batchId');
+        browserConsole.error('Missing initiativeId or batchId');
         return;
       }
-      const result = (await sendRewardBatch(id, batchId.toString())) as any;
+      const result = (await sendRewardBatch(initiative_id, batchId.toString())) as any;
       if ('code' in result && result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
         setAlert({
           title: t('errors.genericTitle'),
@@ -225,6 +273,7 @@ const RefundRequests = () => {
         });
         return;
       }
+      handleRowSelectionChange([]);
       setTimeout(() => {
         setAlert({
           text: t('pages.refundRequests.rewardBatchSentSuccess'),
@@ -232,7 +281,7 @@ const RefundRequests = () => {
           severity: 'success',
         });
       }, 1000);
-      await fetchRewardBatches(id);
+      await fetchRewardBatches(initiative_id);
     } catch (e: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -240,22 +289,22 @@ const RefundRequests = () => {
         isOpen: true,
         severity: 'error',
       });
-        await fetchRewardBatches(id);
+      await fetchRewardBatches(initiative_id);
     } finally {
       setSendBatchIsLoading(false);
-      setIsModalOpen(false);
+      setModal(prev => ({ ...prev, isOpen: false }));
     }
   };
 
   return (
     <Box p={1.5}>
       <RefundRequestsModal
-        isOpen={isModalOpen}
-        setIsOpen={() => setIsModalOpen(false)}
-        title={t('pages.refundRequests.ModalRefundRequests.title')}
-        description={t('pages.refundRequests.ModalRefundRequests.description')}
-        cancelBtn="Indietro"
-        confirmBtn={{ text: `Invia`, onConfirm: handleSentBatches, loading: sendBatchIsLoading }}
+        isOpen={modal.isOpen}
+        setIsOpen={modal.setIsOpen}
+        title={modal.title}
+        description={modal.description}
+        cancelBtn={modal.cancelBtn}
+        confirmBtn={modal.confirmBtn ? { text: "Invia", onConfirm: handleSentBatches, loading: sendBatchIsLoading } : undefined}
       />
       <Stack
         direction={{ xs: 'column', md: 'row' }}
@@ -274,7 +323,14 @@ const RefundRequests = () => {
           <Button
             variant="contained"
             size="small"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setModal({
+              isOpen: true,
+              title: t('pages.refundRequests.ModalRefundRequests.title'),
+              description: t('pages.refundRequests.ModalRefundRequests.description'),
+              cancelBtn: {text: "Indietro", variant: "outlined"},
+              confirmBtn: true,
+              setIsOpen: () => setModal(prev => ({ ...prev, isOpen: false }))
+            })}
             startIcon={<SendIcon />}
             sx={{
               width: {
@@ -303,16 +359,17 @@ const RefundRequests = () => {
             columns={columns}
             rows={rewardBatches}
             rowsPerPage={currentPagination.pageSize}
-            checkable={true}
+            checkable
             paginationModel={{
               pageNo: currentPagination.pageNo,
               pageSize: currentPagination.pageSize,
-              totalElements: currentPagination.totalElements
+              totalElements: currentPagination.totalElements,
             }}
             onPaginationPageChange={handlePaginationPageChange}
-            onRowSelectionChange={handleRowSelectionChange}
             isRowSelectable={isRowSelectable}
             singleSelect
+            singleSelectionModel={singleSelectionModel}
+            onSelectionModelChange={handleRowSelectionChange}
           />
         )}
         {!rewardBatchesLoading && (!rewardBatches || rewardBatches.length === 0) && (

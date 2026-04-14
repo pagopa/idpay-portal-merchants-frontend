@@ -4,26 +4,26 @@ import {
   Typography,
   Breadcrumbs,
   FormControl,
-  Grid,
   InputLabel,
   MenuItem,
   Select,
   Button,
   Tooltip,
   CircularProgress,
-  Alert,
+  Alert as MuiAlert,
   TextField,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { useTranslation } from 'react-i18next';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory, useParams } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Sync } from '@mui/icons-material';
-import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, MOCK_USER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
 import InvoiceDataTable from '../invoiceDataTable';
@@ -32,27 +32,31 @@ import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/Rewar
 import { parseJwt } from '../../../utils/jwt-utils';
 import {
   downloadBatchCsv,
-  getAllRewardBatches,
+  getRewardBatchById,
   getMerchantPointOfSalesWithTransactions,
+  getMerchantDetail,
 } from '../../../services/merchantService';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { useAlert } from '../../../hooks/useAlert';
 import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/FranchisePointOfSaleDTO';
+import { MerchantDetailDTO } from '../../../api/generated/merchants/MerchantDetailDTO';
+import { browserConsole } from '../../../utils/consoleLogger';
 import { ShopCard } from './ShopCard';
 
 const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(
   (el) => el !== RewardBatchTrxStatusEnum.TO_CHECK
 );
 interface RouteParams {
-  id: string;
+  initiative_id: string;
   batch_id: string;
 }
 
 const ShopDetails: React.FC = () => {
   const { t } = useTranslation();
-  const { id, batch_id } = useParams<RouteParams>();
+  const { initiative_id, batch_id } = useParams<RouteParams>();
   const [store, setStore] = useState({} as RewardBatchDTO);
+  const [merchantDetail, setMerchantDetail] = useState<MerchantDetailDTO | null>(null);
   const history = useHistory();
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
   const [stores, setStores] = useState<Array<FranchisePointOfSaleDTO>>([]);
@@ -111,12 +115,11 @@ const ShopDetails: React.FC = () => {
     },
   });
 
-  const fetchAll = async () => {
+  const fetchBatch = async () => {
     try {
-      const response = await getAllRewardBatches(id);
-
-      const match = response?.content?.find((e: any) => e.id === batch_id);
-      setStore(match ?? {});
+      const response = await getRewardBatchById(initiative_id, batch_id);
+      setStore(response);
+      history.replace({ ...history.location, state: {store: response}});
     } catch (error: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -128,8 +131,28 @@ const ShopDetails: React.FC = () => {
   };
 
   useEffect(() => {
-    void fetchAll();
+    void fetchBatch();
   }, [drawerRefreshKey]);
+
+  useEffect(() => {
+    const fetchMerchantDetail = async () => {
+      try {
+        const response = await getMerchantDetail(initiative_id);
+        setMerchantDetail(response);
+      } catch (error: any) {
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
+      }
+    };
+
+    if (initiative_id) {
+      void fetchMerchantDetail();
+    }
+  }, [initiative_id]);
 
   const fetchStores = async () => {
     const userJwt = parseJwt(storageTokenOps.read());
@@ -167,10 +190,10 @@ const ShopDetails: React.FC = () => {
   };
 
   const handleDownloadCsv = async () => {
-    if (batch_id && id) {
+    if (batch_id && initiative_id) {
       try {
         setBatchDownloadIsLoading(true);
-        const response = await downloadBatchCsv(id, batch_id);
+        const response = await downloadBatchCsv(initiative_id, batch_id);
         const { approvedBatchUrl } = response;
         const filename = 'lotto.csv';
 
@@ -181,7 +204,9 @@ const ShopDetails: React.FC = () => {
         link.download = filename;
         link.click();
       } catch (e) {
-        console.log(e);
+        if (MOCK_USER) {
+          browserConsole.log(e);
+        }
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),
@@ -289,17 +314,21 @@ const ShopDetails: React.FC = () => {
       </Box>
 
       {store?.status === StatusEnum.APPROVING && (
-        <Alert
+        <MuiAlert
           sx={{ mb: 3 }}
           variant="outlined"
-          color="info"
+          severity="info"
           icon={<Sync sx={{ color: '#6BCFFB' }} />}
         >
           {t('pages.refundRequests.storeDetails.csv.alert')}
-        </Alert>
+        </MuiAlert>
       )}
 
-      <ShopCard store={mappedStore} />
+      <ShopCard
+        store={mappedStore}
+        iban={merchantDetail?.iban}
+        ibanHolder={merchantDetail?.ibanHolder}
+      />
       <Box
         sx={{
           height: 'auto',
@@ -346,7 +375,6 @@ const ShopDetails: React.FC = () => {
                 placeholder={t('pages.pointOfSaleTransactions.searchByTrxCode')}
                 name="trxCode"
                 aria-label="searchTrxCode"
-                role="input"
                 InputLabelProps={{ required: false }}
                 value={formik.values.trxCode}
                 onChange={handleTrxCodeChange}
@@ -370,7 +398,6 @@ const ShopDetails: React.FC = () => {
                 }}
                 name="status"
                 label={t('pages.initiativeDiscounts.filterByStatus')}
-                placeholder={t('pages.initiativeDiscounts/filterByStatus')}
                 onChange={formik.handleChange}
                 value={formik.values.status}
                 sx={{

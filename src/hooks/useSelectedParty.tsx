@@ -1,6 +1,6 @@
-import useLoading from '@pagopa/selfcare-common-frontend/hooks/useLoading';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { trackEvent } from '@pagopa/selfcare-common-frontend/services/analyticsService';
+import useLoading from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import { trackEvent } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
 import { Party /* PartyRole, UserRole */, PLACEHOLDER_PARTY_LOGO } from '../model/Party';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { partiesActions, partiesSelectors } from '../redux/slices/partiesSlice';
@@ -9,6 +9,7 @@ import { LOADING_TASK_SEARCH_PARTY } from '../utils/constants';
 import { parseJwt } from '../utils/jwt-utils';
 import { ENV } from '../utils/env';
 import { JWTUser } from '../model/JwtUser';
+import { cleanupOnLogout } from '../utils/logoutCleanup';
 
 /* export type PartyJwtConfig = {
   partyId: string;
@@ -143,6 +144,7 @@ export const useSelectedParty = (): (() => Promise<Party>) => {
   return () => {
     if (partyJwtConfig == null) {
       trackEvent('PARTY_ID_NOT_IN_TOKEN');
+      cleanupOnLogout();
       window.location.assign(ENV.URL_FE.LOGOUT);
       return new Promise<Party>((_, reject) => reject());
     } else if (!selectedParty || selectedParty.partyId !== partyJwtConfig.partyId) {

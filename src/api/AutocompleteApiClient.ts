@@ -1,9 +1,11 @@
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
-import { appStateActions } from '@pagopa/selfcare-common-frontend/redux/slices/appStateSlice';
-import { buildFetchApi, extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
-import i18n from '@pagopa/selfcare-common-frontend/locale/locale-utils';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
+import { buildFetchApi } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
+import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
+import { extractResponseWith401 as extractResponse } from '../utils/extractResponseWith401';
 import { store } from '../redux/store';
 import { ENV } from '../utils/env';
+import { cleanupOnLogout } from '../utils/logoutCleanup';
 import { createClient, WithDefaultsT } from './generated/autocomplete/client';
 import { AddressAutocompleteRequestDTO } from './generated/autocomplete/AddressAutocompleteRequestDTO';
 import { AddressAutocompleteResponseDTO } from './generated/autocomplete/AddressAutocompleteResponseDTO';
@@ -22,7 +24,8 @@ const apiClient = createClient({
   withDefaults: withBearer,
 });
 
-const onRedirectToLogin = () =>
+const onRedirectToLogin = () => {
+  cleanupOnLogout();
   store.dispatch(
     appStateActions.addError({
       id: 'tokenNotValid',
@@ -34,6 +37,7 @@ const onRedirectToLogin = () =>
       displayableDescription: i18n.t('errors.sessionExpiredMessage'),
     })
   );
+};
 
 export const AutocompleteApi = {
   getAddresses: async (request: AddressAutocompleteRequestDTO): Promise<AddressAutocompleteResponseDTO> => {

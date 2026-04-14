@@ -1,21 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import {
-  Box,
-  Button,
-  Typography,
-  Paper,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Link,
-  Grid,
-} from '@mui/material';
+import { Box, Button, Typography, Paper, RadioGroup, FormControlLabel, Radio, Link } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useTranslation } from 'react-i18next';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { generatePath, useParams, useHistory } from 'react-router-dom';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { parseJwt } from '../../utils/jwt-utils';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
@@ -37,11 +28,11 @@ interface FieldErrors {
 }
 
 interface RouteParams {
-  id: string;
+  initiative_id: string;
 }
 
 const InitiativeStoresUpload: React.FC = () => {
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
   const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(
     POS_UPDATE.Manual
   );
@@ -50,7 +41,7 @@ const InitiativeStoresUpload: React.FC = () => {
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const { t } = useTranslation();
-  const { id } = useParams<RouteParams>();
+  const { initiative_id } = useParams<RouteParams>();
   const history = useHistory();
   const [submitAttempt, setSubmitAttempt] = useState(0);
 
@@ -110,7 +101,12 @@ const InitiativeStoresUpload: React.FC = () => {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
       if (!merchantId) {
-        setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
         return;
       }
 
@@ -127,25 +123,35 @@ const InitiativeStoresUpload: React.FC = () => {
       const response = await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
       if (response) {
         if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
-          setAlert({title: t('errors.duplicateEmailError'), text: `${response?.message} già associata ad altro punto vendita`, isOpen: true, severity: 'error'});
+          setAlert({
+            title: t('errors.duplicateEmailError'),
+            text: `${response?.message} già associata ad altro punto vendita`,
+            isOpen: true,
+            severity: 'error',
+          });
         } else {
-          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+          setAlert({
+            title: t('errors.genericTitle'),
+            text: t('errors.genericDescription'),
+            isOpen: true,
+            severity: 'error',
+          });
         }
       } else {
         setPointsOfSaleLoaded(true);
         history.push({
-          pathname: generatePath(ROUTES.STORES, { id }),
+          pathname: generatePath(ROUTES.STORES, { initiative_id }),
           state: { showSuccessAlert: true },
         });
       }
     }
     if (uploadMethod === POS_UPDATE.Csv) {
-      history.push(generatePath(ROUTES.STORES, { id }));
+      history.push(generatePath(ROUTES.STORES, { initiative_id }));
     }
   };
 
   const handleBack = () => {
-    history.push(generatePath(ROUTES.OVERVIEW, { id }));
+    history.push(generatePath(ROUTES.OVERVIEW, { initiative_id }));
   };
 
   return (
@@ -180,7 +186,7 @@ const InitiativeStoresUpload: React.FC = () => {
               <Link
                 fontWeight={theme.typography.fontWeightBold}
                 onClick={() => window.open(ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK, '_blank')}
-                sx={{cursor: 'pointer'}}
+                sx={{ cursor: 'pointer' }}
                 underline="hover"
               >
                 {t('pages.initiativeStores.manualLink')}

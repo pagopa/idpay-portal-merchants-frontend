@@ -13,7 +13,7 @@ import {
   TextField,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useTranslation } from 'react-i18next';
 import SearchIcon from '@mui/icons-material/Search';
 import { grey } from '@mui/material/colors';
@@ -259,7 +259,11 @@ const InitiativesList = () => {
                                   initiativeName: row.initiativeName,
                                 })
                               );
-                              history.push(generatePath(ROUTES.OVERVIEW, { id: row.initiativeId }));
+                              history.push(
+                                generatePath(ROUTES.OVERVIEW, {
+                                  initiative_id: row.initiativeId,
+                                })
+                              );
                             }}
                             data-testid="initiative-btn-test"
                           >

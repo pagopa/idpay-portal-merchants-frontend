@@ -1,13 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
+import type { Middleware } from 'redux';
 import logger from 'redux-logger';
-import { appStateReducer } from '@pagopa/selfcare-common-frontend/redux/slices/appStateSlice';
-import { userReducer } from '@pagopa/selfcare-common-frontend/redux/slices/userSlice';
+import { appStateReducer } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
+import { userReducer } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
 import { LOG_REDUX_ACTIONS } from '../utils/constants';
 import { partiesReducer } from './slices/partiesSlice';
 import { permissionsReducer } from './slices/permissionsSlice';
 import { initiativesReducer } from './slices/initiativesSlice';
+import { initiativesApi } from './api/initiativesApi';
 
-const additionalMiddlewares = [LOG_REDUX_ACTIONS ? logger : undefined];
+const additionalMiddlewares: Array<Middleware> = LOG_REDUX_ACTIONS ? [logger] : [];
 
 export const createStore = () =>
   configureStore({
@@ -17,12 +19,12 @@ export const createStore = () =>
       parties: partiesReducer,
       permissions: permissionsReducer,
       initiatives: initiativesReducer,
+      [initiativesApi.reducerPath]: initiativesApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-      additionalMiddlewares.reduce(
-        (array, middleware) => (middleware ? array.concat(middleware) : array),
-        getDefaultMiddleware({ serializableCheck: false })
-      ),
+      getDefaultMiddleware({ serializableCheck: false })
+        .concat(initiativesApi.middleware)
+        .concat(...additionalMiddlewares.filter(Boolean)),
   });
 
 export const store = createStore();

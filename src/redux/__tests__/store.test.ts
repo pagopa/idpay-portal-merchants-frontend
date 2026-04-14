@@ -11,10 +11,10 @@ jest.mock('redux-logger', () => ({
   default: 'mocked-logger',
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/redux/slices/appStateSlice', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
   appStateReducer: jest.fn(),
 }));
-jest.mock('@pagopa/selfcare-common-frontend/redux/slices/userSlice', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice', () => ({
   userReducer: jest.fn(),
 }));
 jest.mock('../slices/partiesSlice', () => ({ partiesReducer: jest.fn() }));
@@ -40,6 +40,7 @@ describe('Redux Store Configuration', () => {
       'parties',
       'permissions',
       'initiatives',
+      'initiativesApi',
     ]);
   });
 
@@ -64,7 +65,10 @@ describe('Redux Store Configuration', () => {
       const finalMiddlewares = middlewareCallback(getDefaultMiddleware);
 
       expect(finalMiddlewares).not.toContain(logger);
-      expect(finalMiddlewares).toEqual(['default-middleware']);
+      expect(finalMiddlewares).toEqual(
+        expect.arrayContaining(['default-middleware'])
+      );
+      expect(finalMiddlewares.length).toBe(2);
     });
 
     it('dovrebbe aggiungere il logger ai middleware di default se LOG_REDUX_ACTIONS è true', () => {
@@ -83,7 +87,10 @@ describe('Redux Store Configuration', () => {
       const finalMiddlewares = middlewareCallback(getDefaultMiddleware);
 
       expect(finalMiddlewares).toContain(logger);
-      expect(finalMiddlewares).toEqual(['default-middleware', 'mocked-logger']);
+      expect(finalMiddlewares).toEqual(
+        expect.arrayContaining(['default-middleware', 'mocked-logger'])
+      );
+      expect(finalMiddlewares.length).toBe(3);
     });
   });
 });

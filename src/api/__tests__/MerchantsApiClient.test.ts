@@ -1,13 +1,13 @@
-import { extractResponse } from '@pagopa/selfcare-common-frontend/utils/api-utils';
+import { extractResponse } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
 import { createClient } from '../generated/merchants/client';
 import { store } from '../../redux/store';
-import { appStateActions } from '@pagopa/selfcare-common-frontend/redux/slices/appStateSlice';
+import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: { read: jest.fn().mockReturnValue('mocked-token') },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/redux/slices/appStateSlice', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice', () => ({
   appStateActions: { addError: jest.fn((e) => e) },
 }));
 
@@ -15,7 +15,7 @@ jest.mock('../../redux/store', () => ({
   store: { dispatch: jest.fn() },
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/api-utils', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/api-utils', () => ({
   buildFetchApi: jest.fn(),
   extractResponse: jest.fn(),
 }));
@@ -55,6 +55,7 @@ describe('MerchantApi', () => {
       getReportedUser: jest.fn(),
       deleteReportedUser: jest.fn(),
       getRewardBatches: jest.fn(),
+      getRewardBatchById: jest.fn(),
       sendRewardBatches: jest.fn(),
       postponeTransaction: jest.fn(),
       approveDownloadRewardBatch: jest.fn(),
@@ -500,21 +501,9 @@ describe('MerchantApi', () => {
 
     mockApiClient.getRewardBatches.mockRejectedValue(error);
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const consoleGroupSpy = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
-    const consoleGroupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
-
     const MerchantApi = loadApi();
 
-    await expect(
-      MerchantApi.getRewardBatches('init1')
-    ).rejects.toThrow('Boom');
-
-    expect(consoleGroupSpy).toHaveBeenCalled();
-
-    consoleErrorSpy.mockRestore();
-    consoleGroupSpy.mockRestore();
-    consoleGroupEndSpy.mockRestore();
+    await expect(MerchantApi.getRewardBatches('init1', 0, 10)).rejects.toThrow('Boom');
   });
 
   it('sendRewardBatches - success', async () => {
@@ -848,4 +837,17 @@ describe('MerchantApi', () => {
       expect(result).toBe('extracted');
     });
   });
+
+  describe("getRewardBatchById", () => {
+    it("should get batch by id", async () => {
+    mockApiClient.getRewardBatchById.mockResolvedValue({ right: 'data' });
+    const MerchantApi = loadApi();
+
+    const result = await MerchantApi.getRewardBatchById('init-1', 'batch-2');
+
+    expect(mockApiClient.getRewardBatchById).toHaveBeenCalledWith({initiativeId: "init-1", rewardBatchId: "batch-2"});
+    expect(extractResponse).toHaveBeenCalledWith({ right: 'data' }, 200, expect.any(Function));
+    expect(result).toBe('extracted');
+    })
+  })
 });

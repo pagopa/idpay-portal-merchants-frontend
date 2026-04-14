@@ -4,7 +4,7 @@ import { createMemoryHistory } from 'history';
 import ReportedUsers from '../reportedUsers';
 import { getReportedUser, deleteReportedUser } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 
 jest.mock('../../../services/merchantService', () => ({
   __esModule: true,
@@ -17,7 +17,7 @@ jest.mock('../../../utils/jwt-utils', () => ({
   parseJwt: jest.fn(),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   __esModule: true,
   storageTokenOps: {
     read: jest.fn(),

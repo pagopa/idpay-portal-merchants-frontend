@@ -3,7 +3,7 @@
 import React from 'react';
 import { Container, Button, Stack, IconButton } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
-import { AccountDropdown } from '@pagopa/mui-italia/dist/components/AccountDropdown';
+import { AccountDropdown } from '@pagopa/mui-italia';
 
 /* Icons */
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';

@@ -3,7 +3,7 @@ import {
   LoadingOverlay,
   UnloadEventHandler,
   UserNotifyHandle,
-} from '@pagopa/selfcare-common-frontend';
+} from '@pagopa/selfcare-common-frontend/lib';
 import { matchPath, Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import withSelectedPartyProducts from './decorators/withSelectedPartyProducts';
@@ -27,7 +27,7 @@ import InsertReportedUser from './pages/reportedUsers/insertReportedUser';
 import { AlertProvider } from './contexts/AlertContext';
 import RefundRequests from './pages/refundRequests/RefundRequests';
 import ROUTES from './routes';
-import { useInitiativesList } from './hooks/useInitiativesList';
+import { useGetInitiativesQuery } from './redux/api/initiativesApi';
 import ShopDetails from './pages/refundRequests/detail/ShopDetails';
 import ModifyDocument from './pages/modifyDocument/ModifyDocument';
 import ExportReport from './pages/exportReport/ExportReport';
@@ -58,7 +58,8 @@ const SecuredRoutes = withLogin(
       );
     }, [location]);
 
-    useInitiativesList(match);
+    // Bridge mode: preserve existing route-driven behavior
+    useGetInitiativesQuery({ enabled: match !== null });
 
     return (
       <AlertProvider>

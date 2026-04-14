@@ -1,10 +1,9 @@
 import { ProductEntity } from '@pagopa/mui-italia';
-import { PartySwitchItem } from '@pagopa/mui-italia/dist/components/PartySwitch';
-import { Header as CommonHeader } from '@pagopa/selfcare-common-frontend';
+import { Header as CommonHeader } from '@pagopa/selfcare-common-frontend/lib';
 
-import { User } from '@pagopa/selfcare-common-frontend/model/User';
-import { trackEvent } from '@pagopa/selfcare-common-frontend/services/analyticsService';
-import { CONFIG } from '@pagopa/selfcare-common-frontend/config/env';
+import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
+import { trackEvent } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
+import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { WithPartiesProps } from '../../decorators/withParties';
@@ -13,6 +12,7 @@ import { useAppSelector } from '../../redux/hooks';
 import { partiesSelectors } from '../../redux/slices/partiesSlice';
 import { Party } from '../../model/Party';
 import { ENV } from '../../utils/env';
+import { browserConsole } from '../../utils/consoleLogger';
 
 type Props = WithPartiesProps & {
   withSecondHeader: boolean;
@@ -90,15 +90,19 @@ const Header = ({ withSecondHeader, onExit, loggedUser }: /* , parties */ Props)
       assistanceEmail={ENV.ASSISTANCE.EMAIL}
       enableLogin={true}
       onSelectedProduct={(p) =>
-        onExit(() => console.log(`TODO: perform token exchange to change Product and set ${p}`))
+        onExit(() =>
+          browserConsole.log(`TODO: perform token exchange to change Product and set ${p}`)
+        )
       }
-      onSelectedParty={(selectedParty: PartySwitchItem) => {
+      onSelectedParty={(selectedParty: any) => {
         if (selectedParty) {
           trackEvent('PARTY_SELECTION', {
             party_id: selectedParty.id,
           });
           onExit(() =>
-            console.log(`TODO: perform token exchange to change Party and set ${selectedParty}`)
+            browserConsole.log(
+              `TODO: perform token exchange to change Party and set ${selectedParty}`
+            )
           );
         }
       }}

@@ -1,7 +1,7 @@
 import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import { ReceiptLong } from '@mui/icons-material';
 import routes from '../../routes';
 import { currencyFormatter, formatValues } from '../../utils/formatUtils';
@@ -24,7 +24,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   const { storeId } = useStore();
   const history = useHistory();
 
-  const { id: merchantId } = useParams<{ id: string }>();
+  const { initiative_id: merchantId } = useParams<{ initiative_id: string }>();
   const [isLoading, setIsLoading] = useState(false);
 
   const editButton: DetailDrawerProps['buttons'] = useMemo(
@@ -36,7 +36,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
               onClick: () => {
-                const path = routes.MODIFY_DOCUMENT.replace(':id', merchantId)
+                const path = routes.MODIFY_DOCUMENT.replace(':initiative_id', merchantId)
                   .replace(':pointOfSaleId', storeId)
                   .replace(':trxId', itemValues.id)
                   .replace(':fileDocNumber', window.btoa(itemValues?.invoiceFile?.docNumber ?? ''));
@@ -53,17 +53,17 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
     () =>
       isReversableOrEditable(itemValues)
         ? [
-          {
-            title: 'Storna',
-            dataTestId: 'reverse-btn',
-            onClick: () => {
-              const path = routes.REVERSE.replace(':id', merchantId)
-                .replace(':pointOfSaleId', storeId)
-                .replace(':trxId', itemValues.id);
-              history.push(path, { fromLocation: history.location });
+            {
+              title: 'Storna',
+              dataTestId: 'reverse-btn',
+              onClick: () => {
+                const path = routes.REVERSE.replace(':initiative_id', merchantId)
+                  .replace(':pointOfSaleId', storeId)
+                  .replace(':trxId', itemValues.id);
+                history.push(path, { fromLocation: history.location });
+              },
             },
-          },
-        ]
+          ]
         : [],
     [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
   );
@@ -92,8 +92,14 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
         text: 'Non è stato possibile scaricare il file',
         isOpen: true,
         severity: 'error',
-        containerStyle: { height: 'fit-content', position: 'fixed', bottom: '20px', right: '20px', zIndex: '1300' },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' }
+        containerStyle: {
+          height: 'fit-content',
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          zIndex: '1300',
+        },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setIsLoading(false);
     }
@@ -115,7 +121,11 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   }
 
   return (
-    <DetailDrawer {...rest} data-testid="transaction-detail" buttons={[...editButton, ...reverseButton]}>
+    <DetailDrawer
+      {...rest}
+      data-testid="transaction-detail"
+      buttons={[...editButton, ...reverseButton]}
+    >
       {listItem.map((item, index) => (
         <Box
           key={`${item?.id}-${index}`}
@@ -155,7 +165,11 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
             >
               {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
             </Typography>
-            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={{ overflowWrap: 'break-word' }}>
+            <Typography
+              variant="body2"
+              fontWeight={theme.typography.fontWeightMedium}
+              sx={{ overflowWrap: 'break-word' }}
+            >
               {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>

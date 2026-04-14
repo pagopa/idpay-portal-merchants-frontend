@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useParams } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
@@ -13,8 +13,8 @@ jest.mock('react-i18next', () => ({
   withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
     <Component {...props} />,
 }));
-jest.mock('@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher');
-jest.mock('@pagopa/selfcare-common-frontend/utils/storage', () => ({
+jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: { read: jest.fn() },
 }));
 jest.mock('../../../services/merchantService', () => ({
@@ -248,7 +248,10 @@ const optionsAutocomplete = [
 describe('InitiativeStoresUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useParams as jest.Mock).mockReturnValue({ id: 'test-initiative' });
+
+    jest.spyOn(window, 'open').mockImplementation(() => null as any);
+
+    (useParams as jest.Mock).mockReturnValue({ initiative_id: 'test-initiative' });
     (useHistory as jest.Mock).mockReturnValue({ push: pushMock });
     mockUsePlacesAutocomplete.mockReturnValue({
       options: optionsAutocomplete,
@@ -256,6 +259,10 @@ describe('InitiativeStoresUpload', () => {
       error: false,
       search: jest.fn(),
     });
+  });
+
+  afterEach(() => {
+    (window.open as jest.Mock | undefined)?.mockRestore?.();
   });
 
   it('renders correctly with Manual upload by default', () => {
@@ -274,6 +281,7 @@ describe('InitiativeStoresUpload', () => {
   it('Click to open manual link', () => {
     render(<InitiativeStoresUpload />);
     fireEvent.click(screen.getByText('pages.initiativeStores.manualLink'));
+    expect(window.open).toHaveBeenCalled();
   });
 
   it('sets salesPoints when form changes', () => {
@@ -386,7 +394,7 @@ describe('InitiativeStoresUpload', () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue();
+    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(undefined);
 
     const rendered = await render(<InitiativeStoresUpload />);
     await fillFormForSuccess(screen);
@@ -415,8 +423,4 @@ const fillFormForSuccess = async (screen: any) => {
 
   const addressAutocompleteItem = await screen.findAllByRole('option');
   fireEvent.click(addressAutocompleteItem[3]);
-  // const addressFieldFilled = screen.getAllByRole('combobox')[0];
 };
-function t(arg0: string): import('@testing-library/dom').Matcher {
-  throw new Error('Function not implemented.');
-}

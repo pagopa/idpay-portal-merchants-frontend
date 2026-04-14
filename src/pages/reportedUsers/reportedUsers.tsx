@@ -3,9 +3,9 @@ import { useFormik } from 'formik';
 import { Box, Stack, Button } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
 import ReportIcon from '@mui/icons-material/Report';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import DataTable from '../../components/dataTable/DataTable';
 import { GetReportedUsersFilters } from '../../types/types';
 import routes from '../../routes';
@@ -13,13 +13,14 @@ import { getReportedUser, deleteReportedUser } from '../../services/merchantServ
 import { parseJwt } from '../../utils/jwt-utils';
 import AlertListComponent, { AlertProps } from '../../components/Alert/AlertListComponent';
 import { useAlert } from '../../hooks/useAlert';
+import { browserConsole } from '../../utils/consoleLogger';
 import { isValidCF, normalizeValue } from './helpersReportedUsers';
 import SearchTaxCode from './SearchTaxCode';
 import NoResultPaper from './NoResultPaper';
 import { getReportedUsersColumns } from './columnsReportedUser';
 import ModalReportedUser from './modalReportedUser';
 interface RouteParams {
-  id: string;
+  initiative_id: string;
 }
 
 const initialValues: GetReportedUsersFilters = {
@@ -66,7 +67,7 @@ const ReportedUsers: React.FC = () => {
   const [selectedCf, setSelectedCf] = useState<string | null>(null);
   const history = useHistory();
 
-  const { id } = useParams<RouteParams>();
+  const { initiative_id } = useParams<RouteParams>();
 
   const userJwt = parseJwt(storageTokenOps.read());
   const merchantId = userJwt?.merchant_id;
@@ -105,7 +106,7 @@ const ReportedUsers: React.FC = () => {
       if (values.cf && isValidCF(values.cf)) {
         setLoading(true);
         try {
-          const res = await getReportedUser(id, values.cf);
+          const res = await getReportedUser(initiative_id, values.cf);
           if (!Array.isArray(res) || res.length === 0) {
             setUser([]);
             updateAlerts('missing', true);
@@ -122,7 +123,7 @@ const ReportedUsers: React.FC = () => {
           }
         } catch (e: any) {
           if (e?.status === 404 || e?.response?.status === 404) {
-            console.error('Reported user not found (404):', e);
+            browserConsole.error('Reported user not found (404):', e);
           } else {
             setUser([]);
             setError('Errore durante il recupero dell’utente segnalato');
@@ -132,7 +133,7 @@ const ReportedUsers: React.FC = () => {
               isOpen: true,
               severity: 'error',
             });
-            console.error('Error while fetching reported user:', e);
+            browserConsole.error('Error while fetching reported user:', e);
           }
         } finally {
           setLoading(false);
@@ -144,16 +145,16 @@ const ReportedUsers: React.FC = () => {
   });
 
   const handleDelete = async (cf: string) => {
-    if (!merchantId || !id || !cf) {
+    if (!merchantId || !initiative_id || !cf) {
       return;
     }
     try {
-      await deleteReportedUser(id, cf);
+      await deleteReportedUser(initiative_id, cf);
       setUser([]);
       updateAlerts('removed', true);
       setTimeout(() => updateAlerts('removed', false), 3000);
     } catch (e) {
-      console.error('Error while deleting reported user:', e);
+      browserConsole.error('Error while deleting reported user:', e);
     }
   };
 
@@ -200,9 +201,9 @@ const ReportedUsers: React.FC = () => {
             variant="contained"
             size="small"
             onClick={() => {
-              history.push(routes.REPORTED_USERS_INSERT.replace(':id', id), {
+              history.push(routes.REPORTED_USERS_INSERT.replace(':initiative_id', initiative_id), {
                 merchantId,
-                initiativeID: id,
+                initiativeID: initiative_id,
               });
             }}
             startIcon={<ReportIcon />}

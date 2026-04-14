@@ -1,10 +1,11 @@
-import { Box, Button, Grid, Typography, TextField } from '@mui/material';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { Box, Button, Typography, TextField } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, Prompt } from 'react-router-dom';
-import { theme } from '@pagopa/mui-italia/dist/theme/theme';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { theme } from '@pagopa/mui-italia/theme';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Edit } from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';
 import { ButtonNaked } from '@pagopa/mui-italia';
@@ -22,13 +23,14 @@ import { isValidEmail, handlePromptMessage } from '../../helpers';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { POS_TYPE } from '../../utils/constants';
+import { browserConsole } from '../../utils/consoleLogger';
 import ROUTES from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
 interface RouteParams {
-  id: string;
+  initiative_id: string;
   store_id: string;
 }
 
@@ -53,7 +55,7 @@ const InitiativeStoreDetail = () => {
     contactNameModal?: string;
   }>({});
   const { t } = useTranslation();
-  const { id, store_id } = useParams<RouteParams>();
+  const { initiative_id, store_id } = useParams<RouteParams>();
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { setStoreId } = useStore();
 
@@ -61,7 +63,7 @@ const InitiativeStoreDetail = () => {
     void fetchStoreDetail();
     void fetchStoreTransactions();
     setStoreId(store_id);
-  }, [id, store_id]);
+  }, [initiative_id, store_id]);
 
   useEffect(() => {
     if (storeDetail) {
@@ -93,7 +95,7 @@ const InitiativeStoreDetail = () => {
   const fetchStoreTransactions = async (filters?: any) => {
     setDataTableIsLoading(true);
     try {
-      const response = await getMerchantPointOfSaleTransactionsProcessed(id, store_id, {
+      const response = await getMerchantPointOfSaleTransactionsProcessed(initiative_id, store_id, {
         size: 10,
         ...filters,
       });
@@ -109,7 +111,7 @@ const InitiativeStoreDetail = () => {
         setStoreTransactions([...responseWIthFormattedDate]);
       }
     } catch (error: any) {
-      console.log(error, 'error');
+      browserConsole.error(error, 'error');
       setAlert({
         title: t('errors.genericTitle'),
         text: t('errors.genericDescription'),
@@ -161,7 +163,7 @@ const InitiativeStoreDetail = () => {
   };
 
   const handleFiltersReset = () => {
-    console.log('Callback dopo reset filtri');
+    browserConsole.log('Callback dopo reset filtri');
     setTransactionsFilters({});
     void fetchStoreTransactions({});
   };

@@ -1,7 +1,7 @@
 import { Box, Step, StepLabel, Stepper } from '@mui/material';
 import { matchPath } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useState } from 'react';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
@@ -12,7 +12,7 @@ import TotalAmount from './TotalAmount';
 import DiscountCode from './DiscountCode';
 
 interface MatchParams {
-  id: string;
+  initiative_id: string;
 }
 
 const AcceptNewDiscount = () => {
@@ -22,7 +22,7 @@ const AcceptNewDiscount = () => {
     exact: true,
     strict: false,
   });
-  const { id } = (match?.params as MatchParams) || {};
+  const { initiative_id } = (match?.params as MatchParams) || {};
   const selectedInitiative = useAppSelector(initiativeSelector);
   const [activeStep, setActiveStep] = useState(0);
   const [amount, setAmount] = useState<number | undefined>();
@@ -38,7 +38,7 @@ const AcceptNewDiscount = () => {
       case 0:
         return (
           <TotalAmount
-            id={id}
+            id={initiative_id}
             amount={amount}
             setAmount={setAmount}
             steps={steps.length}
@@ -49,7 +49,7 @@ const AcceptNewDiscount = () => {
       case 1:
         return (
           <DiscountCode
-            id={id}
+            id={initiative_id}
             amount={amount}
             code={code}
             setCode={setCode}
@@ -70,7 +70,7 @@ const AcceptNewDiscount = () => {
         mt: 3,
         minWidth: 920,
         maxWidth: '75%',
-        justifySelf: 'center'
+        justifySelf: 'center',
       }}
     >
       <BreadcrumbsBox

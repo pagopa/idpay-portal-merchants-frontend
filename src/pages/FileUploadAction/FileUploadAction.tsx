@@ -1,7 +1,8 @@
-import { Box, Typography, Link, Stack, Button, Alert, TextField } from '@mui/material';
+import { Box, Typography, Link, Stack, Button, TextField } from '@mui/material';
+import { Alert as MuiAlert } from '@mui/material';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { SingleFileInput, theme } from '@pagopa/mui-italia';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
@@ -182,7 +183,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         });
         history.goBack();
       } catch (error: unknown) {
-        // console.error('Unexpected API Error:', error);
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),
@@ -283,19 +283,25 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
           {fileSizeError && (
             <Box mt={2}>
-              <Alert severity="error">{scopedT('errors.fileSizeError')}</Alert>
+              <MuiAlert severity="error">
+                <Typography variant="body2">{scopedT('errors.fileSizeError')}</Typography>
+              </MuiAlert>
             </Box>
           )}
 
           {fileTypeError && (
             <Box mt={2}>
-              <Alert severity="error">{scopedT('errors.fileNotSupported')}</Alert>
+              <MuiAlert severity="error">
+                <Typography variant="body2">{scopedT('errors.fileNotSupported')}</Typography>
+              </MuiAlert>
             </Box>
           )}
 
           {requiredFileError && (
             <Box mt={2}>
-              <Alert severity="error">{scopedT('errors.requiredFileError')}</Alert>
+              <MuiAlert severity="error">
+                <Typography variant="body2">{scopedT('errors.requiredFileError')}</Typography>
+              </MuiAlert>
             </Box>
           )}
 

@@ -1,13 +1,14 @@
 import {
   trackAppError,
   trackEvent,
-} from '@pagopa/selfcare-common-frontend/services/analyticsService';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+} from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
+import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useEffect } from 'react';
 import { userFromJwtTokenAsJWTUser } from '../../hooks/useLogin';
 import { IDPayUser } from '../../model/IDPayUser';
 import ROUTES from '../../routes';
 import { ENV } from '../../utils/env';
+import { browserConsole } from '../../utils/consoleLogger';
 
 export const readUserFromToken = (token: string) => {
   const user: IDPayUser = userFromJwtTokenAsJWTUser(token);
@@ -57,7 +58,7 @@ const Auth = () => {
           }
         })
         .catch((error) => {
-          console.error(error);
+          browserConsole.error(error);
           window.location.assign(ENV.URL_FE.LOGIN);
         });
     } else {

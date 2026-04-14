@@ -1,6 +1,7 @@
-import { Box, Grid, Link, Tooltip, Typography } from '@mui/material';
+import { Box, Link, Tooltip, Typography } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import { FC } from 'react';
-import { theme } from "@pagopa/mui-italia/dist/theme/theme.js";
+import { theme } from '@pagopa/mui-italia/theme';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 
 

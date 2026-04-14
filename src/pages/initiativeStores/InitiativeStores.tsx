@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { theme } from '@pagopa/mui-italia';
+import { theme } from '@pagopa/mui-italia/theme';
 import {
   Box,
   Button,
   Stack,
-  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -16,14 +15,15 @@ import {
   Tooltip,
   IconButton,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslation } from 'react-i18next';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import StoreIcon from '@mui/icons-material/Store';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/utils/storage';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
@@ -34,6 +34,7 @@ import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
+import { browserConsole } from '../../utils/consoleLogger';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -45,7 +46,7 @@ const initialValues: GetPointOfSalesFilters = {
   sort: 'asc',
 };
 interface RouteParams {
-  id: string;
+  initiative_id: string;
 }
 
 const InitiativeStores: React.FC = () => {
@@ -65,7 +66,7 @@ const InitiativeStores: React.FC = () => {
   const isGoingToDetail = useRef(false);
   const { t } = useTranslation();
   const history = useHistory();
-  const { id } = useParams<RouteParams>();
+  const { initiative_id } = useParams<RouteParams>();
 
   const location = useLocation<{ showSuccessAlert?: boolean }>();
   useEffect(() => {
@@ -88,7 +89,7 @@ const InitiativeStores: React.FC = () => {
     if (
       storedPagination &&
       JSON.parse(storedPagination)?.pageNo !== undefined &&
-      JSON.parse(storedPagination)?.initiativeId === id
+      JSON.parse(storedPagination)?.initiativeId === initiative_id
     ) {
       const parsed = JSON.parse(storedPagination);
       setStoresPagination(parsed);
@@ -258,7 +259,7 @@ const InitiativeStores: React.FC = () => {
   const formik = useFormik<GetPointOfSalesFilters>({
     initialValues,
     onSubmit: (values) => {
-      console.log('Eseguo ricerca con filtri:', values);
+      browserConsole.log('Eseguo ricerca con filtri:', values);
     },
   });
 
@@ -271,25 +272,25 @@ const InitiativeStores: React.FC = () => {
     setAppliedFilters(values);
     setFiltersAppliedOnce(true);
     fetchStores(filtersWithSort).catch((error) => {
-      console.error('Error fetching stores:', error);
+      browserConsole.error('Error fetching stores:', error);
     });
   };
 
   const handleFiltersReset = () => {
-    console.log('Callback dopo reset filtri');
+    browserConsole.log('Callback dopo reset filtri');
     setFiltersAppliedOnce(false);
     setAppliedFilters(initialValues);
     void fetchStores(initialValues);
   };
 
   const goToAddStorePage = () => {
-    history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`);
+    history.push(`${BASE_ROUTE}/${initiative_id}/punti-vendita/censisci/`);
   };
 
   const goToStoreDetail = (store: PointOfSaleDTO) => {
     // eslint-disable-next-line functional/immutable-data
     isGoingToDetail.current = true;
-    history.push(`${BASE_ROUTE}/${id}/punti-vendita/${store.id}/`);
+    history.push(`${BASE_ROUTE}/${initiative_id}/punti-vendita/${store.id}/`);
   };
 
   const filtersSetted = () =>
@@ -306,7 +307,7 @@ const InitiativeStores: React.FC = () => {
       setSortModel(newSortModel);
 
       // Update sessionStorage with new sort
-      const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId: id };
+      const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId: initiative_id };
       setStoresPagination(updatedPagination);
       sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
 
@@ -319,7 +320,7 @@ const InitiativeStores: React.FC = () => {
         true
       );
     } else {
-      console.log('Ordinamento rimosso.');
+      browserConsole.log('Ordinamento rimosso.');
       setCurrentSort('asc');
       setSortModel([]);
     }
@@ -329,7 +330,7 @@ const InitiativeStores: React.FC = () => {
     const updatedPagination = {
       ...storesPagination,
       pageNo: page,
-      initiativeId: id,
+      initiativeId: initiative_id,
       sort: currentSort,
     };
     setStoresPagination(updatedPagination);

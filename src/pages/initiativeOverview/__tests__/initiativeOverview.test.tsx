@@ -4,7 +4,7 @@ import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import InitiativeOverview from '../initiativeOverview';
 import * as merchantService from '../../../services/merchantService';
-import * as errorUtils from '@pagopa/selfcare-common-frontend/hooks/useErrorDispatcher';
+import * as errorUtils from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import * as helperFunctions from '../../../helpers';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../../../api/generated/merchants/MerchantStatisticsDTO';
@@ -21,7 +21,7 @@ jest.mock('../../../services/merchantService');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ id: 'initiative-123' }),
+  useParams: () => ({ initiative_id: 'initiative-123' }),
 }));
 
 const mockHistory = createMemoryHistory();
@@ -48,7 +48,6 @@ const mockMerchantStatistics: MerchantStatisticsDTO = {
 };
 
 describe('InitiativeOverview', () => {
-
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(helperFunctions, 'formatDate');

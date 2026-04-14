@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { TitleBox } from '@pagopa/selfcare-common-frontend';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { matchPath } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
@@ -13,7 +13,7 @@ import CreateForm from './CreateForm';
 import DiscountCreatedRecap from './DiscountCreatedRecap';
 
 interface MatchParams {
-  id: string;
+  initiative_id: string;
 }
 
 const NewDiscount = () => {
@@ -27,10 +27,18 @@ const NewDiscount = () => {
     exact: true,
     strict: false,
   });
-  const { id } = (match?.params as MatchParams) || {};
+  const { initiative_id } = (match?.params as MatchParams) || {};
 
   return (
-    <Box sx={{ ...genericContainerStyle, mt: 3, alignItems: 'start', maxWidth: '75%', justifySelf: 'center' }}>
+    <Box
+      sx={{
+        ...genericContainerStyle,
+        mt: 3,
+        alignItems: 'start',
+        maxWidth: '75%',
+        justifySelf: 'center',
+      }}
+    >
       <BreadcrumbsBox
         backLabel={t('commons.backBtn')}
         items={[
@@ -60,7 +68,7 @@ const NewDiscount = () => {
 
       {!discountCreated ? (
         <CreateForm
-          id={id}
+          id={initiative_id}
           setDiscountCreated={setDiscountCreated}
           setDiscountResponse={setDiscountResponse}
         />
