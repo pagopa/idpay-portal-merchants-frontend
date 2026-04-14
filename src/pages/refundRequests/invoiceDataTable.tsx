@@ -15,10 +15,10 @@ import { useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
 import {
-  downloadInvoiceFile,
   getMerchantTransactionsProcessed,
   GetMerchantTransactionsProcessedParams,
 } from '../../services/merchantService';
+import { getMerchantsApi } from '../../api/MerchantsApiClient';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
@@ -97,8 +97,8 @@ const InvoiceDataTable = ({
     try {
       setIsDownloading(true);
 
-      const response = await downloadInvoiceFile(
-        selectedTransaction?.id,
+      const response = await getMerchantsApi().downloadInvoiceFile(
+        selectedTransaction?.trxId,
         selectedTransaction?.pointOfSaleId
       );
       const invoiceUrl = response.invoiceUrl;
@@ -309,7 +309,7 @@ const InvoiceDataTable = ({
 
   const tableRows = transactions.map((row: any) => ({
     ...row,
-    id: row.trxId,
+    id: row.id ?? row.trxId,
     invoiceFilename: row.invoiceData?.filename || '',
   }));
 

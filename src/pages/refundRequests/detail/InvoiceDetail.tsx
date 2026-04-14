@@ -5,7 +5,8 @@ import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import routes from '../../../routes';
-import { downloadInvoiceFile, postponeTransaction } from '../../../services/merchantService';
+import { postponeTransaction } from '../../../services/merchantService';
+import { getMerchantsApi } from '../../../api/MerchantsApiClient';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { formatValues, currencyFormatter, getEndOfNextMonth } from '../../../utils/formatUtils';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
@@ -169,8 +170,8 @@ export default function InvoiceDetail({
   const handleDownloadFile = async (selectedTransaction: any) => {
     setLoading(true);
     try {
-      const response = await downloadInvoiceFile(
-        selectedTransaction?.id,
+      const response = await getMerchantsApi().downloadInvoiceFile(
+        selectedTransaction?.trxId,
         selectedTransaction?.pointOfSaleId
       );
       const invoiceUrl = response.invoiceUrl;

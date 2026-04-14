@@ -165,7 +165,7 @@ class MerchantsApiClient {
     size?: number
   ): Promise<ReportListDTO> {
     return this.request<ReportListDTO>({
-      path: `/initiatives/${initiativeId}/reports`,
+      path: `/initiative/${initiativeId}/reports`,
       method: "GET",
       format: "json",
       query: { page, size },
@@ -177,7 +177,7 @@ class MerchantsApiClient {
     body: ReportRequest
   ): Promise<void> {
     return this.request<void>({
-      path: `/initiatives/${initiativeId}/reports`,
+      path: `/initiative/${initiativeId}/reports`,
       method: "POST",
       format: "json",
       body,
@@ -189,7 +189,7 @@ class MerchantsApiClient {
     reportId: string
   ): Promise<{ reportUrl: string }> {
     return this.request<{ reportUrl: string }>({
-      path: `/initiatives/${initiativeId}/reports/${reportId}/download`,
+      path: `/initiative/${initiativeId}/reports/${reportId}/download`,
       method: "GET",
       format: "json",
     });
