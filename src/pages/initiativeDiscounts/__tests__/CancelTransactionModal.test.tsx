@@ -1,8 +1,12 @@
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { StatusEnum as TransactionStatusEnum } from '../../../api/generated/merchants/MerchantTransactionDTO';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import CancelTransactionModal from '../CancelTransactionModal';
+
+const TransactionStatusEnum = {
+  IDENTIFIED: 'IDENTIFIED',
+  AUTHORIZED: 'AUTHORIZED',
+} as const;
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});

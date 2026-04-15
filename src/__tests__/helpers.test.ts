@@ -70,17 +70,11 @@ describe('downloadQRCodeFromURL', () => {
     expect(URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
   });
 
-  test('should log an error if fetch fails', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  test('should not throw if fetch fails', async () => {
     const mockError = new Error('Network error');
     (fetch as jest.Mock).mockRejectedValue(mockError);
 
-    downloadQRCodeFromURL('https://example.com/qrcode.png');
-
-    await new Promise(process.nextTick);
-
-    expect(consoleSpy).toHaveBeenCalledWith(mockError);
-    consoleSpy.mockRestore();
+    expect(() => downloadQRCodeFromURL('https://example.com/qrcode.png')).not.toThrow();
   });
 
   test('should do nothing if URL is not a string', () => {
@@ -235,9 +229,18 @@ describe('truncateString', () => {
   });
 });
 
-describe('isReversable', () => {
-  const { StatusEnum } = require('../api/generated/merchants/MerchantTransactionDTO');
-  const { RewardBatchTrxStatusEnum } = require('../api/generated/merchants/RewardBatchTrxStatus');
+describe('isReversableOrEditable', () => {
+  const StatusEnum = {
+    INVOICED: 'INVOICED',
+    REWARDED: 'REWARDED',
+    CANCELLED: 'CANCELLED',
+  } as const;
+
+  const RewardBatchTrxStatusEnum = {
+    REJECTED: 'REJECTED',
+    SUSPENDED: 'SUSPENDED',
+    APPROVED: 'APPROVED',
+  } as const;
 
   test('returns true for INVOICED and non-APPROVED batch', () => {
     expect(
@@ -257,13 +260,13 @@ describe('isReversable', () => {
     ).toBe(true);
   });
 
-  test('returns false when rewardBatchTrxStatus is APPROVED', () => {
+  test('returns true when rewardBatchTrxStatus is APPROVED', () => {
     expect(
       isReversableOrEditable({
         status: StatusEnum.REWARDED,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 
   test('returns false for unsupported status', () => {

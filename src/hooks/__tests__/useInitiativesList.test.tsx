@@ -4,8 +4,21 @@ import { useInitiativesList } from '../useInitiativesList';
 import { getMerchantInitiativeList } from '../../services/merchantService';
 import { useAppDispatch } from '../../redux/hooks';
 import { setInitiativesList } from '../../redux/slices/initiativesSlice';
-import { InitiativeDTO, StatusEnum } from '../../api/generated/merchants/InitiativeDTO';
 import { match } from 'react-router-dom';
+
+type InitiativeDTO = {
+  initiativeId: string;
+  initiativeName: string;
+  status: StatusEnum;
+};
+
+const StatusEnum = {
+  PUBLISHED: 'PUBLISHED',
+  CLOSED: 'CLOSED',
+  DRAFT: 'DRAFT',
+} as const;
+
+type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
 import { useTranslation } from 'react-i18next';
 
 jest.mock('../../services/merchantService', () => ({

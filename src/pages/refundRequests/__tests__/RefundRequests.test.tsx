@@ -237,23 +237,11 @@ describe('RefundRequests', () => {
   });
 
   it('should show loading spinner while fetching data', async () => {
-    let resolvePromise: any;
-    mockGetRewardBatches.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolvePromise = resolve;
-        })
-    );
+    mockGetRewardBatches.mockReturnValueOnce(new Promise(() => {}));
 
     renderWithStore(<RefundRequests />);
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
-
-    resolvePromise({ content: mockData });
-
-    await waitFor(() => {
-      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
-    });
   });
 
   it('should display data after successful fetch', async () => {

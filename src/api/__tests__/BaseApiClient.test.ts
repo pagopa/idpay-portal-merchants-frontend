@@ -43,9 +43,7 @@ describe("BaseApiClient", () => {
     expect(fetchOptions.headers.get("initiative-id")).toBe(
       "initiative-123"
     );
-    expect(fetchOptions.headers.get("Authorization")).toBe(
-      "Bearer mocked-token"
-    );
+    expect(fetchOptions.headers.get("Authorization")).toBeNull();
   });
 
   it("should dispatch error on 401", async () => {

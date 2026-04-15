@@ -4,10 +4,17 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import ActionMenu from '../actionMenu';
-import {
-  MerchantTransactionDTO,
-  StatusEnum as TransactionStatusEnum,
-} from '../../../api/generated/merchants/MerchantTransactionDTO';
+
+type MerchantTransactionDTO = {
+  trxId: string;
+  status: string;
+};
+
+const TransactionStatusEnum = {
+  CREATED: 'CREATED',
+  IDENTIFIED: 'IDENTIFIED',
+  REJECTED: 'REJECTED',
+} as const;
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({

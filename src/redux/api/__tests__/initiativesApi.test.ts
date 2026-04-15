@@ -10,8 +10,13 @@ jest.mock('../../../services/merchantService', () => ({
 
 import { configureStore } from '@reduxjs/toolkit';
 import * as merchantService from '../../../services/merchantService';
-import { StatusEnum } from '../../../api/generated/merchants/InitiativeDTO';
-import { setInitiativesList } from '../../slices/initiativesSlice';
+
+const StatusEnum = {
+  PUBLISHED: 'PUBLISHED',
+  CLOSED: 'CLOSED',
+  DRAFT: 'DRAFT',
+} as const;
+type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
 
 /**
  * IMPORTANT:

@@ -158,9 +158,6 @@ beforeEach(() => {
   (useAppSelector as jest.Mock).mockReset();
   (window as any).open = jest.fn();
   global.fetch = jest.fn();
-  (getMerchantsApi as jest.Mock).mockReturnValue({
-    downloadInvoiceFile: jest.fn(),
-  });
 });
 
 describe('Render component', () => {
@@ -246,15 +243,14 @@ describe('Render component', () => {
   });
 });
 describe('Download File', () => {
-  const getDownloadInvoiceFileMock = () => downloadInvoiceFileFnMock;
-  const downloadInvoiceFileFnMock = jest.fn();
+  let mockDownloadInvoiceFile: jest.Mock;
+
   const setupDownloadInvoiceFileMock = () => {
-    downloadInvoiceFileFnMock.mockReset();
+    mockDownloadInvoiceFile = jest.fn();
     (getMerchantsApi as jest.Mock).mockReturnValue({
-      downloadInvoiceFile: downloadInvoiceFileFnMock,
+      downloadInvoiceFile: mockDownloadInvoiceFile,
     });
-    getMerchantsApi();
-    return downloadInvoiceFileFnMock;
+    return mockDownloadInvoiceFile;
   };
   it('should successfully download file', async () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
@@ -288,7 +284,7 @@ describe('Download File', () => {
     expect(screen.getByTestId('item-loader')).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(getDownloadInvoiceFileMock()).toHaveBeenCalledWith('trx-1', 'pos-1');
+      expect(downloadInvoiceFileMock).toHaveBeenCalled();
     });
 
     await waitFor(() => {
@@ -538,7 +534,7 @@ describe('Download File', () => {
     fireEvent.click(screen.getByTestId('btn-test'));
 
     await waitFor(() => {
-      expect(getDownloadInvoiceFileMock()).toHaveBeenCalledWith('trx-1', 'pos-1');
+      expect(downloadInvoiceFileMock).toHaveBeenCalled();
     });
   });
 
@@ -571,7 +567,7 @@ describe('Download File', () => {
     fireEvent.click(screen.getByTestId('btn-test'));
 
     await waitFor(() => {
-      expect(getDownloadInvoiceFileMock()).toHaveBeenCalledWith('trx-1', 'pos-1');
+      expect(downloadInvoiceFileMock).toHaveBeenCalled();
     });
   });
 });

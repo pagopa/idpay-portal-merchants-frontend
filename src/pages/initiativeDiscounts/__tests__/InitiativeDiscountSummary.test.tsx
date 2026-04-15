@@ -1,9 +1,17 @@
 import React from 'react';
-import { MerchantApi } from '../../../api/MerchantsApiClient';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/MerchantDetailDTO';
 import { MerchantStatisticsDTO } from '../../../api/generated/merchants/MerchantStatisticsDTO';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import InitiativeDiscountSummary from '../InitiativeDiscountsSummary';
+
+jest.mock('../../../api/MerchantsApiClient', () => ({
+  MerchantApi: {
+    getMerchantDetail: jest.fn(),
+    getMerchantInitiativeStatistics: jest.fn(),
+  },
+}));
+
+import { MerchantApi } from '../../../api/MerchantsApiClient';
 
 jest.mock('../../../services/merchantService');
 
@@ -26,12 +34,13 @@ describe('Test suite for InitiativeDiscountSummary component', () => {
   });
 
   test('catch in case of error from api getMerchantDetail and getMerchantInitiativeStatistics', () => {
-    MerchantApi.getMerchantDetail = async (): Promise<MerchantDetailDTO> =>
-      Promise.reject('mocked error response for tests');
+    (MerchantApi.getMerchantDetail as jest.Mock).mockRejectedValueOnce(
+      'mocked error response for tests'
+    );
 
-    MerchantApi.getMerchantInitiativeStatistics = async (
-      _initiativeId: string
-    ): Promise<MerchantStatisticsDTO> => Promise.reject('mocked error response for tests');
+    (MerchantApi.getMerchantInitiativeStatistics as jest.Mock).mockRejectedValueOnce(
+      'mocked error response for tests'
+    );
 
     renderWithContext(<InitiativeDiscountSummary id={'initativeTestId321'} />);
   });
