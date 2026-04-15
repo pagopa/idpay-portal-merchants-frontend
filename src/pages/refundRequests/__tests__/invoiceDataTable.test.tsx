@@ -1,9 +1,6 @@
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import InvoiceDataTable from '../invoiceDataTable';
-import {
-  getMerchantTransactionsProcessed,
-  downloadInvoiceFile,
-} from '../../../services/merchantService';
+import { getMerchantTransactionsProcessed } from '../../../services/merchantService';
 import { useAlert } from '../../../hooks/useAlert';
 
 jest.mock('react-router-dom', () => ({
@@ -13,7 +10,14 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../../services/merchantService', () => ({
   getMerchantTransactionsProcessed: jest.fn(),
-  downloadInvoiceFile: jest.fn(),
+}));
+
+const mockDownloadInvoiceFile = jest.fn();
+
+jest.mock('../../../api/MerchantsApiClient', () => ({
+  getMerchantsApi: () => ({
+    downloadInvoiceFile: mockDownloadInvoiceFile,
+  }),
 }));
 
 jest.mock('../../../hooks/useAlert', () => ({
@@ -69,9 +73,11 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
         if (!col.renderCell || !firstRow) {
           return null;
         }
-        let value: any = (firstRow as any)[col.field];
-        if (col.field === 'trxChargeDate' && col.valueGetter) {
+        let value: any;
+        if (col.valueGetter) {
           value = col.valueGetter({ row: firstRow });
+        } else {
+          value = (firstRow as any)[col.field];
         }
         return (
           <div key={col.field} data-testid={`col-${col.field}`}>
@@ -112,9 +118,6 @@ jest.mock('../../../utils/formatUtils', () => ({
 
 const mockedGetTransactions = getMerchantTransactionsProcessed as jest.MockedFunction<
   typeof getMerchantTransactionsProcessed
->;
-const mockedDownloadInvoiceFile = downloadInvoiceFile as jest.MockedFunction<
-  typeof downloadInvoiceFile
 >;
 const mockedUseAlert = useAlert as jest.MockedFunction<typeof useAlert>;
 
@@ -275,7 +278,7 @@ describe('InvoiceDataTable', () => {
   it('downloads invoice file PDF and opens new window', async () => {
     const mockWindow = { document: { title: '' }, focus: jest.fn() };
     const openSpy = jest.spyOn(window, 'open').mockReturnValue(mockWindow as any);
-    mockedDownloadInvoiceFile.mockResolvedValueOnce({
+    mockDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
     render(<InvoiceDataTable />);
@@ -283,8 +286,8 @@ describe('InvoiceDataTable', () => {
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
     fireEvent.click(invoiceLink);
-    await waitFor(() => expect(mockedDownloadInvoiceFile).toHaveBeenCalledTimes(1));
-    expect(mockedDownloadInvoiceFile).toHaveBeenCalledWith('trx-1', 'POS-1');
+    await waitFor(() => expect(mockDownloadInvoiceFile).toHaveBeenCalledTimes(1));
+    expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('trx-1', 'POS-1');
     await waitFor(() => expect(openSpy).toHaveBeenCalled());
     openSpy.mockRestore();
   });
@@ -292,7 +295,7 @@ describe('InvoiceDataTable', () => {
   it('downloads invoice file XML and opens new window', async () => {
     const mockWindow = { document: { title: '' }, focus: jest.fn() };
     const openSpy = jest.spyOn(window, 'open').mockReturnValue(mockWindow as any);
-    mockedDownloadInvoiceFile.mockResolvedValueOnce({
+    mockDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.xml',
     } as any);
     const xmlTransaction = {
@@ -308,7 +311,7 @@ describe('InvoiceDataTable', () => {
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-002.xml');
     fireEvent.click(invoiceLink);
-    await waitFor(() => expect(mockedDownloadInvoiceFile).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockDownloadInvoiceFile).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(openSpy).toHaveBeenCalled());
     openSpy.mockRestore();
   });
@@ -317,7 +320,7 @@ describe('InvoiceDataTable', () => {
     (global as any).fetch = jest.fn().mockResolvedValue({
       ok: false,
     });
-    mockedDownloadInvoiceFile.mockResolvedValueOnce({
+    mockDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
     render(<InvoiceDataTable />);
@@ -340,7 +343,7 @@ describe('InvoiceDataTable', () => {
       ok: true,
       blob: jest.fn().mockResolvedValue(new Blob(['test'], { type: 'application/txt' })),
     });
-    mockedDownloadInvoiceFile.mockResolvedValueOnce({
+    mockDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.txt',
     } as any);
     const invalidTransaction = {
@@ -367,7 +370,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('handles download error when downloadInvoiceFile throws', async () => {
-    mockedDownloadInvoiceFile.mockRejectedValueOnce(new Error('download error'));
+    mockDownloadInvoiceFile.mockRejectedValueOnce(new Error('download error'));
     render(<InvoiceDataTable />);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
@@ -385,7 +388,7 @@ describe('InvoiceDataTable', () => {
 
   it('handles download with window.open returning null', async () => {
     jest.spyOn(window, 'open').mockReturnValue(null);
-    mockedDownloadInvoiceFile.mockResolvedValueOnce({
+    mockDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
     render(<InvoiceDataTable />);
@@ -393,7 +396,7 @@ describe('InvoiceDataTable', () => {
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
     fireEvent.click(invoiceLink);
-    await waitFor(() => expect(mockedDownloadInvoiceFile).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockDownloadInvoiceFile).toHaveBeenCalledTimes(1));
   });
 
   it('handles missing invoice filename', async () => {
@@ -501,7 +504,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('shows downloading overlay when isDownloading is true', async () => {
-    mockedDownloadInvoiceFile.mockResolvedValueOnce({
+    mockDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
 
@@ -512,7 +515,7 @@ describe('InvoiceDataTable', () => {
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
     fireEvent.click(invoiceLink);
 
-    await waitFor(() => expect(mockedDownloadInvoiceFile).toHaveBeenCalled());
+    await waitFor(() => expect(mockDownloadInvoiceFile).toHaveBeenCalled());
   });
 
   it('shows generic error when loadTransactions fails', async () => {

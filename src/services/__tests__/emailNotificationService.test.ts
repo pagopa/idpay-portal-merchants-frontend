@@ -1,19 +1,22 @@
-import { EmailNotificationApiNew } from '../../api/EmailNotificationApiClientNew';
+import { EmailNotificationApi } from '../../api/emailNotificationApiClient';
 import { getInstitutionProductUserInfo, sendEmail } from '../emailNotificationService';
 import {
   EmailMessageDTO,
   UserInstitutionInfoDTO,
 } from '../../api/generated/email-notification/data-contracts';
 
-jest.mock('../../api/EmailNotificationApiClientNew', () => ({
-  EmailNotificationApiNew: {
-    getInstitutionProductUserInfo: jest.fn(),
-    sendEmail: jest.fn(),
-  },
-}));
+jest.mock('../../api/emailNotificationApiClient', () => {
+  const { jest: jestGlobal } = require('@jest/globals');
+  return {
+    EmailNotificationApi: {
+      getInstitutionProductUserInfo: jestGlobal.fn(),
+      sendEmail: jestGlobal.fn(),
+    },
+  };
+});
 
 const mockedEmailNotificationApi =
-  EmailNotificationApiNew as jest.Mocked<typeof EmailNotificationApiNew>;
+  EmailNotificationApi as jest.Mocked<typeof EmailNotificationApi>;
 
 describe('emailNotificationService', () => {
   beforeEach(() => {

@@ -1,12 +1,37 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import ReportedUsers from '../reportedUsers';
 import { getReportedUser, deleteReportedUser } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
 import { ApiError } from '../../../api/ApiError';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+
+jest.mock('../../../decorators/withLogin', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withInitiativeGuard', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withParties', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withSelectedParty', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withSelectedPartyProducts', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
 
 jest.mock('../../../services/merchantService', () => ({
   __esModule: true,
@@ -55,6 +80,13 @@ jest.mock('react-i18next', () => ({
     Component.defaultProps = { ...(Component.defaultProps || {}), t: (k: string) => k };
     return Component;
   },
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  __esModule: true,
+  useCurrentInitiativeId: () => ({
+    initiativeId: '123',
+  }),
 }));
 
 jest.mock('../../../components/dataTable/DataTable', () => ({
@@ -171,7 +203,9 @@ describe('ReportedUsers Component', () => {
     }
     return render(
       <Router history={history}>
-        <ReportedUsers />
+        <Route path="/initiative/:initiative_id/reported-users">
+          <ReportedUsers />
+        </Route>
       </Router>
     );
   };
@@ -214,7 +248,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(searchButton);
 
       await waitFor(() => {
-        expect(mockGetReportedUser).toHaveBeenCalledWith(undefined, 'RSSMRA80A01H501U');
+        expect(mockGetReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
 
       await waitFor(() => {
@@ -394,7 +428,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(confirmButton);
 
       await waitFor(() => {
-        expect(mockDeleteReportedUser).not.toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
+        expect(mockDeleteReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
 
       await waitFor(() => {
@@ -475,7 +509,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(confirmButton);
 
       await waitFor(() => {
-        expect(mockDeleteReportedUser).not.toHaveBeenCalled();
+        expect(mockDeleteReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
     });
 
@@ -560,10 +594,10 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(reportButton);
 
       expect(history.location.pathname).toBe(
-        '/portale-esercenti/undefined/utenti-segnalati/segnalazione-utenti'
+        '/portale-esercenti/123/utenti-segnalati/segnalazione-utenti'
       );
       expect(history.location.state).toEqual({
-        initiativeID: undefined,
+        initiativeID: '123',
         merchantId: 'MERCHANT123',
       });
     });
@@ -585,7 +619,7 @@ describe('ReportedUsers Component', () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
       await waitFor(() => {
-        expect(mockGetReportedUser).toHaveBeenCalledWith(undefined, 'RSSMRA80A01H501U');
+        expect(mockGetReportedUser).not.toHaveBeenCalled();
       });
     });
 

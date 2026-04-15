@@ -698,7 +698,7 @@ describe('Column rendering logic', () => {
     });
 
     test('rimuove sessionStorage quando il componente viene smontato (non andando al dettaglio)', async () => {
-      const { unmount: customUnmount } = render(<InitiativeStores />);
+      renderWithContext(<InitiativeStores />);
 
       await waitFor(() => {
         expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
@@ -706,7 +706,9 @@ describe('Column rendering logic', () => {
 
       sessionStorage.setItem('storesPagination', JSON.stringify(mockPagination));
 
-      customUnmount();
+      // simulate unmount
+      const { cleanup } = require('@testing-library/react');
+      cleanup();
 
       expect(sessionStorage.getItem('storesPagination')).toBeNull();
     });

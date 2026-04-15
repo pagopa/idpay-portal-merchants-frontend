@@ -2,13 +2,16 @@ import { jest, describe, test, expect, beforeEach } from '@jest/globals';
 import { RolePermissionApi } from '../../api/rolePermissionApiClient';
 import { getUserPermission, getPortalConsent, savePortalConsent } from '../rolePermissionService';
 
-jest.mock('../../api/rolePermissionApiClient', () => ({
-  RolePermissionApi: {
-    userPermission: jest.fn(),
-    getPortalConsent: jest.fn(),
-    savePortalConsent: jest.fn(),
-  },
-}));
+jest.mock('../../api/rolePermissionApiClient', () => {
+  const { jest: jestGlobal } = require('@jest/globals');
+  return {
+    RolePermissionApi: {
+      userPermission: jestGlobal.fn(),
+      getPortalConsent: jestGlobal.fn(),
+      savePortalConsent: jestGlobal.fn(),
+    },
+  };
+});
 
 const mockedRolePermissionApi =
   RolePermissionApi as any;
