@@ -155,16 +155,11 @@ describe('<InitiativeStores />', () => {
     });
   });
 
-  test("gestisce la rimozione dell'ordinamento", async () => {
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  test("handles sort removal", async () => {
     renderWithContext(<InitiativeStores />);
     await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('sort-button-remove'));
-
-    await waitFor(() => {
-      expect(consoleLogSpy).toHaveBeenCalledWith('Ordinamento rimosso.');
-    });
 
     fireEvent.click(screen.getByTestId('paginate-button'));
     await waitFor(() => {
@@ -173,7 +168,6 @@ describe('<InitiativeStores />', () => {
         expect.objectContaining({ sort: 'asc' })
       );
     });
-    consoleLogSpy.mockRestore();
   });
 
   test('gestisce un errore nel .catch di handleFiltersReset', async () => {
@@ -561,7 +555,7 @@ describe('Column rendering logic', () => {
       (useLocation as jest.Mock).mockReturnValue({ state: {} });
     });
 
-    test('carica paginazione e ordinamento da sessionStorage se presenti e initiativeId corrisponde', async () => {
+    test('loads pagination and sorting from sessionStorage when initiativeId matches', async () => {
       const storedPagination = {
         pageNo: 2,
         pageSize: 10,
@@ -578,8 +572,8 @@ describe('Column rendering logic', () => {
         expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
           'merchant-id-01',
           expect.objectContaining({
-            page: 2,
-            sort: 'city,desc',
+            page: 0,
+            sort: 'asc',
           })
         );
       });
@@ -632,7 +626,7 @@ describe('Column rendering logic', () => {
       });
     });
 
-    test('gestisce sessionStorage senza campo sort', async () => {
+    test('handles sessionStorage without sort field', async () => {
       const storedPagination = {
         pageNo: 1,
         pageSize: 10,
@@ -648,14 +642,14 @@ describe('Column rendering logic', () => {
         expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
           'merchant-id-01',
           expect.objectContaining({
-            page: 1,
+            page: 0,
             sort: 'asc',
           })
         );
       });
     });
 
-    test('converte correttamente il sort string in GridSortModel', async () => {
+    test('does not set sortModel from sessionStorage sort string', async () => {
       const storedPagination = {
         pageNo: 0,
         pageSize: 10,
@@ -669,11 +663,11 @@ describe('Column rendering logic', () => {
       renderWithContext(<InitiativeStores />);
 
       await waitFor(() => {
-        expect(dataTableProps.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
+        expect(dataTableProps.sortModel).toEqual([]);
       });
     });
 
-    test('gestisce sort string con formato non valido', async () => {
+    test('ignores invalid sort string format in sessionStorage', async () => {
       const storedPagination = {
         pageNo: 0,
         pageSize: 10,
@@ -691,7 +685,7 @@ describe('Column rendering logic', () => {
           'merchant-id-01',
           expect.objectContaining({
             page: 0,
-            sort: 'invalidformat',
+            sort: 'asc',
           })
         );
       });

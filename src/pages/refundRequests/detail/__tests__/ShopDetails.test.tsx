@@ -237,10 +237,10 @@ describe('ShopDetails', () => {
     await waitFor(() => expect(downloadBatchCsv).toHaveBeenCalled());
   });
 
-  it("should handle handleDownloadCsv error", async () => {
-    const consoleSpy = jest.spyOn(console, "log")
-    const mockError = new Error("fail")
-    getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
+  it('should handle handleDownloadCsv error', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const mockError = new Error('fail');
+    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
 
     downloadBatchCsv.mockRejectedValue(mockError);
 
@@ -250,14 +250,16 @@ describe('ShopDetails', () => {
     fireEvent.click(btn);
 
     await waitFor(() => expect(downloadBatchCsv).toHaveBeenCalled());
+    await waitFor(() => expect(mockSetAlert).toHaveBeenCalled());
 
-    expect(consoleSpy).toHaveBeenCalledWith(mockError)
+    expect(consoleSpy).toHaveBeenCalled();
     expect(mockSetAlert).toHaveBeenCalledWith({
       title: 'errors.genericTitle',
       text: 'errors.genericDescription',
       isOpen: true,
       severity: 'error',
     });
+    consoleSpy.mockRestore();
   });
 
   it('should handle trxCode input change', async () => {

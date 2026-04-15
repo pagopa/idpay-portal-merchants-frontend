@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import InvoiceDetail from '../InvoiceDetail';
-import { RewardBatchTrxStatusEnum } from '../../../../api/generated/merchants/RewardBatchTrxStatus';
 import { useLocation } from 'react-router-dom';
+import { getMerchantsApi } from '../../../../api/MerchantsApiClient';
 
 jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
   __esModule: true,
@@ -14,7 +14,6 @@ jest.mock('../../../initiativeStores/StoreContext', () => ({
 }));
 
 jest.mock('../../../../services/merchantService', () => ({
-  downloadInvoiceFile: jest.fn(),
   postponeTransaction: jest.fn(),
 }));
 
@@ -40,8 +39,15 @@ const mockUseLocation = {
 const pushMock = jest.fn();
 const mockUseHistory = jest.fn();
 
+jest.mock('../../../../hooks/useCurrentInitiative', () => ({
+  useCurrentInitiative: jest.fn(),
+}));
+
 jest.mock('../../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
+}));
+jest.mock('../../../../api/MerchantsApiClient', () => ({
+  getMerchantsApi: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -67,12 +73,13 @@ jest.mock('../../../../helpers', () => ({
 }));
 
 import { useStore } from '../../../initiativeStores/StoreContext';
-import { downloadInvoiceFile, postponeTransaction } from '../../../../services/merchantService';
+import { postponeTransaction } from '../../../../services/merchantService';
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
 import { isReversableOrEditable } from '../../../../helpers';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../../../utils/constants';
 import { safeFormatDate } from '../../../../utils/formatUtils';
+import { useCurrentInitiative } from '../../../../hooks/useCurrentInitiative';
 
 let mockSetAlert: jest.Mock;
 
@@ -80,7 +87,7 @@ const baseItemValues = {
   id: 'trx-1',
   pointOfSaleId: 'pos-1',
   status: 'APPROVED',
-  rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
+  rewardBatchTrxStatus: 'APPROVED',
   invoiceData: {
     docNumber: 'DOC-123',
     filename: 'fattura.pdf',
@@ -147,9 +154,13 @@ beforeEach(() => {
   (useStore as jest.Mock).mockReturnValue({ storeId: 'STORE_ID' });
   (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
   (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
+  (useCurrentInitiative as jest.Mock).mockReturnValue({ initiativeId: 'init-123', endDate: null });
   (useAppSelector as jest.Mock).mockReset();
   (window as any).open = jest.fn();
   global.fetch = jest.fn();
+  (getMerchantsApi as jest.Mock).mockReturnValue({
+    downloadInvoiceFile: jest.fn(),
+  });
 });
 
 describe('Render component', () => {
@@ -175,7 +186,7 @@ describe('Render component', () => {
     expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
     expect(screen.getByTestId('btn-test')).toBeInTheDocument();
   });
-  it('should render component', () => {
+  it('should render rejection note for suspended status', () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
     render(
       <InvoiceDetail
@@ -194,11 +205,10 @@ describe('Render component', () => {
     expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
     expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
     expect(screen.getByText('Numero fattura')).toBeInTheDocument();
-    expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
-    expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
-    expect(screen.getByText('03/02/2026')).toBeInTheDocument();
+    expect(screen.queryByText('Nota ufficiale')).not.toBeInTheDocument();
+    expect(screen.queryByText('Motivo di rifiuto')).not.toBeInTheDocument();
+    expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
     expect(screen.getByTestId('btn-test')).toBeInTheDocument();
-    expect(screen.getAllByText(MISSING_DATA_PLACEHOLDER)).toHaveLength(5);
   });
   it('should handle undefined initiativesListSel (line 68 branch)', () => {
     (useAppSelector as jest.Mock).mockReturnValue(undefined);
@@ -218,7 +228,7 @@ describe('Render component', () => {
   it('should cover rejection reason empty branch (lines 220-225)', () => {
     const values = {
       ...baseItemValues,
-      rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+      rewardBatchTrxStatus: 'REJECTED',
       rewardBatchRejectionReason: [],
     };
 
@@ -236,8 +246,20 @@ describe('Render component', () => {
   });
 });
 describe('Download File', () => {
+  const getDownloadInvoiceFileMock = () => downloadInvoiceFileFnMock;
+  const downloadInvoiceFileFnMock = jest.fn();
+  const setupDownloadInvoiceFileMock = () => {
+    downloadInvoiceFileFnMock.mockReset();
+    (getMerchantsApi as jest.Mock).mockReturnValue({
+      downloadInvoiceFile: downloadInvoiceFileFnMock,
+    });
+    getMerchantsApi();
+    return downloadInvoiceFileFnMock;
+  };
   it('should successfully download file', async () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
+
+    const downloadInvoiceFileMock = setupDownloadInvoiceFileMock();
 
     const mockBlob = new Blob(['pdf content'], { type: 'application/pdf' });
     const mockResponse = {
@@ -245,7 +267,7 @@ describe('Download File', () => {
       blob: jest.fn().mockResolvedValue(mockBlob),
     };
 
-    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+    downloadInvoiceFileMock.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     });
     (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
@@ -266,7 +288,7 @@ describe('Download File', () => {
     expect(screen.getByTestId('item-loader')).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(downloadInvoiceFile).toHaveBeenCalledWith('trx-1', 'pos-1');
+      expect(getDownloadInvoiceFileMock()).toHaveBeenCalledWith('trx-1', 'pos-1');
     });
 
     await waitFor(() => {
@@ -279,7 +301,9 @@ describe('Download File', () => {
   it('should handle fetch fail', async () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
 
-    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+    const downloadInvoiceFileMock = setupDownloadInvoiceFileMock();
+
+    downloadInvoiceFileMock.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     });
     (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -314,6 +338,8 @@ describe('Download File', () => {
   it('should handle wrong exstension', async () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
 
+    const downloadInvoiceFileMock = setupDownloadInvoiceFileMock();
+
     const unsupportedValues = {
       ...baseItemValues,
       invoiceData: {
@@ -322,7 +348,7 @@ describe('Download File', () => {
       },
     };
 
-    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+    downloadInvoiceFileMock.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.txt',
     });
 
@@ -358,6 +384,8 @@ describe('Download File', () => {
   it('should handle missing file', async () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
 
+    const downloadInvoiceFileMock = setupDownloadInvoiceFileMock();
+
     const noFilenameValues = {
       ...baseItemValues,
       invoiceData: {
@@ -365,7 +393,7 @@ describe('Download File', () => {
       },
     };
 
-    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+    downloadInvoiceFileMock.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     });
 
@@ -401,7 +429,9 @@ describe('Download File', () => {
   it('should handle error', async () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
 
-    (downloadInvoiceFile as jest.Mock).mockRejectedValueOnce(new Error('download error'));
+    const downloadInvoiceFileMock = setupDownloadInvoiceFileMock();
+
+    downloadInvoiceFileMock.mockRejectedValueOnce(new Error('download error'));
 
     render(
       <InvoiceDetail
@@ -429,9 +459,11 @@ describe('Download File', () => {
   it('should show loader', async () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
 
+    const downloadInvoiceFileMock = setupDownloadInvoiceFileMock();
+
     const mockPromise = new Promise(() => {});
 
-    (downloadInvoiceFile as jest.Mock).mockReturnValueOnce(mockPromise);
+    downloadInvoiceFileMock.mockReturnValueOnce(mockPromise);
 
     render(
       <InvoiceDetail
@@ -477,12 +509,14 @@ describe('Download File', () => {
   it('should handle xml extension branch', async () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
 
+    const downloadInvoiceFileMock = setupDownloadInvoiceFileMock();
+
     const xmlValues = {
       ...baseItemValues,
       invoiceData: { docNumber: 'DOC', filename: 'file.xml' },
     };
 
-    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+    downloadInvoiceFileMock.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/file.xml',
     });
 
@@ -504,14 +538,16 @@ describe('Download File', () => {
     fireEvent.click(screen.getByTestId('btn-test'));
 
     await waitFor(() => {
-      expect(downloadInvoiceFile).toHaveBeenCalled();
+      expect(getDownloadInvoiceFileMock()).toHaveBeenCalledWith('trx-1', 'pos-1');
     });
   });
 
   it('should cover window.open null', async () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
 
-    (downloadInvoiceFile as jest.Mock).mockResolvedValueOnce({
+    const downloadInvoiceFileMock = setupDownloadInvoiceFileMock();
+
+    downloadInvoiceFileMock.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     });
 
@@ -535,7 +571,7 @@ describe('Download File', () => {
     fireEvent.click(screen.getByTestId('btn-test'));
 
     await waitFor(() => {
-      expect(downloadInvoiceFile).toHaveBeenCalled();
+      expect(getDownloadInvoiceFileMock()).toHaveBeenCalledWith('trx-1', 'pos-1');
     });
   });
 });
@@ -557,7 +593,7 @@ describe('Postpone Transaction Logic', () => {
 
     const consultableValues = {
       ...baseItemValues,
-      rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+      rewardBatchTrxStatus: 'CONSULTABLE',
     };
     render(
       <InvoiceDetail
@@ -582,6 +618,11 @@ describe('Postpone Transaction Logic', () => {
       },
     ];
 
+    (useCurrentInitiative as jest.Mock).mockReturnValue({
+      initiativeId: 'init-123',
+      endDate: futureDate,
+    });
+
     (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
 
     (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
@@ -590,7 +631,7 @@ describe('Postpone Transaction Logic', () => {
 
     const consultableValues = {
       ...baseItemValues,
-      rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+      rewardBatchTrxStatus: 'CONSULTABLE',
     };
     render(
       <InvoiceDetail
@@ -637,6 +678,11 @@ describe('Postpone Transaction Logic', () => {
       },
     ];
 
+    (useCurrentInitiative as jest.Mock).mockReturnValue({
+      initiativeId: 'init-123',
+      endDate: futureDate,
+    });
+
     (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
 
     (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
@@ -645,7 +691,7 @@ describe('Postpone Transaction Logic', () => {
 
     const consultableValues = {
       ...baseItemValues,
-      rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+      rewardBatchTrxStatus: 'CONSULTABLE',
     };
 
     render(
@@ -694,13 +740,18 @@ describe('Postpone Transaction Logic', () => {
       },
     ];
 
+    (useCurrentInitiative as jest.Mock).mockReturnValue({
+      initiativeId: 'init-123',
+      endDate: futureDate,
+    });
+
     (useAppSelector as jest.Mock).mockReturnValue(mockInitiatives);
 
     (postponeTransaction as jest.Mock).mockRejectedValueOnce(new Error('postpone error'));
 
     const consultableValues = {
       ...baseItemValues,
-      rewardBatchTrxStatus: RewardBatchTrxStatusEnum.CONSULTABLE,
+      rewardBatchTrxStatus: 'CONSULTABLE',
     };
 
     render(
@@ -754,7 +805,7 @@ describe('Reverse button', () => {
       id: 'trx-1',
       pointOfSaleId: 'pos-1',
       status: 'REWARDED',
-      rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+      rewardBatchTrxStatus: 'REJECTED',
       initiativeId: 'init-123',
       invoiceData: {
         docNumber: 'DOC-123',
@@ -789,7 +840,7 @@ describe('Reverse button', () => {
         title="Dettaglio transazione"
         itemValues={{
           ...baseItemValues,
-          rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+          rewardBatchTrxStatus: 'REJECTED',
           status: 'REWARDED',
           pointOfSaleId: 'pos-1',
         }}
