@@ -4,6 +4,12 @@ import { mockedMerchantTransactionList } from '../../../api/__mocks__/MerchantsA
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import AuthorizeTransactionModal from '../AuthorizeTransactionModal';
 
+const mockedTransactionData = {
+  ...mockedMerchantTransactionList.content[0],
+  trxDate: new Date().toISOString(),
+  trxExpirationSeconds: 60,
+};
+
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -25,7 +31,7 @@ describe('Test suite for AuthorizeTransactionModal component', () => {
       <AuthorizeTransactionModal
         openAuthorizeTrxModal={true}
         setOpenAuthorizeTrxModal={jest.fn()}
-        data={mockedMerchantTransactionList.content[0]}
+        data={mockedTransactionData}
       />
     );
 
@@ -58,7 +64,7 @@ describe('Test suite for AuthorizeTransactionModal component', () => {
       <AuthorizeTransactionModal
         openAuthorizeTrxModal={true}
         setOpenAuthorizeTrxModal={jest.fn()}
-        data={mockedMerchantTransactionList.content[0]}
+        data={mockedTransactionData}
       />
     );
     const iconBtn = await screen.findByTestId('close-authorize-transaction-modal-test');
