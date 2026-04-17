@@ -8,7 +8,7 @@ const ROUTES = {
   ASSISTANCE: `${BASE_ROUTE}/assistenza`,
   OVERVIEW: `${BASE_ROUTE}/:initiative_id/panoramica`,
   SIDE_MENU_OVERVIEW: `panoramica`,
-  STORES: `${BASE_ROUTE}/:initiative_id/punti-vendita/`,
+  STORES: `${BASE_ROUTE}/:initiative_id/punti-vendita`,
   REPORTED_USERS: `${BASE_ROUTE}/:initiative_id/utenti-segnalati`,
   SIDE_MENU_REPORTED_USERS: `utenti-segnalati`,
   REPORTED_USERS_INSERT: `${BASE_ROUTE}/:initiative_id/utenti-segnalati/segnalazione-utenti`,
