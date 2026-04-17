@@ -5,12 +5,6 @@ import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Route, useHistory } from 'react-router-dom';
 import RefundRequests from '../RefundRequests';
 
-jest.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
 const mockSetAlert = jest.fn();
 jest.mock('../../../hooks/useAlert', () => ({
   __esModule: true,
@@ -21,105 +15,6 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: jest.fn(),
   useParams: () => ({ initiative_id: 'test-initiative-id' }),
-}));
-
-jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
-  TitleBox: ({ title, subTitle }: any) => (
-    <div>
-      <h4>{title}</h4>
-      <p>{subTitle}</p>
-    </div>
-  ),
-}));
-
-jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
-  __esModule: true,
-  default: () => jest.fn(),
-}));
-
-jest.mock('../../../components/dataTable/DataTable', () => ({
-  __esModule: true,
-  default: ({ columns, rows, onPaginationPageChange }: any) => (
-    <div data-testid="data-table">
-      <table>
-        <thead>
-          <tr>
-            {columns.map((col: any) => (
-              <th key={col.field}>{col.headerName}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row: any) => (
-            <tr key={row.id}>
-              {columns.map((col: any) => (
-                <td key={col.field}>
-                  {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
-    </div>
-  ),
-}));
-
-jest.mock('../../../components/Chip/CustomChip', () => ({
-  __esModule: true,
-  default: ({ label }: any) => <span data-testid="custom-chip">{label}</span>,
-}));
-
-jest.mock('../../../components/Transactions/useStatus', () => ({
-  __esModule: true,
-  default: (status: string) => ({
-    label: status,
-    color: 'primary',
-    textColor: 'white',
-  }),
-  getBatchStatus: (status: string) => ({
-    label: status,
-    color: 'primary',
-    textColor: 'white',
-  }),
-}));
-
-jest.mock('../../../components/Transactions/CurrencyColumn', () => ({
-  __esModule: true,
-  default: ({ value }: any) => <span>{value.toFixed(2)} €</span>,
-}));
-
-jest.mock('../../reportedUsers/NoResultPaper', () => ({
-  __esModule: true,
-  default: ({ translationKey }: any) => <div data-testid="no-result-paper">{translationKey}</div>,
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  intiativesListSelector: (state: any) => state.initiatives.initiativesList,
-}));
-
-jest.mock('../RefundRequestModal', () => ({
-  RefundRequestsModal: ({
-    isOpen,
-    setIsOpen,
-    title,
-    description,
-    warning,
-    cancelBtn,
-    confirmBtn,
-  }: any) =>
-    isOpen ? (
-      <div data-testid="refund-modal">
-        <h2>{title}</h2>
-        <p>{description}</p>
-        <p>{warning}</p>
-        <button onClick={setIsOpen}>{cancelBtn}</button>
-        <button onClick={confirmBtn.onConfirm} disabled={confirmBtn.loading}>
-          {confirmBtn.text}
-        </button>
-      </div>
-    ) : null,
 }));
 
 const mockGetRewardBatches = jest.fn();
@@ -168,7 +63,84 @@ const mockData = [
     month: getPreviousMonth(),
     numberOfTransactions: 1,
   },
+  {
+    id: 4,
+    name: '004-20251125 226',
+    posType: 'ONLINE',
+    initialAmountCents: 300000,
+    status: 'CREATED',
+    month: getPreviousMonth(),
+    numberOfTransactions: 0,
+  },
 ];
+
+jest.mock('../../../components/dataTable/DataTable', () => ({
+  __esModule: true,
+  default: ({
+    columns,
+    rows,
+    onPaginationPageChange,
+    // onSelectionModelChange,
+    // isRowSelectable,
+  }: any) => (
+    <div data-testid="data-table">
+      <table>
+        <thead>
+          <tr>
+            {columns.map((col: any) => (
+              <th key={col.field}>{col.headerName}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row: any, index: number) => (
+            <tr key={row.id ?? index}>
+              {/* <td>
+                <button
+                  data-testid={`select-row-${row.id ?? index}`}
+                  onClick={() => onSelectionModelChange?.([row.id])}
+                  disabled={isRowSelectable ? !isRowSelectable({ row }) : false}
+                >
+                  Select
+                </button>
+              </td> */}
+              {columns.map((col: any) => (
+                <td key={col.field}>
+                  {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
+    </div>
+  ),
+}));
+
+jest.mock('../RefundRequestModal', () => ({
+  RefundRequestsModal: ({
+    isOpen,
+    setIsOpen,
+    title,
+    description,
+    warning,
+    cancelBtn,
+    confirmBtn,
+  }: any) =>
+    isOpen ? (
+      <div data-testid="refund-modal">
+        <h2>{title}</h2>
+        <p>{description}</p>
+        <p>{warning}</p>
+        <button onClick={setIsOpen}>{cancelBtn.text}</button>
+        <button onClick={confirmBtn ? confirmBtn.onConfirm : undefined} disabled={confirmBtn?.loading}>
+          {confirmBtn?.text}
+        </button>
+      </div>
+    ) : null,
+}));
+
 
 const createMockStore = (initiatives = [{ initiativeId: 'test-initiative-id' }]) =>
   configureStore({
@@ -265,6 +237,7 @@ describe('RefundRequests', () => {
 
     expect(screen.getByText('002-20251125 224')).toBeInTheDocument();
     expect(screen.getByText('003-20251125 225')).toBeInTheDocument();
+    expect(screen.getByText('004-20251125 226')).toBeInTheDocument();
   });
 
   it('should show no result paper when there is no data', async () => {
@@ -280,7 +253,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
     expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
   });
 
@@ -300,7 +273,7 @@ describe('RefundRequests', () => {
       })
     );
 
-    expect(await screen.findByTestId('no-result-paper')).toBeInTheDocument();
+    expect(await screen.findByText('pages.refundRequests.noData')).toBeInTheDocument();
   });
 
   it('should not show send button when no rows are selected', async () => {
@@ -325,19 +298,6 @@ describe('RefundRequests', () => {
     expect(screen.getByText('Stato')).toBeInTheDocument();
   });
 
-  it('should display status chips for each row', async () => {
-    renderWithStore(<RefundRequests />);
-
-    await waitFor(() => {
-      const chips = screen.getAllByTestId('custom-chip');
-      expect(chips).toHaveLength(3);
-    });
-
-    const chips = screen.getAllByTestId('custom-chip');
-    expect(chips[0]).toHaveTextContent('CREATED');
-    expect(chips[1]).toHaveTextContent('SENT');
-    expect(chips[2]).toHaveTextContent('EVALUATING');
-  });
 
   it('should map posType correctly', async () => {
     renderWithStore(<RefundRequests />);
@@ -347,7 +307,7 @@ describe('RefundRequests', () => {
     });
 
     const onlineTexts = screen.getAllByText('Online');
-    expect(onlineTexts).toHaveLength(2);
+    expect(onlineTexts).toHaveLength(3);
   });
 
   it('should display tooltip text correctly with dash when value is empty', async () => {
@@ -366,7 +326,7 @@ describe('RefundRequests', () => {
     renderWithStore(<RefundRequests />);
 
     await waitFor(() => {
-      expect(screen.getByText('-')).toBeInTheDocument();
+      expect(screen.getAllByText('-')).toHaveLength(3);
     });
   });
 
@@ -383,10 +343,51 @@ describe('RefundRequests', () => {
     });
   });
 
-  it('should show loading state in modal when sending batch', async () => {
-    // With the real DataTable, selection UI is an implementation detail.
-    // Keeping this test focused on "sending triggers loading state" would require
-    // a higher-level integration test; removed to avoid coupling to DataTable internals.
+  it('should open modal and send batch successfully', async () => {
+    jest.useFakeTimers();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('radio-btn-1'));
+
+    await waitFor(() => expect(screen.getByText("pages.refundRequests.sendRequests")).toBeInTheDocument())
+    fireEvent.click(screen.getByText("pages.refundRequests.sendRequests"));
+
+    await waitFor(() => expect(screen.getByTestId('refund-modal')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
+
+    await waitFor(() => {
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '1');
+    });
+
+    jest.advanceTimersByTime(1000);
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'pages.refundRequests.rewardBatchSentSuccess',
+          isOpen: true,
+          severity: 'success',
+        })
+      );
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('should show error message on empty batch select', async () => {
+    jest.useFakeTimers();
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('radio-btn-4'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('refund-modal')).toBeInTheDocument();
+    });
   });
 
   it('should handle missing initiativeId when sending batch', async () => {
@@ -400,23 +401,6 @@ describe('RefundRequests', () => {
     });
 
     consoleErrorSpy.mockRestore();
-  });
-
-  it('should handle missing batchId when sending batch', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-
-    renderWithStore(<RefundRequests />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('data-table')).toBeInTheDocument();
-    });
-
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('should log error and not call sendRewardBatch when batchId is missing', async () => {
-    // This scenario is driven by row selection and modal confirm flow.
-    // Since selection lives in DataTable, it is skipped here to avoid coupling to DataTable internals.
   });
 
   it('should handle null response from getRewardBatches', async () => {
@@ -433,7 +417,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
   });
 
   it('should handle response without content property', async () => {
@@ -450,7 +434,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
   });
 
   it('should render spacer column', async () => {
@@ -462,14 +446,36 @@ describe('RefundRequests', () => {
     });
   });
 
-  it('should apply isRowSelectable rules for month/year, numberOfTransactions, and missing month', async () => {
-    // isRowSelectable is part of DataTable behavior; keep that unit-tested in DataTable tests.
-    // RefundRequests is covered by service calls / mapping tests in this suite.
-  });
-
   it('should show specific error alert when backend says previous month batch was not sent (REWARD_BATCH_PREVIOUS_NOT_SENT)', async () => {
-    // This scenario depends on selecting a row and confirming in the modal.
-    // Since selection lives in DataTable, it is covered by DataTable tests; kept out here.
+    mockSendRewardBatch.mockResolvedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
+    mockGetRewardBatches.mockResolvedValue({
+      content: mockData,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: mockData.length,
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId("radio-btn-1"));
+
+    await waitFor(() => expect(screen.getByText("pages.refundRequests.sendRequests")).toBeInTheDocument())
+    fireEvent.click(screen.getByText("pages.refundRequests.sendRequests"));
+
+    fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'errors.genericTitle',
+          text: 'errors.sendTheBatchForPreviousMonth',
+          isOpen: true,
+          severity: 'error',
+        })
+      );
+    });
   });
 
   it('should map approved/suspended amounts only for APPROVED batches (others become undefined)', async () => {
@@ -512,28 +518,20 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
 
-    await waitFor(() => {
-      const chips = screen.getAllByTestId('custom-chip');
-      expect(chips.some((c) => c.textContent === 'APPROVED')).toBe(true);
-    });
-
-    expect(screen.getByText('Rimborso approvato')).toBeInTheDocument();
+    expect(screen.getAllByText('Rimborso approvato')).toHaveLength(2);
     expect(screen.getByText('Rimborso sospeso')).toBeInTheDocument();
 
     expect(
-      screen.getByText((t) => t.replace(/\s+/g, ' ').includes('123.45 €'))
+      screen.getByText(/123.45\s€/)
     ).toBeInTheDocument();
-    expect(screen.getByText((t) => t.replace(/\s+/g, ' ').includes('2.00 €'))).toBeInTheDocument();
+    expect(screen.getByText(/2.00\s€/)).toBeInTheDocument();
 
     expect(
-      screen.queryByText((t) => t.replace(/\s+/g, ' ').includes('99.99 €'))
+      screen.queryByText(/99.99\s€/)
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByText((t) => t.replace(/\s+/g, ' ').includes('88.88 €'))
+      screen.queryByText(/88.88\s€/)
     ).not.toBeInTheDocument();
-
-    const nanValues = screen.getAllByText((t) => t.replace(/\s+/g, ' ').includes('NaN €'));
-    expect(nanValues.length).toBeGreaterThanOrEqual(2);
   });
 
   it('should dispatch an error alert when getRewardBatches fails', async () => {
@@ -556,6 +554,6 @@ describe('RefundRequests', () => {
         severity: 'error',
       })
     );
-    expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
+    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
   });
 });

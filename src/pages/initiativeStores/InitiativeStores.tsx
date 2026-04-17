@@ -35,6 +35,7 @@ import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
+import { browserConsole } from '../../utils/consoleLogger';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -287,7 +288,7 @@ const InitiativeStores: React.FC = () => {
   const formik = useFormik<GetPointOfSalesFilters>({
     initialValues,
     onSubmit: (values) => {
-      console.log('Eseguo ricerca con filtri:', values);
+      browserConsole.log('Eseguo ricerca con filtri:', values);
     },
   });
 
@@ -349,7 +350,6 @@ const InitiativeStores: React.FC = () => {
       setCurrentSort(sortKey);
       setSortModel(newSortModel);
 
-      // Update sessionStorage with new sort
       const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId };
       setStoresPagination(updatedPagination);
       sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
@@ -363,7 +363,7 @@ const InitiativeStores: React.FC = () => {
         true
       );
     } else {
-      console.log('Ordinamento rimosso.');
+      browserConsole.log('Ordinamento rimosso.');
       setCurrentSort('asc');
       setSortModel([]);
     }
@@ -383,7 +383,6 @@ const InitiativeStores: React.FC = () => {
     [storesPagination, initiativeId, currentSort]
   );
 
-  // STEP 2 – Effetto deterministico unico di fetch
   useEffect(() => {
     if (!initiativeId) {
       return;

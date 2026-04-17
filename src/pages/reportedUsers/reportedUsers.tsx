@@ -1,4 +1,5 @@
-import React, { useCallback, useState, useRef } from 'react';
+/* eslint-disable functional/immutable-data */
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { useFormik } from 'formik';
 import { Box, Stack, Button } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
@@ -32,24 +33,21 @@ const initialValues: GetReportedUsersFilters = {
 const ReportedUsers: React.FC = () => {
   const { t } = useTranslation();
   const { setAlert } = useAlert();
-  const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
-    valid: {
-      text: t('pages.reportedUsers.cf.validCf'),
-      isOpen: false,
-      severity: 'success',
-    },
-    removed: {
-      text: t('pages.reportedUsers.cf.removedCf'),
-      isOpen: false,
-      severity: 'success',
-    },
-    missing: {
-      text: t('pages.reportedUsers.cf.noResultUser'),
-      isOpen: false,
-      severity: 'error',
-    },
-  });
+  const history = useHistory();
   const location = useLocation<{ newCf?: string; showSuccessAlert?: boolean }>();
+  const { initiativeId } = useCurrentInitiativeId();
+
+  const requestIdRef = useRef<number>(0);
+
+  const userJwt = parseJwt(storageTokenOps.read());
+  const merchantId = userJwt?.merchant_id;
+
+  const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
+    valid: { text: t('pages.reportedUsers.cf.validCf'), isOpen: false, severity: 'success' },
+    removed: { text: t('pages.reportedUsers.cf.removedCf'), isOpen: false, severity: 'success' },
+    missing: { text: t('pages.reportedUsers.cf.noResultUser'), isOpen: false, severity: 'error' },
+  });
+
   const [user, setUser] = useState<
     Array<{
       cf: string;
@@ -58,47 +56,26 @@ const ReportedUsers: React.FC = () => {
       transactionId: string;
     }>
   >([]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedCf, setSelectedCf] = useState<string | null>(null);
-  const history = useHistory();
-
-  const { initiativeId } = useCurrentInitiativeId();
-  const requestIdRef = useRef<number>(0);
-
-  const userJwt = parseJwt(storageTokenOps.read());
-  const merchantId = userJwt?.merchant_id;
 
   const updateAlerts = useCallback((key: string, open: boolean) => {
     setAlerts((prev) => ({ ...prev, [key]: { ...prev[key], isOpen: open } }));
   }, []);
 
-  React.useEffect(() => {
-    if (location.state && location.state.newCf) {
-      void formik.setFieldValue('cf', location.state.newCf);
-      if (location.state.showSuccessAlert) {
-        updateAlerts('valid', true);
-        setTimeout(() => updateAlerts('valid', false), 3000);
-      }
-      setTimeout(() => {
-        void formik.handleSubmit();
-      }, 0);
-      history.replace({ ...location, state: {} });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const formik = useFormik<GetReportedUsersFilters>({
     initialValues,
     validate: (values) => {
-      let errors: Partial<GetReportedUsersFilters> = {};
+      const errors: Partial<GetReportedUsersFilters> = {};
       if (values.cf && !isValidCF(values.cf)) {
-        errors = { ...errors, cf: t('validation.cf.invalid') };
+        errors.cf = t('validation.cf.invalid');
       }
       return errors;
     },
-    onSubmit: async (values: GetReportedUsersFilters) => {
+    onSubmit: async (values) => {
       setError(null);
       setUser([]);
 
@@ -138,10 +115,7 @@ const ReportedUsers: React.FC = () => {
           return;
         }
 
-        if (e?.status === 404 || e?.response?.status === 404) {
-          console.error('Reported user not found (404):', e);
-        } else {
-          setUser([]);
+        if (e?.status !== 404 && e?.response?.status !== 404) {
           setError('Errore durante il recupero dell’utente segnalato');
           setAlert({
             title: t('errors.genericTitle'),
@@ -149,7 +123,6 @@ const ReportedUsers: React.FC = () => {
             isOpen: true,
             severity: 'error',
           });
-          console.error('Error while fetching reported user:', e);
         }
       } finally {
         if (currentRequestId === requestIdRef.current) {
@@ -176,6 +149,33 @@ const ReportedUsers: React.FC = () => {
     [merchantId, initiativeId, updateAlerts]
   );
 
+  useEffect(() => {
+    if (!initiativeId) {
+      return;
+    }
+
+    setUser([]);
+    setError(null);
+    setDeleteModalOpen(false);
+    setSelectedCf(null);
+    formik.resetForm();
+  }, [initiativeId]);
+
+  useEffect(() => {
+    if (location.state?.newCf) {
+      void formik.setFieldValue('cf', location.state.newCf);
+
+      if (location.state.showSuccessAlert) {
+        updateAlerts('valid', true);
+        setTimeout(() => updateAlerts('valid', false), 3000);
+      }
+
+      setTimeout(() => void formik.handleSubmit(), 0);
+      history.replace({ ...location, state: {} });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleOpenDeleteModal = useCallback((cf: string) => {
     setSelectedCf(cf);
     setDeleteModalOpen(true);
@@ -194,31 +194,15 @@ const ReportedUsers: React.FC = () => {
     void formik.setFieldValue('cf', '');
   }, [selectedCf, handleDelete, handleCloseDeleteModal, formik]);
 
-  const rowsWithId = React.useMemo(
+  const rowsWithId = useMemo(
     () => user.map((r, idx) => ({ id: r.cf ?? `row-${idx}`, ...r })),
     [user]
   );
 
-  const reportedUsersColumns = React.useMemo(
+  const reportedUsersColumns = useMemo(
     () => getReportedUsersColumns(handleOpenDeleteModal),
     [handleOpenDeleteModal]
   );
-
-  const handleFiltersApplied = () => {
-    formik.handleSubmit();
-  };
-
-  React.useEffect(() => {
-    if (!initiativeId) {
-      return;
-    }
-
-    setUser([]);
-    setError(null);
-    setDeleteModalOpen(false);
-    setSelectedCf(null);
-    formik.resetForm();
-  }, [initiativeId]);
 
   if (!initiativeId) {
     return null;
@@ -243,26 +227,28 @@ const ReportedUsers: React.FC = () => {
           <Button
             variant="contained"
             size="small"
-            onClick={() => {
+            onClick={() =>
               history.push(routes.REPORTED_USERS_INSERT.replace(':initiative_id', initiativeId), {
                 merchantId,
                 initiativeID: initiativeId,
-              });
-            }}
+              })
+            }
             startIcon={<ReportIcon />}
             sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '174px' } }}
           >
             {t('pages.reportedUsers.reportUser')}
           </Button>
         </Stack>
+
         <SearchTaxCode
           formik={formik as any}
-          onSearch={handleFiltersApplied}
+          onSearch={() => formik.handleSubmit()}
           onReset={() => {
             setUser([]);
             void formik.setFieldValue('cf', '');
           }}
         />
+
         {user.length > 0 && (
           <Box
             sx={{
@@ -284,6 +270,7 @@ const ReportedUsers: React.FC = () => {
             />
           </Box>
         )}
+
         <ModalReportedUser
           open={deleteModalOpen}
           title={t('pages.reportedUsers.ModalReportedUser.title')}
@@ -310,6 +297,7 @@ const ReportedUsers: React.FC = () => {
           <NoResultPaper translationKey="pages.reportedUsers.noUsers" />
         )}
       </Box>
+
       <AlertListComponent
         alertList={Object.entries(alerts).map(([key, value]) => ({
           ...value,

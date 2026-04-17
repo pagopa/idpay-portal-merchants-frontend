@@ -12,6 +12,7 @@ import { safeFormatDate } from '../../utils/formatUtils';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { downloadMerchantReport, getMerchantReports } from '../../services/merchantService';
 import { ReportDTO, ReportStatusEnum } from '../../api/generated/merchants/ReportDTO';
+import { browserConsole } from '../../utils/consoleLogger';
 
 type RouteParams = {
   initiative_id: string;
@@ -96,7 +97,6 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
     void loadReports(pagination.pageNo, pagination.pageSize);
   }, [initiative_id, pagination.pageNo, pagination.pageSize]);
 
-  // STEP 1 – Reset deterministico su refresh
   useEffect(() => {
     if (!initiative_id) {
       return;

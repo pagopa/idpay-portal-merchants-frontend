@@ -23,6 +23,7 @@ import { isValidEmail, handlePromptMessage } from '../../helpers';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import { POS_TYPE } from '../../utils/constants';
+import { browserConsole } from '../../utils/consoleLogger';
 import ROUTES from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
 import InitiativeDetailCard from './InitiativeDetailCard';
@@ -110,7 +111,7 @@ const InitiativeStoreDetail = () => {
         setStoreTransactions([...responseWIthFormattedDate]);
       }
     } catch (error: any) {
-      console.log(error, 'error');
+      browserConsole.error(error, 'error');
       setAlert({
         title: t('errors.genericTitle'),
         text: t('errors.genericDescription'),
@@ -162,7 +163,7 @@ const InitiativeStoreDetail = () => {
   };
 
   const handleFiltersReset = () => {
-    console.log('Callback dopo reset filtri');
+    browserConsole.log('Callback dopo reset filtri');
     setTransactionsFilters({});
     void fetchStoreTransactions({});
   };

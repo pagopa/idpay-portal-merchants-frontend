@@ -12,6 +12,7 @@ import ROUTES from '../../routes';
 import { createReportedUser } from '../../services/merchantService';
 import { MerchantApi } from '../../api/MerchantsApiClient';
 import { useAlert } from '../../hooks/useAlert';
+import { browserConsole } from '../../utils/consoleLogger';
 import { isValidCF } from './helpersReportedUsers';
 import CfTextField from './CfTextField';
 import ModalReportedUser from './modalReportedUser';
@@ -51,7 +52,7 @@ const InsertReportedUser: React.FC = () => {
         isOpen: true,
         severity: 'error',
       });
-      console.error('Error while checking if user is already reported:', e);
+      browserConsole.error('Error while checking if user is already reported:', e);
       return false;
     }
   };
@@ -92,8 +93,8 @@ const InsertReportedUser: React.FC = () => {
         formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyPresent'));
         break;
       case 'Service unavailable':
-        console.error('Service unavailable');
-        history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
+        browserConsole.error('Service unavailable');
+        history.push(ROUTES.REPORTED_USERS.replace(':initiative_id', initiativeID), {
           newCf: undefined,
           showSuccessAlert: false,
         });
@@ -135,7 +136,7 @@ const InsertReportedUser: React.FC = () => {
               }
 
               setShowConfirmModal(false);
-              history.push(ROUTES.REPORTED_USERS.replace(':id', initiativeID), {
+              history.push(ROUTES.REPORTED_USERS.replace(':initiative_id', initiativeID), {
                 newCf: cfToReport,
                 showSuccessAlert: true,
               });
@@ -146,7 +147,7 @@ const InsertReportedUser: React.FC = () => {
                 isOpen: true,
                 severity: 'error',
               });
-              console.error('Error while creating reported user:', e);
+              browserConsole.error('Error while creating reported user:', e);
             }
           }
         }}
