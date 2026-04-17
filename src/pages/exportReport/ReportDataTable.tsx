@@ -132,7 +132,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
           link.parentNode?.removeChild(link);
         }
       } catch (error) {
-        console.error('Error downloading report', error);
+        browserConsole.error('Error downloading report', error);
         updateAlerts('error', true);
         setTimeout(() => updateAlerts('error', false), 3000);
       } finally {
