@@ -80,8 +80,8 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
     columns,
     rows,
     onPaginationPageChange,
-    onSelectionModelChange,
-    isRowSelectable,
+    // onSelectionModelChange,
+    // isRowSelectable,
   }: any) => (
     <div data-testid="data-table">
       <table>
@@ -95,7 +95,7 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
         <tbody>
           {rows.map((row: any, index: number) => (
             <tr key={row.id ?? index}>
-              <td>
+              {/* <td>
                 <button
                   data-testid={`select-row-${row.id ?? index}`}
                   onClick={() => onSelectionModelChange?.([row.id])}
@@ -103,7 +103,7 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
                 >
                   Select
                 </button>
-              </td>
+              </td> */}
               {columns.map((col: any) => (
                 <td key={col.field}>
                   {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
@@ -349,7 +349,7 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId('select-row-1'));
+    fireEvent.click(screen.getByTestId('radio-btn-1'));
 
     await waitFor(() => expect(screen.getByText("pages.refundRequests.sendRequests")).toBeInTheDocument())
     fireEvent.click(screen.getByText("pages.refundRequests.sendRequests"));
@@ -383,7 +383,7 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId('select-row-4'));
+    fireEvent.click(screen.getByTestId('radio-btn-4'));
 
     await waitFor(() => {
       expect(screen.getByTestId('refund-modal')).toBeInTheDocument();
@@ -459,7 +459,7 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId('select-row-1'));
+    fireEvent.click(screen.getByTestId("radio-btn-1"));
 
     await waitFor(() => expect(screen.getByText("pages.refundRequests.sendRequests")).toBeInTheDocument())
     fireEvent.click(screen.getByText("pages.refundRequests.sendRequests"));
