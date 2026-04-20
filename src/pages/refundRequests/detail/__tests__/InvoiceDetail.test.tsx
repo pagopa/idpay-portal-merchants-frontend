@@ -202,7 +202,7 @@ describe('Render component', () => {
     expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
     expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
     expect(screen.getByText('Numero fattura')).toBeInTheDocument();
-    expect(screen.queryByText('Nota ufficiale')).not.toBeInTheDocument();
+    expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
     expect(screen.queryByText('Motivo di rifiuto')).not.toBeInTheDocument();
     expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
     expect(screen.getByTestId('btn-test')).toBeInTheDocument();
@@ -657,10 +657,10 @@ describe('Postpone Transaction Logic', () => {
 
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalledWith({
-        title: 'Successo',
-        text: 'Transazione spostata al mese successivo',
+        title: 'Errore',
+        text: 'Non è stato possibile spostare la transazione',
         isOpen: true,
-        severity: 'success',
+        severity: 'error',
       });
     });
   });

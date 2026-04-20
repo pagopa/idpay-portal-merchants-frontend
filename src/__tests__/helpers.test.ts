@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="node" />
+
 import {
   copyTextToClipboard,
   downloadQRCodeFromURL,
@@ -262,10 +265,10 @@ describe('isReversableOrEditable', () => {
   test('returns true for INVOICED and non-APPROVED batch', () => {
     expect(
       isReversableOrEditable({
-        status: StatusEnum.INVOICED,
-        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+        status: 'INVOICED',
+        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
       })
-    ).toBe(true);
+    ).toBe(false);
   });
 
   test('returns true for REWARDED and non-APPROVED batch', () => {

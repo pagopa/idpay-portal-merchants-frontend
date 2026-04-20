@@ -1,5 +1,5 @@
 /// <reference types="jest" />
-import { EmailNotificationApi } from "../EmailNotificationApiClient";
+import { EmailNotificationApi } from "../emailNotificationApiClient";
 import { BaseApiClient } from "../BaseApiClient";
 
 describe("EmailNotificationApiClient", () => {
