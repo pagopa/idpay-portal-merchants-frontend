@@ -49,7 +49,7 @@ export default function InvoiceDetail({
   const { t } = useTranslation();
   const currentInitiative = useCurrentInitiative();
   const history = useHistory();
-  const { initiative_id, batch_id } = useParams<{ initiative_id: string; batch_id: string }>();
+  const { initiative_id } = useParams<{ initiative_id: string; batch_id: string }>();
 
   useEffect(() => {
     if (currentInitiative?.endDate) {
@@ -135,7 +135,12 @@ export default function InvoiceDetail({
 
     setLoading(true);
     try {
-      await postponeTransaction(initiative_id, batch_id, itemValues.id, initiativeEndDate);
+      const rewardBatchId = location.state?.store?.id;
+      if (!rewardBatchId) {
+        throw new Error('Missing rewardBatchId');
+      }
+
+      await postponeTransaction(initiative_id, rewardBatchId, itemValues?.id, initiativeEndDate);
       setAlert({
         title: 'Successo',
         text: 'Transazione spostata al mese successivo',
@@ -151,14 +156,6 @@ export default function InvoiceDetail({
         text: 'Non è stato possibile spostare la transazione',
         isOpen: true,
         severity: 'error',
-        containerStyle: {
-          height: 'fit-content',
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          zIndex: '1300',
-        },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' },
       });
       setInvoiceTransactionModal(false);
       onCloseDrawer?.();

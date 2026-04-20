@@ -250,6 +250,9 @@ const optionsAutocomplete = [
 describe('InitiativeStoresUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    jest.spyOn(window, 'open').mockImplementation(() => null as any);
+
     (useParams as jest.Mock).mockReturnValue({ initiative_id: 'test-initiative' });
     (useHistory as jest.Mock).mockReturnValue({ push: pushMock });
     mockUsePlacesAutocomplete.mockReturnValue({
@@ -263,6 +266,10 @@ describe('InitiativeStoresUpload', () => {
 
   afterEach(() => {
     (window.open as any).mockRestore?.();
+  });
+
+  afterEach(() => {
+    (window.open as jest.Mock | undefined)?.mockRestore?.();
   });
 
   it('renders correctly with Manual upload by default', () => {
@@ -281,6 +288,7 @@ describe('InitiativeStoresUpload', () => {
   it('Click to open manual link', () => {
     render(<InitiativeStoresUpload />);
     fireEvent.click(screen.getByText('pages.initiativeStores.manualLink'));
+    expect(window.open).toHaveBeenCalled();
   });
 
   it('sets salesPoints when form changes', () => {
@@ -418,5 +426,4 @@ const fillFormForSuccess = async (screen: any) => {
 
   const addressAutocompleteItem = await screen.findAllByRole('option');
   fireEvent.click(addressAutocompleteItem[3]);
-  // const addressFieldFilled = screen.getAllByRole('combobox')[0];
 };

@@ -10,6 +10,8 @@ import { useAppSelector } from '../../redux/hooks';
 import { partiesSelectors } from '../../redux/slices/partiesSlice';
 import { Party } from '../../model/Party';
 import { ENV } from '../../utils/env';
+import { browserConsole } from '../../utils/consoleLogger';
+import { cleanupOnLogout } from '../../utils/logoutCleanup';
 import { CustomHeaderAccount } from './CustomHeaderAccount';
 
 type Props = WithPartiesProps & {
@@ -27,7 +29,6 @@ const CustomHeader = ({ onExit, loggedUser }: /* , parties */ Props) => {
   const title = t('commons.title');
 
   const welfareProduct: ProductEntity = {
-    // TODO check if correct
     id: 'prod-idpay-merchants',
     title,
     productUrl: CONFIG.HEADER.LINK.PRODUCTURL,
@@ -63,7 +64,12 @@ const CustomHeader = ({ onExit, loggedUser }: /* , parties */ Props) => {
   return (
     <>
       <CustomHeaderAccount
-        onLogout={() => onExit(() => window.location.assign(ENV.URL_FE.LOGOUT))}
+        onLogout={() =>
+          onExit(() => {
+            cleanupOnLogout();
+            window.location.assign(ENV.URL_FE.LOGOUT);
+          })
+        }
         onLogin={() => onExit(() => window.location.assign(ENV.URL_FE.LOGIN))}
         onDocumentationClick={() => window.open(ENV.CONFIG.HEADER.OPERATION_MANUAL_LINK, '_blank')}
         loggedUser={
@@ -99,19 +105,21 @@ const CustomHeader = ({ onExit, loggedUser }: /* , parties */ Props) => {
             logoUrl: party.urlLogo,
           }))
         }
-        onSelectedProduct={() =>
-          onExit(() => {
-            /* TODO: implement token exchange for product switch */
-          })
+        onSelectedProduct={(p) =>
+          onExit(() =>
+            browserConsole.log(`TODO: perform token exchange to change Product and set ${p}`)
+          )
         }
         onSelectedParty={(selectedParty: any) => {
           if (selectedParty) {
             trackEvent('PARTY_SELECTION', {
               party_id: selectedParty.id,
             });
-            onExit(() => {
-              /* TODO: implement token exchange for party switch */
-            });
+            onExit(() =>
+              browserConsole.log(
+                `TODO: perform token exchange to change Party and set ${selectedParty}`
+              )
+            );
           }
         }}
       />

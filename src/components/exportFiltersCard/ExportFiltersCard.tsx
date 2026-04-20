@@ -104,6 +104,10 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
           formik.resetForm();
           onReportGenerated?.();
         }
+        if (currentRequestId === requestIdRef.current) {
+          formik.resetForm();
+          onReportGenerated?.();
+        }
       }
     },
   });

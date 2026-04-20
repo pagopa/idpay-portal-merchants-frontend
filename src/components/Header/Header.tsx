@@ -12,6 +12,7 @@ import { useAppSelector } from '../../redux/hooks';
 import { partiesSelectors } from '../../redux/slices/partiesSlice';
 import { Party } from '../../model/Party';
 import { ENV } from '../../utils/env';
+import { browserConsole } from '../../utils/consoleLogger';
 
 type Props = WithPartiesProps & {
   withSecondHeader: boolean;
@@ -88,19 +89,21 @@ const Header = ({ withSecondHeader, onExit, loggedUser }: /* , parties */ Props)
       }
       assistanceEmail={ENV.ASSISTANCE.EMAIL}
       enableLogin={true}
-      onSelectedProduct={() =>
-        onExit(() => {
-          /* TODO: implement token exchange for product switch */
-        })
+      onSelectedProduct={(p) =>
+        onExit(() =>
+          browserConsole.log(`TODO: perform token exchange to change Product and set ${p}`)
+        )
       }
       onSelectedParty={(selectedParty: any) => {
         if (selectedParty) {
           trackEvent('PARTY_SELECTION', {
             party_id: selectedParty.id,
           });
-          onExit(() => {
-            /* TODO: implement token exchange for party switch */
-          });
+          onExit(() =>
+            browserConsole.log(
+              `TODO: perform token exchange to change Party and set ${selectedParty}`
+            )
+          );
         }
       }}
     />

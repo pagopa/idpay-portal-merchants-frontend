@@ -23,9 +23,6 @@ class EmailNotificationApiClient {
     });
   }
 
-  /**
-   * Retrieve institutional email info of the logged user.
-   */
   public async getInstitutionProductUserInfo(): Promise<UserInstitutionInfoDTO> {
     const response =
       await this.baseClient.safeRequest<UserInstitutionInfoDTO>({
@@ -38,9 +35,6 @@ class EmailNotificationApiClient {
     return response.data;
   }
 
-  /**
-   * Send email notification.
-   */
   public async sendEmail(data: EmailMessageDTO): Promise<void> {
     await this.baseClient.safeRequest<void>({
       path: "/notify",
@@ -49,6 +43,7 @@ class EmailNotificationApiClient {
       secure: true,
       format: "json",
     });
+    
   }
 }
 

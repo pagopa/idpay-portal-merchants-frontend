@@ -12,6 +12,7 @@ import { safeFormatDate } from '../../utils/formatUtils';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { downloadMerchantReport, getMerchantReports } from '../../services/merchantService';
 import { ReportDTO } from '../../api/generated/merchants/data-contracts';
+import { browserConsole } from '../../utils/consoleLogger';
 
 type ReportStatusEnum = ReportDTO['reportStatus'];
 const INSERTED: ReportStatusEnum = 'INSERTED';
@@ -138,7 +139,7 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
           link.parentNode?.removeChild(link);
         }
       } catch (error) {
-        console.error('Error downloading report', error);
+        browserConsole.error('Error downloading report', error);
         updateAlerts('error', true);
         setTimeout(() => updateAlerts('error', false), 3000);
       } finally {

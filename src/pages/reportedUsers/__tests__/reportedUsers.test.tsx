@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import ReportedUsers from '../reportedUsers';
+import ReportedUsers from '../ReportedUsers';
 import { getReportedUser, deleteReportedUser } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
 import { ApiError } from '../../../api/ApiError';
@@ -258,7 +258,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire risposta vuota come array', async () => {
-      mockGetReportedUser.mockResolvedValueOnce([]);
+      mockGetReportedUser.mockResolvedValueOnce([] as any);
 
       renderComponent();
 
@@ -632,6 +632,14 @@ describe('ReportedUsers Component', () => {
           transactionId: 'TRX123',
         },
       ];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -722,7 +730,7 @@ describe('ReportedUsers Component', () => {
 
   describe('ShowEmptyAlert logic', () => {
     it('deve mostrare empty alert quando lastSearchedCF è valido ma user è vuoto', async () => {
-      mockGetReportedUser.mockResolvedValueOnce([]);
+      mockGetReportedUser.mockResolvedValueOnce([] as any);
 
       renderComponent();
 
@@ -736,7 +744,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('non deve mostrare empty alert quando location.state.newCf è presente', async () => {
-      mockGetReportedUser.mockResolvedValueOnce([]);
+      mockGetReportedUser.mockResolvedValueOnce([] as any);
 
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 

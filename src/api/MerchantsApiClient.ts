@@ -154,8 +154,7 @@ class MerchantsApiClient {
     return this.request<void>({
       path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/transactions/${transactionId}/postpone`,
       method: "POST",
-      format: "json",
-      body: { initiativeEndDate },
+      query: { initiativeEndDate },
     });
   }
 
@@ -257,7 +256,7 @@ class MerchantsApiClient {
     pointOfSaleId: string
   ): Promise<{ invoiceUrl: string }> {
     return this.request<{ invoiceUrl: string }>({
-      path: `/point-of-sales/${pointOfSaleId}/transactions/${transactionId}/download`,
+      path: `/${pointOfSaleId}/transactions/${transactionId}/download`,
       method: "GET",
       format: "json",
     });

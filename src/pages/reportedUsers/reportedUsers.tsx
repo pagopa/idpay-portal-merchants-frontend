@@ -4,7 +4,7 @@ import { Box, Stack, Button } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
 import ReportIcon from '@mui/icons-material/Report';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import DataTable from '../../components/dataTable/DataTable';
@@ -32,24 +32,20 @@ const initialValues: GetReportedUsersFilters = {
 const ReportedUsers: React.FC = () => {
   const { t } = useTranslation();
   const { setAlert } = useAlert();
+  const history = useHistory();
+  const { initiativeId } = useCurrentInitiativeId();
+
+  const requestIdRef = useRef<number>(0);
+
+  const userJwt = parseJwt(storageTokenOps.read());
+  const merchantId = userJwt?.merchant_id;
+
   const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
-    valid: {
-      text: t('pages.reportedUsers.cf.validCf'),
-      isOpen: false,
-      severity: 'success',
-    },
-    removed: {
-      text: t('pages.reportedUsers.cf.removedCf'),
-      isOpen: false,
-      severity: 'success',
-    },
-    missing: {
-      text: t('pages.reportedUsers.cf.noResultUser'),
-      isOpen: false,
-      severity: 'error',
-    },
+    valid: { text: t('pages.reportedUsers.cf.validCf'), isOpen: false, severity: 'success' },
+    removed: { text: t('pages.reportedUsers.cf.removedCf'), isOpen: false, severity: 'success' },
+    missing: { text: t('pages.reportedUsers.cf.noResultUser'), isOpen: false, severity: 'error' },
   });
-  const location = useLocation<{ newCf?: string; showSuccessAlert?: boolean }>();
+
   const [user, setUser] = useState<
     Array<{
       cf: string;
@@ -58,35 +54,14 @@ const ReportedUsers: React.FC = () => {
       transactionId: string;
     }>
   >([]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedCf, setSelectedCf] = useState<string | null>(null);
-  const history = useHistory();
-
-  const { initiativeId } = useCurrentInitiativeId();
-  const requestIdRef = useRef<number>(0);
-
-  const userJwt = parseJwt(storageTokenOps.read());
-  const merchantId = userJwt?.merchant_id;
 
   const updateAlerts = useCallback((key: string, open: boolean) => {
     setAlerts((prev) => ({ ...prev, [key]: { ...prev[key], isOpen: open } }));
-  }, []);
-
-  React.useEffect(() => {
-    if (location.state && location.state.newCf) {
-      void formik.setFieldValue('cf', location.state.newCf);
-      if (location.state.showSuccessAlert) {
-        updateAlerts('valid', true);
-        setTimeout(() => updateAlerts('valid', false), 3000);
-      }
-      setTimeout(() => {
-        void formik.handleSubmit();
-      }, 0);
-      history.replace({ ...location, state: {} });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formik = useFormik<GetReportedUsersFilters>({
@@ -209,22 +184,6 @@ const ReportedUsers: React.FC = () => {
     [handleOpenDeleteModal]
   );
 
-  const handleFiltersApplied = () => {
-    formik.handleSubmit();
-  };
-
-  React.useEffect(() => {
-    if (!initiativeId) {
-      return;
-    }
-
-    setUser([]);
-    setError(null);
-    setDeleteModalOpen(false);
-    setSelectedCf(null);
-    formik.resetForm();
-  }, [initiativeId]);
-
   if (!initiativeId) {
     return null;
   }
@@ -260,14 +219,16 @@ const ReportedUsers: React.FC = () => {
             {t('pages.reportedUsers.reportUser')}
           </Button>
         </Stack>
+
         <SearchTaxCode
           formik={formik as any}
-          onSearch={handleFiltersApplied}
+          onSearch={() => formik.handleSubmit()}
           onReset={() => {
             setUser([]);
             void formik.setFieldValue('cf', '');
           }}
         />
+
         {user.length > 0 && (
           <Box
             sx={{
@@ -289,6 +250,7 @@ const ReportedUsers: React.FC = () => {
             />
           </Box>
         )}
+
         <ModalReportedUser
           open={deleteModalOpen}
           title={t('pages.reportedUsers.ModalReportedUser.title')}
@@ -315,6 +277,7 @@ const ReportedUsers: React.FC = () => {
           <NoResultPaper translationKey="pages.reportedUsers.noUsers" />
         )}
       </Box>
+
       <AlertListComponent
         alertList={Object.entries(alerts).map(([key, value]) => ({
           ...value,

@@ -18,6 +18,7 @@ import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { PAGINATION_SIZE } from '../../utils/constants';
+import { browserConsole } from '../../utils/consoleLogger';
 import EmptyList from '../../pages/components/EmptyList';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import CustomChip from '../Chip/CustomChip';
@@ -80,8 +81,8 @@ const MerchantTransactions = ({
       status: '',
       page: 0,
     },
-    onSubmit: () => {
-      /* no-op: filters handled via onFiltersApplied */
+    onSubmit: (values) => {
+      browserConsole.log(values);
     },
   });
 
@@ -184,6 +185,7 @@ const MerchantTransactions = ({
   ];
 
   const handleOnFiltersApplied = (filters: any) => {
+    browserConsole.log('Callback dopo applicazione filtri', filters);
     setFiltersAppliedOnce(true);
     if (handleFiltersApplied) {
       handleFiltersApplied(filters);
@@ -191,6 +193,7 @@ const MerchantTransactions = ({
   };
 
   const handleOnFiltersReset = () => {
+    browserConsole.log('Callback dopo reset filtri');
     setFiltersAppliedOnce(false);
     if (handleFiltersReset) {
       handleFiltersReset();

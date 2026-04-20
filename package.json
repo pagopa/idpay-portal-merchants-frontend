@@ -42,7 +42,10 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "clean": "rimraf build coverage",
+    "clean": "npm-run-all clean:*",
+    "clean:build": "rimraf build",
+    "clean:coverage": "rimraf coverage",
+    "clean:generated": "rimraf src/api/generated",
     "start": "craco start",
     "build": "craco build",
     "test": "craco test --testPathIgnorePatterns=src/utils/__tests__/test-utils.tsx -i",
@@ -92,7 +95,6 @@
     "@testing-library/react-hooks": "7",
     "@testing-library/user-event": "^14.0.4",
     "@types/react-router-dom": "^5.3.3",
-    "api-spec-converter": "^2.12.0",
     "craco-module-federation": "^1.1.0",
     "eslint": "^8.18.0",
     "eslint-config-prettier": "^8.5.0",

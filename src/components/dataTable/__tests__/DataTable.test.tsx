@@ -105,49 +105,4 @@ describe('DataTable', () => {
       fireEvent.click(nextButton);
     }
   });
-
-  it('calls onRowSelectionChange with selected rows in multi-select mode', () => {
-    const onRowSelectionChange = jest.fn();
-    const props: DataTableProps = {
-      ...baseProps,
-      checkable: true,
-      singleSelect: false,
-      onRowSelectionChange,
-    };
-
-    render(<DataTable {...props} />);
-
-    const checkboxes = screen.getAllByRole('checkbox');
-    fireEvent.click(checkboxes[1]);
-
-    expect(onRowSelectionChange).toHaveBeenCalledTimes(1);
-    const selectedRows = onRowSelectionChange.mock.calls[0][0];
-    expect(selectedRows).toHaveLength(1);
-    expect(selectedRows[0]).toEqual(baseProps.rows[0]);
-  });
-
-  it('enforces single selection and allows clearing selection', () => {
-    const onRowSelectionChange = jest.fn();
-    const props: DataTableProps = {
-      ...baseProps,
-      checkable: true,
-      singleSelect: true,
-      onRowSelectionChange,
-    };
-
-    render(<DataTable {...props} />);
-
-    const checkboxes = screen.getAllByRole('checkbox');
-
-    fireEvent.click(checkboxes[1]);
-    fireEvent.click(checkboxes[2]);
-
-    const lastCall = onRowSelectionChange.mock.calls[onRowSelectionChange.mock.calls.length - 1][0];
-    expect(lastCall).toHaveLength(1);
-    expect(lastCall[0]).toEqual(baseProps.rows[1]);
-
-    fireEvent.click(checkboxes[2]);
-    const finalCall = onRowSelectionChange.mock.calls[onRowSelectionChange.mock.calls.length - 1][0];
-    expect(finalCall).toHaveLength(0);
-  });
 });

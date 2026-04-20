@@ -43,7 +43,7 @@ const InitiativeOverview = () => {
         setIban(response?.iban);
         setIbanHolder(response?.ibanHolder);
         setOnboardingDate(
-          response?.activationDate ? formatDate(new Date(response.activationDate)) : undefined
+          formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
         );
       } catch {
         if (!active) {

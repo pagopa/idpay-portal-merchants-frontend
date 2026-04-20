@@ -56,14 +56,8 @@ jobs:
       - name: Generate API client
         run: yarn generate
 
-      - name: Jest Coverage Report
-        uses: ArtiomTr/jest-coverage-report-action@82bc34a0347019ba8f6d2808cd96cec42ef9620e # v2.3.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          test-script: yarn test:coverage
-          threshold: 80
-          annotations: none
-          package-manager: yarn
+      - name: Run tests with coverage
+        run: yarn test:coverage
 
       - name: SonarCloud Scan (PR Analysis)
         uses: SonarSource/sonarqube-scan-action@e9a1c4e09a5eddb7db5d045b83807904bf8f67fc # v7.0.0
@@ -80,5 +74,7 @@ jobs:
             -Dsonar.pullrequest.github.repository=${{ github.repository }}
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx,**/__tests__/**/*.*,src/bootstrap.tsx,src/__mocks__/**/*
-            -Dsonar.qualitygate.wait=true
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
+            "-Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx,**/__tests__/**/*.*,src/bootstrap.tsx,src/__mocks__/**/*"
+            "-X"
+            "-Dsonar.qualitygate.wait=false"

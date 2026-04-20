@@ -39,6 +39,7 @@ import {
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { useAlert } from '../../../hooks/useAlert';
 import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts';
+import { browserConsole } from '../../../utils/consoleLogger';
 
 type StatusEnum = RewardBatchDTO['status'];
 const APPROVED_STATUS: StatusEnum = 'APPROVED';
@@ -209,6 +210,7 @@ const ShopDetails: React.FC = () => {
         link.download = filename;
         link.click();
       } catch (e) {
+        browserConsole.log(e);
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),

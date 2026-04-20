@@ -44,29 +44,46 @@ describe('copyTextToClipboard', () => {
 });
 
 describe('downloadQRCodeFromURL', () => {
-  global.fetch = jest.fn();
-  global.URL.createObjectURL = jest.fn();
-  const clickSpy = jest.fn();
+  let fetchSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(document, 'createElement').mockReturnValue({
-      click: clickSpy,
-      href: '',
-      download: '',
-    } as any);
+    fetchSpy = jest.spyOn(global, 'fetch');
+    Object.defineProperty(URL, 'createObjectURL', {
+      value: jest.fn(() => 'blob:mock-url'),
+      writable: true,
+    });
   });
 
-  test('should perform fetch and trigger download on success', async () => {
+  afterEach(() => {
+    fetchSpy.mockRestore();
+    (URL.createObjectURL as jest.Mock).mockClear();
+  });
+
+  it('should log an error if fetch fails', async () => {
+    const mockError = new Error('Network error');
+    fetchSpy.mockRejectedValue(mockError);
+
+    const { browserConsole } = require('../utils/consoleLogger');
+    const consoleSpy = jest.spyOn(browserConsole, 'error').mockImplementation(() => {});
+
+    downloadQRCodeFromURL('https://example.com/qrcode');
+    await new Promise(process.nextTick);
+
+    expect(consoleSpy).toHaveBeenCalledWith(mockError);
+    consoleSpy.mockRestore();
+  });
+
+  it('should perform fetch and trigger download on success', async () => {
     const mockUrl = 'https://example.com/qrcode.png';
     const mockBlob = new Blob(['qrcode-data'], { type: 'image/png' });
-    (fetch as jest.Mock).mockResolvedValue({ blob: () => Promise.resolve(mockBlob) });
+
+    fetchSpy.mockResolvedValue({ blob: () => Promise.resolve(mockBlob) } as any);
 
     downloadQRCodeFromURL(mockUrl);
 
     await new Promise(process.nextTick);
 
-    expect(fetch).toHaveBeenCalledWith(mockUrl);
+    expect(fetchSpy).toHaveBeenCalledWith(mockUrl);
     expect(URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
   });
 
@@ -79,7 +96,7 @@ describe('downloadQRCodeFromURL', () => {
 
   test('should do nothing if URL is not a string', () => {
     downloadQRCodeFromURL(undefined);
-    expect(fetch).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
 

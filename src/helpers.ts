@@ -2,6 +2,7 @@
 /* eslint-disable functional/immutable-data */
 import { matchPath } from 'react-router-dom';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
+import { browserConsole } from './utils/consoleLogger';
 import {
   RewardBatchTrxStatus,
 } from './api/generated/merchants/data-contracts';
@@ -47,9 +48,7 @@ export const downloadQRCodeFromURL = (url: string | undefined) => {
         a.click();
         document.body.removeChild(a);
       })
-      .catch(() => {
-        /* intentionally swallowed to avoid logging sensitive data */
-      });
+      .catch((error) => browserConsole.error(error));
   }
 };
 

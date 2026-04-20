@@ -14,9 +14,8 @@ const NewDiscount = () => {
   const [discountCreated, setDiscountCreated] = useState(false);
   const [discountResponse, setDiscountResponse] = useState<TransactionResponse | undefined>();
   const currentInitiative = useCurrentInitiative();
-  const { t } = useTranslation();
-
   const { initiativeId } = useCurrentInitiativeId();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!initiativeId) {

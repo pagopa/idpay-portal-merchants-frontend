@@ -35,6 +35,7 @@ import { getMerchantPointOfSales } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
+import { browserConsole } from '../../utils/consoleLogger';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -286,8 +287,8 @@ const InitiativeStores: React.FC = () => {
 
   const formik = useFormik<GetPointOfSalesFilters>({
     initialValues,
-    onSubmit: () => {
-      /* no-op: filters handled via handleFiltersApplied */
+    onSubmit: (values) => {
+      browserConsole.log('Eseguo ricerca con filtri:', values);
     },
   });
 
@@ -363,6 +364,7 @@ const InitiativeStores: React.FC = () => {
         true
       );
     } else {
+      browserConsole.log('Ordinamento rimosso.');
       setCurrentSort('asc');
       setSortModel([]);
     }
