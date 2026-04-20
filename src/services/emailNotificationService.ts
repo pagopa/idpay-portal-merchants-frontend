@@ -1,4 +1,4 @@
-import { EmailNotificationApi } from "../api/EmailNotificationApiClient";
+import { EmailNotificationApi } from "../api/emailNotificationApiClient";
 import {
   EmailMessageDTO,
   UserInstitutionInfoDTO,
