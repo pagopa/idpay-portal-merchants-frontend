@@ -19,5 +19,3 @@ export const pagesFiltersFormContainerStyle = {
   gap: 2,
   mb: 4,
 };
-
-

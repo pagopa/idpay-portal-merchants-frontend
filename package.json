@@ -53,18 +53,15 @@
     "lint": "eslint -f json -o eslint-report.json . -c .eslintrc.js --ext .ts,.tsx --cache",
     "lint-autofix": "eslint . -c .eslintrc.js --ext .ts,.tsx --fix",
     "prettify": "prettier --write \"./**/*.{ts,tsx}\"",
-
     "generate": "npm-run-all generate:api:*",
-
     "clean:api:merchants": "rimraf src/api/generated/merchants",
     "clean:api:email-notification": "rimraf src/api/generated/email-notification",
     "clean:api:autocomplete": "rimraf src/api/generated/autocomplete",
     "clean:api:role-permission": "rimraf src/api/generated/role-permission",
-
-"generate:api:merchants": "npm-run-all clean:api:merchants && swagger-typescript-api generate --path openApi/openapi.merchants.portal.yml --output src/api/generated/merchants --name Api.ts --modular",
-"generate:api:email-notification": "npm-run-all clean:api:email-notification && swagger-typescript-api generate --path openApi/openapi.email-notification.yml --output src/api/generated/email-notification --name Api.ts --modular",
-"generate:api:autocomplete": "npm-run-all clean:api:autocomplete && swagger-typescript-api generate --path openApi/openapi.autocomplete.yml --output src/api/generated/autocomplete --name Api.ts --modular",
-"generate:api:role-permission": "npm-run-all clean:api:role-permission && swagger-typescript-api generate --path openApi/openapi.role-permission.yml --output src/api/generated/role-permission --name Api.ts --modular"
+    "generate:api:merchants": "npm-run-all clean:api:merchants && swagger-typescript-api generate --path openApi/openapi.merchants.portal.yml --output src/api/generated/merchants --name Api.ts --modular",
+    "generate:api:email-notification": "npm-run-all clean:api:email-notification && swagger-typescript-api generate --path openApi/openapi.email-notification.yml --output src/api/generated/email-notification --name Api.ts --modular",
+    "generate:api:autocomplete": "npm-run-all clean:api:autocomplete && swagger-typescript-api generate --path openApi/openapi.autocomplete.yml --output src/api/generated/autocomplete --name Api.ts --modular",
+    "generate:api:role-permission": "npm-run-all clean:api:role-permission && swagger-typescript-api generate --path openApi/openapi.role-permission.yml --output src/api/generated/role-permission --name Api.ts --modular"
   },
   "eslintConfig": {
     "extends": [

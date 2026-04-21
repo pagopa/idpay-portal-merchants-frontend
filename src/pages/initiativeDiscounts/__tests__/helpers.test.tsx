@@ -32,9 +32,7 @@ describe('initiativeDiscounts/helpers', () => {
 
     it('should render AUTHORIZATION_REQUESTED status chip', () => {
       render(
-        renderTransactionCreatedStatus(
-          StatusEnum.AUTHORIZATION_REQUESTED
-        ) as React.ReactElement
+        renderTransactionCreatedStatus(StatusEnum.AUTHORIZATION_REQUESTED) as React.ReactElement
       );
       expect(
         screen.getByText('commons.discountStatusEnum.authorizationRequested')

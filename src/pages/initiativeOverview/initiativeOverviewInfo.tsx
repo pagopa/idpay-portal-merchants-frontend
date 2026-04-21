@@ -53,7 +53,7 @@ export const InitiativeOverviewInfo = () => {
               boxShadow: 24,
               px: 4,
               pt: 4,
-              pb: 2
+              pb: 2,
             }}
           >
             <Box>

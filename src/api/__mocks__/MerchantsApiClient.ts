@@ -5,7 +5,7 @@ import {
   MerchantTransactionsListDTO,
   TransactionResponse,
   AuthPaymentResponseDTO,
-} from "../generated/merchants/data-contracts";
+} from '../generated/merchants/data-contracts';
 
 const startDate = new Date();
 const endDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
@@ -14,12 +14,12 @@ export const mockedInitiativesList: Array<InitiativeDTO> = [
   {
     enabled: true,
     endDate: endDate.toISOString(),
-    initiativeId: "1234",
-    initiativeName: "Iniziativa mock 1234",
-    organizationName: "Organizzazione mock 1234",
-    serviceId: "1234",
+    initiativeId: '1234',
+    initiativeName: 'Iniziativa mock 1234',
+    organizationName: 'Organizzazione mock 1234',
+    serviceId: '1234',
     startDate: startDate.toISOString(),
-    status: "PUBLISHED",
+    status: 'PUBLISHED',
   } as unknown as InitiativeDTO,
 ];
 
@@ -38,15 +38,15 @@ export const mockedMerchantInitiativeStatistics: MerchantStatisticsDTO = {
 } as MerchantStatisticsDTO;
 
 export const mockedMerchantDetail: MerchantDetailDTO = {
-  initiativeId: "1234",
-  initiativeName: "Iniziativa mock 1234",
-  status: "PUBLISHED",
+  initiativeId: '1234',
+  initiativeName: 'Iniziativa mock 1234',
+  status: 'PUBLISHED',
 } as unknown as MerchantDetailDTO;
 
 export const transactionResponseMocked: TransactionResponse = {
-  id: "000001",
-  initiativeId: "1234",
-  status: "PUBLISHED",
+  id: '000001',
+  initiativeId: '1234',
+  status: 'PUBLISHED',
 } as unknown as TransactionResponse;
 
 export const authPaymentBarCodeResponseMocked: AuthPaymentResponseDTO =
@@ -62,8 +62,7 @@ export const MerchantsApiMocked = {
   getMerchantInitiativeStatistics: async (): Promise<MerchantStatisticsDTO> =>
     Promise.resolve(mockedMerchantInitiativeStatistics),
 
-  getMerchantDetail: async (): Promise<MerchantDetailDTO> =>
-    Promise.resolve(mockedMerchantDetail),
+  getMerchantDetail: async (): Promise<MerchantDetailDTO> => Promise.resolve(mockedMerchantDetail),
 
   deleteTransaction: async (): Promise<void> => Promise.resolve(),
 

@@ -1,10 +1,8 @@
 import { theme } from '@pagopa/mui-italia/theme';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
-import {
-  RewardBatchDTO,
-} from '../../api/generated/merchants/data-contracts';
+import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
 
-type StatusEnum = RewardBatchDTO["status"];
+type StatusEnum = RewardBatchDTO['status'];
 
 const getStatus: any = (status: string) => {
   switch (status) {
@@ -36,7 +34,6 @@ const getStatus: any = (status: string) => {
 };
 
 export const getBatchStatus: any = (batchStatus: StatusEnum) => {
-
   switch (batchStatus) {
     case 'CREATED':
       return { color: '#FFF5DA !important', textColor: '#614C15 !important', label: 'Da inviare' };

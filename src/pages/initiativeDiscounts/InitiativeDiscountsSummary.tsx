@@ -10,7 +10,7 @@ type Props = {
 };
 
 const InitiativeDiscountsSummary = ({ id }: Props) => {
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
   const { t } = useTranslation();
   const [amount, setAmount] = useState<number | undefined>(undefined);
   const [refunded, setRefunded] = useState<number | undefined>(undefined);
@@ -24,7 +24,12 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
           setIban(response?.iban);
         })
         .catch(() =>
-          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'})
+          setAlert({
+            title: t('errors.genericTitle'),
+            text: t('errors.genericDescription'),
+            isOpen: true,
+            severity: 'error',
+          })
         );
     }
   }, [id]);
@@ -41,7 +46,12 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
         .catch(() => {
           setAmount(undefined);
           setRefunded(undefined);
-          setAlert({title: t('errors.genericTitle'), text: t('errors.genericDescription'), isOpen: true, severity: 'error'});
+          setAlert({
+            title: t('errors.genericTitle'),
+            text: t('errors.genericDescription'),
+            isOpen: true,
+            severity: 'error',
+          });
         });
     }
   }, [id]);

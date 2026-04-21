@@ -94,7 +94,7 @@ export const CustomHeaderAccount = ({
               fontWeight: 'bold',
               color: blueGrey[900],
               '&:hover': {
-                color: blueGrey[700] + "!important",
+                color: blueGrey[700] + '!important',
               },
             }}
           >
@@ -115,7 +115,7 @@ export const CustomHeaderAccount = ({
                   display: ['none', 'flex'],
                   color: blueGrey[900],
                   '&:hover': {
-                    color: blueGrey[700] + "!important",
+                    color: blueGrey[700] + '!important',
                   },
                 }}
               >
@@ -145,7 +145,7 @@ export const CustomHeaderAccount = ({
                   display: ['none', 'flex'],
                   color: blueGrey[900],
                   '&:hover': {
-                    color: blueGrey[700] + "!important",
+                    color: blueGrey[700] + '!important',
                   },
                 }}
               >

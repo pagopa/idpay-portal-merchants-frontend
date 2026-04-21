@@ -1,5 +1,5 @@
-import { ENV } from "../utils/env";
-import { BaseApiClient } from "./BaseApiClient";
+import { ENV } from '../utils/env';
+import { BaseApiClient } from './BaseApiClient';
 import {
   InitiativeDTO,
   MerchantStatisticsDTO,
@@ -15,7 +15,7 @@ import {
   TransactionResponse,
   ReportedUserDTO,
   ReportedUserCreateResponseDTO,
-} from "./generated/merchants/data-contracts";
+} from './generated/merchants/data-contracts';
 
 class MerchantsApiClient {
   private baseClient: BaseApiClient;
@@ -26,9 +26,7 @@ class MerchantsApiClient {
     });
   }
 
-  private async request<T>(
-    config: Parameters<BaseApiClient["safeRequest"]>[0]
-  ): Promise<T> {
+  private async request<T>(config: Parameters<BaseApiClient['safeRequest']>[0]): Promise<T> {
     const response = await this.baseClient.safeRequest<T>({
       secure: true,
       ...config,
@@ -38,29 +36,25 @@ class MerchantsApiClient {
 
   public getMerchantInitiativeList(): Promise<Array<InitiativeDTO>> {
     return this.request<Array<InitiativeDTO>>({
-      path: "/initiatives",
-      method: "GET",
-      format: "json",
+      path: '/initiatives',
+      method: 'GET',
+      format: 'json',
     });
   }
 
-  public getMerchantInitiativeStatistics(
-    initiativeId: string
-  ): Promise<MerchantStatisticsDTO> {
+  public getMerchantInitiativeStatistics(initiativeId: string): Promise<MerchantStatisticsDTO> {
     return this.request<MerchantStatisticsDTO>({
       path: `/initiatives/${initiativeId}/statistics`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
     });
   }
 
-  public getMerchantDetail(
-    initiativeId: string
-  ): Promise<MerchantDetailDTO> {
+  public getMerchantDetail(initiativeId: string): Promise<MerchantDetailDTO> {
     return this.request<MerchantDetailDTO>({
       path: `/initiatives/${initiativeId}`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
     });
   }
 
@@ -72,8 +66,8 @@ class MerchantsApiClient {
   ): Promise<MerchantTransactionsListDTO> {
     return this.request<MerchantTransactionsListDTO>({
       path: `/initiatives/${initiativeId}/transactions`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
       query: { page, size: 10, fiscalCode, status },
     });
   }
@@ -84,8 +78,8 @@ class MerchantsApiClient {
   ): Promise<MerchantTransactionsListDTO> {
     return this.request<MerchantTransactionsListDTO>({
       path: `/initiatives/${initiativeId}/transactions/processed`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
       query,
     });
   }
@@ -97,40 +91,32 @@ class MerchantsApiClient {
   ): Promise<RewardBatchListDTO> {
     return this.request<RewardBatchListDTO>({
       path: `/initiatives/${initiativeId}/reward-batches`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
       query: { page, size },
     });
   }
 
-  public getAllRewardBatches(
-    initiativeId: string
-  ): Promise<RewardBatchListDTO> {
+  public getAllRewardBatches(initiativeId: string): Promise<RewardBatchListDTO> {
     return this.request<RewardBatchListDTO>({
       path: `/initiatives/${initiativeId}/reward-batches/all`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
     });
   }
 
-  public getRewardBatchById(
-    initiativeId: string,
-    rewardBatchId: string
-  ): Promise<RewardBatchDTO> {
+  public getRewardBatchById(initiativeId: string, rewardBatchId: string): Promise<RewardBatchDTO> {
     return this.request<RewardBatchDTO>({
       path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
     });
   }
 
-  public sendRewardBatch(
-    initiativeId: string,
-    rewardBatchId: string
-  ): Promise<void> {
+  public sendRewardBatch(initiativeId: string, rewardBatchId: string): Promise<void> {
     return this.request<void>({
       path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/send`,
-      method: "POST",
+      method: 'POST',
     });
   }
 
@@ -140,8 +126,8 @@ class MerchantsApiClient {
   ): Promise<DownloadRewardBatchResponseDTO> {
     return this.request<DownloadRewardBatchResponseDTO>({
       path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/csv`,
-      method: "GET",
-      format: "blob",
+      method: 'GET',
+      format: 'blob',
     });
   }
 
@@ -153,7 +139,7 @@ class MerchantsApiClient {
   ): Promise<void> {
     return this.request<void>({
       path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/transactions/${transactionId}/postpone`,
-      method: "POST",
+      method: 'POST',
       query: { initiativeEndDate },
     });
   }
@@ -165,20 +151,17 @@ class MerchantsApiClient {
   ): Promise<ReportListDTO> {
     return this.request<ReportListDTO>({
       path: `/initiative/${initiativeId}/reports`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
       query: { page, size },
     });
   }
 
-  public generateMerchantReport(
-    initiativeId: string,
-    body: ReportRequest
-  ): Promise<void> {
+  public generateMerchantReport(initiativeId: string, body: ReportRequest): Promise<void> {
     return this.request<void>({
       path: `/initiative/${initiativeId}/reports`,
-      method: "POST",
-      format: "json",
+      method: 'POST',
+      format: 'json',
       body,
     });
   }
@@ -189,30 +172,28 @@ class MerchantsApiClient {
   ): Promise<{ reportUrl: string }> {
     return this.request<{ reportUrl: string }>({
       path: `/initiative/${initiativeId}/reports/${reportId}/download`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
     });
   }
 
   public deleteTransaction(transactionId: string): Promise<void> {
     return this.request<void>({
       path: `/transactions/${transactionId}`,
-      method: "DELETE",
+      method: 'DELETE',
     });
   }
 
-  public createTransaction(
-    body: {
-      amountCents: number;
-      idTrxAcquirer: string;
-      initiativeId: string;
-      mcc?: string;
-    }
-  ): Promise<TransactionResponse> {
+  public createTransaction(body: {
+    amountCents: number;
+    idTrxAcquirer: string;
+    initiativeId: string;
+    mcc?: string;
+  }): Promise<TransactionResponse> {
     return this.request<TransactionResponse>({
       path: `/transactions`,
-      method: "POST",
-      format: "json",
+      method: 'POST',
+      format: 'json',
       body,
     });
   }
@@ -226,8 +207,8 @@ class MerchantsApiClient {
   ): Promise<unknown> {
     return this.request<unknown>({
       path: `/transactions/bar-code/${trxCode}/authorize`,
-      method: "PUT",
-      format: "json",
+      method: 'PUT',
+      format: 'json',
       body,
     });
   }
@@ -238,15 +219,15 @@ class MerchantsApiClient {
     docNumber?: string
   ): Promise<{ code: string; message: string }> {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
     if (docNumber) {
-      formData.append("docNumber", docNumber);
+      formData.append('docNumber', docNumber);
     }
 
     return this.request<{ code: string; message: string }>({
       path: `/transactions/${transactionId}/invoice/update`,
-      method: "PUT",
-      format: "formData",
+      method: 'PUT',
+      format: 'formData',
       body: formData,
     });
   }
@@ -257,8 +238,8 @@ class MerchantsApiClient {
   ): Promise<{ invoiceUrl: string }> {
     return this.request<{ invoiceUrl: string }>({
       path: `/${pointOfSaleId}/transactions/${transactionId}/download`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
     });
   }
 
@@ -268,15 +249,15 @@ class MerchantsApiClient {
     docNumber?: string
   ): Promise<void | { code: string; message: string }> {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
     if (docNumber) {
-      formData.append("docNumber", docNumber);
+      formData.append('docNumber', docNumber);
     }
 
     return this.request<void | { code: string; message: string }>({
       path: `/transactions/${transactionId}/reversal-invoiced`,
-      method: "POST",
-      format: "formData",
+      method: 'POST',
+      format: 'formData',
       body: formData,
     });
   }
@@ -284,13 +265,11 @@ class MerchantsApiClient {
   public getMerchantPointOfSales(
     merchantId: string,
     query?: Record<string, unknown>
-  ): Promise<import("./generated/merchants/data-contracts").ListPointOfSaleDTO> {
-    return this.request<
-      import("./generated/merchants/data-contracts").ListPointOfSaleDTO
-    >({
+  ): Promise<import('./generated/merchants/data-contracts').ListPointOfSaleDTO> {
+    return this.request<import('./generated/merchants/data-contracts').ListPointOfSaleDTO>({
       path: `/${merchantId}/point-of-sales`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
       query,
     });
   }
@@ -298,26 +277,22 @@ class MerchantsApiClient {
   public getMerchantPointOfSalesById(
     merchantId: string,
     pointOfSaleId: string
-  ): Promise<import("./generated/merchants/data-contracts").PointOfSaleDTO> {
-    return this.request<
-      import("./generated/merchants/data-contracts").PointOfSaleDTO
-    >({
+  ): Promise<import('./generated/merchants/data-contracts').PointOfSaleDTO> {
+    return this.request<import('./generated/merchants/data-contracts').PointOfSaleDTO>({
       path: `/${merchantId}/point-of-sales/${pointOfSaleId}`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
     });
   }
 
   public updateMerchantPointOfSales(
     merchantId: string,
-    body: Array<
-      import("./generated/merchants/data-contracts").PointOfSaleDTO
-    >
+    body: Array<import('./generated/merchants/data-contracts').PointOfSaleDTO>
   ): Promise<void> {
     return this.request<void>({
       path: `/${merchantId}/point-of-sales`,
-      method: "PUT",
-      format: "json",
+      method: 'PUT',
+      format: 'json',
       body,
     });
   }
@@ -329,8 +304,8 @@ class MerchantsApiClient {
   ): Promise<PointOfSaleTransactionsProcessedListDTO> {
     return this.request<PointOfSaleTransactionsProcessedListDTO>({
       path: `/initiatives/${initiativeId}/point-of-sales/${pointOfSaleId}/transactions/processed`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
       query,
     });
   }
@@ -340,8 +315,8 @@ class MerchantsApiClient {
   ): Promise<Array<FranchisePointOfSaleDTO>> {
     return this.request<Array<FranchisePointOfSaleDTO>>({
       path: `/point-of-sales/${rewardBatchId}`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
     });
   }
 
@@ -351,10 +326,10 @@ class MerchantsApiClient {
   ): Promise<Array<ReportedUserDTO>> {
     return this.request<Array<ReportedUserDTO>>({
       path: `/reported-user/${userFiscalCode}`,
-      method: "GET",
-      format: "json",
+      method: 'GET',
+      format: 'json',
       headers: {
-        "initiative-id": initiativeId,
+        'initiative-id': initiativeId,
       },
     });
   }
@@ -365,10 +340,10 @@ class MerchantsApiClient {
   ): Promise<ReportedUserCreateResponseDTO> {
     return this.request<ReportedUserCreateResponseDTO>({
       path: `/reported-user/${userFiscalCode}`,
-      method: "POST",
-      format: "json",
+      method: 'POST',
+      format: 'json',
       headers: {
-        "initiative-id": initiativeId,
+        'initiative-id': initiativeId,
       },
     });
   }
@@ -379,10 +354,10 @@ class MerchantsApiClient {
   ): Promise<ReportedUserCreateResponseDTO> {
     return this.request<ReportedUserCreateResponseDTO>({
       path: `/reported-user/${userFiscalCode}`,
-      method: "DELETE",
-      format: "json",
+      method: 'DELETE',
+      format: 'json',
       headers: {
-        "initiative-id": initiativeId,
+        'initiative-id': initiativeId,
       },
     });
   }

@@ -1,9 +1,6 @@
-import { ENV } from "../utils/env";
-import { BaseApiClient } from "./BaseApiClient";
-import {
-  PortalConsentDTO,
-  UserPermissionDTO,
-} from "./generated/role-permission/data-contracts";
+import { ENV } from '../utils/env';
+import { BaseApiClient } from './BaseApiClient';
+import { PortalConsentDTO, UserPermissionDTO } from './generated/role-permission/data-contracts';
 
 /**
  * RolePermissionApiClient
@@ -26,10 +23,10 @@ class RolePermissionApiClient {
 
   public async userPermission(): Promise<UserPermissionDTO> {
     const response = await this.baseClient.safeRequest<UserPermissionDTO>({
-      path: "/permissions",
-      method: "GET",
+      path: '/permissions',
+      method: 'GET',
       secure: true,
-      format: "json",
+      format: 'json',
     });
 
     return response.data;
@@ -37,23 +34,21 @@ class RolePermissionApiClient {
 
   public async getPortalConsent(): Promise<PortalConsentDTO> {
     const response = await this.baseClient.safeRequest<PortalConsentDTO>({
-      path: "/consent",
-      method: "GET",
+      path: '/consent',
+      method: 'GET',
       secure: true,
-      format: "json",
+      format: 'json',
     });
 
     return response.data;
   }
 
-  public async savePortalConsent(
-    versionId?: string
-  ): Promise<void> {
+  public async savePortalConsent(versionId?: string): Promise<void> {
     await this.baseClient.safeRequest<void>({
-      path: "/consent",
-      method: "POST",
+      path: '/consent',
+      method: 'POST',
       secure: true,
-      format: "json",
+      format: 'json',
       body: { versionId },
     });
   }
@@ -64,6 +59,5 @@ const client = new RolePermissionApiClient();
 export const RolePermissionApi = {
   userPermission: () => client.userPermission(),
   getPortalConsent: () => client.getPortalConsent(),
-  savePortalConsent: (versionId?: string) =>
-    client.savePortalConsent(versionId),
+  savePortalConsent: (versionId?: string) => client.savePortalConsent(versionId),
 };

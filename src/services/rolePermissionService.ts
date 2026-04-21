@@ -10,6 +10,5 @@ export const getUserPermission = (): Promise<UserPermissionDTO> =>
 export const getPortalConsent = (): Promise<PortalConsentDTO> =>
   RolePermissionApi.getPortalConsent();
 
-export const savePortalConsent = (
-  versionId: string | undefined
-): Promise<void> => RolePermissionApi.savePortalConsent(versionId);
+export const savePortalConsent = (versionId: string | undefined): Promise<void> =>
+  RolePermissionApi.savePortalConsent(versionId);

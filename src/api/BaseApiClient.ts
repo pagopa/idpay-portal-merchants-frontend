@@ -1,13 +1,13 @@
-import { storageTokenOps } from "@pagopa/selfcare-common-frontend/lib/utils/storage";
-import { appStateActions } from "@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice";
-import { store } from "../redux/store";
-import { parseJwt } from "../utils/jwt-utils";
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
+import { store } from '../redux/store';
+import { parseJwt } from '../utils/jwt-utils';
 
 type RequestConfig = {
   path: string;
   method: string;
   secure?: boolean;
-  format?: "json" | "blob" | "formData";
+  format?: 'json' | 'blob' | 'formData';
   query?: Record<string, unknown>;
   body?: unknown;
   headers?: Record<string, string>;
@@ -17,7 +17,7 @@ type ApiClientConfig = {
   baseUrl: string;
 };
 
-import { ApiError } from "./ApiError";
+import { ApiError } from './ApiError';
 
 export class BaseApiClient {
   private baseUrl: string;
@@ -28,7 +28,7 @@ export class BaseApiClient {
 
   private buildQueryString(query?: Record<string, unknown>): string {
     if (!query) {
-      return "";
+      return '';
     }
 
     const params = new URLSearchParams();
@@ -40,7 +40,7 @@ export class BaseApiClient {
     });
 
     const queryString = params.toString();
-    return queryString ? `?${queryString}` : "";
+    return queryString ? `?${queryString}` : '';
   }
 
   private buildHeaders(
@@ -59,36 +59,33 @@ export class BaseApiClient {
     if (secure) {
       const token = storageTokenOps.read();
       if (token && parseJwt(token)) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
     }
 
-    if (format === "json") {
-      headers.set("Content-Type", "application/json");
+    if (format === 'json') {
+      headers.set('Content-Type', 'application/json');
     }
 
     return headers;
   }
 
-  public async safeRequest<T>(
-    config: RequestConfig
-  ): Promise<{ data: T }> {
+  public async safeRequest<T>(config: RequestConfig): Promise<{ data: T }> {
     const { path, method, secure, format, query, body, headers } = config;
 
-    const url =
-      `${this.baseUrl}${path}` + this.buildQueryString(query);
+    const url = `${this.baseUrl}${path}` + this.buildQueryString(query);
 
     const requestHeaders = this.buildHeaders(
       secure,
       headers,
-      body && format !== "formData" ? "json" : undefined
+      body && format !== 'formData' ? 'json' : undefined
     );
 
     const fetchOptions: RequestInit = {
       method,
       headers: requestHeaders,
       body:
-        body && format === "formData"
+        body && format === 'formData'
           ? (body as BodyInit)
           : body
           ? JSON.stringify(body)
@@ -100,13 +97,13 @@ export class BaseApiClient {
     if (response.status === 401) {
       store.dispatch(
         appStateActions.addError({
-          id: "tokenNotValid",
+          id: 'tokenNotValid',
           error: new Error(),
-          techDescription: "Unauthorized - token invalid or expired",
+          techDescription: 'Unauthorized - token invalid or expired',
           toNotify: false,
           blocking: false,
-          displayableTitle: "Session expired",
-          displayableDescription: "Please login again",
+          displayableTitle: 'Session expired',
+          displayableDescription: 'Please login again',
         })
       );
     }
@@ -137,9 +134,7 @@ export class BaseApiClient {
     }
 
     const data =
-      format === "blob"
-        ? (await response.blob()) as T
-        : (await response.json()) as T;
+      format === 'blob' ? ((await response.blob()) as T) : ((await response.json()) as T);
 
     return { data };
   }

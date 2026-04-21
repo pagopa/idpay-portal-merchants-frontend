@@ -1,19 +1,17 @@
-import { AutocompleteApi } from "../../api/AutocompleteApiClient";
+import { AutocompleteApi } from '../../api/AutocompleteApiClient';
 import {
   AddressAutocompleteRequestDTO,
   AddressAutocompleteResponseDTO,
 } from '../../api/generated/autocomplete/data-contracts';
 import { autocompleteService } from '../autocompleteService';
 
-jest.mock("../../api/AutocompleteApiClient", () => ({
+jest.mock('../../api/AutocompleteApiClient', () => ({
   AutocompleteApi: {
     getAddresses: jest.fn(),
   },
 }));
 
-const mockedAutocompleteApi = AutocompleteApi as jest.Mocked<
-  typeof AutocompleteApi
->;
+const mockedAutocompleteApi = AutocompleteApi as jest.Mocked<typeof AutocompleteApi>;
 
 describe('autocompleteService', () => {
   beforeEach(() => {

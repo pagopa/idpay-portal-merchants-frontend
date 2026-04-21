@@ -1,4 +1,4 @@
-import { DEBUG_CONSOLE } from "./constants";
+import { DEBUG_CONSOLE } from './constants';
 
 const safeConsole = {
   log: (...args: Array<any>) => console.log(...args),
@@ -21,7 +21,8 @@ export const browserConsole = {
   error: (...args: Array<any>) => (DEBUG_CONSOLE ? safeConsole.error(...args) : undefined),
   trace: (...args: Array<any>) => (DEBUG_CONSOLE ? safeConsole.trace(...args) : undefined),
   group: (...args: Array<any>) => (DEBUG_CONSOLE ? safeConsole.group(...args) : undefined),
-  groupCollapsed: (...args: Array<any>) => (DEBUG_CONSOLE ? safeConsole.groupCollapsed(...args) : undefined),
+  groupCollapsed: (...args: Array<any>) =>
+    DEBUG_CONSOLE ? safeConsole.groupCollapsed(...args) : undefined,
   groupEnd: () => (DEBUG_CONSOLE ? safeConsole.groupEnd() : undefined),
 
   /**
