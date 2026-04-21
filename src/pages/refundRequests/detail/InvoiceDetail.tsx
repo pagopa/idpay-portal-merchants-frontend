@@ -168,8 +168,8 @@ export default function InvoiceDetail({
     setLoading(true);
     try {
       const response = await getMerchantsApi().downloadInvoiceFile(
-        selectedTransaction?.trxId,
-        selectedTransaction?.pointOfSaleId
+        selectedTransaction?.pointOfSaleId,
+        selectedTransaction?.trxId
       );
       const invoiceUrl = response.invoiceUrl;
 

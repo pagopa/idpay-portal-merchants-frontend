@@ -98,8 +98,8 @@ const InvoiceDataTable = ({
       setIsDownloading(true);
 
       const response = await getMerchantsApi().downloadInvoiceFile(
-        selectedTransaction?.trxId,
-        selectedTransaction?.pointOfSaleId
+        selectedTransaction?.pointOfSaleId,
+        selectedTransaction?.trxId
       );
       const invoiceUrl = response.invoiceUrl;
 
