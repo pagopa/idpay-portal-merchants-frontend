@@ -17,6 +17,7 @@ type ApiClientConfig = {
   baseUrl: string;
 };
 
+import { browserConsole } from '../utils/consoleLogger';
 import { ApiError } from './ApiError';
 
 export class BaseApiClient {
@@ -92,7 +93,18 @@ export class BaseApiClient {
           : undefined,
     };
 
+    browserConsole.log('[API REQUEST]', {
+      method,
+      url,
+      body,
+    });
+
     const response = await fetch(url, fetchOptions);
+
+    browserConsole.log('[API RESPONSE]', {
+      status: response.status,
+      url,
+    });
 
     if (response.status === 401) {
       store.dispatch(
@@ -117,8 +129,20 @@ export class BaseApiClient {
       }
 
       if (errorBody?.code && errorBody?.message) {
+        browserConsole.log('[API BUSINESS ERROR]', {
+          status: response.status,
+          url,
+          errorBody,
+        });
+
         return { data: errorBody as T };
       }
+
+      browserConsole.error('[API TECHNICAL ERROR]', {
+        status: response.status,
+        url,
+        errorBody,
+      });
 
       throw new ApiError(
         response.status,
@@ -128,7 +152,6 @@ export class BaseApiClient {
       );
     }
 
-    // ✅ Handle 204 No Content correctly
     if (response.status === 204) {
       return { data: undefined as T };
     }
