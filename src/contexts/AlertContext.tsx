@@ -12,28 +12,27 @@ const initialState: AlertComponentProps = {
   isOpen: false,
   severity: 'error',
   containerStyle: {},
-  contentStyle: {}
+  contentStyle: {},
 };
 
-export const AlertContext = createContext<AlertContextType>({alert: { ...initialState}, setAlert: () => {}});
+export const AlertContext = createContext<AlertContextType>({
+  alert: { ...initialState },
+  setAlert: () => {},
+});
 
-export const AlertProvider = ({children}: {children: ReactNode}) => {
+export const AlertProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<AlertComponentProps | undefined>(initialState);
 
-  const onClose = useCallback(() => setError(prev => ({ ...prev, isOpen: false})), []);
+  const onClose = useCallback(() => setError((prev) => ({ ...prev, isOpen: false })), []);
   const setAlert = useCallback((alert?: AlertComponentProps) => setError(alert), []);
 
   useEffect(() => {
-    if(error?.isOpen) {
+    if (error?.isOpen) {
       setTimeout(onClose, 3000);
-    };
+    }
   }, [error]);
 
-  const value = useMemo(() => ({ alert: {...error, onClose}, setAlert}), [error]);
+  const value = useMemo(() => ({ alert: { ...error, onClose }, setAlert }), [error]);
 
-  return (
-    <AlertContext.Provider value={value}>
-      {children}
-    </AlertContext.Provider>
-  );
+  return <AlertContext.Provider value={value}>{children}</AlertContext.Provider>;
 };

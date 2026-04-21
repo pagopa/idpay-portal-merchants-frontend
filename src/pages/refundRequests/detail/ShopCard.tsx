@@ -5,7 +5,7 @@ import { Box, Paper, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import CustomChip from '../../../components/Chip/CustomChip';
-import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
+import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-contracts';
 import { getBatchStatus } from '../../../components/Transactions/useStatus';
 import { currencyFormatter } from '../../../utils/formatUtils';
 
@@ -128,7 +128,7 @@ export const ShopCard = ({ store, iban, ibanHolder }: Props) => {
         },
         {
           label: t('pages.refundRequests.batchTransactionsDetails.state'),
-          value: <StatusChip status={status as RewardBatchTrxStatusEnum} />,
+          value: <StatusChip status={status as RewardBatchTrxStatus} />,
           minWidth: '180px',
           isStatus: true,
         },

@@ -1,5 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Box, Button, Typography, Paper, RadioGroup, FormControlLabel, Radio, Link } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Paper,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Link,
+} from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
@@ -10,7 +19,7 @@ import { theme } from '@pagopa/mui-italia/theme';
 import { parseJwt } from '../../utils/jwt-utils';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
-import { PointOfSaleDTO, TypeEnum } from '../../api/generated/merchants/PointOfSaleDTO';
+import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
@@ -116,7 +125,7 @@ const InitiativeStoresUpload: React.FC = () => {
           ...rest,
           website: normalizeUrlHttps(sp.website),
           channelGeolink: normalizeUrlHttp(sp.channelGeolink),
-          type: TypeEnum[sp.type as TypeEnum],
+          type: sp.type as any,
         };
       });
 

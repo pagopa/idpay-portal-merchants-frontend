@@ -20,12 +20,8 @@ export default function DetailDrawer({
 }: DetailDrawerProps) {
   return (
     <Drawer anchor="right" open={isOpen} data-testid="detail-drawer">
-      <Box display="flex" flexDirection="row" justifyContent="flex-end" padding='0.5rem'>
-        <IconButton
-          data-testid="close-button"
-          onClick={setIsOpen}
-          sx={{ color: 'text.secondary' }}
-        >
+      <Box display="flex" flexDirection="row" justifyContent="flex-end" padding="0.5rem">
+        <IconButton data-testid="close-button" onClick={setIsOpen} sx={{ color: 'text.secondary' }}>
           <CloseIcon />
         </IconButton>
       </Box>

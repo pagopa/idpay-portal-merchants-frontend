@@ -3,8 +3,10 @@ import { Chip } from '@mui/material';
 import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
 import { FormikProps } from 'formik';
 import { Dispatch, SetStateAction } from 'react';
-import { StatusEnum as TransactionCreatedStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
-import { StatusEnum as TransactionStatusEnum } from '../../api/generated/merchants/MerchantTransactionDTO';
+import { MerchantTransactionDTO } from '../../api/generated/merchants/data-contracts';
+
+type TransactionCreatedStatusEnum = MerchantTransactionDTO['status'];
+type TransactionStatusEnum = MerchantTransactionDTO['status'];
 
 export enum TransactionTypeEnum {
   PROCESSED,
@@ -13,7 +15,7 @@ export enum TransactionTypeEnum {
 
 export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusEnum) => {
   switch (status) {
-    case TransactionCreatedStatusEnum.AUTHORIZED:
+    case 'AUTHORIZED' as TransactionCreatedStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -21,7 +23,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
           color="info"
         />
       );
-    case TransactionCreatedStatusEnum.AUTHORIZATION_REQUESTED:
+    case 'AUTHORIZATION_REQUESTED' as TransactionCreatedStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -29,8 +31,8 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
           color="default"
         />
       );
-    case TransactionCreatedStatusEnum.CREATED:
-    case TransactionCreatedStatusEnum.IDENTIFIED:
+    case 'CREATED' as TransactionCreatedStatusEnum:
+    case 'IDENTIFIED' as TransactionCreatedStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -38,7 +40,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
           color="default"
         />
       );
-    case TransactionCreatedStatusEnum.REJECTED:
+    case 'REJECTED' as TransactionCreatedStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -46,7 +48,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
           color="error"
         />
       );
-    case TransactionCreatedStatusEnum.REWARDED:
+    case 'REWARDED' as TransactionCreatedStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -54,7 +56,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
           color="success"
         />
       );
-    case TransactionCreatedStatusEnum.CANCELLED:
+    case 'CANCELLED' as TransactionCreatedStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -62,7 +64,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
           color="error"
         />
       );
-    case TransactionCreatedStatusEnum.REFUNDED:
+    case 'REFUNDED' as TransactionCreatedStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -70,7 +72,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
           color="warning"
         />
       );
-    case TransactionCreatedStatusEnum.INVOICED:
+    case 'INVOICED' as TransactionCreatedStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -79,11 +81,12 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
         />
       );
   }
+  return null;
 };
 
 export const renderTrasactionProcessedStatus = (status: TransactionStatusEnum) => {
   switch (status) {
-    case TransactionStatusEnum.REWARDED:
+    case 'REWARDED' as TransactionStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}
@@ -91,7 +94,7 @@ export const renderTrasactionProcessedStatus = (status: TransactionStatusEnum) =
           color="success"
         />
       );
-    case TransactionStatusEnum.CANCELLED:
+    case 'CANCELLED' as TransactionStatusEnum:
       return (
         <Chip
           sx={{ fontSize: '14px' }}

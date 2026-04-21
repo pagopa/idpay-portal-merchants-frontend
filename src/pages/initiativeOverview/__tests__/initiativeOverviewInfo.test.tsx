@@ -17,9 +17,7 @@ describe('InitiativeOverviewInfo', () => {
     const openModalButton = screen.getByTestId('open-modal');
 
     // DO NOT renders description
-    expect(
-      screen.queryByText('pages.initiativeOverview.info.description')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('pages.initiativeOverview.info.description')).not.toBeInTheDocument();
 
     // DO NOT renders exit button
     expect(screen.queryByText('commons.closeBtn')).not.toBeInTheDocument();

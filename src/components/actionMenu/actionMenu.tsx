@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { IconButton, Menu, MenuItem, TableCell } from '@mui/material';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import CancelTransactionModal from '../../pages/initiativeDiscounts/CancelTransactionModal';
-import {
-  MerchantTransactionDTO,
-  StatusEnum as TransactionStatusEnum,
-} from '../../api/generated/merchants/MerchantTransactionDTO';
+import { MerchantTransactionDTO } from '../../api/generated/merchants/data-contracts';
+
+type TransactionStatusEnum = MerchantTransactionDTO['status'];
 import AuthorizeTransactionModal from '../../pages/initiativeDiscounts/AuthorizeTransactionModal';
 
 type ActionsMenuProps = {
@@ -42,8 +41,8 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
 
   const RenderAuthorizeTransaction = ({ data }: RenderAuthorizeTrxProps) => {
     switch (data.status) {
-      case TransactionStatusEnum.IDENTIFIED:
-      case TransactionStatusEnum.CREATED:
+      case 'IDENTIFIED' as TransactionStatusEnum:
+      case 'CREATED' as TransactionStatusEnum:
         return (
           <>
             <MenuItem
@@ -59,7 +58,7 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
             />
           </>
         );
-      case TransactionStatusEnum.REJECTED:
+      case 'REJECTED' as TransactionStatusEnum:
       default:
         return null;
     }
@@ -67,15 +66,15 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
 
   const RenderCancelTransaction = ({ initiativeId, status, trxId }: RenderCancelTrxProps) => {
     switch (status) {
-      case TransactionStatusEnum.AUTHORIZED:
-      case TransactionStatusEnum.AUTHORIZATION_REQUESTED:
-      case TransactionStatusEnum.IDENTIFIED:
-      case TransactionStatusEnum.CREATED:
-      case TransactionStatusEnum.REWARDED:
-      case TransactionStatusEnum.REJECTED:
-      case TransactionStatusEnum.CANCELLED:
-      case TransactionStatusEnum.REFUNDED:
-      case TransactionStatusEnum.INVOICED:
+      case 'AUTHORIZED' as TransactionStatusEnum:
+      case 'AUTHORIZATION_REQUESTED' as TransactionStatusEnum:
+      case 'IDENTIFIED' as TransactionStatusEnum:
+      case 'CREATED' as TransactionStatusEnum:
+      case 'REWARDED' as TransactionStatusEnum:
+      case 'REJECTED' as TransactionStatusEnum:
+      case 'CANCELLED' as TransactionStatusEnum:
+      case 'REFUNDED' as TransactionStatusEnum:
+      case 'INVOICED' as TransactionStatusEnum:
         return (
           <>
             <MenuItem data-testid="cancel-trx-button" onClick={() => setOpenCancelTrxModal(true)}>
@@ -91,6 +90,7 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
           </>
         );
     }
+    return null;
   };
 
   return (

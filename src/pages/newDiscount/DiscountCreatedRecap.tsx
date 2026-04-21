@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 
-import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
+import { TransactionResponse } from '../../api/generated/merchants/data-contracts';
 import {
   copyTextToClipboard,
   downloadQRCodeFromURL,
@@ -38,7 +38,7 @@ const DiscountCreatedRecap = ({ data }: Props) => {
     if (typeof data !== 'undefined') {
       const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
         data.trxExpirationSeconds,
-        data.trxDate
+        new Date(data.trxDate)
       );
       setExpirationDays(expirationDays);
       setExpirationDate(expirationDate);

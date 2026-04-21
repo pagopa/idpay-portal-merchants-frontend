@@ -23,11 +23,11 @@ import CustomChip from '../../components/Chip/CustomChip';
 import { getRewardBatches, sendRewardBatch } from '../../services/merchantService';
 import { getBatchStatus } from '../../components/Transactions/useStatus';
 import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
-import { RewardBatchDTO } from '../../api/generated/merchants/RewardBatchDTO';
 import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { useAlert } from '../../hooks/useAlert';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
 import { RefundRequestsModal } from './RefundRequestModal';
 
 const posTypeMapper: Record<string, string> = {
@@ -70,7 +70,6 @@ const RefundRequests = () => {
     if (!initiativeId) {
       return;
     }
-
     setSelectedRow('');
     setSelectedRadio('');
     setDisabledRows([]);
@@ -122,7 +121,6 @@ const RefundRequests = () => {
         }
 
         setSelectedRow('');
-        setSelectedRadio('');
       }
     } catch (error) {
       if (currentRequestId !== requestIdRef.current) {
@@ -188,11 +186,14 @@ const RefundRequests = () => {
 
   const handleRadioButtonChange = useCallback(
     (rowId: string) => {
-      const invalidRow = rewardBatches.find(
-        (row) => rowId === row.id && !row?.numberOfTransactions
+      const invalidRow = rewardBatches.find((row) =>
+        rowId === row.id ? !row?.numberOfTransactions : undefined
       );
 
       if (invalidRow) {
+        setTimeout(() => {
+          handleRadioButtonChange('');
+        }, 300);
         setModal({
           title: t('pages.refundRequests.emptyBatchModal.title'),
           description: (
@@ -206,16 +207,14 @@ const RefundRequests = () => {
           confirmBtn: false,
           cancelBtn: { text: 'Chiudi', variant: 'contained' },
           setIsOpen: () => {
-            setDisabledRows((prev) => [...prev, invalidRow.id]);
+            setDisabledRows((prev) => (invalidRow.id ? [...prev, invalidRow.id] : prev));
             setModal((prev) => ({ ...prev, isOpen: false }));
           },
         });
-
-        return;
       }
-
-      setSelectedRow(rowId);
-      setSelectedRadio(rowId);
+      const selectedRowObjects = rewardBatches.find(({ id }) => id === rowId);
+      setSelectedRow((!invalidRow && selectedRowObjects?.id) || '');
+      setSelectedRadio(selectedRowObjects?.id ?? '');
     },
     [rewardBatches, t]
   );
@@ -244,7 +243,6 @@ const RefundRequests = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
           <Radio
             disabled={!isRowSelectable(params)}
-            checked={selectedRadio === params.value}
             onClick={() =>
               handleRadioButtonChange(params.value === selectedRow ? '' : params.value)
             }
@@ -354,8 +352,7 @@ const RefundRequests = () => {
         severity: 'error',
       });
     } finally {
-      setSelectedRow('');
-      setSelectedRadio('');
+      handleRadioButtonChange('');
       setSendBatchIsLoading(false);
       setModal((prev) => ({ ...prev, isOpen: false }));
     }

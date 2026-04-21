@@ -7,6 +7,20 @@ import { store } from '../../../redux/store';
 
 jest.mock('../../../services/merchantService');
 
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => ({ initiativeId: 'testIniziativeId' }),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiative', () => ({
+  useCurrentInitiative: () => ({
+    initiativeName: 'Test Initiative',
+    spendingPeriod: {
+      startDate: new Date('2023-01-01'),
+      endDate: new Date('2023-12-31'),
+    },
+  }),
+}));
+
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});

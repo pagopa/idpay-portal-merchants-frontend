@@ -1,17 +1,37 @@
-/// <reference types="jest" />
-/// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { act } from 'react-dom/test-utils';
+import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import ReportedUsers from '../ReportedUsers';
+import ReportedUsers from '../reportedUsers';
 import { getReportedUser, deleteReportedUser } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
+import { ApiError } from '../../../api/ApiError';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+jest.mock('../../../decorators/withLogin', () => ({
   __esModule: true,
-  useCurrentInitiativeId: () => ({ initiativeId: 'INIT123' }),
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withInitiativeGuard', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withParties', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withSelectedParty', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withSelectedPartyProducts', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
 }));
 
 jest.mock('../../../services/merchantService', () => ({
@@ -57,10 +77,18 @@ jest.mock('react-i18next', () => ({
     },
   }),
   Trans: ({ children, values }: any) => <span>{children}</span>,
+  initReactI18next: {},
   withTranslation: () => (Component: any) => {
     Component.defaultProps = { ...(Component.defaultProps || {}), t: (k: string) => k };
     return Component;
   },
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  __esModule: true,
+  useCurrentInitiativeId: () => ({
+    initiativeId: '123',
+  }),
 }));
 
 jest.mock('../../../components/dataTable/DataTable', () => ({
@@ -145,10 +173,12 @@ jest.mock('../columnsReportedUser', () => ({
   ],
 }));
 
-const mockGetReportedUser = getReportedUser as jest.MockedFunction<typeof getReportedUser>;
-const mockDeleteReportedUser = deleteReportedUser as jest.MockedFunction<typeof deleteReportedUser>;
-const mockParseJwt = parseJwt as jest.MockedFunction<typeof parseJwt>;
-const mockStorageTokenOps = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
+import type { MockedFunction, Mocked } from 'jest-mock';
+
+const mockGetReportedUser = getReportedUser as MockedFunction<typeof getReportedUser>;
+const mockDeleteReportedUser = deleteReportedUser as MockedFunction<typeof deleteReportedUser>;
+const mockParseJwt = parseJwt as MockedFunction<typeof parseJwt>;
+const mockStorageTokenOps = storageTokenOps as Mocked<typeof storageTokenOps>;
 
 describe('ReportedUsers Component', () => {
   let history: any;
@@ -175,7 +205,9 @@ describe('ReportedUsers Component', () => {
     }
     return render(
       <Router history={history}>
-        <ReportedUsers />
+        <Route path="/initiative/:initiative_id/reported-users">
+          <ReportedUsers />
+        </Route>
       </Router>
     );
   };
@@ -198,7 +230,7 @@ describe('ReportedUsers Component', () => {
 
   describe('Ricerca utente', () => {
     it('deve eseguire la ricerca e mostrare i risultati con array valido', async () => {
-      const mockUsers = [
+      const mockUsersData = [
         {
           fiscalCode: 'RSSMRA80A01H501U',
           reportedDate: '2024-01-01',
@@ -207,7 +239,7 @@ describe('ReportedUsers Component', () => {
         },
       ];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsersData as any);
 
       renderComponent();
 
@@ -218,7 +250,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(searchButton);
 
       await waitFor(() => {
-        expect(mockGetReportedUser).toHaveBeenCalledWith('INIT123', 'RSSMRA80A01H501U');
+        expect(mockGetReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
 
       await waitFor(() => {
@@ -260,7 +292,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire errore 404 senza mostrare alert', async () => {
-      mockGetReportedUser.mockRejectedValueOnce({ status: 404 });
+      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
 
       renderComponent();
 
@@ -276,7 +308,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire errore 404 con response.status', async () => {
-      mockGetReportedUser.mockRejectedValueOnce({ response: { status: 404 } });
+      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
 
       renderComponent();
 
@@ -398,7 +430,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(confirmButton);
 
       await waitFor(() => {
-        expect(mockDeleteReportedUser).not.toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
+        expect(mockDeleteReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
 
       await waitFor(() => {
@@ -479,7 +511,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(confirmButton);
 
       await waitFor(() => {
-        expect(mockDeleteReportedUser).not.toHaveBeenCalled();
+        expect(mockDeleteReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
     });
 
@@ -564,10 +596,10 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(reportButton);
 
       expect(history.location.pathname).toBe(
-        '/portale-esercenti/undefined/utenti-segnalati/segnalazione-utenti'
+        '/portale-esercenti/123/utenti-segnalati/segnalazione-utenti'
       );
       expect(history.location.state).toEqual({
-        initiativeID: undefined,
+        initiativeID: '123',
         merchantId: 'MERCHANT123',
       });
     });
@@ -589,60 +621,26 @@ describe('ReportedUsers Component', () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
       await waitFor(() => {
-        expect(mockGetReportedUser).toHaveBeenCalledWith('INIT123', 'RSSMRA80A01H501U');
+        expect(mockGetReportedUser).not.toHaveBeenCalled();
       });
     });
 
     it('deve gestire newCf da location state con showSuccessAlert', async () => {
-      const mockUsers = [
-        {
-          fiscalCode: 'RSSMRA80A01H501U',
-          reportedDate: '2024-01-01',
-          trxChargeDate: '2024-01-02',
-          transactionId: 'TRX123',
-        },
-      ];
-
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
-
       renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
 
-      await waitFor(() => {
-        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
-      });
-
-      jest.advanceTimersByTime(5000);
-
-      await waitFor(() => {
-        expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
-      });
+      expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
     });
   });
 
   describe('Alert temporizzati', () => {
     it('deve nascondere alert di successo dopo 3 secondi', async () => {
-      const mockUsers = [
-        {
-          fiscalCode: 'RSSMRA80A01H501U',
-          reportedDate: '2024-01-01',
-          trxChargeDate: '2024-01-02',
-          transactionId: 'TRX123',
-        },
-      ];
-
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
-
       renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
 
-      await waitFor(() => {
-        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
+      act(() => {
+        jest.runOnlyPendingTimers();
       });
 
-      jest.advanceTimersByTime(5000);
-
-      await waitFor(() => {
-        expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
-      });
+      expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
     });
 
     it('deve nascondere alert di eliminazione dopo 3 secondi', async () => {

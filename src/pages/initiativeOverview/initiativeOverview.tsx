@@ -42,7 +42,9 @@ const InitiativeOverview = () => {
 
         setIban(response?.iban);
         setIbanHolder(response?.ibanHolder);
-        setOnboardingDate(formatDate(response?.activationDate));
+        setOnboardingDate(
+          formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
+        );
       } catch {
         if (!active) {
           return;

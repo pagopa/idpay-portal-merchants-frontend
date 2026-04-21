@@ -225,27 +225,19 @@ describe('normalizeUrlHttps', () => {
   });
 
   test('should handle urls with paths', () => {
-    expect(normalizeUrlHttps('example.com/path')).toBe(
-      'https://example.com/path'
-    );
+    expect(normalizeUrlHttps('example.com/path')).toBe('https://example.com/path');
   });
 
   test('should handle http with paths', () => {
-    expect(normalizeUrlHttps('http://example.com/path')).toBe(
-      'https://example.com/path'
-    );
+    expect(normalizeUrlHttps('http://example.com/path')).toBe('https://example.com/path');
   });
 
   test('should handle https with paths', () => {
-    expect(normalizeUrlHttps('https://example.com/path')).toBe(
-      'https://example.com/path'
-    );
+    expect(normalizeUrlHttps('https://example.com/path')).toBe('https://example.com/path');
   });
 
   test('should handle urls with ports', () => {
-    expect(normalizeUrlHttps('example.com:8080')).toBe(
-      'https://example.com:8080'
-    );
+    expect(normalizeUrlHttps('example.com:8080')).toBe('https://example.com:8080');
   });
 
   test('should handle whitespace only input', () => {
@@ -266,21 +258,15 @@ describe('normalizeUrlHttp', () => {
   });
 
   test('should handle urls with paths', () => {
-    expect(normalizeUrlHttp('example.com/path')).toBe(
-      'http://example.com/path'
-    );
+    expect(normalizeUrlHttp('example.com/path')).toBe('http://example.com/path');
   });
 
   test('should handle http with paths', () => {
-    expect(normalizeUrlHttp('http://example.com/path')).toBe(
-      'http://example.com/path'
-    );
+    expect(normalizeUrlHttp('http://example.com/path')).toBe('http://example.com/path');
   });
 
   test('should handle https with paths', () => {
-    expect(normalizeUrlHttp('https://example.com/path')).toBe(
-      'https://example.com/path'
-    );
+    expect(normalizeUrlHttp('https://example.com/path')).toBe('https://example.com/path');
   });
 
   test('should handle urls with ports', () => {
@@ -292,8 +278,6 @@ describe('normalizeUrlHttp', () => {
   });
 
   test('should preserve protocol for https with whitespace', () => {
-    expect(normalizeUrlHttp('  https://example.com  ')).toBe(
-      'https://example.com'
-    );
+    expect(normalizeUrlHttp('  https://example.com  ')).toBe('https://example.com');
   });
 });

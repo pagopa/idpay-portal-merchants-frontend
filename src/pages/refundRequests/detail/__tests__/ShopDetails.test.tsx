@@ -21,13 +21,13 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ initiative_id: 'initiative-123', batch_id: 'batch-1' }),
 }));
 
-    jest.mock("../../../../utils/constants", () => {
-      const actual = jest.requireActual("../../../../utils/constants");
-      return {
-        ...actual,
-        MOCK_USER: true,
-      };
-    });
+jest.mock('../../../../utils/constants', () => {
+  const actual = jest.requireActual('../../../../utils/constants');
+  return {
+    ...actual,
+    MOCK_USER: true,
+  };
+});
 
 jest.mock('formik', () => ({
   ...jest.requireActual('formik'),
@@ -52,7 +52,7 @@ jest.mock('react-i18next', () => ({
   withTranslation: () => (Component: any) => Component,
 }));
 
-jest.mock("../../../../services/merchantService", () => ({
+jest.mock('../../../../services/merchantService', () => ({
   getRewardBatchById: jest.fn(),
   getMerchantPointOfSalesWithTransactions: jest.fn(),
   getMerchantDetail: jest.fn(),
@@ -67,7 +67,7 @@ jest.mock('../../../../hooks/useAlert', () => ({
   }),
 }));
 
-let mockJWT: string | undefined = 'merchant-1'
+let mockJWT: string | undefined = 'merchant-1';
 jest.mock('../../../../utils/jwt-utils', () => ({
   parseJwt: () => ({ merchant_id: mockJWT }),
 }));
@@ -92,27 +92,27 @@ describe('ShopDetails', () => {
     jest.clearAllMocks();
   });
 
-    act(() => {
-      getMerchantTransactionsProcessed.mockResolvedValue({
-        content: [],
-        totalPages: 0,
-      });
+  act(() => {
+    getMerchantTransactionsProcessed.mockResolvedValue({
+      content: [],
+      totalPages: 0,
     });
+  });
   it('should render component', async () => {
     act(() => {
       getMerchantDetail.mockResolvedValue({
         iban: 'IT60X0542811101000000123456',
         ibanHolder: 'Mario Rossi',
       });
-      getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
-      getMerchantPointOfSalesWithTransactions.mockResolvedValue([{ franchiseName: "Shop 1", pointOfSaleId: "shop-1" }])
-    })
+      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
+      getMerchantPointOfSalesWithTransactions.mockResolvedValue([
+        { franchiseName: 'Shop 1', pointOfSaleId: 'shop-1' },
+      ]);
+    });
 
     renderComponent();
 
-    await waitFor(() =>
-      expect(getRewardBatchById).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
 
     expect(mockReplace).toHaveBeenCalled();
 
@@ -131,15 +131,13 @@ describe('ShopDetails', () => {
         iban: 'IT60X0542811101000000123456',
         ibanHolder: 'Mario Rossi',
       });
-      getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
-      getMerchantPointOfSalesWithTransactions.mockRejectedValue(mockError)
-    })
+      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
+      getMerchantPointOfSalesWithTransactions.mockRejectedValue(mockError);
+    });
 
     renderComponent();
 
-    await waitFor(() =>
-      expect(getRewardBatchById).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
 
     expect(mockSetAlert).toHaveBeenCalledWith({
       title: 'errors.genericTitle',
@@ -156,15 +154,15 @@ describe('ShopDetails', () => {
         iban: 'IT60X0542811101000000123456',
         ibanHolder: 'Mario Rossi',
       });
-      getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
-      getMerchantPointOfSalesWithTransactions.mockResolvedValue([{ franchiseName: "Shop 1", pointOfSaleId: "shop-1" }])
-    })
+      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
+      getMerchantPointOfSalesWithTransactions.mockResolvedValue([
+        { franchiseName: 'Shop 1', pointOfSaleId: 'shop-1' },
+      ]);
+    });
 
     renderComponent();
 
-    await waitFor(() =>
-      expect(getMerchantPointOfSalesWithTransactions).not.toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getMerchantPointOfSalesWithTransactions).not.toHaveBeenCalled());
   });
 
   it('should handle getAllRewardBatches error', async () => {
@@ -174,14 +172,12 @@ describe('ShopDetails', () => {
         iban: 'IT60X0542811101000000123456',
         ibanHolder: 'Mario Rossi',
       });
-      getRewardBatchById.mockRejectedValue(mockError)
-    })
+      getRewardBatchById.mockRejectedValue(mockError);
+    });
 
     renderComponent();
 
-    await waitFor(() =>
-      expect(getRewardBatchById).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
 
     expect(mockSetAlert).toHaveBeenCalledWith({
       title: 'errors.genericTitle',
@@ -195,14 +191,12 @@ describe('ShopDetails', () => {
     const mockError = new Error('fail');
     act(() => {
       getMerchantDetail.mockRejectedValue(mockError);
-      getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
-    })
+      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
+    });
 
     renderComponent();
 
-    await waitFor(() =>
-      expect(getMerchantDetail).toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getMerchantDetail).toHaveBeenCalled());
 
     expect(mockSetAlert).toHaveBeenCalledWith({
       title: 'errors.genericTitle',
@@ -212,8 +206,8 @@ describe('ShopDetails', () => {
     });
   });
 
-  it("should show approving alert", async () => {
-    getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVING" });
+  it('should show approving alert', async () => {
+    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVING' });
 
     renderComponent();
 
@@ -222,8 +216,8 @@ describe('ShopDetails', () => {
     ).toBeInTheDocument();
   });
 
-  it("should call handleDownloadCsv", async () => {
-    getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" },);
+  it('should call handleDownloadCsv', async () => {
+    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
 
     downloadBatchCsv.mockResolvedValue({
       approvedBatchUrl: 'http://csv',
@@ -237,11 +231,10 @@ describe('ShopDetails', () => {
     await waitFor(() => expect(downloadBatchCsv).toHaveBeenCalled());
   });
 
-  it("should handle handleDownloadCsv error", async () => {
-    const { browserConsole } = require("../../../../utils/consoleLogger");
-    const consoleSpy = jest.spyOn(browserConsole, "log").mockImplementation(() => {});
-    const mockError = new Error("fail")
-    getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
+  it('should handle handleDownloadCsv error', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const mockError = new Error('fail');
+    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
 
     downloadBatchCsv.mockRejectedValue(mockError);
 
@@ -251,14 +244,16 @@ describe('ShopDetails', () => {
     fireEvent.click(btn);
 
     await waitFor(() => expect(downloadBatchCsv).toHaveBeenCalled());
+    await waitFor(() => expect(mockSetAlert).toHaveBeenCalled());
 
-    expect(consoleSpy).toHaveBeenCalledWith(mockError)
+    expect(consoleSpy).toHaveBeenCalled();
     expect(mockSetAlert).toHaveBeenCalledWith({
       title: 'errors.genericTitle',
       text: 'errors.genericDescription',
       isOpen: true,
       severity: 'error',
     });
+    consoleSpy.mockRestore();
     consoleSpy.mockRestore();
   });
 
@@ -268,16 +263,18 @@ describe('ShopDetails', () => {
         iban: 'IT60X0542811101000000123456',
         ibanHolder: 'Mario Rossi',
       });
-      getRewardBatchById.mockResolvedValue({ id: "batch-1", name: "Batch 1", status: "APPROVED" });
-      getMerchantPointOfSalesWithTransactions.mockResolvedValue([{ franchiseName: "Shop 1", pointOfSaleId: "shop-1" }])
-    })
-    renderComponent()
-    const wrapper = screen.getByTestId("trxCodeFilter");
-    const input = wrapper.querySelector('input')
-    const posSelect = screen.getByTestId('point-of-sale-test')
-    const statusSelect = screen.getByTestId('status-test')
-    const filtersBtn = screen.getByText('commons.filterBtn')
-    const removeFiltersBtn = screen.getByText('commons.removeFiltersBtn')
+      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
+      getMerchantPointOfSalesWithTransactions.mockResolvedValue([
+        { franchiseName: 'Shop 1', pointOfSaleId: 'shop-1' },
+      ]);
+    });
+    renderComponent();
+    const wrapper = screen.getByTestId('trxCodeFilter');
+    const input = wrapper.querySelector('input');
+    const posSelect = screen.getByTestId('point-of-sale-test');
+    const statusSelect = screen.getByTestId('status-test');
+    const filtersBtn = screen.getByText('commons.filterBtn');
+    const removeFiltersBtn = screen.getByText('commons.removeFiltersBtn');
 
     await act(() => userEvent.type(input!, ' '));
     await waitFor(() => expect(mockHandleChange).not.toHaveBeenCalled());

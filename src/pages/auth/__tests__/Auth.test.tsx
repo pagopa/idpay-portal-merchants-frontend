@@ -5,7 +5,10 @@ import {
   trackAppError,
   trackEvent,
 } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { userFromJwtTokenAsJWTUser } from '../../../hooks/useLogin';
 import ROUTES from '../../../routes';
 import { ENV } from '../../../utils/env';

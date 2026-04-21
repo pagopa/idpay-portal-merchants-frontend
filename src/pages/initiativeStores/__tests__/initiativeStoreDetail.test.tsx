@@ -383,7 +383,7 @@ describe('InitiativeStoreDetail', () => {
   test('Prompt clears sessionStorage when navigating to a different page', () => {
     const removeItemSpy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
     removeItemSpy.mockImplementation(() => {});
-  
+
     // replica fedele della funzione message usata nel componente
     const ROUTES = { STORES: '/stores' };
     const messageFn = (location: { pathname: string }) => {
@@ -394,23 +394,20 @@ describe('InitiativeStoreDetail', () => {
       }
       return true;
     };
-  
+
     // Simula una navigazione verso una pagina diversa
     const locationMock = { pathname: '/altroPercorso' };
     const result = messageFn(locationMock);
-  
+
     expect(removeItemSpy).toHaveBeenCalledWith('storesPagination');
     expect(result).toBe(true);
-  
+
     removeItemSpy.mockRestore();
   });
 
-  
   test('handlePromptMessage does not remove sessionStorage when staying in stores', () => {
     const spy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
     handlePromptMessage({ pathname: '/stores' }, '/stores');
     expect(spy).not.toHaveBeenCalled();
   });
-  
-
 });

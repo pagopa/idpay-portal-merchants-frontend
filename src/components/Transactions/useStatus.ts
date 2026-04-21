@@ -1,6 +1,8 @@
 import { theme } from '@pagopa/mui-italia/theme';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
-import { StatusEnum } from '../../api/generated/merchants/RewardBatchDTO';
+import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
+
+type StatusEnum = RewardBatchDTO['status'];
 
 const getStatus: any = (status: string) => {
   switch (status) {
@@ -32,27 +34,26 @@ const getStatus: any = (status: string) => {
 };
 
 export const getBatchStatus: any = (batchStatus: StatusEnum) => {
-
   switch (batchStatus) {
-    case StatusEnum.CREATED:
+    case 'CREATED':
       return { color: '#FFF5DA !important', textColor: '#614C15 !important', label: 'Da inviare' };
-    case StatusEnum.EVALUATING:
+    case 'EVALUATING':
       return { color: '#EEEEEE', textColor: '#17324D !important', label: 'Preso in carico' };
-    case StatusEnum.APPROVING:
+    case 'APPROVING':
       return { color: '#E1F5FE', textColor: '#215C76', label: 'In approvazione' };
-    case StatusEnum.APPROVED:
+    case 'APPROVED':
       return { color: '#E1F4E1', textColor: '#224021', label: 'Rimborso approvato' };
-    case StatusEnum.SENT:
+    case 'SENT':
       return { color: '#EEEEEE', textColor: '#224021', label: 'Inviato' };
-    case StatusEnum.REFUNDED:
+    case 'REFUNDED':
       return { color: '#DBF9FA', textColor: '#17324D', label: 'Rimborsato' };
-    case StatusEnum.PENDING_REFUND:
+    case 'PENDING_REFUND':
       return { color: '#E7ECFC', textColor: '#17324D', label: 'In rimborso' };
-    case StatusEnum.NOT_REFUNDED:
+    case 'NOT_REFUNDED':
       return { color: '#FFE0E0', textColor: '#761F1F', label: 'Non rimborsato' };
     default:
       return { color: theme.palette.action.disabled as string, label: MISSING_DATA_PLACEHOLDER };
   }
 };
 
-export default getStatus; 
+export default getStatus;

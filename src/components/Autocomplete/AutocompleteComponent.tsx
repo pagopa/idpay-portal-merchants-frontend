@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 import { MANDATORY_FIELD } from '../../utils/constants';
-
 
 export default function AutocompleteComponent({
   options,
@@ -14,7 +13,7 @@ export default function AutocompleteComponent({
   errorText,
   required,
   label,
-  onTextChange
+  onTextChange,
 }: Readonly<{
   options: Array<any>;
   onChangeDebounce?: (value: string) => void;
@@ -54,7 +53,9 @@ export default function AutocompleteComponent({
   }, [options]);
 
   const getHelperText = () => {
-    if (!inputError) { return ''; }
+    if (!inputError) {
+      return '';
+    }
     return errorText ?? MANDATORY_FIELD;
   };
 
@@ -92,7 +93,7 @@ export default function AutocompleteComponent({
       }}
       onInputChange={(_, newInputValue) => {
         setInputValue(newInputValue);
-        if(onTextChange){
+        if (onTextChange) {
           onTextChange(newInputValue);
         }
       }}
@@ -119,7 +120,7 @@ export default function AutocompleteComponent({
             marginTop: '10px !important',
             borderRadius: '4px !important',
             '& .MuiAutocomplete-option': {
-              fontWeight: theme => theme.typography.fontWeightMedium,
+              fontWeight: (theme) => theme.typography.fontWeightMedium,
               '&:hover': {
                 backgroundColor: '#0073E614 !important',
                 color: '#0073E6 !important',

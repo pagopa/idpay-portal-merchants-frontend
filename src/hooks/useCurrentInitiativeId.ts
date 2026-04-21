@@ -25,9 +25,7 @@ export const useCurrentInitiativeId = (): {
 } => {
   const { initiative_id } = useParams<RouteParams>();
 
-  const initiatives = useSelector((state: RootState) =>
-    intiativesListSelector(state)
-  );
+  const initiatives = useSelector((state: RootState) => intiativesListSelector(state));
 
   const isListLoaded = Array.isArray(initiatives);
 

@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
-import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOArray';
-import { InitiativeDTO } from '../../api/generated/merchants/InitiativeDTO';
+import { InitiativeDTO } from '../../api/generated/merchants/data-contracts';
+
+type InitiativeDTOArray = Array<InitiativeDTO>;
 
 interface InitiativesState {
   list?: InitiativeDTOArray;
@@ -32,21 +33,13 @@ export type InitiativeExtended = InitiativeDTO & {
 };
 
 export const currentInitiativeSelector = createSelector(
-  [
-    intiativesListSelector,
-    (_: RootState, initiativeId: string | undefined) => initiativeId,
-  ],
-  (
-    initiatives,
-    initiativeId
-  ): InitiativeExtended | undefined => {
+  [intiativesListSelector, (_: RootState, initiativeId: string | undefined) => initiativeId],
+  (initiatives, initiativeId): InitiativeExtended | undefined => {
     if (!initiatives || !initiativeId) {
       return undefined;
     }
 
-    const initiative = initiatives.find(
-      (i) => i.initiativeId === initiativeId
-    );
+    const initiative = initiatives.find((i) => i.initiativeId === initiativeId);
 
     if (!initiative) {
       return undefined;
@@ -54,9 +47,9 @@ export const currentInitiativeSelector = createSelector(
 
     const spendingPeriod =
       initiative.startDate && initiative.endDate
-        ? `${new Date(initiative.startDate).toLocaleDateString(
-            'fr-FR'
-          )} - ${new Date(initiative.endDate).toLocaleDateString('fr-FR')}`
+        ? `${new Date(initiative.startDate).toLocaleDateString('fr-FR')} - ${new Date(
+            initiative.endDate
+          ).toLocaleDateString('fr-FR')}`
         : '';
 
     return {

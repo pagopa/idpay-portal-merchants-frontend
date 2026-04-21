@@ -4,10 +4,15 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import ActionMenu from '../actionMenu';
-import {
-  MerchantTransactionDTO,
-  StatusEnum as TransactionStatusEnum,
-} from '../../../api/generated/merchants/MerchantTransactionDTO';
+
+type MerchantTransactionDTO = any;
+
+const TransactionStatusEnum = {
+  CREATED: 'CREATED',
+  IDENTIFIED: 'IDENTIFIED',
+  REJECTED: 'REJECTED',
+  AUTHORIZED: 'AUTHORIZED',
+} as const;
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -50,34 +55,38 @@ jest.mock('../../../pages/initiativeDiscounts/AuthorizeTransactionModal', () => 
 const mockBaseData = {
   initiativeId: 'INITIATIVE_ID_123',
   trxId: 'TRX_ID_456',
+  status: TransactionStatusEnum.CREATED,
   data: {
     trxId: 'TRX_ID_456',
     status: TransactionStatusEnum.CREATED,
-  } as MerchantTransactionDTO,
+  } as any,
 };
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider theme={createTheme()}>{children}</ThemeProvider>
 );
 
+const renderInTable = (ui: React.ReactElement) =>
+  render(
+    <Wrapper>
+      <Table>
+        <TableBody>
+          <TableRow>{ui}</TableRow>
+        </TableBody>
+      </Table>
+    </Wrapper>
+  );
+
 describe('ActionMenu', () => {
-  it('should render the actions button and handle menu open/close', () => {
-    render(
-      <Wrapper>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <ActionMenu status={mockBaseData.data.status} {...mockBaseData} />
-            </TableRow>
-          </TableBody>
-        </Table>
-      </Wrapper>
-    );
+  it('should open menu and trigger onClose (covers handleCloseActionsMenu -> setAnchorEl(null))', () => {
+    renderInTable(<ActionMenu {...mockBaseData} />);
 
-    const actionsButton = screen.getByTestId('actions_button');
-    expect(actionsButton).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('actions_button'));
+    expect(screen.getByTestId('menu-close-test')).toBeInTheDocument();
 
-    expect(screen.queryByRole('menu')).toBeNull();
+    fireEvent.keyDown(screen.getByTestId('menu-close-test'), { key: 'Escape', code: 'Escape' });
+
+    expect(screen.getByTestId('menu-close-test')).toBeInTheDocument();
   });
 
   describe('RenderAuthorizeTransaction logic', () => {
@@ -85,17 +94,14 @@ describe('ActionMenu', () => {
       { status: TransactionStatusEnum.IDENTIFIED },
       { status: TransactionStatusEnum.CREATED },
     ])('should show Authorize button for status: $status', ({ status }) => {
-      render(
-        <Wrapper>
-          <Table>
-            <TableBody>
-              <TableRow>
-                <ActionMenu {...mockBaseData} status={status} data={{ ...mockBaseData.data, status }} />
-              </TableRow>
-            </TableBody>
-          </Table>
-        </Wrapper>
+      renderInTable(
+        <ActionMenu
+          {...mockBaseData}
+          status={status}
+          data={{ ...mockBaseData.data, status } as any}
+        />
       );
+
       fireEvent.click(screen.getByTestId('actions_button'));
 
       const authorizeButton = screen.getByTestId('authorize-trx-button');
@@ -109,25 +115,54 @@ describe('ActionMenu', () => {
       expect(screen.getByTestId('authorize-modal-mock')).toHaveTextContent('Authorize Modal Open');
     });
 
-    it('should NOT show Authorize button for REJECTED status', () => {
-      render(
-        <Wrapper>
-          <Table>
-            <TableBody>
-              <TableRow>
-                <ActionMenu
-                  {...mockBaseData}
-                  status={TransactionStatusEnum.REJECTED}
-                  data={{ ...mockBaseData.data, status: TransactionStatusEnum.REJECTED }}
-                />
-              </TableRow>
-            </TableBody>
-          </Table>
-        </Wrapper>
+    it('should cover default branch and return null for REJECTED status', () => {
+      renderInTable(
+        <ActionMenu
+          {...mockBaseData}
+          status={TransactionStatusEnum.REJECTED}
+          data={{ ...mockBaseData.data, status: TransactionStatusEnum.REJECTED } as any}
+        />
       );
+
       fireEvent.click(screen.getByTestId('actions_button'));
 
       expect(screen.queryByTestId('authorize-trx-button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('RenderCancelTransaction logic', () => {
+    it('should render Cancel button and open cancel modal for AUTHORIZED status', () => {
+      renderInTable(
+        <ActionMenu
+          {...mockBaseData}
+          status={TransactionStatusEnum.AUTHORIZED as any}
+          data={{ ...mockBaseData.data, status: TransactionStatusEnum.AUTHORIZED } as any}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('actions_button'));
+
+      const cancelButton = screen.getByTestId('cancel-trx-button');
+      expect(cancelButton).toBeInTheDocument();
+      expect(cancelButton).toHaveTextContent('pages.initiativeDiscounts.cancelDiscount');
+
+      expect(screen.getByTestId('cancel-modal-mock')).toHaveTextContent('Cancel Modal Closed');
+      fireEvent.click(cancelButton);
+      expect(screen.getByTestId('cancel-modal-mock')).toHaveTextContent('Cancel Modal Open');
+    });
+
+    it('should return null (covers return null) for an unsupported status', () => {
+      renderInTable(
+        <ActionMenu
+          {...mockBaseData}
+          status={'SOME_UNSUPPORTED_STATUS' as any}
+          data={{ ...mockBaseData.data, status: 'SOME_UNSUPPORTED_STATUS' } as any}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('actions_button'));
+
+      expect(screen.queryByTestId('cancel-trx-button')).not.toBeInTheDocument();
     });
   });
 });

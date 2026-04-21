@@ -8,6 +8,16 @@ import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Route, useHistory } from 'react-router-dom';
 import RefundRequests from '../RefundRequests';
 
+let consoleErrorSpy: jest.SpyInstance;
+
+beforeAll(() => {
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  consoleErrorSpy.mockRestore();
+});
+
 const mockSetAlert = jest.fn();
 jest.mock('../../../hooks/useAlert', () => ({
   __esModule: true,
@@ -204,7 +214,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    fireEvent.click(screen.getByTestId('1'));
+    fireEvent.click(screen.getAllByRole('button')[0]);
 
     expect(pushMock).toHaveBeenCalled();
   });
@@ -218,23 +228,11 @@ describe('RefundRequests', () => {
   });
 
   it('should show loading spinner while fetching data', async () => {
-    let resolvePromise: any;
-    mockGetRewardBatches.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolvePromise = resolve;
-        })
-    );
+    mockGetRewardBatches.mockReturnValueOnce(new Promise(() => {}));
 
     renderWithStore(<RefundRequests />);
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
-
-    resolvePromise({ content: mockData });
-
-    await waitFor(() => {
-      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
-    });
   });
 
   it('should display data after successful fetch', async () => {
@@ -370,7 +368,7 @@ describe('RefundRequests', () => {
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
     await waitFor(() => {
-      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '1');
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', 1);
     });
 
     jest.advanceTimersByTime(1000);

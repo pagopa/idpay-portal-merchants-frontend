@@ -1,11 +1,15 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { getMerchantInitiativeList } from '../../services/merchantService';
-import { StatusEnum } from '../../api/generated/merchants/InitiativeDTO';
+import { InitiativeDTO } from '../../api/generated/merchants/data-contracts';
+
+type StatusEnum = InitiativeDTO['status'];
+const PUBLISHED: StatusEnum = 'PUBLISHED';
+const CLOSED: StatusEnum = 'CLOSED';
 import { setInitiativesList } from '../slices/initiativesSlice';
 
 /**
  * RTK Query API layer introduced in BRIDGE MODE.
- * 
+ *
  * IMPORTANT:
  * - Does NOT change existing business logic.
  * - Keeps initiativesSlice as source of truth.
@@ -27,11 +31,7 @@ export const initiativesApi = createApi({
 
           const response = await getMerchantInitiativeList();
 
-          const filtered = response.filter(
-            (r) =>
-              r.status === StatusEnum.PUBLISHED ||
-              r.status === StatusEnum.CLOSED
-          );
+          const filtered = response.filter((r) => r.status === PUBLISHED || r.status === CLOSED);
 
           // Bridge: keep existing slice behavior
           dispatch(setInitiativesList(filtered));

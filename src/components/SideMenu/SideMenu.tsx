@@ -121,22 +121,23 @@ export default function SideMenu() {
               </AccordionSummary>
               <AccordionDetails sx={{ p: 0 }}>
                 <List disablePadding>
-                  {config.map(({ title, route, icon, dataTestId }) => (<SidenavItem key={title}
-                    title={t(title)}
-                    handleClick={() =>
-                      onExit(() => {
-                        history.replace(
-                          `${BASE_ROUTE}/${item.initiativeId}/${route}`
-                        );
-                      })
-                    }
-                    isSelected={pathname.startsWith(
-                      `${BASE_ROUTE}/${item.initiativeId}/${route}`
-                    )}
-                    icon={icon}
-                    level={2}
-                    data-testid={dataTestId}
-                  />))}
+                  {config.map(({ title, route, icon, dataTestId }) => (
+                    <SidenavItem
+                      key={title}
+                      title={t(title)}
+                      handleClick={() =>
+                        onExit(() => {
+                          history.replace(`${BASE_ROUTE}/${item.initiativeId}/${route}`);
+                        })
+                      }
+                      isSelected={pathname.startsWith(
+                        `${BASE_ROUTE}/${item.initiativeId}/${route}`
+                      )}
+                      icon={icon}
+                      level={2}
+                      data-testid={dataTestId}
+                    />
+                  ))}
                 </List>
               </AccordionDetails>
             </Accordion>

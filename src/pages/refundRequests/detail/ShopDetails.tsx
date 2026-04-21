@@ -23,12 +23,12 @@ import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Sync } from '@mui/icons-material';
-import { MISSING_DATA_PLACEHOLDER, MOCK_USER } from '../../../utils/constants';
+import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
 import InvoiceDataTable from '../invoiceDataTable';
 import { formatDate, truncateString } from '../../../helpers';
-import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
+import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-contracts';
 import { parseJwt } from '../../../utils/jwt-utils';
 import {
   downloadBatchCsv,
@@ -38,14 +38,18 @@ import {
 } from '../../../services/merchantService';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { useAlert } from '../../../hooks/useAlert';
-import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
-import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/FranchisePointOfSaleDTO';
-import { MerchantDetailDTO } from '../../../api/generated/merchants/MerchantDetailDTO';
+import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../../utils/consoleLogger';
+
+type StatusEnum = RewardBatchDTO['status'];
+const APPROVED_STATUS: StatusEnum = 'APPROVED';
+const APPROVING_STATUS: StatusEnum = 'APPROVING';
+import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/data-contracts';
+import { MerchantDetailDTO } from '../../../api/generated/merchants/data-contracts';
 import { ShopCard } from './ShopCard';
 
-const filterByStatusOptionsList = Object.values(RewardBatchTrxStatusEnum).filter(
-  (el) => el !== RewardBatchTrxStatusEnum.TO_CHECK
+const filterByStatusOptionsList = Object.values(RewardBatchTrxStatus).filter(
+  (el) => el !== RewardBatchTrxStatus.TO_CHECK
 );
 interface RouteParams {
   initiative_id: string;
@@ -87,8 +91,10 @@ const ShopDetails: React.FC = () => {
 
   const mappedStore = useMemo(
     () => ({
-      batchName: store?.name,
-      dateRange: `${formatDate(store?.startDate)} - ${formatDate(store?.endDate)}`,
+      batchName: store?.name ?? '',
+      dateRange: `${store?.startDate ? formatDate(new Date(store.startDate)) : ''} - ${
+        store?.endDate ? formatDate(new Date(store.endDate)) : ''
+      }`,
       companyName: store?.businessName || '',
       refundAmount: store?.initialAmountCents || 0,
       status: store?.status || '',
@@ -119,7 +125,7 @@ const ShopDetails: React.FC = () => {
     try {
       const response = await getRewardBatchById(initiative_id, batch_id);
       setStore(response);
-      history.replace({ ...history.location, state: {store: response}});
+      history.replace({ ...history.location, state: { store: response } });
     } catch (error: any) {
       setAlert({
         title: t('errors.genericTitle'),
@@ -204,9 +210,7 @@ const ShopDetails: React.FC = () => {
         link.download = filename;
         link.click();
       } catch (e) {
-        if (MOCK_USER) {
-          browserConsole.log(e);
-        }
+        browserConsole.log(e);
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),
@@ -303,7 +307,7 @@ const ShopDetails: React.FC = () => {
             }}
             onClick={handleDownloadCsv}
             data-testid="download-csv-button-test"
-            disabled={store?.status !== StatusEnum.APPROVED || batchDownloadIsLoading}
+            disabled={store?.status !== APPROVED_STATUS || batchDownloadIsLoading}
           >
             {t('pages.refundRequests.storeDetails.exportCSV')}
             <span style={{ marginLeft: '10px' }}>
@@ -313,7 +317,7 @@ const ShopDetails: React.FC = () => {
         </Box>
       </Box>
 
-      {store?.status === StatusEnum.APPROVING && (
+      {store?.status === APPROVING_STATUS && (
         <MuiAlert
           sx={{ mb: 3 }}
           variant="outlined"
