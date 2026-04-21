@@ -20,7 +20,7 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
   CONFIG: {
     HEADER: {
       LINK: {
-        PRODUCTURL: 'http://test-product-url.com',
+        PRODUCTURL: 'https://test-product-url.com',
       },
     },
   },
@@ -29,16 +29,16 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/config/env', () => ({
 jest.mock('../../../utils/env', () => ({
   ENV: {
     URL_FE: {
-      LOGOUT: 'http://logout-url.com',
-      LOGIN: 'http://login-url.com',
+      LOGOUT: 'https://logout-url.com',
+      LOGIN: 'https://login-url.com',
     },
     CONFIG: {
       HEADER: {
-        OPERATION_MANUAL_LINK: 'http://manual-link.com',
+        OPERATION_MANUAL_LINK: 'https://manual-link.com',
       },
     },
     ASSISTANCE: {
-      LINK: 'http://assistance-link.com',
+      LINK: 'https://assistance-link.com',
     },
   },
 }));
@@ -116,21 +116,21 @@ const mockPartiesState = {
     selectedParty: {
       partyId: 'party-123',
       description: 'Test Party',
-      urlLogo: 'http://logo.com/logo.png',
+      urlLogo: 'https://logo.com/logo.png',
       roles: [{ roleKey: 'admin' }],
     },
     selectedProducts: [
       {
         id: 'prod-test-1',
         title: 'Test Product 1',
-        urlPublic: 'http://product1.com',
+        urlPublic: 'https://product1.com',
         status: 'ACTIVE',
         authorized: true,
       },
       {
         id: 'prod-test-2',
         title: 'Test Product 2',
-        urlPublic: 'http://product2.com',
+        urlPublic: 'https://product2.com',
         status: 'INACTIVE',
         authorized: true,
       },
@@ -315,7 +315,7 @@ describe('CustomHeader', () => {
         selectedParty: {
           partyId: 'party-456',
           description: 'New Test Party',
-          urlLogo: 'http://logo.com/new-logo.png',
+          urlLogo: 'https://logo.com/new-logo.png',
           roles: [{ roleKey: 'user' }],
         },
       },
@@ -449,28 +449,28 @@ describe('CustomHeader', () => {
           {
             id: 'prod-idpay-merchants',
             title: 'Welfare Product',
-            urlPublic: 'http://welfare.com',
+            urlPublic: 'https://welfare.com',
             status: 'ACTIVE',
             authorized: true,
           },
           {
             id: 'prod-test-3',
             title: 'Test Product 3',
-            urlPublic: 'http://product3.com',
+            urlPublic: 'https://product3.com',
             status: 'ACTIVE',
             authorized: false,
           },
           {
             id: 'prod-test-4',
             title: 'Test Product 4',
-            urlPublic: 'http://product4.com',
+            urlPublic: 'https://product4.com',
             status: 'PENDING',
             authorized: true,
           },
           {
             id: 'prod-test-5',
             title: 'Test Product 5',
-            urlPublic: 'http://product5.com',
+            urlPublic: 'https://product5.com',
             status: 'ACTIVE',
             authorized: true,
           },
@@ -602,7 +602,7 @@ describe('CustomHeader', () => {
         selectedParty: {
           partyId: 'party-multi-role',
           description: 'Multi Role Party',
-          urlLogo: 'http://logo.com/logo.png',
+          urlLogo: 'https://logo.com/logo.png',
           roles: [{ roleKey: 'admin' }, { roleKey: 'operator' }],
         },
         selectedProducts: [],

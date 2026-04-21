@@ -54,7 +54,7 @@ describe('FileUploadAction', () => {
     apiCall: jest.fn().mockResolvedValue({}),
     successStateKey: 'refundUploadSuccess',
     breadcrumbsLabel: 'Test breadcrumb',
-    manualLink: 'http://manual',
+    manualLink: 'https://manual',
     i18nBlockKey: 'modifyDocument',
   };
 
@@ -178,7 +178,7 @@ describe('FileUploadAction', () => {
   it('opens manual link', () => {
     render(<FileUploadAction {...baseProps} />);
     fireEvent.click(screen.getByText('modifyDocument.manualLink'));
-    expect(window.open).toHaveBeenCalledWith('http://manual', '_blank');
+    expect(window.open).toHaveBeenCalledWith('https://manual', '_blank');
   });
 
   it('handles REWARD_BATCH_ALREADY_SENT branch', async () => {

@@ -186,14 +186,14 @@ const RefundRequests = () => {
 
   const handleRadioButtonChange = useCallback(
     (rowId: string) => {
-      const invalidRow = rewardBatches.find(
-        (row) => rowId === row.id ? !row?.numberOfTransactions : undefined
+      const invalidRow = rewardBatches.find((row) =>
+        rowId === row.id ? !row?.numberOfTransactions : undefined
       );
 
       if (invalidRow) {
-      setTimeout(() => {
-        handleRadioButtonChange('');
-      }, 300);
+        setTimeout(() => {
+          handleRadioButtonChange('');
+        }, 300);
         setModal({
           title: t('pages.refundRequests.emptyBatchModal.title'),
           description: (
@@ -212,9 +212,9 @@ const RefundRequests = () => {
           },
         });
       }
-    const selectedRowObjects = rewardBatches.find(({ id }) => id === rowId);
-    setSelectedRow((!invalidRow && selectedRowObjects?.id) || '');
-    setSelectedRadio(selectedRowObjects?.id ?? '');
+      const selectedRowObjects = rewardBatches.find(({ id }) => id === rowId);
+      setSelectedRow((!invalidRow && selectedRowObjects?.id) || '');
+      setSelectedRadio(selectedRowObjects?.id ?? '');
     },
     [rewardBatches, t]
   );
