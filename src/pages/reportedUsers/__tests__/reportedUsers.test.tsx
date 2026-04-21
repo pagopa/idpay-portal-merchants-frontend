@@ -228,7 +228,7 @@ describe('ReportedUsers Component', () => {
 
   describe('Ricerca utente', () => {
     it('deve eseguire la ricerca e mostrare i risultati con array valido', async () => {
-      const mockUsers = [
+      const mockUsersData = [
         {
           fiscalCode: 'RSSMRA80A01H501U',
           reportedDate: '2024-01-01',
@@ -237,7 +237,7 @@ describe('ReportedUsers Component', () => {
         },
       ];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsersData as any);
 
       renderComponent();
 
@@ -624,14 +624,6 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire newCf da location state con showSuccessAlert', async () => {
-      const mockUsers = [
-        {
-          fiscalCode: 'RSSMRA80A01H501U',
-          reportedDate: '2024-01-01',
-          trxChargeDate: '2024-01-02',
-          transactionId: 'TRX123',
-        },
-      ];
       const mockUsers = [
         {
           fiscalCode: 'RSSMRA80A01H501U',

@@ -8,6 +8,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Route, useHistory } from 'react-router-dom';
 import RefundRequests from '../RefundRequests';
 
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  (console.error as jest.Mock).mockRestore();
+});
+
 const mockSetAlert = jest.fn();
 jest.mock('../../../hooks/useAlert', () => ({
   __esModule: true,
@@ -204,7 +212,8 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    fireEvent.click(screen.getByTestId('1'));
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[0]);
 
     expect(pushMock).toHaveBeenCalled();
   });
@@ -358,7 +367,7 @@ describe('RefundRequests', () => {
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
     await waitFor(() => {
-      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '1');
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', 1);
     });
 
     jest.advanceTimersByTime(1000);

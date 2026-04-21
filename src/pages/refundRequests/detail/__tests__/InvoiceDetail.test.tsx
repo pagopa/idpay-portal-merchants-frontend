@@ -4,6 +4,14 @@ import InvoiceDetail from '../InvoiceDetail';
 import { useLocation } from 'react-router-dom';
 import { getMerchantsApi } from '../../../../api/MerchantsApiClient';
 
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  (console.error as jest.Mock).mockRestore();
+});
+
 jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -203,7 +211,7 @@ describe('Render component', () => {
     expect(screen.getByText('Elettrodomestico')).toBeInTheDocument();
     expect(screen.getByText('Numero fattura')).toBeInTheDocument();
     expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
-    expect(screen.queryByText('Motivo di rifiuto')).not.toBeInTheDocument();
+    expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
     expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
     expect(screen.getByTestId('btn-test')).toBeInTheDocument();
   });

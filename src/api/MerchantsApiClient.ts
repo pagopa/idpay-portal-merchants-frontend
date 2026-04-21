@@ -252,8 +252,8 @@ class MerchantsApiClient {
   }
 
   public downloadInvoiceFile(
-    transactionId: string,
-    pointOfSaleId: string
+    pointOfSaleId: string,
+    transactionId: string
   ): Promise<{ invoiceUrl: string }> {
     return this.request<{ invoiceUrl: string }>({
       path: `/${pointOfSaleId}/transactions/${transactionId}/download`,

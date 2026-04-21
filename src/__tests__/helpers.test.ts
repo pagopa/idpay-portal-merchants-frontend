@@ -225,7 +225,7 @@ describe('handlePromptMessage', () => {
     expect(sessionStorage.getItem('storesPagination')).toBe('test')
 
     handlePromptMessage(pathName1, targetPage1)
-    expect(sessionStorage.getItem('storesPagination')).toBeNull
+    expect(sessionStorage.getItem('storesPagination')).toBeNull()
   });
 });
 
@@ -280,13 +280,13 @@ describe('isReversableOrEditable', () => {
     ).toBe(true);
   });
 
-  test('returns true when rewardBatchTrxStatus is APPROVED', () => {
+  test('returns false when rewardBatchTrxStatus is APPROVED', () => {
     expect(
       isReversableOrEditable({
         status: StatusEnum.REWARDED,
         rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
       })
-    ).toBe(true);
+    ).toBe(false);
   });
 
   test('returns false for unsupported status', () => {

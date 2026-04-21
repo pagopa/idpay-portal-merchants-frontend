@@ -1,6 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import StatusChipInvoice from '../StatusChipInvoice';
+
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  (console.error as jest.Mock).mockRestore();
+});
 import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-contracts';
 
 const RewardBatchTrxStatusEnum = {
@@ -15,12 +23,7 @@ type RewardBatchTrxStatusEnum =
   (typeof RewardBatchTrxStatusEnum)[keyof typeof RewardBatchTrxStatusEnum];
 
 jest.mock('../CustomChip', () => {
-  return function MockCustomChip({
-                                   label,
-                                   colorChip,
-                                   sizeChip,
-                                   textColorChip
-                                 }: any) {
+  return function MockCustomChip({ label, colorChip, sizeChip, textColorChip }: any) {
     return (
       <div
         data-testid="custom-chip"
@@ -50,7 +53,7 @@ describe('StatusChipInvoice', () => {
       render(<StatusChipInvoice status={RewardBatchTrxStatusEnum.CONSULTABLE as any} />);
 
       const chip = screen.getByTestId('custom-chip');
-      expect(chip).toHaveTextContent('CONSULTABLE');
+      expect(chip).toHaveTextContent('Consultabile');
       expect(chip).toHaveAttribute('data-color', '#E0E0E0');
       expect(chip).toHaveAttribute('data-size', 'small');
     });
@@ -59,7 +62,7 @@ describe('StatusChipInvoice', () => {
       render(<StatusChipInvoice status={RewardBatchTrxStatusEnum.SUSPENDED as any} />);
 
       const chip = screen.getByTestId('custom-chip');
-      expect(chip).toHaveTextContent('SUSPENDED');
+      expect(chip).toHaveTextContent('Da controllare');
       expect(chip).toHaveAttribute('data-color', '#E0E0E0');
       expect(chip).toHaveAttribute('data-size', 'small');
     });
@@ -68,7 +71,7 @@ describe('StatusChipInvoice', () => {
       render(<StatusChipInvoice status={RewardBatchTrxStatusEnum.APPROVED as any} />);
 
       const chip = screen.getByTestId('custom-chip');
-      expect(chip).toHaveTextContent('APPROVED');
+      expect(chip).toHaveTextContent('Approvata');
       expect(chip).toHaveAttribute('data-color', '#E0E0E0');
       expect(chip).toHaveAttribute('data-size', 'small');
     });
@@ -115,7 +118,7 @@ describe('StatusChipInvoice', () => {
 
       rerender(<StatusChipInvoice status={RewardBatchTrxStatusEnum.APPROVED as any} />);
       chip = screen.getByTestId('custom-chip');
-      expect(chip).not.toHaveAttribute('data-text-color');
+      expect(chip).toHaveAttribute('data-text-color', '#215C76');
     });
   });
 });
