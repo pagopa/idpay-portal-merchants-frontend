@@ -287,7 +287,7 @@ describe('InvoiceDataTable', () => {
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
     fireEvent.click(invoiceLink);
     await waitFor(() => expect(mockDownloadInvoiceFile).toHaveBeenCalledTimes(1));
-    expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('trx-1', 'POS-1');
+    expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('POS-1', 'trx-1');
     await waitFor(() => expect(openSpy).toHaveBeenCalled());
     openSpy.mockRestore();
   });
