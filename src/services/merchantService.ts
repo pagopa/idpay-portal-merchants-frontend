@@ -116,22 +116,13 @@ export const updateMerchantPointOfSales = async (
     import("../api/generated/merchants/data-contracts").PointOfSaleDTO
   >
 ): Promise<void | { code?: string; message?: string }> => {
-  try {
+  const result =
     await getMerchantsApi().updateMerchantPointOfSales(
       merchantId,
       pointOfSales
     );
-    return;
-  } catch (error: unknown) {
-    if (error instanceof Error && "details" in error) {
-      const apiError = error as {
-        details?: { code?: string; message?: string };
-      };
-      return apiError.details;
-    }
 
-    return;
-  }
+  return result as void | { code?: string; message?: string };
 };
 
 export const getMerchantPointOfSales = async (

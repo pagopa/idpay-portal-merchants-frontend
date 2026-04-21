@@ -119,6 +119,10 @@ export class BaseApiClient {
         // ignore if no json body
       }
 
+      if (errorBody?.code && errorBody?.message) {
+        return { data: errorBody as T };
+      }
+
       throw new ApiError(
         response.status,
         errorBody?.message || `API Error - ${response.status}`,
