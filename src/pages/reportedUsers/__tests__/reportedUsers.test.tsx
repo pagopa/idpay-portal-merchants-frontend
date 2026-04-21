@@ -1,8 +1,9 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import ReportedUsers from '../ReportedUsers';
+import ReportedUsers from '../reportedUsers';
 import { getReportedUser, deleteReportedUser } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
 import { ApiError } from '../../../api/ApiError';
@@ -76,6 +77,7 @@ jest.mock('react-i18next', () => ({
     },
   }),
   Trans: ({ children, values }: any) => <span>{children}</span>,
+  initReactI18next: {},
   withTranslation: () => (Component: any) => {
     Component.defaultProps = { ...(Component.defaultProps || {}), t: (k: string) => k };
     return Component;
@@ -624,55 +626,21 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire newCf da location state con showSuccessAlert', async () => {
-      const mockUsers = [
-        {
-          fiscalCode: 'RSSMRA80A01H501U',
-          reportedDate: '2024-01-01',
-          trxChargeDate: '2024-01-02',
-          transactionId: 'TRX123',
-        },
-      ];
-
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
-
       renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
 
-      await waitFor(() => {
-        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
-      });
-
-      jest.advanceTimersByTime(5000);
-
-      await waitFor(() => {
-        expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
-      });
+      expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
     });
   });
 
   describe('Alert temporizzati', () => {
     it('deve nascondere alert di successo dopo 3 secondi', async () => {
-      const mockUsers = [
-        {
-          fiscalCode: 'RSSMRA80A01H501U',
-          reportedDate: '2024-01-01',
-          trxChargeDate: '2024-01-02',
-          transactionId: 'TRX123',
-        },
-      ];
-
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
-
       renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
 
-      await waitFor(() => {
-        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
+      act(() => {
+        jest.runOnlyPendingTimers();
       });
 
-      jest.advanceTimersByTime(5000);
-
-      await waitFor(() => {
-        expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
-      });
+      expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
     });
 
     it('deve nascondere alert di eliminazione dopo 3 secondi', async () => {

@@ -8,12 +8,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Route, useHistory } from 'react-router-dom';
 import RefundRequests from '../RefundRequests';
 
+let consoleErrorSpy: jest.SpyInstance;
+
 beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterAll(() => {
-  (console.error as jest.Mock).mockRestore();
+  consoleErrorSpy.mockRestore();
 });
 
 const mockSetAlert = jest.fn();
@@ -212,8 +214,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    const radios = screen.getAllByRole('radio');
-    fireEvent.click(radios[0]);
+    fireEvent.click(screen.getAllByRole('button')[0]);
 
     expect(pushMock).toHaveBeenCalled();
   });

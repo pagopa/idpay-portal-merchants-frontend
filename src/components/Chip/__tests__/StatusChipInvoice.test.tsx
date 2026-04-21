@@ -2,13 +2,16 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import StatusChipInvoice from '../StatusChipInvoice';
 
+let consoleErrorSpy: jest.SpyInstance;
+
 beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterAll(() => {
-  (console.error as jest.Mock).mockRestore();
+  consoleErrorSpy.mockRestore();
 });
+
 import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-contracts';
 
 const RewardBatchTrxStatusEnum = {
@@ -44,8 +47,8 @@ describe('StatusChipInvoice', () => {
       render(<StatusChipInvoice status={RewardBatchTrxStatusEnum.TO_CHECK as any} />);
 
       const chip = screen.getByTestId('custom-chip');
-      expect(chip).toHaveTextContent('TO_CHECK');
-      expect(chip).toHaveAttribute('data-color', '#E0E0E0');
+      expect(chip).toHaveTextContent('Da esaminare');
+      expect(chip).toHaveAttribute('data-color', '#EEEEEE');
       expect(chip).toHaveAttribute('data-size', 'small');
     });
 
@@ -54,7 +57,7 @@ describe('StatusChipInvoice', () => {
 
       const chip = screen.getByTestId('custom-chip');
       expect(chip).toHaveTextContent('Consultabile');
-      expect(chip).toHaveAttribute('data-color', '#E0E0E0');
+      expect(chip).toHaveAttribute('data-color', '#EEEEEE');
       expect(chip).toHaveAttribute('data-size', 'small');
     });
 
@@ -63,7 +66,7 @@ describe('StatusChipInvoice', () => {
 
       const chip = screen.getByTestId('custom-chip');
       expect(chip).toHaveTextContent('Da controllare');
-      expect(chip).toHaveAttribute('data-color', '#E0E0E0');
+      expect(chip).toHaveAttribute('data-color', '#FFF5DA');
       expect(chip).toHaveAttribute('data-size', 'small');
     });
 
@@ -72,7 +75,7 @@ describe('StatusChipInvoice', () => {
 
       const chip = screen.getByTestId('custom-chip');
       expect(chip).toHaveTextContent('Approvata');
-      expect(chip).toHaveAttribute('data-color', '#E0E0E0');
+      expect(chip).toHaveAttribute('data-color', '#E1F5FE');
       expect(chip).toHaveAttribute('data-size', 'small');
     });
 

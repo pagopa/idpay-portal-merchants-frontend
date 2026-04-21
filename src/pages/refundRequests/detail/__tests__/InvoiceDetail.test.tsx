@@ -4,12 +4,14 @@ import InvoiceDetail from '../InvoiceDetail';
 import { useLocation } from 'react-router-dom';
 import { getMerchantsApi } from '../../../../api/MerchantsApiClient';
 
+let consoleErrorSpy: jest.SpyInstance;
+
 beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterAll(() => {
-  (console.error as jest.Mock).mockRestore();
+  consoleErrorSpy.mockRestore();
 });
 
 jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher', () => ({
@@ -212,7 +214,7 @@ describe('Render component', () => {
     expect(screen.getByText('Numero fattura')).toBeInTheDocument();
     expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
     expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
-    expect(screen.queryByText('03/02/2026')).not.toBeInTheDocument();
+    expect(screen.getByText('03/02/2026')).toBeInTheDocument();
     expect(screen.getByTestId('btn-test')).toBeInTheDocument();
   });
   it('should handle undefined initiativesListSel (line 68 branch)', () => {
