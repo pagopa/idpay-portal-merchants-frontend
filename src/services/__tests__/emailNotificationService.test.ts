@@ -15,8 +15,7 @@ jest.mock('../../api/emailNotificationApiClient', () => {
   };
 });
 
-const mockedEmailNotificationApi =
-  EmailNotificationApi as jest.Mocked<typeof EmailNotificationApi>;
+const mockedEmailNotificationApi = EmailNotificationApi as jest.Mocked<typeof EmailNotificationApi>;
 
 describe('emailNotificationService', () => {
   beforeEach(() => {

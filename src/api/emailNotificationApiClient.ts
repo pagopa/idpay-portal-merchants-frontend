@@ -1,9 +1,9 @@
-import { ENV } from "../utils/env";
-import { BaseApiClient } from "./BaseApiClient";
+import { ENV } from '../utils/env';
+import { BaseApiClient } from './BaseApiClient';
 import {
   UserInstitutionInfoDTO,
   EmailMessageDTO,
-} from "./generated/email-notification/data-contracts";
+} from './generated/email-notification/data-contracts';
 
 /**
  * EmailNotificationApiClient
@@ -24,35 +24,31 @@ class EmailNotificationApiClient {
   }
 
   public async getInstitutionProductUserInfo(): Promise<UserInstitutionInfoDTO> {
-    const response =
-      await this.baseClient.safeRequest<UserInstitutionInfoDTO>({
-        path: "/users",
-        method: "GET",
-        secure: true,
-        format: "json",
-      });
+    const response = await this.baseClient.safeRequest<UserInstitutionInfoDTO>({
+      path: '/users',
+      method: 'GET',
+      secure: true,
+      format: 'json',
+    });
 
     return response.data;
   }
 
   public async sendEmail(data: EmailMessageDTO): Promise<void> {
     await this.baseClient.safeRequest<void>({
-      path: "/notify",
-      method: "POST",
+      path: '/notify',
+      method: 'POST',
       body: data,
       secure: true,
-      format: "json",
+      format: 'json',
     });
-    
   }
 }
 
 const client = new EmailNotificationApiClient();
 
 export const EmailNotificationApi = {
-  getInstitutionProductUserInfo: () =>
-    client.getInstitutionProductUserInfo(),
+  getInstitutionProductUserInfo: () => client.getInstitutionProductUserInfo(),
 
-  sendEmail: (data: EmailMessageDTO) =>
-    client.sendEmail(data),
+  sendEmail: (data: EmailMessageDTO) => client.sendEmail(data),
 };

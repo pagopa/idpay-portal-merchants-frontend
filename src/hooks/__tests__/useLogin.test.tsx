@@ -3,7 +3,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useDispatch } from 'react-redux';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import { userActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { useTranslation } from 'react-i18next';
 import { parseJwt } from '../../utils/jwt-utils';

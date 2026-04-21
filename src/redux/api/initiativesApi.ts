@@ -9,7 +9,7 @@ import { setInitiativesList } from '../slices/initiativesSlice';
 
 /**
  * RTK Query API layer introduced in BRIDGE MODE.
- * 
+ *
  * IMPORTANT:
  * - Does NOT change existing business logic.
  * - Keeps initiativesSlice as source of truth.
@@ -31,9 +31,7 @@ export const initiativesApi = createApi({
 
           const response = await getMerchantInitiativeList();
 
-          const filtered = response.filter(
-            (r) => r.status === PUBLISHED || r.status === CLOSED
-          );
+          const filtered = response.filter((r) => r.status === PUBLISHED || r.status === CLOSED);
 
           // Bridge: keep existing slice behavior
           dispatch(setInitiativesList(filtered));

@@ -33,7 +33,9 @@ describe('consoleLogger', () => {
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const traceSpy = jest.spyOn(console, 'trace').mockImplementation(() => undefined);
     const groupSpy = jest.spyOn(console, 'group').mockImplementation(() => undefined);
-    const groupCollapsedSpy = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => undefined);
+    const groupCollapsedSpy = jest
+      .spyOn(console, 'groupCollapsed')
+      .mockImplementation(() => undefined);
     const groupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => undefined);
 
     enabledConsole.log('a');
@@ -99,7 +101,9 @@ describe('consoleLogger', () => {
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const traceSpy = jest.spyOn(console, 'trace').mockImplementation(() => undefined);
     const groupSpy = jest.spyOn(console, 'group').mockImplementation(() => undefined);
-    const groupCollapsedSpy = jest.spyOn(console, 'groupCollapsed').mockImplementation(() => undefined);
+    const groupCollapsedSpy = jest
+      .spyOn(console, 'groupCollapsed')
+      .mockImplementation(() => undefined);
     const groupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => undefined);
 
     disabledConsole.log('a');

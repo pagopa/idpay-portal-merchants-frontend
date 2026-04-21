@@ -13,8 +13,7 @@ jest.mock('../../api/rolePermissionApiClient', () => {
   };
 });
 
-const mockedRolePermissionApi =
-  RolePermissionApi as any;
+const mockedRolePermissionApi = RolePermissionApi as any;
 
 describe('rolePermissionService', () => {
   beforeEach(() => {

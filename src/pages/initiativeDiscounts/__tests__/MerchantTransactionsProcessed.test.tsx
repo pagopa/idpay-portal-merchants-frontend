@@ -47,9 +47,9 @@ jest.mock('../../components/EmptyList', () => (props: { message: string }) => (
 
 jest.mock('../TableHeader', () => () => (
   <thead data-testid="table-header-mock">
-  <tr>
-    <th>mock header</th>
-  </tr>
+    <tr>
+      <th>mock header</th>
+    </tr>
   </thead>
 ));
 
@@ -61,10 +61,7 @@ jest.mock('../TablePaginator', () => (props: any) => (
 
 jest.mock('../FiltersForm', () => (props: any) => (
   <div data-testid="filters-form-mock">
-    <button
-      data-testid="submit-filters"
-      onClick={() => props.formik.onSubmit(props.formik.values)}
-    >
+    <button data-testid="submit-filters" onClick={() => props.formik.onSubmit(props.formik.values)}>
       apply-filters
     </button>
     <span>commons.filterBtn</span>
@@ -86,11 +83,9 @@ jest.mock('formik', () => ({
   },
 }));
 
-const useTableDataFilteredMock =
-  tableDataFilteredHook.useTableDataFiltered as jest.Mock;
+const useTableDataFilteredMock = tableDataFilteredHook.useTableDataFiltered as jest.Mock;
 
-const getMerchantTransactionsProcessedMock =
-  getMerchantTransactionsProcessed as jest.Mock;
+const getMerchantTransactionsProcessedMock = getMerchantTransactionsProcessed as jest.Mock;
 
 const formatDateMock = formatDate as jest.Mock;
 const formattedCurrencyMock = formattedCurrency as jest.Mock;
@@ -126,8 +121,7 @@ describe('MerchantTransactionsProcessed', () => {
   });
 
   it('renderizza EmptyList quando non ci sono righe', () => {
-    useTableDataFilteredMock.mockImplementation(() => {
-    });
+    useTableDataFilteredMock.mockImplementation(() => {});
 
     render(<MerchantTransactionsProcessed id={fakeId} />);
 
@@ -135,7 +129,6 @@ describe('MerchantTransactionsProcessed', () => {
     expect(empty).toBeInTheDocument();
     expect(empty).toHaveTextContent('pages.initiativeDiscounts.emptyProcessedList');
   });
-
 
   it('renderizza la tabella e il paginator quando ci sono righe', async () => {
     useTableDataFilteredMock.mockImplementation(
@@ -180,9 +173,7 @@ describe('MerchantTransactionsProcessed', () => {
       });
     });
 
-    await waitFor(() =>
-      expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledTimes(1)
-    );
+    await waitFor(() => expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledTimes(1));
 
     expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledWith({
       initiativeId: fakeId,
@@ -216,9 +207,7 @@ describe('MerchantTransactionsProcessed', () => {
       });
     });
 
-    await waitFor(() =>
-      expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledTimes(1)
-    );
+    await waitFor(() => expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledTimes(1));
 
     expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledWith({
       initiativeId: fakeId,
@@ -231,7 +220,7 @@ describe('MerchantTransactionsProcessed', () => {
     expect(setLoadingMock).toHaveBeenCalledWith(false);
   });
 
-  it('gestisce l\'errore mostrando errore generico e spegnendo il loading', async () => {
+  it("gestisce l'errore mostrando errore generico e spegnendo il loading", async () => {
     useTableDataFilteredMock.mockImplementation(() => {});
 
     const error = new Error('boom');
@@ -287,13 +276,9 @@ describe('MerchantTransactionsProcessed', () => {
       });
     });
 
-    await waitFor(() =>
-      expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledTimes(1)
-    );
+    await waitFor(() => expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledTimes(1));
 
-    await waitFor(() =>
-      expect(screen.getByTestId('empty-list')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('empty-list')).toBeInTheDocument());
   });
 
   it('non chiama il servizio se id non è una stringa', async () => {
@@ -317,9 +302,7 @@ describe('MerchantTransactionsProcessed', () => {
       });
     });
 
-    await waitFor(() =>
-      expect(getMerchantTransactionsProcessedMock).not.toHaveBeenCalled()
-    );
+    await waitFor(() => expect(getMerchantTransactionsProcessedMock).not.toHaveBeenCalled());
   });
 
   it('il bottone di FiltersForm mockato invoca onSubmit del formik', async () => {
@@ -340,8 +323,6 @@ describe('MerchantTransactionsProcessed', () => {
     const button = screen.getByTestId('submit-filters');
     fireEvent.click(button);
 
-    await waitFor(() =>
-      expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledTimes(1)
-    );
+    await waitFor(() => expect(getMerchantTransactionsProcessedMock).toHaveBeenCalledTimes(1));
   });
 });

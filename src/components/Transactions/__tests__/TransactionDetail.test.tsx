@@ -4,7 +4,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 jest.mock('../../../routes', () => ({
   __esModule: true,
   default: {
-    MODIFY_DOCUMENT: '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/modify/:fileDocNumber',
+    MODIFY_DOCUMENT:
+      '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/modify/:fileDocNumber',
     REVERSE: '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/reverse',
   },
 }));
@@ -15,8 +16,7 @@ const mockFormatValues = jest.fn((s: string) => `Formatted: ${s}`);
 jest.mock('../../../utils/formatUtils', () => ({
   __esModule: true,
   currencyFormatter: (n: number) => ({
-    toString: () =>
-      `€ ${Number.isFinite(n) ? n.toFixed(2) : '0.00'}`,
+    toString: () => `€ ${Number.isFinite(n) ? n.toFixed(2) : '0.00'}`,
   }),
   formatValues: (s: string) => mockFormatValues(s),
 }));
@@ -37,10 +37,10 @@ jest.mock('../../../pages/initiativeStores/StoreContext', () => ({
   useStore: () => mockUseStore(),
 }));
 
-const mockSetAlert  = jest.fn();
+const mockSetAlert = jest.fn();
 jest.mock('../../../hooks/useAlert', () => ({
   __esModule: true,
-  useAlert: () => ({ setAlert: mockSetAlert  }),
+  useAlert: () => ({ setAlert: mockSetAlert }),
 }));
 
 const mockDownloadInvoiceFile = jest.fn();
@@ -314,12 +314,10 @@ describe('TransactionDetail', () => {
     };
 
     const origCreateElement = document.createElement.bind(document);
-    const createElSpy = jest
-      .spyOn(document, 'createElement')
-      .mockImplementation((tag: any) => {
-        if (tag === 'a') return linkMock as any;
-        return origCreateElement(tag);
-      });
+    const createElSpy = jest.spyOn(document, 'createElement').mockImplementation((tag: any) => {
+      if (tag === 'a') return linkMock as any;
+      return origCreateElement(tag);
+    });
 
     const itemValues = {
       id: 'TRX-8',
@@ -357,12 +355,10 @@ describe('TransactionDetail', () => {
     const linkMock = { href: '', download: '', click: jest.fn() };
 
     const origCreateElement = document.createElement.bind(document);
-    const createElSpy = jest
-      .spyOn(document, 'createElement')
-      .mockImplementation((tag: any) => {
-        if (tag === 'a') return linkMock as any;
-        return origCreateElement(tag);
-      });
+    const createElSpy = jest.spyOn(document, 'createElement').mockImplementation((tag: any) => {
+      if (tag === 'a') return linkMock as any;
+      return origCreateElement(tag);
+    });
 
     const itemValues = {
       id: 'TRX-9',
@@ -419,10 +415,10 @@ describe('TransactionDetail', () => {
 
     await waitFor(() => {
       expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-10', 'store-999');
-      expect(mockSetAlert ).toHaveBeenCalled();
+      expect(mockSetAlert).toHaveBeenCalled();
     });
 
-    const payload = mockSetAlert .mock.calls[0][0];
+    const payload = mockSetAlert.mock.calls[0][0];
     expect(payload.title).toBe('Errore download file');
     expect(payload.severity).toBe('error');
     expect(payload.isOpen).toBe(true);

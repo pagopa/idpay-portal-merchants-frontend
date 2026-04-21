@@ -43,7 +43,11 @@ jest.mock('../../Autocomplete/AutocompleteComponent', () => (props: any) => {
       >
         select
       </button>
-      <button type="button" aria-label="Trigger onTextChange empty" onClick={() => props.onTextChange?.('')}>
+      <button
+        type="button"
+        aria-label="Trigger onTextChange empty"
+        onClick={() => props.onTextChange?.('')}
+      >
         clear
       </button>
     </div>
@@ -541,7 +545,6 @@ describe('PointsOfSaleForm validation tests', () => {
     fireEvent.click(deleteButtons[0]);
 
     expect(screen.queryAllByTestId('DeleteOutlineIcon')).toHaveLength(0);
-
   });
 });
 

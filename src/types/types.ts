@@ -1,12 +1,11 @@
-
 export interface GetPointOfSalesFilters {
-    type?: "PHYSICAL" | "ONLINE";
-    city?: string;
-    address?: string;
-    contactName?: string;
-    page?: number;
-    size?: number;
-    sort: string;
+  type?: 'PHYSICAL' | 'ONLINE';
+  city?: string;
+  address?: string;
+  contactName?: string;
+  page?: number;
+  size?: number;
+  sort: string;
 }
 
 export interface GetReportedUsersFilters {
@@ -18,52 +17,50 @@ export interface GetReportedUsersFilters {
   sort: string;
 }
 
-
 export interface GetPointOfSaleTransactionsFilters {
-    page?: number;
-    size?: number;
-    sort?: string;
-    fiscalCode?: string;
-    status?: string;
-    productGtin?: string;
-    trxCode?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+  fiscalCode?: string;
+  status?: string;
+  productGtin?: string;
+  trxCode?: string;
 }
 
 export interface SalePointFormDTO {
+  address?: string;
 
-    address?: string;
+  channelEmail?: string;
 
-    channelEmail?: string;
+  channelGeolink?: string;
 
-    channelGeolink?: string;
+  channelPhone?: string;
 
-    channelPhone?: string;
+  channelWebsite?: string;
 
-    channelWebsite?: string;
+  city?: string;
 
-    city?: string;
+  contactEmail?: string;
 
-    contactEmail?: string;
+  confirmContactEmail?: string;
 
-    confirmContactEmail?: string;
+  contactName?: string;
 
-    contactName?: string;
+  contactSurname?: string;
 
-    contactSurname?: string;
+  franchiseName?: string;
 
-    franchiseName?: string;
+  id?: string;
 
-    id?: string;
+  province?: string;
 
-    province?: string;
+  region?: string;
 
-    region?: string;
+  streetNumber?: string;
 
-    streetNumber?: string;
+  type?: string;
 
-    type?: string;
+  website?: string;
 
-    website?: string;
-
-    zipCode?: string;
+  zipCode?: string;
 }

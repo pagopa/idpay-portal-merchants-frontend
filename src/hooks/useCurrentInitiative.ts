@@ -1,8 +1,5 @@
 import { useAppSelector } from '../redux/hooks';
-import {
-  currentInitiativeSelector,
-  InitiativeExtended,
-} from '../redux/slices/initiativesSlice';
+import { currentInitiativeSelector, InitiativeExtended } from '../redux/slices/initiativesSlice';
 import { useCurrentInitiativeId } from './useCurrentInitiativeId';
 
 /**
@@ -16,7 +13,5 @@ import { useCurrentInitiativeId } from './useCurrentInitiativeId';
 export const useCurrentInitiative = (): InitiativeExtended | undefined => {
   const { initiativeId } = useCurrentInitiativeId();
 
-  return useAppSelector((state) =>
-    currentInitiativeSelector(state, initiativeId)
-  );
+  return useAppSelector((state) => currentInitiativeSelector(state, initiativeId));
 };

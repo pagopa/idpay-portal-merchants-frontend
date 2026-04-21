@@ -81,9 +81,7 @@ describe('@standard-schema/utils mock', () => {
       const message = getStandardSchemaMessage();
 
       if (!isSchema) {
-        const error = new SchemaError([
-          { path: ['username'], message: 'Username is required' },
-        ]);
+        const error = new SchemaError([{ path: ['username'], message: 'Username is required' }]);
 
         expect(error.name).toBe('SchemaError');
         expect(message).toBeUndefined();

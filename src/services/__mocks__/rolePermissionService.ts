@@ -15,5 +15,6 @@ export const mockedPermission = {
 export const mockedPortalConsent = {};
 
 export const getUserPermission = () => RolePermissionApiMocked.userPermission();
-export const getPortalConsent = (): Promise<PortalConsentDTO> => RolePermissionApiMocked.getPortalConsent();
+export const getPortalConsent = (): Promise<PortalConsentDTO> =>
+  RolePermissionApiMocked.getPortalConsent();
 export const savePortalConsent = () => RolePermissionApiMocked.savePortalConsent();

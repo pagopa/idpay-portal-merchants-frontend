@@ -14,7 +14,7 @@ import {
   handlePromptMessage,
   truncateString,
   formatEuro,
-  isReversableOrEditable
+  isReversableOrEditable,
 } from '../helpers';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 
@@ -214,38 +214,38 @@ describe('generateUniqueId', () => {
 
 describe('handlePromptMessage', () => {
   test('should handle prompt message', () => {
-    sessionStorage.setItem('storesPagination', 'test')
-    const pathName1 = { pathname: "path-name-test" }
-    const targetPage1 = "target-page-test"
+    sessionStorage.setItem('storesPagination', 'test');
+    const pathName1 = { pathname: 'path-name-test' };
+    const targetPage1 = 'target-page-test';
 
-    const pathName2 = { pathname: "path-name-test" }
-    const targetPage2 = "path-name-test"
+    const pathName2 = { pathname: 'path-name-test' };
+    const targetPage2 = 'path-name-test';
 
-    handlePromptMessage(pathName2, targetPage2)
-    expect(sessionStorage.getItem('storesPagination')).toBe('test')
+    handlePromptMessage(pathName2, targetPage2);
+    expect(sessionStorage.getItem('storesPagination')).toBe('test');
 
-    handlePromptMessage(pathName1, targetPage1)
-    expect(sessionStorage.getItem('storesPagination')).toBeNull()
+    handlePromptMessage(pathName1, targetPage1);
+    expect(sessionStorage.getItem('storesPagination')).toBeNull();
   });
 });
 
 describe('formatEuro', () => {
   test('should formatEuro', () => {
-    const amountCents = 4500
-    const amount = formatEuro(amountCents)
-    expect(amount).toBe("45,00€")
+    const amountCents = 4500;
+    const amount = formatEuro(amountCents);
+    expect(amount).toBe('45,00€');
   });
 });
 
 describe('truncateString', () => {
   test('should truncateString', () => {
-    const initialText = "Initial text excess"
-    const finalText = truncateString(initialText, 7)
-    const fullText = truncateString(initialText)
-    const emptyText = truncateString()
-    expect(finalText).toBe("Initial...")
-    expect(fullText).toBe("Initial text excess")
-    expect(emptyText).toBe("-")
+    const initialText = 'Initial text excess';
+    const finalText = truncateString(initialText, 7);
+    const fullText = truncateString(initialText);
+    const emptyText = truncateString();
+    expect(finalText).toBe('Initial...');
+    expect(fullText).toBe('Initial text excess');
+    expect(emptyText).toBe('-');
   });
 });
 

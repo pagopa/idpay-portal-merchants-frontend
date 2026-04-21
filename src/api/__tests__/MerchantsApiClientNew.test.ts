@@ -10,11 +10,9 @@ describe('MerchantsApiClient', () => {
   it('should call safeRequest with GET /initiatives and return data', async () => {
     const mockResponse = [{ id: '1', name: 'Initiative 1' }];
 
-    const safeRequestSpy = jest
-      .spyOn(BaseApiClient.prototype, 'safeRequest')
-      .mockResolvedValue({
-        data: mockResponse,
-      } as any);
+    const safeRequestSpy = jest.spyOn(BaseApiClient.prototype, 'safeRequest').mockResolvedValue({
+      data: mockResponse,
+    } as any);
 
     const result = await getMerchantsApi().getMerchantInitiativeList();
 

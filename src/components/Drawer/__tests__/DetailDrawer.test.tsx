@@ -13,10 +13,10 @@ describe('DetailDrawer', () => {
     isOpen: true,
     setIsOpen: mockToggleDrawer,
     children: <div data-testid="drawer-content">Contenuto di Test</div>,
-    title: "Titolo"
+    title: 'Titolo',
   };
 
-  const buttons = [{title: "button", dataTestId: "button-test-id"}]
+  const buttons = [{ title: 'button', dataTestId: 'button-test-id' }];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,7 +43,7 @@ describe('DetailDrawer', () => {
     );
 
     expect(screen.queryByText('Contenuto di Test')).not.toBeInTheDocument();
-    expect(screen.queryByTestId("buttons-box")).not.toBeInTheDocument();
+    expect(screen.queryByTestId('buttons-box')).not.toBeInTheDocument();
   });
 
   it('should call toggleDrawer(false) when the CloseIcon button is clicked', () => {
@@ -66,8 +66,8 @@ describe('DetailDrawer', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId("buttons-box")).toBeInTheDocument();
-    expect(screen.getByTestId("button-test-id")).toBeInTheDocument();
+    expect(screen.getByTestId('buttons-box')).toBeInTheDocument();
+    expect(screen.getByTestId('button-test-id')).toBeInTheDocument();
   });
 
   it('should not render buttons when is an empty array', () => {
@@ -77,6 +77,6 @@ describe('DetailDrawer', () => {
       </Wrapper>
     );
 
-    expect(screen.queryByTestId("buttons-box")).not.toBeInTheDocument();
+    expect(screen.queryByTestId('buttons-box')).not.toBeInTheDocument();
   });
 });

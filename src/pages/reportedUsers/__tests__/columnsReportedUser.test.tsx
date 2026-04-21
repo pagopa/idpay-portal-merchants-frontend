@@ -1,4 +1,3 @@
-
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { getReportedUsersColumns } from '../columnsReportedUser';
@@ -100,9 +99,7 @@ describe('getReportedUsersColumns', () => {
       const cfColumn = columns[0];
       const params = { value: 'ABCD1234567890' };
 
-      const { rerender } = render(
-        <CellWrapper renderCell={cfColumn.renderCell} params={params} />
-      );
+      const { rerender } = render(<CellWrapper renderCell={cfColumn.renderCell} params={params} />);
 
       let button = screen.getByRole('button');
       fireEvent.mouseDown(button);
@@ -121,9 +118,7 @@ describe('getReportedUsersColumns', () => {
       const cfColumn = columns[0];
       const params = { value: 'ABCD1234567890' };
 
-      const { rerender } = render(
-        <CellWrapper renderCell={cfColumn.renderCell} params={params} />
-      );
+      const { rerender } = render(<CellWrapper renderCell={cfColumn.renderCell} params={params} />);
 
       const button = screen.getByRole('button');
       fireEvent.mouseDown(button);
@@ -132,10 +127,7 @@ describe('getReportedUsersColumns', () => {
       rerender(<CellWrapper renderCell={cfColumn.renderCell} params={params} />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button')).toHaveAttribute(
-          'aria-label',
-          'Mostra codice fiscale'
-        );
+        expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Mostra codice fiscale');
       });
     });
 
@@ -150,9 +142,7 @@ describe('getReportedUsersColumns', () => {
       const button = screen.queryByRole('button');
 
       expect(button).not.toBeInTheDocument();
-      expect(container.querySelector('p')?.textContent).toBe(
-        MISSING_DATA_PLACEHOLDER
-      );
+      expect(container.querySelector('p')?.textContent).toBe(MISSING_DATA_PLACEHOLDER);
     });
 
     it('should display placeholder when CF is null', () => {
@@ -207,10 +197,7 @@ describe('getReportedUsersColumns', () => {
       fireEvent.mouseDown(button);
 
       await waitFor(() => {
-        expect(button).toHaveAttribute(
-          'aria-label',
-          'Nascondi codice fiscale'
-        );
+        expect(button).toHaveAttribute('aria-label', 'Nascondi codice fiscale');
       });
     });
   });
@@ -235,9 +222,7 @@ describe('getReportedUsersColumns', () => {
       );
       const typography = container.querySelector('p');
 
-      expect(formatUtils.safeFormatDate).toHaveBeenCalledWith(
-        testRow.reportedDate
-      );
+      expect(formatUtils.safeFormatDate).toHaveBeenCalledWith(testRow.reportedDate);
       expect(typography?.textContent).toBe('01/01/2024');
     });
 
@@ -345,9 +330,7 @@ describe('getReportedUsersColumns', () => {
       );
       const typography = container.querySelector('p');
 
-      expect(formatUtils.safeFormatDate).toHaveBeenCalledWith(
-        testRow.transactionDate
-      );
+      expect(formatUtils.safeFormatDate).toHaveBeenCalledWith(testRow.transactionDate);
       expect(typography?.textContent).toBe('01/01/2024');
     });
 
@@ -377,9 +360,7 @@ describe('getReportedUsersColumns', () => {
       const actionsColumn = columns[4];
       const params = { row: testRow };
 
-      render(
-        <CellWrapper renderCell={actionsColumn.renderCell} params={params} />
-      );
+      render(<CellWrapper renderCell={actionsColumn.renderCell} params={params} />);
       expect(screen.getByTestId('DeleteOutlineIcon')).toBeInTheDocument();
     });
 
@@ -388,9 +369,7 @@ describe('getReportedUsersColumns', () => {
       const actionsColumn = columns[4];
       const params = { row: testRow };
 
-      render(
-        <CellWrapper renderCell={actionsColumn.renderCell} params={params} />
-      );
+      render(<CellWrapper renderCell={actionsColumn.renderCell} params={params} />);
       const deleteIcon = screen.getByTestId('DeleteOutlineIcon');
 
       fireEvent.click(deleteIcon);
@@ -403,9 +382,7 @@ describe('getReportedUsersColumns', () => {
       const actionsColumn = columns[4];
       const params = { row: testRow };
 
-      render(
-        <CellWrapper renderCell={actionsColumn.renderCell} params={params} />
-      );
+      render(<CellWrapper renderCell={actionsColumn.renderCell} params={params} />);
       const deleteIcon = screen.getByTestId('DeleteOutlineIcon');
 
       expect(deleteIcon).toHaveClass('MuiSvgIcon-colorError');
@@ -416,9 +393,7 @@ describe('getReportedUsersColumns', () => {
       const actionsColumn = columns[4];
       const params = { row: testRow };
 
-      render(
-        <CellWrapper renderCell={actionsColumn.renderCell} params={params} />
-      );
+      render(<CellWrapper renderCell={actionsColumn.renderCell} params={params} />);
       const deleteIcon = screen.getByTestId('DeleteOutlineIcon');
 
       expect(deleteIcon).toHaveStyle('cursor: pointer');
@@ -429,9 +404,7 @@ describe('getReportedUsersColumns', () => {
       const actionsColumn = columns[4];
       const params = { row: testRow };
 
-      render(
-        <CellWrapper renderCell={actionsColumn.renderCell} params={params} />
-      );
+      render(<CellWrapper renderCell={actionsColumn.renderCell} params={params} />);
       const deleteIcon = screen.getByTestId('DeleteOutlineIcon');
 
       expect(deleteIcon).toBeInTheDocument();
@@ -450,9 +423,7 @@ describe('getReportedUsersColumns', () => {
       );
       fireEvent.click(screen.getByTestId('DeleteOutlineIcon'));
 
-      rerender(
-        <CellWrapper renderCell={actionsColumn.renderCell} params={params2} />
-      );
+      rerender(<CellWrapper renderCell={actionsColumn.renderCell} params={params2} />);
       fireEvent.click(screen.getByTestId('DeleteOutlineIcon'));
 
       expect(mockHandleDelete).toHaveBeenNthCalledWith(1, 'AAAA1111111111A');
@@ -464,9 +435,7 @@ describe('getReportedUsersColumns', () => {
       const actionsColumn = columns[4];
       const params = { row: testRow };
 
-      render(
-        <CellWrapper renderCell={actionsColumn.renderCell} params={params} />
-      );
+      render(<CellWrapper renderCell={actionsColumn.renderCell} params={params} />);
       const deleteIcon = screen.getByTestId('DeleteOutlineIcon');
 
       fireEvent.click(deleteIcon);
@@ -577,9 +546,7 @@ describe('getReportedUsersColumns', () => {
       const cfColumn = columns[0];
       const params = { value: MISSING_DATA_PLACEHOLDER };
 
-      render(
-        <CellWrapper renderCell={cfColumn.renderCell} params={params} />
-      );
+      render(<CellWrapper renderCell={cfColumn.renderCell} params={params} />);
       const buttons = screen.queryAllByRole('button');
 
       expect(buttons).toHaveLength(0);

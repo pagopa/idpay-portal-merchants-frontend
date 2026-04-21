@@ -175,7 +175,7 @@ export default function Footer({
       href: ROUTES.PRIVACY_POLICY,
       ariaLabel: 'Vai al link: Privacy policy',
       linkType: 'internal',
-      onClick: () => onClickNavigate(ROUTES.PRIVACY_POLICY),  
+      onClick: () => onClickNavigate(ROUTES.PRIVACY_POLICY),
     },
     {
       label: t('common.footer.postLoginLinks.protectionofpersonaldata'),

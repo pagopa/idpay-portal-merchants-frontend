@@ -75,6 +75,6 @@ jobs:
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
-            "-Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx,**/__tests__/**/*.*,src/bootstrap.tsx,src/__mocks__/**/*"
+            "-Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx,**/__tests__/**/*.*,src/bootstrap.tsx,src/__mocks__/**/*, src/api/__mocks__/**/*, src/service/__mocks__/**/*"
             "-X"
             "-Dsonar.qualitygate.wait=false"

@@ -108,7 +108,9 @@ describe('ActionMenu', () => {
       expect(authorizeButton).toBeInTheDocument();
       expect(authorizeButton).toHaveTextContent('pages.initiativeDiscounts.detailTitle');
 
-      expect(screen.getByTestId('authorize-modal-mock')).toHaveTextContent('Authorize Modal Closed');
+      expect(screen.getByTestId('authorize-modal-mock')).toHaveTextContent(
+        'Authorize Modal Closed'
+      );
       fireEvent.click(authorizeButton);
       expect(screen.getByTestId('authorize-modal-mock')).toHaveTextContent('Authorize Modal Open');
     });

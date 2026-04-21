@@ -46,11 +46,7 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
           ))
         : null}
 
-      <button
-        type="button"
-        data-testid="type-abcde"
-        onClick={() => onInputChange?.({}, 'abcde')}
-      >
+      <button type="button" data-testid="type-abcde" onClick={() => onInputChange?.({}, 'abcde')}>
         type-abcde
       </button>
     </div>
@@ -59,21 +55,21 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
 
 import AutocompleteComponent from '../AutocompleteComponent';
 
-jest.mock("react-i18next", () => ({
+jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
-      if (key === "pages.pointOfSales.noOptionsText") return "Nessuna opzione";
-      if (key === "pages.pointOfSales.loadingText") return "Caricamento...";
+      if (key === 'pages.pointOfSales.noOptionsText') return 'Nessuna opzione';
+      if (key === 'pages.pointOfSales.loadingText') return 'Caricamento...';
       return key;
     },
   }),
 }));
 
-jest.mock("../../../utils/constants", () => ({
-  MANDATORY_FIELD: "Campo obbligatorio",
+jest.mock('../../../utils/constants', () => ({
+  MANDATORY_FIELD: 'Campo obbligatorio',
 }));
 
-describe("AutocompleteComponent", () => {
+describe('AutocompleteComponent', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -82,9 +78,9 @@ describe("AutocompleteComponent", () => {
     jest.useRealTimers();
   });
 
-  it("renders correctly with label", () => {
+  it('renders correctly with label', () => {
     render(<AutocompleteComponent options={[]} label="Cerca indirizzo" />);
-    expect(screen.getByLabelText("Cerca indirizzo")).toBeInTheDocument();
+    expect(screen.getByLabelText('Cerca indirizzo')).toBeInTheDocument();
   });
 
   it('does not trigger onChangeDebounce for input shorter than 5 chars', () => {
@@ -144,22 +140,16 @@ describe("AutocompleteComponent", () => {
     expect(onTextChange).toHaveBeenCalledWith('abcde');
   });
 
-
-  it("shows error message when inputError is true", () => {
+  it('shows error message when inputError is true', () => {
     render(<AutocompleteComponent options={[]} inputError label="Campo" />);
-    expect(screen.getByText("Campo obbligatorio")).toBeInTheDocument();
+    expect(screen.getByText('Campo obbligatorio')).toBeInTheDocument();
   });
 
-  it("shows custom error message if errorText is provided", () => {
+  it('shows custom error message if errorText is provided', () => {
     render(
-      <AutocompleteComponent
-        options={[]}
-        inputError
-        errorText="Errore custom"
-        label="Campo"
-      />
+      <AutocompleteComponent options={[]} inputError errorText="Errore custom" label="Campo" />
     );
-    expect(screen.getByText("Errore custom")).toBeInTheDocument();
+    expect(screen.getByText('Errore custom')).toBeInTheDocument();
   });
 
   it('calls onChange when an option is selected', () => {

@@ -44,7 +44,13 @@ jest.mock('../../../utils/env', () => ({
 }));
 
 jest.mock('../../../components/Header/CustomHeaderAccount', () => ({
-  CustomHeaderAccount: ({ onLogout, onLogin, onDocumentationClick, onAssistanceClick, loggedUser }: any) => (
+  CustomHeaderAccount: ({
+    onLogout,
+    onLogin,
+    onDocumentationClick,
+    onAssistanceClick,
+    loggedUser,
+  }: any) => (
     <div data-testid="custom-header-account">
       {loggedUser && (
         <div>
@@ -52,41 +58,55 @@ jest.mock('../../../components/Header/CustomHeaderAccount', () => ({
           <span>{loggedUser.surname}</span>
         </div>
       )}
-      <button data-testid="logout-button" onClick={onLogout}>Logout</button>
-      <button data-testid="login-button" onClick={onLogin}>Login</button>
-      <button data-testid="documentation-button" onClick={onDocumentationClick}>Documentation</button>
-      <button data-testid="assistance-button" onClick={onAssistanceClick}>Assistance</button>
+      <button data-testid="logout-button" onClick={onLogout}>
+        Logout
+      </button>
+      <button data-testid="login-button" onClick={onLogin}>
+        Login
+      </button>
+      <button data-testid="documentation-button" onClick={onDocumentationClick}>
+        Documentation
+      </button>
+      <button data-testid="assistance-button" onClick={onAssistanceClick}>
+        Assistance
+      </button>
     </div>
   ),
 }));
 
 jest.mock('@pagopa/mui-italia', () => ({
-  HeaderProduct: ({ partyId, productId, productsList, partyList, onSelectedProduct, onSelectedParty }: any) => (
+  HeaderProduct: ({
+    partyId,
+    productId,
+    productsList,
+    partyList,
+    onSelectedProduct,
+    onSelectedParty,
+  }: any) => (
     <div data-testid="header-product">
       <div data-testid="party-id">{partyId}</div>
       <div data-testid="product-id">{productId}</div>
-      {productsList && productsList.map((product: any) => (
-        <div key={product.id} data-testid={`product-${product.id}`}>
-          {product.title}
-          <button
-            data-testid={`select-product-${product.id}`}
-            onClick={() => onSelectedProduct(product)}
-          >
-            Select
-          </button>
-        </div>
-      ))}
-      {partyList && partyList.map((party: any) => (
-        <div key={party.id} data-testid={`party-${party.id}`}>
-          {party.name}
-          <button
-            data-testid={`select-party-${party.id}`}
-            onClick={() => onSelectedParty(party)}
-          >
-            Select
-          </button>
-        </div>
-      ))}
+      {productsList &&
+        productsList.map((product: any) => (
+          <div key={product.id} data-testid={`product-${product.id}`}>
+            {product.title}
+            <button
+              data-testid={`select-product-${product.id}`}
+              onClick={() => onSelectedProduct(product)}
+            >
+              Select
+            </button>
+          </div>
+        ))}
+      {partyList &&
+        partyList.map((party: any) => (
+          <div key={party.id} data-testid={`party-${party.id}`}>
+            {party.name}
+            <button data-testid={`select-party-${party.id}`} onClick={() => onSelectedParty(party)}>
+              Select
+            </button>
+          </div>
+        ))}
     </div>
   ),
 }));

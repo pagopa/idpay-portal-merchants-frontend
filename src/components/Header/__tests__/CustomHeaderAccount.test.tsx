@@ -10,9 +10,7 @@ jest.mock('@pagopa/mui-italia/components/ButtonNaked', () => ({
 }));
 
 jest.mock('@pagopa/mui-italia', () => ({
-  AccountDropdown: ({ user }: any) => (
-    <div data-testid="account-dropdown">{user?.email}</div>
-  ),
+  AccountDropdown: ({ user }: any) => <div data-testid="account-dropdown">{user?.email}</div>,
 }));
 
 const rootLink: RootLinkType = {
@@ -32,11 +30,7 @@ const loggedUser: JwtUser = {
 describe('CustomHeaderAccount', () => {
   test('renderizza il rootLink come ButtonNaked', () => {
     render(
-      <CustomHeaderAccount
-        rootLink={rootLink}
-        loggedUser={false}
-        onAssistanceClick={jest.fn()}
-      />
+      <CustomHeaderAccount rootLink={rootLink} loggedUser={false} onAssistanceClick={jest.fn()} />
     );
 
     const linkBtn = screen.getByRole('link', { name: rootLink.label });

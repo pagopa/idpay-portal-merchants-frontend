@@ -3,7 +3,10 @@ import { useDispatch } from 'react-redux';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
 import { userActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Dispatch } from 'react';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { useTranslation } from 'react-i18next';
