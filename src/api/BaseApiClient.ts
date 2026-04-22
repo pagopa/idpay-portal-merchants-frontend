@@ -18,6 +18,7 @@ type ApiClientConfig = {
 };
 
 import { browserConsole } from '../utils/consoleLogger';
+import { cleanupOnLogout } from '../utils/logoutCleanup';
 import { ApiError } from './ApiError';
 
 export class BaseApiClient {
@@ -118,6 +119,7 @@ export class BaseApiClient {
           displayableDescription: 'Please login again',
         })
       );
+      cleanupOnLogout();
     }
 
     if (!response.ok) {
