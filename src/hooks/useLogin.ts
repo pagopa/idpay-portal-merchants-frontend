@@ -16,6 +16,7 @@ import { getUserPermission } from '../services/rolePermissionService';
 import { setUserRole, setPermissionsList } from '../redux/slices/permissionsSlice';
 import { Permission } from '../model/Permission';
 import { IDPayUser } from '../model/IDPayUser';
+import { ENV } from '../utils/env';
 
 // const mockedUser = {
 //   uid: '0',
@@ -103,7 +104,7 @@ export const useLogin = () => {
       // Remove any partial data that might have remained, just for safety
       storageUserOps.delete();
       // Go to the login view
-      window.location.assign(CONFIG.URL_FE.LOGIN);
+      window.location.assign(ENV.URL_FE.LOGOUT);
       // This return is necessary
       return;
     }

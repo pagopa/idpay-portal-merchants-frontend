@@ -2,6 +2,10 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/stor
 import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
 import { store } from '../redux/store';
 import { parseJwt } from '../utils/jwt-utils';
+import { browserConsole } from '../utils/consoleLogger';
+import { cleanupOnLogout } from '../utils/logoutCleanup';
+import { ENV } from '../utils/env';
+import { ApiError } from './ApiError';
 
 type RequestConfig = {
   path: string;
@@ -16,10 +20,6 @@ type RequestConfig = {
 type ApiClientConfig = {
   baseUrl: string;
 };
-
-import { browserConsole } from '../utils/consoleLogger';
-import { cleanupOnLogout } from '../utils/logoutCleanup';
-import { ApiError } from './ApiError';
 
 export class BaseApiClient {
   private baseUrl: string;
@@ -120,6 +120,7 @@ export class BaseApiClient {
         })
       );
       cleanupOnLogout();
+      window.location.assign(ENV.URL_FE.LOGOUT);
     }
 
     if (!response.ok) {
