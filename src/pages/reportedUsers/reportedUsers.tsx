@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { Box, Stack, Button } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
@@ -183,6 +183,17 @@ const ReportedUsers: React.FC = () => {
     () => getReportedUsersColumns(handleOpenDeleteModal),
     [handleOpenDeleteModal]
   );
+
+  useEffect(() => {
+    const state = history.location.state as { newCf?: string } | undefined;
+
+    if (state?.newCf) {
+      updateAlerts('valid', true);
+      setTimeout(() => updateAlerts('valid', false), 3000);
+
+      history.replace({ ...history.location, state: undefined });
+    }
+  }, [history, updateAlerts]);
 
   if (!initiativeId) {
     return null;
