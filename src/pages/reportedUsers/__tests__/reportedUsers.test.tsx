@@ -606,41 +606,33 @@ describe('ReportedUsers Component', () => {
   });
 
   describe('Location state', () => {
-    it('deve gestire newCf da location state senza showSuccessAlert', async () => {
-      const mockUsers = [
-        {
-          fiscalCode: 'RSSMRA80A01H501U',
-          reportedDate: '2024-01-01',
-          trxChargeDate: '2024-01-02',
-          transactionId: 'TRX123',
-        },
-      ];
-
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
-
+    it('deve mostrare alert di successo quando newCf è presente in location state', async () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
       await waitFor(() => {
-        expect(mockGetReportedUser).not.toHaveBeenCalled();
+        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
-    });
-
-    it('deve gestire newCf da location state con showSuccessAlert', async () => {
-      renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
-
-      expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
     });
   });
 
   describe('Alert temporizzati', () => {
-    it('deve nascondere alert di successo dopo 3 secondi', async () => {
-      renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
+    it('deve mostrare e poi nascondere alert di successo dopo 3 secondi', async () => {
+      renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
-      act(() => {
-        jest.runOnlyPendingTimers();
+      // Deve comparire subito
+      await waitFor(() => {
+        expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
 
-      expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
+      // Avanziamo il timer
+      act(() => {
+        jest.advanceTimersByTime(3000);
+      });
+
+      // Deve sparire
+      await waitFor(() => {
+        expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
+      });
     });
 
     it('deve nascondere alert di eliminazione dopo 3 secondi', async () => {
