@@ -262,7 +262,10 @@ const InitiativeStores: React.FC = () => {
 
       const { content, ...paginationData } = response;
       setStores(content);
-      setStoresPagination(paginationData);
+      setStoresPagination(() => ({
+        ...paginationData,
+        pageNo: filters.page ?? 0,
+      }));
 
       if (!fromSort) {
         setStoresLoading(false);
@@ -350,7 +353,6 @@ const InitiativeStores: React.FC = () => {
       setCurrentSort(sortKey);
       setSortModel(newSortModel);
 
-      // Update sessionStorage with new sort
       const updatedPagination = { ...storesPagination, sort: sortKey, initiativeId };
       setStoresPagination(updatedPagination);
       sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
@@ -371,7 +373,7 @@ const InitiativeStores: React.FC = () => {
   };
 
   const handlePaginationPageChange = useCallback(
-    (page: number) => {
+    async (page: number) => {
       const updatedPagination = {
         ...storesPagination,
         pageNo: page,
@@ -380,11 +382,16 @@ const InitiativeStores: React.FC = () => {
       };
       setStoresPagination(updatedPagination);
       sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
+
+      await fetchStores({
+        ...appliedFilters,
+        sort: currentSort,
+        page,
+      });
     },
-    [storesPagination, initiativeId, currentSort]
+    [storesPagination, initiativeId, currentSort, appliedFilters]
   );
 
-  // STEP 2 – Effetto deterministico unico di fetch
   useEffect(() => {
     if (!initiativeId) {
       return;
@@ -395,7 +402,7 @@ const InitiativeStores: React.FC = () => {
       sort: currentSort,
       page: storesPagination.pageNo,
     });
-  }, [initiativeId, storesPagination.pageNo, currentSort, appliedFilters]);
+  }, [initiativeId, currentSort, appliedFilters]);
 
   return (
     <Box sx={{ my: 2 }}>
