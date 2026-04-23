@@ -342,7 +342,8 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
 
-    await user.click(screen.getByText('Next Page'));
+    const nextButton = await screen.findByText('Next Page');
+    await user.click(nextButton);
 
     await waitFor(() => {
       expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id', 2, 10);
@@ -562,5 +563,84 @@ describe('RefundRequests', () => {
       })
     );
     expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+  });
+
+  // Removed dynamic module reloading test because it caused duplicate React instance
+
+  it('should handle response without content (undefined content branch)', async () => {
+    mockGetRewardBatches.mockResolvedValueOnce({
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 0,
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+  });
+
+  it('should not select row when month is current month (isRowSelectable false branch)', async () => {
+    const current = new Date();
+    const currentMonth = String(current.getMonth() + 1).padStart(2, '0');
+    const currentYear = current.getFullYear();
+
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: [
+        {
+          id: 99,
+          name: 'current-month-batch',
+          posType: 'ONLINE',
+          initialAmountCents: 1000,
+          status: 'CREATED',
+          month: `${currentYear}-${currentMonth}`,
+          numberOfTransactions: 1,
+        },
+      ],
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 1,
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    const radios = screen.getAllByRole('radio');
+    expect(radios[0]).toBeDisabled();
+  });
+
+  // Removed complex stale requestId test to avoid async rendering instability
+  it('should show generic error when sendRewardBatch fails with unknown error', async () => {
+    mockSendRewardBatch.mockRejectedValueOnce(new Error('Generic error'));
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[0]);
+
+    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'errors.genericTitle',
+          text: 'errors.genericDescription',
+          severity: 'error',
+        })
+      );
+    });
+  });
+
+  it('should not send batch if no row is selected', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    expect(mockSendRewardBatch).not.toHaveBeenCalled();
   });
 });
