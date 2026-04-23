@@ -457,7 +457,7 @@ describe('RefundRequests', () => {
   });
 
   it('should show specific error alert when backend says previous month batch was not sent (REWARD_BATCH_PREVIOUS_NOT_SENT)', async () => {
-    mockSendRewardBatch.mockResolvedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
+    mockSendRewardBatch.mockRejectedValueOnce({ code: 'REWARD_BATCH_PREVIOUS_NOT_SENT' });
     mockGetRewardBatches.mockResolvedValue({
       content: mockData,
       pageNo: 0,
@@ -481,12 +481,12 @@ describe('RefundRequests', () => {
 
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           isOpen: true,
-          severity: 'success',
-          text: "pages.refundRequests.rewardBatchSentSuccess",
+          severity: 'error',
+          text: 'errors.sendTheBatchForPreviousMonth',
           title: 'errors.genericTitle',
-        }
+        })
       );
     });
   });
