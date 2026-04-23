@@ -5,19 +5,22 @@ import { ReceiptLong } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import routes from '../../../routes';
-import { downloadInvoiceFile, postponeTransaction } from '../../../services/merchantService';
+import { postponeTransaction } from '../../../services/merchantService';
+import { getMerchantsApi } from '../../../api/MerchantsApiClient';
 import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { formatValues, currencyFormatter, getEndOfNextMonth } from '../../../utils/formatUtils';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
-import { RewardBatchTrxStatusEnum } from '../../../api/generated/merchants/RewardBatchTrxStatus';
+import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-contracts';
 import { useAlert } from '../../../hooks/useAlert';
 import ModalComponent from '../../../components/modal/ModalComponent';
-import { intiativesListSelector } from '../../../redux/slices/initiativesSlice';
-import { useAppSelector } from '../../../redux/hooks';
 import { formatDate, isReversableOrEditable } from '../../../helpers';
-import { ReasonDTO } from '../../../api/generated/merchants/ReasonDTO';
+import { ReasonDTO } from '../../../api/generated/merchants/data-contracts';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
-import { RewardBatchDTO, StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
+import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts';
+
+type StatusEnum = RewardBatchDTO['status'];
+const CREATED_STATUS: StatusEnum = 'CREATED';
+import { useCurrentInitiative } from '../../../hooks/useCurrentInitiative';
 
 type Props = DetailDrawerProps & {
   itemValues: Record<string, any>;
@@ -44,38 +47,44 @@ export default function InvoiceDetail({
   const batchMonth = location.state?.store?.month;
   const statusBatch = location.state?.store?.status;
   const { t } = useTranslation();
-  const initiativesListSel = useAppSelector(intiativesListSelector);
+  const currentInitiative = useCurrentInitiative();
   const history = useHistory();
-  const { initiative_id, batch_id } = useParams<{ initiative_id: string; batch_id: string }>();
+  const { initiative_id } = useParams<{ initiative_id: string; batch_id: string }>();
 
   useEffect(() => {
-    if (
-      initiativesListSel?.[0]?.endDate &&
-      initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]
-    ) {
-      const endOfNextMonth = getEndOfNextMonth(initiativesListSel?.[0]?.endDate);
+    if (currentInitiative?.endDate) {
+      const endDateObj = new Date(currentInitiative.endDate);
+      const endOfNextMonth = getEndOfNextMonth(endDateObj);
       setNextMonthInitiativeEndDate(endOfNextMonth);
-      setInitiativeEndDate(initiativesListSel?.[0]?.endDate.toISOString().split('T')[0]);
+      setInitiativeEndDate(endDateObj.toISOString().split('T')[0]);
     }
-  }, [initiativesListSel]);
+  }, [currentInitiative]);
 
   const endOfNextBatchMonth = batchMonth ? getEndOfNextMonth(batchMonth) : undefined;
 
-  const isNextMonthDisabled = !endOfNextBatchMonth || !nextMonthInitiativeEndDate ? true : endOfNextBatchMonth > nextMonthInitiativeEndDate;
+  const isNextMonthDisabled =
+    !endOfNextBatchMonth || !nextMonthInitiativeEndDate
+      ? true
+      : endOfNextBatchMonth > nextMonthInitiativeEndDate;
 
-  const isPostponeBtnVisible = statusBatch === StatusEnum.CREATED && (itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatusEnum.APPROVED && itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatusEnum.REJECTED);
+  const isPostponeBtnVisible =
+    statusBatch === CREATED_STATUS &&
+    itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatus.APPROVED &&
+    itemValues?.rewardBatchTrxStatus !== RewardBatchTrxStatus.REJECTED;
 
-  const postponeButton: DetailDrawerProps['buttons'] = useMemo(() =>
-    isPostponeBtnVisible
-      ? [
-        {
-          disabled: isNextMonthDisabled,
-          onClick: () => setInvoiceTransactionModal(true),
-          variant: 'contained',
-          title: 'Sposta al mese successivo',
-          dataTestId: 'next-month-btn',
-        }
-      ] : [],
+  const postponeButton: DetailDrawerProps['buttons'] = useMemo(
+    () =>
+      isPostponeBtnVisible
+        ? [
+            {
+              disabled: isNextMonthDisabled,
+              onClick: () => setInvoiceTransactionModal(true),
+              variant: 'contained',
+              title: 'Sposta al mese successivo',
+              dataTestId: 'next-month-btn',
+            },
+          ]
+        : [],
     [isNextMonthDisabled, isPostponeBtnVisible]
   );
   const editButton: DetailDrawerProps['buttons'] = useMemo(
@@ -126,7 +135,12 @@ export default function InvoiceDetail({
 
     setLoading(true);
     try {
-      await postponeTransaction(initiative_id, batch_id, itemValues.id, initiativeEndDate);
+      const rewardBatchId = location.state?.store?.id;
+      if (!rewardBatchId) {
+        throw new Error('Missing rewardBatchId');
+      }
+
+      await postponeTransaction(initiative_id, rewardBatchId, itemValues?.id, initiativeEndDate);
       setAlert({
         title: 'Successo',
         text: 'Transazione spostata al mese successivo',
@@ -153,9 +167,9 @@ export default function InvoiceDetail({
   const handleDownloadFile = async (selectedTransaction: any) => {
     setLoading(true);
     try {
-      const response = await downloadInvoiceFile(
-        selectedTransaction?.id,
-        selectedTransaction?.pointOfSaleId
+      const response = await getMerchantsApi().downloadInvoiceFile(
+        selectedTransaction?.pointOfSaleId,
+        selectedTransaction?.trxId
       );
       const invoiceUrl = response.invoiceUrl;
 
@@ -237,11 +251,7 @@ export default function InvoiceDetail({
         data-testid="transaction-detail"
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        buttons={[
-          ...editButton,
-          ...postponeButton,
-          ...reverseButton,
-        ]}
+        buttons={[...editButton, ...postponeButton, ...reverseButton]}
       >
         {listItem.map((item, index) => (
           <Box key={`${item?.id}-${index}`}>
@@ -349,7 +359,7 @@ export default function InvoiceDetail({
           </Typography>
           <StatusChipInvoice status={itemValues?.rewardBatchTrxStatus} />
         </Box>
-        {[RewardBatchTrxStatusEnum.SUSPENDED, RewardBatchTrxStatusEnum.REJECTED].includes(
+        {[RewardBatchTrxStatus.SUSPENDED, RewardBatchTrxStatus.REJECTED].includes(
           itemValues.rewardBatchTrxStatus
         ) && (
           <Box>
@@ -379,7 +389,7 @@ export default function InvoiceDetail({
                         fontWeight={theme.typography.fontWeightRegular}
                         color={theme.palette.text.secondary}
                       >
-                        {date ? formatDate(date) : MISSING_DATA_PLACEHOLDER}
+                        {date ? formatDate(new Date(date)) : MISSING_DATA_PLACEHOLDER}
                       </Typography>
                       <Typography
                         variant="body2"

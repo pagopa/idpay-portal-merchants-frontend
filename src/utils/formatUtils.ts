@@ -6,7 +6,9 @@ export function formatDate(value: any) {
 }
 
 export const getEndOfNextMonth = (date?: string | Date): Date | undefined => {
-  if (!date) {return undefined;}
+  if (!date) {
+    return undefined;
+  }
   const d = new Date(date);
   return new Date(d.getFullYear(), d.getMonth() + 2, 0);
 };

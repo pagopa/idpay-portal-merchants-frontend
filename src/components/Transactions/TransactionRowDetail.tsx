@@ -9,15 +9,21 @@ type Props = {
   sx?: object;
 };
 
-export default function TransactionRowDetail({sx, labelVariant, valueVariant ,label, value}:Props) {
+export default function TransactionRowDetail({
+  sx,
+  labelVariant,
+  valueVariant,
+  label,
+  value,
+}: Props) {
   return (
     <Box sx={{ my: 1, ...sx }}>
-        <Typography variant={labelVariant} color="text.secondary">
-          {label}
-        </Typography>
-        <Typography variant={valueVariant} fontWeight="fontWeightMedium">
-          {value}
-        </Typography>
-      </Box>
+      <Typography variant={labelVariant} color="text.secondary">
+        {label}
+      </Typography>
+      <Typography variant={valueVariant} fontWeight="fontWeightMedium">
+        {value}
+      </Typography>
+    </Box>
   );
 }

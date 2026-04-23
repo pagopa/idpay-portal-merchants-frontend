@@ -3,10 +3,23 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { BASE_ROUTE } from '../../../routes';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import InitiativeDiscounts from '../initiativeDiscounts';
-import { setSelectedInitative } from '../../../redux/slices/initiativesSlice';
 import { store } from '../../../redux/store';
 
 jest.mock('../../../services/merchantService');
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => ({ initiativeId: 'testIniziativeId' }),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiative', () => ({
+  useCurrentInitiative: () => ({
+    initiativeName: 'Test Initiative',
+    spendingPeriod: {
+      startDate: new Date('2023-01-01'),
+      endDate: new Date('2023-12-31'),
+    },
+  }),
+}));
 
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -58,13 +71,6 @@ describe('Test suite for initiativeDiscounts page', () => {
   });
 
   test('on change of merchant transactions tabs', async () => {
-    // dispatch the selected initative to cover mapDatesFromPeriod and userCanCreateDiscount  functions
-    store.dispatch(
-      setSelectedInitative({
-        initiativeName: 'local tests initiative name',
-        spendingPeriod: '15/06/2023 - 31/07/2023',
-      })
-    );
     renderWithContext(<InitiativeDiscounts />, store);
 
     const currentDiscounts = screen.getByTestId('merchant-transactions-1');

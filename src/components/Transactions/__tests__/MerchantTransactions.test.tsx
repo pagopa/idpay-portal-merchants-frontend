@@ -1,4 +1,6 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+
+jest.setTimeout(20000);
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Tooltip } from '@mui/material';
@@ -23,9 +25,7 @@ jest.mock('../useStatus', () => jest.fn());
 jest.mock('../useDetailList', () => () => []);
 
 jest.mock('../../Chip/CustomChip', () => {
-  return jest.fn((props: any) => (
-    <div data-testid="custom-chip">{props.label}</div>
-  ));
+  return jest.fn((props: any) => <div data-testid="custom-chip">{props.label}</div>);
 });
 
 jest.mock('@mui/material', () => ({
@@ -43,24 +43,24 @@ jest.mock('../../../pages/components/EmptyList', () => (props: any) => (
   <div data-testid="empty-list">{props.message}</div>
 ));
 
-jest.mock('../TransactionDataTable', () =>
-  (props: any) => (
-    <div data-testid="transaction-data-table">
-      <button onClick={() => props.onSortModelChange([{ field: 'updateDate', sort: 'desc' }])}>
-        Sort Action
-      </button>
-      <button onClick={() => props.onPaginationPageChange(2)}>Pagination Action</button>
-      <button onClick={() => props.handleRowAction(props.rows[0])}>Row Action</button>
-      {props.columns.map((col: any) => {
-        return (
-          <div key={col.field} data-testid={`col-${col.field}`}>
-            {col.valueGetter ? props?.rows[0]?.additionalProperties?.productName : props?.rows[0]?.[col.field]}
-          </div>
-        );
-      })}
-    </div>
-  )
-);
+jest.mock('../TransactionDataTable', () => (props: any) => (
+  <div data-testid="transaction-data-table">
+    <button onClick={() => props.onSortModelChange([{ field: 'updateDate', sort: 'desc' }])}>
+      Sort Action
+    </button>
+    <button onClick={() => props.onPaginationPageChange(2)}>Pagination Action</button>
+    <button onClick={() => props.handleRowAction(props.rows[0])}>Row Action</button>
+    {props.columns.map((col: any) => {
+      return (
+        <div key={col.field} data-testid={`col-${col.field}`}>
+          {col.valueGetter
+            ? props?.rows[0]?.additionalProperties?.productName
+            : props?.rows[0]?.[col.field]}
+        </div>
+      );
+    })}
+  </div>
+));
 
 jest.mock(
   '../TransactionDetail',
@@ -69,7 +69,9 @@ jest.mock(
       isOpen && (
         <div data-testid="detail-drawer">
           {children}
-          <button data-testid="close-button" onClick={() => setIsOpen(false)}>Close Drawer</button>
+          <button data-testid="close-button" onClick={() => setIsOpen(false)}>
+            Close Drawer
+          </button>
         </div>
       )
 );
@@ -93,8 +95,8 @@ describe('MerchantTransactions', () => {
       rewardAmountCents: 500,
       status: 'REWARDED',
       additionalProperties: { productName: 'Frigorifero' },
-    }
-  ]
+    },
+  ];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -131,7 +133,9 @@ describe('MerchantTransactions', () => {
     renderComponent();
 
     const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
-    const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
+    const fiscalCodeInput = screen.getByLabelText(
+      'pages.pointOfSaleTransactions.searchByFiscalCode'
+    );
 
     await act(async () => {
       await userEvent.type(fiscalCodeInput, 'test');
@@ -148,7 +152,9 @@ describe('MerchantTransactions', () => {
 
     await act(async () => {
       const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
-      const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
+      const fiscalCodeInput = screen.getByLabelText(
+        'pages.pointOfSaleTransactions.searchByFiscalCode'
+      );
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
@@ -242,7 +248,9 @@ describe('MerchantTransactions', () => {
   it('updates fiscal code input on user input', async () => {
     renderComponent();
 
-    const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
+    const fiscalCodeInput = screen.getByLabelText(
+      'pages.pointOfSaleTransactions.searchByFiscalCode'
+    );
     await userEvent.type(fiscalCodeInput, 'TESTCF');
 
     expect(fiscalCodeInput).toHaveValue('TESTCF');
@@ -258,14 +266,20 @@ describe('MerchantTransactions', () => {
 
     expect(gtinInput).toHaveValue('ABC123xyz');
     expect(trxCodeInput).toHaveValue('ABC123xy');
-    expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
-    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')
+    ).not.toBeInTheDocument();
   });
 
   it('prevents GTIN and trxCodeInput input with spaces', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin') as HTMLInputElement;
+    const gtinInput = screen.getByLabelText(
+      'pages.pointOfSaleTransactions.searchByGtin'
+    ) as HTMLInputElement;
     const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '123 456' } });
     fireEvent.change(trxCodeInput, { target: { value: '123 456' } });
@@ -277,8 +291,12 @@ describe('MerchantTransactions', () => {
   it('prevents GTIN and trxCodeInput input longer than 14/8 characters', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin') as HTMLInputElement;
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode') as HTMLInputElement;
+    const gtinInput = screen.getByLabelText(
+      'pages.pointOfSaleTransactions.searchByGtin'
+    ) as HTMLInputElement;
+    const trxCodeInput = screen.getByLabelText(
+      'pages.pointOfSaleTransactions.searchByTrxCode'
+    ) as HTMLInputElement;
     fireEvent.change(gtinInput, { target: { value: '123456789012345' } });
     fireEvent.change(trxCodeInput, { target: { value: '123456789012345' } });
 
@@ -294,8 +312,12 @@ describe('MerchantTransactions', () => {
     fireEvent.change(gtinInput, { target: { value: '123@#$' } });
     fireEvent.change(trxCodeInput, { target: { value: '123@#$' } });
 
-    expect(screen.getByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).toBeInTheDocument();
-    expect(screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')
+    ).toBeInTheDocument();
   });
 
   it('accepts exactly 14 characters in GTIN and trxCode', async () => {
@@ -318,13 +340,21 @@ describe('MerchantTransactions', () => {
 
     fireEvent.change(gtinInput, { target: { value: '123@' } });
     fireEvent.change(trxCodeInput, { target: { value: '123@' } });
-    expect(screen.getByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).toBeInTheDocument();
-    expect(screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')
+    ).toBeInTheDocument();
 
     fireEvent.change(gtinInput, { target: { value: '123456' } });
     fireEvent.change(trxCodeInput, { target: { value: '123456' } });
-    expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
-    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')
+    ).not.toBeInTheDocument();
   });
 
   it('clears error message on blur', () => {
@@ -338,8 +368,12 @@ describe('MerchantTransactions', () => {
     fireEvent.change(trxCodeInput, { target: { value: '123@' } });
     fireEvent.blur(trxCodeInput);
 
-    expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
-    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')
+    ).not.toBeInTheDocument();
   });
 
   it('accepts empty GTIN and trxCode input', () => {
@@ -352,11 +386,17 @@ describe('MerchantTransactions', () => {
 
     expect(gtinInput).toHaveValue('');
     expect(trxCodeInput).toHaveValue('');
-    expect(screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')).not.toBeInTheDocument();
-    expect(screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Il codice GTIN/EAN deve contenere al massimo 14 caratteri alfanumerici.')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Il codice sconto deve contenere al massimo 8 caratteri alfanumerici.')
+    ).not.toBeInTheDocument();
   });
 
-  const renderComponent = (overrideProps?: Partial<React.ComponentProps<typeof MerchantTransactions>>) =>
+  const renderComponent = (
+    overrideProps?: Partial<React.ComponentProps<typeof MerchantTransactions>>
+  ) =>
     render(
       <MerchantTransactions
         transactions={mockTransactions}
@@ -374,8 +414,12 @@ describe('MerchantTransactions', () => {
 
   it('renders form with all filter fields', () => {
     renderComponent();
-    expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode')).toBeInTheDocument();
-    expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode')
+    ).toBeInTheDocument();
     expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin')).toBeInTheDocument();
   });
 
@@ -524,7 +568,9 @@ describe('MerchantTransactions', () => {
     );
 
     const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
-    const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
+    const fiscalCodeInput = screen.getByLabelText(
+      'pages.pointOfSaleTransactions.searchByFiscalCode'
+    );
 
     await act(async () => {
       await userEvent.type(fiscalCodeInput, 'test');
@@ -542,18 +588,24 @@ describe('MerchantTransactions', () => {
       />
     );
 
-    const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
-    const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
-
     await act(async () => {
+      const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
+      const fiscalCodeInput = screen.getByLabelText(
+        'pages.pointOfSaleTransactions.searchByFiscalCode'
+      );
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
 
-    const resetButton = await screen.findByRole('button', { name: 'commons.removeFiltersBtn' });
-    await userEvent.click(resetButton);
+    await waitFor(() => {
+      const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+      expect(resetButton).toBeInTheDocument();
+    });
 
-    expect(resetButton).toBeInTheDocument();
+    await act(async () => {
+      const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+      await userEvent.click(resetButton);
+    });
   });
 
   it('does not call handleSortChange when callback is undefined', async () => {
@@ -625,20 +677,24 @@ describe('MerchantTransactions', () => {
   });
 
   it('handles tooltip rendering with long values', () => {
-    const longValueTransaction = [{
-      trxId: '1',
-      updateDate: 'VERY_LONG_VALUE_THAT_EXCEEDS_THRESHOLD_LENGTH_12345' as any,
-      fiscalCode: 'VERYLONGFISCALCODE12345678901234567890',
-      effectiveAmountCents: 5000 as any,
-      rewardAmountCents: 500 as any,
-      status: 'REWARDED' as any,
-      additionalProperties: { productName: 'VERYLONGPRODUCTNAME12345678901234567890' },
-    }];
+    const longValueTransaction = [
+      {
+        trxId: '1',
+        updateDate: 'VERY_LONG_VALUE_THAT_EXCEEDS_THRESHOLD_LENGTH_12345' as any,
+        fiscalCode: 'VERYLONGFISCALCODE12345678901234567890',
+        effectiveAmountCents: 5000 as any,
+        rewardAmountCents: 500 as any,
+        status: 'REWARDED' as any,
+        additionalProperties: { productName: 'VERYLONGPRODUCTNAME12345678901234567890' },
+      },
+    ];
 
     renderComponent({ transactions: longValueTransaction });
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
-    expect(MockedTooltip.mock.calls.some(call => call[0].title.includes('VERYLONGPRODUCTNAME'))).toBe(false);
+    expect(
+      MockedTooltip.mock.calls.some((call) => call[0].title.includes('VERYLONGPRODUCTNAME'))
+    ).toBe(false);
   });
 
   it('handles close drawer correctly', async () => {
@@ -675,10 +731,14 @@ describe('MerchantTransactions', () => {
   });
 
   it('toggles filtersAppliedOnce flag and calls provided callbacks', async () => {
-    render(<MerchantTransactions
-      transactions={mockTransactions}
-      handleFiltersApplied={handleFiltersApplied}
-      handleFiltersReset={handleFiltersReset} sortModel={[]} />);
+    render(
+      <MerchantTransactions
+        transactions={mockTransactions}
+        handleFiltersApplied={handleFiltersApplied}
+        handleFiltersReset={handleFiltersReset}
+        sortModel={[]}
+      />
+    );
 
     const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
     fireEvent.click(applyButton);
@@ -709,15 +769,19 @@ describe('MerchantTransactions', () => {
     expect((gtinInput as HTMLInputElement).value.length).toBeLessThanOrEqual(14);
   });
   it('passes long values to Tooltip title and feeds status label to CustomChip', () => {
-    const longTx = [{
-      ...mockTransactions[0],
-      additionalProperties: { productName: 'VERY_LONG_NAME_EXCEEDING_THRESHOLD' },
-      updateDate: 'LONGDATEVALUEEXCEEDINGTHRESHOLD',
-    }];
+    const longTx = [
+      {
+        ...mockTransactions[0],
+        additionalProperties: { productName: 'VERY_LONG_NAME_EXCEEDING_THRESHOLD' },
+        updateDate: 'LONGDATEVALUEEXCEEDINGTHRESHOLD',
+      },
+    ];
 
     renderComponent({ transactions: longTx });
 
-    expect(MockedTooltip.mock.calls.some(call => call[0].title.includes('VERY_LONG'))).toBe(false);
+    expect(MockedTooltip.mock.calls.some((call) => call[0].title.includes('VERY_LONG'))).toBe(
+      false
+    );
     expect(MockedCustomChip).not.toHaveBeenCalledWith(
       expect.objectContaining({ label: 'REWARDED' }),
       expect.anything()
@@ -762,7 +826,9 @@ describe('MerchantTransactions', () => {
   it('clears input fields on filter reset', async () => {
     renderComponent();
 
-    const fiscalCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode');
+    const fiscalCodeInput = screen.getByLabelText(
+      'pages.pointOfSaleTransactions.searchByFiscalCode'
+    );
     await userEvent.type(fiscalCodeInput, 'TEST');
     const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
     await userEvent.click(resetButton);

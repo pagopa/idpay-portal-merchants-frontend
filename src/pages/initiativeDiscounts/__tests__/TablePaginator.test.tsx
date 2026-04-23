@@ -6,14 +6,7 @@ describe('TablePaginator', () => {
   it('renderizza il componente con i valori passati', () => {
     const setPageMock = jest.fn();
 
-    render(
-      <TablePaginator
-        page={0}
-        setPage={setPageMock}
-        totalElements={25}
-        rowsPerPage={10}
-      />
-    );
+    render(<TablePaginator page={0} setPage={setPageMock} totalElements={25} rowsPerPage={10} />);
 
     const nextButton = screen.getByTitle('Vai alla pagina successiva');
     expect(nextButton).toBeInTheDocument();
@@ -22,14 +15,7 @@ describe('TablePaginator', () => {
   it('chiama setPage con il valore corretto quando si clicca su "pagina successiva"', () => {
     const setPageMock = jest.fn();
 
-    render(
-      <TablePaginator
-        page={0}
-        setPage={setPageMock}
-        totalElements={20}
-        rowsPerPage={10}
-      />
-    );
+    render(<TablePaginator page={0} setPage={setPageMock} totalElements={20} rowsPerPage={10} />);
 
     const nextButton = screen.getByTitle('Vai alla pagina successiva');
     fireEvent.click(nextButton);
@@ -41,14 +27,7 @@ describe('TablePaginator', () => {
   it('disabilita il pulsante "pagina successiva" quando è già sull’ultima pagina', () => {
     const setPageMock = jest.fn();
 
-    render(
-      <TablePaginator
-        page={1}
-        setPage={setPageMock}
-        totalElements={20}
-        rowsPerPage={10}
-      />
-    );
+    render(<TablePaginator page={1} setPage={setPageMock} totalElements={20} rowsPerPage={10} />);
 
     const nextButton = screen.getByTitle('Vai alla pagina successiva');
     expect(nextButton).toBeDisabled();

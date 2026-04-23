@@ -18,7 +18,11 @@ import { ButtonNaked } from '@pagopa/mui-italia/components';
 import { theme } from '@pagopa/mui-italia/theme';
 import { useTranslation } from 'react-i18next';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { TypeEnum, PointOfSaleDTO } from '../../api/generated/merchants/PointOfSaleDTO';
+import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
+
+type TypeEnum = PointOfSaleDTO['type'];
+const PHYSICAL: TypeEnum = 'PHYSICAL';
+const ONLINE: TypeEnum = 'ONLINE';
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
@@ -41,7 +45,6 @@ interface FieldErrors {
   [fieldName: string]: string;
 }
 
-
 const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   submitAttempt,
   externalErrors,
@@ -53,7 +56,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   const { options, loading, error, search } = usePlacesAutocomplete();
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
     {
-      type: TypeEnum.PHYSICAL,
+      type: PHYSICAL,
       franchiseName: '',
       id: generateUniqueId(),
       address: '',
@@ -74,10 +77,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
   const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
 
-  const mergedErrors = useMemo(
-    () => ({ ...errors, ...externalErrors }),
-    [errors, externalErrors]
-  );
+  const mergedErrors = useMemo(() => ({ ...errors, ...externalErrors }), [errors, externalErrors]);
 
   useEffect(() => {
     onFormChange(salesPoints);
@@ -109,11 +109,12 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           (key) => !excludedErrorKeys.includes(key)
         );
 
-        return sp.type === TypeEnum.PHYSICAL && hasNonExcludedErrors;
+        return sp.type === PHYSICAL && hasNonExcludedErrors;
       });
 
-      setShowErrorAlert(prev => {
-        const hasChanged = prev.length !== newShowErrorAlert.length ||
+      setShowErrorAlert((prev) => {
+        const hasChanged =
+          prev.length !== newShowErrorAlert.length ||
           prev.some((val, index) => val !== newShowErrorAlert[index]);
         return hasChanged ? newShowErrorAlert : prev;
       });
@@ -150,8 +151,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         fieldErrors = { ...fieldErrors, franchiseName: 'Campo obbligatorio' };
         isValid = false;
       }
-      if (sp.type === TypeEnum.PHYSICAL) {
-
+      if (sp.type === PHYSICAL) {
         if (!sp.city?.trim()) {
           fieldErrors = { ...fieldErrors, city: 'Campo obbligatorio' };
           isValid = false;
@@ -173,18 +173,17 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           isValid = false;
         }
       }
-      if (sp.type === TypeEnum.ONLINE) {
+      if (sp.type === ONLINE) {
         if (!sp.website?.trim()) {
           fieldErrors = { ...fieldErrors, website: 'Campo obbligatorio' };
           isValid = false;
-        }
-        else if (!isValidUrl(normalizeUrlHttps(sp.website))) {
+        } else if (!isValidUrl(normalizeUrlHttps(sp.website))) {
           fieldErrors = { ...fieldErrors, website: 'Devi inserire una URL valida' };
           isValid = false;
         }
       }
       // eslint-disable-next-line sonarjs/no-collapsible-if
-      if (sp.type === TypeEnum.PHYSICAL) {
+      if (sp.type === PHYSICAL) {
         if (!sp.address?.trim()) {
           fieldErrors = { ...fieldErrors, address: 'Campo obbligatorio' };
           isValid = false;
@@ -197,8 +196,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           fieldErrors = { ...fieldErrors, channelEmail: 'Devi inserire una email valida' };
           isValid = false;
         }
-        if (sp?.channelPhone &&   String(sp?.channelPhone ?? '').trim().length < 7 ||
-          String(sp?.channelPhone ?? '').trim().length > 15) {
+        if (
+          (sp?.channelPhone && String(sp?.channelPhone ?? '').trim().length < 7) ||
+          String(sp?.channelPhone ?? '').trim().length > 15
+        ) {
           fieldErrors = { ...fieldErrors, channelPhone: 'Il numero deve avere tra 7 e 15 cifre' };
           isValid = false;
         }
@@ -208,25 +209,21 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         }
       }
 
-      return Object.keys(fieldErrors).length > 0
-        ? { ...acc, [index]: fieldErrors }
-        : acc;
+      return Object.keys(fieldErrors).length > 0 ? { ...acc, [index]: fieldErrors } : acc;
     }, {});
 
     if (showErrors) {
       setErrors(newErrors);
     }
 
-
     return isValid;
   };
-
 
   useEffect(() => {
     if (pointsOfSaleLoaded) {
       setSalesPoints([
         {
-          type: TypeEnum.PHYSICAL,
+          type: PHYSICAL,
           franchiseName: '',
           address: '',
           city: '',
@@ -247,19 +244,18 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 
   const clearFormOnTypeChanging = (index: number, type: string) => {
     setErrors({});
-    setSalesPoints(prevSalesPoints =>
+    setSalesPoints((prevSalesPoints) =>
       prevSalesPoints.map((salesPoint, i) =>
-        i === index && type === 'ONLINE' ?
-          {
-            ...salesPoint,
-            ['address']: '',
-            ['city']: '',
-            ['zipCode']: '',
-            ['province']: '',
-            ['region']: '',
-          }
+        i === index && type === 'ONLINE'
+          ? {
+              ...salesPoint,
+              ['address']: '',
+              ['city']: '',
+              ['zipCode']: '',
+              ['province']: '',
+              ['region']: '',
+            }
           : salesPoint
-
       )
     );
   };
@@ -273,12 +269,12 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       case 'channelGeolink':
         if (value) {
           if (!isValidUrl(normalizeUrlHttp(value))) {
-            updateError(index, "channelGeolink", "Devi inserire una URL valida");
+            updateError(index, 'channelGeolink', 'Devi inserire una URL valida');
           } else {
-            clearError(index, "channelGeolink");
+            clearError(index, 'channelGeolink');
           }
         } else {
-          clearError(index, "channelGeolink");
+          clearError(index, 'channelGeolink');
         }
         break;
       case 'website':
@@ -392,28 +388,25 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         break;
     }
 
-    setSalesPoints(prevSalesPoints =>
+    setSalesPoints((prevSalesPoints) =>
       prevSalesPoints.map((salesPoint, i) =>
-        i === index
-          ? { ...salesPoint, [name]: value }
-          : salesPoint
+        i === index ? { ...salesPoint, [name]: value } : salesPoint
       )
     );
-
   };
 
   const updateError = (salesPointIndex: number, fieldName: string, errorMessage: string) => {
-    setErrors(prevErrors => ({
+    setErrors((prevErrors) => ({
       ...prevErrors,
       [salesPointIndex]: {
         ...prevErrors[salesPointIndex],
-        [fieldName]: errorMessage
-      }
+        [fieldName]: errorMessage,
+      },
     }));
   };
 
   const clearError = (salesPointIndex: number, fieldName: string) => {
-    setErrors(prevErrors => {
+    setErrors((prevErrors) => {
       if (!prevErrors[salesPointIndex]?.[fieldName]) {
         return prevErrors;
       }
@@ -437,11 +430,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 
   const addAnotherSalesPoint = async () => {
     if (salesPoints.length < 5) {
-      await search("");
+      await search('');
       setSalesPoints([
         ...salesPoints,
         {
-          type: TypeEnum.PHYSICAL,
+          type: PHYSICAL,
           id: generateUniqueId(),
           franchiseName: '',
           address: '',
@@ -459,12 +452,17 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         },
       ]);
     }
-
   };
 
   const handleChangeAddress = (salesPointIndex: number, addressObj: any) => {
     if (addressObj?.Address) {
-      if (!addressObj.Address.Street || !addressObj.Address.Locality || !addressObj.Address.PostalCode || !addressObj.Address.Region || !addressObj.Address.SubRegion) {
+      if (
+        !addressObj.Address.Street ||
+        !addressObj.Address.Locality ||
+        !addressObj.Address.PostalCode ||
+        !addressObj.Address.Region ||
+        !addressObj.Address.SubRegion
+      ) {
         updateError(salesPointIndex, 'address', 'Indirizzo non completo, selezionane un altro');
         return;
       }
@@ -478,13 +476,15 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         prev.map((sp, i) =>
           i === salesPointIndex
             ? {
-              ...sp,
-              address: addressObj.Address.Street.concat(`, ${addressObj.Address.AddressNumber ?? 'SNC'}`),
-              city: addressObj.Address.Locality ?? '',
-              zipCode: addressObj.Address.PostalCode ?? '',
-              region: addressObj.Address.Region?.Name ?? '',
-              province: addressObj.Address.SubRegion?.Code ?? '',
-            }
+                ...sp,
+                address: addressObj.Address.Street.concat(
+                  `, ${addressObj.Address.AddressNumber ?? 'SNC'}`
+                ),
+                city: addressObj.Address.Locality ?? '',
+                zipCode: addressObj.Address.PostalCode ?? '',
+                region: addressObj.Address.Region?.Name ?? '',
+                province: addressObj.Address.SubRegion?.Code ?? '',
+              }
             : sp
         )
       );
@@ -493,18 +493,17 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         prev.map((sp, i) =>
           i === salesPointIndex
             ? {
-              ...sp,
-              address: '',
-              city: '',
-              zipCode: '',
-              region: '',
-              province: '',
-            }
+                ...sp,
+                address: '',
+                city: '',
+                zipCode: '',
+                region: '',
+                province: '',
+              }
             : sp
         )
       );
     }
-
   };
 
   const deleteSalesPoint = (index: number) => {
@@ -513,9 +512,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       Object.entries(errors).filter(([key]) => Number(key) !== index)
     );
     setErrors(newErrors);
-    
   };
-
 
   return (
     <Box bgcolor={'background.paper'} boxShadow={3}>
@@ -648,14 +645,18 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                             handleChangeAddress(index, addressObj);
                           }}
                           onTextChange={async (value) => {
-                            if (value === "") {
-                              await search("");
+                            if (value === '') {
+                              await search('');
                             }
                           }}
                           inputError={!!getFieldError(index, 'address')}
                           errorText={getFieldError(index, 'address')}
                         />
-                        {loading && <Typography variant="body2">{t('pages.pointOfSales.loandingText')}</Typography>}
+                        {loading && (
+                          <Typography variant="body2">
+                            {t('pages.pointOfSales.loandingText')}
+                          </Typography>
+                        )}
                         {error && (
                           <Typography variant="body2" color="error">
                             {error}
@@ -925,9 +926,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                           handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)
                         }
                         onKeyDown={(e) => {
-                          if (
-                            ['e', 'E', '+', '-', '.', ',', ' '].includes(e.key)
-                          ) {
+                          if (['e', 'E', '+', '-', '.', ',', ' '].includes(e.key)) {
                             e.preventDefault();
                           }
                         }}
@@ -952,10 +951,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         sx={{
                           '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button':
-                          {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
+                            {
+                              WebkitAppearance: 'none',
+                              margin: 0,
+                            },
                           '& input[type=number]': {
                             MozAppearance: 'textfield',
                           },

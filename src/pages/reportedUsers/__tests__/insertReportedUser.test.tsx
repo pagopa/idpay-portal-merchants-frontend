@@ -5,6 +5,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (k: string) => k,
   }),
+  Trans: ({ children }: any) => <span>{children}</span>,
   withTranslation: () => (Component: any) => {
     Component.defaultProps = { ...(Component.defaultProps || {}), t: (k: string) => k };
     return Component;
@@ -39,15 +40,11 @@ jest.mock('../../../utils/jwt-utils', () => ({
 }));
 
 const mockCreateReportedUser = jest.fn().mockResolvedValue({});
+const mockGetReportedUser = jest.fn();
+
 jest.mock('../../../services/merchantService', () => ({
   createReportedUser: (...args: any[]) => mockCreateReportedUser(...args),
-}));
-
-const mockGetReportedUser = jest.fn();
-jest.mock('../../../api/MerchantsApiClient', () => ({
-  MerchantApi: {
-    getReportedUser: (...args: any[]) => mockGetReportedUser(...args),
-  },
+  getReportedUser: (...args: any[]) => mockGetReportedUser(...args),
 }));
 
 jest.mock('../modalReportedUser', () => (props: any) => {

@@ -3,10 +3,9 @@
 import { matchPath } from 'react-router-dom';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from './utils/constants';
 import { browserConsole } from './utils/consoleLogger';
-import { StatusEnum as TransactionStatusEnum } from './api/generated/merchants/MerchantTransactionDTO';
-import { RewardBatchTrxStatusEnum } from './api/generated/merchants/RewardBatchTrxStatus';
-import { StatusEnum } from './api/generated/merchants/RewardBatchDTO';
+import { RewardBatchTrxStatus } from './api/generated/merchants/data-contracts';
 
+const RewardBatchTrxStatusEnum = RewardBatchTrxStatus;
 
 export const copyTextToClipboard = (magicLink: string | undefined) => {
   if (typeof magicLink === 'string') {
@@ -140,25 +139,25 @@ export const generateUniqueId = () =>
   Date.now().toString() + Math.random().toString(36).substring(2, 9);
 
 export const handlePromptMessage = (location: { pathname: string }, targetPage: string) => {
-
-
   const match = matchPath(location.pathname, {
-    path: targetPage, 
-    exact: true 
-});
+    path: targetPage,
+    exact: true,
+  });
 
-if (!match) { 
+  if (!match) {
     sessionStorage.removeItem('storesPagination');
-}
+  }
 
-return true;
+  return true;
 };
 
 export function formatEuro(value: number) {
-    return (value / 100).toLocaleString('it-IT', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }) + '€';
+  return (
+    (value / 100).toLocaleString('it-IT', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }) + '€'
+  );
 }
 
 export const truncateString = (str?: string, maxLength: number = 40): string => {
@@ -169,57 +168,37 @@ export const truncateString = (str?: string, maxLength: number = 40): string => 
   }
 };
 
-export const isReversableOrEditable = (itemValues: any, batchStatus:any=undefined): boolean =>{
-  if(!batchStatus){
-      // PV page
-     return (
-      [
-        TransactionStatusEnum.INVOICED,
-        TransactionStatusEnum.REWARDED
-      ].includes(itemValues?.status)
-      && ![
-        RewardBatchTrxStatusEnum.APPROVED,
-      ].includes(itemValues?.rewardBatchTrxStatus)
+export const isReversableOrEditable = (itemValues: any, batchStatus: any = undefined): boolean => {
+  if (!batchStatus) {
+    // PV page
+    return (
+      ['INVOICED', 'REWARDED'].includes(itemValues?.status) &&
+      ![RewardBatchTrxStatusEnum.APPROVED].includes(itemValues?.rewardBatchTrxStatus)
     );
   }
 
   // Batch detail page
-  if (
-    [
-      StatusEnum.PENDING_REFUND,
-      StatusEnum.REFUNDED,
-      StatusEnum.NOT_REFUNDED
-    ].includes(batchStatus)
-  ) {
+  if (['PENDING_REFUND', 'REFUNDED', 'NOT_REFUNDED'].includes(batchStatus)) {
     return itemValues?.rewardBatchTrxStatus === RewardBatchTrxStatusEnum.REJECTED;
   }
   return (
-    impossibleStatusCombination(itemValues, batchStatus)
-    && ![StatusEnum.SENT, StatusEnum.APPROVING].includes(batchStatus)
-    && [
-      TransactionStatusEnum.INVOICED,
-      TransactionStatusEnum.REWARDED
-    ].includes(itemValues?.status)
-    && ![
-      RewardBatchTrxStatusEnum.APPROVED,
-    ].includes(itemValues?.rewardBatchTrxStatus)
+    impossibleStatusCombination(itemValues, batchStatus) &&
+    !['SENT', 'APPROVING'].includes(batchStatus) &&
+    ['INVOICED', 'REWARDED'].includes(itemValues?.status) &&
+    ![RewardBatchTrxStatusEnum.APPROVED].includes(itemValues?.rewardBatchTrxStatus)
   );
 };
 
-const impossibleStatusCombination = (itemValues: any, batchStatus:any): boolean => (
+const impossibleStatusCombination = (itemValues: any, batchStatus: any): boolean =>
   !(
-    batchStatus === StatusEnum.CREATED
-    && [
-      RewardBatchTrxStatusEnum.APPROVED,
-      RewardBatchTrxStatusEnum.REJECTED
-    ].includes(itemValues?.rewardBatchTrxStatus)
-  )
-  &&
+    batchStatus === 'CREATED' &&
+    [RewardBatchTrxStatusEnum.APPROVED, RewardBatchTrxStatusEnum.REJECTED].includes(
+      itemValues?.rewardBatchTrxStatus
+    )
+  ) &&
   !(
-    batchStatus === StatusEnum.APPROVED
-    && [
-      RewardBatchTrxStatusEnum.CONSULTABLE,
-      RewardBatchTrxStatusEnum.SUSPENDED
-    ].includes(itemValues?.rewardBatchTrxStatus)
-  )
-);
+    batchStatus === 'APPROVED' &&
+    [RewardBatchTrxStatusEnum.CONSULTABLE, RewardBatchTrxStatusEnum.SUSPENDED].includes(
+      itemValues?.rewardBatchTrxStatus
+    )
+  );

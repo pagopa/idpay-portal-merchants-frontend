@@ -12,14 +12,11 @@ beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
-const renderComponent = () =>
-  render(
-    <BrowserRouter>
-
-    </BrowserRouter>
-  );
+const renderComponent = () => render(<BrowserRouter></BrowserRouter>);
 describe('test suite for MerchantTransactions', () => {
-  test('render component MerchantTransactions', () => {renderComponent()});
+  test('render component MerchantTransactions', () => {
+    renderComponent();
+  });
 });
 // describe('test suite for MerchantTransactions', () => {
 //   test('render component MerchantTransactions', () => {

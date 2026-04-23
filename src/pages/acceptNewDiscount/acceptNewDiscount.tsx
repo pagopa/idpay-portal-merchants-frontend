@@ -1,29 +1,18 @@
 import { Box, Step, StepLabel, Stepper } from '@mui/material';
-import { matchPath } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useState } from 'react';
-import ROUTES from '../../routes';
+import { useState, useEffect } from 'react';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
-import { useAppSelector } from '../../redux/hooks';
-import { initiativeSelector } from '../../redux/slices/initiativesSlice';
+import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 import { genericContainerStyle } from '../../styles';
 import TotalAmount from './TotalAmount';
 import DiscountCode from './DiscountCode';
 
-interface MatchParams {
-  initiative_id: string;
-}
-
 const AcceptNewDiscount = () => {
   const { t } = useTranslation();
-  const match = matchPath(location.pathname, {
-    path: [ROUTES.ACCEPT_NEW_DISCOUNT],
-    exact: true,
-    strict: false,
-  });
-  const { initiative_id } = (match?.params as MatchParams) || {};
-  const selectedInitiative = useAppSelector(initiativeSelector);
+  const { initiativeId } = useCurrentInitiativeId();
+  const currentInitiative = useCurrentInitiative();
   const [activeStep, setActiveStep] = useState(0);
   const [amount, setAmount] = useState<number | undefined>();
   const [code, setCode] = useState<string | undefined>();
@@ -33,12 +22,26 @@ const AcceptNewDiscount = () => {
     t('pages.acceptNewDiscount.discountDataStepperTitle'),
   ];
 
+  useEffect(() => {
+    if (!initiativeId) {
+      return;
+    }
+
+    setActiveStep(0);
+    setAmount(undefined);
+    setCode(undefined);
+  }, [initiativeId]);
+
+  if (!initiativeId) {
+    return null;
+  }
+
   const renderActiveStepBox = (activeStep: number) => {
     switch (activeStep) {
       case 0:
         return (
           <TotalAmount
-            id={initiative_id}
+            id={initiativeId}
             amount={amount}
             setAmount={setAmount}
             steps={steps.length}
@@ -49,7 +52,7 @@ const AcceptNewDiscount = () => {
       case 1:
         return (
           <DiscountCode
-            id={initiative_id}
+            id={initiativeId}
             amount={amount}
             code={code}
             setCode={setCode}
@@ -77,7 +80,7 @@ const AcceptNewDiscount = () => {
         backLabel={t('commons.backBtn')}
         items={[
           t('pages.initiativesList.title'),
-          selectedInitiative?.initiativeName,
+          currentInitiative?.initiativeName,
           t('pages.initiativeDiscounts.acceptBtn'),
         ]}
       />

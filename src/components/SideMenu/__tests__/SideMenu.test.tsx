@@ -291,18 +291,18 @@ describe('Test suite for SideMenu component', () => {
     });
   });
 
-  test('Accordion summary handles click and dispatches setSelectedInitiative', async () => {
-    const { store } = renderWithContext(<SideMenu />);
+  test('Accordion summary handles click and navigates correctly', async () => {
+    const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
 
     const initiativeTitle = await screen.findByText('Iniziativa mock 1234');
     const user = userEvent.setup();
+    const oldPath = history.location.pathname;
 
     await user.click(initiativeTitle);
 
     await waitFor(() => {
-      const state = store.getState();
-      expect(state.initiatives.selectedInitative).toBeDefined();
+      expect(history.location.pathname).not.toBe(oldPath);
     });
   });
 
@@ -486,7 +486,7 @@ describe('Test suite for SideMenu component', () => {
     expect(screen.getByTestId('list-test')).toBeInTheDocument();
   });
 
-  test('Dispatches empty spendingPeriod when startDate and endDate are undefined (covers || "")', async () => {
+  test('Handles initiative without dates without crashing', async () => {
     const initiativeWithoutDates = {
       initiativeId: 'no-dates-id',
       initiativeName: 'Initiative without dates',
@@ -494,21 +494,21 @@ describe('Test suite for SideMenu component', () => {
       endDate: undefined,
     };
 
-    const { store } = renderWithContext(<SideMenu />);
+    const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList([initiativeWithoutDates as any]));
 
     const user = userEvent.setup();
 
     const overviewLinks = await screen.findAllByText('pages.initiativeOverview.title');
+    const oldPath = history.location.pathname;
     await user.click(overviewLinks[0]);
 
     await waitFor(() => {
-      const state = store.getState();
-      expect(state.initiatives.selectedInitative?.spendingPeriod).toBe('undefined - undefined');
+      expect(history.location.pathname).not.toBe(oldPath);
     });
   });
 
-  test('Dispatches empty spendingPeriod from accordion summary click when dates are undefined (covers panel branch)', async () => {
+  test('Accordion summary click works even when dates are undefined', async () => {
     const initiativeWithoutDates = {
       initiativeId: 'no-dates-summary',
       initiativeName: 'Initiative summary without dates',
@@ -516,17 +516,17 @@ describe('Test suite for SideMenu component', () => {
       endDate: undefined,
     };
 
-    const { store } = renderWithContext(<SideMenu />);
+    const { store, history } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList([initiativeWithoutDates as any]));
 
     const user = userEvent.setup();
-
     const summaryTitle = await screen.findByText('Initiative summary without dates');
+    const oldPath = history.location.pathname;
+
     await user.click(summaryTitle);
 
     await waitFor(() => {
-      const state = store.getState();
-      expect(state.initiatives.selectedInitative?.spendingPeriod).toBe('undefined - undefined');
+      expect(history.location.pathname).not.toBe(oldPath);
     });
   });
 

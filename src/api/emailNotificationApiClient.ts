@@ -1,53 +1,54 @@
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
-import { buildFetchApi } from '@pagopa/selfcare-common-frontend/lib/utils/api-utils';
-import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
-import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
-import { extractResponseWith401 as extractResponse } from '../utils/extractResponseWith401';
 import { ENV } from '../utils/env';
-import { store } from '../redux/store';
-import { cleanupOnLogout } from '../utils/logoutCleanup';
-import { createClient, WithDefaultsT } from './generated/email-notification/client';
-import { UserInstitutionInfoDTO } from './generated/email-notification/UserInstitutionInfoDTO';
-import { EmailMessageDTO } from './generated/email-notification/EmailMessageDTO';
+import { BaseApiClient } from './BaseApiClient';
+import {
+  UserInstitutionInfoDTO,
+  EmailMessageDTO,
+} from './generated/email-notification/data-contracts';
 
-const withBearerAndPartyId: WithDefaultsT<'Bearer'> = (wrappedOperation) => (params: any) => {
-  const token = storageTokenOps.read();
-  return wrappedOperation({
-    ...params,
-    Bearer: `Bearer ${token}`,
-  });
-};
+/**
+ * EmailNotificationApiClient
+ *
+ * ✅ Modern implementation
+ * ✅ Uses BaseApiClient
+ * ✅ No Redux coupling
+ * ✅ No token handling here
+ * ✅ No legacy client usage
+ */
+class EmailNotificationApiClient {
+  private baseClient: BaseApiClient;
 
-const apiClient = createClient({
-  baseUrl: ENV.URL_API.EMAIL_NOTIFICATION,
-  basePath: '',
-  fetchApi: buildFetchApi(ENV.API_TIMEOUT_MS.EMAIL_NOTIFICATION),
-  withDefaults: withBearerAndPartyId,
-});
+  constructor() {
+    this.baseClient = new BaseApiClient({
+      baseUrl: ENV.URL_API.EMAIL_NOTIFICATION,
+    });
+  }
 
-const onRedirectToLogin = () => {
-  cleanupOnLogout();
-  store.dispatch(
-    appStateActions.addError({
-      id: 'tokenNotValid',
-      error: new Error(),
-      techDescription: 'token expired or not valid',
-      toNotify: false,
-      blocking: false,
-      displayableTitle: i18n.t('errors.sessionExpiredTitle'),
-      displayableDescription: i18n.t('errors.sessionExpiredMessage'),
-    })
-  );
-};
+  public async getInstitutionProductUserInfo(): Promise<UserInstitutionInfoDTO> {
+    const response = await this.baseClient.safeRequest<UserInstitutionInfoDTO>({
+      path: '/users',
+      method: 'GET',
+      secure: true,
+      format: 'json',
+    });
+
+    return response.data;
+  }
+
+  public async sendEmail(data: EmailMessageDTO): Promise<void> {
+    await this.baseClient.safeRequest<void>({
+      path: '/notify',
+      method: 'POST',
+      body: data,
+      secure: true,
+      format: 'json',
+    });
+  }
+}
+
+const client = new EmailNotificationApiClient();
 
 export const EmailNotificationApi = {
-  getInstitutionProductUserInfo: async (): Promise<UserInstitutionInfoDTO> => {
-    const result = await apiClient.getInstitutionProductUserInfo({});
-    return extractResponse(result, 200, onRedirectToLogin);
-  },
+  getInstitutionProductUserInfo: () => client.getInstitutionProductUserInfo(),
 
-  sendEmail: async (data: EmailMessageDTO): Promise<void> => {
-    const result = await apiClient.sendEmail({ body: { ...data } });
-    return extractResponse(result, 204, onRedirectToLogin);
-  },
+  sendEmail: (data: EmailMessageDTO) => client.sendEmail(data),
 };

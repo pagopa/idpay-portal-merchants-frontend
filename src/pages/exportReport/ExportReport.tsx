@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { TitleBox } from "@pagopa/selfcare-common-frontend/lib";
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useTranslation } from 'react-i18next';
 import { useCallback, useState } from 'react';
 import AlertListComponent, { AlertProps } from '../../components/Alert/AlertListComponent';
@@ -11,30 +11,30 @@ const InitiativeExportReportPage = () => {
   const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
     INSERTED: {
       text: t('pages.reportExport.alert.info'),
-      severity: "info",
-      isOpen: false
+      severity: 'info',
+      isOpen: false,
     },
     IN_PROGRESS: {
       text: t('pages.reportExport.alert.info'),
-      severity: "info",
-      isOpen: false
+      severity: 'info',
+      isOpen: false,
     },
     GENERATED: {
       text: t('pages.reportExport.alert.success'),
-      severity: "success",
-      isOpen: false
+      severity: 'success',
+      isOpen: false,
     },
     FAILED: {
       text: t('pages.reportExport.alert.error'),
-      severity: "error",
-      isOpen: false
+      severity: 'error',
+      isOpen: false,
     },
     error: {
       title: t('errors.genericTitle'),
       text: t('errors.genericDescription'),
-      severity: "error",
-      isOpen: false
-    }
+      severity: 'error',
+      isOpen: false,
+    },
   });
 
   const updateAlerts = useCallback((key: string, open: boolean) => {
@@ -69,10 +69,7 @@ const InitiativeExportReportPage = () => {
             onReportGenerated={() => setRefreshKey((prev) => prev + 1)}
           />
         </Box>
-        <ReportDataTable
-          updateAlerts={updateAlerts}
-          refreshKey={refreshKey}
-        />
+        <ReportDataTable updateAlerts={updateAlerts} refreshKey={refreshKey} />
       </Box>
       <AlertListComponent
         alertList={Object.entries(alerts).map(([key, value]) => ({

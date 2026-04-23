@@ -7,7 +7,7 @@ import { formatDate, formattedCurrency } from '../../helpers';
 import { getMerchantTransactionsProcessed } from '../../services/merchantService';
 import { pagesTableContainerStyle } from '../../styles';
 import EmptyList from '../components/EmptyList';
-import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
+import { MerchantTransactionDTO } from '../../api/generated/merchants/data-contracts';
 import { useAlert } from '../../hooks/useAlert';
 import {
   TransactionsComponentProps,
@@ -119,7 +119,7 @@ const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
                 <TableBody sx={{ backgroundColor: 'white' }}>
                   {rows.map((r, i) => (
                     <TableRow key={i}>
-                      <TableCell>{formatDate(r.updateDate)}</TableCell>
+                      <TableCell>{formatDate(new Date(r.updateDate))}</TableCell>
                       <TableCell>{r.fiscalCode}</TableCell>
                       <TableCell>{formattedCurrency(r.effectiveAmountCents, '-', true)}</TableCell>
                       <TableCell>{formattedCurrency(r.rewardAmountCents, '-', true)}</TableCell>

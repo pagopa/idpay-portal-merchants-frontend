@@ -1,7 +1,19 @@
 import getStatus, { getBatchStatus } from '../useStatus';
 import { theme } from '@pagopa/mui-italia/theme';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-import { StatusEnum } from '../../../api/generated/merchants/RewardBatchDTO';
+
+const StatusEnum = {
+  CREATED: 'CREATED',
+  EVALUATING: 'EVALUATING',
+  APPROVING: 'APPROVING',
+  APPROVED: 'APPROVED',
+  SENT: 'SENT',
+  REFUNDED: 'REFUNDED',
+  PENDING_REFUND: 'PENDING_REFUND',
+  NOT_REFUNDED: 'NOT_REFUNDED',
+} as const;
+
+type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
 
 describe('useStatus', () => {
   it('returns correct config for REWARDED', () => {

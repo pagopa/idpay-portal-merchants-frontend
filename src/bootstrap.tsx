@@ -25,6 +25,8 @@ CONFIG.URL_FE.LOGOUT = ENV.URL_FE.LOGOUT;
 // eslint-disable-next-line functional/immutable-data
 CONFIG.URL_FE.ASSISTANCE = ENV.URL_FE.ASSISTANCE_MERCHANT;
 // eslint-disable-next-line functional/immutable-data
+CONFIG.TEST = CONFIG.TEST || {};
+// eslint-disable-next-line functional/immutable-data
 CONFIG.TEST.JWT = testToken;
 
 // eslint-disable-next-line functional/immutable-data

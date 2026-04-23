@@ -15,14 +15,14 @@ import { useParams } from 'react-router-dom';
 import DataTable from '../../components/dataTable/DataTable';
 import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
 import {
-  downloadInvoiceFile,
   getMerchantTransactionsProcessed,
   GetMerchantTransactionsProcessedParams,
 } from '../../services/merchantService';
+import { getMerchantsApi } from '../../api/MerchantsApiClient';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
-import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
+import { MerchantTransactionsListDTO } from '../../api/generated/merchants/data-contracts';
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
@@ -97,9 +97,9 @@ const InvoiceDataTable = ({
     try {
       setIsDownloading(true);
 
-      const response = await downloadInvoiceFile(
-        selectedTransaction?.id,
-        selectedTransaction?.pointOfSaleId
+      const response = await getMerchantsApi().downloadInvoiceFile(
+        selectedTransaction?.pointOfSaleId,
+        selectedTransaction?.trxId
       );
       const invoiceUrl = response.invoiceUrl;
 
@@ -309,7 +309,7 @@ const InvoiceDataTable = ({
 
   const tableRows = transactions.map((row: any) => ({
     ...row,
-    id: row.trxId,
+    id: row.id ?? row.trxId,
     invoiceFilename: row.invoiceData?.filename || '',
   }));
 

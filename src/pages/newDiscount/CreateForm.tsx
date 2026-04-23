@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Dispatch, SetStateAction } from 'react';
 import { useHistory } from 'react-router-dom';
 import { createTransaction } from '../../services/merchantService';
-import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
+import { TransactionResponse } from '../../api/generated/merchants/data-contracts';
 import { BASE_ROUTE } from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
 
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
   const { t } = useTranslation();
   const history = useHistory();
 
@@ -57,7 +57,12 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
             setDiscountCreated(true);
           })
           .catch(() => {
-            setAlert({title: t('errors.genericTitle'), text: t('errors.validationDescription'), isOpen: true, severity: 'error'});
+            setAlert({
+              title: t('errors.genericTitle'),
+              text: t('errors.validationDescription'),
+              isOpen: true,
+              severity: 'error',
+            });
           });
       }
     },

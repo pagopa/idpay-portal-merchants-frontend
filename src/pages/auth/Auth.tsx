@@ -2,7 +2,10 @@ import {
   trackAppError,
   trackEvent,
 } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useEffect } from 'react';
 import { userFromJwtTokenAsJWTUser } from '../../hooks/useLogin';
 import { IDPayUser } from '../../model/IDPayUser';

@@ -3,7 +3,6 @@ import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import PointsOfSaleForm from '../PointsOfSaleForm';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
 import { generateUniqueId, isValidEmail, isValidUrl } from '../../../helpers';
-import { TypeEnum } from '../../../api/generated/merchants/PointOfSaleDTO';
 import * as hooks from '../../../hooks/useAutocomplete';
 import * as helpers from '../../../helpers';
 
@@ -21,10 +20,37 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('../../Autocomplete/AutocompleteComponent', () => (props: any) => {
   return (
-    <input
-      aria-label="Autocomplete"
-      onChange={(e: any) => props.onChangeDebounce(e.target.value)}
-    />
+    <div>
+      <input
+        aria-label="Autocomplete"
+        onChange={(e: any) => props.onChangeDebounce?.(e.target.value)}
+      />
+      <button
+        type="button"
+        aria-label="Trigger onChange"
+        onClick={() =>
+          props.onChange?.({
+            Address: {
+              Street: 'Via Roma',
+              AddressNumber: '1',
+              Locality: 'Roma',
+              PostalCode: '00100',
+              Region: { Name: 'Lazio' },
+              SubRegion: { Code: 'RM' },
+            },
+          })
+        }
+      >
+        select
+      </button>
+      <button
+        type="button"
+        aria-label="Trigger onTextChange empty"
+        onClick={() => props.onTextChange?.('')}
+      >
+        clear
+      </button>
+    </div>
   );
 });
 
@@ -136,25 +162,60 @@ describe('PointsOfSaleForm full coverage', () => {
     expect(searchMock).toHaveBeenCalledWith('Via Roma 1');
   });
 
-  it('should handle incomplete and complete address objects', async () => {
-    render(<PointsOfSaleForm {...defaultProps} />);
-
-    const addressObjIncomplete = { Address: { Street: 'Via Roma' } };
-    const addressObjComplete = {
-      Address: {
-        Street: 'Via Roma',
-        Locality: 'Roma',
-        PostalCode: '00100',
-        Region: { Name: 'Lazio' },
-        SubRegion: { Code: 'RM' },
-      },
+  it('shows error alert when submitAttempt > 0 and there are non-excluded errors', async () => {
+    const submitAttemptProps = {
+      ...defaultProps,
+      submitAttempt: 1,
+      externalErrors: { 0: { franchiseName: 'Required' } },
     };
 
-    const autocompleteInput = screen.getByLabelText('Autocomplete');
+    render(<PointsOfSaleForm {...submitAttemptProps} />);
 
-    fireEvent.change(autocompleteInput, { target: { value: addressObjIncomplete } });
+    await waitFor(() => {
+      expect(
+        screen.getByText('Per continuare è necessario compilare tutti i campi obbligatori.')
+      ).toBeInTheDocument();
+    });
+  });
 
-    fireEvent.change(autocompleteInput, { target: { value: addressObjComplete } });
+  it('does not show error alert when errors are only in excluded keys', async () => {
+    const props = {
+      ...defaultProps,
+      submitAttempt: 1,
+      externalErrors: { 0: { channelEmail: 'Invalid' } },
+    };
+
+    render(<PointsOfSaleForm {...props} />);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText('Per continuare è necessario compilare tutti i campi obbligatori.')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('handles AutocompleteComponent selection and clear text triggering search', async () => {
+    const searchMock = jest.fn();
+    mockedUsePlacesAutocomplete.mockReturnValue({
+      options: [],
+      loading: false,
+      error: null,
+      search: searchMock,
+    });
+
+    render(<PointsOfSaleForm {...defaultProps} />);
+
+    fireEvent.click(screen.getByLabelText('Trigger onChange'));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Città')).toHaveValue('Roma');
+      expect(screen.getByLabelText('CAP')).toHaveValue('00100');
+      expect(screen.getByLabelText('Regione')).toHaveValue('Lazio');
+      expect(screen.getByLabelText('Provincia')).toHaveValue('RM');
+    });
+
+    fireEvent.click(screen.getByLabelText('Trigger onTextChange empty'));
+    expect(searchMock).toHaveBeenCalledWith('');
   });
 
   it('should open channelGeolink URL only if valid', () => {
@@ -484,7 +545,6 @@ describe('PointsOfSaleForm validation tests', () => {
     fireEvent.click(deleteButtons[0]);
 
     expect(screen.queryAllByTestId('DeleteOutlineIcon')).toHaveLength(0);
-
   });
 });
 

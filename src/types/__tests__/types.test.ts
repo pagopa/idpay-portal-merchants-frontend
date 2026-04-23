@@ -6,10 +6,10 @@
  * there is no runtime logic to test.
  */
 
-import * as Types from "../types";
+import * as Types from '../types';
 
-describe("types.ts", () => {
-  it("should be defined", () => {
+describe('types.ts', () => {
+  it('should be defined', () => {
     expect(Types).toBeDefined();
   });
 });

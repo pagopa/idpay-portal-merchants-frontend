@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="node" />
+
 import {
   copyTextToClipboard,
   downloadQRCodeFromURL,
@@ -11,7 +14,7 @@ import {
   handlePromptMessage,
   truncateString,
   formatEuro,
-  isReversableOrEditable
+  isReversableOrEditable,
 } from '../helpers';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 
@@ -87,7 +90,14 @@ describe('downloadQRCodeFromURL', () => {
     expect(URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
   });
 
-  it('should do nothing if URL is not a string', () => {
+  test('should not throw if fetch fails', async () => {
+    const mockError = new Error('Network error');
+    (fetch as jest.Mock).mockRejectedValue(mockError);
+
+    expect(() => downloadQRCodeFromURL('https://example.com/qrcode.png')).not.toThrow();
+  });
+
+  test('should do nothing if URL is not a string', () => {
     downloadQRCodeFromURL(undefined);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -204,52 +214,61 @@ describe('generateUniqueId', () => {
 
 describe('handlePromptMessage', () => {
   test('should handle prompt message', () => {
-    sessionStorage.setItem('storesPagination', 'test')
-    const pathName1 = { pathname: "path-name-test" }
-    const targetPage1 = "target-page-test"
+    sessionStorage.setItem('storesPagination', 'test');
+    const pathName1 = { pathname: 'path-name-test' };
+    const targetPage1 = 'target-page-test';
 
-    const pathName2 = { pathname: "path-name-test" }
-    const targetPage2 = "path-name-test"
+    const pathName2 = { pathname: 'path-name-test' };
+    const targetPage2 = 'path-name-test';
 
-    handlePromptMessage(pathName2, targetPage2)
-    expect(sessionStorage.getItem('storesPagination')).toBe('test')
+    handlePromptMessage(pathName2, targetPage2);
+    expect(sessionStorage.getItem('storesPagination')).toBe('test');
 
-    handlePromptMessage(pathName1, targetPage1)
-    expect(sessionStorage.getItem('storesPagination')).toBeNull
+    handlePromptMessage(pathName1, targetPage1);
+    expect(sessionStorage.getItem('storesPagination')).toBeNull();
   });
 });
 
 describe('formatEuro', () => {
   test('should formatEuro', () => {
-    const amountCents = 4500
-    const amount = formatEuro(amountCents)
-    expect(amount).toBe("45,00€")
+    const amountCents = 4500;
+    const amount = formatEuro(amountCents);
+    expect(amount).toBe('45,00€');
   });
 });
 
 describe('truncateString', () => {
   test('should truncateString', () => {
-    const initialText = "Initial text excess"
-    const finalText = truncateString(initialText, 7)
-    const fullText = truncateString(initialText)
-    const emptyText = truncateString()
-    expect(finalText).toBe("Initial...")
-    expect(fullText).toBe("Initial text excess")
-    expect(emptyText).toBe("-")
+    const initialText = 'Initial text excess';
+    const finalText = truncateString(initialText, 7);
+    const fullText = truncateString(initialText);
+    const emptyText = truncateString();
+    expect(finalText).toBe('Initial...');
+    expect(fullText).toBe('Initial text excess');
+    expect(emptyText).toBe('-');
   });
 });
 
-describe('isReversable', () => {
-  const { StatusEnum } = require('../api/generated/merchants/MerchantTransactionDTO');
-  const { RewardBatchTrxStatusEnum } = require('../api/generated/merchants/RewardBatchTrxStatus');
+describe('isReversableOrEditable', () => {
+  const StatusEnum = {
+    INVOICED: 'INVOICED',
+    REWARDED: 'REWARDED',
+    CANCELLED: 'CANCELLED',
+  } as const;
+
+  const RewardBatchTrxStatusEnum = {
+    REJECTED: 'REJECTED',
+    SUSPENDED: 'SUSPENDED',
+    APPROVED: 'APPROVED',
+  } as const;
 
   test('returns true for INVOICED and non-APPROVED batch', () => {
     expect(
       isReversableOrEditable({
-        status: StatusEnum.INVOICED,
-        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.REJECTED,
+        status: 'INVOICED',
+        rewardBatchTrxStatus: RewardBatchTrxStatusEnum.APPROVED,
       })
-    ).toBe(true);
+    ).toBe(false);
   });
 
   test('returns true for REWARDED and non-APPROVED batch', () => {

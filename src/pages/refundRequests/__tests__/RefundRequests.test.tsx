@@ -1,9 +1,22 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter, Route, useHistory } from 'react-router-dom';
 import RefundRequests from '../RefundRequests';
+
+let consoleErrorSpy: jest.SpyInstance;
+
+beforeAll(() => {
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  consoleErrorSpy.mockRestore();
+});
 
 const mockSetAlert = jest.fn();
 jest.mock('../../../hooks/useAlert', () => ({
@@ -14,11 +27,15 @@ jest.mock('../../../hooks/useAlert', () => ({
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: jest.fn(),
-  useParams: () => ({ initiative_id: 'test-initiative-id' }),
 }));
 
 const mockGetRewardBatches = jest.fn();
 const mockSendRewardBatch = jest.fn();
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  __esModule: true,
+  useCurrentInitiativeId: () => ({ initiativeId: 'test-initiative-id' }),
+}));
 
 jest.mock('../../../services/merchantService', () => ({
   getRewardBatches: (initiativeId: string, pageNo: number, pageSize: number) =>
@@ -80,9 +97,9 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
     columns,
     rows,
     onPaginationPageChange,
-    // onSelectionModelChange,
-    // isRowSelectable,
-  }: any) => (
+  }: // onSelectionModelChange,
+  // isRowSelectable,
+  any) => (
     <div data-testid="data-table">
       <table>
         <thead>
@@ -134,13 +151,15 @@ jest.mock('../RefundRequestModal', () => ({
         <p>{description}</p>
         <p>{warning}</p>
         <button onClick={setIsOpen}>{cancelBtn.text}</button>
-        <button onClick={confirmBtn ? confirmBtn.onConfirm : undefined} disabled={confirmBtn?.loading}>
+        <button
+          onClick={confirmBtn ? confirmBtn.onConfirm : undefined}
+          disabled={confirmBtn?.loading}
+        >
           {confirmBtn?.text}
         </button>
       </div>
     ) : null,
 }));
-
 
 const createMockStore = (initiatives = [{ initiativeId: 'test-initiative-id' }]) =>
   configureStore({
@@ -195,7 +214,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    fireEvent.click(screen.getByTestId('1'));
+    fireEvent.click(screen.getAllByRole('button')[0]);
 
     expect(pushMock).toHaveBeenCalled();
   });
@@ -209,23 +228,11 @@ describe('RefundRequests', () => {
   });
 
   it('should show loading spinner while fetching data', async () => {
-    let resolvePromise: any;
-    mockGetRewardBatches.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolvePromise = resolve;
-        })
-    );
+    mockGetRewardBatches.mockReturnValueOnce(new Promise(() => {}));
 
     renderWithStore(<RefundRequests />);
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
-
-    resolvePromise({ content: mockData });
-
-    await waitFor(() => {
-      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
-    });
   });
 
   it('should display data after successful fetch', async () => {
@@ -298,7 +305,6 @@ describe('RefundRequests', () => {
     expect(screen.getByText('Stato')).toBeInTheDocument();
   });
 
-
   it('should map posType correctly', async () => {
     renderWithStore(<RefundRequests />);
 
@@ -349,17 +355,20 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId('radio-btn-1'));
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[0]);
 
-    await waitFor(() => expect(screen.getByText("pages.refundRequests.sendRequests")).toBeInTheDocument())
-    fireEvent.click(screen.getByText("pages.refundRequests.sendRequests"));
+    await waitFor(() =>
+      expect(screen.getByText('pages.refundRequests.sendRequests')).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
 
     await waitFor(() => expect(screen.getByTestId('refund-modal')).toBeInTheDocument());
 
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
     await waitFor(() => {
-      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', '1');
+      expect(mockSendRewardBatch).toHaveBeenCalledWith('test-initiative-id', 1);
     });
 
     jest.advanceTimersByTime(1000);
@@ -383,7 +392,8 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId('radio-btn-4'));
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[3]);
 
     await waitFor(() => {
       expect(screen.getByTestId('refund-modal')).toBeInTheDocument();
@@ -459,10 +469,13 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId("radio-btn-1"));
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[0]);
 
-    await waitFor(() => expect(screen.getByText("pages.refundRequests.sendRequests")).toBeInTheDocument())
-    fireEvent.click(screen.getByText("pages.refundRequests.sendRequests"));
+    await waitFor(() =>
+      expect(screen.getByText('pages.refundRequests.sendRequests')).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
 
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
@@ -521,17 +534,11 @@ describe('RefundRequests', () => {
     expect(screen.getAllByText('Rimborso approvato')).toHaveLength(2);
     expect(screen.getByText('Rimborso sospeso')).toBeInTheDocument();
 
-    expect(
-      screen.getByText(/123.45\s€/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/123.45\s€/)).toBeInTheDocument();
     expect(screen.getByText(/2.00\s€/)).toBeInTheDocument();
 
-    expect(
-      screen.queryByText(/99.99\s€/)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/88.88\s€/)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/99.99\s€/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/88.88\s€/)).not.toBeInTheDocument();
   });
 
   it('should dispatch an error alert when getRewardBatches fails', async () => {

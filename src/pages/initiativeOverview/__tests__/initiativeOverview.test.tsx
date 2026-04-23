@@ -1,13 +1,15 @@
-import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from '../../../redux/store';
 import InitiativeOverview from '../initiativeOverview';
 import * as merchantService from '../../../services/merchantService';
-import * as errorUtils from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import * as helperFunctions from '../../../helpers';
-import { MerchantDetailDTO } from '../../../api/generated/merchants/MerchantDetailDTO';
-import { MerchantStatisticsDTO } from '../../../api/generated/merchants/MerchantStatisticsDTO';
+import type {
+  MerchantDetailDTO,
+  MerchantStatisticsDTO,
+} from '../../../api/generated/merchants/data-contracts';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -29,16 +31,18 @@ const mockHistory = createMemoryHistory();
 const renderComponent = () => {
   mockHistory.push('/overview/initiative-123');
   return render(
-    <Router history={mockHistory}>
-      <InitiativeOverview />
-    </Router>
+    <Provider store={store}>
+      <Router history={mockHistory}>
+        <InitiativeOverview />
+      </Router>
+    </Provider>
   );
 };
 
 const mockMerchantDetail: MerchantDetailDTO = {
   iban: 'IT60X0542811101000000123456',
   ibanHolder: 'Mario Rossi',
-  activationDate: new Date('2023-01-15T10:00:00Z'),
+  activationDate: '2023-01-15T10:00:00Z',
 };
 
 const mockMerchantStatistics: MerchantStatisticsDTO = {

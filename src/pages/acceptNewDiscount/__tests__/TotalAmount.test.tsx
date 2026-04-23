@@ -95,17 +95,20 @@ describe('Test suite for TotalAmount component', () => {
     const spendingAmountField = screen.getByLabelText(
       'pages.newDiscount.spendingAmountLabel'
     ) as HTMLInputElement;
-    
+
     await user.type(spendingAmountField, '100');
-    
+
     // Wait for the button to be enabled after formik validation
     const continueButton = screen.getByTestId('continue-action-test') as HTMLButtonElement;
-    await waitFor(() => {
-      expect(continueButton).not.toBeDisabled();
-    }, { timeout: 3000 });
-    
+    await waitFor(
+      () => {
+        expect(continueButton).not.toBeDisabled();
+      },
+      { timeout: 3000 }
+    );
+
     await user.click(continueButton);
-    
+
     // Verify setActiveStep was called
     await waitFor(() => {
       expect(setActiveStep).toHaveBeenCalled();

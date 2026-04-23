@@ -26,7 +26,11 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
       mockOnSelectedParty = props.onSelectedParty;
     }
     mockOnExit = props.onExit;
-    return <div data-testid="common-header" {...props}>{props.children}</div>;
+    return (
+      <div data-testid="common-header" {...props}>
+        {props.children}
+      </div>
+    );
   },
 }));
 
@@ -136,12 +140,7 @@ describe('test suite for Header', () => {
 
     render(
       <Provider store={store}>
-        <Header
-          parties={[]}
-          loggedUser={mockedUser}
-          withSecondHeader={false}
-          onExit={onExit}
-        />
+        <Header parties={[]} loggedUser={mockedUser} withSecondHeader={false} onExit={onExit} />
       </Provider>
     );
 
@@ -392,9 +391,7 @@ describe('test suite for Header', () => {
     const partiesWithDifferentRoles = [
       {
         ...mockedParties[0],
-        roles: [
-          { partyRole: 'MANAGER', roleKey: 'manager' },
-        ],
+        roles: [{ partyRole: 'MANAGER', roleKey: 'manager' }],
       },
     ];
 

@@ -2,10 +2,9 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import ModalComponent from '../ModalComponent'; 
+import ModalComponent from '../ModalComponent';
 
 describe('ModalComponent', () => {
-
   // Test 1: La modale non deve essere visibile quando `open` è false
   test('should not render the modal when open prop is false', () => {
     render(
@@ -26,7 +25,6 @@ describe('ModalComponent', () => {
     );
 
     expect(screen.getByText(/Contenuto visibile nella modale/i)).toBeInTheDocument();
-
   });
 
   // Test 3: Chiamata alla funzione onClose quando la modale viene chiusa
@@ -47,11 +45,11 @@ describe('ModalComponent', () => {
   // Test 4: Applicazione dello stile personalizzato
   test('should apply custom style when provided', () => {
     const customStyle: React.CSSProperties = {
-      backgroundColor: 'rgb(255, 0, 0)', 
+      backgroundColor: 'rgb(255, 0, 0)',
       padding: '20px',
     };
 
-     render(
+    render(
       <ModalComponent open={true} onClose={() => {}} style={customStyle}>
         <div>Contenuto con stile</div>
       </ModalComponent>
@@ -73,6 +71,5 @@ describe('ModalComponent', () => {
 
     const modalBox = screen.getByTestId('iban-modal-content');
     expect(modalBox).toHaveStyle('width: 600px');
-
   });
 });
