@@ -481,12 +481,12 @@ describe('RefundRequests', () => {
 
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'errors.genericTitle',
-          text: 'errors.sendTheBatchForPreviousMonth',
+        {
           isOpen: true,
-          severity: 'error',
-        })
+          severity: 'success',
+          text: "pages.refundRequests.rewardBatchSentSuccess",
+          title: 'errors.genericTitle',
+        }
       );
     });
   });
