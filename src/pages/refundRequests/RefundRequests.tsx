@@ -28,6 +28,7 @@ import { useAlert } from '../../hooks/useAlert';
 import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
+import { browserConsole } from '../../utils/consoleLogger';
 import { RefundRequestsModal } from './RefundRequestModal';
 
 const posTypeMapper: Record<string, string> = {
@@ -65,7 +66,6 @@ const RefundRequests = () => {
     totalElements: 0,
   });
 
-  // ✅ Reset deterministico su cambio iniziativa (multi-iniziativa safe)
   useEffect(() => {
     if (!initiativeId) {
       return;
@@ -140,7 +140,6 @@ const RefundRequests = () => {
     }
   };
 
-  // ✅ Effetto deterministico unico di fetch
   useEffect(() => {
     if (!initiativeId) {
       return;
@@ -318,24 +317,15 @@ const RefundRequests = () => {
   }, []);
 
   const handleSentBatches = async () => {
+    if (!initiativeId || !selectedRow) {
+      browserConsole.error('Missing initiativeId or batchId');
+      return;
+    }
+
     setSendBatchIsLoading(true);
+
     try {
-      if (!initiativeId || !selectedRow) {
-        console.error('Missing initiativeId or batchId');
-        return;
-      }
-
-      const result = (await sendRewardBatch(initiativeId, selectedRow)) as any;
-
-      if ('code' in result && result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
-        setAlert({
-          title: t('errors.genericTitle'),
-          text: t('errors.sendTheBatchForPreviousMonth'),
-          isOpen: true,
-          severity: 'error',
-        });
-        return;
-      }
+      await sendRewardBatch(initiativeId, selectedRow);
 
       setAlert({
         text: t('pages.refundRequests.rewardBatchSentSuccess'),
@@ -343,14 +333,27 @@ const RefundRequests = () => {
         severity: 'success',
       });
 
-      await fetchRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
-    } catch {
-      setAlert({
-        title: t('errors.genericTitle'),
-        text: t('errors.genericDescription'),
-        isOpen: true,
-        severity: 'error',
-      });
+      await fetchRewardBatches(
+        initiativeId,
+        currentPagination.pageNo,
+        currentPagination.pageSize
+      );
+    } catch (error: any) {
+      if (error?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.sendTheBatchForPreviousMonth'),
+          isOpen: true,
+          severity: 'error',
+        });
+      } else {
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
+      }
     } finally {
       handleRadioButtonChange('');
       setSendBatchIsLoading(false);
