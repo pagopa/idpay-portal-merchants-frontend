@@ -101,8 +101,7 @@ const RefundRequests = () => {
       if (response?.content) {
         const mappedResponse = response.content.map((value) => ({
           ...value,
-          approvedAmountCents:
-            value.status === 'APPROVED' ? value.approvedAmountCents : undefined,
+          approvedAmountCents: value.status === 'APPROVED' ? value.approvedAmountCents : undefined,
           suspendedAmountCents:
             value.status === 'APPROVED' ? value.suspendedAmountCents : undefined,
         }));
@@ -344,11 +343,7 @@ const RefundRequests = () => {
         severity: 'success',
       });
 
-      await fetchRewardBatches(
-        initiativeId,
-        currentPagination.pageNo,
-        currentPagination.pageSize
-      );
+      await fetchRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
     } catch (error: any) {
       if (error?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
         setAlert({
