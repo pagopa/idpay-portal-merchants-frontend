@@ -101,7 +101,8 @@ const RefundRequests = () => {
       if (response?.content) {
         const mappedResponse = response.content.map((value) => ({
           ...value,
-          approvedAmountCents: value.status === 'APPROVED' ? value.approvedAmountCents : undefined,
+          approvedAmountCents:
+            value.status === 'APPROVED' ? value.approvedAmountCents : undefined,
           suspendedAmountCents:
             value.status === 'APPROVED' ? value.suspendedAmountCents : undefined,
         }));
@@ -325,7 +326,17 @@ const RefundRequests = () => {
     setSendBatchIsLoading(true);
 
     try {
-      await sendRewardBatch(initiativeId, selectedRow);
+      const result: any = await sendRewardBatch(initiativeId, selectedRow);
+
+      if (result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.sendTheBatchForPreviousMonth'),
+          isOpen: true,
+          severity: 'error',
+        });
+        return;
+      }
 
       setAlert({
         text: t('pages.refundRequests.rewardBatchSentSuccess'),
