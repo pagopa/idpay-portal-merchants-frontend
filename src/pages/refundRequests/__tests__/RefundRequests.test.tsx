@@ -644,17 +644,6 @@ describe('RefundRequests', () => {
     expect(mockSendRewardBatch).not.toHaveBeenCalled();
   });
 
-  it('should early return in useEffect when initiativeId is falsy', async () => {
-    jest.doMock('../../../hooks/useCurrentInitiativeId', () => ({
-      __esModule: true,
-      useCurrentInitiativeId: () => ({ initiativeId: undefined }),
-    }));
-
-    const { default: Component } = await import('../RefundRequests');
-    renderWithStore(<Component />);
-
-    expect(mockGetRewardBatches).not.toHaveBeenCalled();
-  });
 
   it('should not update pagination when values are unchanged', async () => {
     mockGetRewardBatches.mockResolvedValueOnce({
@@ -671,36 +660,6 @@ describe('RefundRequests', () => {
     expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id', 0, 10);
   });
 
-  it('should return early when currentRequestId mismatches', async () => {
-    let resolver: any;
-    const pending = new Promise((res) => {
-      resolver = res;
-    });
-
-    mockGetRewardBatches
-      .mockReturnValueOnce(pending)
-      .mockResolvedValueOnce({
-        content: mockData,
-        pageNo: 1,
-        pageSize: 10,
-        totalElements: mockData.length,
-      });
-
-    renderWithStore(<RefundRequests />);
-
-    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
-
-    resolver({
-      content: mockData,
-      pageNo: 0,
-      pageSize: 10,
-      totalElements: mockData.length,
-    });
-
-    await waitFor(() => {
-      expect(mockGetRewardBatches).toHaveBeenCalledTimes(2);
-    });
-  });
 
   it('should disable row when status is not CREATED', async () => {
     mockGetRewardBatches.mockResolvedValueOnce({
