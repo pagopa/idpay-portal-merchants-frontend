@@ -196,13 +196,11 @@ export const postponeTransaction = (
   initiativeId: string,
   rewardBatchId: string,
   transactionId: string,
-  initiativeEndDate: string
 ): Promise<void> =>
   getMerchantsApi().postponeTransaction(
     initiativeId,
     rewardBatchId,
     transactionId,
-    initiativeEndDate
   );
 
 export const getMerchantReports = (
