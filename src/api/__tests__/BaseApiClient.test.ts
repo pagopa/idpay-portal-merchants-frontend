@@ -44,41 +44,41 @@ describe('BaseApiClient', () => {
     expect(fetchOptions.headers.get('Authorization')).toBeNull();
   });
 
-  it("should dispatch error on 401 and return business error if present", async () => {
-    (storageTokenOps.read as jest.Mock).mockReturnValue("mocked-token");
+  it('should dispatch error on 401 and return business error if present', async () => {
+    (storageTokenOps.read as jest.Mock).mockReturnValue('mocked-token');
 
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
       status: 401,
       json: async () => ({
-        code: "UNAUTHORIZED",
-        message: "Token expired",
+        code: 'UNAUTHORIZED',
+        message: 'Token expired',
       }),
     });
 
     const client = new BaseApiClient({
-      baseUrl: "http://localhost",
+      baseUrl: 'http://localhost',
     });
 
     const result = await client.safeRequest({
-      path: "/secure",
-      method: "GET",
+      path: '/secure',
+      method: 'GET',
       secure: true,
-      format: "json",
+      format: 'json',
     });
 
     expect(result.data).toEqual({
-      code: "UNAUTHORIZED",
-      message: "Token expired",
+      code: 'UNAUTHORIZED',
+      message: 'Token expired',
     });
   });
 
-  it("should throw ApiError on technical error without business body", async () => {
+  it('should throw ApiError on technical error without business body', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
       status: 500,
       json: async () => {
-        throw new Error("Invalid JSON");
+        throw new Error('Invalid JSON');
       },
     });
 
@@ -88,10 +88,10 @@ describe('BaseApiClient', () => {
 
     await expect(
       client.safeRequest({
-        path: "/error",
-        method: "GET",
-        format: "json",
+        path: '/error',
+        method: 'GET',
+        format: 'json',
       })
-    ).rejects.toThrow("API Error - 500");
+    ).rejects.toThrow('API Error - 500');
   });
 });

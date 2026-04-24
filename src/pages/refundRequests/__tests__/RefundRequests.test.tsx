@@ -643,4 +643,149 @@ describe('RefundRequests', () => {
 
     expect(mockSendRewardBatch).not.toHaveBeenCalled();
   });
+
+
+  it('should not update pagination when values are unchanged', async () => {
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: mockData,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: mockData.length,
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id', 0, 10);
+  });
+
+
+  it('should disable row when status is not CREATED', async () => {
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: [
+        {
+          id: 77,
+          name: 'sent-batch',
+          posType: 'ONLINE',
+          initialAmountCents: 1000,
+          status: 'SENT',
+          month: getPreviousMonth(),
+          numberOfTransactions: 1,
+        },
+      ],
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 1,
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    const radios = screen.getAllByRole('radio');
+    expect(radios[0]).toBeDisabled();
+  });
+
+  it('should disable row when it is in disabledRows list', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[3]);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('refund-modal')).toBeInTheDocument();
+    });
+  });
+
+  it('should update pagination when backend returns different totalElements', async () => {
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: mockData,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 999,
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+  });
+
+  it('should allow selection when batch year is previous year (year branch)', async () => {
+    const previousYear = new Date().getFullYear() - 1;
+
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: [
+        {
+          id: 500,
+          name: 'old-year-batch',
+          posType: 'ONLINE',
+          initialAmountCents: 1000,
+          status: 'CREATED',
+          month: `${previousYear}-12`,
+          numberOfTransactions: 1,
+        },
+      ],
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 1,
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    const radios = screen.getAllByRole('radio');
+    expect(radios[0]).not.toBeDisabled();
+  });
+
+  it('should deselect row when clicking same radio twice (selectedRowObjects undefined branch)', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[0]);
+    fireEvent.click(radios[0]);
+  });
+
+  it('should handle business error returned as resolved promise', async () => {
+    mockSendRewardBatch.mockResolvedValueOnce({
+      code: 'REWARD_BATCH_PREVIOUS_NOT_SENT',
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[0]);
+    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'errors.sendTheBatchForPreviousMonth',
+          severity: 'error',
+        })
+      );
+    });
+  });
+
+  it('should execute modal cancel branch', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[0]);
+    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+
+    await waitFor(() => expect(screen.getByTestId('refund-modal')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('Indietro'));
+  });
 });

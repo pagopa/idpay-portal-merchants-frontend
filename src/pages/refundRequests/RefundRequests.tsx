@@ -325,7 +325,17 @@ const RefundRequests = () => {
     setSendBatchIsLoading(true);
 
     try {
-      await sendRewardBatch(initiativeId, selectedRow);
+      const result: any = await sendRewardBatch(initiativeId, selectedRow);
+
+      if (result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.sendTheBatchForPreviousMonth'),
+          isOpen: true,
+          severity: 'error',
+        });
+        return;
+      }
 
       setAlert({
         text: t('pages.refundRequests.rewardBatchSentSuccess'),
@@ -333,11 +343,7 @@ const RefundRequests = () => {
         severity: 'success',
       });
 
-      await fetchRewardBatches(
-        initiativeId,
-        currentPagination.pageNo,
-        currentPagination.pageSize
-      );
+      await fetchRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
     } catch (error: any) {
       if (error?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
         setAlert({
