@@ -140,7 +140,7 @@ export default function InvoiceDetail({
         throw new Error('Missing rewardBatchId');
       }
 
-      await postponeTransaction(initiative_id, rewardBatchId, itemValues?.id, initiativeEndDate);
+      await postponeTransaction(initiative_id, rewardBatchId, itemValues?.id);
       setAlert({
         title: 'Successo',
         text: 'Transazione spostata al mese successivo',

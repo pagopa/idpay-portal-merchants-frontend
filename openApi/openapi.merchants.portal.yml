@@ -927,6 +927,8 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 24
+            pattern: '^[a-zA-Z0-9]+$'
         - name: rewardBatchId
           in: path
           description: The reward batch ID
@@ -934,20 +936,15 @@ paths:
           schema:
             type: string
             maxLength: 64
+            pattern: .*
         - name: transactionId
           in: path
           description: The transaction ID
           required: true
           schema:
             type: string
-        - name: initiativeEndDate
-          in: query
-          description: Initiative end date (ISO format yyyy-MM-dd)
-          required: true
-          schema:
-            type: string
-            format: date
-            example: "2026-01-01"
+            maxLength: 36
+            pattern: .*
       responses:
         "204":
           description: No content, transaction postponed successfully
