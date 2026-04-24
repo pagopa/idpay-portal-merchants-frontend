@@ -135,12 +135,10 @@ class MerchantsApiClient {
     initiativeId: string,
     rewardBatchId: string,
     transactionId: string,
-    initiativeEndDate: string
   ): Promise<void> {
     return this.request<void>({
       path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/transactions/${transactionId}/postpone`,
       method: 'POST',
-      query: { initiativeEndDate },
     });
   }
 
