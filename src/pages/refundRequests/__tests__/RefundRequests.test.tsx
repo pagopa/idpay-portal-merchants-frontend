@@ -643,4 +643,101 @@ describe('RefundRequests', () => {
 
     expect(mockSendRewardBatch).not.toHaveBeenCalled();
   });
+
+  it('should early return in useEffect when initiativeId is falsy', async () => {
+    jest.doMock('../../../hooks/useCurrentInitiativeId', () => ({
+      __esModule: true,
+      useCurrentInitiativeId: () => ({ initiativeId: undefined }),
+    }));
+
+    const { default: Component } = await import('../RefundRequests');
+    renderWithStore(<Component />);
+
+    expect(mockGetRewardBatches).not.toHaveBeenCalled();
+  });
+
+  it('should not update pagination when values are unchanged', async () => {
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: mockData,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: mockData.length,
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id', 0, 10);
+  });
+
+  it('should return early when currentRequestId mismatches', async () => {
+    let resolver: any;
+    const pending = new Promise((res) => {
+      resolver = res;
+    });
+
+    mockGetRewardBatches
+      .mockReturnValueOnce(pending)
+      .mockResolvedValueOnce({
+        content: mockData,
+        pageNo: 1,
+        pageSize: 10,
+        totalElements: mockData.length,
+      });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    resolver({
+      content: mockData,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: mockData.length,
+    });
+
+    await waitFor(() => {
+      expect(mockGetRewardBatches).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('should disable row when status is not CREATED', async () => {
+    mockGetRewardBatches.mockResolvedValueOnce({
+      content: [
+        {
+          id: 77,
+          name: 'sent-batch',
+          posType: 'ONLINE',
+          initialAmountCents: 1000,
+          status: 'SENT',
+          month: getPreviousMonth(),
+          numberOfTransactions: 1,
+        },
+      ],
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 1,
+    });
+
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
+
+    const radios = screen.getAllByRole('radio');
+    expect(radios[0]).toBeDisabled();
+  });
+
+  it('should disable row when it is in disabledRows list', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
+
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[3]);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('refund-modal')).toBeInTheDocument();
+    });
+  });
 });
