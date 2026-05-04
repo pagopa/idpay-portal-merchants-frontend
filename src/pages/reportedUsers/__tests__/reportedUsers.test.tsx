@@ -1,10 +1,38 @@
+import '@testing-library/jest-dom';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { act } from 'react-dom/test-utils';
+import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import ReportedUsers from '../reportedUsers';
 import { getReportedUser, deleteReportedUser } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
+import { ApiError } from '../../../api/ApiError';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+
+jest.mock('../../../decorators/withLogin', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withInitiativeGuard', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withParties', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withSelectedParty', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
+
+jest.mock('../../../decorators/withSelectedPartyProducts', () => ({
+  __esModule: true,
+  default: (Component: any) => Component,
+}));
 
 jest.mock('../../../services/merchantService', () => ({
   __esModule: true,
@@ -49,10 +77,18 @@ jest.mock('react-i18next', () => ({
     },
   }),
   Trans: ({ children, values }: any) => <span>{children}</span>,
+  initReactI18next: {},
   withTranslation: () => (Component: any) => {
     Component.defaultProps = { ...(Component.defaultProps || {}), t: (k: string) => k };
     return Component;
   },
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  __esModule: true,
+  useCurrentInitiativeId: () => ({
+    initiativeId: '123',
+  }),
 }));
 
 jest.mock('../../../components/dataTable/DataTable', () => ({
@@ -62,13 +98,10 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
       {rows.map((row: any) => (
         <div key={row.id} data-testid={`row-${row.cf}`}>
           {row.cf}
-          {columns.map((col: any, idx: number) => (
-            col.renderCell && (
-              <div key={idx}>
-                {col.renderCell({ row })}
-              </div>
-            )
-          ))}
+          {columns.map(
+            (col: any, idx: number) =>
+              col.renderCell && <div key={idx}>{col.renderCell({ row })}</div>
+          )}
         </div>
       ))}
     </div>
@@ -96,7 +129,7 @@ jest.mock('../SearchTaxCode', () => ({
 
 jest.mock('../../../components/Alert/AlertComponent', () => ({
   __esModule: true,
-  default: ({ text, isOpen }: any) => isOpen && <div data-testid='msg-alert'>{text}</div>,
+  default: ({ text, isOpen }: any) => isOpen && <div data-testid="msg-alert">{text}</div>,
 }));
 
 jest.mock('../NoResultPaper', () => ({
@@ -140,10 +173,12 @@ jest.mock('../columnsReportedUser', () => ({
   ],
 }));
 
-const mockGetReportedUser = getReportedUser as jest.MockedFunction<typeof getReportedUser>;
-const mockDeleteReportedUser = deleteReportedUser as jest.MockedFunction<typeof deleteReportedUser>;
-const mockParseJwt = parseJwt as jest.MockedFunction<typeof parseJwt>;
-const mockStorageTokenOps = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
+import type { MockedFunction, Mocked } from 'jest-mock';
+
+const mockGetReportedUser = getReportedUser as MockedFunction<typeof getReportedUser>;
+const mockDeleteReportedUser = deleteReportedUser as MockedFunction<typeof deleteReportedUser>;
+const mockParseJwt = parseJwt as MockedFunction<typeof parseJwt>;
+const mockStorageTokenOps = storageTokenOps as Mocked<typeof storageTokenOps>;
 
 describe('ReportedUsers Component', () => {
   let history: any;
@@ -170,7 +205,9 @@ describe('ReportedUsers Component', () => {
     }
     return render(
       <Router history={history}>
-        <ReportedUsers />
+        <Route path="/initiative/:initiative_id/reported-users">
+          <ReportedUsers />
+        </Route>
       </Router>
     );
   };
@@ -193,14 +230,16 @@ describe('ReportedUsers Component', () => {
 
   describe('Ricerca utente', () => {
     it('deve eseguire la ricerca e mostrare i risultati con array valido', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsersData = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
+      mockGetReportedUser.mockResolvedValueOnce(mockUsersData as any);
 
       renderComponent();
 
@@ -211,7 +250,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(searchButton);
 
       await waitFor(() => {
-        expect(mockGetReportedUser).toHaveBeenCalledWith(undefined, 'RSSMRA80A01H501U');
+        expect(mockGetReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
 
       await waitFor(() => {
@@ -221,7 +260,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire risposta vuota come array', async () => {
-      mockGetReportedUser.mockResolvedValueOnce([]);
+      mockGetReportedUser.mockResolvedValueOnce([] as any);
 
       renderComponent();
 
@@ -253,7 +292,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire errore 404 senza mostrare alert', async () => {
-      mockGetReportedUser.mockRejectedValueOnce({ status: 404 });
+      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
 
       renderComponent();
 
@@ -269,7 +308,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire errore 404 con response.status', async () => {
-      mockGetReportedUser.mockRejectedValueOnce({ response: { status: 404 } });
+      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
 
       renderComponent();
 
@@ -328,12 +367,14 @@ describe('ReportedUsers Component', () => {
 
   describe('Eliminazione utente', () => {
     it('deve aprire il modale di conferma eliminazione', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -356,12 +397,14 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve eliminare utente dopo conferma', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
       mockDeleteReportedUser.mockResolvedValueOnce(undefined as any);
@@ -387,7 +430,7 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(confirmButton);
 
       await waitFor(() => {
-        expect(mockDeleteReportedUser).not.toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
+        expect(mockDeleteReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
 
       await waitFor(() => {
@@ -396,12 +439,14 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve chiudere il modale se si annulla', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -433,12 +478,14 @@ describe('ReportedUsers Component', () => {
     });
 
     it('deve gestire errori durante eliminazione', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
       mockDeleteReportedUser.mockRejectedValueOnce(new Error('Delete Error'));
@@ -464,19 +511,21 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(confirmButton);
 
       await waitFor(() => {
-        expect(mockDeleteReportedUser).not.toHaveBeenCalled();
+        expect(mockDeleteReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
     });
 
     it('non deve eliminare se merchantId non è presente', async () => {
       mockParseJwt.mockReturnValue({});
 
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -508,12 +557,14 @@ describe('ReportedUsers Component', () => {
 
   describe('Reset funzionalità', () => {
     it('deve resettare la ricerca', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
 
@@ -545,88 +596,54 @@ describe('ReportedUsers Component', () => {
       fireEvent.click(reportButton);
 
       expect(history.location.pathname).toBe(
-        '/portale-esercenti/undefined/utenti-segnalati/segnalazione-utenti'
+        '/portale-esercenti/123/utenti-segnalati/segnalazione-utenti'
       );
       expect(history.location.state).toEqual({
-        initiativeID: undefined,
+        initiativeID: '123',
         merchantId: 'MERCHANT123',
       });
     });
   });
 
   describe('Location state', () => {
-    it('deve gestire newCf da location state senza showSuccessAlert', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
-
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
-
+    it('deve mostrare alert di successo quando newCf è presente in location state', async () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
       await waitFor(() => {
-        expect(mockGetReportedUser).toHaveBeenCalledWith(undefined, 'RSSMRA80A01H501U');
-      });
-    });
-
-    it('deve gestire newCf da location state con showSuccessAlert', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
-
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
-
-      renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
-
-      await waitFor(() => {
         expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
-      });
-
-      jest.advanceTimersByTime(5000);
-
-      await waitFor(() => {
-        expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
       });
     });
   });
 
   describe('Alert temporizzati', () => {
-    it('deve nascondere alert di successo dopo 3 secondi', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+    it('deve mostrare e poi nascondere alert di successo dopo 3 secondi', async () => {
+      renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
-      mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
-
-      renderComponent({ newCf: 'RSSMRA80A01H501U', showSuccessAlert: true });
-
+      // Deve comparire subito
       await waitFor(() => {
         expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
 
-      jest.advanceTimersByTime(5000);
+      // Avanziamo il timer
+      act(() => {
+        jest.advanceTimersByTime(3000);
+      });
 
+      // Deve sparire
       await waitFor(() => {
         expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
       });
     });
 
     it('deve nascondere alert di eliminazione dopo 3 secondi', async () => {
-      const mockUsers = [{
-        fiscalCode: 'RSSMRA80A01H501U',
-        reportedDate: '2024-01-01',
-        trxChargeDate: '2024-01-02',
-        transactionId: 'TRX123',
-      }];
+      const mockUsers = [
+        {
+          fiscalCode: 'RSSMRA80A01H501U',
+          reportedDate: '2024-01-01',
+          trxChargeDate: '2024-01-02',
+          transactionId: 'TRX123',
+        },
+      ];
 
       mockGetReportedUser.mockResolvedValueOnce(mockUsers as any);
       mockDeleteReportedUser.mockResolvedValueOnce(undefined as any);
@@ -665,7 +682,7 @@ describe('ReportedUsers Component', () => {
 
   describe('ShowEmptyAlert logic', () => {
     it('deve mostrare empty alert quando lastSearchedCF è valido ma user è vuoto', async () => {
-      mockGetReportedUser.mockResolvedValueOnce([]);
+      mockGetReportedUser.mockResolvedValueOnce([] as any);
 
       renderComponent();
 
@@ -679,7 +696,7 @@ describe('ReportedUsers Component', () => {
     });
 
     it('non deve mostrare empty alert quando location.state.newCf è presente', async () => {
-      mockGetReportedUser.mockResolvedValueOnce([]);
+      mockGetReportedUser.mockResolvedValueOnce([] as any);
 
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 

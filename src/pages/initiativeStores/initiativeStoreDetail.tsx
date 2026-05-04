@@ -21,7 +21,7 @@ import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
 import { isValidEmail, handlePromptMessage } from '../../helpers';
 import { safeFormatDate } from '../../utils/formatUtils';
-import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
+import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/data-contracts';
 import { POS_TYPE } from '../../utils/constants';
 import { browserConsole } from '../../utils/consoleLogger';
 import ROUTES from '../../routes';

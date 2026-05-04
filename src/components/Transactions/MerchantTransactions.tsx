@@ -22,7 +22,7 @@ import { browserConsole } from '../../utils/consoleLogger';
 import EmptyList from '../../pages/components/EmptyList';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import CustomChip from '../Chip/CustomChip';
-import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
+import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/data-contracts';
 import { useAlert } from '../../hooks/useAlert';
 import TransactionDataTable from './TransactionDataTable';
 import TransactionDetail from './TransactionDetail';

@@ -1,5 +1,8 @@
 import { cleanupOnLogout } from '../logoutCleanup';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 
 jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: {

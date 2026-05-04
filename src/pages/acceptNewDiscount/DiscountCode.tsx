@@ -22,7 +22,7 @@ interface Props {
 }
 
 const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: Props) => {
-  const {setAlert} = useAlert();
+  const { setAlert } = useAlert();
   const { t } = useTranslation();
   const history = useHistory();
   const [openDataSentToast, setOpenDataSentToast] = useState(false);
@@ -120,19 +120,33 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
       const idTrxAcquirer = trxDate.getTime().toString();
       authPaymentBarCode(discountCode, amountCents, idTrxAcquirer)
         .then((response) => {
-          // eslint-disable-next-line no-prototype-builtins
-          if (response.hasOwnProperty('right') && response.right.status !== 200) {
-            const errorText = mapErrorCode(response.right.value.code);
+          type AuthResponse = {
+            right?: {
+              status: number;
+              value: { code: string };
+            };
+          };
+
+          const res = response as AuthResponse;
+
+          if (res.right && res.right.status !== 200) {
+            const errorText = mapErrorCode(res.right.value.code);
             formik.setFieldError('discountCode', errorText);
-          } else {
-            setOpenDataSentToast(true);
-            setTimeout(() => {
-              history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`);
-            }, 3000);
+            return;
           }
+
+          setOpenDataSentToast(true);
+          setTimeout(() => {
+            history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`);
+          }, 3000);
         })
         .catch(() => {
-          setAlert({title: t('errors.genericTitle'), text: t('errors.validationDescription'), isOpen: true, severity: 'error'});
+          setAlert({
+            title: t('errors.genericTitle'),
+            text: t('errors.validationDescription'),
+            isOpen: true,
+            severity: 'error',
+          });
         });
     }
   };

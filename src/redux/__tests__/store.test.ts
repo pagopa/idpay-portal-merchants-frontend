@@ -65,9 +65,7 @@ describe('Redux Store Configuration', () => {
       const finalMiddlewares = middlewareCallback(getDefaultMiddleware);
 
       expect(finalMiddlewares).not.toContain(logger);
-      expect(finalMiddlewares).toEqual(
-        expect.arrayContaining(['default-middleware'])
-      );
+      expect(finalMiddlewares).toEqual(expect.arrayContaining(['default-middleware']));
       expect(finalMiddlewares.length).toBe(2);
     });
 

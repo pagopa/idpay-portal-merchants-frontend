@@ -50,6 +50,6 @@ describe('TOS component', () => {
 
     render(<TOS />);
 
-    expect(screen.getByText("Some TOS content")).toBeInTheDocument();
+    expect(screen.getByText('Some TOS content')).toBeInTheDocument();
   });
 });

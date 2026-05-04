@@ -1,25 +1,22 @@
-import { MerchantApi } from '../api/MerchantsApiClient';
-import { InitiativeDTOArray } from '../api/generated/merchants/InitiativeDTOArray';
-import { MerchantDetailDTO } from '../api/generated/merchants/MerchantDetailDTO';
-import { MerchantStatisticsDTO } from '../api/generated/merchants/MerchantStatisticsDTO';
-import { MerchantTransactionsListDTO } from '../api/generated/merchants/MerchantTransactionsListDTO';
-import { PointOfSaleDTO } from '../api/generated/merchants/PointOfSaleDTO';
-import { TransactionResponse } from '../api/generated/merchants/TransactionResponse';
+import { getMerchantsApi } from '../api/MerchantsApiClient';
 import {
-  GetPointOfSalesFilters,
-  GetPointOfSalesResponse,
-  GetPointOfSaleTransactionsFilters,
-} from '../types/types';
-import { PointOfSaleTransactionsProcessedListDTO } from '../api/generated/merchants/PointOfSaleTransactionsProcessedListDTO';
-import { DownloadInvoiceResponseDTO } from '../api/generated/merchants/DownloadInvoiceResponseDTO';
-import { ReportedUserDTO } from '../api/generated/merchants/ReportedUserDTO';
-import { ReportedUserCreateResponseDTO } from '../api/generated/merchants/ReportedUserCreateResponseDTO';
-import { RewardBatchListDTO } from '../api/generated/merchants/RewardBatchListDTO';
-import { DownloadRewardBatchResponseDTO } from '../api/generated/merchants/DownloadRewardBatchResponseDTO';
-import { FranchisePointOfSaleDTO } from '../api/generated/merchants/FranchisePointOfSaleDTO';
-import { ReportListDTO } from '../api/generated/merchants/ReportListDTO';
-import { ReportRequest } from '../api/generated/merchants/ReportRequest';
-import { RewardBatchDTO } from '../api/generated/merchants/RewardBatchDTO';
+  InitiativeDTO,
+  MerchantStatisticsDTO,
+  MerchantDetailDTO,
+  MerchantTransactionsListDTO,
+  PointOfSaleTransactionsProcessedListDTO,
+  DownloadInvoiceResponseDTO,
+  ReportedUserDTO,
+  ReportedUserCreateResponseDTO,
+  RewardBatchListDTO,
+  DownloadRewardBatchResponseDTO,
+  FranchisePointOfSaleDTO,
+  ReportListDTO,
+  ReportRequest,
+  RewardBatchDTO,
+  TransactionResponse,
+} from '../api/generated/merchants/data-contracts';
+import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 
 export type GetMerchantTransactionsProcessedParams = {
   initiativeId: string;
@@ -34,8 +31,8 @@ export type GetMerchantTransactionsProcessedParams = {
   trxCode?: string;
 };
 
-export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> =>
-  MerchantApi.getMerchantInitiativeList();
+export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> =>
+  getMerchantsApi().getMerchantInitiativeList();
 
 export const getMerchantTransactions = (
   initiativeId: string,
@@ -43,159 +40,180 @@ export const getMerchantTransactions = (
   fiscalCode?: string,
   status?: string
 ): Promise<MerchantTransactionsListDTO> =>
-  MerchantApi.getMerchantTransactions(initiativeId, page, fiscalCode, status);
+  getMerchantsApi().getMerchantTransactions(initiativeId, page, fiscalCode, status);
 
 export const getMerchantTransactionsProcessed = (
   params: GetMerchantTransactionsProcessedParams
-): Promise<MerchantTransactionsListDTO> => 
-  MerchantApi.getMerchantTransactionsProcessed(params);
+): Promise<MerchantTransactionsListDTO> => {
+  const { initiativeId, ...query } = params;
 
+  return getMerchantsApi().getMerchantTransactionsProcessed(initiativeId, query);
+};
 
 export const getMerchantInitiativeStatistics = (
   initiativeId: string
-): Promise<MerchantStatisticsDTO> => MerchantApi.getMerchantInitiativeStatistics(initiativeId);
+): Promise<MerchantStatisticsDTO> =>
+  getMerchantsApi().getMerchantInitiativeStatistics(initiativeId);
 
 export const getMerchantDetail = (initiativeId: string): Promise<MerchantDetailDTO> =>
-  MerchantApi.getMerchantDetail(initiativeId);
+  getMerchantsApi().getMerchantDetail(initiativeId);
 
 export const deleteTransaction = (transactionId: string): Promise<void> =>
-  MerchantApi.deleteTransaction(transactionId);
+  getMerchantsApi().deleteTransaction(transactionId);
 
 export const reversalTransactionInvoiced = (
   transactionId: string,
   file: File,
   docNumber?: string
 ): Promise<void | { code: string; message: string }> =>
-  MerchantApi.reversalTransactionInvoiced(transactionId, file, docNumber);
+  getMerchantsApi().reversalTransactionInvoiced(transactionId, file, docNumber);
 
 export const createTransaction = (
   amountCents: number,
   idTrxAcquirer: string,
   initiativeId: string,
-  mcc: string | undefined
+  mcc?: string
 ): Promise<TransactionResponse> =>
-  MerchantApi.createTransaction(amountCents, idTrxAcquirer, initiativeId, mcc);
+  getMerchantsApi().createTransaction({
+    amountCents,
+    idTrxAcquirer,
+    initiativeId,
+    mcc,
+  });
 
 export const authPaymentBarCode = (
   trxCode: string,
   amountCents: number,
   idTrxAcquirer: string
-): Promise<any> => MerchantApi.authPaymentBarCode(trxCode, amountCents, idTrxAcquirer);
+): Promise<unknown> =>
+  getMerchantsApi().authPaymentBarCode(trxCode, {
+    amountCents,
+    idTrxAcquirer,
+  });
 
-export const updateMerchantPointOfSales = (
+export const updateMerchantPointOfSales = async (
   merchantId: string,
-  pointOfSales: Array<PointOfSaleDTO>
-): Promise<any> => MerchantApi.updateMerchantPointOfSales(merchantId, pointOfSales);
+  pointOfSales: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>
+): Promise<void | { code?: string; message?: string }> => {
+  const result = await getMerchantsApi().updateMerchantPointOfSales(merchantId, pointOfSales);
 
-export const getMerchantPointOfSales = (
+  return result as void | { code?: string; message?: string };
+};
+
+export const getMerchantPointOfSales = async (
   merchantId: string,
   filters: GetPointOfSalesFilters
-): Promise<GetPointOfSalesResponse> => MerchantApi.getMerchantPointOfSales(merchantId, filters);
+): Promise<{
+  content: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>;
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+}> => {
+  const response = await getMerchantsApi().getMerchantPointOfSales(
+    merchantId,
+    filters as unknown as Record<string, unknown>
+  );
 
-export const getMerchantPointOfSalesWithTransactions = async (
+  return {
+    content: response?.content ?? [],
+    pageNo: response?.pageNumber ?? 0,
+    pageSize: response?.pageSize ?? 0,
+    totalElements: response?.totalElements ?? 0,
+  };
+};
+
+export const getMerchantPointOfSalesWithTransactions = (
   rewardBatchId: string
-): Promise<Array<FranchisePointOfSaleDTO>> => MerchantApi.getMerchantPointOfSalesWithTransactions(rewardBatchId);
+): Promise<Array<FranchisePointOfSaleDTO>> =>
+  getMerchantsApi().getMerchantPointOfSalesWithTransactions(rewardBatchId);
 
-export const getMerchantPointOfSalesById = (
-  merchantId: string,
-  pointOfSaleId: string
-): Promise<PointOfSaleDTO> => MerchantApi.getMerchantPointOfSalesById(merchantId, pointOfSaleId);
+export const getMerchantPointOfSalesById = (merchantId: string, pointOfSaleId: string) =>
+  getMerchantsApi().getMerchantPointOfSalesById(merchantId, pointOfSaleId);
 
 export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,
   pointOfSaleId: string,
   filters?: GetPointOfSaleTransactionsFilters
 ): Promise<PointOfSaleTransactionsProcessedListDTO> =>
-  MerchantApi.getMerchantPointOfSaleTransactionsProcessed(initiativeId, pointOfSaleId, filters);
+  getMerchantsApi().getMerchantPointOfSaleTransactionsProcessed(
+    initiativeId,
+    pointOfSaleId,
+    filters as unknown as Record<string, unknown> | undefined
+  );
 
 export const downloadInvoiceFile = (
   transactionId: string,
   pointOfSaleId: string
 ): Promise<DownloadInvoiceResponseDTO> =>
-  MerchantApi.downloadInvoiceFile(transactionId, pointOfSaleId);
+  getMerchantsApi().downloadInvoiceFile(pointOfSaleId, transactionId);
 
 export const getReportedUser = (
   initiativeId: string,
   userFiscalCode: string
-): Promise<ReportedUserDTO> => MerchantApi.getReportedUser(initiativeId, userFiscalCode);
+): Promise<Array<ReportedUserDTO>> =>
+  getMerchantsApi().getReportedUser(initiativeId, userFiscalCode);
 
 export const createReportedUser = (
   initiativeId: string,
   fiscalCode: string
 ): Promise<ReportedUserCreateResponseDTO> =>
-  MerchantApi.createReportedUser(initiativeId, fiscalCode);
+  getMerchantsApi().createReportedUser(initiativeId, fiscalCode);
 
 export const deleteReportedUser = (
   initiativeId: string,
   userFiscalCode: string
 ): Promise<ReportedUserCreateResponseDTO> =>
-  MerchantApi.deleteReportedUser(initiativeId, userFiscalCode);
+  getMerchantsApi().deleteReportedUser(initiativeId, userFiscalCode);
 
 export const getRewardBatches = (
   initiativeId: string,
   page: number,
-  size: number,
-): Promise<RewardBatchListDTO> =>
-  MerchantApi.getRewardBatches(initiativeId, page, size);
+  size: number
+): Promise<RewardBatchListDTO> => getMerchantsApi().getRewardBatches(initiativeId, page, size);
 
-export const getAllRewardBatches = (
-  initiativeId: string
-): Promise<RewardBatchListDTO> =>
-  MerchantApi.getAllRewardBatches(initiativeId);
+export const getAllRewardBatches = (initiativeId: string): Promise<RewardBatchListDTO> =>
+  getMerchantsApi().getAllRewardBatches(initiativeId);
 
 export const getRewardBatchById = (
   initiativeId: string,
   rewardBatchId: string
-): Promise<RewardBatchDTO> =>
-  MerchantApi.getRewardBatchById(initiativeId, rewardBatchId);
+): Promise<RewardBatchDTO> => getMerchantsApi().getRewardBatchById(initiativeId, rewardBatchId);
 
-export const sendRewardBatch = (
-  initiativeId: string,
-  batchId: string
-): Promise<void> =>
-  MerchantApi.sendRewardBatches(initiativeId, batchId);
+export const sendRewardBatch = (initiativeId: string, batchId: string): Promise<void> =>
+  getMerchantsApi().sendRewardBatch(initiativeId, batchId);
 
 export const downloadBatchCsv = (
   initiativeId: string,
   rewardBatchId: string
 ): Promise<DownloadRewardBatchResponseDTO> =>
-  MerchantApi.downloadBatchCsv(initiativeId, rewardBatchId);
+  getMerchantsApi().downloadBatchCsv(initiativeId, rewardBatchId);
 
 export const postponeTransaction = (
   initiativeId: string,
   rewardBatchId: string,
   transactionId: string,
-  initiativeEndDate: string
 ): Promise<void> =>
-  MerchantApi.postponeTransaction(
+  getMerchantsApi().postponeTransaction(
     initiativeId,
     rewardBatchId,
     transactionId,
-    initiativeEndDate
   );
 
 export const getMerchantReports = (
   initiativeId: string,
   page?: number,
   size?: number
-): Promise<ReportListDTO> =>
-  MerchantApi.getMerchantReports(initiativeId, page, size);
+): Promise<ReportListDTO> => getMerchantsApi().getMerchantReports(initiativeId, page, size);
 
-export const generateMerchantReport = (
-  initiativeId: string,
-  body: ReportRequest
-): Promise<void> =>
-  MerchantApi.generateMerchantReport(initiativeId, body);
+export const generateMerchantReport = (initiativeId: string, body: ReportRequest): Promise<void> =>
+  getMerchantsApi().generateMerchantReport(initiativeId, body);
 
-export const downloadMerchantReport = (
-  initiativeId: string,
-  reportId: string,
-) =>
-  MerchantApi.downloadMerchantReport(initiativeId, reportId);
+export const downloadMerchantReport = (initiativeId: string, reportId: string) =>
+  getMerchantsApi().downloadMerchantReport(initiativeId, reportId);
 
 export const updateInvoiceTransaction = (
   transactionId: string,
   file: File,
   docNumber?: string
 ): Promise<{ code: string; message: string }> =>
-  MerchantApi.updateInvoiceTransaction(transactionId, file, docNumber);
+  getMerchantsApi().updateInvoiceTransaction(transactionId, file, docNumber);

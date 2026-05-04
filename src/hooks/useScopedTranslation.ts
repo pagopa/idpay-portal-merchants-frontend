@@ -1,5 +1,5 @@
-import { useTranslation } from "react-i18next";
-import type { TOptionsBase } from "i18next";
+import { useTranslation } from 'react-i18next';
+import type { TOptionsBase } from 'i18next';
 
 type ScopedT = {
   (key: string, options?: TOptionsBase): string;
@@ -9,10 +9,14 @@ type ScopedT = {
 export const useScopedTranslation = (baseKey: string): ScopedT => {
   const { t } = useTranslation();
 
-  return ((key: string, defaultValueOrOptions?: string | TOptionsBase, maybeOptions?: TOptionsBase) => {
+  return ((
+    key: string,
+    defaultValueOrOptions?: string | TOptionsBase,
+    maybeOptions?: TOptionsBase
+  ) => {
     const fullKey = `${baseKey}.${key}` as const;
 
-    if (typeof defaultValueOrOptions !== "string") {
+    if (typeof defaultValueOrOptions !== 'string') {
       return t(fullKey, defaultValueOrOptions as any);
     }
 

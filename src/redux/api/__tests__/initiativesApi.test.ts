@@ -10,8 +10,13 @@ jest.mock('../../../services/merchantService', () => ({
 
 import { configureStore } from '@reduxjs/toolkit';
 import * as merchantService from '../../../services/merchantService';
-import { StatusEnum } from '../../../api/generated/merchants/InitiativeDTO';
-import { setInitiativesList } from '../../slices/initiativesSlice';
+
+const StatusEnum = {
+  PUBLISHED: 'PUBLISHED',
+  CLOSED: 'CLOSED',
+  DRAFT: 'DRAFT',
+} as const;
+type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
 
 /**
  * IMPORTANT:
@@ -30,8 +35,7 @@ describe('initiativesApi - getInitiatives', () => {
       middleware: (gDM) => gDM().concat(initiativesApi.middleware),
     });
 
-  const mockedGetMerchantInitiativeList =
-    merchantService.getMerchantInitiativeList as jest.Mock;
+  const mockedGetMerchantInitiativeList = merchantService.getMerchantInitiativeList as jest.Mock;
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -71,7 +75,6 @@ describe('initiativesApi - getInitiatives', () => {
 
     expect(mockedGetMerchantInitiativeList).toHaveBeenCalledTimes(1);
     expect(result.data).toEqual(expectedFiltered);
-
   });
 
   it('should return error if service throws', async () => {

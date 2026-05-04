@@ -3,13 +3,17 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useDispatch } from 'react-redux';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import { userActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { useTranslation } from 'react-i18next';
 import { parseJwt } from '../../utils/jwt-utils';
 import { getUserPermission } from '../../services/rolePermissionService';
 import { setUserRole, setPermissionsList } from '../../redux/slices/permissionsSlice';
 import { useLogin, userFromJwtToken, userFromJwtTokenAsJWTUser } from '../useLogin';
+import { ENV } from '../../utils/env';
 
 jest.mock('react-redux');
 jest.mock('@pagopa/selfcare-common-frontend/lib/config/env');
@@ -111,7 +115,7 @@ describe('useLogin', () => {
     });
 
     expect(mockedStorageUserOps.delete).toHaveBeenCalledTimes(1);
-    expect(window.location.assign).toHaveBeenCalledWith(CONFIG.URL_FE.LOGIN);
+    expect(window.location.assign).toHaveBeenCalledWith(ENV.URL_FE.LOGOUT);
   });
 
   test('should use token from storage to set user if session user is empty', async () => {

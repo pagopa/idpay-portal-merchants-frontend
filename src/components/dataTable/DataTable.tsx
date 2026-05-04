@@ -1,4 +1,10 @@
-import { DataGrid, GridSortModel, GridColDef, GridSelectionModel, GridInputSelectionModel } from '@mui/x-data-grid';
+import {
+  DataGrid,
+  GridSortModel,
+  GridColDef,
+  GridSelectionModel,
+  GridInputSelectionModel,
+} from '@mui/x-data-grid';
 import { useCallback } from 'react';
 import { ELEMENT_PER_PAGE } from '../../utils/constants';
 
@@ -31,7 +37,7 @@ export interface DataTableProps {
   isTransactionsPage?: boolean;
   onRowsPerPageChange?: (pageSize: number) => void;
   onSelectionModelChange?: (selectionModel: GridSelectionModel) => void;
-  singleSelectionModel?: GridInputSelectionModel
+  singleSelectionModel?: GridInputSelectionModel;
 }
 
 const DataTable = ({
@@ -48,9 +54,8 @@ const DataTable = ({
   isRowSelectable,
   isTransactionsPage = false,
   onRowsPerPageChange,
-  singleSelectionModel
+  singleSelectionModel,
 }: DataTableProps) => {
-
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
   };
@@ -66,9 +71,8 @@ const DataTable = ({
     checkboxSelection: checkable,
     isRowSelectable,
     selectionModel: singleSelect ? singleSelectionModel : undefined,
-    disableMultipleSelection: singleSelect
+    disableMultipleSelection: singleSelect,
   };
-
 
   return (
     <>
@@ -76,8 +80,7 @@ const DataTable = ({
         <DataGrid
           rows={rows}
           columns={columns}
-          rowsPerPageOptions={isTransactionsPage ? ELEMENT_PER_PAGE :[rowsPerPage]}
-
+          rowsPerPageOptions={isTransactionsPage ? ELEMENT_PER_PAGE : [rowsPerPage]}
           {...selectionProps}
           onSelectionModelChange={onSelectionModelChange}
           disableSelectionOnClick

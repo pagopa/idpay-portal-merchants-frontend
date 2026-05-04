@@ -9,8 +9,7 @@ import { ButtonNaked } from '@pagopa/mui-italia';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { GetReportedUsersFilters } from '../../types/types';
 import ROUTES from '../../routes';
-import { createReportedUser } from '../../services/merchantService';
-import { MerchantApi } from '../../api/MerchantsApiClient';
+import { createReportedUser, getReportedUser } from '../../services/merchantService';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
 import { isValidCF } from './helpersReportedUsers';
@@ -42,7 +41,7 @@ const InsertReportedUser: React.FC = () => {
 
   const checkCfAlreadyReported = async (initiativeID: string, cf: string): Promise<boolean> => {
     try {
-      const res = await MerchantApi.getReportedUser(initiativeID, cf);
+      const res = await getReportedUser(initiativeID, cf);
       return Array.isArray(res) && res.length > 0;
     } catch (e) {
       setShowConfirmModal(false);

@@ -1,33 +1,34 @@
 import { Box } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { matchPath } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
-import ROUTES from '../../routes';
+import { useState, useEffect } from 'react';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { genericContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
-import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
-import { useAppSelector } from '../../redux/hooks';
-import { initiativeSelector } from '../../redux/slices/initiativesSlice';
+import { TransactionResponse } from '../../api/generated/merchants/data-contracts';
+import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 import CreateForm from './CreateForm';
 import DiscountCreatedRecap from './DiscountCreatedRecap';
-
-interface MatchParams {
-  initiative_id: string;
-}
 
 const NewDiscount = () => {
   const [discountCreated, setDiscountCreated] = useState(false);
   const [discountResponse, setDiscountResponse] = useState<TransactionResponse | undefined>();
-  const selectedInitiative = useAppSelector(initiativeSelector);
+  const currentInitiative = useCurrentInitiative();
+  const { initiativeId } = useCurrentInitiativeId();
   const { t } = useTranslation();
 
-  const match = matchPath(location.pathname, {
-    path: [ROUTES.NEW_DISCOUNT],
-    exact: true,
-    strict: false,
-  });
-  const { initiative_id } = (match?.params as MatchParams) || {};
+  useEffect(() => {
+    if (!initiativeId) {
+      return;
+    }
+
+    setDiscountCreated(false);
+    setDiscountResponse(undefined);
+  }, [initiativeId]);
+
+  if (!initiativeId) {
+    return null;
+  }
 
   return (
     <Box
@@ -43,7 +44,7 @@ const NewDiscount = () => {
         backLabel={t('commons.backBtn')}
         items={[
           t('pages.initiativesList.title'),
-          selectedInitiative?.initiativeName,
+          currentInitiative?.initiativeName,
           t('pages.initiativeDiscounts.createBtn'),
         ]}
       />
@@ -68,7 +69,7 @@ const NewDiscount = () => {
 
       {!discountCreated ? (
         <CreateForm
-          id={initiative_id}
+          id={initiativeId}
           setDiscountCreated={setDiscountCreated}
           setDiscountResponse={setDiscountResponse}
         />

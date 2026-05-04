@@ -39,7 +39,7 @@ const createFormikMock = (overrides: any = {}) =>
     submitForm: jest.fn(),
     setFormikState: jest.fn(),
     ...overrides,
-  }) as any;
+  } as any);
 
 describe('SearchTaxCode', () => {
   const renderSearchTaxCode = ({
@@ -73,7 +73,9 @@ describe('SearchTaxCode', () => {
     const { formik } = renderSearchTaxCode({
       formikOverrides: { values: { cf: '123' } },
     });
-    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), { target: { value: '123' } });
+    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), {
+      target: { value: '123' },
+    });
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
     expect(formik.setFieldError).toHaveBeenCalledWith('cf', 'pages.reportedUsers.cf.invalid');
   });

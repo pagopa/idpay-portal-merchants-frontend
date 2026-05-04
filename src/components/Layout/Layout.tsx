@@ -17,15 +17,24 @@ type Props = {
 };
 
 const Layout = ({ children }: Props) => {
-  const {alert} = useAlert();
+  const { alert } = useAlert();
   const onExit = useUnloadEventOnExit();
   const loggedUser = useSelector(userSelectors.selectLoggedUser);
   const location = useLocation();
   const [showAssistanceInfo, setShowAssistanceInfo] = useState(true);
 
   const match = matchPath(location.pathname, {
-    path: [ROUTES.HOME, ROUTES.DISCOUNTS, ROUTES.OVERVIEW, ROUTES.STORES, ROUTES.REPORTED_USERS,
-      ROUTES.STORES_DETAIL, ROUTES.REFUND_REQUESTS, ROUTES.REFUND_REQUESTS_STORE, ROUTES.EXPORT_REPORT],
+    path: [
+      ROUTES.HOME,
+      ROUTES.DISCOUNTS,
+      ROUTES.OVERVIEW,
+      ROUTES.STORES,
+      ROUTES.REPORTED_USERS,
+      ROUTES.STORES_DETAIL,
+      ROUTES.REFUND_REQUESTS,
+      ROUTES.REFUND_REQUESTS_STORE,
+      ROUTES.EXPORT_REPORT,
+    ],
     exact: true,
     strict: false,
   });
@@ -36,12 +45,15 @@ const Layout = ({ children }: Props) => {
     strict: false,
   });
 
-  const matchNoAlert = matchPath(location.pathname, {path: [ROUTES.PRIVACY_POLICY, ROUTES.TOS], exact: true, strict: false});
+  const matchNoAlert = matchPath(location.pathname, {
+    path: [ROUTES.PRIVACY_POLICY, ROUTES.TOS],
+    exact: true,
+    strict: false,
+  });
 
   useEffect(() => {
     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
   }, [location.pathname]);
-
 
   return (
     <Box
@@ -77,7 +89,7 @@ const Layout = ({ children }: Props) => {
             gridTemplateColumns="1fr"
           >
             {children}
-            <AlertComponent { ...alert} />
+            <AlertComponent {...alert} />
           </Box>
         </Box>
       ) : (
@@ -87,15 +99,11 @@ const Layout = ({ children }: Props) => {
           gridTemplateColumns="repeat(12, 1fr)"
           justifyContent="center"
         >
-          <Box
-            sx={{overflowX: 'clip'}}
-            display="grid"
-            pb={16}
-            pt={2}
-            gridColumn="span 12"
-          >
+          <Box sx={{ overflowX: 'clip' }} display="grid" pb={16} pt={2} gridColumn="span 12">
             {children}
-          { !matchNoAlert && <AlertComponent { ...alert} contentStyle={{right: '20px', ...alert.contentStyle }} />}
+            {!matchNoAlert && (
+              <AlertComponent {...alert} contentStyle={{ right: '20px', ...alert.contentStyle }} />
+            )}
           </Box>
         </Box>
       )}

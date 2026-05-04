@@ -3,7 +3,10 @@ import { useDispatch } from 'react-redux';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
 import { userActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
-import { storageTokenOps, storageUserOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import {
+  storageTokenOps,
+  storageUserOps,
+} from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Dispatch } from 'react';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +16,7 @@ import { getUserPermission } from '../services/rolePermissionService';
 import { setUserRole, setPermissionsList } from '../redux/slices/permissionsSlice';
 import { Permission } from '../model/Permission';
 import { IDPayUser } from '../model/IDPayUser';
+import { ENV } from '../utils/env';
 
 // const mockedUser = {
 //   uid: '0',
@@ -100,7 +104,7 @@ export const useLogin = () => {
       // Remove any partial data that might have remained, just for safety
       storageUserOps.delete();
       // Go to the login view
-      window.location.assign(CONFIG.URL_FE.LOGIN);
+      window.location.assign(ENV.URL_FE.LOGOUT);
       // This return is necessary
       return;
     }

@@ -19,7 +19,7 @@ import {
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { MerchantTransactionDTO } from '../../api/generated/merchants/MerchantTransactionDTO';
+import { MerchantTransactionDTO } from '../../api/generated/merchants/data-contracts';
 import {
   copyTextToClipboard,
   downloadQRCodeFromURL,
@@ -51,7 +51,7 @@ const AuthorizeTransactionModal = ({
   useEffect(() => {
     const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(
       data.trxExpirationSeconds,
-      data.trxDate
+      new Date(data.trxDate)
     );
     setExpirationDays(expirationDays);
     setExpirationDate(expirationDate);
@@ -132,7 +132,7 @@ const AuthorizeTransactionModal = ({
             <Box sx={{ gridColumn: 'span 12' }}>
               <Typography variant="body2">{t('pages.initiativeDiscounts.dateAndHours')}</Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {formatDate(data?.trxDate)}
+                {data?.trxDate ? formatDate(new Date(data.trxDate)) : ''}
               </Typography>
             </Box>
             <Box sx={{ gridColumn: 'span 12' }}>

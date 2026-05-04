@@ -1,24 +1,24 @@
 import React from 'react';
-import { RewardBatchTrxStatusEnum } from '../../api/generated/merchants/RewardBatchTrxStatus';
+import { RewardBatchTrxStatus } from '../../api/generated/merchants/data-contracts';
 import CustomChip from './CustomChip';
 
 type StatusChipProps = {
-  status: RewardBatchTrxStatusEnum;
+  status: RewardBatchTrxStatus;
 };
 
 const statusMap: Record<
-  RewardBatchTrxStatusEnum,
+  RewardBatchTrxStatus,
   { label: string; color: string; textColor?: string }
 > = {
-  [RewardBatchTrxStatusEnum.TO_CHECK]: { label: 'Da esaminare', color: '#EEEEEE' },
-  [RewardBatchTrxStatusEnum.CONSULTABLE]: { label: 'Consultabile', color: '#EEEEEE' },
-  [RewardBatchTrxStatusEnum.SUSPENDED]: { label: 'Da controllare', color: '#FFF5DA' },
-  [RewardBatchTrxStatusEnum.APPROVED]: {
+  [RewardBatchTrxStatus.TO_CHECK]: { label: 'Da esaminare', color: '#EEEEEE' },
+  [RewardBatchTrxStatus.CONSULTABLE]: { label: 'Consultabile', color: '#EEEEEE' },
+  [RewardBatchTrxStatus.SUSPENDED]: { label: 'Da controllare', color: '#FFF5DA' },
+  [RewardBatchTrxStatus.APPROVED]: {
     label: 'Approvata',
     color: '#E1F5FE',
     textColor: '#215C76',
   },
-  [RewardBatchTrxStatusEnum.REJECTED]: {
+  [RewardBatchTrxStatus.REJECTED]: {
     label: 'Esclusa',
     color: '#FFE0E0',
     textColor: '#761F1F',

@@ -126,10 +126,7 @@ jest.mock('../../../utils/env', () => ({
 
 jest.mock('../FooterConfig', () => ({
   pagoPALink: { href: 'https://www.pagopa.it' },
-  LANGUAGES: [
-    { it: 'Italiano' },
-    { en: 'English' },
-  ],
+  LANGUAGES: [{ it: 'Italiano' }, { en: 'English' }],
 }));
 
 jest.mock('../../../routes', () => ({
@@ -321,7 +318,8 @@ describe('<Footer />', () => {
     render(<Footer loggedUser={false} />);
 
     const infoSecurityLink = mockedMuiFooterProps.preLoginLinks.resources.links.find(
-      (link: any) => link.label === 'common.footer.preLoginLinks.resources.links.informationsecurity'
+      (link: any) =>
+        link.label === 'common.footer.preLoginLinks.resources.links.informationsecurity'
     );
     infoSecurityLink?.onClick();
 
@@ -382,7 +380,8 @@ describe('<Footer />', () => {
     render(<Footer loggedUser={false} />);
 
     const protectionLink = mockedMuiFooterProps.preLoginLinks.resources.links.find(
-      (link: any) => link.label === 'common.footer.preLoginLinks.resources.links.protectionofpersonaldata'
+      (link: any) =>
+        link.label === 'common.footer.preLoginLinks.resources.links.protectionofpersonaldata'
     );
     protectionLink?.onClick();
 

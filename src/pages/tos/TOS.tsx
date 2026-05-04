@@ -11,16 +11,10 @@ const TOS = () => {
   const { t } = useTranslation();
 
   return (
-
     <Box sx={{ width: '100%', padding: '0 20px' }}>
       <Box>
         <Box mt={2} sx={{ display: 'grid', gridColumn: 'span 8' }}>
-          <TitleBox
-            title={t('pages.tosStatic.title')}
-            mbTitle={2}
-            mtTitle={2}
-            variantTitle="h4"
-          />
+          <TitleBox title={t('pages.tosStatic.title')} mbTitle={2} mtTitle={2} variantTitle="h4" />
         </Box>
       </Box>
 
@@ -37,7 +31,6 @@ const TOS = () => {
         </Box>
       </Paper>
     </Box>
-
   );
 };
 export default TOS;

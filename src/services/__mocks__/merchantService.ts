@@ -1,50 +1,48 @@
 import { MerchantsApiMocked } from '../../api/__mocks__/MerchantsApiClient';
-import { InitiativeDTOArray } from '../../api/generated/merchants/InitiativeDTOArray';
-import { MerchantDetailDTO } from '../../api/generated/merchants/MerchantDetailDTO';
-import { MerchantStatisticsDTO } from '../../api/generated/merchants/MerchantStatisticsDTO';
-import { MerchantTransactionsListDTO } from '../../api/generated/merchants/MerchantTransactionsListDTO';
-import { TransactionResponse } from '../../api/generated/merchants/TransactionResponse';
+import {
+  InitiativeDTO,
+  MerchantDetailDTO,
+  MerchantStatisticsDTO,
+  MerchantTransactionsListDTO,
+  TransactionResponse,
+} from '../../api/generated/merchants/data-contracts';
 
-export const getMerchantInitiativeList = (): Promise<InitiativeDTOArray> =>
+export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> =>
   MerchantsApiMocked.getMerchantInitiativeList();
 
 export const getMerchantTransactions = (
-  initiativeId: string,
-  page: number,
-  fiscalCode?: string,
-  status?: string
-): Promise<MerchantTransactionsListDTO> =>
-  MerchantsApiMocked.getMerchantTransactions(initiativeId, page, fiscalCode, status);
+  _initiativeId: string,
+  _page: number,
+  _fiscalCode?: string,
+  _status?: string
+): Promise<MerchantTransactionsListDTO> => MerchantsApiMocked.getMerchantTransactions();
 
 export const getMerchantTransactionsProcessed = (
-  initiativeId: string,
-  page: number,
-  fiscalCode?: string,
-  status?: string
-): Promise<MerchantTransactionsListDTO> =>
-  MerchantsApiMocked.getMerchantTransactionsProcessed(initiativeId, page, fiscalCode, status);
+  _initiativeId: string,
+  _page: number,
+  _fiscalCode?: string,
+  _status?: string
+): Promise<MerchantTransactionsListDTO> => MerchantsApiMocked.getMerchantTransactions();
 
 export const getMerchantInitiativeStatistics = (
-  initiativeId: string
-): Promise<MerchantStatisticsDTO> =>
-  MerchantsApiMocked.getMerchantInitiativeStatistics(initiativeId);
+  _initiativeId: string
+): Promise<MerchantStatisticsDTO> => MerchantsApiMocked.getMerchantInitiativeStatistics();
 
-export const getMerchantDetail = (initiativeId: string): Promise<MerchantDetailDTO> =>
-  MerchantsApiMocked.getMerchantDetail(initiativeId);
+export const getMerchantDetail = (_initiativeId: string): Promise<MerchantDetailDTO> =>
+  MerchantsApiMocked.getMerchantDetail();
 
-export const deleteTransaction = (transactionId: string): Promise<void> =>
-  MerchantsApiMocked.deleteTransaction(transactionId);
+export const deleteTransaction = (_transactionId: string): Promise<void> =>
+  MerchantsApiMocked.deleteTransaction();
 
 export const createTransaction = (
-  amountCents: number,
-  idTrxAcquirer: string,
-  initiativeId: string,
-  mcc: string | undefined
-): Promise<TransactionResponse> =>
-  MerchantsApiMocked.createTransaction(amountCents, idTrxAcquirer, initiativeId, mcc);
+  _amountCents: number,
+  _idTrxAcquirer: string,
+  _initiativeId: string,
+  _mcc: string | undefined
+): Promise<TransactionResponse> => MerchantsApiMocked.createTransaction();
 
 export const authPaymentBarCode = (
-  trxCode: string,
-  amountCents: number,
-  idTrxAcquirer: string
-): Promise<any> => MerchantsApiMocked.authPaymentBarCode(trxCode, amountCents, idTrxAcquirer);
+  _trxCode: string,
+  _amountCents: number,
+  _idTrxAcquirer: string
+): Promise<any> => MerchantsApiMocked.authPaymentBarCode();
