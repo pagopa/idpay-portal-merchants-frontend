@@ -17,6 +17,7 @@ import { matchPath } from 'react-router';
 import ROUTES, { BASE_ROUTE } from '../../routes';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../redux/hooks';
+import { useInitiativeRoutes } from '../../hooks/useInitiativeRoutes';
 import SidenavItem from './SidenavItem';
 import { config } from './config';
 
@@ -27,6 +28,7 @@ interface MatchParams {
 /** The side menu of the application */
 export default function SideMenu() {
   const initiativesList = useAppSelector(intiativesListSelector);
+  const {getInitiativeRoutes} = useInitiativeRoutes();
   const { t } = useTranslation();
   const history = useHistory();
   const onExit = useUnloadEventOnExit();
@@ -121,23 +123,25 @@ export default function SideMenu() {
               </AccordionSummary>
               <AccordionDetails sx={{ p: 0 }}>
                 <List disablePadding>
-                  {config.map(({ title, route, icon, dataTestId }) => (
-                    <SidenavItem
-                      key={title}
-                      title={t(title)}
-                      handleClick={() =>
-                        onExit(() => {
-                          history.replace(`${BASE_ROUTE}/${item.initiativeId}/${route}`);
-                        })
-                      }
-                      isSelected={pathname.startsWith(
-                        `${BASE_ROUTE}/${item.initiativeId}/${route}`
-                      )}
-                      icon={icon}
-                      level={2}
-                      data-testid={dataTestId}
-                    />
-                  ))}
+                  {config.filter(({ key }) => {
+                    const initiativeRoutes = getInitiativeRoutes(item?.initiativeName);
+                    return initiativeRoutes.includes(key);
+                  }).map(({ key, title, route, icon, dataTestId }) => <SidenavItem
+                    key={key}
+                    title={t(title)}
+                    handleClick={() =>
+                      onExit(() => {
+                        history.replace(`${BASE_ROUTE}/${item.initiativeId}/${route}`);
+                      })
+                    }
+                    isSelected={pathname.startsWith(
+                      `${BASE_ROUTE}/${item.initiativeId}/${route}`
+                    )}
+                    icon={icon}
+                    level={2}
+                    data-testid={dataTestId}
+                  />
+                  )}
                 </List>
               </AccordionDetails>
             </Accordion>

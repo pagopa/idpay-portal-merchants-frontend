@@ -240,15 +240,14 @@
       "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
       "cfPlaceholder": "Cerca per Codice Fiscale",
       "cf": {
-        "validCf":"La segnalazione è stata registrata",
-        "removedCf":"La segnalazione è stata rimossa",
+        "validCf": "La segnalazione è stata registrata",
+        "removedCf": "La segnalazione è stata rimossa",
         "invalid": "Codice fiscale non valido",
         "noResultUser": "Codice fiscale assente",
-        "insertCf":"Campo obbligatorio",
+        "insertCf": "Campo obbligatorio",
         "alreadyRegistered": "Il codice fiscale è già stato registrato",
         "alreadyPresent": "Codice fiscale presente presso altro esercente"
-
-    },
+      },
       "ModalReportedUser": {
         "title": "Vuoi procedere con la cancellazione?",
         "description": "Stai per cancellare il soggetto <strong>{{cf}}</strong> dalla lista degli utenti segnalati.",
@@ -260,9 +259,9 @@
     "insertReportedUser": {
       "title": "Segnala utente",
       "subtitle": "Segnala un utente che non ha presentato l'elettrodomestico obsoleto.",
-      "mtTitle":"La segnalazione servirà solo ai fini di controllo e monitoraggio e non influenza la richiesta di rimborso al suo acquisto.",
-      "searchTitle":"Qual è il codice fiscale?",
-      "searchDescription":"Inserire il codice fiscale dell'utente",
+      "mtTitle": "La segnalazione servirà solo ai fini di controllo e monitoraggio e non influenza la richiesta di rimborso al suo acquisto.",
+      "searchTitle": "Qual è il codice fiscale?",
+      "searchDescription": "Inserire il codice fiscale dell'utente",
       "filterBtn": "Continua",
       "reportUser": "Segnala utente",
       "userCf": "Beneficiario",
@@ -337,37 +336,37 @@
       "noData": "Nessun dato disponibile",
       "rewardBatchSentSuccess": "Lotto inviato con successo",
       "emptyBatchModal": {
-          "title": "Stai selezionando un lotto vuoto",
-          "description": "Il lotto <b>{{name}}</b> non può essere selezionato perchè non contiene transazioni."
+        "title": "Stai selezionando un lotto vuoto",
+        "description": "Il lotto <b>{{name}}</b> non può essere selezionato perchè non contiene transazioni."
       },
       "ModalRefundRequests": {
         "title": "Invia richieste di rimborso",
         "description": "Il lotto di transazioni verrà inviato a Invitalia S.p.A., che procederà alla verifica dei dati e al successivo rimborso all’IBAN da te indicato in fase di adesione.",
         "warning": "Se una o più fatture richiedono ulteriori controlli da parte tua, escludile prima di procedere con l’invio dell’intero lotto."
       },
-      "batchTransactionsDetails" : {
-        "referencePeriod" : "Periodo di riferimento",
-        "state" : "Stato",
-        "requestedRefund" : "Rimborso richiesto"
+      "batchTransactionsDetails": {
+        "referencePeriod": "Periodo di riferimento",
+        "state": "Stato",
+        "requestedRefund": "Rimborso richiesto"
       },
-      "storeDetails" : {
-        "referredBatch" : "Lotto di riferimento",
-        "referencePeriod" : "Periodo di riferimento",
-        "companyName" : "Ragione sociale",
-        "requestedRefund" : "Rimborso richiesto",
-        "holder" : "Intestatario",
-        "iban" : "IBAN",
-        "status" : "Status",
-        "approvedRefund" : "Rimborso approvato",
-        "suspendedRefund" : "Rimborso sospeso",
-        "exportCSV" : "Esporta csv",
-        "detailCardTitleDx" : "dati rimborso",
+      "storeDetails": {
+        "referredBatch": "Lotto di riferimento",
+        "referencePeriod": "Periodo di riferimento",
+        "companyName": "Ragione sociale",
+        "requestedRefund": "Rimborso richiesto",
+        "holder": "Intestatario",
+        "iban": "IBAN",
+        "status": "Status",
+        "approvedRefund": "Rimborso approvato",
+        "suspendedRefund": "Rimborso sospeso",
+        "exportCSV": "Esporta csv",
+        "detailCardTitleDx": "dati rimborso",
         "posType": "Tipo",
-        "csv" : {
+        "csv": {
           "alert": "Stiamo elaborando il lotto. Quando sarà pronto, potrai esportare il file .csv"
         }
       },
-      "invoiceDetailConfirmModal" : {
+      "invoiceDetailConfirmModal": {
         "title": "Conferma spostamento",
         "description": "Confermi di voler spostare la transazione al mese successivo?"
       }
@@ -413,53 +412,85 @@
     "uploadSuccess": "Punti vendita caricati con successo"
   },
   "modifyDocument": {
-      "breadcrumbLabel": "Modifica documento",
-      "title":"Carica la fattura",
-      "invoiceTitle": "Qual è il numero  della fattura?",
-      "invoiceSubtitle": "",
-      "insertInvoice": "Inserisci il numero della fattura",
-      "invoiceLabel": "Numero della fattura",
-      "creditNote": "Carica il documento",
-      "replaceFile":"Sostituisci",
-      "creditNoteTitle":"",
-      "creditNoteSubtitle": "Carica il file della fattura elettronica relativa a questo acquisto. Assicurati che il documento sia in formato .xml o .pdf e conforme agli standard della fatturazione elettronica.",
-      "manualLink": "Dubbi? Vai sul manuale",
-      "uploadFile": "Trascina qui il file .xml o .pdf della fattura da caricare o ",
-      "uploadFileButton": "selezionalo dal tuo computer",
-      "refundSuccessUpload": "Richiesta inviata correttamente",
-      "errors": {
-        "requiredFileError": "Selezionare un file da caricare",
-        "deniedSentError": "Non puoi modificare questo documento.",
-        "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
-        "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
-        "fileSizeError": "Il file supera la dimensione massima di 20MB",
-        "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
-      }
-    },
-  "reverse": {
-      "breadcrumbLabel": "Storna transazione",
-      "title": "Storna transazione",
-      "invoiceTitle": "Qual è il numero della nota di credito?",
-      "invoiceSubtitle": "Inserisci il numero della nota di credito e carica la documentazione necessaria per avviare lo storno.  ",
-      "insertInvoice": "Inserisci il numero della nota di credito",
-      "invoiceLabel": "Numero della nota di credito",
-      "creditNote": "Carica nota di credito",
-      "replaceFile": "Sostituisci",
-      "creditNoteTitle": "Qual è il numero della nota di credito?",
-      "creditNoteSubtitle": "Carica il file della nota di credito relativa a questo acquisto. ",
-      "manualLink": "Dubbi? Vai sul manuale",
-      "uploadFile": "Trascina qui il file PDF o XML della nota di credito da caricare o ",
-      "uploadFileButton": "selezionalo dal tuo computer",
-      "insertCreditNote": "Inserisci il numero della nota di credito",
-      "creditNoteLabel": "Numero della nota di credito",
-      "refundSuccessUpload": "Richiesta inviata correttamente",
-      "errors": {
-        "requiredFileError": "Selezionare un file da caricare",
-        "deniedSentError": "Non puoi modificare questo documento.",
-        "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
-        "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
-        "fileSizeError": "Il file supera la dimensione massima di 20MB",
-        "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
-      }
+    "breadcrumbLabel": "Modifica documento",
+    "title": "Carica la fattura",
+    "invoiceTitle": "Qual è il numero  della fattura?",
+    "invoiceSubtitle": "",
+    "insertInvoice": "Inserisci il numero della fattura",
+    "invoiceLabel": "Numero della fattura",
+    "creditNote": "Carica il documento",
+    "replaceFile": "Sostituisci",
+    "creditNoteTitle": "",
+    "creditNoteSubtitle": "Carica il file della fattura elettronica relativa a questo acquisto. Assicurati che il documento sia in formato .xml o .pdf e conforme agli standard della fatturazione elettronica.",
+    "manualLink": "Dubbi? Vai sul manuale",
+    "uploadFile": "Trascina qui il file .xml o .pdf della fattura da caricare o ",
+    "uploadFileButton": "selezionalo dal tuo computer",
+    "refundSuccessUpload": "Richiesta inviata correttamente",
+    "errors": {
+      "requiredFileError": "Selezionare un file da caricare",
+      "deniedSentError": "Non puoi modificare questo documento.",
+      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
+      "fileSizeError": "Il file supera la dimensione massima di 20MB",
+      "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
     }
+  },
+  "reverse": {
+    "breadcrumbLabel": "Storna transazione",
+    "title": "Storna transazione",
+    "invoiceTitle": "Qual è il numero della nota di credito?",
+    "invoiceSubtitle": "Inserisci il numero della nota di credito e carica la documentazione necessaria per avviare lo storno.  ",
+    "insertInvoice": "Inserisci il numero della nota di credito",
+    "invoiceLabel": "Numero della nota di credito",
+    "creditNote": "Carica nota di credito",
+    "replaceFile": "Sostituisci",
+    "creditNoteTitle": "Qual è il numero della nota di credito?",
+    "creditNoteSubtitle": "Carica il file della nota di credito relativa a questo acquisto. ",
+    "manualLink": "Dubbi? Vai sul manuale",
+    "uploadFile": "Trascina qui il file PDF o XML della nota di credito da caricare o ",
+    "uploadFileButton": "selezionalo dal tuo computer",
+    "insertCreditNote": "Inserisci il numero della nota di credito",
+    "creditNoteLabel": "Numero della nota di credito",
+    "refundSuccessUpload": "Richiesta inviata correttamente",
+    "errors": {
+      "requiredFileError": "Selezionare un file da caricare",
+      "deniedSentError": "Non puoi modificare questo documento.",
+      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
+      "fileSizeError": "Il file supera la dimensione massima di 20MB",
+      "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
+    }
+  },
+  "Bonus Elettrodomestici": {
+    "routes": [
+      "initiativeOverview",
+      "initiativeStoresUpload",
+      "initiativeStores",
+      "reportedUsers",
+      "insertReportedUser",
+      "reportExport",
+      "initiativeStoreDetail",
+      "newDiscount",
+      "acceptNewDiscount",
+      "refundRequests",
+      "refundRequestsStore",
+      "modifyDocument",
+      "reverse"
+    ]
+  },
+  "Bonus Elettrodomestici - test": {
+    "routes": [
+      "initiativeOverview",
+      "initiativeStoresUpload",
+      "initiativeStores",
+      "reportExport",
+      "initiativeStoreDetail",
+      "newDiscount",
+      "acceptNewDiscount",
+      "refundRequests",
+      "refundRequestsStore",
+      "modifyDocument",
+      "reverse"
+    ]
+  }
 }

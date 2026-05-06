@@ -5,9 +5,12 @@ import { RootState } from '../redux/store';
 import { intiativesListSelector } from '../redux/slices/initiativesSlice';
 import { useCurrentInitiativeId } from '../hooks/useCurrentInitiativeId';
 import ROUTES from '../routes';
+import { useCurrentInitiative } from '../hooks/useCurrentInitiative';
+import { useInitiativeRoutes } from '../hooks/useInitiativeRoutes';
 
 type Props = {
   children: React.ReactNode;
+  route: string;
 };
 
 /**
@@ -23,11 +26,15 @@ type Props = {
  * - Route remains the single source of truth
  * - No navigation triggered by Redux
  */
-const WithInitiativeGuard: React.FC<Props> = ({ children }) => {
+const WithInitiativeGuard: React.FC<Props> = ({ children, route }) => {
   const initiatives = useSelector((state: RootState) => intiativesListSelector(state));
-
   const { initiativeId, isValid, isListLoaded } = useCurrentInitiativeId();
+  const selectedInitiative = useCurrentInitiative();
+  const {getInitiativeRoutes} = useInitiativeRoutes();
 
+  const validRoutes = getInitiativeRoutes(selectedInitiative?.initiativeName);
+
+  const isValidRoute = validRoutes.includes(route);
   /**
    * HARDENING – Production Safe Flow
    */
@@ -49,6 +56,10 @@ const WithInitiativeGuard: React.FC<Props> = ({ children }) => {
 
   // 4️⃣ initiativeId invalid
   if (!isValid) {
+    return <Redirect to={ROUTES.HOME} />;
+  }
+
+  if (!isValidRoute) {
     return <Redirect to={ROUTES.HOME} />;
   }
 
