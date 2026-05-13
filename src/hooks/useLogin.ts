@@ -9,7 +9,6 @@ import {
 } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Dispatch } from 'react';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
-import { useTranslation } from 'react-i18next';
 import { parseJwt } from '../utils/jwt-utils';
 import { JWTUser } from '../model/JwtUser';
 import { getUserPermission } from '../services/rolePermissionService';
@@ -17,6 +16,7 @@ import { setUserRole, setPermissionsList } from '../redux/slices/permissionsSlic
 import { Permission } from '../model/Permission';
 import { IDPayUser } from '../model/IDPayUser';
 import { ENV } from '../utils/env';
+import useScopedTranslation from './useScopedTranslation';
 
 // const mockedUser = {
 //   uid: '0',
@@ -83,7 +83,7 @@ export const useLogin = () => {
   const setUser = (user: User) => dispatch(userActions.setLoggedUser(user));
 
   const addError = useErrorDispatcher();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   const attemptSilentLogin = async () => {
     if (CONFIG.MOCKS.MOCK_USER) {

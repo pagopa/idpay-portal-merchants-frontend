@@ -248,7 +248,7 @@
         "alreadyRegistered": "Il codice fiscale è già stato registrato",
         "alreadyPresent": "Codice fiscale presente presso altro esercente"
 
-    },
+      },
       "ModalReportedUser": {
         "title": "Vuoi procedere con la cancellazione?",
         "description": "Stai per cancellare il soggetto <strong>{{cf}}</strong> dalla lista degli utenti segnalati.",

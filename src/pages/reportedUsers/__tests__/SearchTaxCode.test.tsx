@@ -77,7 +77,7 @@ describe('SearchTaxCode', () => {
       target: { value: '123' },
     });
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
-    expect(formik.setFieldError).toHaveBeenCalledWith('cf', 'pages.reportedUsers.cf.invalid');
+    expect(formik.setFieldError).toHaveBeenCalledWith('cf', 'pages.reportedUsers.invalid');
   });
 
   it('calls onSearch with cleaned cf if valid', () => {

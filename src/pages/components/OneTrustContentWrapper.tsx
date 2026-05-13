@@ -1,13 +1,13 @@
 import { Box, Grid, Link } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import routes from '../../routes';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 interface Props {
   idSelector: string;
 }
 
 const OneTrustContentWrapper = ({ idSelector }: Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   return (
     <>
       <Grid sx={{ px: 3, py: 3 }}>

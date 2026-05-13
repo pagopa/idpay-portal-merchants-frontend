@@ -65,7 +65,7 @@ describe('FileUploadAction', () => {
 
   it('renders and navigates back', () => {
     render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByText('commons.backBtn'));
+    fireEvent.click(screen.getByText('actions.back'));
     expect(mockGoBack).toHaveBeenCalled();
   });
 

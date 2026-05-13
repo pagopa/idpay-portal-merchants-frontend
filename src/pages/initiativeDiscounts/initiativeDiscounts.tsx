@@ -1,10 +1,10 @@
 import { Box, Button, Tab, Tabs, Typography } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 import { BASE_ROUTE } from '../../routes';
@@ -16,7 +16,7 @@ import MerchantTransactionsProcessed from './MerchantTransactionsProcessed';
 import { mapDatesFromPeriod, userCanCreateDiscount } from './helpers';
 
 const InitiativeDiscounts = () => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [value, setValue] = useState(0);
   const history = useHistory();
   const currentInitiative = useCurrentInitiative();
@@ -74,7 +74,7 @@ const InitiativeDiscounts = () => {
     <Box sx={{ width: '100%', padding: 2 }}>
       <Box sx={{ ...genericContainerStyle, alignItems: 'baseline' }}>
         <BreadcrumbsBox
-          backLabel={t('commons.backBtn')}
+          backLabel={t('actions.back')}
           items={[
             t('pages.initiativesList.title'),
             currentInitiative?.initiativeName,

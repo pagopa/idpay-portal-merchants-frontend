@@ -1,7 +1,6 @@
 /* eslint-disable complexity */
 import { Box, FormControl, Paper, TextField, Typography } from '@mui/material';
 import { Dispatch, SetStateAction, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useHistory } from 'react-router-dom';
@@ -9,6 +8,7 @@ import { Toast } from '@pagopa/selfcare-common-frontend/lib';
 import { authPaymentBarCode } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import WizardNavigation from './WizardNavigation';
 
 interface Props {
@@ -23,7 +23,7 @@ interface Props {
 
 const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: Props) => {
   const { setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const history = useHistory();
   const [openDataSentToast, setOpenDataSentToast] = useState(false);
 

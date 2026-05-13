@@ -1,12 +1,12 @@
 import { TableCell, TableHead, TableRow } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 interface Props {
   data: Array<{ width: string; label: string }>;
 }
 
 const TableHeader = ({ data }: Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   return (
     <TableHead>
       <TableRow>

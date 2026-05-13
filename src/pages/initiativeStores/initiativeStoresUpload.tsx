@@ -12,10 +12,10 @@ import {
 import Grid from '@mui/material/GridLegacy';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useTranslation } from 'react-i18next';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia/theme';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { parseJwt } from '../../utils/jwt-utils';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
@@ -49,7 +49,7 @@ const InitiativeStoresUpload: React.FC = () => {
   const [duplicateEmailErrors, setDuplicateEmailErrors] = useState<FormErrors>({});
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { initiative_id } = useParams<RouteParams>();
   const history = useHistory();
   const [submitAttempt, setSubmitAttempt] = useState(0);
@@ -167,7 +167,7 @@ const InitiativeStoresUpload: React.FC = () => {
     <Box sx={{ maxWidth: '75%', justifySelf: 'center' }}>
       <Box>
         <Box mt={2} sx={{ display: 'grid', gridColumn: 'span 8' }}>
-          <BreadcrumbsBox backLabel={t('commons.backBtn')} items={[]} />
+          <BreadcrumbsBox backLabel={t('actions.back')} items={[]} />
           <TitleBox
             title={t('pages.initiativeStores.uploadStores')}
             mbTitle={2}
@@ -285,10 +285,10 @@ const InitiativeStoresUpload: React.FC = () => {
 
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
         <Button data-testid="back-stores-button" variant="outlined" onClick={handleBack}>
-          {t('commons.backBtn')}
+          {t('actions.back')}
         </Button>
         <Button data-testid="confirm-stores-button" variant="contained" onClick={handleConfirm}>
-          {t('commons.confirmBtn')}
+          {t('actions.confirm')}
         </Button>
       </Box>
     </Box>

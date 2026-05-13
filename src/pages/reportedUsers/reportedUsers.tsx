@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { Box, Stack, Button } from '@mui/material';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import ReportIcon from '@mui/icons-material/Report';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { getReportedUser, deleteReportedUser } from '../../services/merchantServ
 import { parseJwt } from '../../utils/jwt-utils';
 import AlertListComponent, { AlertProps } from '../../components/Alert/AlertListComponent';
 import { useAlert } from '../../hooks/useAlert';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { isValidCF, normalizeValue } from './helpersReportedUsers';
 import SearchTaxCode from './SearchTaxCode';
 import NoResultPaper from './NoResultPaper';
@@ -30,7 +31,7 @@ const initialValues: GetReportedUsersFilters = {
 };
 
 const ReportedUsers: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { setAlert } = useAlert();
   const history = useHistory();
   const { initiativeId } = useCurrentInitiativeId();
@@ -41,9 +42,9 @@ const ReportedUsers: React.FC = () => {
   const merchantId = userJwt?.merchant_id;
 
   const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
-    valid: { text: t('pages.reportedUsers.cf.validCf'), isOpen: false, severity: 'success' },
-    removed: { text: t('pages.reportedUsers.cf.removedCf'), isOpen: false, severity: 'success' },
-    missing: { text: t('pages.reportedUsers.cf.noResultUser'), isOpen: false, severity: 'error' },
+    valid: { text: t('pages.reportedUsers.validCf'), isOpen: false, severity: 'success' },
+    removed: { text: t('pages.reportedUsers.removedCf'), isOpen: false, severity: 'success' },
+    missing: { text: t('pages.reportedUsers.noResultUser'), isOpen: false, severity: 'error' },
   });
 
   const [user, setUser] = useState<

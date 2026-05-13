@@ -1,12 +1,12 @@
 import { Paper, Box } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import privacyHTML from './privacyHTML.json';
 
 const PrivacyPolicy = () => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   return (
     <Box sx={{ width: '100%', padding: '0 20px' }}>

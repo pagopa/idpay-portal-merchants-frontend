@@ -116,11 +116,11 @@ describe('ShopDetails', () => {
 
     expect(mockReplace).toHaveBeenCalled();
 
-    expect(screen.getByText('commons.backBtn')).toBeInTheDocument();
+    expect(screen.getByText('actions.back')).toBeInTheDocument();
     expect(screen.getByText('Bonus Elettrodomestici')).toBeInTheDocument();
     expect(screen.getByText('pages.refundRequests.storeDetails.exportCSV')).toBeInTheDocument();
     expect(screen.getByTestId('download-csv-button-test')).toHaveProperty('disabled', false);
-    fireEvent.click(screen.getByText('commons.backBtn'));
+    fireEvent.click(screen.getByText('actions.back'));
     expect(mockGoBack).toHaveBeenCalled();
   });
 
@@ -273,8 +273,8 @@ describe('ShopDetails', () => {
     const input = wrapper.querySelector('input');
     const posSelect = screen.getByTestId('point-of-sale-test');
     const statusSelect = screen.getByTestId('status-test');
-    const filtersBtn = screen.getByText('commons.filterBtn');
-    const removeFiltersBtn = screen.getByText('commons.removeFiltersBtn');
+    const filtersBtn = screen.getByText('actions.filterBtn');
+    const removeFiltersBtn = screen.getByText('actions.removeFiltersBtn');
 
     await act(() => userEvent.type(input!, ' '));
     await waitFor(() => expect(mockHandleChange).not.toHaveBeenCalled());

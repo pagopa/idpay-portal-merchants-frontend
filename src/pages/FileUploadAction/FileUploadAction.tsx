@@ -3,7 +3,6 @@ import { Alert as MuiAlert } from '@mui/material';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { SingleFileInput, theme } from '@pagopa/mui-italia';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import BreadcrumbsBoxUpload from '../components/BreadcrumbsBoxUpload';
@@ -54,12 +53,12 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
   const [inputKey, setInputKey] = useState<number>(0);
 
-  const { t } = useTranslation();
-  const scopedT = useScopedTranslation(i18nBlockKey);
+  const { t } = useScopedTranslation();
+  const { t: scopedT, isLoading } = useScopedTranslation();
   const history = useHistory();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const secondBreadcrumbLabel = scopedT('breadcrumbLabel');
+  const secondBreadcrumbLabel = scopedT(`${i18nBlockKey}.breadcrumbLabel`);
 
   const { trxId, fileDocNumber } = useParams<{
     id: string;
@@ -220,10 +219,10 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         />
 
         <TitleBox
-          title={scopedT('title')}
+          title={scopedT(`${i18nBlockKey}.title`)}
           mtTitle={3}
           variantTitle="h4"
-          subTitle={scopedT('invoiceSubtitle')}
+          subTitle={scopedT(`${i18nBlockKey}.invoiceSubtitle`)}
           variantSubTitle="body2"
         />
 
@@ -235,11 +234,11 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           borderRadius="4px"
         >
           <Typography mt={2} variant="h6" fontWeight={theme.typography.fontWeightBold}>
-            {scopedT('invoiceTitle')}
+            {scopedT(`${i18nBlockKey}.invoiceTitle`)}
           </Typography>
 
           <Typography mt={2} variant="body2" fontWeight={theme.typography.fontWeightMedium}>
-            {scopedT('insertInvoice')}
+            {scopedT(`${i18nBlockKey}.insertInvoice`)}
           </Typography>
 
           <TextField
@@ -252,7 +251,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
                 ? setDocNumberError(true)
                 : setDocNumberError(false)
             }
-            label={scopedT('invoiceLabel')}
+            label={scopedT(`${i18nBlockKey}.invoiceLabel`)}
             size="small"
             sx={{
               mt: 2,
@@ -282,24 +281,26 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           }}
         >
           <Typography variant="h6" fontWeight={theme.typography.fontWeightBold}>
-            {scopedT('creditNote')}
+            {scopedT(`${i18nBlockKey}.creditNote`)}
           </Typography>
 
           <Typography variant="body2" mt={4} mb={1} sx={{ marginTop: '32px !important' }}>
-            {scopedT('creditNoteSubtitle')}
+            {scopedT(`${i18nBlockKey}.creditNoteSubtitle`)}
           </Typography>
 
           <Link
             onClick={() => window.open(manualLink || '', '_blank')}
             sx={{ cursor: 'pointer', fontWeight: theme.typography.fontWeightMedium, fontSize: 14 }}
           >
-            {scopedT('manualLink')}
+            {scopedT(`${i18nBlockKey}.manualLink`)}
           </Link>
 
           {fileSizeError && (
             <Box mt={2}>
               <MuiAlert severity="error">
-                <Typography variant="body2">{scopedT('errors.fileSizeError')}</Typography>
+                <Typography variant="body2">
+                  {scopedT(`${i18nBlockKey}.errors.fileSizeError`)}
+                </Typography>
               </MuiAlert>
             </Box>
           )}
@@ -307,7 +308,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           {fileTypeError && (
             <Box mt={2}>
               <MuiAlert severity="error">
-                <Typography variant="body2">{scopedT('errors.fileNotSupported')}</Typography>
+                <Typography variant="body2">
+                  {scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
+                </Typography>
               </MuiAlert>
             </Box>
           )}
@@ -315,7 +318,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           {requiredFileError && (
             <Box mt={2}>
               <MuiAlert severity="error">
-                <Typography variant="body2">{scopedT('errors.requiredFileError')}</Typography>
+                <Typography variant="body2">
+                  {scopedT(`${i18nBlockKey}.errors.requiredFileError`)}
+                </Typography>
               </MuiAlert>
             </Box>
           )}
@@ -342,10 +347,10 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               onFileSelected={handleFileSelect}
               onFileRemoved={handleRemoveFile}
               value={file}
-              dropzoneLabel={scopedT('uploadFile')}
-              dropzoneButton={scopedT('uploadFileButton')}
-              rejectedLabel={scopedT('errors.fileNotSupported')}
-              loading={loadingFile}
+              dropzoneLabel={scopedT(`${i18nBlockKey}.uploadFile`)}
+              dropzoneButton={scopedT(`${i18nBlockKey}.uploadFileButton`)}
+              rejectedLabel={scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
+              loading={loadingFile || isLoading}
             />
           </Box>
 
@@ -371,7 +376,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               onClick={handleButtonClick}
               sx={{ fontWeight: 'bold', fontSize: 14 }}
             >
-              {scopedT('replaceFile')}
+              {scopedT(`${i18nBlockKey}.replaceFile`)}
             </Button>
           )}
 
@@ -383,7 +388,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             justifyContent="space-between"
           >
             <Button variant="outlined" onClick={handleBackNavigation}>
-              {t('commons.backBtn')}
+              {t('actions.back')}
             </Button>
             <Button variant="contained" onClick={handleAction}>
               {t('commons.continueBtn')}

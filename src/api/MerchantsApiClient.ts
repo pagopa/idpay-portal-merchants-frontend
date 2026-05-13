@@ -134,7 +134,7 @@ class MerchantsApiClient {
   public postponeTransaction(
     initiativeId: string,
     rewardBatchId: string,
-    transactionId: string,
+    transactionId: string
   ): Promise<void> {
     return this.request<void>({
       path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/transactions/${transactionId}/postpone`,

@@ -1,11 +1,11 @@
 import { Box, FormControl, InputAdornment, Paper, TextField, Typography } from '@mui/material';
 import EuroSymbolIcon from '@mui/icons-material/EuroSymbol';
-import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Dispatch, Fragment, SetStateAction, useState } from 'react';
 import { BASE_ROUTE } from '../../routes';
 import ExitModal from '../../components/ExitModal/ExitModal';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import WizardNavigation from './WizardNavigation';
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
 }
 
 const TotalAmount = ({ id, amount, setAmount, setActiveStep }: Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [openExitModal, setOpenExitModal] = useState(false);
 
   const validationSchema = Yup.object().shape({

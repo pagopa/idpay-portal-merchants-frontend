@@ -18,13 +18,13 @@ import {
 import Grid from '@mui/material/GridLegacy';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import StoreIcon from '@mui/icons-material/Store';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation } from 'react-router-dom';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import DataTable from '../../components/dataTable/DataTable';
 import FiltersForm from '../initiativeDiscounts/FiltersForm';
@@ -63,7 +63,7 @@ const InitiativeStores: React.FC = () => {
 
   const isGoingToDetail = useRef(false);
   const requestIdRef = useRef(0);
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const history = useHistory();
   const { initiativeId } = useCurrentInitiativeId();
 

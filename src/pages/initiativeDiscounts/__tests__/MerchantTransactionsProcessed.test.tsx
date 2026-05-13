@@ -64,8 +64,8 @@ jest.mock('../FiltersForm', () => (props: any) => (
     <button data-testid="submit-filters" onClick={() => props.formik.onSubmit(props.formik.values)}>
       apply-filters
     </button>
-    <span>commons.filterBtn</span>
-    <span>commons.removeFiltersBtn</span>
+    <span>actions.filterBtn</span>
+    <span>actions.removeFiltersBtn</span>
   </div>
 ));
 
@@ -317,8 +317,8 @@ describe('MerchantTransactionsProcessed', () => {
 
     render(<MerchantTransactionsProcessed id={fakeId} />);
 
-    expect(screen.getByText('commons.filterBtn')).toBeInTheDocument();
-    expect(screen.getByText('commons.removeFiltersBtn')).toBeInTheDocument();
+    expect(screen.getByText('actions.filterBtn')).toBeInTheDocument();
+    expect(screen.getByText('actions.removeFiltersBtn')).toBeInTheDocument();
 
     const button = screen.getByTestId('submit-filters');
     fireEvent.click(button);

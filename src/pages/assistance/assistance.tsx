@@ -1,5 +1,5 @@
 import { Box, Typography, Paper, FormControl, TextField, Divider, Button } from '@mui/material';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Fragment, useState, useEffect } from 'react';
@@ -12,10 +12,11 @@ import { ENV } from '../../utils/env';
 import { EmailMessageDTO } from '../../api/generated/email-notification/data-contracts';
 import ExitModal from '../../components/ExitModal/ExitModal';
 import { useAlert } from '../../hooks/useAlert';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 const Assistance = () => {
   const { setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [openExitModal, setOpenExitModal] = useState(false);
   const handleOpenExitModal = () => setOpenExitModal(true);
   const handleCloseExitModal = () => setOpenExitModal(false);
@@ -182,7 +183,7 @@ const Assistance = () => {
             </Box>
             <Box sx={{ display: 'grid', gridColumn: 'span 2' }}>
               <Button variant="outlined" onClick={handleOpenExitModal} data-testid="open-exit-test">
-                {t('commons.backBtn')}
+                {t('actions.back')}
               </Button>
               <ExitModal
                 title={t('pages.assistanceRequest.exitModalTitle')}
@@ -234,7 +235,7 @@ const Assistance = () => {
                 onClick={() => history.replace(ROUTES.HOME)}
                 data-testid="thankyouPageBackBtn-test"
               >
-                {t('commons.closeBtn')}
+                {t('actions.close')}
               </Button>
             </Box>
           </Box>

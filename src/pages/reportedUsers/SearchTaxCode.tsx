@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Box, Button } from '@mui/material';
 import { FormikProps } from 'formik';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { isValidCF } from './helpersReportedUsers';
 import CfTextField from './CfTextField';
 
@@ -17,7 +17,7 @@ function SearchTaxCode<T extends { cf: string }>({
   onSearch,
   onReset,
 }: SearchTaxCodeProps<T>) {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [showErrors, setShowErrors] = useState(false);
 
   const cfButtonStyle = {
@@ -38,11 +38,11 @@ function SearchTaxCode<T extends { cf: string }>({
       .trim();
     void formik.setFieldValue('cf', cleaned, false);
     if (!cleaned) {
-      formik.setFieldError('cf', t('pages.reportedUsers.cf.insertCf'));
+      formik.setFieldError('cf', t('pages.reportedUsers.insertCf'));
       return;
     }
     if (!isValidCF(cleaned)) {
-      formik.setFieldError('cf', t('pages.reportedUsers.cf.invalid'));
+      formik.setFieldError('cf', t('pages.reportedUsers.invalid'));
       return;
     }
     onSearch({ ...formik.values, cf: cleaned });
@@ -65,7 +65,7 @@ function SearchTaxCode<T extends { cf: string }>({
             formik={formik}
             showErrors={showErrors}
             setShowErrors={setShowErrors}
-            label={t('pages.reportedUsers.cfPlaceholder')}
+            label={t('commons.labels.searchByFiscalCode')}
             name="cf"
           />
         </Box>

@@ -180,8 +180,8 @@ describe('ExportFiltersCard', () => {
     fireEvent.change(inputDal, result.startDate);
     fireEvent.change(inputAl, result.endDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
-    expect(result.startDate).toBe('pages.reportExport.form.validation.required');
-    expect(result.endDate).toBe('pages.reportExport.form.validation.required');
+    expect(result.startDate).toBe('validation.required');
+    expect(result.endDate).toBe('validation.required');
   });
 
   it('covers validate invalidRange branch (<1 day)', async () => {

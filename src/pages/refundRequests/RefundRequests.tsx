@@ -11,12 +11,13 @@ import {
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { GridColDef } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia/theme';
 import { useHistory } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
@@ -40,7 +41,7 @@ const RefundRequests = () => {
   const { setAlert } = useAlert();
   const { initiativeId } = useCurrentInitiativeId();
   const history = useHistory();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   const requestIdRef = useRef<number>(0);
 
@@ -338,7 +339,7 @@ const RefundRequests = () => {
       }
 
       setAlert({
-        text: t('pages.refundRequests.rewardBatchSentSuccess'),
+        text: t('shared.labels.rewardBatchSentSuccess'),
         isOpen: true,
         severity: 'success',
       });
@@ -406,7 +407,7 @@ const RefundRequests = () => {
             }
             startIcon={<SendIcon />}
           >
-            {t('pages.refundRequests.sendRequests')}
+            {t('shared.labels.send')}
           </Button>
         )}
       </Stack>
@@ -431,7 +432,7 @@ const RefundRequests = () => {
         )}
 
         {!rewardBatchesLoading && rewardBatches.length === 0 && (
-          <NoResultPaper translationKey="pages.refundRequests.noData" />
+          <NoResultPaper translationKey="shared.labels.noData" />
         )}
       </Box>
     </Box>

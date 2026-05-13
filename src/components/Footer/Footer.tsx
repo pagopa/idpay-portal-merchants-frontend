@@ -3,13 +3,14 @@ import {
   FooterLinksType,
   PreLoginFooterLinksType,
 } from '@pagopa/mui-italia';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { useState } from 'react';
 import { LangCode } from '@pagopa/mui-italia';
 import i18n from '@pagopa/selfcare-common-frontend/lib/locale/locale-utils';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import ROUTES from '../../routes';
 import { ENV } from '../../utils/env';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { LANGUAGES, pagoPALink } from './FooterConfig';
 
 type FooterProps = {
@@ -28,7 +29,7 @@ export default function Footer({
   productsJsonUrl,
   onExit = (exitAction) => exitAction(),
 }: FooterProps) {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<LangCode>();
 
   const onClickNavigate = (url?: string) => window.open(url);

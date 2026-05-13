@@ -121,7 +121,7 @@ describe('InitiativeStoreDetail', () => {
     const editButton = screen.getByRole('button', { name: /Modifica/i });
     await user.click(editButton);
     expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
-    await user.click(screen.getByText('commons.cancel'));
+    await user.click(screen.getByText('actions.cancel'));
 
     await user.click(editButton);
     const backdrop = screen.getByRole('presentation').firstChild as HTMLElement;

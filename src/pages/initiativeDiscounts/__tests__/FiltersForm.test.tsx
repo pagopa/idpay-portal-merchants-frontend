@@ -9,8 +9,8 @@ import FiltersForm from '../FiltersForm';
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
-      if (key === 'commons.filterBtn') return 'Applica';
-      if (key === 'commons.removeFiltersBtn') return 'Rimuovi filtri';
+      if (key === 'actions.filterBtn') return 'Applica';
+      if (key === 'actions.removeFiltersBtn') return 'Rimuovi filtri';
       return key;
     },
   }),

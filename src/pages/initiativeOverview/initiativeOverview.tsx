@@ -2,10 +2,10 @@ import { Box, Button, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { generatePath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import { theme } from '@pagopa/mui-italia/theme';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
 import { getMerchantDetail } from '../../services/merchantService';
@@ -17,7 +17,7 @@ import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
 
 const InitiativeOverview = () => {
   const history = useHistory();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { initiativeId } = useCurrentInitiativeId();
   const { setAlert } = useAlert();
   // const [amount, setAmount] = useState<number | undefined>(undefined);
@@ -130,7 +130,7 @@ const InitiativeOverview = () => {
                 </Grid>
                 <Grid item xs={4}>
                   <Typography variant="body1">
-                    {t('pages.initiativeOverview.totalAmount')}
+                    {t('shared.refund.totalAmount')}
                   </Typography>
                 </Grid>
                 <Grid item xs={8}>
@@ -140,7 +140,7 @@ const InitiativeOverview = () => {
                 </Grid>
                 <Grid item xs={4}>
                   <Typography variant="body1">
-                    {t('pages.initiativeOverview.totalRefunded')}
+                    {t('shared.refund.totalRefunded')}
                   </Typography>
                 </Grid> 
                 <Grid item xs={8}>
@@ -151,9 +151,7 @@ const InitiativeOverview = () => {
 
                 <Grid item xs={12}>
                   <Box my={2}>
-                    <Typography variant="overline">
-                      {t('pages.initiativeOverview.refundsDataTitle')}
-                    </Typography>
+                    <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={4}>

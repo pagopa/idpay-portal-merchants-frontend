@@ -1,9 +1,9 @@
 import { Button } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { ButtonNaked } from '@pagopa/mui-italia/components';
-import { useTranslation } from 'react-i18next';
 import React, { cloneElement, isValidElement } from 'react';
 import { FormikProps } from 'formik';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 interface Props<T = any> {
   children?: React.ReactNode;
@@ -20,7 +20,7 @@ const FiltersForm = <T extends Record<string, any>>({
   onFiltersReset,
   filtersAppliedOnce,
 }: Props<T>) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   const handleApplyFilters = () => {
     if (onFiltersApplied) {
@@ -72,7 +72,7 @@ const FiltersForm = <T extends Record<string, any>>({
           disabled={!formik.dirty}
           data-testid="apply-filters-test"
         >
-          {t('commons.filterBtn')}
+          {t('actions.filterBtn')}
         </Button>
       </Grid>
       <Grid item xs={12} sm={6} md={3} lg={1}>
@@ -90,7 +90,7 @@ const FiltersForm = <T extends Record<string, any>>({
           disabled={!formik.dirty && !filtersAppliedOnce}
           data-testid="reset-filters-test"
         >
-          {t('commons.removeFiltersBtn')}
+          {t('actions.removeFiltersBtn')}
         </ButtonNaked>
       </Grid>
     </Grid>

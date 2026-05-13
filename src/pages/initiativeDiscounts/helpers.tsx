@@ -19,7 +19,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.authorized'))}
+          label={String(i18n.t('enums.discountStatus.authorized'))}
           color="info"
         />
       );
@@ -27,7 +27,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.authorizationRequested'))}
+          label={String(i18n.t('enums.discountStatus.authorizationRequested'))}
           color="default"
         />
       );
@@ -36,7 +36,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.identified'))}
+          label={String(i18n.t('enums.discountStatus.identified'))}
           color="default"
         />
       );
@@ -44,7 +44,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.invalidated'))}
+          label={String(i18n.t('enums.discountStatus.invalidated'))}
           color="error"
         />
       );
@@ -52,7 +52,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.rewarded'))}
+          label={String(i18n.t('enums.discountStatus.rewarded'))}
           color="success"
         />
       );
@@ -60,7 +60,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.cancelled'))}
+          label={String(i18n.t('enums.discountStatus.cancelled'))}
           color="error"
         />
       );
@@ -68,7 +68,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.refunded'))}
+          label={String(i18n.t('enums.discountStatus.refunded'))}
           color="warning"
         />
       );
@@ -76,7 +76,7 @@ export const renderTransactionCreatedStatus = (status: TransactionCreatedStatusE
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.invoiced'))}
+          label={String(i18n.t('enums.discountStatus.invoiced'))}
           color="primary"
         />
       );
@@ -90,7 +90,7 @@ export const renderTrasactionProcessedStatus = (status: TransactionStatusEnum) =
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.rewarded'))}
+          label={String(i18n.t('enums.discountStatus.rewarded'))}
           color="success"
         />
       );
@@ -98,7 +98,7 @@ export const renderTrasactionProcessedStatus = (status: TransactionStatusEnum) =
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.cancelled'))}
+          label={String(i18n.t('enums.discountStatus.cancelled'))}
           color="error"
         />
       );
@@ -106,7 +106,7 @@ export const renderTrasactionProcessedStatus = (status: TransactionStatusEnum) =
       return (
         <Chip
           sx={{ fontSize: '14px' }}
-          label={String(i18n.t('commons.discountStatusEnum.identified'))}
+          label={String(i18n.t('enums.discountStatus.identified'))}
           color="default"
         />
       );
@@ -140,7 +140,7 @@ export const tableHeadData = [
   { width: '30%', label: 'pages.initiativeDiscounts.beneficiary' },
   { width: '15%', label: 'pages.initiativeDiscounts.totalSpent' },
   { width: '15%', label: 'pages.initiativeDiscounts.authorizedAmount' },
-  { width: '15%', label: 'pages.initiativeDiscounts.discountStatus' },
+  { width: '15%', label: 'shared.labels.discountStatus' },
 ];
 
 export interface TransactionsComponentProps {

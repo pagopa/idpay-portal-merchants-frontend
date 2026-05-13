@@ -1,12 +1,12 @@
 import { Box } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { genericContainerStyle } from '../../styles';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { TransactionResponse } from '../../api/generated/merchants/data-contracts';
 import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import CreateForm from './CreateForm';
 import DiscountCreatedRecap from './DiscountCreatedRecap';
 
@@ -15,7 +15,7 @@ const NewDiscount = () => {
   const [discountResponse, setDiscountResponse] = useState<TransactionResponse | undefined>();
   const currentInitiative = useCurrentInitiative();
   const { initiativeId } = useCurrentInitiativeId();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   useEffect(() => {
     if (!initiativeId) {
@@ -41,7 +41,7 @@ const NewDiscount = () => {
       }}
     >
       <BreadcrumbsBox
-        backLabel={t('commons.backBtn')}
+        backLabel={t('actions.back')}
         items={[
           t('pages.initiativesList.title'),
           currentInitiative?.initiativeName,
