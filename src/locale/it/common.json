@@ -17,6 +17,7 @@
     "title": "PARI",
     "status": "Stato",
     "labels": {
+      "noData": "Nessun dato disponibile",
       "searchByFiscalCode": "Cerca per Codice Fiscale",
       "searchByGtin": "Cerca per GTIN",
       "searchByTrxCode": "Cerca per Codice sconto"
@@ -68,6 +69,22 @@
     }
   },
   "pages": {
+    "tos": {
+      "and": "e l’",
+      "backHome": "Torna alla home",
+      "linkPrivacy": "Informativa Privacy",
+      "linkTos": "Termini e condizioni d’uso",
+      "termsDescription": "Accedendo, accetti i",
+      "termsDescription2": "del servizio e confermi di aver letto l’",
+      "termsDescriptionChanged": "Recentemente abbiamo cambiato i",
+      "title": "Elenco informatico degli elettrodomestici"
+    },
+    "tosStatic": {
+      "title": "Termini e Condizioni"
+    },
+    "privacyPolicyStatic": {
+      "title": "Privacy Policy"
+    },
     "initiativesList": {
       "emptyList": "Nessuna iniziativa disponibile",
       "initiativeStatus": "Stato",
@@ -92,13 +109,7 @@
       "refundsStatusTitle": "Stato rimborsi",
       "totalAmount": "Totale erogato",
       "totalRefunded": "Totale rimborsato",
-      "onboardingDate": "Data di adesione",
-      "info": {
-        "button": "Scopri di più",
-        "description": "Bonus Elettrodomestici è il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica ai sensi del Decreto del Ministro delle Imprese e del Made in Italy di concerto con il Ministero dell’Economia e delle Finanze 3 settembre 2025, ammesso alla registrazione dalla Corte dei conti in data 18 settembre 2025, al n. 1146.",
-        "message": "È il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica.",
-        "title": "Cos'è Bonus Elettrodomestici?"
-      }
+      "onboardingDate": "Data di adesione"
     },
     "pointOfSales": {
       "type": "Tipologia di punto vendita",
@@ -223,6 +234,56 @@
       },
       "reportTitle": "I tuoi report",
       "noReportFound": "Non hai ancora generato report."
+    }
+  },
+  "modifyDocument": {
+    "breadcrumbLabel": "Modifica documento",
+    "title":"Carica la fattura",
+    "invoiceTitle": "Qual è il numero  della fattura?",
+    "invoiceSubtitle": "",
+    "insertInvoice": "Inserisci il numero della fattura",
+    "invoiceLabel": "Numero della fattura",
+    "creditNote": "Carica il documento",
+    "replaceFile":"Sostituisci",
+    "creditNoteTitle":"",
+    "creditNoteSubtitle": "Carica il file della fattura elettronica relativa a questo acquisto. Assicurati che il documento sia in formato .xml o .pdf e conforme agli standard della fatturazione elettronica.",
+    "manualLink": "Dubbi? Vai sul manuale",
+    "uploadFile": "Trascina qui il file .xml o .pdf della fattura da caricare o ",
+    "uploadFileButton": "selezionalo dal tuo computer",
+    "refundSuccessUpload": "Richiesta inviata correttamente",
+    "errors": {
+      "requiredFileError": "Selezionare un file da caricare",
+      "deniedSentError": "Non puoi modificare questo documento.",
+      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
+      "fileSizeError": "Il file supera la dimensione massima di 20MB",
+      "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
+    }
+  },
+  "reverse": {
+    "breadcrumbLabel": "Storna transazione",
+    "title": "Storna transazione",
+    "invoiceTitle": "Qual è il numero della nota di credito?",
+    "invoiceSubtitle": "Inserisci il numero della nota di credito e carica la documentazione necessaria per avviare lo storno.  ",
+    "insertInvoice": "Inserisci il numero della nota di credito",
+    "invoiceLabel": "Numero della nota di credito",
+    "creditNote": "Carica nota di credito",
+    "replaceFile": "Sostituisci",
+    "creditNoteTitle": "Qual è il numero della nota di credito?",
+    "creditNoteSubtitle": "Carica il file della nota di credito relativa a questo acquisto. ",
+    "manualLink": "Dubbi? Vai sul manuale",
+    "uploadFile": "Trascina qui il file PDF o XML della nota di credito da caricare o ",
+    "uploadFileButton": "selezionalo dal tuo computer",
+    "insertCreditNote": "Inserisci il numero della nota di credito",
+    "creditNoteLabel": "Numero della nota di credito",
+    "refundSuccessUpload": "Richiesta inviata correttamente",
+    "errors": {
+      "requiredFileError": "Selezionare un file da caricare",
+      "deniedSentError": "Non puoi modificare questo documento.",
+      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
+      "fileSizeError": "Il file supera la dimensione massima di 20MB",
+      "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
     }
   }
 }

@@ -72,7 +72,7 @@ const ExitModal = ({ title, subtitle, openExitModal, handleCloseExitModal, backR
               onClick={(e) => closeWithoutSaving(e)}
               data-testid="exit-button-test"
             >
-              {t('commons.exitBtn')}
+              {t('actions.exit')}
             </Button>
           </Box>
         </Box>

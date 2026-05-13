@@ -432,7 +432,7 @@ const RefundRequests = () => {
         )}
 
         {!rewardBatchesLoading && rewardBatches.length === 0 && (
-          <NoResultPaper translationKey="shared.labels.noData" />
+          <NoResultPaper translationKey="commons.labels.noData" />
         )}
       </Box>
     </Box>

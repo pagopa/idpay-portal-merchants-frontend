@@ -74,7 +74,7 @@ describe('FileUploadAction', () => {
     fireEvent.click(screen.getByText('commons.continueBtn'));
 
     await waitFor(() => {
-      expect(screen.getByText('modifyDocument.errors.requiredFileError')).toBeInTheDocument();
+      expect(screen.getByText('pages.modifyDocument.errors.requiredFileError')).toBeInTheDocument();
     });
   });
 
@@ -153,7 +153,7 @@ describe('FileUploadAction', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('modifyDocument.errors.fileNotSupported')).toBeInTheDocument();
+      expect(screen.getByText('pages.modifyDocument.errors.fileNotSupported')).toBeInTheDocument();
     });
   });
 
@@ -171,13 +171,13 @@ describe('FileUploadAction', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('modifyDocument.errors.fileSizeError')).toBeInTheDocument();
+      expect(screen.getByText('pages.modifyDocument.errors.fileSizeError')).toBeInTheDocument();
     });
   });
 
   it('opens manual link', () => {
     render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByText('modifyDocument.manualLink'));
+    fireEvent.click(screen.getByText('pages.modifyDocument.manualLink'));
     expect(window.open).toHaveBeenCalledWith('https://manual', '_blank');
   });
 
@@ -220,7 +220,7 @@ describe('FileUploadAction', () => {
     // select valid file first
     fireEvent.click(screen.getByTestId('mock-file-input'));
 
-    const replaceButton = screen.getByText('modifyDocument.replaceFile');
+    const replaceButton = screen.getByText('pages.modifyDocument.replaceFile');
 
     // clicking replace triggers hidden input click (not removal)
     fireEvent.click(replaceButton);

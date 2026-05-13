@@ -212,7 +212,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
     <>
       <Box p={4} maxWidth="75%" justifySelf="center">
         <BreadcrumbsBoxUpload
-          backLabel={t('commons.exitBtn')}
+          backLabel={t('actions.exit')}
           items={[breadcrumbsLabel, secondBreadcrumbLabel]}
           active={true}
           onClickBackButton={handleBackNavigation}
@@ -391,7 +391,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               {t('actions.back')}
             </Button>
             <Button variant="contained" onClick={handleAction}>
-              {t('commons.continueBtn')}
+              {t('actions.continue')}
             </Button>
           </Stack>
         </Box>

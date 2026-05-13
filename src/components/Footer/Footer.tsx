@@ -40,21 +40,21 @@ export default function Footer({
       title: undefined,
       links: [
         {
-          label: t('common.footer.preLoginLinks.aboutUs.links.aboutUs'),
+          label: t('footer.preLoginLinks.aboutUs.links.aboutUs'),
           href: CONFIG.FOOTER.LINK.ABOUTUS,
           ariaLabel: 'Vai al link: Chi siamo',
           linkType: 'internal',
           onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.ABOUTUS),
         },
         {
-          label: t('common.footer.preLoginLinks.aboutUs.links.media'),
+          label: t('footer.preLoginLinks.aboutUs.links.media'),
           href: CONFIG.FOOTER.LINK.MEDIA,
           ariaLabel: 'Vai al link: Media',
           linkType: 'internal',
           onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.MEDIA),
         },
         {
-          label: t('common.footer.preLoginLinks.aboutUs.links.workwithud'),
+          label: t('footer.preLoginLinks.aboutUs.links.workwithud'),
           href: CONFIG.FOOTER.LINK.WORKWITHUS,
           ariaLabel: 'Vai al link: Lavora con noi',
           linkType: 'internal',
@@ -64,65 +64,65 @@ export default function Footer({
     },
     // Third column
     resources: {
-      title: t('common.footer.preLoginLinks.resources.title'),
+      title: t('footer.preLoginLinks.resources.title'),
       links: [
         {
-          label: t('common.footer.preLoginLinks.resources.links.privacyPolicy'),
+          label: t('footer.preLoginLinks.resources.links.privacyPolicy'),
           href: CONFIG.FOOTER.LINK.PRIVACYPOLICY,
           ariaLabel: 'Vai al link: Privacy Policy',
           linkType: 'internal',
           onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.PRIVACYPOLICY),
         },
         {
-          label: t('common.footer.preLoginLinks.resources.links.certifications'),
+          label: t('footer.preLoginLinks.resources.links.certifications'),
           href: CONFIG.FOOTER.LINK.CERTIFICATIONS,
           ariaLabel: 'Vai al link: Certificazioni',
           linkType: 'internal',
           onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.CERTIFICATIONS),
         },
         {
-          label: t('common.footer.preLoginLinks.resources.links.informationsecurity'),
+          label: t('footer.preLoginLinks.resources.links.informationsecurity'),
           href: CONFIG.FOOTER.LINK.INFORMATIONSECURITY,
           ariaLabel: 'Vai al link: Sicurezza delle informazioni',
           linkType: 'internal',
           onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.INFORMATIONSECURITY),
         },
         {
-          label: t('common.footer.preLoginLinks.resources.links.protectionofpersonaldata'),
+          label: t('footer.preLoginLinks.resources.links.protectionOfPersonalData'),
           href: CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA,
           ariaLabel: 'Vai al link: Diritto alla protezione dei dati personali',
           linkType: 'internal',
           onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA),
         },
         {
-          label: t('common.footer.preLoginLinks.resources.links.cookies'),
+          label: t('footer.preLoginLinks.resources.links.cookies'),
           onClick: () => window.OneTrust.ToggleInfoDisplay(),
           ariaLabel: 'Vai al link: Preferenze Cookie',
           linkType: 'internal',
         },
         {
-          label: t('common.footer.preLoginLinks.resources.links.termsandconditions'),
+          label: t('footer.preLoginLinks.resources.links.termsAndConditions'),
           href: CONFIG.FOOTER.LINK.TERMSANDCONDITIONS,
           ariaLabel: 'Vai al link: Termini e Condizioni',
           linkType: 'internal',
           onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.TERMSANDCONDITIONS),
         },
         {
-          label: t('common.footer.preLoginLinks.resources.links.transparentcompany'),
+          label: t('footer.preLoginLinks.resources.links.transparentcompany'),
           href: CONFIG.FOOTER.LINK.TRANSPARENTCOMPANY,
           ariaLabel: 'Vai al link: Società trasparente',
           linkType: 'internal',
           onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.TRANSPARENTCOMPANY),
         },
         {
-          label: t('common.footer.preLoginLinks.resources.links.disclosurePolicy'),
+          label: t('footer.preLoginLinks.resources.links.disclosurePolicy'),
           href: CONFIG.FOOTER.LINK.DISCLOSUREPOLICY,
           ariaLabel: 'Vai al link: Responsible Disclosure Policy',
           linkType: 'internal',
           onClick: () => onClickNavigate(CONFIG.FOOTER.LINK.DISCLOSUREPOLICY),
         },
         {
-          label: t('common.footer.preLoginLinks.resources.links.model231'),
+          label: t('footer.preLoginLinks.resources.links.model231'),
           href: CONFIG.FOOTER.LINK.MODEL231,
           ariaLabel: 'Vai al link: Modello 231',
           linkType: 'internal',
@@ -132,7 +132,7 @@ export default function Footer({
     },
     // Fourth column
     followUs: {
-      title: t('common.footer.preLoginLinks.followUs.title'),
+      title: t('footer.preLoginLinks.followUs.title'),
       socialLinks: [
         {
           icon: 'linkedin',
@@ -161,7 +161,7 @@ export default function Footer({
       ],
       links: [
         {
-          label: t('common.footer.preLoginLinks.accessibility'),
+          label: t('footer.preLoginLinks.accessibility'),
           href: CONFIG.FOOTER.LINK.ACCESSIBILITY,
           ariaLabel: 'Vai al link: Accessibilità',
           linkType: 'internal',
@@ -172,28 +172,28 @@ export default function Footer({
   };
   const postLoginLinks: Array<FooterLinksType> = [
     {
-      label: t('common.footer.postLoginLinks.privacyPolicy'),
+      label: t('footer.postLoginLinks.privacyPolicy'),
       href: ROUTES.PRIVACY_POLICY,
       ariaLabel: 'Vai al link: Privacy policy',
       linkType: 'internal',
       onClick: () => onClickNavigate(ROUTES.PRIVACY_POLICY),
     },
     {
-      label: t('common.footer.postLoginLinks.protectionofpersonaldata'),
+      label: t('footer.postLoginLinks.protectionOfPersonalData'),
       href: ENV.CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA,
       ariaLabel: 'Vai al link: Diritto alla protezione dei dati personali',
       linkType: 'internal',
       onClick: () => onClickNavigate(ENV.CONFIG.FOOTER.LINK.PROTECTIONOFPERSONALDATA),
     },
     {
-      label: t('common.footer.postLoginLinks.termsandconditions'),
+      label: t('footer.postLoginLinks.termsAndConditions'),
       href: ROUTES.TOS,
       ariaLabel: 'Vai al link: Termini e condizioni',
       onClick: () => onClickNavigate(ROUTES.TOS),
       linkType: 'internal',
     },
     {
-      label: t('common.footer.postLoginLinks.accessibility'),
+      label: t('footer.postLoginLinks.accessibility'),
       href: ENV.CONFIG.FOOTER.LINK.ACCESSIBILITY,
       ariaLabel: 'Vai al link: Accessibilità',
       linkType: 'internal',
@@ -201,7 +201,7 @@ export default function Footer({
     },
   ];
   const companyLegalInfo = (
-    <Trans i18nKey="common.footer.legalInfoText">
+    <Trans i18nKey="footer.legalInfoText">
       <strong>PagoPA S.p.A.</strong> - Società per azioni con socio unico - Capitale sociale di euro
       1,000,000 interamente versato - Sede legale in Roma, Piazza Colonna 370, <br />
       CAP 00187 - N. di iscrizione a Registro Imprese di Roma, CF e P.IVA 15376371009

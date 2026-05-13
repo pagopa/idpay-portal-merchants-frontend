@@ -3,10 +3,6 @@
     "title": "Elenco informatico degli elettrodomestici"
   },
   "pages" : {
-    "addProducts": {
-      "boxAddText": "Carica un file con al massimo 100 prodotti idonei al Bonus Elettrodomestici. I prodotti che non superano i controlli EPREL saranno automaticamente esclusi. Dopo il caricamento, potrai visualizzarli nella sezione ",
-      "manualLink": "https://developer.pagopa.it/pari/guides/bonuselettrodomestici-manuale-tecnico-produttore"
-    },
     "tos": {
       "and": "e l’",
       "backHome": "Torna alla home",
@@ -16,50 +12,14 @@
       "termsDescription2": "del servizio e confermi di aver letto l’",
       "termsDescriptionChanged": "Recentemente abbiamo cambiato i",
       "title": "Elenco informatico degli elettrodomestici"
+    },
+    "initiativeOverview": {
+      "info": {
+        "button": "Scopri di più",
+        "description": "Bonus Elettrodomestici è il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica ai sensi del Decreto del Ministro delle Imprese e del Made in Italy di concerto con il Ministero dell’Economia e delle Finanze 3 settembre 2025, ammesso alla registrazione dalla Corte dei conti in data 18 settembre 2025, al n. 1146.",
+        "message": "È il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica.",
+        "title": "Cos'è Bonus Elettrodomestici?"
+      }
     }
-  },
-  "categories": {
-    "washingmachines": "Lavatrici",
-    "tumbledryers": "Asciugatrici",
-    "ovens": "Forni",
-    "rangehoods": "Cappe da cucina",
-    "dishwashers": "Lavastoviglie",
-    "washerdriers": "Lavasciuga",
-    "refrigeratingappl": "Apparecchi di refrigerazione",
-    "cookinghobs": "Piani cottura"
-  },
-  "csv": {
-    "headers": [
-      "Codice GTIN/EAN",
-      "Codice Prodotto",
-      "Categoria",
-      "Paese di Produzione",
-      "Marca",
-      "Modello"
-    ],
-    "fields": [
-      "GTIN123ABC4567",
-      "SKU98765",
-      "Piano cottura",
-      "IT",
-      "MarcaEsempio",
-      "ModelloX100"
-    ]
-  },
-  "eprel": {
-    "headers": [
-      "Codice EPREL",
-      "Codice GTIN/EAN",
-      "Codice Prodotto",
-      "Categoria",
-      "Paese di Produzione"
-    ],
-    "fields": [
-      "12345",
-      "GTIN01234",
-      "SKU12345",
-      "Lavatrice",
-      "IT"
-    ]
   }
 }
