@@ -127,7 +127,6 @@ class MerchantsApiClient {
     return this.request<DownloadRewardBatchResponseDTO>({
       path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/approved/download`,
       method: 'GET',
-      format: 'blob',
     });
   }
 
