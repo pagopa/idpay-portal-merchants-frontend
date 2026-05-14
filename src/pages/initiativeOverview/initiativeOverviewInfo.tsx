@@ -67,7 +67,7 @@ export const InitiativeOverviewInfo = () => {
                 {t('pages.initiativeOverview.info.title')}
               </Typography>
               <Typography variant="body1" sx={{ color: theme.palette.text.primary }} mt={2} mb={3}>
-                {t("pages.initiativeOverview.info.description")}
+                {t('pages.initiativeOverview.info.description')}
               </Typography>
             </Box>
             <Box display="flex" justifyContent={'flex-end'}>
