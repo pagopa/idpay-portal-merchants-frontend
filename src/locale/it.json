@@ -284,7 +284,7 @@
       "organizationName": "Creata da",
       "searchByInitiativeName": "Cerca per nome dell'iniziativa",
       "serviceId": "Codice identificativo",
-      "spendingPeriod": "Periodo di spesa",
+      "validityPeriod": "Periodo di Validità",
       "subtitle": "Visualizza e gestisci le iniziative di supporto alla spesa a cui hai aderito.",
       "title": "Iniziative",
       "initiativeName": "Nome"
