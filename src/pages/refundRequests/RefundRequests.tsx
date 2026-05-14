@@ -339,7 +339,7 @@ const RefundRequests = () => {
       }
 
       setAlert({
-        text: t('shared.labels.rewardBatchSentSuccess'),
+        text: t('pages.refundRequests.rewardBatchSentSuccess'),
         isOpen: true,
         severity: 'success',
       });
@@ -407,7 +407,7 @@ const RefundRequests = () => {
             }
             startIcon={<SendIcon />}
           >
-            {t('shared.labels.send')}
+            {t('actions.send')}
           </Button>
         )}
       </Stack>

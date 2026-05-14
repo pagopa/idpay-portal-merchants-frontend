@@ -262,7 +262,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             error={docNumberError}
             helperText={
               docNumberError && docNumber === ''
-                ? t('validation.requiredField')
+                ? t('validation.required')
                 : docNumberError && docNumber.trim().length < 2
                 ? 'Lunghezza minima 2 caratteri'
                 : ''

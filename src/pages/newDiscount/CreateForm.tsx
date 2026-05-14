@@ -32,7 +32,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
   const validationSchema = Yup.object().shape({
     spendingAmount: Yup.number()
       .typeError(t('validation.number'))
-      .required(t('validation.requiredField'))
+      .required(t('validation.required'))
       .positive(t('validation.positiveNumber'))
       .min(0.01, t('validation.minValue', { x: 0.01 })),
   });

@@ -46,9 +46,9 @@ const Assistance = () => {
   }, []);
 
   const validationSchema = Yup.object().shape({
-    assistanceSubject: Yup.string().required(t('validation.requiredField')),
+    assistanceSubject: Yup.string().required(t('validation.required')),
     assistanceMessage: Yup.string()
-      .required(t('validation.requiredField'))
+      .required(t('validation.required'))
       .max(500, t('validation.maxChars', { x: 500 })),
   });
 
@@ -176,7 +176,7 @@ const Assistance = () => {
                     data-testid="sendAssistenceRequest-test"
                     disabled={!formik.dirty || !formik.isValid}
                   >
-                    {t('commons.sendBtn')}
+                    {t('actions.send')}
                   </Button>
                 </Box>
               </Paper>

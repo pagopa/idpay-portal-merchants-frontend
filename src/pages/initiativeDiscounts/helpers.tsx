@@ -140,7 +140,7 @@ export const tableHeadData = [
   { width: '30%', label: 'pages.initiativeDiscounts.beneficiary' },
   { width: '15%', label: 'pages.initiativeDiscounts.totalSpent' },
   { width: '15%', label: 'pages.initiativeDiscounts.authorizedAmount' },
-  { width: '15%', label: 'shared.labels.discountStatus' },
+  { width: '15%', label: 'commons.labels.discountStatus' },
 ];
 
 export interface TransactionsComponentProps {

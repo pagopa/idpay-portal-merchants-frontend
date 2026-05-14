@@ -248,7 +248,7 @@ describe('FileUploadAction', () => {
     fireEvent.blur(input);
 
     await waitFor(() => {
-      expect(screen.getByText('validation.requiredField')).toBeInTheDocument();
+      expect(screen.getByText('validation.required')).toBeInTheDocument();
     });
   });
 });

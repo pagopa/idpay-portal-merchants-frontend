@@ -29,7 +29,7 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
 
   const validationSchema = Yup.object().shape({
     discountCode: Yup.string()
-      .required(t('validation.requiredField'))
+      .required(t('validation.required'))
       .test(
         'len',
         t('validation.exactChars', { x: 8 }),

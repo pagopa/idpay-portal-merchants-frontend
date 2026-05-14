@@ -37,7 +37,8 @@
     "contactAdmin": "Contatta l'assistenza",
     "sessionExpiredTitle": "La tua sessione è scaduta",
     "sessionExpiredMessage": "Ti stiamo reindirizzando alla pagina di accesso",
-    "validationDescription": "Verifica che i dati inseriti siano corretti"
+    "validationDescription": "Verifica che i dati inseriti siano corretti",
+    "sendTheBatchForPreviousMonth": "Inviare prima i lotti relativi ai mesi precedenti"
   },
   "validation": {
     "required": "Campo obbligatorio",
@@ -47,7 +48,8 @@
     "exactChars": "Deve essere esattamente di {{x}} caratteri",
     "maxChars": "Scrivi massimo {{x}} caratteri",
     "maxRange": "Il range massimo consentito è di 90 giorni",
-    "invalidRange": "Il range delle date non è valido"
+    "invalidRange": "Il range delle date non è valido",
+    "assistanceSubject": "Inserisci l’argomento della tua richiesta"
   },
   "roles": {
     "admin": "Amministratore"
@@ -191,6 +193,10 @@
         "exportCSV": "Esporta csv",
         "detailCardTitleDx": "dati rimborso",
         "posType": "Tipo"
+      },
+      "invoiceDetailConfirmModal" : {
+        "title": "Conferma spostamento",
+        "description": "Confermi di voler spostare la transazione al mese successivo?"
       }
     },
     "reportedUsers": {
@@ -234,6 +240,16 @@
       },
       "reportTitle": "I tuoi report",
       "noReportFound": "Non hai ancora generato report."
+    },
+    "assistanceRequest": {
+      "exitModalBody": "Il team di Assistenza non riceverà la tua richiesta.",
+      "exitModalTitle": "Vuoi uscire?",
+      "message": "Descrivi il tuo problema",
+      "subject": "Oggetto",
+      "subtitle": "Compila e invia il modulo. Ti risponderemo al più presto.",
+      "thankYouDescription": "Ti risponderemo al più presto all’indirizzo e-mail che hai indicato.",
+      "thankYouTitle": "Abbiamo ricevuto la tua richiesta!",
+      "title": "Come possiamo aiutarti?"
     }
   },
   "modifyDocument": {
