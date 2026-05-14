@@ -125,7 +125,7 @@ class MerchantsApiClient {
     rewardBatchId: string
   ): Promise<DownloadRewardBatchResponseDTO> {
     return this.request<DownloadRewardBatchResponseDTO>({
-      path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/csv`,
+      path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/approved/download`,
       method: 'GET',
       format: 'blob',
     });
