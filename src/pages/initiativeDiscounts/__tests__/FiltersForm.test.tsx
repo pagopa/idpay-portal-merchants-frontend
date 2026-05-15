@@ -5,6 +5,7 @@ import '@testing-library/jest-dom';
 import { Formik, useFormik } from 'formik';
 import { TextField } from '@mui/material';
 import FiltersForm from '../FiltersForm';
+import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -14,6 +15,20 @@ jest.mock('react-i18next', () => ({
       return key;
     },
   }),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 const TestFormWrapper = ({
@@ -40,6 +55,7 @@ const TestFormWrapper = ({
 };
 
 describe('FiltersForm', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   test('should render children and buttons initially disabled', () => {
     render(<TestFormWrapper />);
 

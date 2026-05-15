@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import SearchTaxCode from '../SearchTaxCode';
+import { useAppSelector } from '../../../redux/hooks';
 
 const createFormikMock = (overrides: any = {}) =>
   ({
@@ -41,7 +42,22 @@ const createFormikMock = (overrides: any = {}) =>
     ...overrides,
   } as any);
 
+  jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
 describe('SearchTaxCode', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   const renderSearchTaxCode = ({
     formikOverrides,
     onReset,
@@ -58,7 +74,7 @@ describe('SearchTaxCode', () => {
 
   it('renders cf field and buttons', () => {
     renderSearchTaxCode();
-    expect(screen.getByLabelText('pages.reportedUsers.cfPlaceholder')).toBeInTheDocument();
+    expect(screen.getByLabelText('commons.labels.searchByFiscalCode')).toBeInTheDocument();
     expect(screen.getByTestId('btn-filters-cf')).toBeInTheDocument();
     expect(screen.getByTestId('btn-cancel-cf')).toBeInTheDocument();
   });
@@ -73,7 +89,7 @@ describe('SearchTaxCode', () => {
     const { formik } = renderSearchTaxCode({
       formikOverrides: { values: { cf: '123' } },
     });
-    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), {
+    fireEvent.change(screen.getByLabelText('commons.labels.searchByFiscalCode'), {
       target: { value: '123' },
     });
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
@@ -84,7 +100,7 @@ describe('SearchTaxCode', () => {
     const { onSearch } = renderSearchTaxCode({
       formikOverrides: { values: { cf: 'abcDEF12g34h567i' } },
     });
-    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), {
+    fireEvent.change(screen.getByLabelText('commons.labels.searchByFiscalCode'), {
       target: { value: 'abcDEF12g34h567i' },
     });
     fireEvent.click(screen.getByTestId('btn-filters-cf'));

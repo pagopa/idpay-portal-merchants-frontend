@@ -138,14 +138,18 @@ const mockPartiesState = {
   },
 };
 
-const createMockStore = (initialState: any = mockPartiesState) => {
+const createMockStore = (initialState?: any) => {
   return configureStore({
     reducer: {
-      parties: (state = initialState.parties) => state,
+      parties: (state = initialState?.parties || mockPartiesState.parties) => state,
+      initiatives: ()=>  jest.fn()
     },
-    preloadedState: initialState,
   });
 };
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
 
 describe('CustomHeader', () => {
   const mockOnExit = jest.fn((callback) => callback());
@@ -592,7 +596,6 @@ describe('CustomHeader', () => {
         />
       </Provider>
     );
-
     expect(screen.getByTestId('product-prod-no-url')).toBeInTheDocument();
   });
 

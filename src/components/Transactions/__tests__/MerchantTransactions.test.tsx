@@ -5,12 +5,26 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Tooltip } from '@mui/material';
 import MerchantTransactions from '../MerchantTransactions';
-import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import getStatus from '../useStatus';
 import CustomChip from '../../Chip/CustomChip';
+import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/data-contracts';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 const mockSetAlert = jest.fn();
@@ -134,7 +148,7 @@ describe('MerchantTransactions', () => {
 
     const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
     const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
+      'commons.labels.searchByFiscalCode'
     );
 
     await act(async () => {
@@ -153,7 +167,7 @@ describe('MerchantTransactions', () => {
     await act(async () => {
       const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
       const fiscalCodeInput = screen.getByLabelText(
-        'pages.pointOfSaleTransactions.searchByFiscalCode'
+        'commons.labels.searchByFiscalCode'
       );
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
@@ -249,7 +263,7 @@ describe('MerchantTransactions', () => {
     renderComponent();
 
     const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
+      'commons.labels.searchByFiscalCode'
     );
     await userEvent.type(fiscalCodeInput, 'TESTCF');
 
@@ -411,7 +425,7 @@ describe('MerchantTransactions', () => {
   it('renders form with all filter fields', () => {
     renderComponent();
     expect(
-      screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode')
+      screen.getByLabelText('commons.labels.searchByFiscalCode')
     ).toBeInTheDocument();
     expect(screen.getByLabelText('commons.labels.searchByTrxCode')).toBeInTheDocument();
     expect(screen.getByLabelText('commons.labels.searchByGtin')).toBeInTheDocument();
@@ -563,7 +577,7 @@ describe('MerchantTransactions', () => {
 
     const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
     const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
+      'commons.labels.searchByFiscalCode'
     );
 
     await act(async () => {
@@ -585,7 +599,7 @@ describe('MerchantTransactions', () => {
     await act(async () => {
       const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
       const fiscalCodeInput = screen.getByLabelText(
-        'pages.pointOfSaleTransactions.searchByFiscalCode'
+        'commons.labels.searchByFiscalCode'
       );
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
@@ -821,7 +835,7 @@ describe('MerchantTransactions', () => {
     renderComponent();
 
     const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
+      'commons.labels.searchByFiscalCode'
     );
     await userEvent.type(fiscalCodeInput, 'TEST');
     const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });

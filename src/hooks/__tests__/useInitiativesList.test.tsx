@@ -2,7 +2,7 @@ import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useInitiativesList } from '../useInitiativesList';
 import { getMerchantInitiativeList } from '../../services/merchantService';
-import { useAppDispatch } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setInitiativesList } from '../../redux/slices/initiativesSlice';
 import { match } from 'react-router-dom';
 
@@ -19,7 +19,7 @@ const StatusEnum = {
 } as const;
 
 type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
-import { useTranslation } from 'react-i18next';
+import { useScopedTranslation} from '../useScopedTranslation';
 
 jest.mock('../../services/merchantService', () => ({
   getMerchantInitiativeList: jest.fn(),
@@ -30,7 +30,7 @@ jest.mock('../../redux/hooks');
 const mockedUseAppDispatch = useAppDispatch as jest.Mock;
 
 jest.mock('react-i18next');
-const mockedUseTranslation = useTranslation as jest.Mock;
+const mockedUseScopedTranslation = useScopedTranslation as jest.Mock;
 
 const mockInitiatives: Array<InitiativeDTO> = [
   { initiativeId: '1', initiativeName: 'Iniziativa Pubblicata', status: StatusEnum.PUBLISHED },
@@ -45,13 +45,28 @@ const mockMatchObject: match = {
   params: {},
 };
 
+jest.mock('../useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
 describe('useInitiativesList', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   const mockDispatch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockedUseAppDispatch.mockReturnValue(mockDispatch);
-    mockedUseTranslation.mockReturnValue({ t: (key: string) => key } as any);
+    mockedUseScopedTranslation.mockReturnValue({ t: (key: string) => key } as any);
   });
 
   test('should do nothing if match is null', () => {

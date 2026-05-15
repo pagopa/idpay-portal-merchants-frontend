@@ -1,8 +1,23 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import FileUploadAction from '../FileUploadAction';
+import { useAppSelector } from '../../../redux/hooks';
 
 const mockGoBack = jest.fn();
 const mockReplace = jest.fn();
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
 
 jest.mock('react-router-dom', () => ({
   useParams: () => ({
@@ -50,6 +65,7 @@ jest.mock('../../../hooks/useAlert', () => ({
 }));
 
 describe('FileUploadAction', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   const baseProps = {
     apiCall: jest.fn().mockResolvedValue({}),
     successStateKey: 'refundUploadSuccess',
@@ -71,10 +87,10 @@ describe('FileUploadAction', () => {
 
   it('shows required file error', async () => {
     render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
-      expect(screen.getByText('pages.modifyDocument.errors.requiredFileError')).toBeInTheDocument();
+      expect(screen.getByText('modifyDocument.errors.requiredFileError')).toBeInTheDocument();
     });
   });
 
@@ -84,7 +100,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'A' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(screen.getByText('Lunghezza minima 2 caratteri')).toBeInTheDocument();
@@ -98,7 +114,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'ABC' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(apiCall).toHaveBeenCalled();
@@ -117,7 +133,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'ABC' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalled();
@@ -132,7 +148,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'ABC' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalled();
@@ -153,7 +169,7 @@ describe('FileUploadAction', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('pages.modifyDocument.errors.fileNotSupported')).toBeInTheDocument();
+      expect(screen.getByText('modifyDocument.errors.fileNotSupported')).toBeInTheDocument();
     });
   });
 
@@ -171,13 +187,13 @@ describe('FileUploadAction', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('pages.modifyDocument.errors.fileSizeError')).toBeInTheDocument();
+      expect(screen.getByText('modifyDocument.errors.fileSizeError')).toBeInTheDocument();
     });
   });
 
   it('opens manual link', () => {
     render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByText('pages.modifyDocument.manualLink'));
+    fireEvent.click(screen.getByText('modifyDocument.manualLink'));
     expect(window.open).toHaveBeenCalledWith('https://manual', '_blank');
   });
 
@@ -191,7 +207,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'ABC' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalled();
@@ -220,7 +236,7 @@ describe('FileUploadAction', () => {
     // select valid file first
     fireEvent.click(screen.getByTestId('mock-file-input'));
 
-    const replaceButton = screen.getByText('pages.modifyDocument.replaceFile');
+    const replaceButton = screen.getByText('modifyDocument.replaceFile');
 
     // clicking replace triggers hidden input click (not removal)
     fireEvent.click(replaceButton);

@@ -5,6 +5,7 @@ import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
 import { generateUniqueId, isValidEmail, isValidUrl } from '../../../helpers';
 import * as hooks from '../../../hooks/useAutocomplete';
 import * as helpers from '../../../helpers';
+import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('../../../hooks/useAutocomplete');
 jest.mock('../../../helpers', () => ({
@@ -12,6 +13,20 @@ jest.mock('../../../helpers', () => ({
   generateUniqueId: jest.fn(),
   isValidEmail: jest.fn(),
   isValidUrl: jest.fn(),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 jest.mock('react-i18next', () => ({
@@ -55,6 +70,7 @@ jest.mock('../../Autocomplete/AutocompleteComponent', () => (props: any) => {
 });
 
 describe('PointsOfSaleForm full coverage', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
 
   const defaultProps = {

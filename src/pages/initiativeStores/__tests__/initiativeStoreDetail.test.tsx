@@ -15,6 +15,9 @@ import { isValidEmail } from '../../../helpers';
 import { POS_TYPE } from '../../../utils/constants';
 import { StoreProvider } from '../StoreContext';
 import { handlePromptMessage } from '../../../helpers';
+import { configureStore } from '@reduxjs/toolkit';
+import { useAppSelector } from '../../../redux/hooks';
+import { Provider } from 'react-redux';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -76,7 +79,27 @@ const mockStore = {
   channelGeolink: 'https://maps.google.com',
 };
 
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState
+  });
+};
+
+const store = createMockStore();
+
 describe('InitiativeStoreDetail', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -98,9 +121,11 @@ describe('InitiativeStoreDetail', () => {
   test('renders store detail and calls APIs', async () => {
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
     expect(await screen.findByText('Mock Store')).toBeInTheDocument();
@@ -112,9 +137,11 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
     await screen.findByText('Mock Store');
@@ -181,9 +208,11 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
 
@@ -213,9 +242,11 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
 
@@ -244,9 +275,11 @@ describe('InitiativeStoreDetail', () => {
 
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
 
@@ -278,9 +311,11 @@ describe('InitiativeStoreDetail', () => {
 
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
 
@@ -310,9 +345,11 @@ describe('InitiativeStoreDetail', () => {
 
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
 
@@ -341,9 +378,11 @@ describe('InitiativeStoreDetail', () => {
 
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
   });
@@ -353,9 +392,11 @@ describe('InitiativeStoreDetail', () => {
 
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
   });
@@ -365,9 +406,11 @@ describe('InitiativeStoreDetail', () => {
 
     render(
       <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
+        <Provider store={store}>
+          <StoreProvider>
+            <InitiativeStoreDetail />
+          </StoreProvider>
+        </Provider>
       </MemoryRouter>
     );
 
@@ -382,7 +425,7 @@ describe('InitiativeStoreDetail', () => {
 
   test('Prompt clears sessionStorage when navigating to a different page', () => {
     const removeItemSpy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
-    removeItemSpy.mockImplementation(() => {});
+    removeItemSpy.mockImplementation(() => { });
 
     // replica fedele della funzione message usata nel componente
     const ROUTES = { STORES: '/stores' };

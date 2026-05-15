@@ -14,6 +14,20 @@ let mockOnDocumentationClick = jest.fn();
 let mockOnSelectedProduct = jest.fn();
 let mockOnSelectedParty = jest.fn();
 
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
 jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
   Header: (props: any) => {
     if (props.onDocumentationClick) {
@@ -58,6 +72,7 @@ import { mockedUser } from '../../../decorators/__mocks__/withLogin';
 import { Party } from '../../../model/Party';
 import { partiesSlice } from '../../../redux/slices/partiesSlice';
 import * as analyticsService from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
+import { useAppSelector } from '../../../redux/hooks';
 
 function createMockStore(preloadedState?: PreloadedState<any>) {
   return configureStore({
@@ -129,6 +144,7 @@ afterEach(() => {
 });
 
 describe('test suite for Header', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   test('render Header with no parties', () => {
     const onExit = jest.fn();
     const store = createMockStore({

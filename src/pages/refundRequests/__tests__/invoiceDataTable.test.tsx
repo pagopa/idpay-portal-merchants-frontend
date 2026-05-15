@@ -2,10 +2,23 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import InvoiceDataTable from '../invoiceDataTable';
 import { getMerchantTransactionsProcessed } from '../../../services/merchantService';
 import { useAlert } from '../../../hooks/useAlert';
+import { useAppSelector } from '../../../redux/hooks';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ initiative_id: 'initiative-123', batch_id: 'batch-1' }),
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 jest.mock('../../../services/merchantService', () => ({
@@ -121,7 +134,16 @@ const mockedGetTransactions = getMerchantTransactionsProcessed as jest.MockedFun
 >;
 const mockedUseAlert = useAlert as jest.MockedFunction<typeof useAlert>;
 
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState
+  });
+};
+
+const store = createMockStore();
+
 describe('InvoiceDataTable', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   const mockSetAlert = jest.fn();
   const baseTransactions: any = {
     content: [
@@ -161,7 +183,8 @@ describe('InvoiceDataTable', () => {
   });
 
   it('fetches and displays transactions', async () => {
-    render(<InvoiceDataTable />);
+    render(
+      <Provider store={store}><InvoiceDataTable /></Provider>);
     expect(mockedGetTransactions).toHaveBeenCalledTimes(1);
     expect(mockedGetTransactions).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -175,12 +198,12 @@ describe('InvoiceDataTable', () => {
 
   it('applies filters and calls service with additional params', async () => {
     render(
-      <InvoiceDataTable
+      <Provider store={store}><InvoiceDataTable
         rewardBatchTrxStatus="ELIGIBLE"
         pointOfSaleId="POS-2"
         fiscalCode="BBBBBB00B00B000B"
         trxCode="TRX-CODE-001"
-      />
+      /></Provider>
     );
     await screen.findByTestId('data-table');
     expect(mockedGetTransactions).toHaveBeenCalledWith(
@@ -204,13 +227,13 @@ describe('InvoiceDataTable', () => {
       totalElements: 0,
       totalPages: 0,
     });
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByText('Nessuna richiesta di rimborso trovata.');
     expect(screen.getByText('Nessuna richiesta di rimborso trovata.')).toBeInTheDocument();
   });
 
   it('updates sort model and calls service with sort parameter for trxChargeDate', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const sortButton = screen.getByTestId('sort-by-date');
     fireEvent.click(sortButton);
@@ -220,7 +243,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('handles empty sort model and does not send sort parameter', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const clearSortButton = screen.getByTestId('clear-sort');
     fireEvent.click(clearSortButton);
@@ -231,7 +254,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('handles sort model change with descending sort', async () => {
-    render(<InvoiceDataTable />);
+       render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const sortButton = screen.getByTestId('sort-by-date');
     fireEvent.click(sortButton);
@@ -241,7 +264,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('updates page and calls service with new page number', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const pageButton = screen.getByTestId('page-change');
     fireEvent.click(pageButton);
@@ -251,7 +274,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('updates rows per page and resets to page 0', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const rowsPerPageButton = screen.getByTestId('rows-per-page-change');
     fireEvent.click(rowsPerPageButton);
@@ -262,7 +285,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('opens drawer and shows invoice detail when action icon is clicked and can be closed', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const actionIcon = screen.getByTestId('trx-1');
     fireEvent.click(actionIcon);
@@ -281,7 +304,7 @@ describe('InvoiceDataTable', () => {
     mockDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
@@ -306,7 +329,7 @@ describe('InvoiceDataTable', () => {
       ...baseTransactions,
       content: [xmlTransaction],
     });
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-002.xml');
@@ -323,7 +346,7 @@ describe('InvoiceDataTable', () => {
     mockDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
@@ -354,7 +377,7 @@ describe('InvoiceDataTable', () => {
       ...baseTransactions,
       content: [invalidTransaction],
     });
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-003.txt');
@@ -371,7 +394,7 @@ describe('InvoiceDataTable', () => {
 
   it('handles download error when downloadInvoiceFile throws', async () => {
     mockDownloadInvoiceFile.mockRejectedValueOnce(new Error('download error'));
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
@@ -391,7 +414,7 @@ describe('InvoiceDataTable', () => {
     mockDownloadInvoiceFile.mockResolvedValueOnce({
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
@@ -408,7 +431,7 @@ describe('InvoiceDataTable', () => {
       ...baseTransactions,
       content: [noFilenameTransaction],
     });
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     expect(invoiceCell).toBeInTheDocument();
@@ -424,7 +447,7 @@ describe('InvoiceDataTable', () => {
       ...baseTransactions,
       content: [noFranchiseTransaction],
     });
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     expect(screen.getByTestId('col-franchiseName')).toBeInTheDocument();
   });
@@ -438,26 +461,26 @@ describe('InvoiceDataTable', () => {
       ...baseTransactions,
       content: [noProductTransaction],
     });
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     expect(screen.getByTestId('col-additionalProperties.productName')).toBeInTheDocument();
   });
 
   it('renders reward amount in correct currency format', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const rewardCell = screen.getByTestId('col-rewardAmountCents');
     expect(rewardCell).toBeInTheDocument();
   });
 
   it('renders status chip', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     expect(screen.getByTestId('status-chip')).toBeInTheDocument();
   });
 
   it('closes drawer when toggling with false', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     const actionIcon = screen.getByTestId('trx-1');
     fireEvent.click(actionIcon);
@@ -475,13 +498,13 @@ describe('InvoiceDataTable', () => {
     mockedGetTransactions.mockImplementation(
       () => new Promise((resolve) => setTimeout(() => resolve(baseTransactions), 100))
     );
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     expect(screen.getByTestId('data-table')).toBeInTheDocument();
   });
 
   it('reloads transactions when onSuccess is called from detail drawer', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
     expect(mockedGetTransactions).toHaveBeenCalledTimes(1);
     const actionIcon = screen.getByTestId('trx-1');
@@ -490,7 +513,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('does not trigger sort when sorting different field', async () => {
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
 
     const table = screen.getByTestId('data-table');
@@ -508,7 +531,7 @@ describe('InvoiceDataTable', () => {
       invoiceUrl: 'https://example.com/invoice.pdf',
     } as any);
 
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
     await screen.findByTestId('data-table');
 
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
@@ -521,7 +544,7 @@ describe('InvoiceDataTable', () => {
   it('shows generic error when loadTransactions fails', async () => {
     mockedGetTransactions.mockRejectedValueOnce(new Error('fail'));
 
-    render(<InvoiceDataTable />);
+    render(<Provider store={store}><InvoiceDataTable /></Provider>);
 
     await waitFor(() =>
       expect(mockSetAlert).toHaveBeenCalledWith({

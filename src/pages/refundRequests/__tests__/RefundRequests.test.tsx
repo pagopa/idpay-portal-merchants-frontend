@@ -260,8 +260,8 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should handle fetch error gracefully', async () => {
@@ -280,7 +280,7 @@ describe('RefundRequests', () => {
       })
     );
 
-    expect(await screen.findByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(await screen.findByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should not show send button when no rows are selected', async () => {
@@ -291,7 +291,7 @@ describe('RefundRequests', () => {
     });
 
     expect(
-      screen.queryByRole('button', { name: /pages.refundRequests.sendRequests/i })
+      screen.queryByRole('button', { name: /actions.send/i })
     ).not.toBeInTheDocument();
   });
 
@@ -360,9 +360,9 @@ describe('RefundRequests', () => {
     fireEvent.click(radios[0]);
 
     await waitFor(() =>
-      expect(screen.getByText('pages.refundRequests.sendRequests')).toBeInTheDocument()
+      expect(screen.getByText('actions.send')).toBeInTheDocument()
     );
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByText('actions.send'));
 
     await waitFor(() => expect(screen.getByTestId('refund-modal')).toBeInTheDocument());
 
@@ -428,7 +428,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should handle response without content property', async () => {
@@ -445,7 +445,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should render spacer column', async () => {
@@ -474,9 +474,9 @@ describe('RefundRequests', () => {
     fireEvent.click(radios[0]);
 
     await waitFor(() =>
-      expect(screen.getByText('pages.refundRequests.sendRequests')).toBeInTheDocument()
+      expect(screen.getByText('actions.send')).toBeInTheDocument()
     );
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByText('actions.send'));
 
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
@@ -562,7 +562,7 @@ describe('RefundRequests', () => {
         severity: 'error',
       })
     );
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   // Removed dynamic module reloading test because it caused duplicate React instance
@@ -578,7 +578,7 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
 
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should not select row when month is current month (isRowSelectable false branch)', async () => {
@@ -622,7 +622,7 @@ describe('RefundRequests', () => {
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
 
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByText('actions.send'));
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
     await waitFor(() => {
@@ -760,7 +760,7 @@ describe('RefundRequests', () => {
 
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByText('actions.send'));
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
     await waitFor(() => {
@@ -780,7 +780,7 @@ describe('RefundRequests', () => {
 
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByText('actions.send'));
 
     await waitFor(() => expect(screen.getByTestId('refund-modal')).toBeInTheDocument());
 
