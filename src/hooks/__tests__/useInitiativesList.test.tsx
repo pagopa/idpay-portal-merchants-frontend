@@ -5,6 +5,7 @@ import { getMerchantInitiativeList } from '../../services/merchantService';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setInitiativesList } from '../../redux/slices/initiativesSlice';
 import { match } from 'react-router-dom';
+import useScopedTranslation from '../useScopedTranslation';
 
 type InitiativeDTO = {
   initiativeId: string;
@@ -19,18 +20,13 @@ const StatusEnum = {
 } as const;
 
 type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
-import { useScopedTranslation} from '../useScopedTranslation';
 
 jest.mock('../../services/merchantService', () => ({
   getMerchantInitiativeList: jest.fn(),
 }));
 const mockedGetMerchantInitiativeList = getMerchantInitiativeList as jest.Mock;
 
-jest.mock('../../redux/hooks');
-const mockedUseAppDispatch = useAppDispatch as jest.Mock;
-
 jest.mock('react-i18next');
-const mockedUseScopedTranslation = useScopedTranslation as jest.Mock;
 
 const mockInitiatives: Array<InitiativeDTO> = [
   { initiativeId: '1', initiativeName: 'Iniziativa Pubblicata', status: StatusEnum.PUBLISHED },
@@ -48,6 +44,9 @@ const mockMatchObject: match = {
 jest.mock('../useCurrentInitiativeId', () => ({
   useCurrentInitiativeId: () => 'initiative-1',
 }));
+jest.mock('../useScopedTranslation', () => ({
+  useScopedTranslation: jest.fn(),
+}));
 
 jest.mock('../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
@@ -57,16 +56,19 @@ jest.mock('../../redux/slices/initiativesSlice', () => ({
 
 jest.mock('../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
+  useAppDispatch: jest.fn()
 }));
 
 describe('useInitiativesList', () => {
     (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+    (useAppDispatch as jest.Mock)
+    (useScopedTranslation as jest.Mock)
   const mockDispatch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUseAppDispatch.mockReturnValue(mockDispatch);
-    mockedUseScopedTranslation.mockReturnValue({ t: (key: string) => key } as any);
+    useAppDispatch.mockReturnValue(mockDispatch);
+    useScopedTranslation.mockReturnValue({ t: (key: string) => key } as any);
   });
 
   test('should do nothing if match is null', () => {
