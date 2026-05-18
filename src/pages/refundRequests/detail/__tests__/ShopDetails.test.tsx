@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ShopDetails from '../ShopDetails';
@@ -102,7 +103,7 @@ const createMockStore = (initialState?: any) => {
 
 const store = createMockStore();
 
-const renderComponent = () =>
+const renderWithProvider = () =>
   render(
     <Provider store={store}>
       <BrowserRouter>
@@ -110,6 +111,21 @@ const renderComponent = () =>
       </BrowserRouter>
     </Provider>
   );
+
+const setupSuccessfulBaseMocks = () => {
+  getMerchantDetail.mockResolvedValue({
+    iban: 'IT60X0542811101000000123456',
+    ibanHolder: 'Mario Rossi',
+  });
+  getRewardBatchById.mockResolvedValue({
+    id: 'batch-1',
+    name: 'Batch 1',
+    status: 'APPROVED',
+  });
+  getMerchantPointOfSalesWithTransactions.mockResolvedValue([
+    { franchiseName: 'Shop 1', pointOfSaleId: 'shop-1' },
+  ]);
+};
 
 describe('ShopDetails', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
@@ -135,7 +151,7 @@ describe('ShopDetails', () => {
       ]);
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
 
@@ -160,7 +176,7 @@ describe('ShopDetails', () => {
       getMerchantPointOfSalesWithTransactions.mockRejectedValue(mockError);
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
 
@@ -185,7 +201,7 @@ describe('ShopDetails', () => {
       ]);
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getMerchantPointOfSalesWithTransactions).not.toHaveBeenCalled());
   });
@@ -200,7 +216,7 @@ describe('ShopDetails', () => {
       getRewardBatchById.mockRejectedValue(mockError);
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
 
@@ -219,7 +235,7 @@ describe('ShopDetails', () => {
       getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getMerchantDetail).toHaveBeenCalled());
 
@@ -234,7 +250,7 @@ describe('ShopDetails', () => {
   it('should show approving alert', async () => {
     getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVING' });
 
-    renderComponent();
+    renderWithProvider();
 
     expect(
       await screen.findByText('pages.refundRequests.storeDetails.csv.alert')
@@ -248,7 +264,7 @@ describe('ShopDetails', () => {
       approvedBatchUrl: 'http://csv',
     });
 
-    renderComponent();
+    renderWithProvider();
 
     const btn = await screen.findByTestId('download-csv-button-test');
     fireEvent.click(btn);
@@ -263,7 +279,7 @@ describe('ShopDetails', () => {
 
     downloadBatchCsv.mockRejectedValue(mockError);
 
-    renderComponent();
+    renderWithProvider();
 
     const btn = await screen.findByTestId('download-csv-button-test');
     fireEvent.click(btn);
@@ -293,7 +309,7 @@ describe('ShopDetails', () => {
         { franchiseName: 'Shop 1', pointOfSaleId: 'shop-1' },
       ]);
     });
-    renderComponent();
+    renderWithProvider();
     const wrapper = screen.getByTestId('trxCodeFilter');
     const input = wrapper.querySelector('input');
     const posSelect = screen.getByTestId('point-of-sale-test');

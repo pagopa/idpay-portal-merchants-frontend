@@ -47,207 +47,46 @@ const pushMock = jest.fn();
 const readTokenMock = storageTokenOps.read as jest.Mock;
 const updateMerchantPointOfSalesMock = merchantService.updateMerchantPointOfSales as jest.Mock;
 
+const createAutocompleteOption = (id: string, title: string, postalCode: string) => ({
+  PlaceId: id,
+  PlaceType: 'PointAddress',
+  Title: title,
+  Address: {
+    Label: title,
+    Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
+    Region: { Name: 'TestRegion' },
+    SubRegion: { Code: 'XX', Name: 'TestProvince' },
+    Locality: 'TestCity',
+    PostalCode: postalCode,
+    Street: 'Via Roma',
+    StreetComponents: [
+      {
+        BaseName: 'Roma',
+        Type: 'Via',
+        TypePlacement: 'BeforeBaseName',
+        TypeSeparator: ' ',
+        Language: 'it',
+      },
+    ],
+    AddressNumber: '100',
+  },
+  Language: 'it',
+  Highlights: {
+    Title: [],
+    Address: {
+      Label: [],
+      Street: [],
+      AddressNumber: [],
+    },
+  },
+});
+
 const optionsAutocomplete = [
-  {
-    PlaceId:
-      'AQAAAEIAo-GdOMG0YuWiCl1bLeH7pnLeGU-DJ1DARfn03wWK1Ibzikvro9XAM6Hv4sDPGpdIfvw6oDSL_x6wyMU6LSAZno_TU8Um_hTeBU-YKbWrPDwG2O8ZhQj-WT_GFbqxVehn5DA',
-    PlaceType: 'Street',
-    Title: 'Italia, 10073, Ciriè, Via Roma',
-    Address: {
-      Label: 'Via Roma, 10073 Ciriè TO, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Piemonte' },
-      SubRegion: { Code: 'TO', Name: 'Torino' },
-      Locality: 'Ciriè',
-      PostalCode: '10073',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 8, EndIndex: 11, Value: '100' },
-        { StartIndex: 22, EndIndex: 30, Value: ' Via Rom' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        PostalCode: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGEArii9_R-e4p-pnON6GGp6cAJbd8-_zRriejOfxrlDW_B870Lz52oI4nsxVlDzeLDBmqRNd2I2NPEVGcrww28DVTKENY0-VYoLJz9vLP7Reg2i6DG7X3oz40JBQJTV_mVhAT_l0ifPvO-tgbtvvAI-LTw-ccaUedojG-bRkDSwngmx',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 39100, Bolzano, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 39100 Bolzano BZ, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Trentino-Alto Adige' },
-      SubRegion: { Code: 'BZ', Name: 'Bolzano' },
-      Locality: 'Bolzano',
-      PostalCode: '39100',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 24, EndIndex: 32, Value: 'Via Roma' },
-        { StartIndex: 33, EndIndex: 36, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGAA9Xws_AzxKpyI4UWarvaljnUGFydR3IszQ73fttFEV9Z9quYdYtSxgmvDXJ0BhmgoDgRNVo85kDrmY8Kq1IYoi4MaxsdhkB_1s_MZsqZPjjs6ce9Uu3il6y5cfjgHjsKlH_hs8IsbtmM65q3HMq3VOkl8UMPHg7-fSym-rj44WN8',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 52017, Pratovecchio Stia, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 52017 Pratovecchio Stia AR, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Toscana' },
-      SubRegion: { Code: 'AR', Name: 'Arezzo' },
-      Locality: 'Pratovecchio Stia',
-      District: 'Stia',
-      PostalCode: '52017',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 34, EndIndex: 42, Value: 'Via Roma' },
-        { StartIndex: 43, EndIndex: 46, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGAA_-f12qM_vUnpxK3dXvRN-bf638wAOLJ7f1QPKgB_SyfnIroh0TEvNwfV_sBGSOkGeBLrPNVrqfcxsNiNCrS4tAHN1gebTUHV-LCXq4CHImG9GDqIBF5m5CNZKQ-uOoWTTjGcCz5Ejw5OVIMWqV05JAPCl-dWOJag0pp0gr_Mkdo',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 17014, Cairo Montenotte, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 17014 Cairo Montenotte SV, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Liguria' },
-      SubRegion: { Code: 'SV', Name: 'Savona' },
-      Locality: 'Cairo Montenotte',
-      PostalCode: '17014',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 33, EndIndex: 41, Value: 'Via Roma' },
-        { StartIndex: 42, EndIndex: 45, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGEAiZmfC8mQdUA2Vk3C9f5T0ZRHSn_e1dTZM1HolAGFAppnd2a1Czq_WdoN_3qcuJcdIsV1JXelZ9VRnAirvew4r9xsOuLxc-EzeSrGpRoJTvmU5s5tb0_xd-CLBNuNXsOAlvnZUhTWeewujbIqkHXPF5vBheEjVKJ0MMdHwopwK9tH',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 32013, Longarone, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 32013 Longarone BL, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Veneto' },
-      SubRegion: { Code: 'BL', Name: 'Belluno' },
-      Locality: 'Longarone',
-      PostalCode: '32013',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 26, EndIndex: 34, Value: 'Via Roma' },
-        { StartIndex: 35, EndIndex: 38, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
+  createAutocompleteOption('id-1', 'Via Roma, 100, 10000 City1', '10000'),
+  createAutocompleteOption('id-2', 'Via Roma, 100, 20000 City2', '20000'),
+  createAutocompleteOption('id-3', 'Via Roma, 100, 30000 City3', '30000'),
+  createAutocompleteOption('id-4', 'Via Roma, 100, 40000 City4', '40000'),
+  createAutocompleteOption('id-5', 'Via Roma, 100, 50000 City5', '50000'),
 ];
 
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
@@ -313,12 +152,12 @@ describe('InitiativeStoresUpload', () => {
   });
 
   it('renders correctly with Manual upload by default', () => {
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);
+    renderWithProvider();
     expect(screen.getByTestId('confirm-stores-button')).toBeInTheDocument();
   });
 
   it('calls handleBack when back button is clicked', () => {
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    renderWithProvider();
     fireEvent.click(screen.getByTestId('back-stores-button'));
     expect(pushMock).toHaveBeenCalledWith(
       expect.stringContaining('/portale-esercenti/test-initiative/panoramica')
@@ -326,13 +165,13 @@ describe('InitiativeStoresUpload', () => {
   });
 
   it('Click to open manual link', () => {
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    renderWithProvider();
     fireEvent.click(screen.getByText('pages.initiativeStores.manualLink'));
     expect(window.open).toHaveBeenCalled();
   });
 
   it('sets salesPoints when form changes', () => {
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    renderWithProvider();
     const instance = screen.getByTestId('confirm-stores-button');
     expect(instance).toBeInTheDocument();
   });
@@ -364,7 +203,7 @@ describe('InitiativeStoresUpload', () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue(undefined);
 
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    renderWithProvider();
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
