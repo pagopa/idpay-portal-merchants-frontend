@@ -253,7 +253,7 @@ const optionsAutocomplete = [
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: (state = { list: [] }) => state,
 }));
 
 jest.mock('../../../redux/hooks', () => ({

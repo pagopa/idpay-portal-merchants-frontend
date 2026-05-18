@@ -1,5 +1,8 @@
 // @ts-nocheck
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { useAppSelector } from '../../../redux/hooks';
 import ReportDataTable from '../ReportDataTable';
 
 jest.mock('react-router-dom', () => ({
@@ -41,7 +44,7 @@ const { getMerchantReports, downloadMerchantReport } = jest.requireMock(
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: (state = { list: [] }) => state,
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -152,7 +155,7 @@ describe('ReportDataTable', () => {
 
     const revokeSpy = jest.spyOn(window.URL, 'revokeObjectURL').mockImplementation(() => {});
 
-    render(<ReportDataTable refreshKey={0} />);
+    render(<Provider store={store}><ReportDataTable refreshKey={0} /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId('row-r1')).toBeInTheDocument());
 
@@ -218,7 +221,7 @@ describe('ReportDataTable', () => {
 
     downloadMerchantReport.mockRejectedValue(new Error('fail'));
 
-    render(<ReportDataTable updateAlerts={updateAlerts} />);
+    render(<Provider store={store}><ReportDataTable updateAlerts={updateAlerts} /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId('row-r2')).toBeInTheDocument());
 
@@ -340,11 +343,19 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    const { rerender } = render(<ReportDataTable refreshKey={1} />);
+    const { rerender } = render(
+      <Provider store={store}>
+        <ReportDataTable refreshKey={1} />
+      </Provider>
+    );
 
     await waitFor(() => expect(screen.getByTestId('row-r6')).toBeInTheDocument());
 
-    rerender(<ReportDataTable refreshKey={2} />);
+    rerender(
+      <Provider store={store}>
+        <ReportDataTable refreshKey={2} />
+      </Provider>
+    );
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
   });
@@ -403,7 +414,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<ReportDataTable refreshKey={1} />);
+    render(<Provider store={store}><ReportDataTable refreshKey={1} /></Provider>);
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10));
   });

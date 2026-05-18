@@ -83,13 +83,13 @@ const {
   downloadBatchCsv,
 } = jest.requireMock('../../../../services/merchantService');
 
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
+jest.mock('../../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(),
+  initiativesReducer: (state = { list: [] }) => state,
 }));
 
-jest.mock('../../../redux/hooks', () => ({
+jest.mock('../../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
 

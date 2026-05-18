@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import PointsOfSaleForm from '../PointsOfSaleForm';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
@@ -22,7 +21,7 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: (state = { list: [] }) => state,
 }));
 
 jest.mock('../../../redux/hooks', () => ({
