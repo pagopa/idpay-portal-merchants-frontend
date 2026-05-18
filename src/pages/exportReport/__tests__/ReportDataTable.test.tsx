@@ -52,23 +52,20 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: () => initialState
-  });
-};
-
-const store = createMockStore();
-
 describe('ReportDataTable', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
 
-  const renderWithProvider = (props: any = {}) =>
-    render(
-      <Provider store={store}>
+  const renderComponent = (props: any = {}) => {
+    const localStore = configureStore({
+      reducer: () => ({})
+    });
+
+    return render(
+      <Provider store={localStore}>
         <ReportDataTable {...props} />
       </Provider>
     );
+  };
 
   const mockReportsResponse = (reports: any[], overrides: any = {}) => {
     getMerchantReports.mockResolvedValue({
@@ -89,7 +86,7 @@ describe('ReportDataTable', () => {
   it('renders empty state when no reports', async () => {
     mockReportsResponse([]);
 
-    renderWithProvider();
+    renderComponent();
 
     await waitFor(() =>
       expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10)
@@ -109,7 +106,7 @@ describe('ReportDataTable', () => {
       },
     ]);
 
-    renderWithProvider();
+    renderComponent();
 
     await waitFor(() =>
       expect(screen.getByTestId('row-r1')).toBeInTheDocument()
@@ -135,7 +132,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(screen.getByTestId(/row-/)).toBeInTheDocument());
 
@@ -170,7 +167,7 @@ describe('ReportDataTable', () => {
 
     const revokeSpy = jest.spyOn(window.URL, 'revokeObjectURL').mockImplementation(() => {});
 
-    render(<Provider store={store}><ReportDataTable refreshKey={0} /></Provider>);
+    renderComponent({ refreshKey: 0 });
 
     await waitFor(() => expect(screen.getByTestId('row-r1')).toBeInTheDocument());
 
@@ -189,7 +186,7 @@ describe('ReportDataTable', () => {
   it('renders loading state', async () => {
     getMerchantReports.mockImplementation(() => new Promise(() => {}));
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -209,7 +206,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(screen.getByTestId(/row-/)).toBeInTheDocument());
 
@@ -236,7 +233,7 @@ describe('ReportDataTable', () => {
 
     downloadMerchantReport.mockRejectedValue(new Error('fail'));
 
-    render(<Provider store={store}><ReportDataTable updateAlerts={updateAlerts} /></Provider>);
+    renderComponent({ updateAlerts });
 
     await waitFor(() => expect(screen.getByTestId('row-r2')).toBeInTheDocument());
 
@@ -265,7 +262,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(screen.getByTestId('row-r3')).toBeInTheDocument());
 
@@ -282,7 +279,7 @@ describe('ReportDataTable', () => {
       totalPages: 0,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
   });
@@ -302,7 +299,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(screen.getByTestId('row-r4')).toBeInTheDocument());
 
@@ -329,7 +326,7 @@ describe('ReportDataTable', () => {
 
     const appendSpy = jest.spyOn(document.body, 'appendChild');
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(screen.getByTestId('row-r5')).toBeInTheDocument());
 
@@ -358,8 +355,9 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
+    const localStore = configureStore({ reducer: () => ({}) });
     const { rerender } = render(
-      <Provider store={store}>
+      <Provider store={localStore}>
         <ReportDataTable refreshKey={1} />
       </Provider>
     );
@@ -367,7 +365,7 @@ describe('ReportDataTable', () => {
     await waitFor(() => expect(screen.getByTestId('row-r6')).toBeInTheDocument());
 
     rerender(
-      <Provider store={store}>
+      <Provider store={localStore}>
         <ReportDataTable refreshKey={2} />
       </Provider>
     );
@@ -390,7 +388,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(screen.getByTestId('row-r7')).toBeInTheDocument());
 
@@ -407,7 +405,7 @@ describe('ReportDataTable', () => {
       totalPages: 0,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
 
@@ -429,7 +427,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<Provider store={store}><ReportDataTable refreshKey={1} /></Provider>);
+    renderComponent({ refreshKey: 1 });
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10));
   });
@@ -449,7 +447,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(screen.getByTestId('row-r9')).toBeInTheDocument());
   });
@@ -463,7 +461,7 @@ describe('ReportDataTable', () => {
       totalPages: 0,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
   });
@@ -483,7 +481,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(screen.getByTestId('row-r10')).toBeInTheDocument());
 
@@ -514,7 +512,7 @@ describe('ReportDataTable', () => {
         })
     );
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderComponent();
 
     await waitFor(() => expect(screen.getByTestId('row-r11')).toBeInTheDocument());
 
