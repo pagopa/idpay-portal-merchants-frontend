@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 interface Props {
   handleBack: () => void;
@@ -8,7 +8,7 @@ interface Props {
 }
 
 const WizardNavigation = ({ handleBack, handleNext, disabledNext }: Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   return (
     <Box sx={{ gridColumn: 'span 12', my: 2 }}>
       <Box
@@ -23,7 +23,7 @@ const WizardNavigation = ({ handleBack, handleNext, disabledNext }: Props) => {
       >
         <Box sx={{ gridArea: 'back' }}>
           <Button variant="outlined" onClick={handleBack} data-testid="back-action-test">
-            {t('commons.backBtn')}
+            {t('actions.back')}
           </Button>
         </Box>
         <Box sx={{ gridArea: 'continue', justifySelf: 'end' }}>
@@ -33,7 +33,7 @@ const WizardNavigation = ({ handleBack, handleNext, disabledNext }: Props) => {
             data-testid="continue-action-test"
             disabled={disabledNext}
           >
-            {t('commons.confirmBtn')}
+            {t('actions.confirm')}
           </Button>
         </Box>
       </Box>

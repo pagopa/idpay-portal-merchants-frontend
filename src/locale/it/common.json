@@ -1,0 +1,305 @@
+{
+  "actions": {
+    "back": "Indietro",
+    "cancel": "Annulla",
+    "close": "Chiudi",
+    "confirm": "Conferma",
+    "continue": "Continua",
+    "save": "Salva",
+    "send": "Invia",
+    "exit": "Esci",
+    "modify": "Modifica",
+    "removeFiltersBtn": "Rimuovi filtri",
+    "filterBtn": "Filtra"
+  },
+  "commons": {
+    "refundsDataTitle": "dati rimborso",
+    "title": "PARI",
+    "status": "Stato",
+    "labels": {
+      "noData": "Nessun dato disponibile",
+      "searchByFiscalCode": "Cerca per Codice Fiscale",
+      "searchByGtin": "Cerca per GTIN",
+      "searchByTrxCode": "Cerca per Codice sconto"
+    }
+  },
+  "footer": {
+    "postLoginLinks": {
+      "privacyPolicy": "Informativa Privacy",
+      "protectionOfPersonalData": "Diritto alla protezione dei dati personali",
+      "termsAndConditions": "Termini e condizioni d'uso",
+      "accessibility": "Accessibilità"
+    }
+  },
+  "errors": {
+    "genericTitle": "Si è verificato un errore",
+    "genericDescription": "Riprovare",
+    "contactAdmin": "Contatta l'assistenza",
+    "sessionExpiredTitle": "La tua sessione è scaduta",
+    "sessionExpiredMessage": "Ti stiamo reindirizzando alla pagina di accesso",
+    "validationDescription": "Verifica che i dati inseriti siano corretti",
+    "sendTheBatchForPreviousMonth": "Inviare prima i lotti relativi ai mesi precedenti"
+  },
+  "validation": {
+    "required": "Campo obbligatorio",
+    "number": "Inserisci un numero",
+    "positiveNumber": "Inserisci un valore positivo",
+    "minValue": "Inserisci un valore maggiore o uguale a {{x}}",
+    "exactChars": "Deve essere esattamente di {{x}} caratteri",
+    "maxChars": "Scrivi massimo {{x}} caratteri",
+    "maxRange": "Il range massimo consentito è di 90 giorni",
+    "invalidRange": "Il range delle date non è valido",
+    "assistanceSubject": "Inserisci l’argomento della tua richiesta"
+  },
+  "roles": {
+    "admin": "Amministratore"
+  },
+  "enums": {
+    "discountStatus": {
+      "authorized": "Autorizzato",
+      "authorizationRequested": "Autorizzazione in corso",
+      "cancelled": "Annullato",
+      "identified": "Da autorizzare",
+      "invalidated": "Invalidato",
+      "rejected": "Rifiutato",
+      "rewarded": "Rimborso richiesto",
+      "refunded": "Stornato"
+    },
+    "initiativeStatus": {
+      "closed": "Terminata",
+      "published": "In corso"
+    }
+  },
+  "pages": {
+    "tos": {
+      "and": "e l’",
+      "backHome": "Torna alla home",
+      "linkPrivacy": "Informativa Privacy",
+      "linkTos": "Termini e condizioni d’uso",
+      "termsDescription": "Accedendo, accetti i",
+      "termsDescription2": "del servizio e confermi di aver letto l’",
+      "termsDescriptionChanged": "Recentemente abbiamo cambiato i",
+      "title": "Elenco informatico degli elettrodomestici"
+    },
+    "tosStatic": {
+      "title": "Termini e Condizioni"
+    },
+    "privacyPolicyStatic": {
+      "title": "Privacy Policy"
+    },
+    "initiativesList": {
+      "emptyList": "Nessuna iniziativa disponibile",
+      "initiativeStatus": "Stato",
+      "organizationName": "Creata da",
+      "searchByInitiativeName": "Cerca per nome dell'iniziativa",
+      "serviceId": "Codice identificativo",
+      "spendingPeriod": "Periodo di spesa",
+      "subtitle": "Visualizza e gestisci le iniziative di supporto alla spesa a cui hai aderito.",
+      "title": "Iniziative",
+      "initiativeName": "Nome"
+    },
+    "initiativeOverview": {
+      "subtitle": "Tieni sotto controllo tutte le tue attività da qui.",
+      "title": "Panoramica",
+      "information": "Informazioni",
+      "stores": "Punti vendita",
+      "uploadStores": "Censisci i tuoi punti vendita",
+      "storesSubtitle": "Inserisci i tuoi punti vendita direttamente sul portale.",
+      "iban": "IBAN",
+      "holder": "Intestatario",
+      "refundsDataTitle": "Dati rimborso",
+      "refundsStatusTitle": "Stato rimborsi",
+      "totalAmount": "Totale erogato",
+      "totalRefunded": "Totale rimborsato",
+      "onboardingDate": "Data di adesione"
+    },
+    "pointOfSales": {
+      "type": "Tipologia di punto vendita",
+      "typeDescription": "I punti vendita fisici richiedono l'indirizzo completo. Per quelli online è sufficiente l'URL del sito.",
+      "noOptionsText": "Nessun risultato",
+      "loadingText": "Caricamento...",
+      "referentContactDescription": "Indica chi sarà il referente per questo punto vendita.",
+      "referentContactTitle": "Contatti referente",
+      "poitOfSaleContact": "Contatti punto vendita",
+      "title": "Punto vendita",
+      "signName": "Nome insegna",
+      "website": "Indirizzo web",
+      "address": "Indirizzo"
+    },
+    "initiativeStores": {
+      "title": "Punti vendita",
+      "subtitle": "Consulta i tuoi punti vendita",
+      "addStore": "Inserisci i punti vendita",
+      "addStoreList": "Aggiungi punti vendita",
+      "uploadStores": "Inserisci l’elenco dei tuoi punti vendita",
+      "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online.",
+      "online": "Online",
+      "physical": "Fisico",
+      "manualLink": "Dubbi? Vai al manuale",
+      "uploadCSV": "Carica CSV",
+      "enterManually": "Inserisci manualmente",
+      "referent": "Referente",
+      "address": "Indirizzo",
+      "addressURL": "URL",
+      "city": "Città",
+      "pointOfSaleType": "Tipologia punto vendita",
+      "contactName": "Nome",
+      "contactSurname": "Cognome",
+      "contactEmail": "E-mail",
+      "franchiseName": "Insegna",
+      "region": "Regione",
+      "province": "Provincia",
+      "zipCode": "CAP",
+      "type": "Tipologia",
+      "email": "E-mail",
+      "id": "Id",
+      "phone": "Telefono",
+      "geoLink": "Landing google",
+      "website": "Sito web",
+      "pointOfSale": "Punto vendita",
+      "modalDescription": "Qui puoi modificare i dati del referente di questo punto vendita. Se procedi, il nuovo referente riceverà un’email di conferma all’indirizzo indicato. Le credenziali di accesso del vecchio referente non saranno più valide.",
+      "contactEmailModal": "Indirizzo e-mail"
+    },
+    "initiativeStoreDetail": {
+      "transactionHistory": "Storico transazioni",
+      "confirmContactEmail": "Conferma indirizzo e-mail"
+    },
+    "initiativeDiscounts": {
+      "emptyList": "Non ci sono buoni sconto in corso per questa iniziativa."
+    },
+    "refundRequests": {
+      "title": "Richieste di rimborso",
+      "subtitle": "Invia i rimborsi dei tuoi punti vendita.",
+      "sendRequests": "Invia",
+      "noData": "Nessun dato disponibile",
+      "rewardBatchSentSuccess": "Lotto inviato con successo",
+      "emptyBatchModal": {
+        "title": "Stai selezionando un lotto vuoto",
+        "description": "Il lotto <b>{{name}}</b> non può essere selezionato perchè non contiene transazioni."
+      },
+      "ModalRefundRequests": {
+        "title": "Invia richieste di rimborso",
+        "description": "Il lotto di transazioni verrà inviato a Invitalia S.p.A."
+      },
+      "storeDetails": {
+        "referredBatch": "Lotto di riferimento",
+        "referencePeriod": "Periodo di riferimento",
+        "companyName": "Ragione sociale",
+        "requestedRefund": "Rimborso richiesto",
+        "holder": "Intestatario",
+        "iban": "IBAN",
+        "approvedRefund": "Rimborso approvato",
+        "suspendedRefund": "Rimborso sospeso",
+        "exportCSV": "Esporta csv",
+        "detailCardTitleDx": "dati rimborso",
+        "posType": "Tipo"
+      },
+      "invoiceDetailConfirmModal" : {
+        "title": "Conferma spostamento",
+        "description": "Confermi di voler spostare la transazione al mese successivo?"
+      }
+    },
+    "reportedUsers": {
+      "title": "Segnalazione utenti",
+      "subtitle": "Comunica gli utenti che hanno beneficiato del bonus, ma non hanno consegnato un elettrodomestico obsoleto.",
+      "filterBtn": "Cerca",
+      "cancelBtn": "Cancella",
+      "reportUser": "Segnala utente",
+      "userCf": "Beneficiario",
+      "date": "Data e ora",
+      "discountCode": "Codice sconto",
+      "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
+      "reportUserSubtitle": "Segnala un utente che non ha presentato l'elettrodomestico obsoleto.",
+      "mtTitle":"La segnalazione servirà solo ai fini di controllo e monitoraggio e non influenza la richiesta di rimborso al suo acquisto.",
+      "searchTitle":"Qual è il codice fiscale?",
+      "searchDescription":"Inserire il codice fiscale dell'utente",
+      "validCf":"La segnalazione è stata registrata",
+      "removedCf":"La segnalazione è stata rimossa",
+      "invalid": "Codice fiscale non valido",
+      "noResultUser": "Codice fiscale assente",
+      "insertCf":"Campo obbligatorio",
+      "alreadyRegistered": "Il codice fiscale è già stato registrato",
+      "alreadyPresent": "Codice fiscale presente presso altro esercente",
+      "ModalReportedUser": {
+        "title": "Vuoi procedere con la cancellazione?",
+        "description": "Stai per cancellare il soggetto <strong>{{cf}}</strong> dalla lista degli utenti segnalati.",
+        "descriptionTwo": "Questa operazione non comporta il blocco della relativa richiesta di rimborso.",
+        "cancelText": "Annulla",
+        "confirmText": "Conferma"
+      }
+    },
+    "reportExport": {
+      "title": "Esporta report",
+      "subtitle": "Esporta le transazioni del Bonus Elettrodomestici in base ai criteri selezionati.",
+      "form": {
+        "title": "Seleziona i parametri di esportazione",
+        "subtitle": "Imposta i criteri di ricerca per generare il report delle transazioni.",
+        "from": "Dal",
+        "to": "Al",
+        "submit": "Genera report"
+      },
+      "reportTitle": "I tuoi report",
+      "noReportFound": "Non hai ancora generato report."
+    },
+    "assistanceRequest": {
+      "exitModalBody": "Il team di Assistenza non riceverà la tua richiesta.",
+      "exitModalTitle": "Vuoi uscire?",
+      "message": "Descrivi il tuo problema",
+      "subject": "Oggetto",
+      "subtitle": "Compila e invia il modulo. Ti risponderemo al più presto.",
+      "thankYouDescription": "Ti risponderemo al più presto all’indirizzo e-mail che hai indicato.",
+      "thankYouTitle": "Abbiamo ricevuto la tua richiesta!",
+      "title": "Come possiamo aiutarti?"
+    }
+  },
+  "modifyDocument": {
+    "breadcrumbLabel": "Modifica documento",
+    "title":"Carica la fattura",
+    "invoiceTitle": "Qual è il numero  della fattura?",
+    "invoiceSubtitle": "",
+    "insertInvoice": "Inserisci il numero della fattura",
+    "invoiceLabel": "Numero della fattura",
+    "creditNote": "Carica il documento",
+    "replaceFile":"Sostituisci",
+    "creditNoteTitle":"",
+    "creditNoteSubtitle": "Carica il file della fattura elettronica relativa a questo acquisto. Assicurati che il documento sia in formato .xml o .pdf e conforme agli standard della fatturazione elettronica.",
+    "manualLink": "Dubbi? Vai sul manuale",
+    "uploadFile": "Trascina qui il file .xml o .pdf della fattura da caricare o ",
+    "uploadFileButton": "selezionalo dal tuo computer",
+    "refundSuccessUpload": "Richiesta inviata correttamente",
+    "errors": {
+      "requiredFileError": "Selezionare un file da caricare",
+      "deniedSentError": "Non puoi modificare questo documento.",
+      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
+      "fileSizeError": "Il file supera la dimensione massima di 20MB",
+      "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
+    }
+  },
+  "reverse": {
+    "breadcrumbLabel": "Storna transazione",
+    "title": "Storna transazione",
+    "invoiceTitle": "Qual è il numero della nota di credito?",
+    "invoiceSubtitle": "Inserisci il numero della nota di credito e carica la documentazione necessaria per avviare lo storno.  ",
+    "insertInvoice": "Inserisci il numero della nota di credito",
+    "invoiceLabel": "Numero della nota di credito",
+    "creditNote": "Carica nota di credito",
+    "replaceFile": "Sostituisci",
+    "creditNoteTitle": "Qual è il numero della nota di credito?",
+    "creditNoteSubtitle": "Carica il file della nota di credito relativa a questo acquisto. ",
+    "manualLink": "Dubbi? Vai sul manuale",
+    "uploadFile": "Trascina qui il file PDF o XML della nota di credito da caricare o ",
+    "uploadFileButton": "selezionalo dal tuo computer",
+    "insertCreditNote": "Inserisci il numero della nota di credito",
+    "creditNoteLabel": "Numero della nota di credito",
+    "refundSuccessUpload": "Richiesta inviata correttamente",
+    "errors": {
+      "requiredFileError": "Selezionare un file da caricare",
+      "deniedSentError": "Non puoi modificare questo documento.",
+      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
+      "fileSizeError": "Il file supera la dimensione massima di 20MB",
+      "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
+    }
+  }
+}

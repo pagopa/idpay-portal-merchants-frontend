@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 import { match } from 'react-router-dom';
 import { getMerchantInitiativeList } from '../services/merchantService';
@@ -6,10 +5,11 @@ import { useAppDispatch } from '../redux/hooks';
 import { setInitiativesList } from '../redux/slices/initiativesSlice';
 import { InitiativeDTO } from '../api/generated/merchants/data-contracts';
 import { useAlert } from './useAlert';
+import useScopedTranslation from './useScopedTranslation';
 
 export const useInitiativesList = (match: match | null) => {
   const { setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const dispatch = useAppDispatch();
 
   useEffect(() => {

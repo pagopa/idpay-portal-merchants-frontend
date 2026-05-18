@@ -1,11 +1,9 @@
 import { ProductEntity } from '@pagopa/mui-italia';
 import { Header as CommonHeader } from '@pagopa/selfcare-common-frontend/lib';
-
 import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
 import { trackEvent } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { WithPartiesProps } from '../../decorators/withParties';
 import { Product } from '../../model/Product';
 import { useAppSelector } from '../../redux/hooks';
@@ -13,6 +11,7 @@ import { partiesSelectors } from '../../redux/slices/partiesSlice';
 import { Party } from '../../model/Party';
 import { ENV } from '../../utils/env';
 import { browserConsole } from '../../utils/consoleLogger';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 type Props = WithPartiesProps & {
   withSecondHeader: boolean;
@@ -21,7 +20,7 @@ type Props = WithPartiesProps & {
 };
 
 const Header = ({ withSecondHeader, onExit, loggedUser }: /* , parties */ Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const products = useAppSelector(partiesSelectors.selectPartySelectedProducts);
   const selectedParty = useAppSelector(partiesSelectors.selectPartySelected);
   const [party2Show, setParty2Show] = useState<Array<Party>>();

@@ -1,14 +1,14 @@
 import { Box, Paper } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
 import TitleBox from '@pagopa/selfcare-common-frontend/lib/components/TitleBox';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import tosHTML from './tosHTML.json';
 
 declare const OneTrust: any;
 
 const TOS = () => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   return (
     <Box sx={{ width: '100%', padding: '0 20px' }}>

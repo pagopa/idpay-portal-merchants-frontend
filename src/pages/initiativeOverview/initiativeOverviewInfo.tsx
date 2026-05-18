@@ -1,10 +1,10 @@
 import { Box, Typography, Button, Modal, Fade, Divider } from '@mui/material';
-import { Trans, useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia/theme';
 import { useState } from 'react';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 export const InitiativeOverviewInfo = () => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -67,12 +67,12 @@ export const InitiativeOverviewInfo = () => {
                 {t('pages.initiativeOverview.info.title')}
               </Typography>
               <Typography variant="body1" sx={{ color: theme.palette.text.primary }} mt={2} mb={3}>
-                <Trans i18nKey="pages.initiativeOverview.info.description" />
+                {t('pages.initiativeOverview.info.description')}
               </Typography>
             </Box>
             <Box display="flex" justifyContent={'flex-end'}>
               <Button variant="contained" onClick={() => setOpen(false)}>
-                {t('commons.closeBtn')}
+                {t('actions.close')}
               </Button>
             </Box>
           </Box>

@@ -1,7 +1,12 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ShopDetails from '../ShopDetails';
 import { BrowserRouter } from 'react-router-dom';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
+import { useAppSelector } from '../../../../redux/hooks';
 
 const mockHandleSubmit = jest.fn();
 const mockResetForm = jest.fn();
@@ -80,14 +85,48 @@ const {
   downloadBatchCsv,
 } = jest.requireMock('../../../../services/merchantService');
 
-const renderComponent = () =>
-  render(
-    <BrowserRouter>
-      <ShopDetails />
-    </BrowserRouter>
+jest.mock('../../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: (state = { list: [] }) => state,
+}));
+
+jest.mock('../../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+
+const renderWithProvider = () => {
+  const localStore = configureStore({
+    reducer: () => ({})
+  });
+
+  return render(
+    <Provider store={localStore}>
+      <BrowserRouter>
+        <ShopDetails />
+      </BrowserRouter>
+    </Provider>
   );
+};
+
+const setupSuccessfulBaseMocks = () => {
+  getMerchantDetail.mockResolvedValue({
+    iban: 'IT60X0542811101000000123456',
+    ibanHolder: 'Mario Rossi',
+  });
+  getRewardBatchById.mockResolvedValue({
+    id: 'batch-1',
+    name: 'Batch 1',
+    status: 'APPROVED',
+  });
+  getMerchantPointOfSalesWithTransactions.mockResolvedValue([
+    { franchiseName: 'Shop 1', pointOfSaleId: 'shop-1' },
+  ]);
+};
 
 describe('ShopDetails', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -110,17 +149,17 @@ describe('ShopDetails', () => {
       ]);
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
 
     expect(mockReplace).toHaveBeenCalled();
 
-    expect(screen.getByText('commons.backBtn')).toBeInTheDocument();
+    expect(screen.getByText('actions.back')).toBeInTheDocument();
     expect(screen.getByText('Bonus Elettrodomestici')).toBeInTheDocument();
     expect(screen.getByText('pages.refundRequests.storeDetails.exportCSV')).toBeInTheDocument();
     expect(screen.getByTestId('download-csv-button-test')).toHaveProperty('disabled', false);
-    fireEvent.click(screen.getByText('commons.backBtn'));
+    fireEvent.click(screen.getByText('actions.back'));
     expect(mockGoBack).toHaveBeenCalled();
   });
 
@@ -135,7 +174,7 @@ describe('ShopDetails', () => {
       getMerchantPointOfSalesWithTransactions.mockRejectedValue(mockError);
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
 
@@ -160,7 +199,7 @@ describe('ShopDetails', () => {
       ]);
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getMerchantPointOfSalesWithTransactions).not.toHaveBeenCalled());
   });
@@ -175,7 +214,7 @@ describe('ShopDetails', () => {
       getRewardBatchById.mockRejectedValue(mockError);
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
 
@@ -194,7 +233,7 @@ describe('ShopDetails', () => {
       getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
     });
 
-    renderComponent();
+    renderWithProvider();
 
     await waitFor(() => expect(getMerchantDetail).toHaveBeenCalled());
 
@@ -209,7 +248,7 @@ describe('ShopDetails', () => {
   it('should show approving alert', async () => {
     getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVING' });
 
-    renderComponent();
+    renderWithProvider();
 
     expect(
       await screen.findByText('pages.refundRequests.storeDetails.csv.alert')
@@ -223,7 +262,7 @@ describe('ShopDetails', () => {
       approvedBatchUrl: 'http://csv',
     });
 
-    renderComponent();
+    renderWithProvider();
 
     const btn = await screen.findByTestId('download-csv-button-test');
     fireEvent.click(btn);
@@ -232,13 +271,13 @@ describe('ShopDetails', () => {
   });
 
   it('should handle handleDownloadCsv error', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
     const mockError = new Error('fail');
     getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
 
     downloadBatchCsv.mockRejectedValue(mockError);
 
-    renderComponent();
+    renderWithProvider();
 
     const btn = await screen.findByTestId('download-csv-button-test');
     fireEvent.click(btn);
@@ -268,13 +307,13 @@ describe('ShopDetails', () => {
         { franchiseName: 'Shop 1', pointOfSaleId: 'shop-1' },
       ]);
     });
-    renderComponent();
+    renderWithProvider();
     const wrapper = screen.getByTestId('trxCodeFilter');
     const input = wrapper.querySelector('input');
     const posSelect = screen.getByTestId('point-of-sale-test');
     const statusSelect = screen.getByTestId('status-test');
-    const filtersBtn = screen.getByText('commons.filterBtn');
-    const removeFiltersBtn = screen.getByText('commons.removeFiltersBtn');
+    const filtersBtn = screen.getByText('actions.filterBtn');
+    const removeFiltersBtn = screen.getByText('actions.removeFiltersBtn');
 
     await act(() => userEvent.type(input!, ' '));
     await waitFor(() => expect(mockHandleChange).not.toHaveBeenCalled());

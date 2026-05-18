@@ -3,6 +3,9 @@ import '@testing-library/jest-dom';
 import { ShopCard } from '../ShopCard';
 import { MISSING_DATA_PLACEHOLDER } from '../../../../utils/constants';
 import { getBatchStatus } from '../../../../components/Transactions/useStatus';
+import { useAppSelector } from '../../../../redux/hooks';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -36,9 +39,32 @@ jest.mock('../../../../components/Chip/CustomChip', () => ({
   ),
 }));
 
+jest.mock('../../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState
+  });
+};
+
+const mockedStore = createMockStore();
+
 const mockedGetStatus = getBatchStatus as jest.MockedFunction<typeof getBatchStatus>;
 
 describe('ShopCard (presentational)', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -60,7 +86,7 @@ describe('ShopCard (presentational)', () => {
       suspendedAmountCents: 0,
     };
 
-    render(<ShopCard store={store} iban="IT60X0542811101000000123456" ibanHolder="Mario Rossi" />);
+    render(<Provider store={mockedStore}><ShopCard store={store} iban="IT60X0542811101000000123456" ibanHolder="Mario Rossi" /></Provider>);
 
     expect(screen.getByText('Batch 1')).toBeInTheDocument();
     expect(screen.getByText('ACME srl')).toBeInTheDocument();
@@ -90,7 +116,7 @@ describe('ShopCard (presentational)', () => {
       suspendedAmountCents: 0,
     };
 
-    render(<ShopCard store={store} />);
+    render(<Provider store={mockedStore}><ShopCard store={store} /></Provider>);
 
     const placeholders = screen.getAllByText(MISSING_DATA_PLACEHOLDER);
     expect(placeholders.length).toBeGreaterThan(0);

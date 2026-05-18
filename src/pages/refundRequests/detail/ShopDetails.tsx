@@ -14,7 +14,6 @@ import {
   TextField,
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory, useParams } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
@@ -23,6 +22,7 @@ import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Sync } from '@mui/icons-material';
+import useScopedTranslation from '../../../hooks/useScopedTranslation';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import FiltersForm from '../../initiativeDiscounts/FiltersForm';
 import StatusChip from '../../../components/Chip/StatusChipInvoice';
@@ -57,7 +57,7 @@ interface RouteParams {
 }
 
 const ShopDetails: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { initiative_id, batch_id } = useParams<RouteParams>();
   const [store, setStore] = useState({} as RewardBatchDTO);
   const [merchantDetail, setMerchantDetail] = useState<MerchantDetailDTO | null>(null);
@@ -263,7 +263,7 @@ const ShopDetails: React.FC = () => {
             weight="default"
             data-testid="back-button-test"
           >
-            {t('commons.backBtn')}
+            {t('actions.back')}
           </ButtonNaked>
           <Breadcrumbs aria-label="breadcrumb" sx={{ marginBottom: '3px', marginRight: '8px' }}>
             <Typography color="text.primary" variant="body2">
@@ -375,8 +375,8 @@ const ShopDetails: React.FC = () => {
           <Grid item xs={12} sm={6} md={3} lg={2.5}>
             <FormControl fullWidth size="small">
               <TextField
-                label={t('pages.pointOfSaleTransactions.searchByTrxCode')}
-                placeholder={t('pages.pointOfSaleTransactions.searchByTrxCode')}
+                label={t('commons.labels.searchByTrxCode')}
+                placeholder={t('commons.labels.searchByTrxCode')}
                 name="trxCode"
                 aria-label="searchTrxCode"
                 InputLabelProps={{ required: false }}
@@ -393,7 +393,7 @@ const ShopDetails: React.FC = () => {
           </Grid>
           <Grid item>
             <FormControl size="small" fullWidth>
-              <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
+              <InputLabel>{t('commons.status')}</InputLabel>
               <Select
                 data-testid="status-test"
                 id="rewardBatchTrxStatus"
@@ -401,7 +401,7 @@ const ShopDetails: React.FC = () => {
                   'data-testid': 'filterStatus-select',
                 }}
                 name="status"
-                label={t('pages.initiativeDiscounts.filterByStatus')}
+                label={t('commons.status')}
                 onChange={formik.handleChange}
                 value={formik.values.status}
                 sx={{

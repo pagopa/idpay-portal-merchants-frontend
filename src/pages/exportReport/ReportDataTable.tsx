@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { Box, Card, CircularProgress, IconButton, Paper, Tooltip, Typography } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
-import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia/theme';
 import CachedIcon from '@mui/icons-material/Cached';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -13,6 +12,7 @@ import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { downloadMerchantReport, getMerchantReports } from '../../services/merchantService';
 import { ReportDTO } from '../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../utils/consoleLogger';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 type ReportStatusEnum = ReportDTO['reportStatus'];
 const INSERTED: ReportStatusEnum = 'INSERTED';
@@ -44,7 +44,7 @@ interface ReportDataTableProps {
 }
 
 const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refreshKey }) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { initiative_id } = useParams<RouteParams>();
 
   const [reports, setReports] = useState<any>({

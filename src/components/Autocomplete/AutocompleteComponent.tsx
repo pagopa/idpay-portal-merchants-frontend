@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useTranslation } from 'react-i18next';
 import { MANDATORY_FIELD } from '../../utils/constants';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 export default function AutocompleteComponent({
   options,
@@ -28,7 +28,7 @@ export default function AutocompleteComponent({
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [optionValue, setOptionValue] = useState('');
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   useEffect(() => {
     if (inputValue.length < 5 || inputValue.trim().length === 0 || optionValue === inputValue) {

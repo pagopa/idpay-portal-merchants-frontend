@@ -27,7 +27,7 @@ describe('initiativeDiscounts/helpers', () => {
   describe('renderTransactionCreatedStatus', () => {
     it('should render AUTHORIZED status chip', () => {
       render(renderTransactionCreatedStatus(StatusEnum.AUTHORIZED) as React.ReactElement);
-      expect(screen.getByText('commons.discountStatusEnum.authorized')).toBeInTheDocument();
+      expect(screen.getByText('enums.discountStatus.authorized')).toBeInTheDocument();
     });
 
     it('should render AUTHORIZATION_REQUESTED status chip', () => {
@@ -35,35 +35,35 @@ describe('initiativeDiscounts/helpers', () => {
         renderTransactionCreatedStatus(StatusEnum.AUTHORIZATION_REQUESTED) as React.ReactElement
       );
       expect(
-        screen.getByText('commons.discountStatusEnum.authorizationRequested')
+        screen.getByText('enums.discountStatus.authorizationRequested')
       ).toBeInTheDocument();
     });
 
     it('should render CREATED status as identified', () => {
       render(renderTransactionCreatedStatus(StatusEnum.CREATED) as React.ReactElement);
-      expect(screen.getByText('commons.discountStatusEnum.identified')).toBeInTheDocument();
+      expect(screen.getByText('enums.discountStatus.identified')).toBeInTheDocument();
     });
 
     it('should render IDENTIFIED status chip', () => {
       render(renderTransactionCreatedStatus(StatusEnum.IDENTIFIED) as React.ReactElement);
-      expect(screen.getByText('commons.discountStatusEnum.identified')).toBeInTheDocument();
+      expect(screen.getByText('enums.discountStatus.identified')).toBeInTheDocument();
     });
 
     it('should render REJECTED status chip', () => {
       render(renderTransactionCreatedStatus(StatusEnum.REJECTED) as React.ReactElement);
-      expect(screen.getByText('commons.discountStatusEnum.invalidated')).toBeInTheDocument();
+      expect(screen.getByText('enums.discountStatus.invalidated')).toBeInTheDocument();
     });
   });
 
   describe('renderTrasactionProcessedStatus', () => {
     it('should render REWARDED status chip', () => {
       render(renderTrasactionProcessedStatus(StatusEnum.REWARDED) as React.ReactElement);
-      expect(screen.getByText('commons.discountStatusEnum.rewarded')).toBeInTheDocument();
+      expect(screen.getByText('enums.discountStatus.rewarded')).toBeInTheDocument();
     });
 
     it('should render CANCELLED status chip', () => {
       render(renderTrasactionProcessedStatus(StatusEnum.CANCELLED) as React.ReactElement);
-      expect(screen.getByText('commons.discountStatusEnum.cancelled')).toBeInTheDocument();
+      expect(screen.getByText('enums.discountStatus.cancelled')).toBeInTheDocument();
     });
   });
 

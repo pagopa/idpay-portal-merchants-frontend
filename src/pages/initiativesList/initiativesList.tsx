@@ -14,11 +14,11 @@ import {
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useTranslation } from 'react-i18next';
 import SearchIcon from '@mui/icons-material/Search';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import EmptyList from '../components/EmptyList';
@@ -35,7 +35,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   const createSortHandler = (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
   };
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   const headCells: ReadonlyArray<HeadCell> = [
     {
@@ -101,7 +101,7 @@ const InitiativesList = () => {
   const [initiativeList, setInitiativeList] = useState<Array<Data>>([]);
   const [initiativeListFiltered, setInitiativeListFiltered] = useState<Array<Data>>([]);
   const history = useHistory();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const initiativesListSel = useAppSelector(intiativesListSelector);
 
   useEffect(() => {
@@ -152,7 +152,7 @@ const InitiativesList = () => {
         return (
           <Chip
             sx={{ fontSize: '14px' }}
-            label={t('commons.initiativeStatusEnum.published')}
+            label={t('enums.initiativeStatus.published')}
             color="success"
           />
         );
@@ -160,7 +160,7 @@ const InitiativesList = () => {
         return (
           <Chip
             sx={{ fontSize: '14px' }}
-            label={t('commons.initiativeStatusEnum.closed')}
+            label={t('enums.initiativeStatus.closed')}
             color="default"
           />
         );

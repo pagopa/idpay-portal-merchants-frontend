@@ -4,8 +4,23 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import ActionMenu from '../actionMenu';
+import { useAppSelector } from '../../../redux/hooks';
 
 type MerchantTransactionDTO = any;
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
 
 const TransactionStatusEnum = {
   CREATED: 'CREATED',
@@ -78,6 +93,7 @@ const renderInTable = (ui: React.ReactElement) =>
   );
 
 describe('ActionMenu', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   it('should open menu and trigger onClose (covers handleCloseActionsMenu -> setAnchorEl(null))', () => {
     renderInTable(<ActionMenu {...mockBaseData} />);
 
