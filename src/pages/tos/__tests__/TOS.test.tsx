@@ -34,38 +34,42 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 describe('TOS component', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  const mockInitiative = () =>
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
 
-  test('renders without crashing', async () => {
+  const renderTOS = async (html: string) => {
     jest.doMock('../tosHTML.json', () => ({
       __esModule: true,
-      default: { html: '<p>Some TOS content</p>' },
-      html: '<p>Some TOS content</p>',
+      default: { html },
+      html,
     }));
 
     const { default: TOS } = await import('../TOS');
-
     render(<TOS />);
+  };
 
-    expect(screen.getByText(/pages\.tosStatic\.title/i)).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockInitiative();
+  });
+
+  it('renders content when html is provided', async () => {
+    await renderTOS('<p>Some TOS content</p>');
+
+    expect(
+      screen.getByText(/pages\.tosStatic\.title/i)
+    ).toBeInTheDocument();
 
     expect(document.querySelector('.content')).toBeInTheDocument();
   });
 
-  test('renders fallback Typography when html is empty (branch 2)', async () => {
-    jest.doMock('../tosHTML.json', () => ({
-      __esModule: true,
-      default: { html: '' },
-      html: '',
-    }));
+  it('renders fallback Typography when html is empty', async () => {
+    await renderTOS('');
 
-    const { default: TOS } = await import('../TOS');
-
-    render(<TOS />);
-
-    expect(screen.getByText('Some TOS content')).toBeInTheDocument();
+    expect(
+      screen.getByText('Some TOS content')
+    ).toBeInTheDocument();
   });
 });

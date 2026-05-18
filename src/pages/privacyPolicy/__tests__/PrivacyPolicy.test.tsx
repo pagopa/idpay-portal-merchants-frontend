@@ -40,13 +40,19 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 describe('PrivacyPolicy', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  const renderComponent = () => render(<PrivacyPolicy />);
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
   });
 
-  test('renders without crashing', () => {
-    render(<PrivacyPolicy />);
-    expect(screen.getByText(/pages\.privacyPolicyStatic\.title/i)).toBeInTheDocument();
+  it('renders page title correctly', () => {
+    renderComponent();
+    expect(
+      screen.getByText(/pages\.privacyPolicyStatic\.title/i)
+    ).toBeInTheDocument();
   });
 });
