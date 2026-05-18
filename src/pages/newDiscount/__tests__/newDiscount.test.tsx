@@ -4,6 +4,13 @@ import { render, screen } from '@testing-library/react';
 import NewDiscount from '../newDiscount';
 import { useAppSelector } from '../../../redux/hooks';
 
+jest.mock('../../../hooks/useScopedTranslation', () => ({
+  __esModule: true,
+  default: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
 const mockUseCurrentInitiativeId = jest.fn();
 jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
   useCurrentInitiativeId: () => mockUseCurrentInitiativeId(),
@@ -96,7 +103,7 @@ describe('NewDiscount', () => {
   it('renders DiscountCreatedRecap when discount is created', () => {
     mockInitiative('init-1');
 
-    jest
+    const useStateSpy = jest
       .spyOn(React, 'useState')
       .mockImplementationOnce(() => [true, jest.fn()] as any)
       .mockImplementationOnce(() => [{ id: 'trx' } as any, jest.fn()] as any);
@@ -116,5 +123,7 @@ describe('NewDiscount', () => {
         data: { id: 'trx' },
       })
     );
+
+    useStateSpy.mockRestore();
   });
 });
