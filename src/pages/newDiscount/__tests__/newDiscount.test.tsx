@@ -44,36 +44,45 @@ jest.mock('../../../redux/hooks', () => ({
 
 
 describe('NewDiscount', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseCurrentInitiativeId.mockReturnValue({ initiativeName: 'Init name' });
-  });
+  const renderComponent = () => render(<NewDiscount />);
 
-  it('returns null when initiativeId is missing', () => {
+  const mockInitiative = (initiativeId?: string) =>
     mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: undefined,
+      initiativeId,
       isValid: true,
       isListLoaded: true,
     });
 
-    const { container } = render(<NewDiscount />);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
+    mockUseCurrentInitiativeId.mockReturnValue({
+      initiativeName: 'Init name',
+    });
+  });
+
+  it('returns null when initiativeId is missing', () => {
+    mockInitiative(undefined);
+
+    const { container } = renderComponent();
     expect(container.firstChild).toBeNull();
   });
 
   it('renders CreateForm when discount is not created', () => {
-    mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: 'init-1',
-      isValid: true,
-      isListLoaded: true,
-    });
+    mockInitiative('init-1');
 
-    render(<NewDiscount />);
+    renderComponent();
 
     expect(screen.getByTestId('breadcrumbs')).toBeInTheDocument();
     expect(screen.getByTestId('create-form')).toBeInTheDocument();
-    expect(screen.getByTestId('title')).toHaveTextContent('pages.newDiscount.title');
-    expect(screen.getByTestId('subtitle')).toHaveTextContent('pages.newDiscount.subtitle');
+    expect(screen.getByTestId('title')).toHaveTextContent(
+      'pages.newDiscount.title'
+    );
+    expect(screen.getByTestId('subtitle')).toHaveTextContent(
+      'pages.newDiscount.subtitle'
+    );
 
     expect(mockCreateForm).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -85,22 +94,22 @@ describe('NewDiscount', () => {
   });
 
   it('renders DiscountCreatedRecap when discount is created', () => {
-    mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: 'init-1',
-      isValid: true,
-      isListLoaded: true,
-    });
+    mockInitiative('init-1');
 
-    jest.spyOn(React, 'useState').mockImplementation(() => [true, jest.fn()] as any);
     jest
       .spyOn(React, 'useState')
-      .mockImplementation(() => [{ id: 'trx' } as any, jest.fn()] as any);
+      .mockImplementationOnce(() => [true, jest.fn()] as any)
+      .mockImplementationOnce(() => [{ id: 'trx' } as any, jest.fn()] as any);
 
-    render(<NewDiscount />);
+    renderComponent();
 
     expect(screen.getByTestId('discount-recap')).toBeInTheDocument();
-    expect(screen.getByTestId('title')).toHaveTextContent('pages.newDiscount.createdTitle');
-    expect(screen.getByTestId('subtitle')).toHaveTextContent('pages.newDiscount.createdSubtitle');
+    expect(screen.getByTestId('title')).toHaveTextContent(
+      'pages.newDiscount.createdTitle'
+    );
+    expect(screen.getByTestId('subtitle')).toHaveTextContent(
+      'pages.newDiscount.createdSubtitle'
+    );
 
     expect(mockDiscountRecap).toHaveBeenCalledWith(
       expect.objectContaining({

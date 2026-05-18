@@ -237,6 +237,28 @@ describe('ReportedUsers Component', () => {
     );
   };
 
+  const searchByCF = async (cf: string) => {
+    fireEvent.change(screen.getByTestId('cf-input'), {
+      target: { value: cf },
+    });
+    fireEvent.click(screen.getByTestId('search-button'));
+  };
+
+  const openDeleteModal = async (cf: string) => {
+    await searchByCF(cf);
+    await waitFor(() =>
+      expect(screen.getByTestId('data-table')).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByTestId(`delete-${cf}`));
+    await waitFor(() =>
+      expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument()
+    );
+  };
+
+  const confirmDelete = async () => {
+    fireEvent.click(screen.getByTestId('modal-confirm'));
+  };
+
   describe('Rendering iniziale', () => {
     it('deve renderizzare il componente correttamente', () => {
       renderComponent();
@@ -284,80 +306,20 @@ describe('ReportedUsers Component', () => {
       });
     });
 
-    it('deve gestire risposta vuota come array', async () => {
-      mockGetReportedUser.mockResolvedValueOnce([] as any);
+    it.each([
+      { response: [] },
+      { response: null },
+      { response: new ApiError(404, 'Not Found'), isError: true },
+      { response: new Error('API Error'), isError: true },
+    ])('handles empty or error responses', async ({ response, isError }) => {
+      if (isError) {
+        mockGetReportedUser.mockRejectedValueOnce(response as any);
+      } else {
+        mockGetReportedUser.mockResolvedValueOnce(response as any);
+      }
 
       renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByText('Nessun utente trovato')).toBeInTheDocument();
-      });
-    });
-
-    it('deve gestire risposta non array', async () => {
-      mockGetReportedUser.mockResolvedValueOnce(null as any);
-
-      renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByText('Nessun utente trovato')).toBeInTheDocument();
-      });
-    });
-
-    it('deve gestire errore 404 senza mostrare alert', async () => {
-      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
-
-      renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
-      });
-    });
-
-    it('deve gestire errore 404 con response.status', async () => {
-      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
-
-      renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
-      });
-    });
-
-    it('deve gestire errori generici durante la ricerca', async () => {
-      mockGetReportedUser.mockRejectedValueOnce(new Error('API Error'));
-
-      renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
+      await searchByCF('RSSMRA80A01H501U');
 
       await waitFor(() => {
         expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
@@ -405,20 +367,7 @@ describe('ReportedUsers Component', () => {
 
       renderComponent();
 
-      const input = screen.getByTestId('cf-input');
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(screen.getByTestId('search-button'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('data-table')).toBeInTheDocument();
-      });
-
-      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
-      fireEvent.click(deleteButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
-      });
+      await openDeleteModal('RSSMRA80A01H501U');
     });
 
     it('deve eliminare utente dopo conferma', async () => {
@@ -451,11 +400,13 @@ describe('ReportedUsers Component', () => {
         expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
       });
 
-      const confirmButton = screen.getByTestId('modal-confirm');
-      fireEvent.click(confirmButton);
+      await confirmDelete();
 
       await waitFor(() => {
-        expect(mockDeleteReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
+        expect(mockDeleteReportedUser).toHaveBeenCalledWith(
+          '123',
+          'RSSMRA80A01H501U'
+        );
       });
 
       await waitFor(() => {

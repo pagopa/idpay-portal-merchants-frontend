@@ -23,27 +23,28 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 describe('InitiativeOverviewInfo', () => {
-    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  const renderComponent = () => render(<InitiativeOverviewInfo />);
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
   });
 
-  test('Renders InitiativeOverviewInfo', async () => {
-    render(<InitiativeOverviewInfo />);
-    const openModalButton = screen.getByTestId('open-modal');
+  it('toggles modal content correctly', () => {
+    renderComponent();
 
-    // DO NOT renders description
-    expect(screen.queryByText('pages.initiativeOverview.info.description')).not.toBeInTheDocument();
+    const descriptionKey =
+      'pages.initiativeOverview.info.description';
+    const closeKey = 'actions.close';
 
-    // DO NOT renders exit button
-    expect(screen.queryByText('actions.close')).not.toBeInTheDocument();
+    expect(screen.queryByText(descriptionKey)).not.toBeInTheDocument();
+    expect(screen.queryByText(closeKey)).not.toBeInTheDocument();
 
-    openModalButton.click();
+    screen.getByTestId('open-modal').click();
 
-    // renders description
-    expect(screen.getByText('pages.initiativeOverview.info.description')).toBeInTheDocument();
-
-    //renders exit button
-    expect(screen.getByText('actions.close')).toBeInTheDocument();
+    expect(screen.getByText(descriptionKey)).toBeInTheDocument();
+    expect(screen.getByText(closeKey)).toBeInTheDocument();
   });
 });

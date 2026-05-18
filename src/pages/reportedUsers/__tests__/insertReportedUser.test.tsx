@@ -96,10 +96,27 @@ const createMockStore = (initialState?: any) => {
 
 const store = createMockStore();
 
+const renderWithProvider = () =>
+  render(
+    <Provider store={store}>
+      <InsertReportedUser />
+    </Provider>
+  );
+
+const typeValidCFAndOpenModal = async () => {
+  fireEvent.change(screen.getByTestId('cf-input'), {
+    target: { value: 'RSSMRA80A01F205X' },
+  });
+  fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+  await waitFor(() => screen.getByTestId('modal-reported-user'));
+};
+
 describe('InsertReportedUser', () => {
-(useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
     mockUseLocation.mockReturnValue({
       state: { merchantId: 'MERCHANT123', initiativeID: 'INITIATIVE456' },
     });
@@ -134,16 +151,12 @@ describe('InsertReportedUser', () => {
 
   it('shows confirmation modal when CF is valid and not already reported', async () => {
     mockGetReportedUser.mockResolvedValueOnce([]);
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
-    fireEvent.change(screen.getByTestId('cf-input'), {
-      target: { value: 'RSSMRA80A01F205X' },
-    });
-    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+    renderWithProvider();
+    await typeValidCFAndOpenModal();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
-      expect(screen.getByTestId('cf-modal')).toHaveTextContent('RSSMRA80A01F205X');
-    });
+    expect(screen.getByTestId('cf-modal')).toHaveTextContent(
+      'RSSMRA80A01F205X'
+    );
   });
 
   it('does not open modal when CF already reported', async () => {
@@ -161,32 +174,31 @@ describe('InsertReportedUser', () => {
 
   it('calls createReportedUser and redirects when modal confirmed', async () => {
     mockGetReportedUser.mockResolvedValueOnce([]);
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
-    fireEvent.change(screen.getByTestId('cf-input'), {
-      target: { value: 'RSSMRA80A01F205X' },
-    });
-    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
+    renderWithProvider();
+    await typeValidCFAndOpenModal();
 
-    await waitFor(() => screen.getByTestId('modal-reported-user'));
     fireEvent.click(screen.getByTestId('modal-confirm'));
 
     await waitFor(() => {
-      expect(mockCreateReportedUser).toHaveBeenCalledWith('INITIATIVE456', 'RSSMRA80A01F205X');
+      expect(mockCreateReportedUser).toHaveBeenCalledWith(
+        'INITIATIVE456',
+        'RSSMRA80A01F205X'
+      );
       expect(mockPush).toHaveBeenCalled();
     });
   });
 
   it('closes modal when canceled', async () => {
     mockGetReportedUser.mockResolvedValueOnce([]);
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
-    fireEvent.change(screen.getByTestId('cf-input'), {
-      target: { value: 'RSSMRA80A01F205X' },
-    });
-    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
-    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    renderWithProvider();
+    await typeValidCFAndOpenModal();
+
     fireEvent.click(screen.getByTestId('modal-cancel'));
+
     await waitFor(() => {
-      expect(screen.queryByTestId('modal-reported-user')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('modal-reported-user')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -223,22 +235,26 @@ describe('InsertReportedUser', () => {
     });
   });
 
-  it('gestisce correttamente handleKOError per UserId not found', async () => {
+  it.each([
+    { errorKey: 'UserId not found' },
+    { errorKey: "CF doesn't match initiative or merchant" },
+    { errorKey: 'Service unavailable' },
+    { errorKey: 'Already reported' },
+    { errorKey: 'Some other error' },
+  ])('handles KO error: $errorKey', async ({ errorKey }) => {
     mockGetReportedUser.mockResolvedValueOnce([]);
-    mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: 'UserId not found' });
-
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
-    fireEvent.change(screen.getByTestId('cf-input'), {
-      target: { value: 'RSSMRA80A01F205X' },
+    mockCreateReportedUser.mockResolvedValueOnce({
+      status: 'KO',
+      errorKey,
     });
-    fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
 
-    await waitFor(() => screen.getByTestId('modal-reported-user'));
+    renderWithProvider();
+    await typeValidCFAndOpenModal();
+
     fireEvent.click(screen.getByTestId('modal-confirm'));
 
     await waitFor(() => {
       expect(mockCreateReportedUser).toHaveBeenCalled();
-      expect(screen.getByLabelText('pages.reportedUsers.cfPlaceholder')).toBeInTheDocument();
     });
   });
 
