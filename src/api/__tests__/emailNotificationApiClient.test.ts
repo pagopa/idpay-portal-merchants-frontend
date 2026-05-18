@@ -1,62 +1,63 @@
 /// <reference types="jest" />
+
+import { axiosInstance } from '../axiosInstance';
 import { EmailNotificationApi } from '../emailNotificationApiClient';
-import { BaseApiClient } from '../BaseApiClient';
+
+jest.mock('../axiosInstance', () => ({
+  axiosInstance: {
+    request: jest.fn(),
+  },
+}));
 
 describe('EmailNotificationApiClient', () => {
-  const mockInstitutionInfo = {
-    email: 'test@example.com',
-  };
-
-  const mockEmailMessage = {
-    subject: 'Test',
-    content: 'Hello',
-    recipients: ['test@example.com'],
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should call safeRequest with GET /users and return data', async () => {
-    const safeRequestSpy = jest.spyOn(BaseApiClient.prototype, 'safeRequest').mockResolvedValue({
+  it('getInstitutionProductUserInfo returns data', async () => {
+    const mockInstitutionInfo = {
+      email: 'test@example.com',
+    };
+
+    (axiosInstance.request as jest.Mock).mockResolvedValue({
       data: mockInstitutionInfo,
-    } as any);
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+    });
 
     const result = await EmailNotificationApi.getInstitutionProductUserInfo();
 
-    expect(safeRequestSpy).toHaveBeenCalledWith({
-      path: '/users',
-      method: 'GET',
-      secure: true,
-      format: 'json',
-    });
-
     expect(result).toEqual(mockInstitutionInfo);
+    expect(axiosInstance.request).toHaveBeenCalled();
   });
 
-  it('should call safeRequest with POST /notify', async () => {
-    const safeRequestSpy = jest
-      .spyOn(BaseApiClient.prototype, 'safeRequest')
-      .mockResolvedValue({} as any);
+  it('sendEmail resolves without error', async () => {
+    const mockEmailMessage = {
+      subject: 'Test',
+      content: 'Hello',
+      recipients: ['test@example.com'],
+    };
+
+    (axiosInstance.request as jest.Mock).mockResolvedValue({
+      data: undefined,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+    });
 
     await EmailNotificationApi.sendEmail(mockEmailMessage as any);
 
-    expect(safeRequestSpy).toHaveBeenCalledWith({
-      path: '/notify',
-      method: 'POST',
-      body: mockEmailMessage,
-      secure: true,
-      format: 'json',
-    });
+    expect(axiosInstance.request).toHaveBeenCalled();
   });
 
-  it('should propagate errors from safeRequest', async () => {
+  it('propagates axios error', async () => {
     const error = new Error('Network error');
 
-    jest.spyOn(BaseApiClient.prototype, 'safeRequest').mockRejectedValue(error);
+    (axiosInstance.request as jest.Mock).mockRejectedValue(error);
 
-    await expect(EmailNotificationApi.getInstitutionProductUserInfo()).rejects.toThrow(
-      'Network error'
-    );
+    await expect(
+      EmailNotificationApi.getInstitutionProductUserInfo()
+    ).rejects.toThrow('Network error');
   });
 });

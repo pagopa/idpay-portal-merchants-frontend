@@ -1,37 +1,34 @@
 import { ENV } from '../utils/env';
-import { BaseApiClient } from './BaseApiClient';
 import {
   AddressAutocompleteRequestDTO,
   AddressAutocompleteResponseDTO,
 } from './generated/autocomplete/data-contracts';
+import { Autocomplete } from './generated/autocomplete/Autocomplete';
+import { axiosFetchAdapter } from './axiosFetchAdapter';
 
 class AutocompleteApiClient {
-  private baseClient: BaseApiClient;
+  private autocompleteClient: Autocomplete;
 
   constructor() {
-    this.baseClient = new BaseApiClient({
+    this.autocompleteClient = new Autocomplete({
       baseUrl: `${ENV.URL_API.MERCHANTS}/address-search`,
+      customFetch: axiosFetchAdapter,
     });
   }
 
   public async getAddresses(
     request: AddressAutocompleteRequestDTO
   ): Promise<AddressAutocompleteResponseDTO> {
-    const httpResponse = await this.baseClient.safeRequest<AddressAutocompleteResponseDTO>({
-      path: '/autocomplete',
-      method: 'POST',
-      body: request,
-      format: 'json',
-      secure: true,
-    });
-
-    return httpResponse.data;
+    const response = await this.autocompleteClient.autocomplete(request);
+    return response.data;
   }
 }
 
 const client = new AutocompleteApiClient();
 
 export const AutocompleteApi = {
-  getAddresses: (request: AddressAutocompleteRequestDTO): Promise<AddressAutocompleteResponseDTO> =>
+  getAddresses: (
+    request: AddressAutocompleteRequestDTO
+  ): Promise<AddressAutocompleteResponseDTO> =>
     client.getAddresses(request),
 };

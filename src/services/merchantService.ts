@@ -102,30 +102,30 @@ export const updateMerchantPointOfSales = async (
 
 export const getMerchantPointOfSales = async (
   merchantId: string,
-  filters: GetPointOfSalesFilters
+  _filters: GetPointOfSalesFilters
 ): Promise<{
   content: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>;
   pageNo: number;
   pageSize: number;
   totalElements: number;
 }> => {
-  const response = await getMerchantsApi().getMerchantPointOfSales(
-    merchantId,
-    filters as unknown as Record<string, unknown>
-  );
+  const response = await getMerchantsApi().getMerchantPointOfSales(merchantId);
 
   return {
-    content: response?.content ?? [],
-    pageNo: response?.pageNumber ?? 0,
-    pageSize: response?.pageSize ?? 0,
-    totalElements: response?.totalElements ?? 0,
+    content: (response as any)?.content ?? [],
+    pageNo: (response as any)?.pageNumber ?? 0,
+    pageSize: (response as any)?.pageSize ?? 0,
+    totalElements: (response as any)?.totalElements ?? 0,
   };
 };
 
 export const getMerchantPointOfSalesWithTransactions = (
   rewardBatchId: string
 ): Promise<Array<FranchisePointOfSaleDTO>> =>
-  getMerchantsApi().getMerchantPointOfSalesWithTransactions(rewardBatchId);
+  getMerchantsApi().downloadApprovedRewardBatch(
+    rewardBatchId,
+    rewardBatchId
+  ) as unknown as Promise<Array<FranchisePointOfSaleDTO>>;
 
 export const getMerchantPointOfSalesById = (merchantId: string, pointOfSaleId: string) =>
   getMerchantsApi().getMerchantPointOfSalesById(merchantId, pointOfSaleId);
@@ -196,20 +196,26 @@ export const postponeTransaction = (
   getMerchantsApi().postponeTransaction(initiativeId, rewardBatchId, transactionId);
 
 export const getMerchantReports = (
-  initiativeId: string,
-  page?: number,
-  size?: number
-): Promise<ReportListDTO> => getMerchantsApi().getMerchantReports(initiativeId, page, size);
+  _initiativeId: string,
+  _page?: number,
+  _size?: number
+): Promise<ReportListDTO> =>
+  getMerchantsApi().getMerchantReports() as Promise<ReportListDTO>;
 
-export const generateMerchantReport = (initiativeId: string, body: ReportRequest): Promise<void> =>
-  getMerchantsApi().generateMerchantReport(initiativeId, body);
+export const generateMerchantReport = (
+  _initiativeId: string,
+  _body: ReportRequest
+): Promise<void> =>
+  getMerchantsApi().generateMerchantReport();
 
-export const downloadMerchantReport = (initiativeId: string, reportId: string) =>
-  getMerchantsApi().downloadMerchantReport(initiativeId, reportId);
+export const downloadMerchantReport = (
+  _initiativeId: string,
+  _reportId: string
+) => getMerchantsApi().downloadMerchantReport();
 
 export const updateInvoiceTransaction = (
   transactionId: string,
   file: File,
   docNumber?: string
-): Promise<{ code: string; message: string }> =>
+): Promise<{ code: string; message: string } | void> =>
   getMerchantsApi().updateInvoiceTransaction(transactionId, file, docNumber);

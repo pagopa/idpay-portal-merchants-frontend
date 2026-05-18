@@ -1,56 +1,63 @@
 /// <reference types="jest" />
-import { BaseApiClient } from '../BaseApiClient';
 
-jest.mock('../BaseApiClient');
+import { axiosInstance } from '../axiosInstance';
+import { getMerchantsApi } from '../MerchantsApiClient';
 
-const getApi = () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { getMerchantsApi } = require('../MerchantsApiClient');
-  return getMerchantsApi();
-};
+jest.mock('../axiosInstance', () => ({
+  axiosInstance: {
+    request: jest.fn(),
+  },
+}));
 
-describe.skip('MerchantsApiClient', () => {
-  let mockSafeRequest: jest.Mock;
-
+describe('MerchantsApiClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockSafeRequest = jest.fn().mockResolvedValue({ data: 'mocked' });
-
-    (BaseApiClient as jest.Mock).mockImplementation(() => ({
-      safeRequest: mockSafeRequest,
-    }));
   });
 
-  it('getMerchantInitiativeList calls safeRequest correctly', async () => {
-    const api = getApi();
-    await api.getMerchantInitiativeList();
-  });
+  it('createTransaction returns response data', async () => {
+    const mockResponse = { id: 'trx1' };
 
-  it('getMerchantTransactions calls safeRequest correctly', async () => {
-    const api = getApi();
-    await api.getMerchantTransactions('init1', 1);
-  });
+    (axiosInstance.request as jest.Mock).mockResolvedValue({
+      data: mockResponse,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+    });
 
-  it('createTransaction calls safeRequest with POST', async () => {
-    const api = getApi();
-    await api.createTransaction({
+    const api = getMerchantsApi();
+
+    const result = await api.createTransaction({
       amountCents: 100,
       idTrxAcquirer: 'trx1',
       initiativeId: 'init1',
-      mcc: 'mcc1',
     });
+
+    expect(result).toEqual(mockResponse);
+    expect(axiosInstance.request).toHaveBeenCalled();
   });
 
-  it('deleteTransaction calls safeRequest with DELETE', async () => {
-    const api = getApi();
+  it('deleteTransaction calls axios and returns void', async () => {
+    (axiosInstance.request as jest.Mock).mockResolvedValue({
+      data: undefined,
+      status: 204,
+      statusText: 'No Content',
+      headers: {},
+    });
+
+    const api = getMerchantsApi();
+
     await api.deleteTransaction('trx1');
+
+    expect(axiosInstance.request).toHaveBeenCalled();
   });
 
-  it('getRewardBatches propagates error', async () => {
-    const api = getApi();
-    mockSafeRequest.mockRejectedValueOnce(new Error('boom'));
+  it('propagates axios error', async () => {
+    const error = new Error('boom');
 
-    await expect(api.getRewardBatches('init1', 0, 10)).rejects.toThrow('boom');
+    (axiosInstance.request as jest.Mock).mockRejectedValue(error);
+
+    const api = getMerchantsApi();
+
+    await expect(api.deleteTransaction('trx1')).rejects.toThrow('boom');
   });
 });

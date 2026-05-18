@@ -1,68 +1,46 @@
 /// <reference types="jest" />
-import { AutocompleteApi } from '../AutocompleteApiClient';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
-  storageTokenOps: {
-    read: jest.fn(),
+import { axiosInstance } from '../axiosInstance';
+import { AutocompleteApi } from '../AutocompleteApiClient';
+
+jest.mock('../axiosInstance', () => ({
+  axiosInstance: {
+    request: jest.fn(),
   },
 }));
 
 describe('AutocompleteApiClient', () => {
-  const mockResponse = {
-    ResultItems: [],
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return response.data when API call succeeds', async () => {
-    (storageTokenOps.read as jest.Mock).mockReturnValue('mocked-token');
+  it('returns response.data when call succeeds', async () => {
+    const mockResponse = {
+      ResultItems: [],
+    };
 
-    const safeRequestSpy = jest
-      .spyOn(require('../BaseApiClient').BaseApiClient.prototype, 'safeRequest')
-      .mockResolvedValue({
-        data: mockResponse,
-      });
+    (axiosInstance.request as jest.Mock).mockResolvedValue({
+      data: mockResponse,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+    });
 
     const result = await AutocompleteApi.getAddresses({
       QueryText: 'via roma',
     } as any);
 
-    expect(safeRequestSpy).toHaveBeenCalled();
     expect(result).toEqual(mockResponse);
+    expect(axiosInstance.request).toHaveBeenCalled();
   });
 
-  it('should throw when API call rejects', async () => {
-    (storageTokenOps.read as jest.Mock).mockReturnValue('mocked-token');
+  it('propagates axios error', async () => {
+    const error = new Error('Bad request');
 
-    const error = { status: 400 };
-
-    jest
-      .spyOn(require('../BaseApiClient').BaseApiClient.prototype, 'safeRequest')
-      .mockRejectedValue(error);
+    (axiosInstance.request as jest.Mock).mockRejectedValue(error);
 
     await expect(
-      AutocompleteApi.getAddresses({
-        QueryText: 'invalid',
-      } as any)
-    ).rejects.toEqual(error);
-  });
-
-  it('should work even if token is missing', async () => {
-    (storageTokenOps.read as jest.Mock).mockReturnValue('');
-
-    const safeRequestSpy = jest
-      .spyOn(require('../BaseApiClient').BaseApiClient.prototype, 'safeRequest')
-      .mockResolvedValue({
-        data: mockResponse,
-      });
-
-    await AutocompleteApi.getAddresses({
-      QueryText: 'via milano',
-    } as any);
-
-    expect(safeRequestSpy).toHaveBeenCalled();
+      AutocompleteApi.getAddresses({ QueryText: 'invalid' } as any)
+    ).rejects.toThrow('Bad request');
   });
 });
