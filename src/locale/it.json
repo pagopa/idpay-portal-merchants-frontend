@@ -461,37 +461,5 @@
       "fileSizeError": "Il file supera la dimensione massima di 20MB",
       "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
     }
-  },
-  "Bonus Elettrodomestici": {
-    "routes": [
-      "initiativeOverview",
-      "initiativeStoresUpload",
-      "initiativeStores",
-      "reportedUsers",
-      "insertReportedUser",
-      "reportExport",
-      "initiativeStoreDetail",
-      "newDiscount",
-      "acceptNewDiscount",
-      "refundRequests",
-      "refundRequestsStore",
-      "modifyDocument",
-      "reverse"
-    ]
-  },
-  "Bonus Elettrodomestici - test": {
-    "routes": [
-      "initiativeOverview",
-      "initiativeStoresUpload",
-      "initiativeStores",
-      "reportExport",
-      "initiativeStoreDetail",
-      "newDiscount",
-      "acceptNewDiscount",
-      "refundRequests",
-      "refundRequestsStore",
-      "modifyDocument",
-      "reverse"
-    ]
   }
 }

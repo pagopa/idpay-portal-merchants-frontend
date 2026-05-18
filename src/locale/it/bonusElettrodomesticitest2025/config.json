@@ -1,0 +1,15 @@
+{
+    "routes": [
+      "initiativeOverview",
+      "initiativeStoresUpload",
+      "initiativeStores",
+      "reportExport",
+      "initiativeStoreDetail",
+      "newDiscount",
+      "acceptNewDiscount",
+      "refundRequests",
+      "refundRequestsStore",
+      "modifyDocument",
+      "reverse"
+    ]
+  }

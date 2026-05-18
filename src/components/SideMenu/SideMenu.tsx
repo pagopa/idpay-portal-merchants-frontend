@@ -27,11 +27,11 @@ interface MatchParams {
 
 export default function SideMenu() {
   const initiativesList = useAppSelector(intiativesListSelector);
-  const {getInitiativeRoutes} = useInitiativeRoutes();
+  const { getInitiativeRoutes } = useInitiativeRoutes();
   const { t } = useScopedTranslation();
   const history = useHistory();
   const onExit = useUnloadEventOnExit();
-  const [expanded, setExpanded] = useState<string | false>(false);
+  const [expandedItem, setExpandedItem] = useState<string>('');
   const [pathname, setPathName] = useState(() => {
     /*
     For some reason, push on history will not notify this component.
@@ -41,7 +41,6 @@ export default function SideMenu() {
     history.listen(() => setPathName(history.location.pathname));
     return history.location.pathname;
   });
-  const [firstInitiativePage] = config;
 
   const match = matchPath(location.pathname, {
     path: [
@@ -62,20 +61,15 @@ export default function SideMenu() {
     // eslint-disable-next-line no-prototype-builtins
     if (match !== null && match.params.hasOwnProperty('initiative_id')) {
       const { initiative_id } = match.params as MatchParams;
-      const itemExpanded = `panel-${initiative_id}`;
-      setExpanded(itemExpanded);
+      setExpandedItem(`panel-${initiative_id}`);
     } else {
       const firstItemExpanded =
         Array.isArray(initiativesList) && initiativesList.length > 0
           ? `panel-${initiativesList[0].initiativeId}`
-          : false;
-      setExpanded(firstItemExpanded);
+          : '';
+      setExpandedItem(firstItemExpanded);
     }
   }, [JSON.stringify(match), initiativesList]);
-
-  const handleChange = (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
-    setExpanded(isExpanded ? panel : false);
-  };
 
   return (
     <Box display="grid" mt={1}>
@@ -89,62 +83,64 @@ export default function SideMenu() {
             level={0}
             data-testid="initiativeList-click-test"
           />
-          {initiativesList?.map((item) => (
-            <Accordion
-              key={item.initiativeId}
-              expanded={expanded === `panel-${item.initiativeId}`}
-              onChange={handleChange(`panel-${item.initiativeId}`)}
-              disableGutters
-              elevation={0}
-              sx={{
-                border: 'none',
-                '&:before': { backgroundColor: '#fff' },
-                minWidth: 300,
-                maxWidth: 316,
-              }}
-              data-testid="accordion-click-test"
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls={`panel-${item.initiativeId}-content`}
-                id={`panel-${item.initiativeId}-header`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onExit(() => {
-                    history.replace(
-                      `${BASE_ROUTE}/${item.initiativeId}/${firstInitiativePage.route}`
-                    );
-                    setExpanded(`panel-${item.initiativeId}`);
-                  });
+          {initiativesList && initiativesList.map((item) => {
+            const initiativeRoutes = getInitiativeRoutes(item.initiativeName, item.startDate) as Array<string>;
+            const accordionConfig = config.filter(({ key }) => initiativeRoutes.includes(key));
+            const [firstInitiativePage] = accordionConfig;
+            const isExpanded = expandedItem === `panel-${item.initiativeId}`;
+            return (
+              <Accordion
+                key={item.initiativeId}
+                expanded={isExpanded}
+                disableGutters
+                elevation={0}
+                sx={{
+                  border: 'none',
+                  '&:before': { backgroundColor: '#fff' },
+                  minWidth: 300,
+                  maxWidth: 316,
                 }}
+                data-testid="accordion-click-test"
               >
-                <ListItemText sx={{ wordBreak: 'break-word' }} primary={item.initiativeName} />
-              </AccordionSummary>
-              <AccordionDetails sx={{ p: 0 }}>
-                <List disablePadding>
-                  {config.filter(({ key }) => {
-                    const initiativeRoutes = getInitiativeRoutes(item?.initiativeName);
-                    return initiativeRoutes.includes(key);
-                  }).map(({ key, title, route, icon, dataTestId }) => <SidenavItem
-                    key={key}
-                    title={t(title)}
-                    handleClick={() =>
-                      onExit(() => {
-                        history.replace(`${BASE_ROUTE}/${item.initiativeId}/${route}`);
-                      })
-                    }
-                    isSelected={pathname.startsWith(
-                      `${BASE_ROUTE}/${item.initiativeId}/${route}`
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls={`panel-${item.initiativeId}-content`}
+                  id={`panel-${item.initiativeId}-header`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onExit(() => {
+                      history.replace(
+                        `${BASE_ROUTE}/${item.initiativeId}/${firstInitiativePage.route}`
+                      );
+                      setExpandedItem(`panel-${item.initiativeId}`);
+                    });
+                  }}
+                >
+                  <ListItemText sx={{ wordBreak: 'break-word' }} primary={item.initiativeName} />
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 0 }}>
+                  <List disablePadding>
+                    {accordionConfig.map(({ key, title, route, icon, dataTestId }) => <SidenavItem
+                      key={key}
+                      title={t(title)}
+                      handleClick={() =>
+                        onExit(() => {
+                          history.replace(`${BASE_ROUTE}/${item.initiativeId}/${route}`);
+                        })
+                      }
+                      isSelected={pathname.startsWith(
+                        `${BASE_ROUTE}/${item.initiativeId}/${route}`
+                      )}
+                      icon={icon}
+                      level={2}
+                      data-testid={dataTestId}
+                    />
                     )}
-                    icon={icon}
-                    level={2}
-                    data-testid={dataTestId}
-                  />
-                  )}
-                </List>
-              </AccordionDetails>
-            </Accordion>
-          ))}
+                  </List>
+                </AccordionDetails>
+              </Accordion>
+            );
+          })}
         </List>
       </Box>
     </Box>

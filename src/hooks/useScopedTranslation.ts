@@ -13,6 +13,7 @@ const failedNamespaceLoads = new Set<string>();
 export type UseScopedTranslationOptions = {
   initiativeName?: string;
   enableNamespaceLoading?: boolean;
+  fileName?: 'copy' | 'config'
 };
 
 export type UseScopedTranslationResult = {
@@ -48,7 +49,7 @@ const resolveInitiativeNamespace = (
 export const useScopedTranslation = (
   options: UseScopedTranslationOptions = {}
 ): UseScopedTranslationResult => {
-  const { initiativeName: initiativeNameProp, enableNamespaceLoading = true } = options;
+  const { initiativeName: initiativeNameProp, enableNamespaceLoading = true, fileName = "copy" } = options;
 
   const { initiativeId } = useCurrentInitiativeId();
   const initiatives = useAppSelector(intiativesListSelector);
@@ -74,10 +75,10 @@ export const useScopedTranslation = (
 
   const namespacesForHook = useMemo((): Array<string> => {
     if (initiativeName) {
-      return ['common', `${initiativeName}/copy`, `${initiativeName}/tos`];
+      return ['common', `${initiativeName}/copy`, `${initiativeName}/config`];
     }
 
-    return ['common', 'default/copy'];
+    return ['common', 'default/copy', 'default/config'];
   }, [initiativeName]);
 
   const translationHook = (useTranslation as any)(namespacesForHook);
@@ -86,8 +87,8 @@ export const useScopedTranslation = (
   const t = useMemo(
     () =>
       ((key: any, options?: any) => {
-        if (initiativeName) {
-          const initiativeNs = `${initiativeName}/copy`;
+        if (options?.nameSpace || initiativeName) {
+          const initiativeNs = `${options?.nameSpace || initiativeName}/${fileName}`;
 
           const initiativeValue = rawT(key, {
             ns: initiativeNs,
@@ -143,6 +144,14 @@ export const useScopedTranslation = (
         if (ns.endsWith('/copy')) {
           const { loadItNamespace } = await import('../locale/multiInitiativeI18n');
           const fallback = await loadItNamespace('default/copy');
+
+          (i18n as any).addResourceBundle(currentLang, ns, fallback, true, true);
+          (i18n as any).reloadResources(currentLang, ns);
+          (i18n as any).emit('loaded');
+        }
+        if (ns.endsWith('/config')) {
+          const { loadItNamespace } = await import('../locale/multiInitiativeI18n');
+          const fallback = await loadItNamespace('default/config');
 
           (i18n as any).addResourceBundle(currentLang, ns, fallback, true, true);
           (i18n as any).reloadResources(currentLang, ns);

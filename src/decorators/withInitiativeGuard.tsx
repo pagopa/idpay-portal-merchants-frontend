@@ -32,7 +32,7 @@ const WithInitiativeGuard: React.FC<Props> = ({ children, route }) => {
   const selectedInitiative = useCurrentInitiative();
   const {getInitiativeRoutes} = useInitiativeRoutes();
 
-  const validRoutes = getInitiativeRoutes(selectedInitiative?.initiativeName);
+  const validRoutes = getInitiativeRoutes(selectedInitiative?.initiativeName, selectedInitiative?.startDate) as unknown as Array<string>;
 
   const isValidRoute = validRoutes.includes(route);
   /**
