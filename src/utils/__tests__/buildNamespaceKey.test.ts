@@ -29,14 +29,20 @@ describe('buildNamespaceKey', () => {
     {
       name: 'TESTName',
       date: '2022-07-01',
-      expected: 'tESTName2022',
-      description: 'lowercases only the first character',
+      expected: 'testname2022',
+      description: 'normalizes entire string to lowercase before camelCase rebuild',
     },
     {
       name: 'My   New   Initiative',
       date: '2021-12-31',
       expected: 'myNewInitiative2021',
       description: 'handles names with multiple spaces',
+    },
+    {
+      name: 'Bonus elettrodomestici',
+      date: '2025-01-01',
+      expected: 'bonusElettrodomestici2025',
+      description: 'is case insensitive and builds correct camelCase namespace',
     },
   ])('should $description', ({ name, date, expected }) => {
     expect(buildNamespaceKey(name, date)).toBe(expected);

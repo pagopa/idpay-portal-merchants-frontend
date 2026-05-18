@@ -4,11 +4,22 @@ export function buildNamespaceKey(name: string, startDate: string): string {
   }
 
   const year = new Date(startDate).getFullYear();
+  
+  const words = name
+    .toLowerCase()
+    .match(/[a-z0-9]+/g);
 
-  const normalized = name
-    .replace(/\s+/g, '')
-    .replace(/[^\w]/g, '')
-    .replace(/^\w/, (c) => c.toLowerCase());
+  if (!words) {
+    return '';
+  }
 
-  return `${normalized}${year}`;
+  const camelCaseName = words
+    .map((word, index) =>
+      index === 0
+        ? word
+        : word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join('');
+
+  return `${camelCaseName}${year}`;
 }
