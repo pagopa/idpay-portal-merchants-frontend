@@ -9,30 +9,18 @@ import { parseJwt } from '../../../utils/jwt-utils';
 import { ApiError } from '../../../api/ApiError';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 
-jest.mock('../../../decorators/withLogin', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
-
-jest.mock('../../../decorators/withInitiativeGuard', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
-
-jest.mock('../../../decorators/withParties', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
-
-jest.mock('../../../decorators/withSelectedParty', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
-
-jest.mock('../../../decorators/withSelectedPartyProducts', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
+[
+  '../../../decorators/withLogin',
+  '../../../decorators/withInitiativeGuard',
+  '../../../decorators/withParties',
+  '../../../decorators/withSelectedParty',
+  '../../../decorators/withSelectedPartyProducts',
+].forEach((path) => {
+  jest.mock(path, () => ({
+    __esModule: true,
+    default: (Component: any) => Component,
+  }));
+});
 
 jest.mock('../../../services/merchantService', () => ({
   __esModule: true,
@@ -194,13 +182,7 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: () => initialState
-  });
-};
-
-const store = createMockStore();
+/* local store will be created inside renderComponent to avoid duplication */
 
 describe('ReportedUsers Component', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
@@ -226,8 +208,13 @@ describe('ReportedUsers Component', () => {
     if (locationState) {
       history.push('/initiative/123/reported-users', locationState);
     }
+
+    const localStore = configureStore({
+      reducer: () => ({})
+    });
+
     return render(
-      <Provider store={store}>
+      <Provider store={localStore}>
         <Router history={history}>
           <Route path="/initiative/:initiative_id/reported-users">
             <ReportedUsers />
