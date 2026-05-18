@@ -61,48 +61,63 @@ const createMockStore = (initialState?: any) => {
 const store = createMockStore();
 
 describe('ReportDataTable', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
+
+  const renderWithProvider = (props: any = {}) =>
+    render(
+      <Provider store={store}>
+        <ReportDataTable {...props} />
+      </Provider>
+    );
+
+  const mockReportsResponse = (reports: any[], overrides: any = {}) => {
+    getMerchantReports.mockResolvedValue({
+      reports,
+      page: 0,
+      size: 10,
+      totalElements: reports?.length ?? 0,
+      totalPages: reports?.length ? 1 : 0,
+      ...overrides,
+    });
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
   });
 
   it('renders empty state when no reports', async () => {
-    getMerchantReports.mockResolvedValue({
-      reports: [],
-      page: 0,
-      size: 10,
-      totalElements: 0,
-      totalPages: 0,
-    });
+    mockReportsResponse([]);
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderWithProvider();
 
-    await waitFor(() => expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10));
+    await waitFor(() =>
+      expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10)
+    );
 
-    expect(screen.getByText('pages.reportExport.noReportFound')).toBeInTheDocument();
+    expect(
+      screen.getByText('pages.reportExport.noReportFound')
+    ).toBeInTheDocument();
   });
 
   it('renders reports when available', async () => {
-    getMerchantReports.mockResolvedValue({
-      reports: [
-        {
-          id: 'r1',
-          fileName: 'report.csv',
-          reportStatus: 'INSERTED',
-        },
-      ],
-      page: 0,
-      size: 10,
-      totalElements: 1,
-      totalPages: 1,
-    });
+    mockReportsResponse([
+      {
+        id: 'r1',
+        fileName: 'report.csv',
+        reportStatus: 'INSERTED',
+      },
+    ]);
 
-    render(<Provider store={store}><ReportDataTable /></Provider>);
+    renderWithProvider();
 
-    await waitFor(() => expect(screen.getByTestId('row-r1')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByTestId('row-r1')).toBeInTheDocument()
+    );
 
-    expect(screen.getByText('pages.reportExport.reportTitle')).toBeInTheDocument();
+    expect(
+      screen.getByText('pages.reportExport.reportTitle')
+    ).toBeInTheDocument();
   });
 
   it('handles pagination change', async () => {

@@ -270,13 +270,30 @@ const createMockStore = (initialState?: any) => {
 const store = createMockStore();
 
 describe('InitiativeStoresUpload', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
+
+  const renderWithProvider = () =>
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
+
+  const setupAuth = () => {
+    readTokenMock.mockReturnValue('fakeToken');
+    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({
+      merchant_id: 'merchant-1',
+    });
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
     jest.spyOn(window, 'open').mockImplementation(() => null as any);
 
-    (useParams as jest.Mock).mockReturnValue({ initiative_id: 'test-initiative' });
+    (useParams as jest.Mock).mockReturnValue({
+      initiative_id: 'test-initiative',
+    });
     (useHistory as jest.Mock).mockReturnValue({ push: pushMock });
     mockUsePlacesAutocomplete.mockReturnValue({
       options: optionsAutocomplete,
@@ -320,39 +337,21 @@ describe('InitiativeStoresUpload', () => {
     expect(instance).toBeInTheDocument();
   });
 
-  it('shows POINT_OF_SALE_ALREADY_REGISTERED error', async () => {
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+  it.each([
+    { result: undefined },
+    { result: null },
+    {
+      result: {
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: 'Email duplicata',
+      },
+    },
+  ])('handles confirm flow', async ({ result }) => {
+    setupAuth();
+    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(result);
 
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    renderWithProvider();
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  });
-
-  it('navigates to STORES when response is null', async () => {
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(null);
-
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
-    fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  });
-
-  it('normalizes URLs when uploading manually', async () => {
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
-
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue({
-      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
-      message: 'Email duplicata',
-    });
-
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
-    fireEvent.click(screen.getByTestId('confirm-stores-button'));
-
-    /*await waitFor(() => {
-      expect(formatUtils.normalizeUrlHttps).toHaveBeenCalled();
-      expect(formatUtils.normalizeUrlHttp).toHaveBeenCalled();
-    });*/
   });
 
   it.skip('test complete flow - physical store - error Merchant ID not found', async () => {

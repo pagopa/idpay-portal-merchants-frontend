@@ -118,7 +118,7 @@ describe('InitiativeStoreDetail', () => {
     jest.useRealTimers();
   });
 
-  test('renders store detail and calls APIs', async () => {
+  const renderWithProviders = () =>
     render(
       <MemoryRouter>
         <Provider store={store}>
@@ -128,6 +128,28 @@ describe('InitiativeStoreDetail', () => {
         </Provider>
       </MemoryRouter>
     );
+
+  const openEditModal = async (user: any) => {
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+    await waitFor(() =>
+      expect(
+        screen.getByText('pages.initiativeStores.modalDescription')
+      ).toBeInTheDocument()
+    );
+  };
+
+  const fillEmails = async (user: any, email: string) => {
+    const inputs = screen.getAllByRole('textbox');
+    const email1 = inputs[2];
+    const email2 = inputs[3];
+    await user.clear(email1);
+    await user.type(email1, email);
+    await user.clear(email2);
+    await user.type(email2, email);
+  };
+
+  test('renders store detail and calls APIs', async () => {
+    renderWithProviders();
     expect(await screen.findByText('Mock Store')).toBeInTheDocument();
     expect(mockGetById).toHaveBeenCalled();
     expect(mockGetTransactions).toHaveBeenCalled();
@@ -269,108 +291,22 @@ describe('InitiativeStoreDetail', () => {
     expect(await screen.findAllByText('Le email non coincidono')).toHaveLength(2);
   });
 
-  test('handles update success and alert', async () => {
+  it.each([
+    { result: undefined, email: 'new@test.it' },
+    { result: { code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' }, email: 'duplicate@test.it' },
+    { result: { code: 'OTHER' }, email: 'test@test.com' },
+  ])('handles update flow', async ({ result, email }) => {
     const user = userEvent.setup({ delay: null });
-    mockUpdate.mockResolvedValue(undefined);
+    mockUpdate.mockResolvedValue(result as any);
 
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
-
-    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
-    });
-
-    const inputs = screen.getAllByRole('textbox');
-    const emailField1 = inputs[2];
-    const emailField2 = inputs[3];
-
-    await user.clear(emailField1);
-    await user.type(emailField1, 'new@test.it');
-
-    await user.clear(emailField2);
-    await user.type(emailField2, 'new@test.it');
+    renderWithProviders();
+    await openEditModal(user);
+    await fillEmails(user, email);
 
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
 
     await waitFor(() => expect(mockUpdate).toHaveBeenCalled());
-  });
-
-  test('handles duplicate email error', async () => {
-    const user = userEvent.setup({ delay: null });
-    mockUpdate.mockResolvedValue({ code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' });
-
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
-
-    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
-    });
-
-    const inputs = screen.getAllByRole('textbox');
-    const emailField1 = inputs[2];
-    const emailField2 = inputs[3];
-
-    await user.clear(emailField1);
-    await user.type(emailField1, 'duplicate@test.it');
-
-    await user.clear(emailField2);
-    await user.type(emailField2, 'duplicate@test.it');
-
-    const submitButton = screen.getByTestId('update-button');
-    await user.click(submitButton);
-  });
-
-  test('handles generic update error', async () => {
-    const user = userEvent.setup({ delay: null });
-    mockUpdate.mockResolvedValue({ code: 'OTHER' });
-
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
-
-    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
-    });
-
-    const inputs = screen.getAllByRole('textbox');
-    const emailField1 = inputs[2];
-    const emailField2 = inputs[3];
-
-    await user.clear(emailField1);
-    await user.type(emailField1, 'test@test.com');
-
-    await user.clear(emailField2);
-    await user.type(emailField2, 'test@test.com');
-
-    const submitButton = screen.getByTestId('update-button');
-    await user.click(submitButton);
   });
 
   test('handles fetchStoreDetail failure', async () => {

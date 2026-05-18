@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { loadItNamespace } from '../multiInitiativeI18n';
 
 jest.mock('../it/common.json', () => ({
@@ -20,15 +21,13 @@ jest.mock(
 );
 
 describe('loadItNamespace', () => {
-  it('should load common namespace when namespace is "common"', async () => {
-    const result = await loadItNamespace('common');
-    expect(result).toEqual({ key: 'commonValue' });
-  });
-
-  it('should load common namespace when namespace is "commons"', async () => {
-    const result = await loadItNamespace('commons');
-    expect(result).toEqual({ key: 'commonValue' });
-  });
+  it.each(['common', 'commons'])(
+    'should load common namespace when namespace is "%s"',
+    async (ns: string) => {
+      const result = await loadItNamespace(ns);
+      expect(result).toEqual({ key: 'commonValue' });
+    }
+  );
 
   it('should load default namespace file', async () => {
     const result = await loadItNamespace('default/copy');
@@ -40,13 +39,11 @@ describe('loadItNamespace', () => {
     expect(result).toEqual({ key: 'initiativeCopyValue' });
   });
 
-  it('should return empty object if namespace format is invalid', async () => {
-    const result = await loadItNamespace('invalidnamespace');
-    expect(result).toEqual({});
-  });
-
-  it('should return empty object if import fails', async () => {
-    const result = await loadItNamespace('unknown/copy');
-    expect(result).toEqual({});
-  });
+  it.each(['invalidnamespace', 'unknown/copy'])(
+    'should return empty object for invalid or failing namespace "%s"',
+    async (ns: string) => {
+      const result = await loadItNamespace(ns);
+      expect(result).toEqual({});
+    }
+  );
 });
