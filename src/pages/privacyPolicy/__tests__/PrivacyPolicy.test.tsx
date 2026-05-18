@@ -5,6 +5,7 @@ import PrivacyPolicy from '../PrivacyPolicy';
 import { useOneTrustNotice } from '../../../hooks/useOneTrustNotice';
 import { ENV } from '../../../utils/env';
 import routes from '../../../routes';
+import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('../../../hooks/useOneTrustNotice');
 jest.mock('../../components/OneTrustContentWrapper', () => (props: { idSelector: string }) => (
@@ -24,13 +25,34 @@ jest.mock('../../../routes', () => ({
   PRIVACY_POLICY: '/mock-privacy-route',
 }));
 
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
 describe('PrivacyPolicy', () => {
+  const renderComponent = () => render(<PrivacyPolicy />);
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
   });
 
-  test('renders without crashing', () => {
-    render(<PrivacyPolicy />);
-    expect(screen.getByText(/pages\.privacyPolicyStatic\.title/i)).toBeInTheDocument();
+  it('renders page title correctly', () => {
+    renderComponent();
+    expect(
+      screen.getByText(/pages\.privacyPolicyStatic\.title/i)
+    ).toBeInTheDocument();
   });
 });

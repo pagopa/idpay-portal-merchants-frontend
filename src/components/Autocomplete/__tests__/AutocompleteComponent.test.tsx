@@ -53,7 +53,22 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
   );
 });
 
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
 import AutocompleteComponent from '../AutocompleteComponent';
+import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -70,6 +85,7 @@ jest.mock('../../../utils/constants', () => ({
 }));
 
 describe('AutocompleteComponent', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
     jest.useFakeTimers();
   });

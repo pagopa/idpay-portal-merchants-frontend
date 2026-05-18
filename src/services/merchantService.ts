@@ -191,13 +191,9 @@ export const downloadBatchCsv = (
 export const postponeTransaction = (
   initiativeId: string,
   rewardBatchId: string,
-  transactionId: string,
+  transactionId: string
 ): Promise<void> =>
-  getMerchantsApi().postponeTransaction(
-    initiativeId,
-    rewardBatchId,
-    transactionId,
-  );
+  getMerchantsApi().postponeTransaction(initiativeId, rewardBatchId, transactionId);
 
 export const getMerchantReports = (
   initiativeId: string,

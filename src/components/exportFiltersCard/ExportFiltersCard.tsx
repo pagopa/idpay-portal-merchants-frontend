@@ -1,5 +1,4 @@
 import { Box, Button, Card, CardContent, Typography, Stack, TextField } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { useRef, useMemo, useCallback } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
@@ -12,6 +11,7 @@ type ReportTypeEnum = ReportRequest['reportType'];
 const MERCHANT_TRANSACTIONS: ReportTypeEnum = 'MERCHANT_TRANSACTIONS';
 import { MIN_START_DATE } from '../../utils/constants';
 import { ReportDTO } from '../../api/generated/merchants/data-contracts';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 type ReportStatusEnum = ReportDTO['reportStatus'];
 const FAILED: ReportStatusEnum = 'FAILED';
@@ -31,7 +31,7 @@ type Props = {
 };
 
 const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { initiative_id } = useParams<RouteParams>();
   const requestIdRef = useRef<number>(0);
 
@@ -45,28 +45,28 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
     },
     validate: (values) => ({
       ...(!values.startDate && {
-        startDate: t('pages.reportExport.form.validation.required'),
+        startDate: t('validation.required'),
       }),
       ...(!values.endDate && {
-        endDate: t('pages.reportExport.form.validation.required'),
+        endDate: t('validation.required'),
       }),
       ...(values.startDate &&
         dayjs(values.startDate).isAfter(yesterday, 'day') && {
-          startDate: t('pages.reportExport.form.validation.invalidRange'),
+          startDate: t('validation.invalidRange'),
         }),
       ...(values.endDate &&
         dayjs(values.endDate).isAfter(yesterday, 'day') && {
-          endDate: t('pages.reportExport.form.validation.invalidRange'),
+          endDate: t('validation.invalidRange'),
         }),
       ...(values.startDate &&
         values.endDate &&
         dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 0 && {
-          endDate: t('pages.reportExport.form.validation.invalidRange'),
+          endDate: t('validation.invalidRange'),
         }),
       ...(values.startDate &&
         values.endDate &&
         dayjs(values.endDate).diff(dayjs(values.startDate), 'day') > 90 && {
-          endDate: t('pages.reportExport.form.validation.maxRange'),
+          endDate: t('validation.maxRange'),
         }),
     }),
     onSubmit: async (values) => {

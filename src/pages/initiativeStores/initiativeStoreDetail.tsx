@@ -2,13 +2,13 @@ import { Box, Button, Typography, TextField } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useParams, Prompt } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Edit } from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';
 import { ButtonNaked } from '@pagopa/mui-italia';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import {
   getMerchantPointOfSalesById,
   getMerchantPointOfSaleTransactionsProcessed,
@@ -54,7 +54,7 @@ const InitiativeStoreDetail = () => {
     contactSurnameModal?: string;
     contactNameModal?: string;
   }>({});
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { initiative_id, store_id } = useParams<RouteParams>();
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { setStoreId } = useStore();
@@ -369,7 +369,7 @@ const InitiativeStoreDetail = () => {
         }}
       >
         <BreadcrumbsBox
-          backLabel={t('commons.backBtn')}
+          backLabel={t('actions.back')}
           items={[t('pages.initiativeStores.title'), storeDetail?.franchiseName]}
         />
         <TitleBox
@@ -473,7 +473,7 @@ const InitiativeStoreDetail = () => {
         }}
         className="iban-modal"
       >
-        <Typography variant="h6">{t('commons.modify')}</Typography>
+        <Typography variant="h6">{t('actions.modify')}</Typography>
         <Typography variant="body1" my={2}>
           {t('pages.initiativeStores.modalDescription')}
         </Typography>
@@ -563,10 +563,10 @@ const InitiativeStoreDetail = () => {
               setFieldErrors({});
             }}
           >
-            {t('commons.cancel')}
+            {t('actions.cancel')}
           </Button>
           <Button variant="contained" data-testid="update-button" onClick={handleUpdateReferent}>
-            {t('commons.modify')}
+            {t('actions.modify')}
           </Button>
         </Box>
       </ModalComponent>

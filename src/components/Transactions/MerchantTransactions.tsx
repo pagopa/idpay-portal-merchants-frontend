@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia/theme';
 import { useFormik } from 'formik';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
@@ -24,6 +23,7 @@ import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import CustomChip from '../Chip/CustomChip';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/data-contracts';
 import { useAlert } from '../../hooks/useAlert';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import TransactionDataTable from './TransactionDataTable';
 import TransactionDetail from './TransactionDetail';
 import getStatus from './useStatus';
@@ -52,7 +52,7 @@ const MerchantTransactions = ({
   dataTableIsLoading,
 }: MerchantTransactionsProps) => {
   const { alert, setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [rows, setRows] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
@@ -87,10 +87,10 @@ const MerchantTransactions = ({
   });
 
   const filterByStatusOptionsList = [
-    { value: 'REFUNDED', label: t('commons.discountStatusEnum.refunded') },
-    { value: 'CANCELLED', label: t('commons.discountStatusEnum.cancelled') },
-    { value: 'REWARDED', label: t('commons.discountStatusEnum.rewarded') },
-    { value: 'INVOICED', label: t('commons.discountStatusEnum.invoiced') },
+    { value: 'REFUNDED', label: t('enums.discountStatus.refunded') },
+    { value: 'CANCELLED', label: t('enums.discountStatus.cancelled') },
+    { value: 'REWARDED', label: t('enums.discountStatus.rewarded') },
+    { value: 'INVOICED', label: t('enums.discountStatus.invoiced') },
   ];
 
   const StatusChip = ({ status }: any) => {
@@ -266,8 +266,8 @@ const MerchantTransactions = ({
         <Grid item xs={12} sm={6} md={3} lg={2.5}>
           <FormControl fullWidth size="small">
             <TextField
-              label={t('pages.pointOfSaleTransactions.searchByFiscalCode')}
-              placeholder={t('pages.pointOfSaleTransactions.searchByFiscalCode')}
+              label={t('commons.labels.searchByFiscalCode')}
+              placeholder={t('commons.labels.searchByFiscalCode')}
               name="fiscalCode"
               aria-label="searchUser"
               role="input"
@@ -282,8 +282,8 @@ const MerchantTransactions = ({
         <Grid item xs={12} sm={6} md={3} lg={2.5}>
           <FormControl fullWidth size="small">
             <TextField
-              label={t('pages.pointOfSaleTransactions.searchByGtin')}
-              placeholder={t('pages.pointOfSaleTransactions.searchByGtin')}
+              label={t('commons.labels.searchByGtin')}
+              placeholder={t('commons.labels.searchByGtin')}
               name="productGtin"
               aria-label="searchGtin"
               role="input"
@@ -301,8 +301,8 @@ const MerchantTransactions = ({
         <Grid item xs={12} sm={6} md={3} lg={2.5}>
           <FormControl fullWidth size="small">
             <TextField
-              label={t('pages.pointOfSaleTransactions.searchByTrxCode')}
-              placeholder={t('pages.pointOfSaleTransactions.searchByTrxCode')}
+              label={t('commons.labels.searchByTrxCode')}
+              placeholder={t('commons.labels.searchByTrxCode')}
               name="trxCode"
               aria-label="searchTrxCode"
               role="input"
@@ -319,14 +319,14 @@ const MerchantTransactions = ({
         </Grid>
         <Grid item xs={12} sm={6} md={3} lg={2.5}>
           <FormControl size="small" fullWidth>
-            <InputLabel>{t('pages.initiativeDiscounts.filterByStatus')}</InputLabel>
+            <InputLabel>{t('commons.status')}</InputLabel>
             <Select
               id="status"
               inputProps={{
                 'data-testid': 'filterStatus-select',
               }}
               name="status"
-              label={t('pages.initiativeDiscounts.filterByStatus')}
+              label={t('commons.status')}
               onChange={formik.handleChange}
               value={formik.values.status}
               sx={{

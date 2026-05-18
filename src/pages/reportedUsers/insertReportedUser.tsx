@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import { Box, Typography, Paper, Button, Breadcrumbs } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory, useLocation } from 'react-router-dom';
 import { ButtonNaked } from '@pagopa/mui-italia';
@@ -12,6 +12,7 @@ import ROUTES from '../../routes';
 import { createReportedUser, getReportedUser } from '../../services/merchantService';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { isValidCF } from './helpersReportedUsers';
 import CfTextField from './CfTextField';
 import ModalReportedUser from './modalReportedUser';
@@ -29,7 +30,7 @@ const InsertReportedUser: React.FC = () => {
   const [showErrors, setShowErrors] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [cfToReport, setCfToReport] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { setAlert } = useAlert();
 
   const history = useHistory();
@@ -61,9 +62,9 @@ const InsertReportedUser: React.FC = () => {
     validate: (values) => {
       let errors: Partial<GetReportedUsersFilters> = {};
       if (!values.cf) {
-        errors = { ...errors, cf: t('pages.reportedUsers.cf.noResultUser') };
+        errors = { ...errors, cf: t('pages.reportedUsers.noResultUser') };
       } else if (!isValidCF(values.cf)) {
-        errors = { ...errors, cf: t('pages.reportedUsers.cf.invalid') };
+        errors = { ...errors, cf: t('pages.reportedUsers.invalid') };
       }
       return errors;
     },
@@ -72,7 +73,7 @@ const InsertReportedUser: React.FC = () => {
         if (initiativeID && merchantId) {
           const alreadyReported = await checkCfAlreadyReported(initiativeID, values.cf);
           if (alreadyReported) {
-            formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyRegistered'));
+            formik.setFieldError('cf', t('pages.reportedUsers.alreadyRegistered'));
             return;
           }
         }
@@ -86,10 +87,10 @@ const InsertReportedUser: React.FC = () => {
     setShowConfirmModal(false);
     switch (errorKey) {
       case 'UserId not found':
-        formik.setFieldError('cf', t('pages.reportedUsers.cf.noResultUser'));
+        formik.setFieldError('cf', t('pages.reportedUsers.noResultUser'));
         break;
       case "CF doesn't match initiative or merchant":
-        formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyPresent'));
+        formik.setFieldError('cf', t('pages.reportedUsers.alreadyPresent'));
         break;
       case 'Service unavailable':
         browserConsole.error('Service unavailable');
@@ -99,10 +100,10 @@ const InsertReportedUser: React.FC = () => {
         });
         break;
       case 'Already reported':
-        formik.setFieldError('cf', t('pages.reportedUsers.cf.alreadyRegistered'));
+        formik.setFieldError('cf', t('pages.reportedUsers.alreadyRegistered'));
         break;
       default:
-        formik.setFieldError('cf', t('pages.reportedUsers.cf.insertCf'));
+        formik.setFieldError('cf', t('pages.reportedUsers.insertCf'));
         break;
     }
   };
@@ -111,18 +112,18 @@ const InsertReportedUser: React.FC = () => {
     <Box maxWidth="75%" justifySelf="center">
       <ModalReportedUser
         open={showConfirmModal}
-        title={t('pages.insertReportedUser.ModalReportedUser.title')}
+        title={t('pages.reportedUsers.ModalReportedUser.title')}
         description={
           <Trans
-            i18nKey="pages.insertReportedUser.ModalReportedUser.description"
+            i18nKey="pages.reportedUsers.ModalReportedUser.description"
             values={{ cf: cfToReport ?? '' }}
             components={{ b: <b /> }}
           />
         }
-        descriptionTwo={t('pages.insertReportedUser.ModalReportedUser.descriptionTwo')}
+        descriptionTwo={t('pages.reportedUsers.ModalReportedUser.descriptionTwo')}
         cfModal={cfToReport ?? ''}
-        cancelText={t('pages.insertReportedUser.ModalReportedUser.cancelText')}
-        confirmText={t('pages.insertReportedUser.ModalReportedUser.confirmText')}
+        cancelText={t('pages.reportedUsers.ModalReportedUser.cancelText')}
+        confirmText={t('pages.reportedUsers.ModalReportedUser.confirmText')}
         onCancel={() => setShowConfirmModal(false)}
         onConfirm={async () => {
           if (cfToReport) {
@@ -192,16 +193,16 @@ const InsertReportedUser: React.FC = () => {
             }}
           >
             <TitleBox
-              title={t('pages.insertReportedUser.title')}
+              title={t('pages.reportedUsers.reportUser')}
               mbTitle={2}
               variantTitle="h4"
               variantSubTitle="body1"
             />
             <Typography variant="body2" sx={{ textAlign: 'left', width: '100%' }}>
-              {t('pages.insertReportedUser.subtitle')}
+              {t('pages.reportedUsers.reportUserSubtitle')}
             </Typography>
             <Typography variant="body2" sx={{ textAlign: 'left', width: '100%' }}>
-              {t('pages.insertReportedUser.mtTitle')}
+              {t('pages.reportedUsers.mtTitle')}
             </Typography>
           </Box>
         </Box>
@@ -212,8 +213,8 @@ const InsertReportedUser: React.FC = () => {
           <Grid container>
             <Grid item xs={12}>
               <TitleBox
-                title={t('pages.insertReportedUser.searchTitle')}
-                subTitle={t('pages.insertReportedUser.searchDescription')}
+                title={t('pages.reportedUsers.searchTitle')}
+                subTitle={t('pages.reportedUsers.searchDescription')}
                 mbTitle={3}
                 mtTitle={2}
                 mbSubTitle={2}
@@ -235,7 +236,7 @@ const InsertReportedUser: React.FC = () => {
                 formik={formik}
                 showErrors={showErrors}
                 setShowErrors={setShowErrors}
-                label={t('pages.reportedUsers.cfPlaceholder')}
+                label={t('commons.labels.searchByFiscalCode')}
                 name="cf"
               />
             </Box>
@@ -245,7 +246,7 @@ const InsertReportedUser: React.FC = () => {
 
       <Box sx={{ mt: 5, display: 'flex', justifyContent: 'space-between' }}>
         <Button data-testid="back-reportedUsers-button" variant="outlined" onClick={handleBack}>
-          {t('commons.backBtn')}
+          {t('actions.back')}
         </Button>
         <Button
           data-testid="confirm-reportedUsers-button"
@@ -255,7 +256,7 @@ const InsertReportedUser: React.FC = () => {
             formik.handleSubmit();
           }}
         >
-          {t('commons.confirmBtn')}
+          {t('actions.confirm')}
         </Button>
       </Box>
     </Box>

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   Box,
   Stack,
@@ -12,6 +11,7 @@ import {
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useParams } from 'react-router-dom';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import DataTable from '../../components/dataTable/DataTable';
 import StatusChipInvoice from '../../components/Chip/StatusChipInvoice';
 import {
@@ -72,7 +72,7 @@ const InvoiceDataTable = ({
   ]);
   const { initiative_id, batch_id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleListButtonClick = (row: any) => {
