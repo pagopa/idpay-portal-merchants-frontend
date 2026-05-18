@@ -1,5 +1,5 @@
 import { Box, Typography, Paper, FormControl, TextField, Divider, Button } from '@mui/material';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Fragment, useState, useEffect } from 'react';
@@ -12,10 +12,11 @@ import { ENV } from '../../utils/env';
 import { EmailMessageDTO } from '../../api/generated/email-notification/data-contracts';
 import ExitModal from '../../components/ExitModal/ExitModal';
 import { useAlert } from '../../hooks/useAlert';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 const Assistance = () => {
   const { setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [openExitModal, setOpenExitModal] = useState(false);
   const handleOpenExitModal = () => setOpenExitModal(true);
   const handleCloseExitModal = () => setOpenExitModal(false);
@@ -45,9 +46,9 @@ const Assistance = () => {
   }, []);
 
   const validationSchema = Yup.object().shape({
-    assistanceSubject: Yup.string().required(t('validation.requiredField')),
+    assistanceSubject: Yup.string().required(t('validation.required')),
     assistanceMessage: Yup.string()
-      .required(t('validation.requiredField'))
+      .required(t('validation.required'))
       .max(500, t('validation.maxChars', { x: 500 })),
   });
 
@@ -175,14 +176,14 @@ const Assistance = () => {
                     data-testid="sendAssistenceRequest-test"
                     disabled={!formik.dirty || !formik.isValid}
                   >
-                    {t('commons.sendBtn')}
+                    {t('actions.send')}
                   </Button>
                 </Box>
               </Paper>
             </Box>
             <Box sx={{ display: 'grid', gridColumn: 'span 2' }}>
               <Button variant="outlined" onClick={handleOpenExitModal} data-testid="open-exit-test">
-                {t('commons.backBtn')}
+                {t('actions.back')}
               </Button>
               <ExitModal
                 title={t('pages.assistanceRequest.exitModalTitle')}
@@ -234,7 +235,7 @@ const Assistance = () => {
                 onClick={() => history.replace(ROUTES.HOME)}
                 data-testid="thankyouPageBackBtn-test"
               >
-                {t('commons.closeBtn')}
+                {t('actions.close')}
               </Button>
             </Box>
           </Box>

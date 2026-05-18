@@ -5,12 +5,26 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Tooltip } from '@mui/material';
 import MerchantTransactions from '../MerchantTransactions';
-import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import getStatus from '../useStatus';
 import CustomChip from '../../Chip/CustomChip';
+import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/data-contracts';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 const mockSetAlert = jest.fn();
@@ -132,9 +146,9 @@ describe('MerchantTransactions', () => {
   it('handles filter application', async () => {
     renderComponent();
 
-    const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
+    const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
     const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
+      'commons.labels.searchByFiscalCode'
     );
 
     await act(async () => {
@@ -151,16 +165,16 @@ describe('MerchantTransactions', () => {
     renderComponent();
 
     await act(async () => {
-      const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
+      const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
       const fiscalCodeInput = screen.getByLabelText(
-        'pages.pointOfSaleTransactions.searchByFiscalCode'
+        'commons.labels.searchByFiscalCode'
       );
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
 
     await waitFor(() => {
-      const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+      const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });
       expect(resetButton).toBeInTheDocument();
     });
   });
@@ -249,7 +263,7 @@ describe('MerchantTransactions', () => {
     renderComponent();
 
     const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
+      'commons.labels.searchByFiscalCode'
     );
     await userEvent.type(fiscalCodeInput, 'TESTCF');
 
@@ -259,8 +273,8 @@ describe('MerchantTransactions', () => {
   it('accepts valid alphanumeric GTIN and trxCode input', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     await userEvent.type(gtinInput, 'ABC123xyz');
     await userEvent.type(trxCodeInput, 'ABC123xy');
 
@@ -277,10 +291,8 @@ describe('MerchantTransactions', () => {
   it('prevents GTIN and trxCodeInput input with spaces', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByGtin'
-    ) as HTMLInputElement;
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin') as HTMLInputElement;
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '123 456' } });
     fireEvent.change(trxCodeInput, { target: { value: '123 456' } });
 
@@ -291,11 +303,9 @@ describe('MerchantTransactions', () => {
   it('prevents GTIN and trxCodeInput input longer than 14/8 characters', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByGtin'
-    ) as HTMLInputElement;
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin') as HTMLInputElement;
     const trxCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByTrxCode'
+      'commons.labels.searchByTrxCode'
     ) as HTMLInputElement;
     fireEvent.change(gtinInput, { target: { value: '123456789012345' } });
     fireEvent.change(trxCodeInput, { target: { value: '123456789012345' } });
@@ -307,8 +317,8 @@ describe('MerchantTransactions', () => {
   it('shows error message for special characters in GTIN and trxCode', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '123@#$' } });
     fireEvent.change(trxCodeInput, { target: { value: '123@#$' } });
 
@@ -323,8 +333,8 @@ describe('MerchantTransactions', () => {
   it('accepts exactly 14 characters in GTIN and trxCode', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     await userEvent.type(gtinInput, '12345678901234');
     await userEvent.type(trxCodeInput, '12345678');
 
@@ -335,8 +345,8 @@ describe('MerchantTransactions', () => {
   it('clears error message when valid input is entered after invalid', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
 
     fireEvent.change(gtinInput, { target: { value: '123@' } });
     fireEvent.change(trxCodeInput, { target: { value: '123@' } });
@@ -360,8 +370,8 @@ describe('MerchantTransactions', () => {
   it('clears error message on blur', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
 
     fireEvent.change(gtinInput, { target: { value: '123@' } });
     fireEvent.blur(gtinInput);
@@ -379,8 +389,8 @@ describe('MerchantTransactions', () => {
   it('accepts empty GTIN and trxCode input', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '' } });
     fireEvent.change(trxCodeInput, { target: { value: '' } });
 
@@ -415,12 +425,10 @@ describe('MerchantTransactions', () => {
   it('renders form with all filter fields', () => {
     renderComponent();
     expect(
-      screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode')
+      screen.getByLabelText('commons.labels.searchByFiscalCode')
     ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode')
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin')).toBeInTheDocument();
+    expect(screen.getByLabelText('commons.labels.searchByTrxCode')).toBeInTheDocument();
+    expect(screen.getByLabelText('commons.labels.searchByGtin')).toBeInTheDocument();
   });
 
   describe('renders transactions with variant values', () => {
@@ -567,9 +575,9 @@ describe('MerchantTransactions', () => {
       />
     );
 
-    const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
+    const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
     const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
+      'commons.labels.searchByFiscalCode'
     );
 
     await act(async () => {
@@ -589,21 +597,21 @@ describe('MerchantTransactions', () => {
     );
 
     await act(async () => {
-      const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
+      const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
       const fiscalCodeInput = screen.getByLabelText(
-        'pages.pointOfSaleTransactions.searchByFiscalCode'
+        'commons.labels.searchByFiscalCode'
       );
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
 
     await waitFor(() => {
-      const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+      const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });
       expect(resetButton).toBeInTheDocument();
     });
 
     await act(async () => {
-      const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+      const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });
       await userEvent.click(resetButton);
     });
   });
@@ -629,7 +637,7 @@ describe('MerchantTransactions', () => {
   it('validates GTIN with only numbers', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
     await userEvent.type(gtinInput, '1234567890123');
 
     expect(gtinInput).toHaveValue('1234567890123');
@@ -740,11 +748,11 @@ describe('MerchantTransactions', () => {
       />
     );
 
-    const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
+    const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
     fireEvent.click(applyButton);
 
     await waitFor(() => expect(handleFiltersApplied).not.toHaveBeenCalled());
-    expect(screen.getByRole('button', { name: 'commons.removeFiltersBtn' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'actions.removeFiltersBtn' })).toBeInTheDocument();
   });
 
   it('calls setAlert when drawer is toggled', async () => {
@@ -761,7 +769,7 @@ describe('MerchantTransactions', () => {
   it('rejects GTIN input with spaces or long values without updating formik', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
     fireEvent.change(gtinInput, { target: { value: '123 456' } });
     expect(gtinInput).toHaveValue('');
 
@@ -808,7 +816,7 @@ describe('MerchantTransactions', () => {
   it('accepts GTIN input of exactly 14 characters', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
     await userEvent.type(gtinInput, '12345678901234');
 
     expect(gtinInput).toHaveValue('12345678901234');
@@ -827,10 +835,10 @@ describe('MerchantTransactions', () => {
     renderComponent();
 
     const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
+      'commons.labels.searchByFiscalCode'
     );
     await userEvent.type(fiscalCodeInput, 'TEST');
-    const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+    const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });
     await userEvent.click(resetButton);
 
     expect(fiscalCodeInput).toHaveValue('');

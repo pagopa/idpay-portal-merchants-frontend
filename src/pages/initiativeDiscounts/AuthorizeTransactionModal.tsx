@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 import { MerchantTransactionDTO } from '../../api/generated/merchants/data-contracts';
 import {
@@ -46,7 +46,7 @@ const AuthorizeTransactionModal = ({
   const [expirationDays, setExpirationDays] = useState<number>();
   const [expirationDate, setExpirationDate] = useState<string>();
   const [expirationTime, setExpirationTime] = useState<string>();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   useEffect(() => {
     const { expirationDays, expirationDate, expirationTime } = mapDataForDiscoutTimeRecap(

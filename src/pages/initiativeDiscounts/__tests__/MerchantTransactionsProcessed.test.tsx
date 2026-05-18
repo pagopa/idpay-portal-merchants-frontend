@@ -1,13 +1,28 @@
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MerchantTransactionsProcessed from '../MerchantTransactionsProcessed';
-import { MerchantTransactionDTO } from '../../../api/generated/merchants/MerchantTransactionDTO';
 import { getMerchantTransactionsProcessed } from '../../../services/merchantService';
 import { formatDate, formattedCurrency } from '../../../helpers';
 import * as loadingHook from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
 import * as tableDataFilteredHook from '../useTableDataFiltered';
+import { useAppSelector } from '../../../redux/hooks';
+import { MerchantTransactionDTO } from '../../../api/generated/merchants/data-contracts';
 
 window.scrollTo = jest.fn();
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -64,8 +79,8 @@ jest.mock('../FiltersForm', () => (props: any) => (
     <button data-testid="submit-filters" onClick={() => props.formik.onSubmit(props.formik.values)}>
       apply-filters
     </button>
-    <span>commons.filterBtn</span>
-    <span>commons.removeFiltersBtn</span>
+    <span>actions.filterBtn</span>
+    <span>actions.removeFiltersBtn</span>
   </div>
 ));
 
@@ -91,6 +106,7 @@ const formatDateMock = formatDate as jest.Mock;
 const formattedCurrencyMock = formattedCurrency as jest.Mock;
 
 describe('MerchantTransactionsProcessed', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   const fakeId = '123';
 
   const fakeRows: MerchantTransactionDTO[] = [
@@ -317,8 +333,8 @@ describe('MerchantTransactionsProcessed', () => {
 
     render(<MerchantTransactionsProcessed id={fakeId} />);
 
-    expect(screen.getByText('commons.filterBtn')).toBeInTheDocument();
-    expect(screen.getByText('commons.removeFiltersBtn')).toBeInTheDocument();
+    expect(screen.getByText('actions.filterBtn')).toBeInTheDocument();
+    expect(screen.getByText('actions.removeFiltersBtn')).toBeInTheDocument();
 
     const button = screen.getByTestId('submit-filters');
     fireEvent.click(button);

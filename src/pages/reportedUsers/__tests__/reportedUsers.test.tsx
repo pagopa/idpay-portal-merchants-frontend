@@ -62,10 +62,10 @@ jest.mock('react-i18next', () => ({
         'pages.reportedUsers.subtitle': 'Sottotitolo',
         'pages.reportedUsers.reportUser': 'Segnala Utente',
         'pages.reportedUsers.loading': 'Caricamento...',
-        'pages.reportedUsers.cf.noResultUser': 'Nessun utente trovato',
+        'pages.reportedUsers.noResultUser': 'Nessun utente trovato',
         'pages.reportedUsers.noUsers': 'Nessun utente presente',
-        'pages.reportedUsers.cf.validCf': 'La segnalazione è stata registrata',
-        'pages.reportedUsers.cf.removedCf': 'Utente rimosso con successo',
+        'pages.reportedUsers.validCf': 'La segnalazione è stata registrata',
+        'pages.reportedUsers.removedCf': 'Utente rimosso con successo',
         'pages.reportedUsers.ModalReportedUser.title': 'Conferma eliminazione',
         'pages.reportedUsers.ModalReportedUser.description': `Vuoi eliminare ${params?.cf}?`,
         'pages.reportedUsers.ModalReportedUser.descriptionTwo': 'Operazione irreversibile',
@@ -174,13 +174,36 @@ jest.mock('../columnsReportedUser', () => ({
 }));
 
 import type { MockedFunction, Mocked } from 'jest-mock';
+import { configureStore } from '@reduxjs/toolkit';
+import { useAppSelector } from '../../../redux/hooks';
+import { Provider } from 'react-redux';
 
 const mockGetReportedUser = getReportedUser as MockedFunction<typeof getReportedUser>;
 const mockDeleteReportedUser = deleteReportedUser as MockedFunction<typeof deleteReportedUser>;
 const mockParseJwt = parseJwt as MockedFunction<typeof parseJwt>;
 const mockStorageTokenOps = storageTokenOps as Mocked<typeof storageTokenOps>;
 
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState
+  });
+};
+
+const store = createMockStore();
+
 describe('ReportedUsers Component', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   let history: any;
 
   beforeEach(() => {
@@ -204,11 +227,13 @@ describe('ReportedUsers Component', () => {
       history.push('/initiative/123/reported-users', locationState);
     }
     return render(
-      <Router history={history}>
-        <Route path="/initiative/:initiative_id/reported-users">
-          <ReportedUsers />
-        </Route>
-      </Router>
+      <Provider store={store}>
+        <Router history={history}>
+          <Route path="/initiative/:initiative_id/reported-users">
+            <ReportedUsers />
+          </Route>
+        </Router>
+      </Provider>
     );
   };
 

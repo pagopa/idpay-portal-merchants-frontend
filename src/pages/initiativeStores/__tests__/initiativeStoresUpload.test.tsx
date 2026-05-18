@@ -9,6 +9,9 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/stor
 import { useHistory, useParams } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
+import { configureStore } from '@reduxjs/toolkit';
+import { useAppSelector } from '../../../redux/hooks';
+import { Provider } from 'react-redux';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -247,7 +250,27 @@ const optionsAutocomplete = [
   },
 ];
 
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState
+  });
+};
+
+const store = createMockStore();
+
 describe('InitiativeStoresUpload', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -273,12 +296,12 @@ describe('InitiativeStoresUpload', () => {
   });
 
   it('renders correctly with Manual upload by default', () => {
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);
     expect(screen.getByTestId('confirm-stores-button')).toBeInTheDocument();
   });
 
   it('calls handleBack when back button is clicked', () => {
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     fireEvent.click(screen.getByTestId('back-stores-button'));
     expect(pushMock).toHaveBeenCalledWith(
       expect.stringContaining('/portale-esercenti/test-initiative/panoramica')
@@ -286,13 +309,13 @@ describe('InitiativeStoresUpload', () => {
   });
 
   it('Click to open manual link', () => {
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     fireEvent.click(screen.getByText('pages.initiativeStores.manualLink'));
     expect(window.open).toHaveBeenCalled();
   });
 
   it('sets salesPoints when form changes', () => {
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     const instance = screen.getByTestId('confirm-stores-button');
     expect(instance).toBeInTheDocument();
   });
@@ -301,7 +324,7 @@ describe('InitiativeStoresUpload', () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   });
 
@@ -310,7 +333,7 @@ describe('InitiativeStoresUpload', () => {
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
     (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(null);
 
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   });
 
@@ -323,7 +346,7 @@ describe('InitiativeStoresUpload', () => {
       message: 'Email duplicata',
     });
 
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
 
     /*await waitFor(() => {
@@ -342,7 +365,7 @@ describe('InitiativeStoresUpload', () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue(undefined);
 
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -362,7 +385,7 @@ describe('InitiativeStoresUpload', () => {
       message: 'Email duplicata',
     });
 
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -382,7 +405,7 @@ describe('InitiativeStoresUpload', () => {
       message: 'Error with SailPoint',
     });
 
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -399,7 +422,7 @@ describe('InitiativeStoresUpload', () => {
 
     (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(undefined);
 
-    render(<InitiativeStoresUpload />);
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);

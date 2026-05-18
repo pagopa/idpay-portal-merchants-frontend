@@ -3,7 +3,6 @@ import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
 import { trackEvent } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 import { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { WithPartiesProps } from '../../decorators/withParties';
 import { Product } from '../../model/Product';
 import { useAppSelector } from '../../redux/hooks';
@@ -12,6 +11,7 @@ import { Party } from '../../model/Party';
 import { ENV } from '../../utils/env';
 import { browserConsole } from '../../utils/consoleLogger';
 import { cleanupOnLogout } from '../../utils/logoutCleanup';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { CustomHeaderAccount } from './CustomHeaderAccount';
 
 type Props = WithPartiesProps & {
@@ -22,7 +22,7 @@ type Props = WithPartiesProps & {
 };
 
 const CustomHeader = ({ onExit, loggedUser }: /* , parties */ Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const products = useAppSelector(partiesSelectors.selectPartySelectedProducts);
   const selectedParty = useAppSelector(partiesSelectors.selectPartySelected);
   const [party2Show, setParty2Show] = useState<Array<Party>>();

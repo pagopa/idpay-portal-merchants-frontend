@@ -2,15 +2,11 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import NewDiscount from '../newDiscount';
+import { useAppSelector } from '../../../redux/hooks';
 
 const mockUseCurrentInitiativeId = jest.fn();
 jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
   useCurrentInitiativeId: () => mockUseCurrentInitiativeId(),
-}));
-
-const mockUseCurrentInitiative = jest.fn();
-jest.mock('../../../hooks/useCurrentInitiative', () => ({
-  useCurrentInitiative: () => mockUseCurrentInitiative(),
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend/lib', () => ({
@@ -36,10 +32,22 @@ jest.mock('../DiscountCreatedRecap', () => (props: any) => {
   return <div data-testid="discount-recap" />;
 });
 
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+
 describe('NewDiscount', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCurrentInitiative.mockReturnValue({ initiativeName: 'Init name' });
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeName: 'Init name' });
   });
 
   it('returns null when initiativeId is missing', () => {
@@ -83,10 +91,10 @@ describe('NewDiscount', () => {
       isListLoaded: true,
     });
 
-    jest.spyOn(React, 'useState').mockImplementationOnce(() => [true, jest.fn()] as any);
+    jest.spyOn(React, 'useState').mockImplementation(() => [true, jest.fn()] as any);
     jest
       .spyOn(React, 'useState')
-      .mockImplementationOnce(() => [{ id: 'trx' } as any, jest.fn()] as any);
+      .mockImplementation(() => [{ id: 'trx' } as any, jest.fn()] as any);
 
     render(<NewDiscount />);
 

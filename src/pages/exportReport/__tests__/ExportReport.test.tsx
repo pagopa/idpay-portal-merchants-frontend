@@ -1,10 +1,25 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeExportReportPage from '../ExportReport';
+import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
@@ -45,6 +60,7 @@ jest.mock('../../../components/Alert/AlertListComponent', () => ({ alertList }: 
 ));
 
 describe('InitiativeExportReportPage', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   it('renders title, subtitle, filters and table', () => {
     render(<InitiativeExportReportPage />);
 

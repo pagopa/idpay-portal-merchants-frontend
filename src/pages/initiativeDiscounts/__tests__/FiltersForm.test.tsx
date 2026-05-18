@@ -5,15 +5,30 @@ import '@testing-library/jest-dom';
 import { Formik, useFormik } from 'formik';
 import { TextField } from '@mui/material';
 import FiltersForm from '../FiltersForm';
+import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
-      if (key === 'commons.filterBtn') return 'Applica';
-      if (key === 'commons.removeFiltersBtn') return 'Rimuovi filtri';
+      if (key === 'actions.filterBtn') return 'Applica';
+      if (key === 'actions.removeFiltersBtn') return 'Rimuovi filtri';
       return key;
     },
   }),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 const TestFormWrapper = ({
@@ -40,6 +55,7 @@ const TestFormWrapper = ({
 };
 
 describe('FiltersForm', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   test('should render children and buttons initially disabled', () => {
     render(<TestFormWrapper />);
 

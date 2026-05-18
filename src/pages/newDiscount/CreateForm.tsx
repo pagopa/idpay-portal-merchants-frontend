@@ -10,13 +10,13 @@ import {
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useTranslation } from 'react-i18next';
 import { Dispatch, SetStateAction } from 'react';
 import { useHistory } from 'react-router-dom';
 import { createTransaction } from '../../services/merchantService';
 import { TransactionResponse } from '../../api/generated/merchants/data-contracts';
 import { BASE_ROUTE } from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 interface Props {
   id: string;
@@ -26,13 +26,13 @@ interface Props {
 
 const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
   const { setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const history = useHistory();
 
   const validationSchema = Yup.object().shape({
     spendingAmount: Yup.number()
       .typeError(t('validation.number'))
-      .required(t('validation.requiredField'))
+      .required(t('validation.required'))
       .positive(t('validation.positiveNumber'))
       .min(0.01, t('validation.minValue', { x: 0.01 })),
   });
@@ -108,7 +108,7 @@ const CreateForm = ({ id, setDiscountCreated, setDiscountResponse }: Props) => {
               onClick={() => history.replace(`${BASE_ROUTE}/sconti-iniziativa/${id}`)}
               data-testid="back-to-initiative-discounts-test"
             >
-              {t('commons.backBtn')}
+              {t('actions.back')}
             </Button>
           </Box>
           <Box>

@@ -4,6 +4,7 @@ import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useEr
 import { useTranslation } from 'react-i18next';
 import { getPortalConsent, savePortalConsent } from '../../services/rolePermissionService';
 import useTCAgreement from '../useTCAgreement';
+import { useAppSelector } from '../../redux/hooks';
 
 jest.mock('../../services/rolePermissionService', () => ({
   getPortalConsent: jest.fn(),
@@ -18,7 +19,22 @@ const mockedSavePortalConsent = savePortalConsent as jest.Mock;
 const mockedUseErrorDispatcher = useErrorDispatcher as jest.Mock;
 const mockedUseTranslation = useTranslation as jest.Mock;
 
+jest.mock('../useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
 describe('useTCAgreement', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   const mockAddError = jest.fn();
 
   beforeEach(() => {

@@ -9,7 +9,6 @@ import {
 } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/lib/hooks/useUnloadEventInterceptor';
-import { useTranslation } from 'react-i18next';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import { useEffect, useState } from 'react';
@@ -18,6 +17,7 @@ import ROUTES, { BASE_ROUTE } from '../../routes';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../redux/hooks';
 import { useInitiativeRoutes } from '../../hooks/useInitiativeRoutes';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import SidenavItem from './SidenavItem';
 import { config } from './config';
 
@@ -25,11 +25,10 @@ interface MatchParams {
   initiative_id: string;
 }
 
-/** The side menu of the application */
 export default function SideMenu() {
   const initiativesList = useAppSelector(intiativesListSelector);
   const {getInitiativeRoutes} = useInitiativeRoutes();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const history = useHistory();
   const onExit = useUnloadEventOnExit();
   const [expanded, setExpanded] = useState<string | false>(false);

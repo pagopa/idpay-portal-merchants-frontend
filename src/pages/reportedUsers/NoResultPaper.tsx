@@ -1,13 +1,13 @@
 import React from 'react';
 import { Paper, Stack, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 interface NoResultPaperProps {
   translationKey: string;
 }
 
 const NoResultPaper: React.FC<NoResultPaperProps> = ({ translationKey }) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   return (
     <Paper
       sx={{

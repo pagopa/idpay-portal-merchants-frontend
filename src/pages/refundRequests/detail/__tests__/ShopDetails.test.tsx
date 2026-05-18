@@ -2,6 +2,9 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import ShopDetails from '../ShopDetails';
 import { BrowserRouter } from 'react-router-dom';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
+import { useAppSelector } from '../../../../redux/hooks';
 
 const mockHandleSubmit = jest.fn();
 const mockResetForm = jest.fn();
@@ -80,14 +83,36 @@ const {
   downloadBatchCsv,
 } = jest.requireMock('../../../../services/merchantService');
 
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState
+  });
+};
+
+const store = createMockStore();
+
 const renderComponent = () =>
   render(
-    <BrowserRouter>
-      <ShopDetails />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <ShopDetails />
+      </BrowserRouter>
+    </Provider>
   );
 
 describe('ShopDetails', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -116,11 +141,11 @@ describe('ShopDetails', () => {
 
     expect(mockReplace).toHaveBeenCalled();
 
-    expect(screen.getByText('commons.backBtn')).toBeInTheDocument();
+    expect(screen.getByText('actions.back')).toBeInTheDocument();
     expect(screen.getByText('Bonus Elettrodomestici')).toBeInTheDocument();
     expect(screen.getByText('pages.refundRequests.storeDetails.exportCSV')).toBeInTheDocument();
     expect(screen.getByTestId('download-csv-button-test')).toHaveProperty('disabled', false);
-    fireEvent.click(screen.getByText('commons.backBtn'));
+    fireEvent.click(screen.getByText('actions.back'));
     expect(mockGoBack).toHaveBeenCalled();
   });
 
@@ -232,7 +257,7 @@ describe('ShopDetails', () => {
   });
 
   it('should handle handleDownloadCsv error', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
     const mockError = new Error('fail');
     getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
 
@@ -273,8 +298,8 @@ describe('ShopDetails', () => {
     const input = wrapper.querySelector('input');
     const posSelect = screen.getByTestId('point-of-sale-test');
     const statusSelect = screen.getByTestId('status-test');
-    const filtersBtn = screen.getByText('commons.filterBtn');
-    const removeFiltersBtn = screen.getByText('commons.removeFiltersBtn');
+    const filtersBtn = screen.getByText('actions.filterBtn');
+    const removeFiltersBtn = screen.getByText('actions.removeFiltersBtn');
 
     await act(() => userEvent.type(input!, ' '));
     await waitFor(() => expect(mockHandleChange).not.toHaveBeenCalled());

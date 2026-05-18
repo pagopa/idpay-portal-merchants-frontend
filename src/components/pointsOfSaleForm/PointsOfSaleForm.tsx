@@ -16,18 +16,18 @@ import { ArrowOutward } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked } from '@pagopa/mui-italia/components';
 import { theme } from '@pagopa/mui-italia/theme';
-import { useTranslation } from 'react-i18next';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
-
-type TypeEnum = PointOfSaleDTO['type'];
-const PHYSICAL: TypeEnum = 'PHYSICAL';
-const ONLINE: TypeEnum = 'ONLINE';
 import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
 import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
+
+type TypeEnum = PointOfSaleDTO['type'];
+const PHYSICAL: TypeEnum = 'PHYSICAL';
+const ONLINE: TypeEnum = 'ONLINE';
 
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
@@ -52,7 +52,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   onValidationChange,
   pointsOfSaleLoaded,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { options, loading, error, search } = usePlacesAutocomplete();
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
     {

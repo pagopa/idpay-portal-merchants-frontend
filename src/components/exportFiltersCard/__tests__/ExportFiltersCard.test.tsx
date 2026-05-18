@@ -8,10 +8,23 @@ jest.mock('../../../services/merchantService', () => ({
 }));
 
 import { generateMerchantReport } from '../../../services/merchantService';
+import { useAppSelector } from '../../../redux/hooks';
+import { Provider } from 'react-redux';
+import { configureStore, UnknownAction } from '@reduxjs/toolkit';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ initiative_id: 'test-id' }),
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 let lastFormikConfig: any;
@@ -49,14 +62,24 @@ jest.mock('formik', () => ({
 
 const mockedGenerate = generateMerchantReport as jest.Mock;
 
-const renderComponent = (updateAlerts = jest.fn()) =>
-  render(
-    <BrowserRouter>
-      <ExportFiltersCard updateAlerts={updateAlerts} />
-    </BrowserRouter>
-  );
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState
+  });
+};
 
+const store = createMockStore();
+const renderComponent = (updateAlerts = jest.fn()) => {
+  render(
+    <Provider store={store}>
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    </Provider>
+  );
+}
 describe('ExportFiltersCard', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -133,9 +156,11 @@ describe('ExportFiltersCard', () => {
     const updateAlerts = jest.fn();
 
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
 
     clickSubmit();
@@ -148,11 +173,12 @@ describe('ExportFiltersCard', () => {
 
     const updateAlerts = jest.fn();
     const onReportGenerated = jest.fn();
-
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} onReportGenerated={onReportGenerated} />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} onReportGenerated={onReportGenerated} />
+        </BrowserRouter>
+      </Provider>
     );
 
     clickSubmit();
@@ -165,9 +191,11 @@ describe('ExportFiltersCard', () => {
   it('covers validate required branch', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
 
     const result = lastFormikConfig.validate({
@@ -180,16 +208,18 @@ describe('ExportFiltersCard', () => {
     fireEvent.change(inputDal, result.startDate);
     fireEvent.change(inputAl, result.endDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
-    expect(result.startDate).toBe('pages.reportExport.form.validation.required');
-    expect(result.endDate).toBe('pages.reportExport.form.validation.required');
+    expect(result.startDate).toBe('validation.required');
+    expect(result.endDate).toBe('validation.required');
   });
 
   it('covers validate invalidRange branch (<1 day)', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const dayjs = require('dayjs');
     const startDate = dayjs();
@@ -207,16 +237,18 @@ describe('ExportFiltersCard', () => {
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
     await waitFor(() =>
-      expect(result.endDate).toBe('pages.reportExport.form.validation.invalidRange')
+      expect(result.endDate).toBe('validation.invalidRange')
     );
   });
 
   it('covers validate maxRange branch (>90 days)', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const dayjs = require('dayjs');
     const startDate = dayjs();
@@ -234,15 +266,17 @@ describe('ExportFiltersCard', () => {
     fireEvent.change(inputAl, result.endDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
-    await waitFor(() => expect(result.endDate).toBe('pages.reportExport.form.validation.maxRange'));
+    await waitFor(() => expect(result.endDate).toBe('validation.maxRange'));
   });
 
   it('covers validate success branch (no errors)', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const mockDay = {
       diff: () => 10,
@@ -269,9 +303,11 @@ describe('ExportFiltersCard', () => {
   it('covers validate future startDate invalidRange branch', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const dayjs = require('dayjs');
     const futureDate = dayjs().add(2, 'day');
@@ -290,16 +326,18 @@ describe('ExportFiltersCard', () => {
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
     await waitFor(() =>
-      expect(result.startDate).toBe('pages.reportExport.form.validation.invalidRange')
+      expect(result.startDate).toBe('validation.invalidRange')
     );
   });
 
   it('covers validate future endDate invalidRange branch', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const dayjs = require('dayjs');
     const futureDate = dayjs().add(2, 'day');
@@ -318,7 +356,7 @@ describe('ExportFiltersCard', () => {
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
     await waitFor(() =>
-      expect(result.endDate).toBe('pages.reportExport.form.validation.invalidRange')
+      expect(result.endDate).toBe('validation.invalidRange')
     );
   });
 });

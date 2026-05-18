@@ -1,8 +1,23 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import FileUploadAction from '../FileUploadAction';
+import { useAppSelector } from '../../../redux/hooks';
 
 const mockGoBack = jest.fn();
 const mockReplace = jest.fn();
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
 
 jest.mock('react-router-dom', () => ({
   useParams: () => ({
@@ -50,6 +65,7 @@ jest.mock('../../../hooks/useAlert', () => ({
 }));
 
 describe('FileUploadAction', () => {
+    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   const baseProps = {
     apiCall: jest.fn().mockResolvedValue({}),
     successStateKey: 'refundUploadSuccess',
@@ -65,13 +81,13 @@ describe('FileUploadAction', () => {
 
   it('renders and navigates back', () => {
     render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByText('commons.backBtn'));
+    fireEvent.click(screen.getByText('actions.back'));
     expect(mockGoBack).toHaveBeenCalled();
   });
 
   it('shows required file error', async () => {
     render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(screen.getByText('modifyDocument.errors.requiredFileError')).toBeInTheDocument();
@@ -84,7 +100,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'A' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(screen.getByText('Lunghezza minima 2 caratteri')).toBeInTheDocument();
@@ -98,7 +114,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'ABC' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(apiCall).toHaveBeenCalled();
@@ -117,7 +133,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'ABC' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalled();
@@ -132,7 +148,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'ABC' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalled();
@@ -191,7 +207,7 @@ describe('FileUploadAction', () => {
     fireEvent.change(screen.getByRole('textbox'), {
       target: { value: 'ABC' },
     });
-    fireEvent.click(screen.getByText('commons.continueBtn'));
+    fireEvent.click(screen.getByText('actions.continue'));
 
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalled();
@@ -248,7 +264,7 @@ describe('FileUploadAction', () => {
     fireEvent.blur(input);
 
     await waitFor(() => {
-      expect(screen.getByText('validation.requiredField')).toBeInTheDocument();
+      expect(screen.getByText('validation.required')).toBeInTheDocument();
     });
   });
 });

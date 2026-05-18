@@ -1,6 +1,6 @@
 import { Backdrop, Box, Button, Fade, Modal, Typography } from '@mui/material';
 import { Dispatch, SetStateAction } from 'react';
-import { useTranslation } from 'react-i18next';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { MerchantTransactionDTO } from '../../api/generated/merchants/data-contracts';
 
 type TransactionStatusEnum = MerchantTransactionDTO['status'];
@@ -22,7 +22,7 @@ const CancelTransactionModal = ({
   status,
 }: Props) => {
   const { setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   const handleCancelTransaction = (trxId: string) => {
     deleteTransaction(trxId)
@@ -88,7 +88,7 @@ const CancelTransactionModal = ({
               onClick={() => setOpenCancelTrxModal(false)}
               data-testid="modal-cancel-back-button-test"
             >
-              {t('commons.cancelBtn')}
+              {t('actions.cancel')}
             </Button>
             <Button
               variant="contained"
