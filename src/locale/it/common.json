@@ -92,8 +92,7 @@
       "initiativeStatus": "Stato",
       "organizationName": "Creata da",
       "searchByInitiativeName": "Cerca per nome dell'iniziativa",
-      "serviceId": "Codice identificativo",
-      "spendingPeriod": "Periodo di spesa",
+      "validityPeriod": "Periodo di Validità",
       "subtitle": "Visualizza e gestisci le iniziative di supporto alla spesa a cui hai aderito.",
       "title": "Iniziative",
       "initiativeName": "Nome"
@@ -133,6 +132,7 @@
       "addStoreList": "Aggiungi punti vendita",
       "uploadStores": "Inserisci l’elenco dei tuoi punti vendita",
       "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online.",
+      "noStoresInitiative": "Non ci sono punti vendita per questa iniziativa",
       "online": "Online",
       "physical": "Fisico",
       "manualLink": "Dubbi? Vai al manuale",
@@ -239,7 +239,12 @@
         "submit": "Genera report"
       },
       "reportTitle": "I tuoi report",
-      "noReportFound": "Non hai ancora generato report."
+      "noReportFound": "Non hai ancora generato report.",
+      "alert": {
+        "success": "Il report è stato generato ed è pronto per il download.",
+        "info": "Stiamo elaborando il file. Una volta fatto, il report potrà essere scaricato in questa sezione.",
+        "error": "Si è verificato un errore nella generazione del report. Riprova"
+      }
     },
     "assistanceRequest": {
       "exitModalBody": "Il team di Assistenza non riceverà la tua richiesta.",
