@@ -87,11 +87,10 @@ export default function SideMenu() {
             const initiativeRoutes = getInitiativeRoutes(item.initiativeName, item.startDate) as Array<string>;
             const accordionConfig = config.filter(({ key }) => initiativeRoutes.includes(key));
             const [firstInitiativePage] = accordionConfig;
-            const isExpanded = expandedItem === `panel-${item.initiativeId}`;
             return (
               <Accordion
                 key={item.initiativeId}
-                expanded={isExpanded}
+                expanded={expandedItem === `panel-${item.initiativeId}`}
                 disableGutters
                 elevation={0}
                 sx={{
