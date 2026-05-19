@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { RootState } from '../redux/store';
@@ -27,13 +27,18 @@ type Props = {
  * - No navigation triggered by Redux
  */
 const WithInitiativeGuard: React.FC<Props> = ({ children, route }) => {
+  const [isValidRoute, setIsValidRoute] = useState<boolean>(true);
   const initiatives = useSelector((state: RootState) => intiativesListSelector(state));
   const { initiativeId, isValid, isListLoaded } = useCurrentInitiativeId();
   const selectedInitiative = useCurrentInitiative();
-  const {initiativeConfig} = useInitiativeConfig<Array<string>>("routes", {initiativeName: selectedInitiative?.initiativeName || '', startDate: selectedInitiative?.startDate || ''});
+  const { initiativeConfig } = useInitiativeConfig<Array<string>>("routes", { initiativeName: selectedInitiative?.initiativeName || '', startDate: selectedInitiative?.startDate || '' });
 
+  useEffect(() => {
+    if (Array.isArray(initiativeConfig)) {
+      setIsValidRoute(initiativeConfig?.includes(route));
+    }
+  }, [initiativeConfig]);
 
-  const isValidRoute = initiativeConfig?.includes(route);
   /**
    * HARDENING – Production Safe Flow
    */
