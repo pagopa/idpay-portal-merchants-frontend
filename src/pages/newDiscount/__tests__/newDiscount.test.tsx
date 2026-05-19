@@ -43,6 +43,17 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+
 describe('NewDiscount', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
@@ -50,30 +61,43 @@ describe('NewDiscount', () => {
     mockUseCurrentInitiativeId.mockReturnValue({ initiativeName: 'Init name' });
   });
 
-  it('returns null when initiativeId is missing', () => {
+  const mockInitiative = (initiativeId?: string) =>
     mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: undefined,
+      initiativeId,
       isValid: true,
       isListLoaded: true,
     });
 
-    const { container } = render(<NewDiscount />);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
+    mockUseCurrentInitiativeId.mockReturnValue({
+      initiativeName: 'Init name',
+    });
+  });
+
+  it('returns null when initiativeId is missing', () => {
+    mockInitiative(undefined);
+
+    const { container } = renderComponent();
     expect(container.firstChild).toBeNull();
   });
 
   it('renders CreateForm when discount is not created', () => {
-    mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: 'init-1',
-      isValid: true,
-      isListLoaded: true,
-    });
+    mockInitiative('init-1');
 
-    render(<NewDiscount />);
+    renderComponent();
 
     expect(screen.getByTestId('breadcrumbs')).toBeInTheDocument();
     expect(screen.getByTestId('create-form')).toBeInTheDocument();
-    expect(screen.getByTestId('title')).toHaveTextContent('pages.newDiscount.title');
-    expect(screen.getByTestId('subtitle')).toHaveTextContent('pages.newDiscount.subtitle');
+    expect(screen.getByTestId('title')).toHaveTextContent(
+      'pages.newDiscount.title'
+    );
+    expect(screen.getByTestId('subtitle')).toHaveTextContent(
+      'pages.newDiscount.subtitle'
+    );
 
     expect(mockCreateForm).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -96,16 +120,22 @@ describe('NewDiscount', () => {
       .spyOn(React, 'useState')
       .mockImplementation(() => [{ id: 'trx' } as any, jest.fn()] as any);
 
-    render(<NewDiscount />);
+    renderComponent();
 
     expect(screen.getByTestId('discount-recap')).toBeInTheDocument();
-    expect(screen.getByTestId('title')).toHaveTextContent('pages.newDiscount.createdTitle');
-    expect(screen.getByTestId('subtitle')).toHaveTextContent('pages.newDiscount.createdSubtitle');
+    expect(screen.getByTestId('title')).toHaveTextContent(
+      'pages.newDiscount.createdTitle'
+    );
+    expect(screen.getByTestId('subtitle')).toHaveTextContent(
+      'pages.newDiscount.createdSubtitle'
+    );
 
     expect(mockDiscountRecap).toHaveBeenCalledWith(
       expect.objectContaining({
         data: { id: 'trx' },
       })
     );
+
+    useStateSpy.mockRestore();
   });
 });

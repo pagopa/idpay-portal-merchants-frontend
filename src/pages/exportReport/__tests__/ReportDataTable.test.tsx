@@ -1,5 +1,8 @@
 // @ts-nocheck
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { useAppSelector } from '../../../redux/hooks';
 import ReportDataTable from '../ReportDataTable';
 
 jest.mock('react-router-dom', () => ({
@@ -75,9 +78,13 @@ describe('ReportDataTable', () => {
 
     render(<Provider store={store}><ReportDataTable /></Provider>);
 
-    await waitFor(() => expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10));
+    await waitFor(() =>
+      expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10)
+    );
 
-    expect(screen.getByText('pages.reportExport.noReportFound')).toBeInTheDocument();
+    expect(
+      screen.getByText('pages.reportExport.noReportFound')
+    ).toBeInTheDocument();
   });
 
   it('renders reports when available', async () => {
@@ -97,9 +104,13 @@ describe('ReportDataTable', () => {
 
     render(<Provider store={store}><ReportDataTable /></Provider>);
 
-    await waitFor(() => expect(screen.getByTestId('row-r1')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByTestId('row-r1')).toBeInTheDocument()
+    );
 
-    expect(screen.getByText('pages.reportExport.reportTitle')).toBeInTheDocument();
+    expect(
+      screen.getByText('pages.reportExport.reportTitle')
+    ).toBeInTheDocument();
   });
 
   it('handles pagination change', async () => {
@@ -152,7 +163,7 @@ describe('ReportDataTable', () => {
 
     const revokeSpy = jest.spyOn(window.URL, 'revokeObjectURL').mockImplementation(() => {});
 
-    render(<ReportDataTable refreshKey={0} />);
+    renderComponent({ refreshKey: 0 });
 
     await waitFor(() => expect(screen.getByTestId('row-r1')).toBeInTheDocument());
 
@@ -218,7 +229,7 @@ describe('ReportDataTable', () => {
 
     downloadMerchantReport.mockRejectedValue(new Error('fail'));
 
-    render(<ReportDataTable updateAlerts={updateAlerts} />);
+    renderComponent({ updateAlerts });
 
     await waitFor(() => expect(screen.getByTestId('row-r2')).toBeInTheDocument());
 
@@ -340,11 +351,20 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    const { rerender } = render(<ReportDataTable refreshKey={1} />);
+    const localStore = configureStore({ reducer: () => ({}) });
+    const { rerender } = render(
+      <Provider store={localStore}>
+        <ReportDataTable refreshKey={1} />
+      </Provider>
+    );
 
     await waitFor(() => expect(screen.getByTestId('row-r6')).toBeInTheDocument());
 
-    rerender(<ReportDataTable refreshKey={2} />);
+    rerender(
+      <Provider store={localStore}>
+        <ReportDataTable refreshKey={2} />
+      </Provider>
+    );
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
   });
@@ -403,7 +423,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    render(<ReportDataTable refreshKey={1} />);
+    renderComponent({ refreshKey: 1 });
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10));
   });

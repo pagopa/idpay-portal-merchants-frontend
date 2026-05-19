@@ -12,6 +12,9 @@ import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
 import { configureStore } from '@reduxjs/toolkit';
 import { useAppSelector } from '../../../redux/hooks';
 import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { useAppSelector } from '../../../redux/hooks';
+import { Provider } from 'react-redux';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -47,91 +50,32 @@ const pushMock = jest.fn();
 const readTokenMock = storageTokenOps.read as jest.Mock;
 const updateMerchantPointOfSalesMock = merchantService.updateMerchantPointOfSales as jest.Mock;
 
-const optionsAutocomplete = [
-  {
-    PlaceId:
-      'AQAAAEIAo-GdOMG0YuWiCl1bLeH7pnLeGU-DJ1DARfn03wWK1Ibzikvro9XAM6Hv4sDPGpdIfvw6oDSL_x6wyMU6LSAZno_TU8Um_hTeBU-YKbWrPDwG2O8ZhQj-WT_GFbqxVehn5DA',
-    PlaceType: 'Street',
-    Title: 'Italia, 10073, Ciriè, Via Roma',
-    Address: {
-      Label: 'Via Roma, 10073 Ciriè TO, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Piemonte' },
-      SubRegion: { Code: 'TO', Name: 'Torino' },
-      Locality: 'Ciriè',
-      PostalCode: '10073',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 8, EndIndex: 11, Value: '100' },
-        { StartIndex: 22, EndIndex: 30, Value: ' Via Rom' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        PostalCode: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
+const createAutocompleteOption = (id: string, title: string, postalCode: string) => ({
+  PlaceId: id,
+  PlaceType: 'PointAddress',
+  Title: title,
+  Address: {
+    Label: title,
+    Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
+    Region: { Name: 'TestRegion' },
+    SubRegion: { Code: 'XX', Name: 'TestProvince' },
+    Locality: 'TestCity',
+    PostalCode: postalCode,
+    Street: 'Via Roma',
+    StreetComponents: [
+      {
+        BaseName: 'Roma',
+        Type: 'Via',
+        TypePlacement: 'BeforeBaseName',
+        TypeSeparator: ' ',
+        Language: 'it',
       },
-    },
+    ],
+    AddressNumber: '100',
   },
-  {
-    PlaceId:
-      'AQAAAGEArii9_R-e4p-pnON6GGp6cAJbd8-_zRriejOfxrlDW_B870Lz52oI4nsxVlDzeLDBmqRNd2I2NPEVGcrww28DVTKENY0-VYoLJz9vLP7Reg2i6DG7X3oz40JBQJTV_mVhAT_l0ifPvO-tgbtvvAI-LTw-ccaUedojG-bRkDSwngmx',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 39100, Bolzano, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 39100 Bolzano BZ, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Trentino-Alto Adige' },
-      SubRegion: { Code: 'BZ', Name: 'Bolzano' },
-      Locality: 'Bolzano',
-      PostalCode: '39100',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 24, EndIndex: 32, Value: 'Via Roma' },
-        { StartIndex: 33, EndIndex: 36, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGAA9Xws_AzxKpyI4UWarvaljnUGFydR3IszQ73fttFEV9Z9quYdYtSxgmvDXJ0BhmgoDgRNVo85kDrmY8Kq1IYoi4MaxsdhkB_1s_MZsqZPjjs6ce9Uu3il6y5cfjgHjsKlH_hs8IsbtmM65q3HMq3VOkl8UMPHg7-fSym-rj44WN8',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 52017, Pratovecchio Stia, Via Roma 100',
+  Language: 'it',
+  Highlights: {
+    Title: [],
     Address: {
       Label: 'Via Roma, 100, 52017 Pratovecchio Stia AR, Italia',
       Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
@@ -276,7 +220,9 @@ describe('InitiativeStoresUpload', () => {
 
     jest.spyOn(window, 'open').mockImplementation(() => null as any);
 
-    (useParams as jest.Mock).mockReturnValue({ initiative_id: 'test-initiative' });
+    (useParams as jest.Mock).mockReturnValue({
+      initiative_id: 'test-initiative',
+    });
     (useHistory as jest.Mock).mockReturnValue({ push: pushMock });
     mockUsePlacesAutocomplete.mockReturnValue({
       options: optionsAutocomplete,
@@ -348,11 +294,6 @@ describe('InitiativeStoresUpload', () => {
 
     render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
-
-    /*await waitFor(() => {
-      expect(formatUtils.normalizeUrlHttps).toHaveBeenCalled();
-      expect(formatUtils.normalizeUrlHttp).toHaveBeenCalled();
-    });*/
   });
 
   it.skip('test complete flow - physical store - error Merchant ID not found', async () => {
@@ -386,6 +327,7 @@ describe('InitiativeStoresUpload', () => {
     });
 
     render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -406,6 +348,7 @@ describe('InitiativeStoresUpload', () => {
     });
 
     render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -422,6 +365,7 @@ describe('InitiativeStoresUpload', () => {
 
     (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(undefined);
 
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));

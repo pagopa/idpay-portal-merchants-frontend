@@ -3,11 +3,26 @@ import '@testing-library/jest-dom';
 import Table from '@mui/material/Table';
 import TableHeader from '../TableHeader';
 import { useAppSelector } from '../../../redux/hooks';
+import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => `translated_${key}`,
   }),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
@@ -33,54 +48,48 @@ describe('TableHeader', () => {
       { width: '50%', label: 'header.third' },
     ];
 
-    render(
-      <Table>
-        <TableHeader data={data} />
-      </Table>
-    );
+    renderHeader(data);
 
-    data.forEach((d) => {
-      const cell = screen.getByText(`translated_${d.label}`);
-      expect(cell).toBeInTheDocument();
+    data.forEach(({ label }) => {
+      expect(
+        screen.getByText(`translated_${label}`)
+      ).toBeInTheDocument();
     });
   });
 
-  it('usa la traduzione solo per le label non vuote', () => {
+  it('translates only non-empty labels', () => {
     const data = [
       { width: '20%', label: 'header.first' },
       { width: '30%', label: '' },
     ];
 
-    render(
-      <Table>
-        <TableHeader data={data} />
-      </Table>
+    renderHeader(data);
+
+    expect(
+      screen.getByText('translated_header.first')
+    ).toBeInTheDocument();
+
+    const cells = within(screen.getByRole('row')).getAllByRole(
+      'columnheader'
     );
-
-    expect(screen.getByText('translated_header.first')).toBeInTheDocument();
-
-    const headerRow = screen.getByRole('row');
-    const cells = within(headerRow).getAllByRole('columnheader');
 
     expect(cells[1]).toBeEmptyDOMElement();
   });
 
-  it('applica la width corretta alle celle', () => {
+  it('applies correct width to each cell', () => {
     const data = [
       { width: '10%', label: 'header.first' },
       { width: '40%', label: 'header.second' },
     ];
 
-    render(
-      <Table>
-        <TableHeader data={data} />
-      </Table>
+    renderHeader(data);
+
+    const cells = within(screen.getByRole('row')).getAllByRole(
+      'columnheader'
     );
 
-    const headerRow = screen.getByRole('row');
-    const cells = within(headerRow).getAllByRole('columnheader');
-
-    expect(cells[0]).toHaveAttribute('width', '10%');
-    expect(cells[1]).toHaveAttribute('width', '40%');
+    data.forEach(({ width }, index) => {
+      expect(cells[index]).toHaveAttribute('width', width);
+    });
   });
 });

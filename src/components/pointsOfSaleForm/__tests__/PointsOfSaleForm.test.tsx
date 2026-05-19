@@ -1,10 +1,10 @@
-import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import PointsOfSaleForm from '../PointsOfSaleForm';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
 import { generateUniqueId, isValidEmail, isValidUrl } from '../../../helpers';
 import * as hooks from '../../../hooks/useAutocomplete';
 import * as helpers from '../../../helpers';
+import { useAppSelector } from '../../../redux/hooks';
 import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('../../../hooks/useAutocomplete');
@@ -22,7 +22,7 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: (state = { list: [] }) => state,
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -70,6 +70,7 @@ jest.mock('../../Autocomplete/AutocompleteComponent', () => (props: any) => {
 });
 
 describe('PointsOfSaleForm full coverage', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
 

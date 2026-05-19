@@ -3,8 +3,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useInitiativesList } from '../useInitiativesList';
 import { getMerchantInitiativeList } from '../../services/merchantService';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setInitiativesList } from '../../redux/slices/initiativesSlice';
 import { match } from 'react-router-dom';
+import useScopedTranslation from '../useScopedTranslation';
 import useScopedTranslation from '../useScopedTranslation';
 
 type InitiativeDTO = {
