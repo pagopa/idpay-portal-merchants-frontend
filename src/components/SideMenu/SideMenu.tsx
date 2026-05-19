@@ -1,75 +1,19 @@
 /* eslint-disable no-prototype-builtins */
-import {
-  List,
-  Box,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  ListItemText,
-} from '@mui/material';
+import { List, Box } from '@mui/material';
 import { useHistory } from 'react-router-dom';
-import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/lib/hooks/useUnloadEventInterceptor';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListAltIcon from '@mui/icons-material/ListAlt';
-import { useEffect, useState } from 'react';
-import { matchPath } from 'react-router';
-import ROUTES, { BASE_ROUTE } from '../../routes';
+import ROUTES from '../../routes';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../redux/hooks';
-import { useInitiativeRoutes } from '../../hooks/useInitiativeRoutes';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import SidenavItem from './SidenavItem';
-import { config } from './config';
+import { SidenavAccordion } from './SidenavAccordion';
 
-interface MatchParams {
-  initiative_id: string;
-}
 
 export default function SideMenu() {
   const initiativesList = useAppSelector(intiativesListSelector);
-  const { getInitiativeRoutes } = useInitiativeRoutes();
   const { t } = useScopedTranslation();
   const history = useHistory();
-  const onExit = useUnloadEventOnExit();
-  const [expandedItem, setExpandedItem] = useState<string>('');
-  const [pathname, setPathName] = useState(() => {
-    /*
-    For some reason, push on history will not notify this component.
-    We are configuring the listener here and not into a useEffect in order to configure it at the costruction of the component, not at its mount
-    because the Redirect performed as fallback on the routing would be executed before the listen as been configured
-    */
-    history.listen(() => setPathName(history.location.pathname));
-    return history.location.pathname;
-  });
-
-  const match = matchPath(location.pathname, {
-    path: [
-      ROUTES.DISCOUNTS,
-      ROUTES.OVERVIEW,
-      ROUTES.STORES,
-      ROUTES.REPORTED_USERS,
-      ROUTES.STORES_DETAIL,
-      ROUTES.REFUND_REQUESTS,
-      ROUTES.REFUND_REQUESTS_STORE,
-      ROUTES.EXPORT_REPORT,
-    ],
-    exact: true,
-    strict: false,
-  });
-
-  useEffect(() => {
-    // eslint-disable-next-line no-prototype-builtins
-    if (match !== null && match.params.hasOwnProperty('initiative_id')) {
-      const { initiative_id } = match.params as MatchParams;
-      setExpandedItem(`panel-${initiative_id}`);
-    } else {
-      const firstItemExpanded =
-        Array.isArray(initiativesList) && initiativesList.length > 0
-          ? `panel-${initiativesList[0].initiativeId}`
-          : '';
-      setExpandedItem(firstItemExpanded);
-    }
-  }, [JSON.stringify(match), initiativesList]);
 
   return (
     <Box display="grid" mt={1}>
@@ -77,69 +21,16 @@ export default function SideMenu() {
         <List data-testid="list-test">
           <SidenavItem
             title={t('pages.initiativesList.title')}
-            handleClick={() => onExit(() => history.replace(ROUTES.HOME))}
-            isSelected={pathname === ROUTES.HOME}
+            handleClick={() => history.replace(ROUTES.HOME)}
+            isSelected={history.location.pathname === ROUTES.HOME}
             icon={ListAltIcon}
             level={0}
             data-testid="initiativeList-click-test"
           />
-          {initiativesList && initiativesList.map((item) => {
-            const initiativeRoutes = getInitiativeRoutes(item.initiativeName, item.startDate) as Array<string>;
-            const accordionConfig = config.filter(({ key }) => initiativeRoutes.includes(key));
-            const [firstInitiativePage] = accordionConfig;
-            return (
-              <Accordion
-                key={item.initiativeId}
-                expanded={expandedItem === `panel-${item.initiativeId}`}
-                disableGutters
-                elevation={0}
-                sx={{
-                  border: 'none',
-                  '&:before': { backgroundColor: '#fff' },
-                  minWidth: 300,
-                  maxWidth: 316,
-                }}
-                data-testid="accordion-click-test"
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls={`panel-${item.initiativeId}-content`}
-                  id={`panel-${item.initiativeId}-header`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onExit(() => {
-                      history.replace(
-                        `${BASE_ROUTE}/${item.initiativeId}/${firstInitiativePage.route}`
-                      );
-                      setExpandedItem(`panel-${item.initiativeId}`);
-                    });
-                  }}
-                >
-                  <ListItemText sx={{ wordBreak: 'break-word' }} primary={item.initiativeName} />
-                </AccordionSummary>
-                <AccordionDetails sx={{ p: 0 }}>
-                  <List disablePadding>
-                    {accordionConfig.map(({ key, title, route, icon, dataTestId }) => <SidenavItem
-                      key={key}
-                      title={t(title)}
-                      handleClick={() =>
-                        onExit(() => {
-                          history.replace(`${BASE_ROUTE}/${item.initiativeId}/${route}`);
-                        })
-                      }
-                      isSelected={pathname.startsWith(
-                        `${BASE_ROUTE}/${item.initiativeId}/${route}`
-                      )}
-                      icon={icon}
-                      level={2}
-                      data-testid={dataTestId}
-                    />
-                    )}
-                  </List>
-                </AccordionDetails>
-              </Accordion>
-            );
-          })}
+          {initiativesList && initiativesList.map((item) => <SidenavAccordion
+              key={item?.initiativeId}
+              item={item}
+            />)};
         </List>
       </Box>
     </Box>

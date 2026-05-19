@@ -5,8 +5,8 @@ import { RootState } from '../redux/store';
 import { intiativesListSelector } from '../redux/slices/initiativesSlice';
 import { useCurrentInitiativeId } from '../hooks/useCurrentInitiativeId';
 import ROUTES from '../routes';
+import { useInitiativeConfig } from '../hooks/useInitiativeConfig';
 import { useCurrentInitiative } from '../hooks/useCurrentInitiative';
-import { useInitiativeRoutes } from '../hooks/useInitiativeRoutes';
 
 type Props = {
   children: React.ReactNode;
@@ -30,11 +30,10 @@ const WithInitiativeGuard: React.FC<Props> = ({ children, route }) => {
   const initiatives = useSelector((state: RootState) => intiativesListSelector(state));
   const { initiativeId, isValid, isListLoaded } = useCurrentInitiativeId();
   const selectedInitiative = useCurrentInitiative();
-  const {getInitiativeRoutes} = useInitiativeRoutes();
+  const {initiativeConfig} = useInitiativeConfig<Array<string>>("routes", {initiativeName: selectedInitiative?.initiativeName || '', startDate: selectedInitiative?.startDate || ''});
 
-  const validRoutes = getInitiativeRoutes(selectedInitiative?.initiativeName, selectedInitiative?.startDate) as unknown as Array<string>;
 
-  const isValidRoute = validRoutes.includes(route);
+  const isValidRoute = initiativeConfig?.includes(route);
   /**
    * HARDENING – Production Safe Flow
    */
