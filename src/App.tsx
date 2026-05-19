@@ -59,8 +59,12 @@ const SecuredRoutes = withLogin(
       );
     }, [location]);
 
-    // Bridge mode: preserve existing route-driven behavior
-    useGetInitiativesQuery({ enabled: match !== null });
+    // Centralized initiatives fetch via RTK Query (bootstrap only, cached)
+    useGetInitiativesQuery(undefined, {
+      refetchOnMountOrArgChange: false,
+      refetchOnReconnect: false,
+      refetchOnFocus: false,
+    });
 
     return (
       <AlertProvider>

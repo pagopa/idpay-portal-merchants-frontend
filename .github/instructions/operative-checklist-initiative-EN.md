@@ -1,16 +1,10 @@
-# ✅ MULTI‑INITIATIVE OPERATIONAL CHECKLIST  
+# ✅ MULTI-INITIATIVE OPERATIVE CHECKLIST  
 Repository name: idpay-portal-merchants-frontend  
-**Execution date: ** dd/mm/yyyy – hh:mm (Europe/Rome)
-
-## 📍 DETERMINISTIC ARCHITECTURAL AUDIT PROTOCOL (NO CODE CHANGE)
+**Execution date:** dd/mm/yyyy – hh:mm (Europe/Rome)
 
 ---
 
-# 🎯 PURPOSE OF THE DOCUMENT
-
-This document defines a **deterministic architectural audit protocol** for the repository:
-
-`idpay-portal-merchants-frontend`
+# 📍 DETERMINISTIC ARCHITECTURAL AUDIT PROTOCOL (NO CODE CHANGE)
 
 ⚠️ Fundamental rules:
 
@@ -18,36 +12,49 @@ This document defines a **deterministic architectural audit protocol** for the r
 - ❌ No refactors must be applied.
 - ❌ No automatic fixes must be introduced.
 - ✅ The activity is strictly architectural audit.
-- ✅ Every statement must be supported by technical evidence.
+- ✅ Every statement must be supported by verifiable technical evidence.
 
-The report must NOT be written inside this file.
+The report must NOT be written in this file.
 
 It must be generated in:
 
 ```
-.github/instructions/report-operative-checklist-initiative-EN-GGMMAAAA.md
+.github/instructions/report-operative-checklist-initiative-EN-DDMMYYYY.md
 ```
 
-⚠️ The generated report MUST be written entirely in English.
+---
+
+# 🎯 DOCUMENT PURPOSE
+
+This document defines a deterministic audit protocol focused on:
+
+- Correct multi-initiative routing
+- Determinism of initiativeId as the source of truth
+- Absence of domain duplication in the store
+- Consistent propagation of initiativeId across architectural layers
+- Absence of anti-patterns that could compromise multi-initiative coherence
+
+⚠️ This checklist does NOT extend the functional scope.  
+It formalizes, in a deterministic way, the architectural checks required to guarantee initiative consistency.
 
 ---
 
 # 🔬 MANDATORY ANALYSIS METHODOLOGY
 
-For every section:
+For each section:
 
 1. A global search across the repository is mandatory.
-2. An explicit citation of analyzed files is mandatory.
-3. Relevant code snippets must be quoted.
-4. Declaring issues without technical evidence is forbidden.
-5. Declaring compliance without concrete verification is forbidden.
-6. Every non‑compliance must explicitly reference the violated rule.
+2. All analyzed files must be explicitly cited.
+3. Relevant code snippets must be cited.
+4. It is forbidden to declare issues without technical evidence.
+5. It is forbidden to declare compliance without concrete verification.
+6. Every non-compliance must explicitly reference the violated rule.
 
 ---
 
 # 📄 MANDATORY REPORT STRUCTURE
 
-Each report section must have EXACTLY the following structure:
+Each report section must follow EXACTLY this structure:
 
 ```
 # X️⃣ SECTION NAME
@@ -56,107 +63,78 @@ Each report section must have EXACTLY the following structure:
 - detailed list with cited files
 
 ## ⚠️ Issues detected
-- concise and technical description of the issue (e.g. derived DTO synchronization into the store)
-- manual `find` usage if present
-- any non‑compliant pattern detected
+- concise and technical problem description
 
-### Why this is an architectural problem
+### Why this is an architectural issue
 
-This section is mandatory when issues are detected.
+This section is mandatory if issues are detected.
 
-The explanation MUST NOT be short or generic.  
-It must be structured, technical, and maintenance‑oriented.
+It must start with:
 
-It must explicitly start with:
-
-```
 This behavior may cause:
 ```
 
-And it must clearly and contextually develop:
+The explanation must explicitly develop:
 
 1. **State duplication**
-   - Specify where the data already exists (e.g. `list`)
-   - Specify where it is duplicated (e.g. `selectedInitative`)
-   - Clearly explain why two potentially divergent sources of truth are created
-   - Explicitly describe the concrete architectural risk
-
 2. **Silent inconsistency**
-   - Explain what happens in case of refetch or state refresh
-   - Identify which state can become stale
-   - Describe the impact on components consuming that state
-   - Highlight the risk of inconsistencies that are not immediately visible
-
 3. **Unnecessary coupling**
-   - Explain which downstream components may start depending on the duplicated state
-   - Describe the regression risk toward a non‑derived architecture
-   - Highlight the increase in technical debt or maintenance complexity
 
-⚠️ The list must be:
-- Dynamic
-- Specific to the detected issue
-- Contextualized to the actual analyzed files
-- Clear for developers during maintenance
-
-⚠️ Short lists such as:
-
-```
-1. Domain duplication
-2. Stale state
-3. Redux coupling
-```
-
-are NOT allowed.
-
-The explanation must always be expanded as in the following example:
-
-```
-This behavior may cause:
-
-1. State duplication
-   - The initiative already exists in `list`
-   - A derived copy is saved into `selectedInitative`
-   - Two potentially divergent sources of truth
-
-2. Silent inconsistency
-   - If `list` is updated (refetch), `selectedInitative` may remain stale
-   - Components reading from the store may receive inconsistent data
-
-3. Unnecessary coupling
-   - Downstream components may start depending on `selectedInitative`
-   - Risk of regression toward non‑derived architecture
-```
-
-## ❌ Architectural non‑compliance
-Violated rule:
-> explicitly cite the violated protocol rule
-
-Technical evidence:
-```
-real detected code snippet
-```
-```
-
-Generic or purely descriptive reports are not allowed.
+With reference to the actually analyzed files.
 
 ---
 
-# 🔍 MANDATORY GLOBAL SEARCHES
+# 🔍 MANDATORY GLOBAL SEARCHES (REINFORCED DETERMINISTIC VERSION)
 
-Before drafting the report, global searches must be performed for:
+Before compiling the report, global searches must be performed for:
 
-- selectedInitative
-- InitiativeDTO
-- find(
+## ✅ React effects and determinism
+
 - useEffect(
-- dependency []
+- useMemo(
+- useCallback(
+- []
+- eslint-disable-next-line react-hooks/exhaustive-deps
+
+## ✅ Manual domain derivations
+
+- .find(
+- .filter(
+- .map(
+- reduce(
+- includes(
+- some(
+
+⚠️ Any manual derivation on the initiatives list outside official selectors must be analyzed.
+
+## ✅ initiativeId propagation
+
 - initiativeId
+- initiative_id
 - useParams(
+- useCurrentInitiative
+- useCurrentInitiativeId
 - currentInitiativeSelector
 - setSelectedInitative
-- routes.tsx
 
-All findings must be documented in the report.
+## ✅ Routing and navigation
+
+- routes.tsx
+- navigate(
+- history.push(
+- window.location
+
+## ✅ Persistence and alternative state sources
+
+- localStorage
+- sessionStorage
+
+## ✅ HTTP layer
+
+- axios(
+- fetch(
+
+Evidence must be reported with file references and code snippets.
 
 ---
 
@@ -166,161 +144,190 @@ All findings must be documented in the report.
 
 # 1️⃣ ROUTING ANALYSIS (SOURCE OF TRUTH)
 
-### Mandatory checks
+## ✅ Mandatory checks
 
-- All multi‑initiative pages include `:initiative_id`.
+- All multi-initiative pages include `:initiative_id`.
 - Uniform pattern `${BASE_ROUTE}/:initiative_id/...`.
-- No legacy routes without the parameter.
-- No navigation driven by Redux.
+- No legacy routes without parameter.
+- No Redux-driven navigation.
+- No silent fallback to hardcoded initiativeId.
 
-### Required evidence
+## ✅ Deterministic rule
 
-- Citation of `routes.tsx`
-- Complete list of multi‑initiative routes
-- Evidence of any non‑uniform patterns
-
-✅ Rule:
 > The URL is the only source of initiative context.
 
+PASS if:
+- All multi-initiative routes include the parameter.
+- No initiativeId derived from store is used as primary source.
+
 ---
 
-# 2️⃣ REDUX STATE ANALYSIS
+# 2️⃣ REDUX STATE ANALYSIS (DERIVED DOMAIN)
 
-### Mandatory checks
+## ✅ Mandatory checks
 
-- Presence of initiatives list as the only primary domain source.
-- Complete absence of persisted derived state (e.g. `selectedInitative` or equivalents).
-- Absence of storing any "Extended" DTO inside the store.
-- Absence of route → store synchronization actions.
-- Presence and consistent usage of `currentInitiativeSelector` as the single domain derivation point.
+- The initiatives list is the only primary domain source.
+- Total absence of persisted derived state (e.g., selectedInitative or equivalents).
+- No extended DTOs stored in Redux.
+- No route → store synchronization actions.
+- Consistent use of `currentInitiativeSelector`.
 
-### Required evidence
+## ✅ Deterministic rule
 
-- Citation of Redux slice
-- Citation of guard
-- Citation of any dispatch
-
-✅ Rule:
 > The domain must be derived, not duplicated.
 
+PASS if:
+- No store property replicates a selected initiative.
+- Domain is always derived via selector.
+
 ---
 
-# 3️⃣ EFFECTS ANALYSIS (DETERMINISM)
+# 3️⃣ INITIATIVE ID PROPAGATION ACROSS LAYERS
 
-### Mandatory checks
+## ✅ Mandatory checks
 
-- All multi‑initiative fetches include `initiativeId` in dependency arrays.
-- No `useEffect` with dependency `[]` in multi‑initiative context.
-- No manual `find` or domain derivation on initiatives in components, guards, or `useEffect`.
-- No domain formatting logic (e.g. spendingPeriod) outside memoized selectors.
+- Service layer receives initiativeId as explicit parameter.
+- No service reads initiativeId from store or global context.
+- No API client invoked without initiativeId when required.
+- No HTTP calls in components or guards.
 
-### Required evidence
+## ✅ Deterministic rule
 
-- Citation of analyzed `useEffect`
-- Evidence of dependency arrays
+> initiativeId must be explicitly propagated across layers.
 
-✅ Rule:
+PASS if:
+- initiativeId is explicitly passed in multi-initiative domain functions.
+- No intermediate layer performs implicit derivations.
+
+---
+
+# 4️⃣ EFFECT ANALYSIS (DETERMINISM)
+
+## ✅ Mandatory checks
+
+- All multi-initiative fetches include initiativeId in dependencies.
+- No useEffect with empty dependency array in multi-initiative context.
+- No manual `find` on initiatives outside official selectors.
+- No domain formatting outside memoized selectors.
+
+## ✅ Deterministic rule
+
 > Every effect must be deterministic with respect to the route.
 
----
-
-# 4️⃣ UI STATE RESET ANALYSIS
-
-### Mandatory checks
-
-- Verification of local state reset on `initiativeId` change.
-- Verification of absence of cross‑initiative leakage.
-- Verification of presence or absence of a global reset mechanism.
-
-✅ Rule:
-> No cross‑initiative leakage.
+PASS if:
+- Every relevant useEffect includes initiativeId.
+- No manual domain derivation inside components.
 
 ---
 
 # 5️⃣ INITIATIVE GUARD ANALYSIS
 
-Mandatory file to analyze:
+Mandatory file:
 `src/decorators/withInitiativeGuard.tsx`
 
-### Mandatory checks
+## ✅ Mandatory checks
 
-- `initiativeId` is read exclusively from the route.
-- No imperative route → store synchronization.
-- No domain derivation inside the guard (no `find`, no formatting, no DTO logic).
-- No knowledge of InitiativeDTO internal structure beyond existence validation.
+- initiativeId read exclusively from route.
+- No route → store synchronization.
+- No domain logic (no find, no mapping).
+- No knowledge of internal DTO structure beyond existence validation.
 
-✅ Rule:
+## ✅ Deterministic rule
+
 > Validation must be centralized and must not duplicate domain logic.
 
 ---
 
-# 6️⃣ TEST ANALYSIS
+# 6️⃣ SERVICE AND API LAYER ANALYSIS
 
-### Mandatory checks
+## ✅ Mandatory checks
 
-- Tests must not depend on persisted derived state.
-- No mocking of `selectedInitative` as primary source.
-- Consistency with derived model.
+- No HTTP calls outside `src/api` or `src/services`.
+- No direct axios or fetch usage in components.
+- Consistent use of `axiosInstance`.
+- Consistent use of `ApiError`.
 
-✅ Rule:
-> Tests must reflect the derived architecture.
+## ✅ Deterministic rule
+
+> The HTTP layer must be centralized and isolated from the UI.
+
+PASS if:
+- No axios/fetch imports exist outside authorized layers.
 
 ---
 
-# 7️⃣ GLOBAL ANTI‑PATTERN VERIFICATION
+# 7️⃣ UI STATE RESET ANALYSIS
 
-### Mandatory checks
+## ✅ Mandatory checks
 
-- No manual `find` on initiatives outside official selectors.
-- No reintroduction of persisted derived state into the store.
-- No route → Redux synchronization actions.
-- No domain duplication in Redux.
-- No effect without `initiativeId`.
-- No non‑uniform route.
+- Changing initiativeId triggers proper local state reset.
+- No cross-initiative leakage.
+- No persistent local cache left invalidated.
+
+## ✅ Deterministic rule
+
+> No cross-initiative leakage is allowed.
+
+---
+
+# 8️⃣ TEST ANALYSIS
+
+## ✅ Mandatory checks
+
+- Tests must not depend on persisted derived state.
+- No mock of selectedInitative as primary source.
+- Tests must reflect the derived domain model.
+
+## ✅ Deterministic rule
+
+> Tests must be consistent with the derived architecture.
+
+---
+
+# 9️⃣ GLOBAL ANTI-PATTERN VERIFICATION
+
+The following must be ABSENT:
+
+- Manual find on initiatives outside selectors.
+- Duplicated state in Redux.
+- Route → Redux synchronization actions.
+- Hardcoded initiativeId.
+- Effects without initiativeId.
+- HTTP calls inside components.
+- initiativeId read from localStorage as primary source.
 
 ---
 
 # ✅ DETERMINISTIC OUTCOME CRITERIA
 
-The report must mandatorily end with the following chapter:
+The report must end with:
 
 ```
 # ✅ CONCLUSION
 ```
 
-### In case of POSITIVE OUTCOME
+### POSITIVE RESULT
 
 ```
-# ✅ CONCLUSION
-
-No architectural non‑compliance has been identified with documented technical evidence.
+No architectural non-compliances documented with technical evidence were identified.
 
 OUTCOME: *** POSITIVE ***
 ```
 
-### In case of NEGATIVE OUTCOME
+### NEGATIVE RESULT
 
 ```
-# ✅ CONCLUSION
-
-Architectural non‑compliance has been identified and documented with technical evidence.
+Architectural non-compliances documented with technical evidence were identified.
 
 OUTCOME: *** NEGATIVE ***
 
 List of files to be modified:
-1 - `path/to/file1`
-2 - `path/to/file2`
-...
+1 - path/file1
+2 - path/file2
 ```
 
-⚠️ The list of files to be modified must be:
-- Numbered.
-- Dynamic.
-- Strictly aligned with the actual non‑compliance identified in the report.
-- Based exclusively on technical evidence cited in previous sections.
-
-"Partially aligned" is not allowed.
+⚠️ "Partially aligned" is not allowed.
 
 ---
 
-✅ This document constitutes the official deterministic multi‑initiative audit protocol.
+✅ This document constitutes the official deterministic multi-initiative audit protocol, including routing verification, derived domain enforcement, and architectural propagation of initiativeId.
