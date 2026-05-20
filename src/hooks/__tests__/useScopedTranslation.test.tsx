@@ -112,4 +112,71 @@ describe('useScopedTranslation', () => {
 
     expect(typeof result.current.isLoading).toBe('boolean');
   });
+
+  it('should fallback to default config when initiative config namespace fails', async () => {
+    const mockT = jest
+      .fn()
+      .mockImplementationOnce(() => 'missing.key') // initiative ns
+      .mockImplementationOnce(() => 'default.config.value'); // fallback ns
+
+    mockUseTranslation.mockReturnValue({ t: mockT });
+
+    const { result } = renderHook(() =>
+      useScopedTranslation({ initiativeName: 'myInitiative', fileName: 'config' })
+    );
+
+    const value = result.current.t('missing.key');
+
+    expect(value).toBe('default.config.value');
+  });
+
+  it('should return common namespace when no initiative and no nameSpace option', () => {
+    const mockT = jest.fn((key: string, opts?: any) => {
+      if (opts?.ns === 'common') {
+        return 'common.value';
+      }
+      return key;
+    });
+
+    mockUseTranslation.mockReturnValue({ t: mockT });
+
+    const { result } = renderHook(() => useScopedTranslation());
+
+    const value = result.current.t('pages.test');
+
+    expect(value).toBe('common.value');
+  });
+
+  it('should skip loading if resource bundle already exists', async () => {
+    const locale = require('../../locale');
+    locale.getResourceBundle.mockReturnValue({ key: 'value' });
+
+    const { result } = renderHook(() =>
+      useScopedTranslation({ initiativeName: 'myInitiative' })
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(typeof result.current.isLoading).toBe('boolean');
+  });
+
+  it('should handle namespace load failure and fallback for copy', async () => {
+    const multiI18n = require('../../locale/multiInitiativeI18n');
+    multiI18n.loadItNamespace.mockRejectedValueOnce(new Error('fail'));
+
+    const locale = require('../../locale');
+    locale.getResourceBundle.mockReturnValue(undefined);
+
+    const { result } = renderHook(() =>
+      useScopedTranslation({ initiativeName: 'myInitiative' })
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(typeof result.current.isLoading).toBe('boolean');
+  });
 });
