@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useScopedTranslation } from '../useScopedTranslation';
-import { useAppSelector } from '../../redux/hooks';
+import { setupInitiativeMocks } from '../../test-utils/mockInitiativeContext';
 
 const mockT = jest.fn((key: string) => key);
 
@@ -10,26 +10,11 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-jest.mock('../useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
 
 describe('useScopedTranslation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
+    setupInitiativeMocks();
   });
 
 test('should prefix key with baseKey and call t(key, options) when second param is options', () => {

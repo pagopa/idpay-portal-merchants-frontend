@@ -1,37 +1,41 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
 import { InitiativeOverviewInfo } from '../initiativeOverviewInfo';
-import { useAppSelector } from '../../../redux/hooks';
+import { setupInitiativeMocks } from '../../../test-utils/mockInitiativeContext';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
   Trans: ({ i18nKey }: { i18nKey: string }) => <>{i18nKey}</>,
 }));
 
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
 
 describe('InitiativeOverviewInfo', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
+    setupInitiativeMocks();
   });
 
   test('Renders InitiativeOverviewInfo', async () => {
-    render(<InitiativeOverviewInfo />);
+    const store = configureStore({
+      reducer: {
+        initiatives: () => ({
+          list: [],
+        }),
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <InitiativeOverviewInfo />
+      </Provider>
+    );
     const openModalButton = screen.getByTestId('open-modal');
 
     expect(screen.queryByText('pages.initiativeOverview.info.description')).not.toBeInTheDocument();

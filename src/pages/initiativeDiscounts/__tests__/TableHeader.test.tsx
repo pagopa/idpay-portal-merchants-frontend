@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { useAppSelector } from '../../../redux/hooks';
+import { setupInitiativeMocks } from '../../../test-utils/mockInitiativeContext';
 import Table from '@mui/material/Table';
 import TableHeader from '../TableHeader';
 
@@ -10,26 +10,11 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
 
 describe('TableHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
+    setupInitiativeMocks();
   });
 
   const renderHeader = (data: { width: string; label: string }[]) =>

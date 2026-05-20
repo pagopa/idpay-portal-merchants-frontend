@@ -1,7 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import SearchTaxCode from '../SearchTaxCode';
-import { useAppSelector } from '../../../redux/hooks';
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+import { setupInitiativeMocks } from '../../../test-utils/mockInitiativeContext';
 
 const createFormikMock = (overrides: any = {}) =>
   ({
@@ -43,26 +49,20 @@ const createFormikMock = (overrides: any = {}) =>
     ...overrides,
   } as any);
 
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
 
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
+const createMockStore = () =>
+  configureStore({
+    reducer: {
+      initiatives: () => ({
+        list: [],
+      }),
+    },
+  });
 
 describe('SearchTaxCode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
+    setupInitiativeMocks();
   });
   const renderSearchTaxCode = ({
     formikOverrides,
@@ -74,12 +74,16 @@ describe('SearchTaxCode', () => {
     const formik = createFormikMock(formikOverrides);
     const onSearch = jest.fn();
 
+    const store = createMockStore();
+
     render(
-      <SearchTaxCode
-        formik={formik}
-        onSearch={onSearch}
-        onReset={onReset}
-      />
+      <Provider store={store}>
+        <SearchTaxCode
+          formik={formik}
+          onSearch={onSearch}
+          onReset={onReset}
+        />
+      </Provider>
     );
 
     return { formik, onSearch, onReset };

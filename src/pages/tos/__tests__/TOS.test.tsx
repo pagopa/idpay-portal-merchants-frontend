@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { useAppSelector } from '../../../redux/hooks';
+import { setupInitiativeMocks } from '../../../test-utils/mockInitiativeContext';
 
 jest.mock('../../../hooks/useOneTrustNotice');
 jest.mock('../../components/OneTrustContentWrapper', () => (props: { idSelector: string }) => (
@@ -19,26 +19,11 @@ jest.mock('../../../routes', () => ({
   TOS: '/mock-tos-route',
 }));
 
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
 
 describe('TOS component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
+    setupInitiativeMocks();
   });
 
   const renderTOS = async (html: string) => {
