@@ -1,8 +1,8 @@
 import { render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupInitiativeMocks } from '../../../test-utils/mockInitiativeContext';
 import Table from '@mui/material/Table';
 import TableHeader from '../TableHeader';
-import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -10,21 +10,13 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
 
 describe('TableHeader', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupInitiativeMocks();
+  });
+
   const renderHeader = (data: { width: string; label: string }[]) =>
     render(
       <Table>
@@ -32,13 +24,7 @@ describe('TableHeader', () => {
       </Table>
     );
 
-  beforeEach(() => {
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
-  });
-
-  it('renders all provided header cells', () => {
+  it('renderizza tutte le celle di intestazione passate nei props', () => {
     const data = [
       { width: '20%', label: 'header.first' },
       { width: '30%', label: 'header.second' },

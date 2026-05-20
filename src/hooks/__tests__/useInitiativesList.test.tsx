@@ -52,7 +52,7 @@ jest.mock('../useScopedTranslation', () => ({
 jest.mock('../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: (state = { list: [] }) => state,
+  initiativesReducer: jest.fn(), 
 }));
 
 jest.mock('../../redux/hooks', () => ({

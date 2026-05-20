@@ -28,7 +28,7 @@ if (process.env.NODE_ENV !== 'test' && initReactI18next) {
 
 if (process.env.NODE_ENV !== 'test' && typeof (i18n as any).addResourceBundle === 'function') {
   void Promise.all(
-    ['default/copy'].map(async (ns) => {
+    ['default/copy', 'default/config'].map(async (ns) => {
       const res = await loadItNamespace(ns);
       (i18n as any).addResourceBundle(defaultLanguage, ns, res, true, true);
     })

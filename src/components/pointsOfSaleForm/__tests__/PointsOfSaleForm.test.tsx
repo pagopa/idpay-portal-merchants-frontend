@@ -717,7 +717,6 @@ describe('PointsOfSaleForm integration tests', () => {
     expect(onValidationChangeMock).toHaveBeenCalled();
     onValidationChangeMock.mockClear();
 
-    // Simulate submit attempt
     rerender(
       <PointsOfSaleForm
         onFormChange={onFormChangeMock}

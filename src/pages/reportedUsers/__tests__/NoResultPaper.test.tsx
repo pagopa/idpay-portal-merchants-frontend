@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import NoResultPaper from '../NoResultPaper';
 import { useAppSelector } from '../../../redux/hooks';
@@ -16,7 +15,7 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(),
+  initiativesReducer: jest.fn(), 
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -25,6 +24,12 @@ jest.mock('../../../redux/hooks', () => ({
 
 describe('NoResultPaper', () => {
   const defaultKey = 'test.key';
+
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  test('should render without crashing', () => {
+    render(<NoResultPaper translationKey="test.key" />);
+    expect(screen.getByText('translated_test.key')).toBeInTheDocument();
+  });
 
   const renderComponent = (translationKey: string = defaultKey) =>
     render(<NoResultPaper translationKey={translationKey} />);
