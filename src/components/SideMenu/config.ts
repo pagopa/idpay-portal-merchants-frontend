@@ -3,15 +3,14 @@ import ReportIcon from '@mui/icons-material/Report';
 import EuroIcon from '@mui/icons-material/Euro';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { SvgIconTypeMap } from '@mui/material';
-import { OverridableComponent } from '@mui/material/OverridableComponent';
+import { SvgIconComponent } from '@mui/icons-material';
 import ROUTES from '../../routes';
 
 type ConfigProps = {
   key: string
   title: string
   route: string
-  icon: OverridableComponent<SvgIconTypeMap<unknown, "svg">> & { muiName: string}
+  icon: SvgIconComponent
   dataTestId: string
 }
 
