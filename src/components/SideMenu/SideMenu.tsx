@@ -30,6 +30,7 @@ export default function SideMenu() {
           {initiativesList && initiativesList.map((item) => <SidenavAccordion
               key={item?.initiativeId}
               item={item}
+              isExpanded={!(initiativesList.length - 1)}
             />)};
         </List>
       </Box>

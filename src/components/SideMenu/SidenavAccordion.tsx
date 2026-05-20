@@ -11,9 +11,10 @@ import SidenavItem from './SidenavItem';
 
 type Props = {
     item: InitiativeDTO
+    isExpanded: boolean
 }
 
-export const SidenavAccordion = ({ item }: Props) => {
+export const SidenavAccordion = ({ item, isExpanded }: Props) => {
     const history = useHistory();
     const { initiativeConfig } = useInitiativeConfig<Array<string>>("routes", {initiativeName: item?.initiativeName || '', startDate: item?.startDate || ''});
     const { t } = useScopedTranslation();
@@ -24,7 +25,7 @@ export const SidenavAccordion = ({ item }: Props) => {
 
     return (<Accordion
         key={initiativeId}
-        expanded={history.location.pathname.startsWith(`${BASE_ROUTE}/${initiativeId}`)}
+        expanded={history.location.pathname.startsWith(`${BASE_ROUTE}/${initiativeId}`) || isExpanded}
         disableGutters
         elevation={0}
         sx={{
