@@ -15,9 +15,13 @@ import { isValidEmail } from '../../../helpers';
 import { POS_TYPE } from '../../../utils/constants';
 import { StoreProvider } from '../StoreContext';
 import { handlePromptMessage } from '../../../helpers';
-import { configureStore } from '@reduxjs/toolkit';
 import { useAppSelector } from '../../../redux/hooks';
 import { Provider } from 'react-redux';
+import {
+  createMockStore,
+  openEditModal,
+  fillAndConfirmEmailsByIndex,
+} from '../../../test-utils/initiativeStoresTestUtils';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -90,12 +94,6 @@ jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
 
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: () => initialState
-  });
-};
-
 const store = createMockStore();
 
 describe('InitiativeStoreDetail', () => {
@@ -129,24 +127,6 @@ describe('InitiativeStoreDetail', () => {
       </MemoryRouter>
     );
 
-  const openEditModal = async (user: any) => {
-    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
-    await waitFor(() =>
-      expect(
-        screen.getByText('pages.initiativeStores.modalDescription')
-      ).toBeInTheDocument()
-    );
-  };
-
-  const fillEmails = async (user: any, email: string) => {
-    const inputs = screen.getAllByRole('textbox');
-    const email1 = inputs[2];
-    const email2 = inputs[3];
-    await user.clear(email1);
-    await user.type(email1, email);
-    await user.clear(email2);
-    await user.type(email2, email);
-  };
 
   test('renders store detail and calls APIs', async () => {
     renderWithProviders();
@@ -234,15 +214,7 @@ describe('InitiativeStoreDetail', () => {
       expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
     });
 
-    const inputs = screen.getAllByRole('textbox');
-    const emailField1 = inputs[2];
-    const emailField2 = inputs[3];
-
-    await user.clear(emailField1);
-    await user.type(emailField1, 'new@test.it');
-
-    await user.clear(emailField2);
-    await user.type(emailField2, 'new@test.it');
+    await fillAndConfirmEmailsByIndex(user, 'new@test.it');
 
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
@@ -262,15 +234,7 @@ describe('InitiativeStoreDetail', () => {
       expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
     });
 
-    const inputs = screen.getAllByRole('textbox');
-    const emailField1 = inputs[2];
-    const emailField2 = inputs[3];
-
-    await user.clear(emailField1);
-    await user.type(emailField1, 'duplicate@test.it');
-
-    await user.clear(emailField2);
-    await user.type(emailField2, 'duplicate@test.it');
+    await fillAndConfirmEmailsByIndex(user, 'duplicate@test.it');
 
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
@@ -288,15 +252,7 @@ describe('InitiativeStoreDetail', () => {
       expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
     });
 
-    const inputs = screen.getAllByRole('textbox');
-    const emailField1 = inputs[2];
-    const emailField2 = inputs[3];
-
-    await user.clear(emailField1);
-    await user.type(emailField1, 'test@test.com');
-
-    await user.clear(emailField2);
-    await user.type(emailField2, 'test@test.com');
+    await fillAndConfirmEmailsByIndex(user, 'test@test.com');
 
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
