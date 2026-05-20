@@ -5,7 +5,6 @@ import { generateUniqueId, isValidEmail, isValidUrl } from '../../../helpers';
 import * as hooks from '../../../hooks/useAutocomplete';
 import * as helpers from '../../../helpers';
 import { useAppSelector } from '../../../redux/hooks';
-import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('../../../hooks/useAutocomplete');
 jest.mock('../../../helpers', () => ({
@@ -70,7 +69,6 @@ jest.mock('../../Autocomplete/AutocompleteComponent', () => (props: any) => {
 });
 
 describe('PointsOfSaleForm full coverage', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
 
@@ -719,7 +717,6 @@ describe('PointsOfSaleForm integration tests', () => {
     expect(onValidationChangeMock).toHaveBeenCalled();
     onValidationChangeMock.mockClear();
 
-    // Simulate submit attempt
     rerender(
       <PointsOfSaleForm
         onFormChange={onFormChangeMock}

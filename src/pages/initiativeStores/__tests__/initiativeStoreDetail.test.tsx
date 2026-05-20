@@ -18,9 +18,6 @@ import { handlePromptMessage } from '../../../helpers';
 import { configureStore } from '@reduxjs/toolkit';
 import { useAppSelector } from '../../../redux/hooks';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import { useAppSelector } from '../../../redux/hooks';
-import { Provider } from 'react-redux';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -85,32 +82,13 @@ const mockStore = {
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(),
+  initiativesReducer: () => null,
+  default: () => null,
 }));
 
 jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
-
-
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: () => initialState
-  });
-};
-
-const store = createMockStore();
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(),
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
-
 
 const createMockStore = (initialState?: any) => {
   return configureStore({
@@ -121,7 +99,6 @@ const createMockStore = (initialState?: any) => {
 const store = createMockStore();
 
 describe('InitiativeStoreDetail', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   beforeEach(() => {
     jest.clearAllMocks();
@@ -144,11 +121,6 @@ describe('InitiativeStoreDetail', () => {
   const renderWithProviders = () =>
     render(
       <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
         <Provider store={store}>
           <StoreProvider>
             <InitiativeStoreDetail />

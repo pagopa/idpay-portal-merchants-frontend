@@ -1,5 +1,3 @@
-/// <reference types="jest" />
-/// <reference types="@testing-library/jest-dom" />
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
@@ -9,9 +7,6 @@ import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/stor
 import { useHistory, useParams } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
-import { configureStore } from '@reduxjs/toolkit';
-import { useAppSelector } from '../../../redux/hooks';
-import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { useAppSelector } from '../../../redux/hooks';
 import { Provider } from 'react-redux';
@@ -77,13 +72,12 @@ const createAutocompleteOption = (id: string, title: string, postalCode: string)
   Highlights: {
     Title: [],
     Address: {
-      Label: 'Via Roma, 100, 52017 Pratovecchio Stia AR, Italia',
+      Label: title,
       Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Toscana' },
-      SubRegion: { Code: 'AR', Name: 'Arezzo' },
-      Locality: 'Pratovecchio Stia',
-      District: 'Stia',
-      PostalCode: '52017',
+      Region: { Name: 'TestRegion' },
+      SubRegion: { Code: 'XX', Name: 'TestProvince' },
+      Locality: 'TestCity',
+      PostalCode: postalCode,
       Street: 'Via Roma',
       StreetComponents: [
         {
@@ -96,108 +90,21 @@ const createAutocompleteOption = (id: string, title: string, postalCode: string)
       ],
       AddressNumber: '100',
     },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 34, EndIndex: 42, Value: 'Via Roma' },
-        { StartIndex: 43, EndIndex: 46, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
   },
-  {
-    PlaceId:
-      'AQAAAGAA_-f12qM_vUnpxK3dXvRN-bf638wAOLJ7f1QPKgB_SyfnIroh0TEvNwfV_sBGSOkGeBLrPNVrqfcxsNiNCrS4tAHN1gebTUHV-LCXq4CHImG9GDqIBF5m5CNZKQ-uOoWTTjGcCz5Ejw5OVIMWqV05JAPCl-dWOJag0pp0gr_Mkdo',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 17014, Cairo Montenotte, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 17014 Cairo Montenotte SV, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Liguria' },
-      SubRegion: { Code: 'SV', Name: 'Savona' },
-      Locality: 'Cairo Montenotte',
-      PostalCode: '17014',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 33, EndIndex: 41, Value: 'Via Roma' },
-        { StartIndex: 42, EndIndex: 45, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGEAiZmfC8mQdUA2Vk3C9f5T0ZRHSn_e1dTZM1HolAGFAppnd2a1Czq_WdoN_3qcuJcdIsV1JXelZ9VRnAirvew4r9xsOuLxc-EzeSrGpRoJTvmU5s5tb0_xd-CLBNuNXsOAlvnZUhTWeewujbIqkHXPF5vBheEjVKJ0MMdHwopwK9tH',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 32013, Longarone, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 32013 Longarone BL, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Veneto' },
-      SubRegion: { Code: 'BL', Name: 'Belluno' },
-      Locality: 'Longarone',
-      PostalCode: '32013',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 26, EndIndex: 34, Value: 'Via Roma' },
-        { StartIndex: 35, EndIndex: 38, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
+});
+
+const optionsAutocomplete = [
+  createAutocompleteOption('1', 'Via Roma 100', '52017'),
+  createAutocompleteOption('2', 'Via Milano 50', '20100'),
+  createAutocompleteOption('3', 'Via Napoli 10', '80100'),
+  createAutocompleteOption('4', 'Via Firenze 20', '50100'),
 ];
 
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: () => null,
+  default: () => null,
 }));
 
 jest.mock('../../../redux/hooks', () => ({

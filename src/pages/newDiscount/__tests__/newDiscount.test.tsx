@@ -4,6 +4,13 @@ import { render, screen } from '@testing-library/react';
 import NewDiscount from '../newDiscount';
 import { useAppSelector } from '../../../redux/hooks';
 
+jest.mock('../../../hooks/useScopedTranslation', () => ({
+  __esModule: true,
+  default: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
 const mockUseCurrentInitiativeId = jest.fn();
 jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
   useCurrentInitiativeId: () => mockUseCurrentInitiativeId(),
@@ -55,6 +62,8 @@ jest.mock('../../../redux/hooks', () => ({
 
 
 describe('NewDiscount', () => {
+  const renderComponent = () => render(<NewDiscount />);
+
   (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
     jest.clearAllMocks();
@@ -115,10 +124,10 @@ describe('NewDiscount', () => {
       isListLoaded: true,
     });
 
-    jest.spyOn(React, 'useState').mockImplementation(() => [true, jest.fn()] as any);
-    jest
-      .spyOn(React, 'useState')
-      .mockImplementation(() => [{ id: 'trx' } as any, jest.fn()] as any);
+    const useStateSpy = jest.spyOn(React, 'useState');
+    useStateSpy
+      .mockImplementationOnce(() => [true, jest.fn()] as any)
+      .mockImplementationOnce(() => [{ id: 'trx' } as any, jest.fn()] as any);
 
     renderComponent();
 
@@ -135,7 +144,5 @@ describe('NewDiscount', () => {
         data: { id: 'trx' },
       })
     );
-
-    useStateSpy.mockRestore();
   });
 });

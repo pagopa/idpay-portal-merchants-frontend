@@ -60,6 +60,14 @@ const createMockStore = (initialState?: any) => {
 
 const store = createMockStore();
 
+const renderComponent = (props: any = {}) => {
+  return render(
+    <Provider store={store}>
+      <ReportDataTable {...props} />
+    </Provider>
+  );
+};
+
 describe('ReportDataTable', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {

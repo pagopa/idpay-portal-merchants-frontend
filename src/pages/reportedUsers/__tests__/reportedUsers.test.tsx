@@ -51,10 +51,7 @@ jest.mock('react-i18next', () => ({
         'pages.reportedUsers.reportUser': 'Segnala Utente',
         'pages.reportedUsers.loading': 'Caricamento...',
         'pages.reportedUsers.noResultUser': 'Nessun utente trovato',
-        'pages.reportedUsers.noResultUser': 'Nessun utente trovato',
         'pages.reportedUsers.noUsers': 'Nessun utente presente',
-        'pages.reportedUsers.validCf': 'La segnalazione è stata registrata',
-        'pages.reportedUsers.removedCf': 'Utente rimosso con successo',
         'pages.reportedUsers.validCf': 'La segnalazione è stata registrata',
         'pages.reportedUsers.removedCf': 'Utente rimosso con successo',
         'pages.reportedUsers.ModalReportedUser.title': 'Conferma eliminazione',
@@ -168,9 +165,6 @@ import type { MockedFunction, Mocked } from 'jest-mock';
 import { configureStore } from '@reduxjs/toolkit';
 import { useAppSelector } from '../../../redux/hooks';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import { useAppSelector } from '../../../redux/hooks';
-import { Provider } from 'react-redux';
 
 const mockGetReportedUser = getReportedUser as MockedFunction<typeof getReportedUser>;
 const mockDeleteReportedUser = deleteReportedUser as MockedFunction<typeof deleteReportedUser>;
@@ -197,7 +191,6 @@ const createMockStore = (initialState?: any) => {
 const store = createMockStore();
 
 describe('ReportedUsers Component', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
   let history: any;
 
@@ -235,6 +228,27 @@ describe('ReportedUsers Component', () => {
         </Router>
       </Provider>
     );
+  };
+
+  const searchByCF = async (cf: string) => {
+    const input = screen.getByTestId('cf-input');
+    fireEvent.change(input, { target: { value: cf } });
+    fireEvent.click(screen.getByTestId('search-button'));
+  };
+
+  const openDeleteModal = async (cf: string) => {
+    await searchByCF(cf);
+    await waitFor(() => {
+      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId(`delete-${cf}`));
+    await waitFor(() => {
+      expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
+    });
+  };
+
+  const confirmDelete = async () => {
+    fireEvent.click(screen.getByTestId('modal-confirm'));
   };
 
   describe('Rendering iniziale', () => {

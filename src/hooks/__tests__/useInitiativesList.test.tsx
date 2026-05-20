@@ -3,10 +3,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useInitiativesList } from '../useInitiativesList';
 import { getMerchantInitiativeList } from '../../services/merchantService';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setInitiativesList } from '../../redux/slices/initiativesSlice';
 import { match } from 'react-router-dom';
-import useScopedTranslation from '../useScopedTranslation';
 import useScopedTranslation from '../useScopedTranslation';
 
 type InitiativeDTO = {
@@ -47,7 +45,8 @@ jest.mock('../useCurrentInitiativeId', () => ({
   useCurrentInitiativeId: () => 'initiative-1',
 }));
 jest.mock('../useScopedTranslation', () => ({
-  useScopedTranslation: jest.fn(),
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 jest.mock('../../redux/slices/initiativesSlice', () => ({
@@ -62,15 +61,13 @@ jest.mock('../../redux/hooks', () => ({
 }));
 
 describe('useInitiativesList', () => {
-    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
-    (useAppDispatch as jest.Mock)
-    (useScopedTranslation as jest.Mock)
   const mockDispatch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAppDispatch.mockReturnValue(mockDispatch);
-    useScopedTranslation.mockReturnValue({ t: (key: string) => key } as any);
+    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
+    (useAppDispatch as jest.Mock).mockReturnValue(mockDispatch);
+    (useScopedTranslation as jest.Mock).mockReturnValue({ t: (key: string) => key } as any);
   });
 
   test('should do nothing if match is null', () => {

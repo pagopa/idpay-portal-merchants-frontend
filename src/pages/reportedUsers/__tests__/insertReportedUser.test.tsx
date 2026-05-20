@@ -3,9 +3,6 @@ import InsertReportedUser from '../insertReportedUser';
 import { configureStore } from '@reduxjs/toolkit';
 import { useAppSelector } from '../../../redux/hooks';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import { useAppSelector } from '../../../redux/hooks';
-import { Provider } from 'react-redux';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -113,7 +110,6 @@ describe('InsertReportedUser', () => {
 
   it('renders CF field, buttons and titles', () => {
     render(<Provider store={store}><InsertReportedUser /></Provider>);
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     expect(screen.getByLabelText('pages.reportedUsers.cfPlaceholder')).toBeInTheDocument();
     expect(screen.getByText('Utenti segnalati')).toBeInTheDocument();
     expect(screen.getByText('Segnalazione utenti')).toBeInTheDocument();
@@ -123,7 +119,6 @@ describe('InsertReportedUser', () => {
 
   it('shows error when trying to confirm with empty CF', async () => {
     render(<Provider store={store}><InsertReportedUser /></Provider>);
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     fireEvent.click(screen.getByTestId('confirm-reportedUsers-button'));
     await waitFor(() => {
       expect(mockGetReportedUser).not.toHaveBeenCalled();
@@ -131,7 +126,6 @@ describe('InsertReportedUser', () => {
   });
 
   it('shows error when CF is invalid', async () => {
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     render(<Provider store={store}><InsertReportedUser /></Provider>);
     const input = screen.getByTestId('cf-input');
     fireEvent.change(input, { target: { value: 'INVALID' } });
@@ -157,7 +151,6 @@ describe('InsertReportedUser', () => {
 
   it('does not open modal when CF already reported', async () => {
     mockGetReportedUser.mockResolvedValueOnce([{ cf: 'RSSMRA80A01F205X' }]);
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     render(<Provider store={store}><InsertReportedUser /></Provider>);
     fireEvent.change(screen.getByTestId('cf-input'), {
       target: { value: 'RSSMRA80A01F205X' },
@@ -208,14 +201,12 @@ describe('InsertReportedUser', () => {
 
   it('goes back when pressing back button', () => {
     render(<Provider store={store}><InsertReportedUser /></Provider>);
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     fireEvent.click(screen.getByTestId('back-reportedUsers-button'));
     expect(mockGoBack).toHaveBeenCalled();
   });
 
   it('handles API error gracefully when checking CF', async () => {
     mockGetReportedUser.mockRejectedValueOnce(new Error('network error'));
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     render(<Provider store={store}><InsertReportedUser /></Provider>);
     fireEvent.change(screen.getByTestId('cf-input'), {
       target: { value: 'RSSMRA80A01F205X' },
@@ -229,7 +220,6 @@ describe('InsertReportedUser', () => {
   it('handles API error gracefully when creating reported user', async () => {
     mockGetReportedUser.mockResolvedValueOnce([]);
     mockCreateReportedUser.mockRejectedValueOnce(new Error('create failed'));
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     render(<Provider store={store}><InsertReportedUser /></Provider>);
     fireEvent.change(screen.getByTestId('cf-input'), {
       target: { value: 'RSSMRA80A01F205X' },
@@ -277,7 +267,6 @@ describe('InsertReportedUser', () => {
     });
 
     render(<Provider store={store}><InsertReportedUser /></Provider>);
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     fireEvent.change(screen.getByTestId('cf-input'), {
       target: { value: 'RSSMRA80A01F205X' },
     });
@@ -295,7 +284,6 @@ describe('InsertReportedUser', () => {
     mockGetReportedUser.mockResolvedValueOnce([]);
     mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: 'Service unavailable' });
 
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     render(<Provider store={store}><InsertReportedUser /></Provider>);
     fireEvent.change(screen.getByTestId('cf-input'), {
       target: { value: 'RSSMRA80A01F205X' },
@@ -316,7 +304,6 @@ describe('InsertReportedUser', () => {
     mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: 'Already reported' });
 
     render(<Provider store={store}><InsertReportedUser /></Provider>);
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     fireEvent.change(screen.getByTestId('cf-input'), {
       target: { value: 'RSSMRA80A01F205X' },
     });
@@ -334,7 +321,6 @@ describe('InsertReportedUser', () => {
     mockGetReportedUser.mockResolvedValueOnce([]);
     mockCreateReportedUser.mockResolvedValueOnce({ status: 'KO', errorKey: 'Some other error' });
 
-    render(<Provider store={store}><InsertReportedUser /></Provider>);
     render(<Provider store={store}><InsertReportedUser /></Provider>);
     fireEvent.change(screen.getByTestId('cf-input'), {
       target: { value: 'RSSMRA80A01F205X' },
