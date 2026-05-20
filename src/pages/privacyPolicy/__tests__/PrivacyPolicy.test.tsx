@@ -1,11 +1,6 @@
-import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import PrivacyPolicy from '../PrivacyPolicy';
-import { useOneTrustNotice } from '../../../hooks/useOneTrustNotice';
-import { ENV } from '../../../utils/env';
-import routes from '../../../routes';
-import { useAppSelector } from '../../../redux/hooks';
 import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('../../../hooks/useOneTrustNotice');
@@ -62,6 +57,10 @@ describe('PrivacyPolicy', () => {
       { initiativeId: 'initiative-1' },
     ]);
   });
+
+  const renderComponent = () => {
+    render(<PrivacyPolicy />);
+  };
 
   it('renders page title correctly', () => {
     renderComponent();

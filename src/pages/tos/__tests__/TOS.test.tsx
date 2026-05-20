@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useAppSelector } from '../../../redux/hooks';
-import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('../../../hooks/useOneTrustNotice');
 jest.mock('../../components/OneTrustContentWrapper', () => (props: { idSelector: string }) => (
@@ -64,6 +63,11 @@ describe('TOS component', () => {
     const { default: TOS } = await import('../TOS');
     render(<TOS />);
   };
+
+  const mockInitiative = () =>
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
 
   beforeEach(() => {
     jest.clearAllMocks();

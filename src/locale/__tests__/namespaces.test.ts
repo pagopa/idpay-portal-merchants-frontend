@@ -38,7 +38,7 @@ describe('namespaces', () => {
 
       expect(result).toEqual({
         common: ['common'],
-        initiative: ['myInitiative/copy'],
+        initiative: ['myInitiative/copy', 'myInitiative/config'],
         default: ['default/copy'],
       });
     });

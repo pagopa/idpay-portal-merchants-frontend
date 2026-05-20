@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { InitiativeOverviewInfo } from '../initiativeOverviewInfo';
 import { useAppSelector } from '../../../redux/hooks';
-import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -47,18 +46,14 @@ describe('InitiativeOverviewInfo', () => {
     render(<InitiativeOverviewInfo />);
     const openModalButton = screen.getByTestId('open-modal');
 
-    // DO NOT renders description
     expect(screen.queryByText('pages.initiativeOverview.info.description')).not.toBeInTheDocument();
 
-    // DO NOT renders exit button
     expect(screen.queryByText('actions.close')).not.toBeInTheDocument();
 
     screen.getByTestId('open-modal').click();
 
-    // renders description
     expect(screen.getByText('pages.initiativeOverview.info.description')).toBeInTheDocument();
 
-    //renders exit button
     expect(screen.getByText('actions.close')).toBeInTheDocument();
   });
 });

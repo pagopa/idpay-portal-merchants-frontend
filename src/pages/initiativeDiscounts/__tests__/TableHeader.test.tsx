@@ -1,9 +1,8 @@
 import { render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { useAppSelector } from '../../../redux/hooks';
 import Table from '@mui/material/Table';
 import TableHeader from '../TableHeader';
-import { useAppSelector } from '../../../redux/hooks';
-import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -41,6 +40,14 @@ jest.mock('../../../redux/hooks', () => ({
 
 describe('TableHeader', () => {
     (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+
+  const renderHeader = (data: { width: string; label: string }[]) =>
+    render(
+      <Table>
+        <TableHeader data={data} />
+      </Table>
+    );
+
   it('renderizza tutte le celle di intestazione passate nei props', () => {
     const data = [
       { width: '20%', label: 'header.first' },
