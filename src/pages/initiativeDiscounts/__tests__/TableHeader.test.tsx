@@ -24,22 +24,13 @@ jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
 
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
-
 describe('TableHeader', () => {
-    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
+  });
 
   const renderHeader = (data: { width: string; label: string }[]) =>
     render(

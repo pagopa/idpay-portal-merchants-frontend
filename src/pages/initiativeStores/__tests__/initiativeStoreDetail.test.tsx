@@ -157,15 +157,7 @@ describe('InitiativeStoreDetail', () => {
 
   test('opens and closes modal', async () => {
     const user = userEvent.setup({ delay: null });
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
+    renderWithProviders();
     await screen.findByText('Mock Store');
     const editButton = screen.getByRole('button', { name: /Modifica/i });
     await user.click(editButton);
@@ -179,15 +171,7 @@ describe('InitiativeStoreDetail', () => {
 
   test('validates email fields on blur', async () => {
     const user = userEvent.setup({ delay: null });
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
+    renderWithProviders();
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
 
@@ -213,15 +197,7 @@ describe('InitiativeStoreDetail', () => {
 
   test('handles mismatched emails', async () => {
     const user = userEvent.setup({ delay: null });
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
+    renderWithProviders();
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
 
@@ -250,15 +226,7 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     mockUpdate.mockResolvedValue(undefined);
 
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
+    renderWithProviders();
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
 
@@ -286,15 +254,7 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     mockUpdate.mockResolvedValue({ code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' });
 
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
+    renderWithProviders();
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
 
@@ -320,15 +280,7 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     mockUpdate.mockResolvedValue({ code: 'OTHER' });
 
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
+    renderWithProviders();
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
 
@@ -353,43 +305,19 @@ describe('InitiativeStoreDetail', () => {
   test('handles fetchStoreDetail failure', async () => {
     mockGetById.mockRejectedValueOnce(new Error('fail'));
 
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
+    renderWithProviders();
   });
 
   test('handles fetchStoreTransactions failure', async () => {
     mockGetTransactions.mockRejectedValueOnce(new Error('fail'));
 
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
+    renderWithProviders();
   });
 
   test('calls handleFiltersApplied, handleFiltersReset, sort and pagination', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(
-      <MemoryRouter>
-        <Provider store={store}>
-          <StoreProvider>
-            <InitiativeStoreDetail />
-          </StoreProvider>
-        </Provider>
-      </MemoryRouter>
-    );
+    renderWithProviders();
 
     await screen.findByTestId('transactions');
     await user.click(screen.getByText('apply'));

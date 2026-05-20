@@ -33,24 +33,12 @@ jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
 
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
-
 describe('TOS component', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
   });
 
   const renderTOS = async (html: string) => {
@@ -64,15 +52,6 @@ describe('TOS component', () => {
     render(<TOS />);
   };
 
-  const mockInitiative = () =>
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockInitiative();
-  });
 
   it('renders content when html is provided', async () => {
     await renderTOS('<p>Some TOS content</p>');

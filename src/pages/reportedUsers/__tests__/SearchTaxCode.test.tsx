@@ -43,21 +43,7 @@ const createFormikMock = (overrides: any = {}) =>
     ...overrides,
   } as any);
 
-  jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
-
-  jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
   useCurrentInitiativeId: () => 'initiative-1',
 }));
 
@@ -72,7 +58,12 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 describe('SearchTaxCode', () => {
-    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
+  });
   const renderSearchTaxCode = ({
     formikOverrides,
     onReset,
@@ -94,11 +85,6 @@ describe('SearchTaxCode', () => {
     return { formik, onSearch, onReset };
   };
 
-  beforeEach(() => {
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
-  });
 
   it('renders cf field and buttons', () => {
     renderSearchTaxCode();

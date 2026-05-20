@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { getPortalConsent, savePortalConsent } from '../../services/rolePermissionService';
 import useTCAgreement from '../useTCAgreement';
 import { useAppSelector } from '../../redux/hooks';
+import { mockCommonHooks } from '../../test-utils/setupCommonTestMocks';
 
 jest.mock('../../services/rolePermissionService', () => ({
   getPortalConsent: jest.fn(),
@@ -34,8 +35,7 @@ jest.mock('../../redux/hooks', () => ({
 }));
 
 describe('useTCAgreement', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
-  const mockAddError = jest.fn();
+  let mockAddError: jest.Mock;
 
   const setupHook = (
     consentResponse: any,
@@ -59,11 +59,8 @@ describe('useTCAgreement', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
-    mockedUseErrorDispatcher.mockReturnValue(mockAddError);
-    mockedUseTranslation.mockReturnValue({ t: (key: string) => key });
+    const mocks = mockCommonHooks();
+    mockAddError = mocks.mockAddError;
   });
 
   it('sets isTOSAccepted to false when pending consents exist', async () => {

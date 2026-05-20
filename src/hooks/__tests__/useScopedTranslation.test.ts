@@ -1,7 +1,5 @@
 import { renderHook } from '@testing-library/react-hooks';
-import { useTranslation } from 'react-i18next';
 import { useScopedTranslation } from '../useScopedTranslation';
-import { setInitiativesList, initiativesReducer, intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../redux/hooks';
 
 const mockT = jest.fn((key: string) => key);
@@ -27,16 +25,19 @@ jest.mock('../../redux/hooks', () => ({
 }));
 
 describe('useScopedTranslation', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
-
   beforeEach(() => {
     jest.clearAllMocks();
-});
+    (useAppSelector as jest.Mock).mockReturnValue([
+      { initiativeId: 'initiative-1' },
+    ]);
+  });
 
 test('should prefix key with baseKey and call t(key, options) when second param is options', () => {
   const options = { ns: 'common' };
 
-const { result } = renderHook(() => useScopedTranslation('base'));
+const { result } = renderHook(() =>
+  useScopedTranslation({ baseKey: 'base' } as any)
+);
 
   result.current.t('hello', options as any);
 
@@ -47,7 +48,9 @@ const { result } = renderHook(() => useScopedTranslation('base'));
 test('should prefix key with baseKey and call t(key,  options) when second param is string', () => {
   const options = { ns: 'common' };
 
-  const { result } = renderHook(() => useScopedTranslation('base'));
+  const { result } = renderHook(() =>
+    useScopedTranslation({ baseKey: 'base' } as any)
+  );
 
   result.current.t('missing', options as any);
 
@@ -56,7 +59,9 @@ test('should prefix key with baseKey and call t(key,  options) when second param
 });
 
 test('should pass undefined options through when only key is provided', () => {
-  const { result } = renderHook(() => useScopedTranslation('base'));
+  const { result } = renderHook(() =>
+    useScopedTranslation({ baseKey: 'base' } as any)
+  );
 
   result.current.t('onlyKey');
 
