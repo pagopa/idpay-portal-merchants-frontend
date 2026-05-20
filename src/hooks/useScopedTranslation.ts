@@ -97,7 +97,7 @@ export const useScopedTranslation = (
 
           if (initiativeValue === key) {
             return rawT(key, {
-              ns: 'default/copy',
+              ns: `default/${fileName}`,
               ...options,
             });
           }
