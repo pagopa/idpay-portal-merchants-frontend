@@ -2,6 +2,7 @@
 import { List, Box } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import { useState } from 'react';
 import ROUTES from '../../routes';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../redux/hooks';
@@ -11,6 +12,7 @@ import { SidenavAccordion } from './SidenavAccordion';
 
 
 export default function SideMenu() {
+  const [expandedItem, setExpandedItem] = useState<string>('');
   const initiativesList = useAppSelector(intiativesListSelector);
   const { t } = useScopedTranslation();
   const history = useHistory();
@@ -30,7 +32,9 @@ export default function SideMenu() {
           {initiativesList && initiativesList.map((item) => <SidenavAccordion
               key={item?.initiativeId}
               item={item}
-              isExpanded={!(initiativesList.length - 1)}
+              isExpanded={expandedItem}
+              defaultExpanded={!(initiativesList.length - 1)}
+              setIsExpanded={setExpandedItem}
             />)};
         </List>
       </Box>

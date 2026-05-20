@@ -11,10 +11,12 @@ import SidenavItem from './SidenavItem';
 
 type Props = {
     item: InitiativeDTO
-    isExpanded: boolean
+    isExpanded: string
+    setIsExpanded: (value: string) => void
+    defaultExpanded?: boolean
 }
 
-export const SidenavAccordion = ({ item, isExpanded }: Props) => {
+export const SidenavAccordion = ({ item, isExpanded, setIsExpanded, defaultExpanded }: Props) => {
     const history = useHistory();
     const { initiativeConfig } = useInitiativeConfig<Array<string>>("routes", {initiativeName: item?.initiativeName || '', startDate: item?.startDate || ''});
     const { t } = useScopedTranslation();
@@ -24,8 +26,7 @@ export const SidenavAccordion = ({ item, isExpanded }: Props) => {
     const [firstInitiativePage] = filteredRoutes;
 
     return (<Accordion
-        key={initiativeId}
-        expanded={history.location.pathname.startsWith(`${BASE_ROUTE}/${initiativeId}`) || isExpanded}
+        expanded={history.location.pathname.startsWith(`${BASE_ROUTE}/${initiativeId}`) || isExpanded === initiativeId || defaultExpanded}
         disableGutters
         elevation={0}
         sx={{
@@ -37,6 +38,7 @@ export const SidenavAccordion = ({ item, isExpanded }: Props) => {
         onChange={(e) => {
             e.stopPropagation();
             history.replace(`${BASE_ROUTE}/${initiativeId}/${firstInitiativePage?.route}`);
+            setIsExpanded(initiativeId || '');
         }}
         data-testid="accordion-click-test"
     >
