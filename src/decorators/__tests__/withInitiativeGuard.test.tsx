@@ -1,4 +1,3 @@
-import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import WithInitiativeGuard from '../withInitiativeGuard';
@@ -28,9 +27,29 @@ jest.mock('../../routes', () => ({
   },
 }));
 
+const mockUseInitiativeConfig = jest.fn();
+jest.mock('../../hooks/useInitiativeConfig', () => ({
+  useInitiativeConfig: () => mockUseInitiativeConfig(),
+}));
+
+const mockUseCurrentInitiative = jest.fn();
+jest.mock('../../hooks/useCurrentInitiative', () => ({
+  useCurrentInitiative: () => mockUseCurrentInitiative(),
+}));
+
 describe('WithInitiativeGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Default safe mock to avoid destructuring undefined
+    mockUseInitiativeConfig.mockReturnValue({
+      initiativeConfig: [],
+    });
+
+    mockUseCurrentInitiative.mockReturnValue({
+      initiativeName: '',
+      startDate: '',
+    });
   });
 
   it('renders loading state when list is not loaded', () => {
@@ -42,7 +61,7 @@ describe('WithInitiativeGuard', () => {
     });
 
     render(
-      <WithInitiativeGuard>
+      <WithInitiativeGuard route="test-route">
         <div>Protected</div>
       </WithInitiativeGuard>
     );
@@ -59,7 +78,7 @@ describe('WithInitiativeGuard', () => {
     });
 
     render(
-      <WithInitiativeGuard>
+      <WithInitiativeGuard route="test-route">
         <div>Protected</div>
       </WithInitiativeGuard>
     );
@@ -76,7 +95,7 @@ describe('WithInitiativeGuard', () => {
     });
 
     render(
-      <WithInitiativeGuard>
+      <WithInitiativeGuard route="test-route">
         <div>Protected</div>
       </WithInitiativeGuard>
     );
@@ -93,7 +112,7 @@ describe('WithInitiativeGuard', () => {
     });
 
     render(
-      <WithInitiativeGuard>
+      <WithInitiativeGuard route="test-route">
         <div>Protected</div>
       </WithInitiativeGuard>
     );
@@ -108,13 +127,44 @@ describe('WithInitiativeGuard', () => {
       isValid: true,
       isListLoaded: true,
     });
+    mockUseCurrentInitiative.mockReturnValue({
+      initiativeName: 'Test',
+      startDate: '2024-01-01',
+    });
+    mockUseInitiativeConfig.mockReturnValue({
+      initiativeConfig: ['allowed-route'],
+    });
 
     render(
-      <WithInitiativeGuard>
+      <WithInitiativeGuard route="allowed-route">
         <div>Protected</div>
       </WithInitiativeGuard>
     );
 
     expect(screen.getByText('Protected')).toBeInTheDocument();
+  });
+
+  it('redirects when route is not included in initiativeConfig', () => {
+    mockUseSelector.mockReturnValue([{ id: '1' }]);
+    mockUseCurrentInitiativeId.mockReturnValue({
+      initiativeId: '1',
+      isValid: true,
+      isListLoaded: true,
+    });
+    mockUseCurrentInitiative.mockReturnValue({
+      initiativeName: 'Test',
+      startDate: '2024-01-01',
+    });
+    mockUseInitiativeConfig.mockReturnValue({
+      initiativeConfig: ['another-route'],
+    });
+
+    render(
+      <WithInitiativeGuard route="forbidden-route">
+        <div>Protected</div>
+      </WithInitiativeGuard>
+    );
+
+    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
   });
 });
