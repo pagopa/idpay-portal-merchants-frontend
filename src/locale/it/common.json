@@ -133,6 +133,8 @@
       "uploadStores": "Inserisci l’elenco dei tuoi punti vendita",
       "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online.",
       "noStoresInitiative": "Non ci sono punti vendita per questa iniziativa",
+      "noStores": "Non ci sono punti vendita, ",
+      "addStoreNoResults": "aggiungili per iniziare",
       "online": "Online",
       "physical": "Fisico",
       "manualLink": "Dubbi? Vai al manuale",
@@ -158,7 +160,8 @@
       "website": "Sito web",
       "pointOfSale": "Punto vendita",
       "modalDescription": "Qui puoi modificare i dati del referente di questo punto vendita. Se procedi, il nuovo referente riceverà un’email di conferma all’indirizzo indicato. Le credenziali di accesso del vecchio referente non saranno più valide.",
-      "contactEmailModal": "Indirizzo e-mail"
+      "contactEmailModal": "Indirizzo e-mail",
+      "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati"
     },
     "initiativeStoreDetail": {
       "transactionHistory": "Storico transazioni",
