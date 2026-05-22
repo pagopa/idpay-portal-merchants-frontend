@@ -2,6 +2,7 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Accordion, AccordionDetails, AccordionSummary, List, ListItemText } from '@mui/material';
 import { useHistory } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useInitiativeConfig } from '../../hooks/useInitiativeConfig';
 import { InitiativeDTO } from '../../api/generated/merchants/data-contracts';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
@@ -17,13 +18,17 @@ type Props = {
 }
 
 export const SidenavAccordion = ({ item, isExpanded, setIsExpanded, defaultExpanded }: Props) => {
+    const [filteredRoutes, setFilteredRoutes] = useState<typeof config>();
     const history = useHistory();
-    const { initiativeConfig } = useInitiativeConfig<Array<string>>("routes", {initiativeName: item?.initiativeName || '', startDate: item?.startDate || ''});
+    const { getConfig } = useInitiativeConfig<Array<string>>();
     const { t } = useScopedTranslation();
+    const { initiativeId, initiativeName} = item;
 
-    const { initiativeName, initiativeId } = item;
-    const filteredRoutes = config.filter(({ key }) => initiativeConfig?.includes(key));
-    const [firstInitiativePage] = filteredRoutes;
+    useEffect(() => {
+        if(item) {
+        void getConfig("routes", item).then((res) => setFilteredRoutes(config.filter(({ key }) => res?.includes(key))));
+        }
+    }, [item]);
 
     return (<Accordion
         expanded={history.location.pathname.startsWith(`${BASE_ROUTE}/${initiativeId}`) || isExpanded === initiativeId || defaultExpanded}
@@ -37,8 +42,10 @@ export const SidenavAccordion = ({ item, isExpanded, setIsExpanded, defaultExpan
         }}
         onChange={(e) => {
             e.stopPropagation();
-            history.replace(`${BASE_ROUTE}/${initiativeId}/${firstInitiativePage?.route}`);
+            if(filteredRoutes) {
+            history.replace(`${BASE_ROUTE}/${initiativeId}/${filteredRoutes[0]?.route}`);
             setIsExpanded(initiativeId || '');
+            }
         }}
         data-testid="accordion-click-test"
     >
@@ -51,7 +58,7 @@ export const SidenavAccordion = ({ item, isExpanded, setIsExpanded, defaultExpan
         </AccordionSummary>
         <AccordionDetails sx={{ p: 0 }}>
             <List disablePadding>
-                {filteredRoutes.map(({ key, title, route, icon, dataTestId }) =>
+                {filteredRoutes && filteredRoutes.map(({ key, title, route, icon, dataTestId }) =>
                     <SidenavItem
                         key={key}
                         title={t(title)}

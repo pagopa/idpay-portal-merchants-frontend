@@ -20,7 +20,7 @@ export const loadItNamespace = async (namespace: string): Promise<Resource> => {
       return {};
     }
 
-    const mod = await import(`./it/${initiativeName}/${file}.json`);
+    const mod = await import(`./it/${namespace}.json`);
     return mod.default as Resource;
   } catch (e) {
     return {};
