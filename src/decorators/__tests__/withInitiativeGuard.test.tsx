@@ -41,9 +41,8 @@ describe('WithInitiativeGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Default safe mock to avoid destructuring undefined
     mockUseInitiativeConfig.mockReturnValue({
-      initiativeConfig: [],
+      getConfig: jest.fn().mockResolvedValue([]),
     });
 
     mockUseCurrentInitiative.mockReturnValue({
@@ -66,7 +65,9 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(screen.getByText('Caricamento iniziative...')).toBeInTheDocument();
+    expect(
+      screen.getByText('Caricamento iniziative...')
+    ).toBeInTheDocument();
   });
 
   it('redirects to HOME when initiatives list is empty', () => {
@@ -83,7 +84,9 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
+    expect(mockRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({ to: '/home' })
+    );
   });
 
   it('redirects to HOME when initiativeId is missing', () => {
@@ -100,7 +103,9 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
+    expect(mockRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({ to: '/home' })
+    );
   });
 
   it('redirects to HOME when initiativeId is invalid', () => {
@@ -117,22 +122,26 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
+    expect(mockRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({ to: '/home' })
+    );
   });
 
-  it('renders children when state is OK', () => {
+  it('renders children when state is OK', async () => {
     mockUseSelector.mockReturnValue([{ id: '1' }]);
     mockUseCurrentInitiativeId.mockReturnValue({
       initiativeId: '1',
       isValid: true,
       isListLoaded: true,
     });
+
     mockUseCurrentInitiative.mockReturnValue({
       initiativeName: 'Test',
       startDate: '2024-01-01',
     });
+
     mockUseInitiativeConfig.mockReturnValue({
-      initiativeConfig: ['allowed-route'],
+      getConfig: jest.fn().mockResolvedValue(['allowed-route']),
     });
 
     render(
@@ -141,22 +150,24 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(screen.getByText('Protected')).toBeInTheDocument();
+    expect(await screen.findByText('Protected')).toBeInTheDocument();
   });
 
-  it('redirects when route is not included in initiativeConfig', () => {
+  it('redirects when route is not included in initiativeConfig', async () => {
     mockUseSelector.mockReturnValue([{ id: '1' }]);
     mockUseCurrentInitiativeId.mockReturnValue({
       initiativeId: '1',
       isValid: true,
       isListLoaded: true,
     });
+
     mockUseCurrentInitiative.mockReturnValue({
       initiativeName: 'Test',
       startDate: '2024-01-01',
     });
+
     mockUseInitiativeConfig.mockReturnValue({
-      initiativeConfig: ['another-route'],
+      getConfig: jest.fn().mockResolvedValue(['another-route']),
     });
 
     render(
@@ -165,6 +176,10 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
+    await screen.findByTestId('redirect');
+
+    expect(mockRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({ to: '/home' })
+    );
   });
 });
