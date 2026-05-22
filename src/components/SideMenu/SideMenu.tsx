@@ -35,7 +35,7 @@ export default function SideMenu() {
               isExpanded={expandedItem}
               defaultExpanded={!(initiativesList.length - 1)}
               setIsExpanded={setExpandedItem}
-            />)};
+            />)}
         </List>
       </Box>
     </Box>

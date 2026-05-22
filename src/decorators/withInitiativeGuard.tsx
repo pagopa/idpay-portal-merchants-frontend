@@ -31,13 +31,13 @@ const WithInitiativeGuard: React.FC<Props> = ({ children, route }) => {
   const initiatives = useSelector((state: RootState) => intiativesListSelector(state));
   const { initiativeId, isValid, isListLoaded } = useCurrentInitiativeId();
   const selectedInitiative = useCurrentInitiative();
-  const { initiativeConfig } = useInitiativeConfig<Array<string>>("routes", { initiativeName: selectedInitiative?.initiativeName || '', startDate: selectedInitiative?.startDate || '' });
+    const { getConfig } = useInitiativeConfig<Array<string>>();
 
-  useEffect(() => {
-    if (Array.isArray(initiativeConfig)) {
-      setIsValidRoute(initiativeConfig?.includes(route));
-    }
-  }, [initiativeConfig]);
+    useEffect(() => {
+        if(selectedInitiative) {
+        void getConfig("routes", selectedInitiative).then((res) => setIsValidRoute(res?.includes(route)));
+        }
+    }, [selectedInitiative]);
 
   /**
    * HARDENING – Production Safe Flow
