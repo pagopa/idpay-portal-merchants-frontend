@@ -50,8 +50,25 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(), 
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+
 describe('NewDiscount', () => {
   const renderComponent = () => render(<NewDiscount />);
+
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeName: 'Init name' });
+  });
 
   const mockInitiative = (initiativeId?: string) =>
     mockUseCurrentInitiativeId.mockReturnValue({
@@ -101,10 +118,14 @@ describe('NewDiscount', () => {
   });
 
   it('renders DiscountCreatedRecap when discount is created', () => {
-    mockInitiative('init-1');
+    mockUseCurrentInitiativeId.mockReturnValue({
+      initiativeId: 'init-1',
+      isValid: true,
+      isListLoaded: true,
+    });
 
-    const useStateSpy = jest
-      .spyOn(React, 'useState')
+    const useStateSpy = jest.spyOn(React, 'useState');
+    useStateSpy
       .mockImplementationOnce(() => [true, jest.fn()] as any)
       .mockImplementationOnce(() => [{ id: 'trx' } as any, jest.fn()] as any);
 
@@ -123,7 +144,5 @@ describe('NewDiscount', () => {
         data: { id: 'trx' },
       })
     );
-
-    useStateSpy.mockRestore();
   });
 });

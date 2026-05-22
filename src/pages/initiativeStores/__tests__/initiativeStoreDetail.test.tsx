@@ -15,9 +15,13 @@ import { isValidEmail } from '../../../helpers';
 import { POS_TYPE } from '../../../utils/constants';
 import { StoreProvider } from '../StoreContext';
 import { handlePromptMessage } from '../../../helpers';
-import { configureStore } from '@reduxjs/toolkit';
 import { useAppSelector } from '../../../redux/hooks';
 import { Provider } from 'react-redux';
+import {
+  createMockStore,
+  openEditModal,
+  fillAndConfirmEmailsByIndex,
+} from '../../../test-utils/initiativeStoresTestUtils';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -82,19 +86,13 @@ const mockStore = {
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(),
+  initiativesReducer: () => null,
+  default: () => null,
 }));
 
 jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
-
-
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: () => initialState
-  });
-};
 
 const store = createMockStore();
 
@@ -129,24 +127,6 @@ describe('InitiativeStoreDetail', () => {
       </MemoryRouter>
     );
 
-  const openEditModal = async (user: any) => {
-    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
-    await waitFor(() =>
-      expect(
-        screen.getByText('pages.initiativeStores.modalDescription')
-      ).toBeInTheDocument()
-    );
-  };
-
-  const fillEmails = async (user: any, email: string) => {
-    const inputs = screen.getAllByRole('textbox');
-    const email1 = inputs[2];
-    const email2 = inputs[3];
-    await user.clear(email1);
-    await user.type(email1, email);
-    await user.clear(email2);
-    await user.type(email2, email);
-  };
 
   test('renders store detail and calls APIs', async () => {
     renderWithProviders();
@@ -159,8 +139,9 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     renderWithProviders();
     await screen.findByText('Mock Store');
-
-    await openEditModal(user);
+    const editButton = screen.getByRole('button', { name: /Modifica/i });
+    await user.click(editButton);
+    expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
     await user.click(screen.getByText('actions.cancel'));
 
     await openEditModal(user);
@@ -171,7 +152,12 @@ describe('InitiativeStoreDetail', () => {
   test('validates email fields on blur', async () => {
     const user = userEvent.setup({ delay: null });
     renderWithProviders();
-    await openEditModal(user);
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
 
     const inputs = screen.getAllByRole('textbox');
     const emailField = inputs[2];
@@ -192,7 +178,12 @@ describe('InitiativeStoreDetail', () => {
   test('handles mismatched emails', async () => {
     const user = userEvent.setup({ delay: null });
     renderWithProviders();
-    await openEditModal(user);
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
 
     const inputs = screen.getAllByRole('textbox');
     const email1 = inputs[2];
@@ -213,11 +204,17 @@ describe('InitiativeStoreDetail', () => {
     { result: { code: 'OTHER' }, email: 'test@test.com' },
   ])('handles update flow', async ({ result, email }) => {
     const user = userEvent.setup({ delay: null });
-    mockUpdate.mockResolvedValue(result as any);
+    mockUpdate.mockResolvedValue(undefined);
 
     renderWithProviders();
-    await openEditModal(user);
-    await fillEmails(user, email);
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
+
+    await fillAndConfirmEmailsByIndex(user, 'new@test.it');
 
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
@@ -225,13 +222,51 @@ describe('InitiativeStoreDetail', () => {
     await waitFor(() => expect(mockUpdate).toHaveBeenCalled());
   });
 
+  test('handles duplicate email error', async () => {
+    const user = userEvent.setup({ delay: null });
+    mockUpdate.mockResolvedValue({ code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' });
+
+    renderWithProviders();
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
+
+    await fillAndConfirmEmailsByIndex(user, 'duplicate@test.it');
+
+    const submitButton = screen.getByTestId('update-button');
+    await user.click(submitButton);
+  });
+
+  test('handles generic update error', async () => {
+    const user = userEvent.setup({ delay: null });
+    mockUpdate.mockResolvedValue({ code: 'OTHER' });
+
+    renderWithProviders();
+
+    await user.click(await screen.findByRole('button', { name: /Modifica/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument();
+    });
+
+    await fillAndConfirmEmailsByIndex(user, 'test@test.com');
+
+    const submitButton = screen.getByTestId('update-button');
+    await user.click(submitButton);
+  });
+
   test('handles fetchStoreDetail failure', async () => {
     mockGetById.mockRejectedValueOnce(new Error('fail'));
+
     renderWithProviders();
   });
 
   test('handles fetchStoreTransactions failure', async () => {
     mockGetTransactions.mockRejectedValueOnce(new Error('fail'));
+
     renderWithProviders();
   });
 
@@ -239,6 +274,7 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
 
     renderWithProviders();
+
     await screen.findByTestId('transactions');
     await user.click(screen.getByText('apply'));
     await user.click(screen.getByText('reset'));
@@ -250,6 +286,7 @@ describe('InitiativeStoreDetail', () => {
 
   test('Prompt clears sessionStorage when navigating to a different page', () => {
     const removeItemSpy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
+    removeItemSpy.mockImplementation(() => { });
     removeItemSpy.mockImplementation(() => { });
 
     // replica fedele della funzione message usata nel componente

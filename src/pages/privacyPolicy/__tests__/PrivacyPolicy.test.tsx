@@ -1,11 +1,14 @@
-import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
 import PrivacyPolicy from '../PrivacyPolicy';
-import { useOneTrustNotice } from '../../../hooks/useOneTrustNotice';
-import { ENV } from '../../../utils/env';
-import routes from '../../../routes';
-import { useAppSelector } from '../../../redux/hooks';
+import { setupInitiativeMocks } from '../../../test-utils/mockInitiativeContext';
 
 jest.mock('../../../hooks/useOneTrustNotice');
 jest.mock('../../components/OneTrustContentWrapper', () => (props: { idSelector: string }) => (
@@ -25,29 +28,30 @@ jest.mock('../../../routes', () => ({
   PRIVACY_POLICY: '/mock-privacy-route',
 }));
 
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
 
 describe('PrivacyPolicy', () => {
-  const renderComponent = () => render(<PrivacyPolicy />);
-
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
+    setupInitiativeMocks();
   });
+
+  const createMockStore = () =>
+    configureStore({
+      reducer: {
+        initiatives: () => ({
+          list: [],
+        }),
+      },
+    });
+
+  const renderComponent = () => {
+    const store = createMockStore();
+    render(
+      <Provider store={store}>
+        <PrivacyPolicy />
+      </Provider>
+    );
+  };
 
   it('renders page title correctly', () => {
     renderComponent();
