@@ -30,8 +30,14 @@ export const SidenavAccordion = ({ item, isExpanded, setIsExpanded, defaultExpan
         }
     }, [item]);
 
+    const isAccordionExpanded =
+        (history.location.pathname.includes(`/${initiativeId}`) &&
+            (history.location.pathname.startsWith(`${BASE_ROUTE}/${initiativeId}`) ||
+                isExpanded === initiativeId)) ||
+        defaultExpanded;
+
     return (<Accordion
-        expanded={history.location.pathname.startsWith(`${BASE_ROUTE}/${initiativeId}`) || isExpanded === initiativeId || defaultExpanded}
+        expanded={isAccordionExpanded}
         disableGutters
         elevation={0}
         sx={{
