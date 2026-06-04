@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import InvoiceDataTable from '../invoiceDataTable';
 import { getMerchantTransactionsProcessed } from '../../../services/merchantService';
@@ -142,6 +143,13 @@ const createMockStore = (initialState?: any) => {
 
 const store = createMockStore();
 
+const renderComponent = (props: any = {}) =>
+  render(
+    <Provider store={store}>
+      <InvoiceDataTable {...props} />
+    </Provider>
+  );
+
 describe('InvoiceDataTable', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   const mockSetAlert = jest.fn();
@@ -183,11 +191,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('fetches and displays transactions', async () => {
-    render(
-      <Provider store={store}>
-        <InvoiceDataTable />
-      </Provider>
-    );
+    renderComponent();
     expect(mockedGetTransactions).toHaveBeenCalledTimes(1);
     expect(mockedGetTransactions).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -232,21 +236,13 @@ describe('InvoiceDataTable', () => {
       totalElements: 0,
       totalPages: 0,
     });
-    render(
-      <Provider store={store}>
-        <InvoiceDataTable />
-      </Provider>
-    );
+    renderComponent();
     await screen.findByText('Nessuna richiesta di rimborso trovata.');
     expect(screen.getByText('Nessuna richiesta di rimborso trovata.')).toBeInTheDocument();
   });
 
   it('updates sort model and calls service with sort parameter for trxChargeDate', async () => {
-    render(
-      <Provider store={store}>
-        <InvoiceDataTable />
-      </Provider>
-    );
+    renderComponent();
     await screen.findByTestId('data-table');
     const sortButton = screen.getByTestId('sort-by-date');
     fireEvent.click(sortButton);
@@ -256,26 +252,17 @@ describe('InvoiceDataTable', () => {
   });
 
   it('handles empty sort model and does not send sort parameter', async () => {
-    render(
-      <Provider store={store}>
-        <InvoiceDataTable />
-      </Provider>
-    );
+    renderComponent();
     await screen.findByTestId('data-table');
     const clearSortButton = screen.getByTestId('clear-sort');
     fireEvent.click(clearSortButton);
     await waitFor(() => expect(mockedGetTransactions).toHaveBeenCalledTimes(2));
-    // await waitFor(() => expect(mockedGetTransactions).toHaveBeenCalledWith({initiativeId: "initiative-123", size: 10}));
     const secondCallArgs = mockedGetTransactions.mock.calls[1][0];
     expect(secondCallArgs.sort).toBeUndefined();
   });
 
   it('handles sort model change with descending sort', async () => {
-    render(
-      <Provider store={store}>
-        <InvoiceDataTable />
-      </Provider>
-    );
+    renderComponent();
     await screen.findByTestId('data-table');
     const sortButton = screen.getByTestId('sort-by-date');
     fireEvent.click(sortButton);
@@ -285,11 +272,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('updates page and calls service with new page number', async () => {
-    render(
-      <Provider store={store}>
-        <InvoiceDataTable />
-      </Provider>
-    );
+    renderComponent();
     await screen.findByTestId('data-table');
     const pageButton = screen.getByTestId('page-change');
     fireEvent.click(pageButton);
@@ -299,11 +282,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('updates rows per page and resets to page 0', async () => {
-    render(
-      <Provider store={store}>
-        <InvoiceDataTable />
-      </Provider>
-    );
+    renderComponent();
     await screen.findByTestId('data-table');
     const rowsPerPageButton = screen.getByTestId('rows-per-page-change');
     fireEvent.click(rowsPerPageButton);
@@ -314,11 +293,7 @@ describe('InvoiceDataTable', () => {
   });
 
   it('opens drawer and shows invoice detail when action icon is clicked and can be closed', async () => {
-    render(
-      <Provider store={store}>
-        <InvoiceDataTable />
-      </Provider>
-    );
+    renderComponent();
     await screen.findByTestId('data-table');
     const actionIcon = screen.getByTestId('trx-1');
     fireEvent.click(actionIcon);

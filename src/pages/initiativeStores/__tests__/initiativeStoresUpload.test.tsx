@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
@@ -22,9 +23,6 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
 }));
 jest.mock('../../../services/merchantService', () => ({
   getMerchantPointOfSales: jest.fn(),
-}));
-
-jest.mock('../../../services/merchantService', () => ({
   updateMerchantPointOfSales: jest.fn(),
 }));
 jest.mock('../../../utils/jwt-utils');
@@ -119,6 +117,13 @@ const createMockStore = (initialState?: any) => {
 
 const store = createMockStore();
 
+const renderComponent = () =>
+  render(
+    <Provider store={store}>
+      <InitiativeStoresUpload />
+    </Provider>
+  );
+
 describe('InitiativeStoresUpload', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
@@ -140,19 +145,11 @@ describe('InitiativeStoresUpload', () => {
   });
 
   afterEach(() => {
-    (window.open as any).mockRestore?.();
-  });
-
-  afterEach(() => {
     (window.open as jest.Mock | undefined)?.mockRestore?.();
   });
 
   it('renders correctly with Manual upload by default', () => {
-    render(
-      <Provider store={store}>
-        <InitiativeStoresUpload />
-      </Provider>
-    );
+    renderComponent();
     expect(screen.getByTestId('confirm-stores-button')).toBeInTheDocument();
   });
 
@@ -264,16 +261,7 @@ describe('InitiativeStoresUpload', () => {
       message: 'Email duplicata',
     });
 
-    render(
-      <Provider store={store}>
-        <InitiativeStoresUpload />
-      </Provider>
-    );
-    render(
-      <Provider store={store}>
-        <InitiativeStoresUpload />
-      </Provider>
-    );
+    renderComponent();
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
