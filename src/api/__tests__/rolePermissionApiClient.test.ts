@@ -1,13 +1,22 @@
-/// <reference types="jest" />
+var mockPermissionsInstance: any;
+var mockConsentInstance: any;
 
-import { axiosInstance } from '../axiosInstance';
-import { RolePermissionApi } from '../rolePermissionApiClient';
-
-jest.mock('../axiosInstance', () => ({
-  axiosInstance: {
-    request: jest.fn(),
-  },
+jest.mock('../generated/role-permission/Permissions', () => ({
+  Permissions: jest.fn().mockImplementation(function (this: any) {
+    this.userPermission = jest.fn();
+    mockPermissionsInstance = this;
+  }),
 }));
+
+jest.mock('../generated/role-permission/Consent', () => ({
+  Consent: jest.fn().mockImplementation(function (this: any) {
+    this.getPortalConsent = jest.fn();
+    this.savePortalConsent = jest.fn();
+    mockConsentInstance = this;
+  }),
+}));
+
+import { RolePermissionApi } from '../rolePermissionApiClient';
 
 describe('RolePermissionApiClient', () => {
   beforeEach(() => {
@@ -17,52 +26,45 @@ describe('RolePermissionApiClient', () => {
   it('userPermission returns data', async () => {
     const mockResponse = { right: 'data' };
 
-    (axiosInstance.request as jest.Mock).mockResolvedValue({
+    mockPermissionsInstance.userPermission.mockResolvedValue({
       data: mockResponse,
-      status: 200,
-      statusText: 'OK',
-      headers: {},
     });
 
     const result = await RolePermissionApi.userPermission();
 
     expect(result).toEqual(mockResponse);
-    expect(axiosInstance.request).toHaveBeenCalled();
+    expect(mockPermissionsInstance.userPermission).toHaveBeenCalled();
   });
 
   it('getPortalConsent returns data', async () => {
     const mockResponse = { right: 'consent-data' };
 
-    (axiosInstance.request as jest.Mock).mockResolvedValue({
+    mockConsentInstance.getPortalConsent.mockResolvedValue({
       data: mockResponse,
-      status: 200,
-      statusText: 'OK',
-      headers: {},
     });
 
     const result = await RolePermissionApi.getPortalConsent();
 
     expect(result).toEqual(mockResponse);
-    expect(axiosInstance.request).toHaveBeenCalled();
+    expect(mockConsentInstance.getPortalConsent).toHaveBeenCalled();
   });
 
   it('savePortalConsent resolves', async () => {
-    (axiosInstance.request as jest.Mock).mockResolvedValue({
+    mockConsentInstance.savePortalConsent.mockResolvedValue({
       data: undefined,
-      status: 200,
-      statusText: 'OK',
-      headers: {},
     });
 
     await RolePermissionApi.savePortalConsent('v1');
 
-    expect(axiosInstance.request).toHaveBeenCalled();
+    expect(mockConsentInstance.savePortalConsent).toHaveBeenCalledWith({
+      versionId: 'v1',
+    });
   });
 
-  it('propagates axios error', async () => {
+  it('propagates client error', async () => {
     const error = new Error('Network error');
 
-    (axiosInstance.request as jest.Mock).mockRejectedValue(error);
+    mockPermissionsInstance.userPermission.mockRejectedValue(error);
 
     await expect(RolePermissionApi.userPermission()).rejects.toThrow(
       'Network error'

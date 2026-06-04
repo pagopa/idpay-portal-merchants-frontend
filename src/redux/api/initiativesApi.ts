@@ -22,8 +22,11 @@ export const initiativesApi = createApi({
   baseQuery: async () => ({ data: {} }),
   tagTypes: ['Initiatives'],
   endpoints: (builder) => ({
-    getInitiatives: builder.query<Array<InitiativeDTO>, void>({
+    getInitiatives: builder.query<Array<InitiativeDTO>, { enabled: boolean }>({
       async queryFn(_arg, { dispatch }) {
+        if (!_arg.enabled) {
+          return { data: [] };
+        }
         try {
           const response = await getMerchantInitiativeList();
 

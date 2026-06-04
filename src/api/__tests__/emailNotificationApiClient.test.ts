@@ -1,13 +1,21 @@
-/// <reference types="jest" />
+var mockUsersInstance: any;
+var mockNotifyInstance: any;
 
-import { axiosInstance } from '../axiosInstance';
-import { EmailNotificationApi } from '../emailNotificationApiClient';
-
-jest.mock('../axiosInstance', () => ({
-  axiosInstance: {
-    request: jest.fn(),
-  },
+jest.mock('../generated/email-notification/Users', () => ({
+  Users: jest.fn().mockImplementation(function (this: any) {
+    this.getInstitutionProductUserInfo = jest.fn();
+    mockUsersInstance = this;
+  }),
 }));
+
+jest.mock('../generated/email-notification/Notify', () => ({
+  Notify: jest.fn().mockImplementation(function (this: any) {
+    this.sendEmail = jest.fn();
+    mockNotifyInstance = this;
+  }),
+}));
+
+import { EmailNotificationApi } from '../emailNotificationApiClient';
 
 describe('EmailNotificationApiClient', () => {
   beforeEach(() => {
@@ -19,17 +27,14 @@ describe('EmailNotificationApiClient', () => {
       email: 'test@example.com',
     };
 
-    (axiosInstance.request as jest.Mock).mockResolvedValue({
+    mockUsersInstance.getInstitutionProductUserInfo.mockResolvedValue({
       data: mockInstitutionInfo,
-      status: 200,
-      statusText: 'OK',
-      headers: {},
     });
 
     const result = await EmailNotificationApi.getInstitutionProductUserInfo();
 
     expect(result).toEqual(mockInstitutionInfo);
-    expect(axiosInstance.request).toHaveBeenCalled();
+    expect(mockUsersInstance.getInstitutionProductUserInfo).toHaveBeenCalled();
   });
 
   it('sendEmail resolves without error', async () => {
@@ -39,22 +44,17 @@ describe('EmailNotificationApiClient', () => {
       recipients: ['test@example.com'],
     };
 
-    (axiosInstance.request as jest.Mock).mockResolvedValue({
-      data: undefined,
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-    });
+    mockNotifyInstance.sendEmail.mockResolvedValue({ data: undefined });
 
     await EmailNotificationApi.sendEmail(mockEmailMessage as any);
 
-    expect(axiosInstance.request).toHaveBeenCalled();
+    expect(mockNotifyInstance.sendEmail).toHaveBeenCalled();
   });
 
   it('propagates axios error', async () => {
     const error = new Error('Network error');
 
-    (axiosInstance.request as jest.Mock).mockRejectedValue(error);
+    mockUsersInstance.getInstitutionProductUserInfo.mockRejectedValue(error);
 
     await expect(
       EmailNotificationApi.getInstitutionProductUserInfo()

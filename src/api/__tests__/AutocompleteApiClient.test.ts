@@ -1,13 +1,13 @@
-/// <reference types="jest" />
+var mockAutocompleteInstance: any;
 
-import { axiosInstance } from '../axiosInstance';
-import { AutocompleteApi } from '../AutocompleteApiClient';
-
-jest.mock('../axiosInstance', () => ({
-  axiosInstance: {
-    request: jest.fn(),
-  },
+jest.mock('../generated/autocomplete/Autocomplete', () => ({
+  Autocomplete: jest.fn().mockImplementation(function (this: any) {
+    this.autocomplete = jest.fn();
+    mockAutocompleteInstance = this;
+  }),
 }));
+
+import { AutocompleteApi } from '../AutocompleteApiClient';
 
 describe('AutocompleteApiClient', () => {
   beforeEach(() => {
@@ -19,11 +19,8 @@ describe('AutocompleteApiClient', () => {
       ResultItems: [],
     };
 
-    (axiosInstance.request as jest.Mock).mockResolvedValue({
+    mockAutocompleteInstance.autocomplete.mockResolvedValue({
       data: mockResponse,
-      status: 200,
-      statusText: 'OK',
-      headers: {},
     });
 
     const result = await AutocompleteApi.getAddresses({
@@ -31,13 +28,13 @@ describe('AutocompleteApiClient', () => {
     } as any);
 
     expect(result).toEqual(mockResponse);
-    expect(axiosInstance.request).toHaveBeenCalled();
+    expect(mockAutocompleteInstance.autocomplete).toHaveBeenCalled();
   });
 
   it('propagates axios error', async () => {
     const error = new Error('Bad request');
 
-    (axiosInstance.request as jest.Mock).mockRejectedValue(error);
+    mockAutocompleteInstance.autocomplete.mockRejectedValue(error);
 
     await expect(
       AutocompleteApi.getAddresses({ QueryText: 'invalid' } as any)
