@@ -23,6 +23,14 @@ export const axiosFetchAdapter: typeof fetch = async (
     responseType: 'arraybuffer',
   });
 
+  if (axiosResponse.status === 204) {
+    return new Response(null, {
+      status: 204,
+      statusText: axiosResponse.statusText,
+      headers: axiosResponse.headers as any,
+    });
+  }
+
   const blob = new Blob([axiosResponse.data]);
 
   return new Response(blob, {

@@ -308,11 +308,14 @@ class MerchantsApiClient {
     size?: number
   ): Promise<ReportListDTO> {
     const res =
-      await this.merchantReport.getMerchantTransactionsReports({
-        initiativeId,
-        page,
-        size,
-      });
+      await this.merchantReport.getMerchantTransactionsReports(
+        {
+          initiativeId,
+          page,
+          size,
+        },
+        { format: "json" }
+      );
 
     const data = res.data as ReportListDTO | null;
 
@@ -329,7 +332,8 @@ class MerchantsApiClient {
   ): Promise<ReportDTO> {
     const res = await this.merchantReport.generateReport(
       { initiativeId },
-      body
+      body,
+      { format: "json" }
     );
     return res.data;
   }
@@ -339,10 +343,13 @@ class MerchantsApiClient {
     reportId: string
   ): Promise<DownloadReportResponseDTO> {
     const res =
-      await this.merchantReport.downloadTransactionsReport({
-        initiativeId,
-        reportId,
-      });
+      await this.merchantReport.downloadTransactionsReport(
+        {
+          initiativeId,
+          reportId,
+        },
+        { format: "json" }
+      );
     return res.data;
   }
 

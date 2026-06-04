@@ -103,7 +103,6 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
     void loadReports(pagination.pageNo, pagination.pageSize);
   }, [initiative_id, pagination.pageNo, pagination.pageSize]);
 
-  // STEP 1 – Reset deterministico su refresh
   useEffect(() => {
     if (!initiative_id) {
       return;
