@@ -187,10 +187,12 @@ class MerchantsApiClient {
   }
 
   public async getMerchantPointOfSales(
-    merchantId: string
+    merchantId: string,
+    query?: Record<string, unknown>
   ): Promise<unknown> {
     const res = await this.pointOfSales.getPointOfSales({
       merchantId,
+      ...(query ?? {}),
     });
     return res.data;
   }

@@ -103,14 +103,17 @@ export const updateMerchantPointOfSales = async (
 
 export const getMerchantPointOfSales = async (
   merchantId: string,
-  _filters: GetPointOfSalesFilters
+  filters: GetPointOfSalesFilters
 ): Promise<{
   content: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>;
   pageNo: number;
   pageSize: number;
   totalElements: number;
 }> => {
-  const response = await getMerchantsApi().getMerchantPointOfSales(merchantId);
+  const response = await getMerchantsApi().getMerchantPointOfSales(
+    merchantId,
+    filters as unknown as Record<string, unknown>
+  );
 
   return {
     content: (response as any)?.content ?? [],
