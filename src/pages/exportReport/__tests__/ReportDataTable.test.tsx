@@ -44,7 +44,7 @@ const { getMerchantReports, downloadMerchantReport } = jest.requireMock(
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: (state = { list: [] }) => state,
+  initiativesReducer: jest.fn(), 
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -52,41 +52,39 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState
+  });
+};
+
+const store = createMockStore();
+
+const renderComponent = (props: any = {}) => {
+  return render(
+    <Provider store={store}>
+      <ReportDataTable {...props} />
+    </Provider>
+  );
+};
+
 describe('ReportDataTable', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
-
-  const renderComponent = (props: any = {}) => {
-    const localStore = configureStore({
-      reducer: () => ({})
-    });
-
-    return render(
-      <Provider store={localStore}>
-        <ReportDataTable {...props} />
-      </Provider>
-    );
-  };
-
-  const mockReportsResponse = (reports: any[], overrides: any = {}) => {
-    getMerchantReports.mockResolvedValue({
-      reports,
-      page: 0,
-      size: 10,
-      totalElements: reports?.length ?? 0,
-      totalPages: reports?.length ? 1 : 0,
-      ...overrides,
-    });
-  };
-
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
   });
 
   it('renders empty state when no reports', async () => {
-    mockReportsResponse([]);
+    getMerchantReports.mockResolvedValue({
+      reports: [],
+      page: 0,
+      size: 10,
+      totalElements: 0,
+      totalPages: 0,
+    });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() =>
       expect(getMerchantReports).toHaveBeenCalledWith('merchant-1', 0, 10)
@@ -98,15 +96,21 @@ describe('ReportDataTable', () => {
   });
 
   it('renders reports when available', async () => {
-    mockReportsResponse([
-      {
-        id: 'r1',
-        fileName: 'report.csv',
-        reportStatus: 'INSERTED',
-      },
-    ]);
+    getMerchantReports.mockResolvedValue({
+      reports: [
+        {
+          id: 'r1',
+          fileName: 'report.csv',
+          reportStatus: 'INSERTED',
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+    });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() =>
       expect(screen.getByTestId('row-r1')).toBeInTheDocument()
@@ -132,7 +136,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId(/row-/)).toBeInTheDocument());
 
@@ -186,7 +190,7 @@ describe('ReportDataTable', () => {
   it('renders loading state', async () => {
     getMerchantReports.mockImplementation(() => new Promise(() => {}));
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -206,7 +210,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId(/row-/)).toBeInTheDocument());
 
@@ -262,7 +266,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId('row-r3')).toBeInTheDocument());
 
@@ -279,7 +283,7 @@ describe('ReportDataTable', () => {
       totalPages: 0,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
   });
@@ -299,7 +303,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId('row-r4')).toBeInTheDocument());
 
@@ -326,7 +330,7 @@ describe('ReportDataTable', () => {
 
     const appendSpy = jest.spyOn(document.body, 'appendChild');
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId('row-r5')).toBeInTheDocument());
 
@@ -388,7 +392,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId('row-r7')).toBeInTheDocument());
 
@@ -405,7 +409,7 @@ describe('ReportDataTable', () => {
       totalPages: 0,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
 
@@ -447,7 +451,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId('row-r9')).toBeInTheDocument());
   });
@@ -461,7 +465,7 @@ describe('ReportDataTable', () => {
       totalPages: 0,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
   });
@@ -481,7 +485,7 @@ describe('ReportDataTable', () => {
       totalPages: 1,
     });
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId('row-r10')).toBeInTheDocument());
 
@@ -512,7 +516,7 @@ describe('ReportDataTable', () => {
         })
     );
 
-    renderComponent();
+    render(<Provider store={store}><ReportDataTable /></Provider>);
 
     await waitFor(() => expect(screen.getByTestId('row-r11')).toBeInTheDocument());
 

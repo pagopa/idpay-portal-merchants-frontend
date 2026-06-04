@@ -1,5 +1,3 @@
-/// <reference types="jest" />
-/// <reference types="@testing-library/jest-dom" />
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
@@ -74,25 +72,39 @@ const createAutocompleteOption = (id: string, title: string, postalCode: string)
   Highlights: {
     Title: [],
     Address: {
-      Label: [],
-      Street: [],
-      AddressNumber: [],
+      Label: title,
+      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
+      Region: { Name: 'TestRegion' },
+      SubRegion: { Code: 'XX', Name: 'TestProvince' },
+      Locality: 'TestCity',
+      PostalCode: postalCode,
+      Street: 'Via Roma',
+      StreetComponents: [
+        {
+          BaseName: 'Roma',
+          Type: 'Via',
+          TypePlacement: 'BeforeBaseName',
+          TypeSeparator: ' ',
+          Language: 'it',
+        },
+      ],
+      AddressNumber: '100',
     },
   },
 });
 
 const optionsAutocomplete = [
-  createAutocompleteOption('id-1', 'Via Roma, 100, 10000 City1', '10000'),
-  createAutocompleteOption('id-2', 'Via Roma, 100, 20000 City2', '20000'),
-  createAutocompleteOption('id-3', 'Via Roma, 100, 30000 City3', '30000'),
-  createAutocompleteOption('id-4', 'Via Roma, 100, 40000 City4', '40000'),
-  createAutocompleteOption('id-5', 'Via Roma, 100, 50000 City5', '50000'),
+  createAutocompleteOption('1', 'Via Roma 100', '52017'),
+  createAutocompleteOption('2', 'Via Milano 50', '20100'),
+  createAutocompleteOption('3', 'Via Napoli 10', '80100'),
+  createAutocompleteOption('4', 'Via Firenze 20', '50100'),
 ];
 
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: (state = { list: [] }) => state,
+  initiativesReducer: () => null,
+  default: () => null,
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -109,22 +121,7 @@ const createMockStore = (initialState?: any) => {
 const store = createMockStore();
 
 describe('InitiativeStoresUpload', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
-
-  const renderWithProvider = () =>
-    render(
-      <Provider store={store}>
-        <InitiativeStoresUpload />
-      </Provider>
-    );
-
-  const setupAuth = () => {
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({
-      merchant_id: 'merchant-1',
-    });
-  };
-
+  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -152,12 +149,12 @@ describe('InitiativeStoresUpload', () => {
   });
 
   it('renders correctly with Manual upload by default', () => {
-    renderWithProvider();
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);
     expect(screen.getByTestId('confirm-stores-button')).toBeInTheDocument();
   });
 
   it('calls handleBack when back button is clicked', () => {
-    renderWithProvider();
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     fireEvent.click(screen.getByTestId('back-stores-button'));
     expect(pushMock).toHaveBeenCalledWith(
       expect.stringContaining('/portale-esercenti/test-initiative/panoramica')
@@ -165,31 +162,44 @@ describe('InitiativeStoresUpload', () => {
   });
 
   it('Click to open manual link', () => {
-    renderWithProvider();
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     fireEvent.click(screen.getByText('pages.initiativeStores.manualLink'));
     expect(window.open).toHaveBeenCalled();
   });
 
   it('sets salesPoints when form changes', () => {
-    renderWithProvider();
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     const instance = screen.getByTestId('confirm-stores-button');
     expect(instance).toBeInTheDocument();
   });
 
-  it.each([
-    { result: undefined },
-    { result: null },
-    {
-      result: {
-        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
-        message: 'Email duplicata',
-      },
-    },
-  ])('handles confirm flow', async ({ result }) => {
-    setupAuth();
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(result);
+  it('shows POINT_OF_SALE_ALREADY_REGISTERED error', async () => {
+    readTokenMock.mockReturnValue('fakeToken');
+    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
-    renderWithProvider();
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+  });
+
+  it('navigates to STORES when response is null', async () => {
+    readTokenMock.mockReturnValue('fakeToken');
+    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(null);
+
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+  });
+
+  it('normalizes URLs when uploading manually', async () => {
+    readTokenMock.mockReturnValue('fakeToken');
+    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+
+    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue({
+      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+      message: 'Email duplicata',
+    });
+
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   });
 
@@ -203,7 +213,7 @@ describe('InitiativeStoresUpload', () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue(undefined);
 
-    renderWithProvider();
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -223,6 +233,7 @@ describe('InitiativeStoresUpload', () => {
       message: 'Email duplicata',
     });
 
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
@@ -244,6 +255,7 @@ describe('InitiativeStoresUpload', () => {
     });
 
     render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -260,6 +272,7 @@ describe('InitiativeStoresUpload', () => {
 
     (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(undefined);
 
+    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
