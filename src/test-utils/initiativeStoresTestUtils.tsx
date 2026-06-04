@@ -20,9 +20,7 @@ export const renderWithRedux = (
 export const openEditModal = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.click(await screen.findByRole('button', { name: /Modifica/i }));
   await waitFor(() =>
-    expect(
-      screen.getByText('pages.initiativeStores.modalDescription')
-    ).toBeInTheDocument()
+    expect(screen.getByText('pages.initiativeStores.modalDescription')).toBeInTheDocument()
   );
 };
 
@@ -42,7 +40,10 @@ export const fillAndConfirmEmailsByIndex = async (
   await user.type(email2, email);
 };
 
-export const clickConfirmButton = async (user: ReturnType<typeof userEvent.setup>, testId: string) => {
+export const clickConfirmButton = async (
+  user: ReturnType<typeof userEvent.setup>,
+  testId: string
+) => {
   const button = screen.getByTestId(testId);
   await user.click(button);
 };

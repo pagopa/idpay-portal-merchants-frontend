@@ -142,7 +142,7 @@ const createMockStore = (initialState?: any) => {
   return configureStore({
     reducer: {
       parties: (state = initialState?.parties || mockPartiesState.parties) => state,
-      initiatives: ()=>  jest.fn()
+      initiatives: () => jest.fn(),
     },
   });
 };

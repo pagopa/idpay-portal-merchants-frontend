@@ -52,12 +52,12 @@ jest.mock('../useScopedTranslation', () => ({
 jest.mock('../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
-  useAppDispatch: jest.fn()
+  useAppDispatch: jest.fn(),
 }));
 
 describe('useInitiativesList', () => {

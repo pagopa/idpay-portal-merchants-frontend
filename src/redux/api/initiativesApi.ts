@@ -22,13 +22,12 @@ export const initiativesApi = createApi({
   baseQuery: async () => ({ data: {} }),
   tagTypes: ['Initiatives'],
   endpoints: (builder) => ({
-    getInitiatives: builder.query<Array<any>, { enabled: boolean }>({
-      async queryFn(arg, { dispatch }) {
+    getInitiatives: builder.query<Array<InitiativeDTO>, { enabled: boolean }>({
+      async queryFn(_arg, { dispatch }) {
+        if (!_arg.enabled) {
+          return { data: [] };
+        }
         try {
-          if (!arg?.enabled) {
-            return { data: [] };
-          }
-
           const response = await getMerchantInitiativeList();
 
           const filtered = response.filter((r) => r.status === PUBLISHED || r.status === CLOSED);

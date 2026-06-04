@@ -28,7 +28,6 @@ jest.mock('../../../routes', () => ({
   PRIVACY_POLICY: '/mock-privacy-route',
 }));
 
-
 describe('PrivacyPolicy', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -55,8 +54,6 @@ describe('PrivacyPolicy', () => {
 
   it('renders page title correctly', () => {
     renderComponent();
-    expect(
-      screen.getByText(/pages\.privacyPolicyStatic\.title/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/pages\.privacyPolicyStatic\.title/i)).toBeInTheDocument();
   });
 });

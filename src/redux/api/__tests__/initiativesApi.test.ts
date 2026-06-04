@@ -1,9 +1,3 @@
-/**
- * IMPORTANT:
- * We fully mock merchantService to avoid circular dependency
- * (merchantService -> MerchantsApiClient -> store -> initiativesApi).
- * This prevents reducerPath undefined errors.
- */
 jest.mock('../../../services/merchantService', () => ({
   getMerchantInitiativeList: jest.fn(),
 }));
@@ -18,11 +12,6 @@ const StatusEnum = {
 } as const;
 type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
 
-/**
- * IMPORTANT:
- * We require initiativesApi AFTER the mock,
- * to prevent circular dependency evaluation.
- */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { initiativesApi } = require('../initiativesApi');
 

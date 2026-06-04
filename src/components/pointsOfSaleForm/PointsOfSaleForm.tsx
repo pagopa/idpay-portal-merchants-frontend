@@ -654,7 +654,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         />
                         {loading && (
                           <Typography variant="body2">
-                            {t('pages.pointOfSales.loandingText')}
+                            {t('pages.pointOfSales.loadingText')}
                           </Typography>
                         )}
                         {error && (

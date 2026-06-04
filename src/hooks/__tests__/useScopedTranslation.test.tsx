@@ -33,8 +33,7 @@ jest.mock('../../locale/multiInitiativeI18n', () => ({
 
 const mockUseTranslation = require('react-i18next').useTranslation;
 const mockUseAppSelector = require('../../redux/hooks').useAppSelector;
-const mockUseCurrentInitiativeId =
-  require('../useCurrentInitiativeId').useCurrentInitiativeId;
+const mockUseCurrentInitiativeId = require('../useCurrentInitiativeId').useCurrentInitiativeId;
 
 describe('useScopedTranslation', () => {
   beforeEach(() => {
@@ -56,9 +55,7 @@ describe('useScopedTranslation', () => {
   });
 
   it('should resolve initiativeName from prop', () => {
-    const { result } = renderHook(() =>
-      useScopedTranslation({ initiativeName: 'myInitiative' })
-    );
+    const { result } = renderHook(() => useScopedTranslation({ initiativeName: 'myInitiative' }));
 
     expect(result.current.initiativeName).toBe('myInitiative');
   });
@@ -86,9 +83,7 @@ describe('useScopedTranslation', () => {
 
     mockUseTranslation.mockReturnValue({ t: mockT });
 
-    const { result } = renderHook(() =>
-      useScopedTranslation({ initiativeName: 'myInitiative' })
-    );
+    const { result } = renderHook(() => useScopedTranslation({ initiativeName: 'myInitiative' }));
 
     const value = result.current.t('missing.key');
 
@@ -96,9 +91,7 @@ describe('useScopedTranslation', () => {
   });
 
   it('should not load namespaces if enableNamespaceLoading is false', () => {
-    const { result } = renderHook(() =>
-      useScopedTranslation({ enableNamespaceLoading: false })
-    );
+    const { result } = renderHook(() => useScopedTranslation({ enableNamespaceLoading: false }));
 
     expect(result.current.isLoading).toBe(false);
   });
@@ -151,9 +144,7 @@ describe('useScopedTranslation', () => {
     const locale = require('../../locale');
     locale.getResourceBundle.mockReturnValue({ key: 'value' });
 
-    const { result } = renderHook(() =>
-      useScopedTranslation({ initiativeName: 'myInitiative' })
-    );
+    const { result } = renderHook(() => useScopedTranslation({ initiativeName: 'myInitiative' }));
 
     await act(async () => {
       await Promise.resolve();
@@ -169,9 +160,7 @@ describe('useScopedTranslation', () => {
     const locale = require('../../locale');
     locale.getResourceBundle.mockReturnValue(undefined);
 
-    const { result } = renderHook(() =>
-      useScopedTranslation({ initiativeName: 'myInitiative' })
-    );
+    const { result } = renderHook(() => useScopedTranslation({ initiativeName: 'myInitiative' }));
 
     await act(async () => {
       await Promise.resolve();

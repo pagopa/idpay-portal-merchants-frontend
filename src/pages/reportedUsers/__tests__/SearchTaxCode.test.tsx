@@ -49,7 +49,6 @@ const createFormikMock = (overrides: any = {}) =>
     ...overrides,
   } as any);
 
-
 const createMockStore = () =>
   configureStore({
     reducer: {
@@ -78,17 +77,12 @@ describe('SearchTaxCode', () => {
 
     render(
       <Provider store={store}>
-        <SearchTaxCode
-          formik={formik}
-          onSearch={onSearch}
-          onReset={onReset}
-        />
+        <SearchTaxCode formik={formik} onSearch={onSearch} onReset={onReset} />
       </Provider>
     );
 
     return { formik, onSearch, onReset };
   };
-
 
   it('renders cf field and buttons', () => {
     renderSearchTaxCode();
@@ -116,10 +110,7 @@ describe('SearchTaxCode', () => {
     });
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
 
-    expect(formik.setFieldError).toHaveBeenCalledWith(
-      'cf',
-      'pages.reportedUsers.invalid'
-    );
+    expect(formik.setFieldError).toHaveBeenCalledWith('cf', 'pages.reportedUsers.invalid');
   });
 
   it('calls onSearch with cleaned cf if valid', () => {

@@ -27,15 +27,15 @@ describe('useInitiativeConfig', () => {
 
     const { result } = renderHook(() => useInitiativeConfig<string[]>());
 
-    const config = await result.current.getConfig('routes' as any, {
-      initiativeName: 'Test',
-      startDate: '2024-01-01',
-    } as any);
-
-    expect(mockBuildNamespaceKey).toHaveBeenCalledWith(
-      'Test',
-      '2024-01-01'
+    const config = await result.current.getConfig(
+      'routes' as any,
+      {
+        initiativeName: 'Test',
+        startDate: '2024-01-01',
+      } as any
     );
+
+    expect(mockBuildNamespaceKey).toHaveBeenCalledWith('Test', '2024-01-01');
 
     expect(config).toEqual(['a', 'b']);
   });
@@ -45,10 +45,13 @@ describe('useInitiativeConfig', () => {
 
     const { result } = renderHook(() => useInitiativeConfig<string[]>());
 
-    const config = await result.current.getConfig('routes' as any, {
-      initiativeName: 'X',
-      startDate: 'Y',
-    } as any);
+    const config = await result.current.getConfig(
+      'routes' as any,
+      {
+        initiativeName: 'X',
+        startDate: 'Y',
+      } as any
+    );
 
     expect(mockBuildNamespaceKey).toHaveBeenCalledWith('X', 'Y');
     expect(config).toBeDefined();
@@ -59,10 +62,13 @@ describe('useInitiativeConfig', () => {
 
     const { result } = renderHook(() => useInitiativeConfig<string[]>());
 
-    await result.current.getConfig('routes' as any, {
-      initiativeName: undefined,
-      startDate: undefined,
-    } as any);
+    await result.current.getConfig(
+      'routes' as any,
+      {
+        initiativeName: undefined,
+        startDate: undefined,
+      } as any
+    );
 
     expect(mockBuildNamespaceKey).toHaveBeenCalledWith('', '');
   });

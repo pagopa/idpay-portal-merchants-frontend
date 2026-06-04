@@ -42,29 +42,27 @@ jest.mock('../DiscountCreatedRecap', () => (props: any) => {
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
-
 
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
 
-
 describe('NewDiscount', () => {
   const renderComponent = () => render(<NewDiscount />);
 
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseCurrentInitiativeId.mockReturnValue({ initiativeName: 'Init name' });
@@ -79,9 +77,7 @@ describe('NewDiscount', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
+    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
     mockUseCurrentInitiativeId.mockReturnValue({
       initiativeName: 'Init name',
     });
@@ -101,12 +97,8 @@ describe('NewDiscount', () => {
 
     expect(screen.getByTestId('breadcrumbs')).toBeInTheDocument();
     expect(screen.getByTestId('create-form')).toBeInTheDocument();
-    expect(screen.getByTestId('title')).toHaveTextContent(
-      'pages.newDiscount.title'
-    );
-    expect(screen.getByTestId('subtitle')).toHaveTextContent(
-      'pages.newDiscount.subtitle'
-    );
+    expect(screen.getByTestId('title')).toHaveTextContent('pages.newDiscount.title');
+    expect(screen.getByTestId('subtitle')).toHaveTextContent('pages.newDiscount.subtitle');
 
     expect(mockCreateForm).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -132,12 +124,8 @@ describe('NewDiscount', () => {
     renderComponent();
 
     expect(screen.getByTestId('discount-recap')).toBeInTheDocument();
-    expect(screen.getByTestId('title')).toHaveTextContent(
-      'pages.newDiscount.createdTitle'
-    );
-    expect(screen.getByTestId('subtitle')).toHaveTextContent(
-      'pages.newDiscount.createdSubtitle'
-    );
+    expect(screen.getByTestId('title')).toHaveTextContent('pages.newDiscount.createdTitle');
+    expect(screen.getByTestId('subtitle')).toHaveTextContent('pages.newDiscount.createdSubtitle');
 
     expect(mockDiscountRecap).toHaveBeenCalledWith(
       expect.objectContaining({

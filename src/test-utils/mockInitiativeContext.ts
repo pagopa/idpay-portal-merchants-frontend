@@ -20,7 +20,5 @@ jest.mock('../redux/hooks', () => ({
 }));
 
 export const setupInitiativeMocks = () => {
-  (useAppSelector as jest.Mock).mockReturnValue([
-    { initiativeId: 'initiative-1' },
-  ]);
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
 };

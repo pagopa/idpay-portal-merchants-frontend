@@ -5,9 +5,7 @@ import { useAppSelector } from '../redux/hooks';
 export const mockCommonHooks = () => {
   const mockAddError = jest.fn();
 
-  (useAppSelector as jest.Mock).mockReturnValue([
-    { initiativeId: 'initiative-1' },
-  ]);
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
 
   (useErrorDispatcher as jest.Mock).mockReturnValue(mockAddError);
 

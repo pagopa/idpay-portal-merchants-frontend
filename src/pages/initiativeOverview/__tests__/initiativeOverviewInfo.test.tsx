@@ -15,7 +15,6 @@ jest.mock('react-i18next', () => ({
   Trans: ({ i18nKey }: { i18nKey: string }) => <>{i18nKey}</>,
 }));
 
-
 describe('InitiativeOverviewInfo', () => {
   beforeEach(() => {
     jest.clearAllMocks();

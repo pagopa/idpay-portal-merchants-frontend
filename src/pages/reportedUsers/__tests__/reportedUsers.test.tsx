@@ -186,17 +186,16 @@ jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
 
-
 const createMockStore = (initialState?: any) => {
   return configureStore({
-    reducer: () => initialState
+    reducer: () => initialState,
   });
 };
 
 const store = createMockStore();
 
 describe('ReportedUsers Component', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   let history: any;
 
   beforeEach(() => {
@@ -221,7 +220,7 @@ describe('ReportedUsers Component', () => {
     }
 
     const localStore = configureStore({
-      reducer: () => ({})
+      reducer: () => ({}),
     });
 
     return render(
@@ -366,10 +365,7 @@ describe('ReportedUsers Component', () => {
       await confirmDelete();
 
       await waitFor(() => {
-        expect(mockDeleteReportedUser).toHaveBeenCalledWith(
-          '123',
-          'RSSMRA80A01H501U'
-        );
+        expect(mockDeleteReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
       });
 
       await waitFor(() => {

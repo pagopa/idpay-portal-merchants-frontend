@@ -161,7 +161,8 @@
       "pointOfSale": "Punto vendita",
       "modalDescription": "Qui puoi modificare i dati del referente di questo punto vendita. Se procedi, il nuovo referente riceverà un’email di conferma all’indirizzo indicato. Le credenziali di accesso del vecchio referente non saranno più valide.",
       "contactEmailModal": "Indirizzo e-mail",
-      "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati"
+      "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati",
+      "referentChangeSuccess": "Dati modificati con successo"
     },
     "initiativeStoreDetail": {
       "transactionHistory": "Storico transazioni",
