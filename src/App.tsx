@@ -36,7 +36,7 @@ import WithInitiativeGuard from './decorators/withInitiativeGuard';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
-    const [match, setMatch] = useState<any>(null);
+    const [, setMatch] = useState<any>(null);
     const location = useLocation();
 
     useEffect(() => {
