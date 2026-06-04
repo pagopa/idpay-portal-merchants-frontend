@@ -24,7 +24,7 @@ jest.mock('../../utils/env', () => ({
   },
 }));
 
-import { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosHeaders, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
 import { store } from '../../redux/store';
@@ -32,63 +32,115 @@ import { cleanupOnLogout } from '../../utils/logoutCleanup';
 import { axiosInstance } from '../axiosInstance';
 import { ApiError } from '../ApiError';
 
-const getRequestFulfilled = (): ((config: InternalAxiosRequestConfig) => InternalAxiosRequestConfig) =>
-  (axiosInstance.interceptors.request as any).handlers[0].fulfilled;
+// ---------------------------------------------------------------------------
+// Helpers to build a mock adapter
+// ---------------------------------------------------------------------------
 
-const getResponseFulfilled = (): ((response: AxiosResponse) => AxiosResponse) =>
-  (axiosInstance.interceptors.response as any).handlers[0].fulfilled;
+function makeSuccessAdapter(data: unknown = {}, status = 200) {
+  return async (config: InternalAxiosRequestConfig): Promise<AxiosResponse> => ({
+    data,
+    status,
+    statusText: 'OK',
+    headers: {},
+    config,
+  });
+}
 
-const getResponseRejected = (): ((error: unknown) => Promise<never>) =>
-  (axiosInstance.interceptors.response as any).handlers[0].rejected;
+function makeErrorAdapter(status: number, data: unknown) {
+  return async (config: InternalAxiosRequestConfig): Promise<never> => {
+    const response: AxiosResponse = {
+      data,
+      status,
+      statusText: 'Error',
+      headers: new AxiosHeaders(),
+      config,
+    };
+    const err = new AxiosError('Request failed', String(status), config, null, response);
+    throw err;
+  };
+}
 
-describe('axiosInstance - request interceptor', () => {
-  it('returns config unchanged when no token is available', () => {
+// ---------------------------------------------------------------------------
+// Request interceptor
+// ---------------------------------------------------------------------------
+
+describe('axiosInstance – request interceptor', () => {
+  it('returns config unchanged when no token is available', async () => {
     (storageTokenOps.read as jest.Mock).mockReturnValue(null);
 
-    const config = { headers: {} } as InternalAxiosRequestConfig;
-    const result = getRequestFulfilled()(config);
+    let capturedConfig: InternalAxiosRequestConfig | undefined;
+    (axiosInstance.defaults as any).adapter = async (config: InternalAxiosRequestConfig) => {
+      capturedConfig = config;
+      return { data: {}, status: 200, statusText: 'OK', headers: {}, config };
+    };
 
-    expect(result).toBe(config);
-    expect((result.headers as any).Authorization).toBeUndefined();
+    await axiosInstance.get('/test');
+
+    expect(capturedConfig?.headers?.Authorization).toBeUndefined();
   });
 
-  it('adds Authorization Bearer header when token is present', () => {
-    (storageTokenOps.read as jest.Mock).mockReturnValue('my-token');
+  it('injects Authorization Bearer header when a token is present', async () => {
+    (storageTokenOps.read as jest.Mock).mockReturnValue('test-token-abc');
 
-    const config = { headers: {} } as InternalAxiosRequestConfig;
-    const result = getRequestFulfilled()(config);
+    let capturedConfig: InternalAxiosRequestConfig | undefined;
+    (axiosInstance.defaults as any).adapter = async (config: InternalAxiosRequestConfig) => {
+      capturedConfig = config;
+      return { data: {}, status: 200, statusText: 'OK', headers: {}, config };
+    };
 
-    expect(result).not.toBe(config);
-    expect((result.headers as any).Authorization).toBe('Bearer my-token');
+    await axiosInstance.get('/test');
+
+    expect(capturedConfig?.headers?.Authorization).toBe('Bearer test-token-abc');
   });
 });
 
-describe('axiosInstance - response interceptor', () => {
-  it('passes through a successful response unchanged', () => {
-    const response = { status: 200, data: { id: 1 } } as AxiosResponse;
-    const result = getResponseFulfilled()(response);
-    expect(result).toBe(response);
-  });
+// ---------------------------------------------------------------------------
+// Response interceptor – success path
+// ---------------------------------------------------------------------------
 
-  it('dispatches addError, calls cleanupOnLogout and redirects on 401', async () => {
-    const assignMock = jest.fn();
+describe('axiosInstance – response interceptor (success)', () => {
+  it('passes a 200 response through unchanged', async () => {
+    (storageTokenOps.read as jest.Mock).mockReturnValue(null);
+
+    (axiosInstance.defaults as any).adapter = makeSuccessAdapter({ id: 42 }, 200);
+
+    const response = await axiosInstance.get('/test');
+
+    expect(response.status).toBe(200);
+    expect(response.data).toEqual({ id: 42 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Response interceptor – error paths
+// ---------------------------------------------------------------------------
+
+describe('axiosInstance – response interceptor (error handling)', () => {
+  let assignMock: jest.Mock;
+
+  beforeEach(() => {
+    assignMock = jest.fn();
     Object.defineProperty(window, 'location', {
       value: { assign: assignMock },
       configurable: true,
       writable: true,
     });
-
     (appStateActions.addError as unknown as jest.Mock).mockReturnValue({ type: 'app/addError' });
+    (storageTokenOps.read as jest.Mock).mockReturnValue(null);
+  });
 
-    const error = {
-      response: { status: 401, data: null },
-      message: 'Unauthorized',
-    };
+  it('dispatches addError, calls cleanupOnLogout, and redirects on 401', async () => {
+    (axiosInstance.defaults as any).adapter = makeErrorAdapter(401, null);
 
-    await expect(getResponseRejected()(error)).rejects.toBeInstanceOf(ApiError);
+    await expect(axiosInstance.get('/test')).rejects.toBeInstanceOf(ApiError);
 
     expect(appStateActions.addError).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'tokenNotValid' })
+      expect.objectContaining({
+        id: 'tokenNotValid',
+        toNotify: false,
+        blocking: false,
+        techDescription: 'Unauthorized - token invalid or expired',
+      })
     );
     expect(store.dispatch).toHaveBeenCalledWith({ type: 'app/addError' });
     expect(cleanupOnLogout).toHaveBeenCalled();
@@ -96,76 +148,81 @@ describe('axiosInstance - response interceptor', () => {
   });
 
   it('rejects with ApiError containing code and message from error body', async () => {
-    const error = {
-      response: {
-        status: 400,
-        data: { code: 'ERR_001', message: 'Bad request' },
-      },
-      message: 'Request failed with status 400',
-    };
-
-    await expect(getResponseRejected()(error)).rejects.toMatchObject({
-      status: 400,
-      message: 'Bad request',
-      code: 'ERR_001',
+    (axiosInstance.defaults as any).adapter = makeErrorAdapter(400, {
+      code: 'ERR_VALIDATION',
+      message: 'Invalid input',
     });
 
-    await expect(getResponseRejected()(error)).rejects.toBeInstanceOf(ApiError);
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+      status: 400,
+      message: 'Invalid input',
+      code: 'ERR_VALIDATION',
+    });
+    await expect(axiosInstance.get('/test')).rejects.toBeInstanceOf(ApiError);
   });
 
   it('rejects with fallback ApiError when error body has no code or message', async () => {
-    const error = {
-      response: {
-        status: 500,
-        data: {},
-      },
-      message: 'Internal server error',
-    };
+    (axiosInstance.defaults as any).adapter = makeErrorAdapter(500, {});
 
-    await expect(getResponseRejected()(error)).rejects.toMatchObject({
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
       status: 500,
-      message: 'Internal server error',
     });
-
-    await expect(getResponseRejected()(error)).rejects.toBeInstanceOf(ApiError);
+    await expect(axiosInstance.get('/test')).rejects.toBeInstanceOf(ApiError);
   });
 
-  it('uses status 500 as fallback when response is undefined', async () => {
-    const error = {
-      response: undefined,
-      message: 'Network Error',
-    };
+  it('uses error.message as fallback when errorBody is null', async () => {
+    // makeErrorAdapter creates AxiosError with message 'Request failed'
+    (axiosInstance.defaults as any).adapter = makeErrorAdapter(503, null);
 
-    await expect(getResponseRejected()(error)).rejects.toMatchObject({
-      status: 500,
-      message: 'Network Error',
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+      status: 503,
+      message: 'Request failed',
     });
   });
 
-  it('uses "API Error" as message fallback when neither body nor error message exist', async () => {
-    const error = {
-      response: { status: 503, data: null },
-      message: undefined,
+  it('falls through to API Error literal when errorBody has code but no message and error.message is empty', async () => {
+    // Covers line 55 branch: code truthy but message falsy → goes to fallback path
+    // Covers line 62 branch: errorBody.message falsy AND error.message falsy → 'API Error'
+    (axiosInstance.defaults as any).adapter = async (config: InternalAxiosRequestConfig) => {
+      const response: AxiosResponse = {
+        data: { code: 'SOME_CODE' }, // code present, message absent
+        status: 503,
+        statusText: 'Service Unavailable',
+        headers: new AxiosHeaders(),
+        config,
+      };
+      const err = new AxiosError('', '503', config, null, response);
+      throw err;
     };
 
-    await expect(getResponseRejected()(error)).rejects.toMatchObject({
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
       status: 503,
       message: 'API Error',
+      code: 'SOME_CODE',
     });
   });
 
-  it('uses errorBody.message over error.message in fallback path', async () => {
-    const error = {
-      response: {
-        status: 422,
-        data: { message: 'Unprocessable entity' },
-      },
-      message: 'Request failed',
-    };
+  it('uses errorBody.message when available and code is absent', async () => {
+    (axiosInstance.defaults as any).adapter = makeErrorAdapter(422, {
+      message: 'Unprocessable entity',
+    });
 
-    await expect(getResponseRejected()(error)).rejects.toMatchObject({
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
       status: 422,
       message: 'Unprocessable entity',
+    });
+  });
+
+  it('uses status 500 as fallback when response is absent', async () => {
+    // Simulate a network error where there is no response at all
+    (axiosInstance.defaults as any).adapter = async (config: InternalAxiosRequestConfig) => {
+      const err = new AxiosError('Network Error', 'ERR_NETWORK', config, null, undefined);
+      throw err;
+    };
+
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+      status: 500,
+      message: 'Network Error',
     });
   });
 });
