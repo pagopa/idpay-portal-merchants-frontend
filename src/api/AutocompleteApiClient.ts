@@ -19,7 +19,10 @@ class AutocompleteApiClient {
   public async getAddresses(
     request: AddressAutocompleteRequestDTO
   ): Promise<AddressAutocompleteResponseDTO> {
-    const response = await this.autocompleteClient.autocomplete(request);
+    const response = await this.autocompleteClient.autocomplete(
+      request,
+      { format: 'json' }
+    );
     return response.data;
   }
 }
@@ -30,5 +33,5 @@ export const AutocompleteApi = {
   getAddresses: (
     request: AddressAutocompleteRequestDTO
   ): Promise<AddressAutocompleteResponseDTO> =>
-    client.getAddresses(request),
+    client.getAddresses(request,),
 };
