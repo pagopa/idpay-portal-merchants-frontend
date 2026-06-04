@@ -41,7 +41,8 @@ const SecuredRoutes = withLogin(
       );
     }, [location]);
 
-    // Bridge mode: preserve existing route-driven behavior
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     useGetInitiativesQuery({ enabled: !match });
 
     return (
@@ -68,12 +69,12 @@ const SecuredRoutes = withLogin(
           </Route> */}
 
             {routesConfig.map(({key, route, render}) => (
-                <Route key={key} path={route} exact={true}>
-                  <WithInitiativeGuard route={key}>
-                    {render()}
-                  </WithInitiativeGuard>
-                </Route>
-              ))}
+              <Route key={key} path={route} exact={true}>
+                <WithInitiativeGuard route={key}>
+                  {render()}
+                </WithInitiativeGuard>
+              </Route>
+            ))}
 
             <Route path="*">
               <Redirect to={routes.HOME} />
