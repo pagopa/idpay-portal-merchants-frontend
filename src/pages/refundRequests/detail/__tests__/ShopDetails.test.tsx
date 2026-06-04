@@ -93,10 +93,9 @@ jest.mock('../../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
 
-
 const createMockStore = (initialState?: any) => {
   return configureStore({
-    reducer: () => initialState
+    reducer: () => initialState,
   });
 };
 
@@ -127,7 +126,7 @@ const setupSuccessfulBaseMocks = () => {
 };
 
 describe('ShopDetails', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -274,7 +273,7 @@ describe('ShopDetails', () => {
   });
 
   it('should handle handleDownloadCsv error', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const mockError = new Error('fail');
     getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
 

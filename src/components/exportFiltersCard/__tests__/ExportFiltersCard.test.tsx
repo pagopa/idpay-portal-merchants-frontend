@@ -64,7 +64,7 @@ const mockedGenerate = generateMerchantReport as jest.Mock;
 
 const createMockStore = (initialState?: any) => {
   return configureStore({
-    reducer: () => initialState
+    reducer: () => initialState,
   });
 };
 
@@ -77,9 +77,9 @@ const renderComponent = (updateAlerts = jest.fn()) => {
       </BrowserRouter>
     </Provider>
   );
-}
+};
 describe('ExportFiltersCard', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -236,9 +236,7 @@ describe('ExportFiltersCard', () => {
     fireEvent.change(inputAl, result.endDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
-    await waitFor(() =>
-      expect(result.endDate).toBe('validation.invalidRange')
-    );
+    await waitFor(() => expect(result.endDate).toBe('validation.invalidRange'));
   });
 
   it('covers validate maxRange branch (>90 days)', async () => {
@@ -325,9 +323,7 @@ describe('ExportFiltersCard', () => {
     fireEvent.change(inputAl, result.endDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
-    await waitFor(() =>
-      expect(result.startDate).toBe('validation.invalidRange')
-    );
+    await waitFor(() => expect(result.startDate).toBe('validation.invalidRange'));
   });
 
   it('covers validate future endDate invalidRange branch', async () => {
@@ -355,8 +351,6 @@ describe('ExportFiltersCard', () => {
     fireEvent.change(inputAl, result.endDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
-    await waitFor(() =>
-      expect(result.endDate).toBe('validation.invalidRange')
-    );
+    await waitFor(() => expect(result.endDate).toBe('validation.invalidRange'));
   });
 });

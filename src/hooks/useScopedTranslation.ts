@@ -13,7 +13,7 @@ const failedNamespaceLoads = new Set<string>();
 export type UseScopedTranslationOptions = {
   initiativeName?: string;
   enableNamespaceLoading?: boolean;
-  fileName?: 'copy' | 'config'
+  fileName?: 'copy' | 'config';
 };
 
 export type UseScopedTranslationResult = {
@@ -49,7 +49,11 @@ const resolveInitiativeNamespace = (
 export const useScopedTranslation = (
   options: UseScopedTranslationOptions = {}
 ): UseScopedTranslationResult => {
-  const { initiativeName: initiativeNameProp, enableNamespaceLoading = true, fileName = "copy" } = options;
+  const {
+    initiativeName: initiativeNameProp,
+    enableNamespaceLoading = true,
+    fileName = 'copy',
+  } = options;
 
   const { initiativeId } = useCurrentInitiativeId();
   const initiatives = useAppSelector(intiativesListSelector);

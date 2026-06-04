@@ -21,6 +21,7 @@
     "@types/react": "18",
     "@types/react-redux": "7.1.34",
     "@types/redux-logger": "3.0.13",
+    "axios": "^1.16.1",
     "date-fns": "^2.28.0",
     "dayjs": "^1.11.19",
     "dompurify": "3.4.0",
@@ -58,7 +59,7 @@
     "clean:api:email-notification": "rimraf src/api/generated/email-notification",
     "clean:api:autocomplete": "rimraf src/api/generated/autocomplete",
     "clean:api:role-permission": "rimraf src/api/generated/role-permission",
-    "generate:api:merchants": "npm-run-all clean:api:merchants && swagger-typescript-api generate --path openApi/openapi.merchants.portal.yml --output src/api/generated/merchants --name Api.ts --modular",
+    "generate:api:merchants": "npm-run-all clean:api:merchants && swagger-typescript-api generate --path openApi/openapi.merchants.portal.yml --output src/api/generated/merchants --name Api.ts --modular --module-name-first-tag --generate-route-types --extract-request-params --extract-response-body",
     "generate:api:email-notification": "npm-run-all clean:api:email-notification && swagger-typescript-api generate --path openApi/openapi.email-notification.yml --output src/api/generated/email-notification --name Api.ts --modular",
     "generate:api:autocomplete": "npm-run-all clean:api:autocomplete && swagger-typescript-api generate --path openApi/openapi.autocomplete.yml --output src/api/generated/autocomplete --name Api.ts --modular",
     "generate:api:role-permission": "npm-run-all clean:api:role-permission && swagger-typescript-api generate --path openApi/openapi.role-permission.yml --output src/api/generated/role-permission --name Api.ts --modular"

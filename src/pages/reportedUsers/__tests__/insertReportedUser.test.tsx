@@ -109,9 +109,7 @@ const submitForm = async () => {
 const openModalWithValidCF = async () => {
   await typeValidCF();
   await submitForm();
-  await waitFor(() =>
-    expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument()
-  );
+  await waitFor(() => expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument());
 };
 
 const confirmModal = async () => {
@@ -122,9 +120,7 @@ describe('InsertReportedUser', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
+    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
 
     mockUseLocation.mockReturnValue({
       state: { merchantId: 'MERCHANT123', initiativeID: 'INITIATIVE456' },
@@ -134,17 +130,11 @@ describe('InsertReportedUser', () => {
   it('renders CF field, buttons and titles', () => {
     renderComponent();
 
-    expect(
-      screen.getByLabelText('pages.reportedUsers.cfPlaceholder')
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText('pages.reportedUsers.cfPlaceholder')).toBeInTheDocument();
     expect(screen.getByText('Utenti segnalati')).toBeInTheDocument();
     expect(screen.getByText('Segnalazione utenti')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('confirm-reportedUsers-button')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('back-reportedUsers-button')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('confirm-reportedUsers-button')).toBeInTheDocument();
+    expect(screen.getByTestId('back-reportedUsers-button')).toBeInTheDocument();
   });
 
   it('shows error when trying to confirm with empty CF', async () => {
@@ -174,15 +164,11 @@ describe('InsertReportedUser', () => {
     renderComponent();
     await openModalWithValidCF();
 
-    expect(screen.getByTestId('cf-modal')).toHaveTextContent(
-      'RSSMRA80A01F205X'
-    );
+    expect(screen.getByTestId('cf-modal')).toHaveTextContent('RSSMRA80A01F205X');
   });
 
   it('does not open modal when CF already reported', async () => {
-    mockGetReportedUser.mockResolvedValueOnce([
-      { cf: 'RSSMRA80A01F205X' },
-    ]);
+    mockGetReportedUser.mockResolvedValueOnce([{ cf: 'RSSMRA80A01F205X' }]);
 
     renderComponent();
     await typeValidCF();
@@ -190,9 +176,7 @@ describe('InsertReportedUser', () => {
 
     await waitFor(() => {
       expect(mockGetReportedUser).toHaveBeenCalled();
-      expect(
-        screen.queryByTestId('modal-reported-user')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('modal-reported-user')).not.toBeInTheDocument();
     });
   });
 
@@ -204,10 +188,7 @@ describe('InsertReportedUser', () => {
     await confirmModal();
 
     await waitFor(() => {
-      expect(mockCreateReportedUser).toHaveBeenCalledWith(
-        'INITIATIVE456',
-        'RSSMRA80A01F205X'
-      );
+      expect(mockCreateReportedUser).toHaveBeenCalledWith('INITIATIVE456', 'RSSMRA80A01F205X');
       expect(mockPush).toHaveBeenCalled();
     });
   });
@@ -221,9 +202,7 @@ describe('InsertReportedUser', () => {
     fireEvent.click(screen.getByTestId('modal-cancel'));
 
     await waitFor(() => {
-      expect(
-        screen.queryByTestId('modal-reported-user')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('modal-reported-user')).not.toBeInTheDocument();
     });
   });
 
@@ -234,9 +213,7 @@ describe('InsertReportedUser', () => {
   });
 
   it('handles API error gracefully when checking CF', async () => {
-    mockGetReportedUser.mockRejectedValueOnce(
-      new Error('network error')
-    );
+    mockGetReportedUser.mockRejectedValueOnce(new Error('network error'));
 
     renderComponent();
     await typeValidCF();

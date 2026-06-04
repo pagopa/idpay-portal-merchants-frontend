@@ -15,7 +15,7 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -25,7 +25,7 @@ jest.mock('../../../redux/hooks', () => ({
 describe('NoResultPaper', () => {
   const defaultKey = 'test.key';
 
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   test('should render without crashing', () => {
     render(<NoResultPaper translationKey="test.key" />);
     expect(screen.getByText('translated_test.key')).toBeInTheDocument();
@@ -35,16 +35,12 @@ describe('NoResultPaper', () => {
     render(<NoResultPaper translationKey={translationKey} />);
 
   beforeEach(() => {
-    (useAppSelector as jest.Mock).mockReturnValue([
-      { initiativeId: 'initiative-1' },
-    ]);
+    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   });
 
   it('renders translated text correctly', () => {
     renderComponent();
-    expect(
-      screen.getByText(`translated_${defaultKey}`)
-    ).toBeInTheDocument();
+    expect(screen.getByText(`translated_${defaultKey}`)).toBeInTheDocument();
   });
 
   it('updates correctly on re-render with different keys', () => {
@@ -65,9 +61,7 @@ describe('NoResultPaper', () => {
 
     keys.forEach((key) => {
       renderComponent(key);
-      expect(
-        screen.getByText(`translated_${key}`)
-      ).toBeInTheDocument();
+      expect(screen.getByText(`translated_${key}`)).toBeInTheDocument();
     });
   });
 
@@ -76,9 +70,7 @@ describe('NoResultPaper', () => {
 
     const paper = container.querySelector('[class*="MuiPaper"]');
     const stack = container.querySelector('[class*="MuiStack"]');
-    const typography = container.querySelector(
-      '[class*="MuiTypography"]'
-    );
+    const typography = container.querySelector('[class*="MuiTypography"]');
 
     expect(paper).toBeInTheDocument();
     expect(paper).toHaveStyle({
@@ -98,8 +90,7 @@ describe('NoResultPaper', () => {
   it('renders a single Typography inside Stack', () => {
     const { container } = renderComponent();
     const stack = container.querySelector('[class*="MuiStack"]');
-    const typographies =
-      stack?.querySelectorAll('[class*="MuiTypography"]');
+    const typographies = stack?.querySelectorAll('[class*="MuiTypography"]');
 
     expect(typographies).toHaveLength(1);
   });

@@ -15,7 +15,7 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -60,7 +60,7 @@ jest.mock('../../../components/Alert/AlertListComponent', () => ({ alertList }: 
 ));
 
 describe('InitiativeExportReportPage', () => {
-    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   it('renders title, subtitle, filters and table', () => {
     render(<InitiativeExportReportPage />);
 

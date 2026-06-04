@@ -26,9 +26,7 @@ export const clickConfirmReportedUser = () => {
 export const openInsertReportedUserModal = async () => {
   fillCfInput();
   clickConfirmReportedUser();
-  await waitFor(() =>
-    expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument()
-  );
+  await waitFor(() => expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument());
 };
 
 /**
@@ -45,9 +43,7 @@ export const searchByCF = async (cf: string) => {
  */
 export const searchAndWaitForTable = async (cf: string) => {
   await searchByCF(cf);
-  await waitFor(() =>
-    expect(screen.getByTestId('data-table')).toBeInTheDocument()
-  );
+  await waitFor(() => expect(screen.getByTestId('data-table')).toBeInTheDocument());
 };
 
 /**
@@ -56,7 +52,5 @@ export const searchAndWaitForTable = async (cf: string) => {
 export const openDeleteModal = async (cf: string) => {
   await searchAndWaitForTable(cf);
   fireEvent.click(screen.getByTestId(`delete-${cf}`));
-  await waitFor(() =>
-    expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument()
-  );
+  await waitFor(() => expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument());
 };

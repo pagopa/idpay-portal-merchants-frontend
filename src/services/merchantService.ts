@@ -15,6 +15,7 @@ import {
   ReportRequest,
   RewardBatchDTO,
   TransactionResponse,
+  ReportDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 
@@ -115,10 +116,10 @@ export const getMerchantPointOfSales = async (
   );
 
   return {
-    content: response?.content ?? [],
-    pageNo: response?.pageNumber ?? 0,
-    pageSize: response?.pageSize ?? 0,
-    totalElements: response?.totalElements ?? 0,
+    content: (response as any)?.content ?? [],
+    pageNo: (response as any)?.pageNumber ?? 0,
+    pageSize: (response as any)?.pageSize ?? 0,
+    totalElements: (response as any)?.totalElements ?? 0,
   };
 };
 
@@ -201,8 +202,10 @@ export const getMerchantReports = (
   size?: number
 ): Promise<ReportListDTO> => getMerchantsApi().getMerchantReports(initiativeId, page, size);
 
-export const generateMerchantReport = (initiativeId: string, body: ReportRequest): Promise<void> =>
-  getMerchantsApi().generateMerchantReport(initiativeId, body);
+export const generateMerchantReport = (
+  initiativeId: string,
+  body: ReportRequest
+): Promise<ReportDTO> => getMerchantsApi().generateMerchantReport(initiativeId, body);
 
 export const downloadMerchantReport = (initiativeId: string, reportId: string) =>
   getMerchantsApi().downloadMerchantReport(initiativeId, reportId);
@@ -211,5 +214,5 @@ export const updateInvoiceTransaction = (
   transactionId: string,
   file: File,
   docNumber?: string
-): Promise<{ code: string; message: string }> =>
+): Promise<{ code: string; message: string } | void> =>
   getMerchantsApi().updateInvoiceTransaction(transactionId, file, docNumber);

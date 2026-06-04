@@ -97,7 +97,7 @@ jest.mock('../../../redux/hooks', () => ({
 const store = createMockStore();
 
 describe('InitiativeStoreDetail', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -126,7 +126,6 @@ describe('InitiativeStoreDetail', () => {
         </Provider>
       </MemoryRouter>
     );
-
 
   test('renders store detail and calls APIs', async () => {
     renderWithProviders();
@@ -200,7 +199,10 @@ describe('InitiativeStoreDetail', () => {
 
   it.each([
     { result: undefined, email: 'new@test.it' },
-    { result: { code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' }, email: 'duplicate@test.it' },
+    {
+      result: { code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' },
+      email: 'duplicate@test.it',
+    },
     { result: { code: 'OTHER' }, email: 'test@test.com' },
   ])('handles update flow', async ({ result, email }) => {
     const user = userEvent.setup({ delay: null });
@@ -286,8 +288,8 @@ describe('InitiativeStoreDetail', () => {
 
   test('Prompt clears sessionStorage when navigating to a different page', () => {
     const removeItemSpy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
-    removeItemSpy.mockImplementation(() => { });
-    removeItemSpy.mockImplementation(() => { });
+    removeItemSpy.mockImplementation(() => {});
+    removeItemSpy.mockImplementation(() => {});
 
     // replica fedele della funzione message usata nel componente
     const ROUTES = { STORES: '/stores' };

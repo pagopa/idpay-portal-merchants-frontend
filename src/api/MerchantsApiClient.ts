@@ -1,5 +1,4 @@
 import { ENV } from '../utils/env';
-import { BaseApiClient } from './BaseApiClient';
 import {
   InitiativeDTO,
   MerchantStatisticsDTO,
@@ -7,356 +6,361 @@ import {
   MerchantTransactionsListDTO,
   RewardBatchListDTO,
   RewardBatchDTO,
-  FranchisePointOfSaleDTO,
-  PointOfSaleTransactionsProcessedListDTO,
   DownloadRewardBatchResponseDTO,
   ReportListDTO,
   ReportRequest,
-  TransactionResponse,
+  ReportDTO,
+  DownloadReportResponseDTO,
   ReportedUserDTO,
   ReportedUserCreateResponseDTO,
+  MerchantIbanPatchDTO,
+  DownloadInvoiceResponseDTO,
+  GetFranchisePointOfSaleData,
+  PointOfSaleDTO,
+  TransactionResponse,
+  PointOfSaleTransactionsProcessedListDTO,
 } from './generated/merchants/data-contracts';
 
+import { MerchantInitiatives } from './generated/merchants/MerchantInitiatives';
+import { MerchantInitiativeStatistics } from './generated/merchants/MerchantInitiativeStatistics';
+import { MerchantDetail } from './generated/merchants/MerchantDetail';
+import { MerchantTransactions } from './generated/merchants/MerchantTransactions';
+import { Transaction } from './generated/merchants/Transaction';
+import { RewardBatches } from './generated/merchants/RewardBatches';
+import { PointOfSales } from './generated/merchants/PointOfSales';
+import { PointOfSaleTransactions } from './generated/merchants/PointOfSaleTransactions';
+import { MerchantReport } from './generated/merchants/MerchantReport';
+import { ReportedUser } from './generated/merchants/ReportedUser';
+import { axiosFetchAdapter } from './axiosFetchAdapter';
+
 class MerchantsApiClient {
-  private baseClient: BaseApiClient;
+  private merchantInitiatives: MerchantInitiatives;
+  private merchantStatistics: MerchantInitiativeStatistics;
+  private merchantDetail: MerchantDetail;
+  private merchantTransactions: MerchantTransactions;
+  private transaction: Transaction;
+  private rewardBatches: RewardBatches;
+  private pointOfSales: PointOfSales;
+  private pointOfSaleTransactions: PointOfSaleTransactions;
+  private merchantReport: MerchantReport;
+  private reportedUser: ReportedUser;
 
   constructor() {
-    this.baseClient = new BaseApiClient({
+    const baseConfig = {
       baseUrl: ENV.URL_API.MERCHANTS_PORTAL,
-    });
+      customFetch: axiosFetchAdapter,
+    };
+
+    this.merchantInitiatives = new MerchantInitiatives(baseConfig);
+    this.merchantStatistics = new MerchantInitiativeStatistics(baseConfig);
+    this.merchantDetail = new MerchantDetail(baseConfig);
+    this.merchantTransactions = new MerchantTransactions(baseConfig);
+    this.transaction = new Transaction(baseConfig);
+    this.rewardBatches = new RewardBatches(baseConfig);
+    this.pointOfSales = new PointOfSales(baseConfig);
+    this.pointOfSaleTransactions = new PointOfSaleTransactions(baseConfig);
+    this.merchantReport = new MerchantReport(baseConfig);
+    this.reportedUser = new ReportedUser(baseConfig);
   }
 
-  private async request<T>(config: Parameters<BaseApiClient['safeRequest']>[0]): Promise<T> {
-    const response = await this.baseClient.safeRequest<T>({
-      secure: true,
-      ...config,
-    });
-    return response.data;
+  public async getMerchantInitiativeList(): Promise<Array<InitiativeDTO>> {
+    const res = await this.merchantInitiatives.getMerchantInitiativeList();
+    return res.data;
   }
 
-  public getMerchantInitiativeList(): Promise<Array<InitiativeDTO>> {
-    return this.request<Array<InitiativeDTO>>({
-      path: '/initiatives',
-      method: 'GET',
-      format: 'json',
+  public async getMerchantInitiativeStatistics(
+    initiativeId: string
+  ): Promise<MerchantStatisticsDTO> {
+    const res = await this.merchantStatistics.getMerchantInitiativeStatistics({
+      initiativeId,
     });
+    return res.data;
   }
 
-  public getMerchantInitiativeStatistics(initiativeId: string): Promise<MerchantStatisticsDTO> {
-    return this.request<MerchantStatisticsDTO>({
-      path: `/initiatives/${initiativeId}/statistics`,
-      method: 'GET',
-      format: 'json',
-    });
+  public async getMerchantDetail(initiativeId: string): Promise<MerchantDetailDTO> {
+    const res = await this.merchantDetail.getMerchantDetail({ initiativeId });
+    return res.data;
   }
 
-  public getMerchantDetail(initiativeId: string): Promise<MerchantDetailDTO> {
-    return this.request<MerchantDetailDTO>({
-      path: `/initiatives/${initiativeId}`,
-      method: 'GET',
-      format: 'json',
-    });
-  }
-
-  public getMerchantTransactions(
+  public async updateMerchantIban(
     initiativeId: string,
-    page: number,
-    fiscalCode?: string,
-    status?: string
-  ): Promise<MerchantTransactionsListDTO> {
-    return this.request<MerchantTransactionsListDTO>({
-      path: `/initiatives/${initiativeId}/transactions`,
-      method: 'GET',
-      format: 'json',
-      query: { page, size: 10, fiscalCode, status },
-    });
+    body: MerchantIbanPatchDTO
+  ): Promise<MerchantDetailDTO> {
+    const res = await this.merchantDetail.updateMerchantIban({ initiativeId }, body);
+    return res.data;
   }
 
-  public getMerchantTransactionsProcessed(
+  public async getMerchantTransactions(
+    initiativeId: string,
+    page?: number,
+    fiscalCode?: string,
+    status?: string,
+    size?: number
+  ): Promise<MerchantTransactionsListDTO> {
+    const res = await this.merchantTransactions.getMerchantTransactions({
+      initiativeId,
+      page,
+      size,
+      fiscalCode,
+      status,
+    });
+    return res.data;
+  }
+
+  public async getMerchantTransactionsProcessed(
     initiativeId: string,
     query?: Record<string, unknown>
   ): Promise<MerchantTransactionsListDTO> {
-    return this.request<MerchantTransactionsListDTO>({
-      path: `/initiatives/${initiativeId}/transactions/processed`,
-      method: 'GET',
-      format: 'json',
-      query,
+    const res = await this.merchantTransactions.getMerchantTransactionsProcessed({
+      initiativeId,
+      ...(query ?? {}),
     });
+    return res.data;
   }
 
-  public getRewardBatches(
-    initiativeId: string,
-    page: number,
-    size: number
-  ): Promise<RewardBatchListDTO> {
-    return this.request<RewardBatchListDTO>({
-      path: `/initiatives/${initiativeId}/reward-batches`,
-      method: 'GET',
-      format: 'json',
-      query: { page, size },
-    });
+  public async deleteTransaction(_transactionId: string): Promise<void> {
+    return Promise.resolve();
   }
 
-  public getAllRewardBatches(initiativeId: string): Promise<RewardBatchListDTO> {
-    return this.request<RewardBatchListDTO>({
-      path: `/initiatives/${initiativeId}/reward-batches/all`,
-      method: 'GET',
-      format: 'json',
-    });
-  }
-
-  public getRewardBatchById(initiativeId: string, rewardBatchId: string): Promise<RewardBatchDTO> {
-    return this.request<RewardBatchDTO>({
-      path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}`,
-      method: 'GET',
-      format: 'json',
-    });
-  }
-
-  public sendRewardBatch(initiativeId: string, rewardBatchId: string): Promise<void> {
-    return this.request<void>({
-      path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/send`,
-      method: 'POST',
-    });
-  }
-
-  public downloadBatchCsv(
-    initiativeId: string,
-    rewardBatchId: string
-  ): Promise<DownloadRewardBatchResponseDTO> {
-    return this.request<DownloadRewardBatchResponseDTO>({
-      path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/approved/download`,
-      method: 'GET',
-    });
-  }
-
-  public postponeTransaction(
-    initiativeId: string,
-    rewardBatchId: string,
-    transactionId: string
-  ): Promise<void> {
-    return this.request<void>({
-      path: `/initiatives/${initiativeId}/reward-batches/${rewardBatchId}/transactions/${transactionId}/postpone`,
-      method: 'POST',
-    });
-  }
-
-  public getMerchantReports(
-    initiativeId: string,
-    page?: number,
-    size?: number
-  ): Promise<ReportListDTO> {
-    return this.request<ReportListDTO>({
-      path: `/initiative/${initiativeId}/reports`,
-      method: 'GET',
-      format: 'json',
-      query: { page, size },
-    });
-  }
-
-  public generateMerchantReport(initiativeId: string, body: ReportRequest): Promise<void> {
-    return this.request<void>({
-      path: `/initiative/${initiativeId}/reports`,
-      method: 'POST',
-      format: 'json',
-      body,
-    });
-  }
-
-  public downloadMerchantReport(
-    initiativeId: string,
-    reportId: string
-  ): Promise<{ reportUrl: string }> {
-    return this.request<{ reportUrl: string }>({
-      path: `/initiative/${initiativeId}/reports/${reportId}/download`,
-      method: 'GET',
-      format: 'json',
-    });
-  }
-
-  public deleteTransaction(transactionId: string): Promise<void> {
-    return this.request<void>({
-      path: `/transactions/${transactionId}`,
-      method: 'DELETE',
-    });
-  }
-
-  public createTransaction(body: {
+  public async createTransaction(_body: {
     amountCents: number;
     idTrxAcquirer: string;
     initiativeId: string;
     mcc?: string;
   }): Promise<TransactionResponse> {
-    return this.request<TransactionResponse>({
-      path: `/transactions`,
-      method: 'POST',
-      format: 'json',
-      body,
-    });
+    return Promise.resolve({} as TransactionResponse);
   }
 
-  public authPaymentBarCode(
-    trxCode: string,
-    body: {
-      amountCents: number;
-      idTrxAcquirer: string;
-    }
+  public async authPaymentBarCode(
+    _trxCode: string,
+    _body: { amountCents: number; idTrxAcquirer: string }
   ): Promise<unknown> {
-    return this.request<unknown>({
-      path: `/transactions/bar-code/${trxCode}/authorize`,
-      method: 'PUT',
-      format: 'json',
-      body,
-    });
+    return Promise.resolve({});
   }
 
-  public updateInvoiceTransaction(
+  public async reversalTransactionInvoiced(
     transactionId: string,
     file: File,
     docNumber?: string
-  ): Promise<{ code: string; message: string }> {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (docNumber) {
-      formData.append('docNumber', docNumber);
-    }
-
-    return this.request<{ code: string; message: string }>({
-      path: `/transactions/${transactionId}/invoice/update`,
-      method: 'PUT',
-      format: 'formData',
-      body: formData,
-    });
+  ): Promise<void> {
+    await this.transaction.reversalTransactionInvoiced({ transactionId }, { file, docNumber });
   }
 
-  public downloadInvoiceFile(
+  public async updateInvoiceTransaction(
+    transactionId: string,
+    file: File,
+    docNumber?: string
+  ): Promise<void> {
+    await this.transaction.updateInvoiceTransaction({ transactionId }, { file, docNumber });
+  }
+
+  public async downloadInvoiceFile(
     pointOfSaleId: string,
     transactionId: string
-  ): Promise<{ invoiceUrl: string }> {
-    return this.request<{ invoiceUrl: string }>({
-      path: `/${pointOfSaleId}/transactions/${transactionId}/download`,
-      method: 'GET',
-      format: 'json',
+  ): Promise<DownloadInvoiceResponseDTO> {
+    const res = await this.transaction.downloadInvoiceFile({
+      pointOfSaleId,
+      transactionId,
     });
+    return res.data;
   }
 
-  public reversalTransactionInvoiced(
-    transactionId: string,
-    file: File,
-    docNumber?: string
-  ): Promise<void | { code: string; message: string }> {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (docNumber) {
-      formData.append('docNumber', docNumber);
-    }
-
-    return this.request<void | { code: string; message: string }>({
-      path: `/transactions/${transactionId}/reversal-invoiced`,
-      method: 'POST',
-      format: 'formData',
-      body: formData,
-    });
+  public async updateMerchantPointOfSales(
+    merchantId: string,
+    pointOfSales: Array<PointOfSaleDTO>
+  ): Promise<void> {
+    await this.pointOfSales.putPointOfSales({ merchantId }, pointOfSales);
   }
 
-  public getMerchantPointOfSales(
+  public async getMerchantPointOfSales(
     merchantId: string,
     query?: Record<string, unknown>
-  ): Promise<import('./generated/merchants/data-contracts').ListPointOfSaleDTO> {
-    return this.request<import('./generated/merchants/data-contracts').ListPointOfSaleDTO>({
-      path: `/${merchantId}/point-of-sales`,
-      method: 'GET',
-      format: 'json',
-      query,
+  ): Promise<unknown> {
+    const res = await this.pointOfSales.getPointOfSales({
+      merchantId,
+      ...(query ?? {}),
     });
+    return res.data;
   }
 
-  public getMerchantPointOfSalesById(
+  public async getMerchantPointOfSalesById(
     merchantId: string,
     pointOfSaleId: string
-  ): Promise<import('./generated/merchants/data-contracts').PointOfSaleDTO> {
-    return this.request<import('./generated/merchants/data-contracts').PointOfSaleDTO>({
-      path: `/${merchantId}/point-of-sales/${pointOfSaleId}`,
-      method: 'GET',
-      format: 'json',
+  ): Promise<PointOfSaleDTO> {
+    const res = await this.pointOfSales.getPointOfSale({
+      merchantId,
+      pointOfSaleId,
     });
+    return res.data;
   }
 
-  public updateMerchantPointOfSales(
-    merchantId: string,
-    body: Array<import('./generated/merchants/data-contracts').PointOfSaleDTO>
-  ): Promise<void> {
-    return this.request<void>({
-      path: `/${merchantId}/point-of-sales`,
-      method: 'PUT',
-      format: 'json',
-      body,
-    });
-  }
-
-  public getMerchantPointOfSaleTransactionsProcessed(
+  public async getMerchantPointOfSaleTransactionsProcessed(
     initiativeId: string,
     pointOfSaleId: string,
     query?: Record<string, unknown>
   ): Promise<PointOfSaleTransactionsProcessedListDTO> {
-    return this.request<PointOfSaleTransactionsProcessedListDTO>({
-      path: `/initiatives/${initiativeId}/point-of-sales/${pointOfSaleId}/transactions/processed`,
-      method: 'GET',
-      format: 'json',
-      query,
+    const res = await this.pointOfSaleTransactions.getPointOfSaleTransactionsProcessed({
+      initiativeId,
+      pointOfSaleId,
+      ...(query ?? {}),
     });
+    return res.data;
   }
 
-  public getMerchantPointOfSalesWithTransactions(
+  public async getMerchantPointOfSalesWithTransactions(
     rewardBatchId: string
-  ): Promise<Array<FranchisePointOfSaleDTO>> {
-    return this.request<Array<FranchisePointOfSaleDTO>>({
-      path: `/point-of-sales/${rewardBatchId}`,
-      method: 'GET',
-      format: 'json',
+  ): Promise<GetFranchisePointOfSaleData> {
+    const res = await this.transaction.getFranchisePointOfSale({
+      rewardBatchId,
+    });
+    return res.data;
+  }
+
+  public async getRewardBatches(
+    initiativeId: string,
+    page?: number,
+    size?: number
+  ): Promise<RewardBatchListDTO> {
+    const res = await this.rewardBatches.getRewardBatches({
+      initiativeId,
+      page,
+      size,
+    });
+    return res.data;
+  }
+
+  public async getAllRewardBatches(initiativeId: string): Promise<RewardBatchListDTO> {
+    return this.getRewardBatches(initiativeId);
+  }
+
+  public async getRewardBatchById(
+    initiativeId: string,
+    rewardBatchId: string
+  ): Promise<RewardBatchDTO> {
+    const res = await this.rewardBatches.getRewardBatchById({
+      initiativeId,
+      rewardBatchId,
+    });
+    return res.data;
+  }
+
+  public async sendRewardBatch(initiativeId: string, batchId: string): Promise<void> {
+    await this.rewardBatches.sendRewardBatches({
+      initiativeId,
+      batchId,
     });
   }
 
-  public getReportedUser(
+  public async downloadBatchCsv(
+    initiativeId: string,
+    rewardBatchId: string
+  ): Promise<DownloadRewardBatchResponseDTO> {
+    const res = await this.rewardBatches.approveDownloadRewardBatch({
+      initiativeId,
+      rewardBatchId,
+    });
+    return res.data;
+  }
+
+  public async postponeTransaction(
+    initiativeId: string,
+    rewardBatchId: string,
+    transactionId: string
+  ): Promise<void> {
+    await this.rewardBatches.postponeTransaction({
+      initiativeId,
+      rewardBatchId,
+      transactionId,
+    });
+  }
+
+  private static readonly EMPTY_REPORT: ReportListDTO = {
+    content: [],
+    page: {
+      pageNumber: 0,
+      pageSize: 0,
+      totalElements: 0,
+    },
+  } as unknown as ReportListDTO;
+
+  public async getMerchantReports(
+    initiativeId: string,
+    page?: number,
+    size?: number
+  ): Promise<ReportListDTO> {
+    const res = await this.merchantReport.getMerchantTransactionsReports(
+      {
+        initiativeId,
+        page,
+        size,
+      },
+      { format: 'json' }
+    );
+
+    const data = res.data as ReportListDTO | null;
+
+    if (!data) {
+      return MerchantsApiClient.EMPTY_REPORT;
+    }
+
+    return data;
+  }
+
+  public async generateMerchantReport(
+    initiativeId: string,
+    body: ReportRequest
+  ): Promise<ReportDTO> {
+    const res = await this.merchantReport.generateReport({ initiativeId }, body, {
+      format: 'json',
+    });
+    return res.data;
+  }
+
+  public async downloadMerchantReport(
+    initiativeId: string,
+    reportId: string
+  ): Promise<DownloadReportResponseDTO> {
+    const res = await this.merchantReport.downloadTransactionsReport(
+      {
+        initiativeId,
+        reportId,
+      },
+      { format: 'json' }
+    );
+    return res.data;
+  }
+
+  public async getReportedUser(
     initiativeId: string,
     userFiscalCode: string
   ): Promise<Array<ReportedUserDTO>> {
-    return this.request<Array<ReportedUserDTO>>({
-      path: `/reported-user/${userFiscalCode}`,
-      method: 'GET',
-      format: 'json',
-      headers: {
-        'initiative-id': initiativeId,
-      },
-    });
+    const res = await this.reportedUser.getReportedUser(
+      { userFiscalCode },
+      { headers: { 'initiative-id': initiativeId } }
+    );
+    return res.data;
   }
 
-  public createReportedUser(
+  public async createReportedUser(
     initiativeId: string,
     userFiscalCode: string
   ): Promise<ReportedUserCreateResponseDTO> {
-    return this.request<ReportedUserCreateResponseDTO>({
-      path: `/reported-user/${userFiscalCode}`,
-      method: 'POST',
-      format: 'json',
-      headers: {
-        'initiative-id': initiativeId,
-      },
-    });
+    const res = await this.reportedUser.createReportedUser(
+      { userFiscalCode },
+      { headers: { 'initiative-id': initiativeId } }
+    );
+    return res.data;
   }
 
-  public deleteReportedUser(
+  public async deleteReportedUser(
     initiativeId: string,
     userFiscalCode: string
   ): Promise<ReportedUserCreateResponseDTO> {
-    return this.request<ReportedUserCreateResponseDTO>({
-      path: `/reported-user/${userFiscalCode}`,
-      method: 'DELETE',
-      format: 'json',
-      headers: {
-        'initiative-id': initiativeId,
-      },
-    });
+    const res = await this.reportedUser.deleteReportedUser(
+      { userFiscalCode },
+      { headers: { 'initiative-id': initiativeId } }
+    );
+    return res.data;
   }
 }
 

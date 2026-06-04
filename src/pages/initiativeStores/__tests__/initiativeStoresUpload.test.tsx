@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
@@ -22,9 +23,6 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
 }));
 jest.mock('../../../services/merchantService', () => ({
   getMerchantPointOfSales: jest.fn(),
-}));
-
-jest.mock('../../../services/merchantService', () => ({
   updateMerchantPointOfSales: jest.fn(),
 }));
 jest.mock('../../../utils/jwt-utils');
@@ -111,17 +109,23 @@ jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
 
-
 const createMockStore = (initialState?: any) => {
   return configureStore({
-    reducer: () => initialState
+    reducer: () => initialState,
   });
 };
 
 const store = createMockStore();
 
+const renderComponent = () =>
+  render(
+    <Provider store={store}>
+      <InitiativeStoresUpload />
+    </Provider>
+  );
+
 describe('InitiativeStoresUpload', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -141,20 +145,20 @@ describe('InitiativeStoresUpload', () => {
   });
 
   afterEach(() => {
-    (window.open as any).mockRestore?.();
-  });
-
-  afterEach(() => {
     (window.open as jest.Mock | undefined)?.mockRestore?.();
   });
 
   it('renders correctly with Manual upload by default', () => {
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);
+    renderComponent();
     expect(screen.getByTestId('confirm-stores-button')).toBeInTheDocument();
   });
 
   it('calls handleBack when back button is clicked', () => {
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
     fireEvent.click(screen.getByTestId('back-stores-button'));
     expect(pushMock).toHaveBeenCalledWith(
       expect.stringContaining('/portale-esercenti/test-initiative/panoramica')
@@ -162,13 +166,21 @@ describe('InitiativeStoresUpload', () => {
   });
 
   it('Click to open manual link', () => {
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
     fireEvent.click(screen.getByText('pages.initiativeStores.manualLink'));
     expect(window.open).toHaveBeenCalled();
   });
 
   it('sets salesPoints when form changes', () => {
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
     const instance = screen.getByTestId('confirm-stores-button');
     expect(instance).toBeInTheDocument();
   });
@@ -177,7 +189,11 @@ describe('InitiativeStoresUpload', () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
 
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   });
 
@@ -186,7 +202,11 @@ describe('InitiativeStoresUpload', () => {
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
     (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(null);
 
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   });
 
@@ -199,7 +219,11 @@ describe('InitiativeStoresUpload', () => {
       message: 'Email duplicata',
     });
 
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   });
 
@@ -213,7 +237,11 @@ describe('InitiativeStoresUpload', () => {
     readTokenMock.mockReturnValue('fakeToken');
     (jwtUtils.parseJwt as jest.Mock).mockReturnValue(undefined);
 
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -233,8 +261,7 @@ describe('InitiativeStoresUpload', () => {
       message: 'Email duplicata',
     });
 
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    renderComponent();
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -254,8 +281,16 @@ describe('InitiativeStoresUpload', () => {
       message: 'Error with SailPoint',
     });
 
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);
@@ -272,8 +307,16 @@ describe('InitiativeStoresUpload', () => {
 
     (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(undefined);
 
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
-    render(<Provider store={store}><InitiativeStoresUpload /></Provider>);;
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
+    render(
+      <Provider store={store}>
+        <InitiativeStoresUpload />
+      </Provider>
+    );
     await fillFormForSuccess(screen);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
   }, 10000);

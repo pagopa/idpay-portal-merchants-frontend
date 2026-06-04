@@ -65,9 +65,7 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(
-      screen.getByText('Caricamento iniziative...')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Caricamento iniziative...')).toBeInTheDocument();
   });
 
   it('redirects to HOME when initiatives list is empty', () => {
@@ -84,9 +82,7 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(mockRedirect).toHaveBeenCalledWith(
-      expect.objectContaining({ to: '/home' })
-    );
+    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
   });
 
   it('redirects to HOME when initiativeId is missing', () => {
@@ -103,9 +99,7 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(mockRedirect).toHaveBeenCalledWith(
-      expect.objectContaining({ to: '/home' })
-    );
+    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
   });
 
   it('redirects to HOME when initiativeId is invalid', () => {
@@ -122,9 +116,7 @@ describe('WithInitiativeGuard', () => {
       </WithInitiativeGuard>
     );
 
-    expect(mockRedirect).toHaveBeenCalledWith(
-      expect.objectContaining({ to: '/home' })
-    );
+    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
   });
 
   it('renders children when state is OK', async () => {
@@ -178,8 +170,6 @@ describe('WithInitiativeGuard', () => {
 
     await screen.findByTestId('redirect');
 
-    expect(mockRedirect).toHaveBeenCalledWith(
-      expect.objectContaining({ to: '/home' })
-    );
+    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
   });
 });

@@ -8,9 +8,7 @@ import { useAppSelector } from '../../redux/hooks';
 const mockCommonHooks = () => {
   const mockAddError = jest.fn();
 
-  (useAppSelector as jest.Mock).mockReturnValue([
-    { initiativeId: 'initiative-1' },
-  ]);
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
 
   (useErrorDispatcher as jest.Mock).mockReturnValue(mockAddError);
 
@@ -41,7 +39,7 @@ jest.mock('../useCurrentInitiativeId', () => ({
 jest.mock('../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../redux/hooks', () => ({
@@ -51,10 +49,7 @@ jest.mock('../../redux/hooks', () => ({
 describe('useTCAgreement', () => {
   let mockAddError: jest.Mock;
 
-  const setupHook = (
-    consentResponse: any,
-    saveError?: Error
-  ) => {
+  const setupHook = (consentResponse: any, saveError?: Error) => {
     if (consentResponse instanceof Error) {
       mockedGetPortalConsent.mockRejectedValue(consentResponse);
     } else {
@@ -116,21 +111,15 @@ describe('useTCAgreement', () => {
     const consentData = { versionId: 'v2.0.0', firstAcceptance: false };
     const { result } = setupHook(consentData);
 
-    await waitFor(() =>
-      expect(result.current.isTOSAccepted).toBe(false)
-    );
+    await waitFor(() => expect(result.current.isTOSAccepted).toBe(false));
 
     await act(async () => {
       result.current.acceptTOS();
     });
 
-    expect(mockedSavePortalConsent).toHaveBeenCalledWith(
-      consentData.versionId
-    );
+    expect(mockedSavePortalConsent).toHaveBeenCalledWith(consentData.versionId);
 
-    await waitFor(() =>
-      expect(result.current.isTOSAccepted).toBe(true)
-    );
+    await waitFor(() => expect(result.current.isTOSAccepted).toBe(true));
 
     expect(mockAddError).not.toHaveBeenCalled();
   });
@@ -141,17 +130,13 @@ describe('useTCAgreement', () => {
 
     const { result } = setupHook(consentData, error);
 
-    await waitFor(() =>
-      expect(result.current.isTOSAccepted).toBe(false)
-    );
+    await waitFor(() => expect(result.current.isTOSAccepted).toBe(false));
 
     await act(async () => {
       result.current.acceptTOS();
     });
 
-    expect(mockedSavePortalConsent).toHaveBeenCalledWith(
-      consentData.versionId
-    );
+    expect(mockedSavePortalConsent).toHaveBeenCalledWith(consentData.versionId);
 
     await waitFor(() => {
       expect(result.current.isTOSAccepted).toBe(false);

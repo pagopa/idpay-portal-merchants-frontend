@@ -4,9 +4,9 @@ import { MemoryRouter } from 'react-router-dom';
 import Layout from '../Layout';
 import ROUTES from '../../../routes';
 
-jest.mock('../../../hooks/useInitiativesList', () => ({
-  useInitiativesList: jest.fn(),
-}));
+/**
+ * useInitiativesList rimosso: gestione initiatives ora centralizzata in RTK Query.
+ */
 
 jest.mock('../../SideMenu/SideMenu', () => () => <div data-testid="side-menu-mock" />);
 jest.mock('../../Footer/Footer', () => () => <div data-testid="footer-mock" />);
