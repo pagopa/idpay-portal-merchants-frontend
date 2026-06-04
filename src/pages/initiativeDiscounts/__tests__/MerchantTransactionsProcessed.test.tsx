@@ -17,7 +17,7 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -106,7 +106,7 @@ const formatDateMock = formatDate as jest.Mock;
 const formattedCurrencyMock = formattedCurrency as jest.Mock;
 
 describe('MerchantTransactionsProcessed', () => {
-    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   const fakeId = '123';
 
   const fakeRows: MerchantTransactionDTO[] = [

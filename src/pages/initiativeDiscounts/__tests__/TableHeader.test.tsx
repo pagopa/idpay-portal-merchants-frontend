@@ -10,7 +10,6 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-
 describe('TableHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,9 +33,7 @@ describe('TableHeader', () => {
     renderHeader(data);
 
     data.forEach(({ label }) => {
-      expect(
-        screen.getByText(`translated_${label}`)
-      ).toBeInTheDocument();
+      expect(screen.getByText(`translated_${label}`)).toBeInTheDocument();
     });
   });
 
@@ -48,13 +45,9 @@ describe('TableHeader', () => {
 
     renderHeader(data);
 
-    expect(
-      screen.getByText('translated_header.first')
-    ).toBeInTheDocument();
+    expect(screen.getByText('translated_header.first')).toBeInTheDocument();
 
-    const cells = within(screen.getByRole('row')).getAllByRole(
-      'columnheader'
-    );
+    const cells = within(screen.getByRole('row')).getAllByRole('columnheader');
 
     expect(cells[1]).toBeEmptyDOMElement();
   });
@@ -67,9 +60,7 @@ describe('TableHeader', () => {
 
     renderHeader(data);
 
-    const cells = within(screen.getByRole('row')).getAllByRole(
-      'columnheader'
-    );
+    const cells = within(screen.getByRole('row')).getAllByRole('columnheader');
 
     data.forEach(({ width }, index) => {
       expect(cells[index]).toHaveAttribute('width', width);

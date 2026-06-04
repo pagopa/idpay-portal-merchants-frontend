@@ -34,9 +34,7 @@ describe('initiativeDiscounts/helpers', () => {
       render(
         renderTransactionCreatedStatus(StatusEnum.AUTHORIZATION_REQUESTED) as React.ReactElement
       );
-      expect(
-        screen.getByText('enums.discountStatus.authorizationRequested')
-      ).toBeInTheDocument();
+      expect(screen.getByText('enums.discountStatus.authorizationRequested')).toBeInTheDocument();
     });
 
     it('should render CREATED status as identified', () => {

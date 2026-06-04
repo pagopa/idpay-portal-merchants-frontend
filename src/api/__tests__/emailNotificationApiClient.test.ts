@@ -56,8 +56,8 @@ describe('EmailNotificationApiClient', () => {
 
     mockUsersInstance.getInstitutionProductUserInfo.mockRejectedValue(error);
 
-    await expect(
-      EmailNotificationApi.getInstitutionProductUserInfo()
-    ).rejects.toThrow('Network error');
+    await expect(EmailNotificationApi.getInstitutionProductUserInfo()).rejects.toThrow(
+      'Network error'
+    );
   });
 });

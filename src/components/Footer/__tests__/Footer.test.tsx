@@ -17,7 +17,7 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -156,7 +156,7 @@ afterEach(() => {
 });
 
 describe('<Footer />', () => {
-    (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   test('should render the pre-login footer when user is not logged', () => {
     render(<Footer loggedUser={false} />);
 
@@ -167,9 +167,7 @@ describe('<Footer />', () => {
 
     const preLoginLinks = screen.getByTestId('pre-login-links-prop');
     expect(preLoginLinks).toHaveTextContent('footer.preLoginLinks.aboutUs.links.aboutUs');
-    expect(preLoginLinks).toHaveTextContent(
-      'footer.preLoginLinks.resources.links.privacyPolicy'
-    );
+    expect(preLoginLinks).toHaveTextContent('footer.preLoginLinks.resources.links.privacyPolicy');
   });
 
   test('should render the post-login footer when user is logged', () => {
@@ -327,8 +325,7 @@ describe('<Footer />', () => {
     render(<Footer loggedUser={false} />);
 
     const infoSecurityLink = mockedMuiFooterProps.preLoginLinks.resources.links.find(
-      (link: any) =>
-        link.label === 'footer.preLoginLinks.resources.links.informationSecurity'
+      (link: any) => link.label === 'footer.preLoginLinks.resources.links.informationSecurity'
     );
     infoSecurityLink?.onClick();
 
@@ -389,8 +386,7 @@ describe('<Footer />', () => {
     render(<Footer loggedUser={false} />);
 
     const protectionLink = mockedMuiFooterProps.preLoginLinks.resources.links.find(
-      (link: any) =>
-        link.label === 'footer.preLoginLinks.resources.links.protectionOfPersonalData'
+      (link: any) => link.label === 'footer.preLoginLinks.resources.links.protectionOfPersonalData'
     );
     protectionLink?.onClick();
 

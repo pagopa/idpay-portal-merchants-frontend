@@ -29,12 +29,7 @@ const SecuredRoutes = withLogin(
     useEffect(() => {
       setMatch(
         matchPath(location.pathname, {
-          path: [
-            ROUTES.PRIVACY_POLICY,
-            ROUTES.TOS,
-            ROUTES.ASSISTANCE,
-            ROUTES.AUTH,
-          ],
+          path: [ROUTES.PRIVACY_POLICY, ROUTES.TOS, ROUTES.ASSISTANCE, ROUTES.AUTH],
           exact: true,
           strict: false,
         })
@@ -68,11 +63,9 @@ const SecuredRoutes = withLogin(
             <InitiativeDiscounts />
           </Route> */}
 
-            {routesConfig.map(({key, route, render}) => (
+            {routesConfig.map(({ key, route, render }) => (
               <Route key={key} path={route} exact={true}>
-                <WithInitiativeGuard route={key}>
-                  {render()}
-                </WithInitiativeGuard>
+                <WithInitiativeGuard route={key}>{render()}</WithInitiativeGuard>
               </Route>
             ))}
 

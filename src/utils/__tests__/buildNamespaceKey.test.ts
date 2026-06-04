@@ -26,20 +26,14 @@ describe('buildNamespaceKey', () => {
   });
 
   it('removes special characters and handles numbers', () => {
-    expect(buildNamespaceKey('My Initiative! @2024', '2023-03-15')).toBe(
-      'myInitiative20242023'
-    );
+    expect(buildNamespaceKey('My Initiative! @2024', '2023-03-15')).toBe('myInitiative20242023');
   });
 
   it('handles multiple spaces correctly', () => {
-    expect(
-      buildNamespaceKey('My   New   Initiative', '2021-12-31')
-    ).toBe('myNewInitiative2021');
+    expect(buildNamespaceKey('My   New   Initiative', '2021-12-31')).toBe('myNewInitiative2021');
   });
 
   it('normalizes entire string before camelCase rebuild', () => {
-    expect(buildNamespaceKey('TESTName', '2022-07-01')).toBe(
-      'testname2022'
-    );
+    expect(buildNamespaceKey('TESTName', '2022-07-01')).toBe('testname2022');
   });
 });

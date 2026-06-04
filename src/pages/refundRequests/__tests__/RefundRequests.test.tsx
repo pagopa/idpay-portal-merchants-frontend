@@ -290,9 +290,7 @@ describe('RefundRequests', () => {
       expect(screen.getByTestId('data-table')).toBeInTheDocument();
     });
 
-    expect(
-      screen.queryByRole('button', { name: /actions.send/i })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /actions.send/i })).not.toBeInTheDocument();
   });
 
   it('should render table columns correctly', async () => {
@@ -359,9 +357,7 @@ describe('RefundRequests', () => {
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
 
-    await waitFor(() =>
-      expect(screen.getByText('actions.send')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText('actions.send')).toBeInTheDocument());
     fireEvent.click(screen.getByText('actions.send'));
 
     await waitFor(() => expect(screen.getByTestId('refund-modal')).toBeInTheDocument());
@@ -473,9 +469,7 @@ describe('RefundRequests', () => {
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
 
-    await waitFor(() =>
-      expect(screen.getByText('actions.send')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText('actions.send')).toBeInTheDocument());
     fireEvent.click(screen.getByText('actions.send'));
 
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));

@@ -24,9 +24,7 @@ export const useInitiativesList = (matchObj: match | null): void => {
 
     getMerchantInitiativeList()
       .then((list) => {
-        const filtered = list.filter(
-          (item) => item.status === PUBLISHED || item.status === CLOSED
-        );
+        const filtered = list.filter((item) => item.status === PUBLISHED || item.status === CLOSED);
         dispatch(setInitiativesList(filtered));
       })
       .catch(() => {

@@ -35,8 +35,7 @@ class EmailNotificationApiClient {
 const client = new EmailNotificationApiClient();
 
 export const EmailNotificationApi = {
-  getInstitutionProductUserInfo: () =>
-    client.getInstitutionProductUserInfo(),
+  getInstitutionProductUserInfo: () => client.getInstitutionProductUserInfo(),
 
   sendEmail: (data: EmailMessageDTO) => client.sendEmail(data),
 };

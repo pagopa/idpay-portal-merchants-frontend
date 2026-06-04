@@ -17,7 +17,8 @@ import {
   DownloadInvoiceResponseDTO,
   GetFranchisePointOfSaleData,
   PointOfSaleDTO,
-  TransactionResponse, PointOfSaleTransactionsProcessedListDTO,
+  TransactionResponse,
+  PointOfSaleTransactionsProcessedListDTO,
 } from './generated/merchants/data-contracts';
 
 import { MerchantInitiatives } from './generated/merchants/MerchantInitiatives';
@@ -70,16 +71,13 @@ class MerchantsApiClient {
   public async getMerchantInitiativeStatistics(
     initiativeId: string
   ): Promise<MerchantStatisticsDTO> {
-    const res =
-      await this.merchantStatistics.getMerchantInitiativeStatistics({
-        initiativeId,
-      });
+    const res = await this.merchantStatistics.getMerchantInitiativeStatistics({
+      initiativeId,
+    });
     return res.data;
   }
 
-  public async getMerchantDetail(
-    initiativeId: string
-  ): Promise<MerchantDetailDTO> {
+  public async getMerchantDetail(initiativeId: string): Promise<MerchantDetailDTO> {
     const res = await this.merchantDetail.getMerchantDetail({ initiativeId });
     return res.data;
   }
@@ -88,10 +86,7 @@ class MerchantsApiClient {
     initiativeId: string,
     body: MerchantIbanPatchDTO
   ): Promise<MerchantDetailDTO> {
-    const res = await this.merchantDetail.updateMerchantIban(
-      { initiativeId },
-      body
-    );
+    const res = await this.merchantDetail.updateMerchantIban({ initiativeId }, body);
     return res.data;
   }
 
@@ -116,11 +111,10 @@ class MerchantsApiClient {
     initiativeId: string,
     query?: Record<string, unknown>
   ): Promise<MerchantTransactionsListDTO> {
-    const res =
-      await this.merchantTransactions.getMerchantTransactionsProcessed({
-        initiativeId,
-        ...(query ?? {}),
-      });
+    const res = await this.merchantTransactions.getMerchantTransactionsProcessed({
+      initiativeId,
+      ...(query ?? {}),
+    });
     return res.data;
   }
 
@@ -128,14 +122,12 @@ class MerchantsApiClient {
     return Promise.resolve();
   }
 
-  public async createTransaction(
-    _body: {
-      amountCents: number;
-      idTrxAcquirer: string;
-      initiativeId: string;
-      mcc?: string;
-    }
-  ): Promise<TransactionResponse> {
+  public async createTransaction(_body: {
+    amountCents: number;
+    idTrxAcquirer: string;
+    initiativeId: string;
+    mcc?: string;
+  }): Promise<TransactionResponse> {
     return Promise.resolve({} as TransactionResponse);
   }
 
@@ -151,10 +143,7 @@ class MerchantsApiClient {
     file: File,
     docNumber?: string
   ): Promise<void> {
-    await this.transaction.reversalTransactionInvoiced(
-      { transactionId },
-      { file, docNumber }
-    );
+    await this.transaction.reversalTransactionInvoiced({ transactionId }, { file, docNumber });
   }
 
   public async updateInvoiceTransaction(
@@ -162,10 +151,7 @@ class MerchantsApiClient {
     file: File,
     docNumber?: string
   ): Promise<void> {
-    await this.transaction.updateInvoiceTransaction(
-      { transactionId },
-      { file, docNumber }
-    );
+    await this.transaction.updateInvoiceTransaction({ transactionId }, { file, docNumber });
   }
 
   public async downloadInvoiceFile(
@@ -213,12 +199,11 @@ class MerchantsApiClient {
     pointOfSaleId: string,
     query?: Record<string, unknown>
   ): Promise<PointOfSaleTransactionsProcessedListDTO> {
-    const res =
-      await this.pointOfSaleTransactions.getPointOfSaleTransactionsProcessed({
-        initiativeId,
-        pointOfSaleId,
-        ...(query ?? {}),
-      });
+    const res = await this.pointOfSaleTransactions.getPointOfSaleTransactionsProcessed({
+      initiativeId,
+      pointOfSaleId,
+      ...(query ?? {}),
+    });
     return res.data;
   }
 
@@ -244,9 +229,7 @@ class MerchantsApiClient {
     return res.data;
   }
 
-  public async getAllRewardBatches(
-    initiativeId: string
-  ): Promise<RewardBatchListDTO> {
+  public async getAllRewardBatches(initiativeId: string): Promise<RewardBatchListDTO> {
     return this.getRewardBatches(initiativeId);
   }
 
@@ -261,10 +244,7 @@ class MerchantsApiClient {
     return res.data;
   }
 
-  public async sendRewardBatch(
-    initiativeId: string,
-    batchId: string
-  ): Promise<void> {
+  public async sendRewardBatch(initiativeId: string, batchId: string): Promise<void> {
     await this.rewardBatches.sendRewardBatches({
       initiativeId,
       batchId,
@@ -275,11 +255,10 @@ class MerchantsApiClient {
     initiativeId: string,
     rewardBatchId: string
   ): Promise<DownloadRewardBatchResponseDTO> {
-    const res =
-      await this.rewardBatches.approveDownloadRewardBatch({
-        initiativeId,
-        rewardBatchId,
-      });
+    const res = await this.rewardBatches.approveDownloadRewardBatch({
+      initiativeId,
+      rewardBatchId,
+    });
     return res.data;
   }
 
@@ -309,15 +288,14 @@ class MerchantsApiClient {
     page?: number,
     size?: number
   ): Promise<ReportListDTO> {
-    const res =
-      await this.merchantReport.getMerchantTransactionsReports(
-        {
-          initiativeId,
-          page,
-          size,
-        },
-        { format: "json" }
-      );
+    const res = await this.merchantReport.getMerchantTransactionsReports(
+      {
+        initiativeId,
+        page,
+        size,
+      },
+      { format: 'json' }
+    );
 
     const data = res.data as ReportListDTO | null;
 
@@ -332,11 +310,9 @@ class MerchantsApiClient {
     initiativeId: string,
     body: ReportRequest
   ): Promise<ReportDTO> {
-    const res = await this.merchantReport.generateReport(
-      { initiativeId },
-      body,
-      { format: "json" }
-    );
+    const res = await this.merchantReport.generateReport({ initiativeId }, body, {
+      format: 'json',
+    });
     return res.data;
   }
 
@@ -344,14 +320,13 @@ class MerchantsApiClient {
     initiativeId: string,
     reportId: string
   ): Promise<DownloadReportResponseDTO> {
-    const res =
-      await this.merchantReport.downloadTransactionsReport(
-        {
-          initiativeId,
-          reportId,
-        },
-        { format: "json" }
-      );
+    const res = await this.merchantReport.downloadTransactionsReport(
+      {
+        initiativeId,
+        reportId,
+      },
+      { format: 'json' }
+    );
     return res.data;
   }
 

@@ -60,7 +60,7 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -85,7 +85,7 @@ jest.mock('../../../utils/constants', () => ({
 }));
 
 describe('AutocompleteComponent', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.useFakeTimers();
   });

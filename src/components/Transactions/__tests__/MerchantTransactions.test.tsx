@@ -20,7 +20,7 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
   intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(), 
+  initiativesReducer: jest.fn(),
 }));
 
 jest.mock('../../../redux/hooks', () => ({
@@ -147,9 +147,7 @@ describe('MerchantTransactions', () => {
     renderComponent();
 
     const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
-    const fiscalCodeInput = screen.getByLabelText(
-      'commons.labels.searchByFiscalCode'
-    );
+    const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
 
     await act(async () => {
       await userEvent.type(fiscalCodeInput, 'test');
@@ -166,9 +164,7 @@ describe('MerchantTransactions', () => {
 
     await act(async () => {
       const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
-      const fiscalCodeInput = screen.getByLabelText(
-        'commons.labels.searchByFiscalCode'
-      );
+      const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
@@ -262,9 +258,7 @@ describe('MerchantTransactions', () => {
   it('updates fiscal code input on user input', async () => {
     renderComponent();
 
-    const fiscalCodeInput = screen.getByLabelText(
-      'commons.labels.searchByFiscalCode'
-    );
+    const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
     await userEvent.type(fiscalCodeInput, 'TESTCF');
 
     expect(fiscalCodeInput).toHaveValue('TESTCF');
@@ -424,9 +418,7 @@ describe('MerchantTransactions', () => {
 
   it('renders form with all filter fields', () => {
     renderComponent();
-    expect(
-      screen.getByLabelText('commons.labels.searchByFiscalCode')
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText('commons.labels.searchByFiscalCode')).toBeInTheDocument();
     expect(screen.getByLabelText('commons.labels.searchByTrxCode')).toBeInTheDocument();
     expect(screen.getByLabelText('commons.labels.searchByGtin')).toBeInTheDocument();
   });
@@ -576,9 +568,7 @@ describe('MerchantTransactions', () => {
     );
 
     const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
-    const fiscalCodeInput = screen.getByLabelText(
-      'commons.labels.searchByFiscalCode'
-    );
+    const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
 
     await act(async () => {
       await userEvent.type(fiscalCodeInput, 'test');
@@ -598,9 +588,7 @@ describe('MerchantTransactions', () => {
 
     await act(async () => {
       const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
-      const fiscalCodeInput = screen.getByLabelText(
-        'commons.labels.searchByFiscalCode'
-      );
+      const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
@@ -834,9 +822,7 @@ describe('MerchantTransactions', () => {
   it('clears input fields on filter reset', async () => {
     renderComponent();
 
-    const fiscalCodeInput = screen.getByLabelText(
-      'commons.labels.searchByFiscalCode'
-    );
+    const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
     await userEvent.type(fiscalCodeInput, 'TEST');
     const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });
     await userEvent.click(resetButton);

@@ -126,9 +126,7 @@ export const getMerchantPointOfSales = async (
 export const getMerchantPointOfSalesWithTransactions = (
   rewardBatchId: string
 ): Promise<Array<FranchisePointOfSaleDTO>> =>
-  getMerchantsApi().getMerchantPointOfSalesWithTransactions(
-    rewardBatchId
-  );
+  getMerchantsApi().getMerchantPointOfSalesWithTransactions(rewardBatchId);
 
 export const getMerchantPointOfSalesById = (merchantId: string, pointOfSaleId: string) =>
   getMerchantsApi().getMerchantPointOfSalesById(merchantId, pointOfSaleId);
@@ -202,19 +200,15 @@ export const getMerchantReports = (
   initiativeId: string,
   page?: number,
   size?: number
-): Promise<ReportListDTO> =>
-  getMerchantsApi().getMerchantReports(initiativeId, page, size);
+): Promise<ReportListDTO> => getMerchantsApi().getMerchantReports(initiativeId, page, size);
 
 export const generateMerchantReport = (
   initiativeId: string,
   body: ReportRequest
-): Promise<ReportDTO> =>
-  getMerchantsApi().generateMerchantReport(initiativeId, body);
+): Promise<ReportDTO> => getMerchantsApi().generateMerchantReport(initiativeId, body);
 
-export const downloadMerchantReport = (
-  initiativeId: string,
-  reportId: string
-) => getMerchantsApi().downloadMerchantReport(initiativeId, reportId);
+export const downloadMerchantReport = (initiativeId: string, reportId: string) =>
+  getMerchantsApi().downloadMerchantReport(initiativeId, reportId);
 
 export const updateInvoiceTransaction = (
   transactionId: string,

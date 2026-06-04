@@ -69,7 +69,7 @@ jest.mock('../../Autocomplete/AutocompleteComponent', () => (props: any) => {
 });
 
 describe('PointsOfSaleForm full coverage', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{initiativeId: 'initiative-1'}])
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
 
   const defaultProps = {

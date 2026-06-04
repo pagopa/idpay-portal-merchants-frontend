@@ -10,7 +10,6 @@ import useScopedTranslation from '../../hooks/useScopedTranslation';
 import SidenavItem from './SidenavItem';
 import { SidenavAccordion } from './SidenavAccordion';
 
-
 export default function SideMenu() {
   const [expandedItem, setExpandedItem] = useState<string>('');
   const initiativesList = useAppSelector(intiativesListSelector);
@@ -29,13 +28,16 @@ export default function SideMenu() {
             level={0}
             data-testid="initiativeList-click-test"
           />
-          {initiativesList && initiativesList.map((item) => <SidenavAccordion
-              key={item?.initiativeId}
-              item={item}
-              isExpanded={expandedItem}
-              defaultExpanded={!(initiativesList.length - 1)}
-              setIsExpanded={setExpandedItem}
-            />)}
+          {initiativesList &&
+            initiativesList.map((item) => (
+              <SidenavAccordion
+                key={item?.initiativeId}
+                item={item}
+                isExpanded={expandedItem}
+                defaultExpanded={!(initiativesList.length - 1)}
+                setIsExpanded={setExpandedItem}
+              />
+            ))}
         </List>
       </Box>
     </Box>

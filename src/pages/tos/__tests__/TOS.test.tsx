@@ -19,7 +19,6 @@ jest.mock('../../../routes', () => ({
   TOS: '/mock-tos-route',
 }));
 
-
 describe('TOS component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,13 +36,10 @@ describe('TOS component', () => {
     render(<TOS />);
   };
 
-
   it('renders content when html is provided', async () => {
     await renderTOS('<p>Some TOS content</p>');
 
-    expect(
-      screen.getByText(/pages\.tosStatic\.title/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/pages\.tosStatic\.title/i)).toBeInTheDocument();
 
     expect(document.querySelector('.content')).toBeInTheDocument();
   });
@@ -51,8 +47,6 @@ describe('TOS component', () => {
   it('renders fallback Typography when html is empty', async () => {
     await renderTOS('');
 
-    expect(
-      screen.getByText('Some TOS content')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Some TOS content')).toBeInTheDocument();
   });
 });

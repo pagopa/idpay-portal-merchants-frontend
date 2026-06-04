@@ -66,8 +66,6 @@ describe('RolePermissionApiClient', () => {
 
     mockPermissionsInstance.userPermission.mockRejectedValue(error);
 
-    await expect(RolePermissionApi.userPermission()).rejects.toThrow(
-      'Network error'
-    );
+    await expect(RolePermissionApi.userPermission()).rejects.toThrow('Network error');
   });
 });

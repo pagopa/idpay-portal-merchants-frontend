@@ -1,8 +1,4 @@
-import axios, {
-  AxiosError,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from 'axios';
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { appStateActions } from '@pagopa/selfcare-common-frontend/lib/redux/slices/appStateSlice';
 import { store } from '../redux/store';
@@ -12,25 +8,23 @@ import { ApiError } from './ApiError';
 
 export const axiosInstance = axios.create();
 
-axiosInstance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = storageTokenOps.read();
+axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = storageTokenOps.read();
 
-    if (!token) {
-      return config;
-    }
-
-    const newConfig: InternalAxiosRequestConfig = {
-      ...config,
-      headers: {
-        ...(config.headers as any),
-        Authorization: `Bearer ${token}`,
-      },
-    } as InternalAxiosRequestConfig;
-
-    return newConfig;
+  if (!token) {
+    return config;
   }
-);
+
+  const newConfig: InternalAxiosRequestConfig = {
+    ...config,
+    headers: {
+      ...(config.headers as any),
+      Authorization: `Bearer ${token}`,
+    },
+  } as InternalAxiosRequestConfig;
+
+  return newConfig;
+});
 
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,

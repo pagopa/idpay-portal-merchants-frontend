@@ -36,8 +36,8 @@ describe('AutocompleteApiClient', () => {
 
     mockAutocompleteInstance.autocomplete.mockRejectedValue(error);
 
-    await expect(
-      AutocompleteApi.getAddresses({ QueryText: 'invalid' } as any)
-    ).rejects.toThrow('Bad request');
+    await expect(AutocompleteApi.getAddresses({ QueryText: 'invalid' } as any)).rejects.toThrow(
+      'Bad request'
+    );
   });
 });

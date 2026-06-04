@@ -102,5 +102,4 @@ describe('MerchantsApiClient', () => {
 
     await expect(api.deleteTransaction('trx1')).resolves.toBeUndefined();
   });
-
 });
