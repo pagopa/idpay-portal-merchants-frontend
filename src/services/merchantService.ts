@@ -93,10 +93,11 @@ export const authPaymentBarCode = (
   });
 
 export const updateMerchantPointOfSales = async (
+  initiativeId: string,
   merchantId: string,
   pointOfSales: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>
 ): Promise<void | { code?: string; message?: string }> => {
-  const result = await getMerchantsApi().updateMerchantPointOfSales(merchantId, pointOfSales);
+  const result = await getMerchantsApi().updateMerchantPointOfSales( initiativeId, merchantId, pointOfSales);
 
   return result as void | { code?: string; message?: string };
 };

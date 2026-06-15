@@ -129,7 +129,7 @@ const InitiativeStoresUpload: React.FC = () => {
         };
       });
 
-      const response = await updateMerchantPointOfSales(merchantId, normalizedSalesPoints);
+      const response = await updateMerchantPointOfSales( initiative_id, merchantId, normalizedSalesPoints);
       if (response) {
         if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
           setAlert({

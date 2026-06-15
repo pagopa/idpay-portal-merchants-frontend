@@ -288,7 +288,7 @@ const InitiativeStoreDetail = () => {
       return;
     }
 
-    const response = await updateMerchantPointOfSales(merchantId, obj);
+    const response = await updateMerchantPointOfSales(initiative_id, merchantId, obj);
     if (response) {
       if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
         setAlert({
