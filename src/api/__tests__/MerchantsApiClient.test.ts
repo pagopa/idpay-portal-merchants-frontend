@@ -62,7 +62,7 @@ jest.mock('../generated/merchants/RewardBatches', () => ({
 
 jest.mock('../generated/merchants/PointOfSales', () => ({
   PointOfSales: jest.fn().mockImplementation(function (this: any) {
-    this.putPointOfSales = jest.fn();
+    this.postPointOfSales = jest.fn();
     this.getPointOfSales = jest.fn();
     this.getPointOfSale = jest.fn();
     mockPointOfSalesInstance = this;
@@ -265,13 +265,13 @@ describe('MerchantsApiClient', () => {
   });
 
   it('updateMerchantPointOfSales calls pointOfSales method', async () => {
-    mockPointOfSalesInstance.putPointOfSales.mockResolvedValue({});
+    mockPointOfSalesInstance.postPointOfSales.mockResolvedValue({});
     const pointOfSales = [{ pointOfSaleId: 'pos1' }];
 
-    await api.updateMerchantPointOfSales('merch1', pointOfSales as any);
+    await api.updateMerchantPointOfSales('init1', 'merch1', pointOfSales as any);
 
-    expect(mockPointOfSalesInstance.putPointOfSales).toHaveBeenCalledWith(
-      { merchantId: 'merch1' },
+    expect(mockPointOfSalesInstance.postPointOfSales).toHaveBeenCalledWith(
+      { initiativeId: 'init1', merchantId: 'merch1' },
       pointOfSales
     );
   });
