@@ -1,10 +1,11 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import { theme } from '@pagopa/mui-italia/theme';
+import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
@@ -13,6 +14,8 @@ import { formatDate, formatIban } from '../../helpers';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
+import { MerchantDetailDTO } from '../../api/generated/merchants/data-contracts';
+import { EditModal } from '../components/EditModal';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
 
 const InitiativeOverview = () => {
@@ -20,11 +23,10 @@ const InitiativeOverview = () => {
   const { t } = useScopedTranslation();
   const { initiativeId } = useCurrentInitiativeId();
   const { setAlert } = useAlert();
-  // const [amount, setAmount] = useState<number | undefined>(undefined);
-  // const [refunded, setRefunded] = useState<number | undefined>(undefined);
-  const [iban, setIban] = useState<string | undefined>();
-  const [ibanHolder, setIbanHolder] = useState<string | undefined>();
-  const [onboardingDate, setOnboardingDate] = useState<string | undefined>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+// WIP
+  const [data, setData] = useState<MerchantDetailDTO & { onboardingDate: string } | undefined>();
 
   useEffect(() => {
     if (!initiativeId) {
@@ -40,11 +42,12 @@ const InitiativeOverview = () => {
           return;
         }
 
-        setIban(response?.iban);
-        setIbanHolder(response?.ibanHolder);
-        setOnboardingDate(
-          formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
-        );
+// WIP
+        setData({
+          ...response,
+          onboardingDate: formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
+        });
+
       } catch {
         if (!active) {
           return;
@@ -66,29 +69,6 @@ const InitiativeOverview = () => {
     };
   }, [initiativeId]);
 
-  // useEffect(() => {
-  //   getMerchantInitiativeStatistics(id)
-  //     .then((response) => {
-  //       setAmount(response?.amountCents);
-  //       setRefunded(response?.refundedCents);
-  //     })
-  //     .catch((error) => {
-  //       setAmount(undefined);
-  //       setRefunded(undefined);
-  //       addError({
-  //         id: 'GET_MERCHANT_STATISTICS',
-  //         blocking: false,
-  //         error,
-  //         techDescription: 'An error occurred getting merchant statistics',
-  //         displayableTitle: t('errors.genericTitle'),
-  //         displayableDescription: t('errors.genericDescription'),
-  //         toNotify: true,
-  //         component: 'Toast',
-  //         showCloseIcon: true,
-  //       });
-  //     });
-  // }, [id]);
-
   return (
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={3}>
@@ -103,84 +83,58 @@ const InitiativeOverview = () => {
           />
         </Grid>
         <Grid item xs={6}>
-          <Box display={'flex'}>
+          <Box>
             <InitiativeOverviewCard
               title={t('pages.initiativeOverview.information')}
               titleVariant={'h5'}
             >
-              <Grid container gridColumn={'span 12'}>
-                <Grid item xs={4}>
-                  <Typography variant="body1">
-                    {t('pages.initiativeOverview.onboardingDate')}
-                  </Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {onboardingDate?.trim() === '' || !onboardingDate
-                      ? MISSING_DATA_PLACEHOLDER
-                      : onboardingDate}
-                  </Typography>
-                </Grid>
-                {/* <Grid item xs={12}>
-                  <Box my={2}>
-                    <Typography variant="overline">
-                      {t('pages.initiativeOverview.refundsStatusTitle')}
+              <Box>
+                <Box display="flex" flexDirection="column" rowGap="2rem">
+                  <Box>
+                    <Typography variant="body1">
+                      {t('pages.initiativeOverview.onboardingDate')}
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
+                      {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
                     </Typography>
                   </Box>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body1">
-                    {t('shared.refund.totalAmount')}
-                  </Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {formattedCurrency(amount, MISSING_EURO_PLACEHOLDER, true)}
-                  </Typography>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body1">
-                    {t('shared.refund.totalRefunded')}
-                  </Typography>
-                </Grid> 
-                <Grid item xs={8}>
-                  <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {formattedCurrency(refunded, MISSING_EURO_PLACEHOLDER, true)}
-                  </Typography>
-                </Grid> */}
-
-                <Grid item xs={12}>
-                  <Box my={2}>
+                  <Box display="flex" justifyContent="space-between">
+                    <Box>
+                      <Typography variant="body1">
+                        {t('pages.initiativeOverview.operativeEmail')}
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
+                        {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Box>
+                    <IconButton sx={{ height: "fit-content" }} onClick={() => setIsModalOpen(true)}>
+                      <CreateOutlinedIcon />
+                    </IconButton>
+                  </Box>
+                  <Box>
                     <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
                   </Box>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {ibanHolder?.trim() === '' || !ibanHolder
-                      ? MISSING_DATA_PLACEHOLDER
-                      : ibanHolder}
-                  </Typography>
-                </Grid>
-
-                <Grid item xs={4}>
-                  <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography
-                    variant="body1"
-                    noWrap
-                    sx={{ fontWeight: theme.typography.fontWeightBold }}
-                  >
-                    {formatIban(iban)}
-                  </Typography>
-                </Grid>
+                  <Box>
+                    <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
+                      {data?.ibanHolder || MISSING_DATA_PLACEHOLDER}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
+                    <Typography
+                      variant="body1"
+                      noWrap
+                      sx={{ fontWeight: theme.typography.fontWeightBold }}
+                    >
+                      {formatIban(data?.iban)}
+                    </Typography>
+                  </Box>
+                </Box>
                 <Grid item xs={12}>
                   <InitiativeOverviewInfo />
                 </Grid>
-              </Grid>
+              </Box>
             </InitiativeOverviewCard>
           </Box>
         </Grid>
@@ -200,7 +154,6 @@ const InitiativeOverview = () => {
                       generatePath(ROUTES.STORES_UPLOAD, { initiative_id: initiativeId })
                     );
                   }}
-                  // onClick={() => { history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`); }}
                   size="large"
                   fullWidth={false}
                   data-testid="add-stores-button"
@@ -212,6 +165,29 @@ const InitiativeOverview = () => {
           </InitiativeOverviewCard>
         </Grid>
       </Grid>
+      <EditModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        title='pages.initiativeOverview.modal.title'
+        desciption='pages.initiativeOverview.modal.description'
+      >
+        <Box display="flex" flexDirection="column" rowGap="1.5rem">
+          <Typography variant='h6'>
+            {t('pages.initiativeOverview.modal.fieldInsert.label')}
+          </Typography>
+          <TextField
+            defaultValue={data?.operativeEmail}
+            label={t('pages.initiativeOverview.modal.fieldInsert.placeholder')}
+            variant='outlined' />
+          <Typography variant='h6'>
+            {t('pages.initiativeOverview.modal.fieldConfirm.label')}
+          </Typography>
+          <TextField
+            defaultValue={data?.operativeEmail}
+            label={t('pages.initiativeOverview.modal.fieldConfirm.placeholder')}
+            variant='outlined' />
+        </Box>
+      </EditModal>
     </Box>
   );
 };
