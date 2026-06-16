@@ -363,6 +363,13 @@ class MerchantsApiClient {
     );
     return res.data;
   }
+
+  public async updateMerchantData(
+    initiativeId: string,
+    merchantData: MerchantIbanPatchDTO
+  ): Promise<void> {
+    await this.merchantDetail.updateMerchantIban({ initiativeId }, merchantData);
+  }
 }
 
 let merchantsApiInstance: MerchantsApiClient | null = null;

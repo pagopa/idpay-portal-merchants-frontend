@@ -16,6 +16,7 @@ import {
   RewardBatchDTO,
   TransactionResponse,
   ReportDTO,
+  MerchantIbanPatchDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 
@@ -217,3 +218,8 @@ export const updateInvoiceTransaction = (
   docNumber?: string
 ): Promise<{ code: string; message: string } | void> =>
   getMerchantsApi().updateInvoiceTransaction(transactionId, file, docNumber);
+
+export const updateMerchantData = (
+  initaitiveId: string,
+  merchantData: MerchantIbanPatchDTO
+): Promise<void> => getMerchantsApi().updateMerchantData(initaitiveId, merchantData);

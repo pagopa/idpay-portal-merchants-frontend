@@ -122,7 +122,10 @@
         "fieldConfirm": {
           "label": "Conferma e-mail*",
           "placeholder": "Conferma e-mail"
-        }
+        },
+        "notValidEmail": "Inserisci un'e-mail valida",
+        "notEqualEmail": "Le e-mail devono corrispondere",
+        "requiredField": "Campo obbligatorio"
       }
     },
     "pointOfSales": {
