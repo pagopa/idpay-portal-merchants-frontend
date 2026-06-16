@@ -26,7 +26,7 @@ const InitiativeOverview = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState<MerchantDetailDTO & { onboardingDate: string } | undefined>();
   const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({});
-  const [dataError, setDataError] = useState<MerchantIbanPatchDTO & {draftEmail?: string}>({});
+  const [dataError, setDataError] = useState<MerchantIbanPatchDTO & { draftEmail?: string }>({});
   const [draftEmail, setDraftEmail] = useState<string | undefined>();
 
   useEffect(() => {
@@ -81,9 +81,9 @@ const InitiativeOverview = () => {
         });
       }
     } else {
-      const dataError = isEmpty || !isEqual ? {operativeEmail: isEmpty ? 'pages.initiativeOverview.modal.requiredField' : 'pages.initiativeOverview.modal.notEqualEmail'} : {};
-      const draftError = isDraftEmpty ? {draftEmail: 'pages.initiativeOverview.modal.requiredField'} : {};
-      setDataError(prev => ({ ...prev, ...dataError, ...draftError}));
+      const dataError = isEmpty || !isEqual ? { operativeEmail: isEmpty ? 'pages.initiativeOverview.modal.requiredField' : 'pages.initiativeOverview.modal.notEqualEmail' } : {};
+      const draftError = isDraftEmpty ? { draftEmail: 'pages.initiativeOverview.modal.requiredField' } : {};
+      setDataError(prev => ({ ...prev, ...dataError, ...draftError }));
     }
   };
 
@@ -203,12 +203,18 @@ const InitiativeOverview = () => {
             variant='outlined'
             error={!!dataError?.draftEmail}
             helperText={dataError?.draftEmail && t(dataError?.draftEmail)}
+            onBlur={() => {
+              if (!draftEmail) {
+                const { draftEmail, ...rest } = dataError;
+                setDataError(rest);
+              }
+            }}
             onChange={(e) => {
               setDraftEmail(e.target.value);
-              if(!isValidEmail(e.target.value)) {
-                setDataError( prev => ({ ...prev, draftEmail: 'pages.initiativeOverview.modal.notValidEmail'}));
+              if (!isValidEmail(e.target.value)) {
+                setDataError(prev => ({ ...prev, draftEmail: 'pages.initiativeOverview.modal.notValidEmail' }));
               } else {
-                const {draftEmail, ...rest} = dataError;
+                const { draftEmail, ...rest } = dataError;
                 setDataError(rest);
               }
             }}
@@ -220,6 +226,12 @@ const InitiativeOverview = () => {
             defaultValue={data?.operativeEmail}
             label={t('pages.initiativeOverview.modal.fieldConfirm.placeholder')}
             variant='outlined'
+            onBlur={() => {
+              if (!merchantData?.operativeEmail) {
+                const { operativeEmail, ...rest } = dataError;
+                setDataError(rest);
+              }
+            }}
             onChange={(e) => {
               setMerchantData(prev => ({ ...prev, operativeEmail: e.target.value }));
             }}
