@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, TextField, Typography } from '@mui/material';
+import { Box, Button, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
@@ -10,44 +10,37 @@ import useScopedTranslation from '../../hooks/useScopedTranslation';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
 import { getMerchantDetail, updateMerchantData } from '../../services/merchantService';
-import { formatDate, formatIban, isValidEmail } from '../../helpers';
+import { formatDate, formatIban } from '../../helpers';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from '../../api/generated/merchants/data-contracts';
-import { EditModal } from '../components/EditModal';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
+import { EditEmailModal } from './EditEmailModal';
+import { EditIbanModal } from './EditIbanModal';
 
 const InitiativeOverview = () => {
   const history = useHistory();
   const { t } = useScopedTranslation();
   const { initiativeId } = useCurrentInitiativeId();
   const { setAlert } = useAlert();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [isIbanModalOpen, setIsIbanModalOpen] = useState(false);
   const [data, setData] = useState<MerchantDetailDTO & { onboardingDate: string } | undefined>();
   const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({});
   const [dataError, setDataError] = useState<MerchantIbanPatchDTO & { draftEmail?: string }>({});
-  const [draftEmail, setDraftEmail] = useState<string | undefined>();
 
-  useEffect(() => {
+    const loadDetails = async () => {
     if (!initiativeId) {
       return;
     }
-    let active = true;
-    const load = async () => {
       try {
         const response = await getMerchantDetail(initiativeId);
-        if (!active) {
-          return;
-        }
         setData({
           ...response,
           onboardingDate: formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
         });
       } catch {
-        if (!active) {
-          return;
-        }
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),
@@ -56,34 +49,28 @@ const InitiativeOverview = () => {
         });
       }
     };
-    void load();
-    return () => {
-      active = false;
-    };
+
+  useEffect(() => {
+    void loadDetails();
   }, [initiativeId]);
 
-  const onEmailUpdate = async (merchantData: MerchantIbanPatchDTO) => {
-    const isEqual = merchantData?.operativeEmail === draftEmail;
-    const isEmpty = !merchantData?.operativeEmail;
-    const isDraftEmpty = !draftEmail;
-    if (isEqual && !isEmpty && !isDraftEmpty) {
-      const { operativeEmail, draftEmail, ...rest } = dataError;
-      setDataError(rest);
-      setIsModalOpen(false);
-      try {
-        await updateMerchantData(initiativeId || '', merchantData);
-      } catch {
-        setAlert({
-          title: t('errors.genericTitle'),
-          text: t('errors.genericDescription'),
-          isOpen: true,
-          severity: 'error',
-        });
-      }
-    } else {
-      const dataError = isEmpty || !isEqual ? { operativeEmail: isEmpty ? 'pages.initiativeOverview.modal.requiredField' : 'pages.initiativeOverview.modal.notEqualEmail' } : {};
-      const draftError = isDraftEmpty ? { draftEmail: 'pages.initiativeOverview.modal.requiredField' } : {};
-      setDataError(prev => ({ ...prev, ...dataError, ...draftError }));
+  const onUpdate = async () => {
+    setIsEmailModalOpen(false);
+    setIsIbanModalOpen(false);
+    try {
+      await updateMerchantData(initiativeId || '', merchantData).then(() => loadDetails());
+      setAlert({
+        text: t('pages.initiativeOverview.successAlert'),
+        isOpen: true,
+        severity: 'success',
+      });
+    } catch {
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
     }
   };
 
@@ -125,12 +112,15 @@ const InitiativeOverview = () => {
                         {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
                       </Typography>
                     </Box>
-                    <IconButton sx={{ height: "fit-content" }} onClick={() => setIsModalOpen(true)}>
+                    <IconButton sx={{ height: "fit-content" }} onClick={() => setIsEmailModalOpen(true)}>
                       <CreateOutlinedIcon />
                     </IconButton>
                   </Box>
-                  <Box>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
+                    <IconButton sx={{ height: "fit-content" }} onClick={() => setIsIbanModalOpen(true)}>
+                      <CreateOutlinedIcon />
+                    </IconButton>
                   </Box>
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
@@ -183,63 +173,26 @@ const InitiativeOverview = () => {
           </InitiativeOverviewCard>
         </Grid>
       </Grid>
-      <EditModal
-        isOpen={isModalOpen}
-        setIsOpen={() => {
-          setIsModalOpen(false);
-          setDataError({});
-        }}
-        onSave={() => onEmailUpdate(merchantData)}
-        title='pages.initiativeOverview.modal.title'
-        desciption='pages.initiativeOverview.modal.description'
-      >
-        <Box display="flex" flexDirection="column" rowGap="1.5rem">
-          <Typography variant='h6'>
-            {t('pages.initiativeOverview.modal.fieldInsert.label')}
-          </Typography>
-          <TextField
-            defaultValue={data?.operativeEmail}
-            label={t('pages.initiativeOverview.modal.fieldInsert.placeholder')}
-            variant='outlined'
-            error={!!dataError?.draftEmail}
-            helperText={dataError?.draftEmail && t(dataError?.draftEmail)}
-            onBlur={() => {
-              if (!draftEmail) {
-                const { draftEmail, ...rest } = dataError;
-                setDataError(rest);
-              }
-            }}
-            onChange={(e) => {
-              setDraftEmail(e.target.value);
-              if (!isValidEmail(e.target.value)) {
-                setDataError(prev => ({ ...prev, draftEmail: 'pages.initiativeOverview.modal.notValidEmail' }));
-              } else {
-                const { draftEmail, ...rest } = dataError;
-                setDataError(rest);
-              }
-            }}
-          />
-          <Typography variant='h6'>
-            {t('pages.initiativeOverview.modal.fieldConfirm.label')}
-          </Typography>
-          <TextField
-            defaultValue={data?.operativeEmail}
-            label={t('pages.initiativeOverview.modal.fieldConfirm.placeholder')}
-            variant='outlined'
-            onBlur={() => {
-              if (!merchantData?.operativeEmail) {
-                const { operativeEmail, ...rest } = dataError;
-                setDataError(rest);
-              }
-            }}
-            onChange={(e) => {
-              setMerchantData(prev => ({ ...prev, operativeEmail: e.target.value }));
-            }}
-            error={!!dataError?.operativeEmail}
-            helperText={dataError?.operativeEmail && t(dataError?.operativeEmail)}
-          />
-        </Box>
-      </EditModal>
+      <EditEmailModal
+        isOpen={isEmailModalOpen}
+        setIsOpen={setIsEmailModalOpen}
+        data={data}
+        onUpdate={onUpdate}
+        dataError={dataError}
+        setDataError={setDataError}
+        merchantData={merchantData}
+        setMerchantData={setMerchantData}
+      />
+      <EditIbanModal
+        isOpen={isIbanModalOpen}
+        setIsOpen={setIsIbanModalOpen}
+        data={data}
+        onUpdate={onUpdate}
+        dataError={dataError}
+        setDataError={setDataError}
+        merchantData={merchantData}
+        setMerchantData={setMerchantData}
+      />
     </Box>
   );
 };

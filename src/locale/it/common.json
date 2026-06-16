@@ -112,7 +112,8 @@
       "totalAmount": "Totale erogato",
       "totalRefunded": "Totale rimborsato",
       "onboardingDate": "Data di adesione",
-      "modal": {
+      "successAlert": "Modifica avvenuta con successo",
+      "emailModal": {
         "title": "E-mail operativa",
         "description": "L’e-mail indicata sarà utilizzata per la comunicazione con i punti vendita.",
         "fieldInsert": {
@@ -125,6 +126,17 @@
         },
         "notValidEmail": "Inserisci un'e-mail valida",
         "notEqualEmail": "Le e-mail devono corrispondere",
+        "requiredField": "Campo obbligatorio"
+      },
+      "ibanModal": {
+        "title": "Inserisci IBAN",
+        "description": "L’IBAN indicato sarà utilizzato per l’accredito degli importi maturati tramite l’uso del buono. Assicurati che i dati siano corretti e intestati all’azienda.",
+        "fieldHolder": {
+          "placeholder": "Inserisci intestatario *"
+        },
+        "fieldIban": {
+          "placeholder": "Inserisci IBAN *"
+        },
         "requiredField": "Campo obbligatorio"
       }
     },

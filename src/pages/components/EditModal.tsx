@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import ModalComponent from "../../components/modal/ModalComponent";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
 
-type Props = {
+export type EditModalProps = {
     isOpen: boolean
     setIsOpen: (value: boolean) => void
     onSave?: () => void
@@ -13,7 +13,7 @@ type Props = {
     children?: ReactNode
 }
 
-export const EditModal = ({ isOpen, setIsOpen, onSave, title, desciption, children }: Props) => {
+export const EditModal = ({ isOpen, setIsOpen, onSave, title, desciption, children }: EditModalProps) => {
     const { t } = useScopedTranslation();
     return <ModalComponent open={isOpen} onClose={() => setIsOpen(false)}>
         <Box display="flex" flexDirection="column" rowGap="2rem">
