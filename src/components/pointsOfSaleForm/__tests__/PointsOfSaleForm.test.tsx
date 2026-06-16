@@ -118,28 +118,67 @@ const isAllowedTestUrl = (value: string): boolean => {
   }
 };
 
+const createDefaultProps = () => ({
+  onFormChange: jest.fn(),
+  onValidationChange: jest.fn(),
+  pointsOfSaleLoaded: false,
+  submitAttempt: 0,
+});
+
+const mockAutocompleteHook = (mockedHook: jest.Mock, overrides = {}) => {
+  const search = jest.fn();
+  mockedHook.mockReturnValue({
+    options: [],
+    loading: false,
+    error: null,
+    search,
+    ...overrides,
+  });
+  return search;
+};
+
+const setBooleanValidationMocks = (email = true, url = true) => {
+  (isValidEmail as jest.Mock).mockReturnValue(email);
+  (isValidUrl as jest.Mock).mockReturnValue(url);
+};
+
+const COMPLETE_ADDRESS_EVENT = {
+  target: {
+    Address: {
+      Street: 'Via Roma',
+      AddressNumber: '12',
+      Locality: 'Roma',
+      PostalCode: '00100',
+      Region: { Name: 'Lazio' },
+      SubRegion: { Code: 'RM' },
+    },
+  },
+};
+
+const INCOMPLETE_ADDRESS_EVENT = {
+  target: { Address: { Street: 'Via Roma' } },
+};
+
+
+const typeGoogleBusinessUrlAndVerify = (value: string) => {
+  const geoInput = screen.getByLabelText('Scheda Google MYBusiness');
+  fireEvent.change(geoInput, { target: { value } });
+  const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+  fireEvent.click(screen.getByText('Verifica URL'));
+  return openSpy;
+};
+
 describe('PointsOfSaleForm full coverage', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
-
-  const defaultProps = {
-    onFormChange: jest.fn(),
-    onValidationChange: jest.fn(),
-    pointsOfSaleLoaded: false,
-    submitAttempt: 0,
-  };
+  let defaultProps: ReturnType<typeof createDefaultProps>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUsePlacesAutocomplete.mockReturnValue({
-      options: [],
-      loading: false,
-      error: null,
-      search: jest.fn(),
-    });
+    defaultProps = createDefaultProps();
+    mockAutocompleteHook(mockedUsePlacesAutocomplete);
     (generateUniqueId as jest.Mock).mockReturnValue('id-1');
-    (isValidEmail as jest.Mock).mockReturnValue(true);
-    (isValidUrl as jest.Mock).mockReturnValue(true);
+    setBooleanValidationMocks();
   });
 
   it('should render initial form', () => {
@@ -417,12 +456,7 @@ describe('PointsOfSaleForm full coverage', () => {
   it('should handle Verifica URL button', () => {
     (isValidUrl as jest.Mock).mockReturnValue(true);
     render(<PointsOfSaleForm {...defaultProps} />);
-    const geoInput = screen.getByLabelText('Scheda Google MYBusiness');
-    fireEvent.change(geoInput, { target: { value: 'example.com' } });
-
-    const verifyButton = screen.getByText('Verifica URL');
-    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-    fireEvent.click(verifyButton);
+    const openSpy = typeGoogleBusinessUrlAndVerify('example.com');
     expect(openSpy).toHaveBeenCalled();
     openSpy.mockRestore();
   });
@@ -430,24 +464,14 @@ describe('PointsOfSaleForm full coverage', () => {
 
 describe('PointsOfSaleForm additional coverage', () => {
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
-  const defaultProps = {
-    onFormChange: jest.fn(),
-    onValidationChange: jest.fn(),
-    pointsOfSaleLoaded: false,
-    submitAttempt: 0,
-  };
+  let defaultProps: ReturnType<typeof createDefaultProps>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUsePlacesAutocomplete.mockReturnValue({
-      options: [],
-      loading: false,
-      error: null,
-      search: jest.fn(),
-    });
+    defaultProps = createDefaultProps();
+    mockAutocompleteHook(mockedUsePlacesAutocomplete);
     (generateUniqueId as jest.Mock).mockReturnValue('id-1');
-    (isValidEmail as jest.Mock).mockReturnValue(true);
-    (isValidUrl as jest.Mock).mockReturnValue(true);
+    setBooleanValidationMocks();
   });
 
   it('should trigger onBlur validation for channelPhone and channelEmail', () => {
@@ -465,11 +489,7 @@ describe('PointsOfSaleForm additional coverage', () => {
   it('should trigger Verifica URL click with valid and invalid URL', () => {
     (isValidUrl as jest.Mock).mockReturnValue(true);
     render(<PointsOfSaleForm {...defaultProps} />);
-    const geoInput = screen.getByLabelText('Scheda Google MYBusiness');
-    fireEvent.change(geoInput, { target: { value: 'example.com' } });
-    const verifyButton = screen.getByText('Verifica URL');
-    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-    fireEvent.click(verifyButton);
+    const openSpy = typeGoogleBusinessUrlAndVerify('example.com');
     expect(openSpy).toHaveBeenCalled();
     openSpy.mockRestore();
   });
@@ -490,74 +510,33 @@ describe('PointsOfSaleForm additional coverage', () => {
   });
 
   it.skip('should handle complete and incomplete autocomplete addresses', async () => {
-    const searchMock = jest.fn();
-    mockedUsePlacesAutocomplete.mockReturnValue({
-      options: [],
-      loading: false,
-      error: null,
-      search: searchMock,
-    });
+    mockAutocompleteHook(mockedUsePlacesAutocomplete);
 
     render(<PointsOfSaleForm {...defaultProps} />);
     const autocompleteInput = screen.getByLabelText('Indirizzo completo');
 
-    fireEvent.change(autocompleteInput, { target: { Address: { Street: 'Via Roma' } } });
-
-    fireEvent.change(autocompleteInput, {
-      target: {
-        Address: {
-          Street: 'Via Roma',
-          AddressNumber: '12',
-          Locality: 'Roma',
-          PostalCode: '00100',
-          Region: { Name: 'Lazio' },
-          SubRegion: { Code: 'RM' },
-        },
-      },
-    });
+    fireEvent.change(autocompleteInput, INCOMPLETE_ADDRESS_EVENT);
+    fireEvent.change(autocompleteInput, COMPLETE_ADDRESS_EVENT);
   });
 });
 describe('PointsOfSaleForm validation tests', () => {
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
+  let defaultProps: ReturnType<typeof createDefaultProps>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUsePlacesAutocomplete.mockReturnValue({
-      options: [],
-      loading: false,
-      error: null,
-      search: jest.fn(),
-    });
+    defaultProps = createDefaultProps();
+    mockAutocompleteHook(mockedUsePlacesAutocomplete);
     (generateUniqueId as jest.Mock).mockReturnValue('id-1');
-    (isValidEmail as jest.Mock).mockReturnValue(true);
-    (isValidUrl as jest.Mock).mockReturnValue(true);
+    setBooleanValidationMocks();
   });
-
-  const defaultProps = {
-    onFormChange: jest.fn(),
-    onValidationChange: jest.fn(),
-    pointsOfSaleLoaded: false,
-    submitAttempt: 0,
-  };
 
   it.skip('handles complete and incomplete addresses', () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const autocompleteInput = screen.getByLabelText('Indirizzo completo');
 
-    fireEvent.change(autocompleteInput, { target: { Address: { Street: 'Via Roma' } } });
-
-    fireEvent.change(autocompleteInput, {
-      target: {
-        Address: {
-          Street: 'Via Roma',
-          AddressNumber: '12',
-          Locality: 'Roma',
-          PostalCode: '00100',
-          Region: { Name: 'Lazio' },
-          SubRegion: { Code: 'RM' },
-        },
-      },
-    });
+    fireEvent.change(autocompleteInput, INCOMPLETE_ADDRESS_EVENT);
+    fireEvent.change(autocompleteInput, COMPLETE_ADDRESS_EVENT);
   });
 
   it('validates contactEmail and confirmContactEmail', () => {
@@ -592,9 +571,7 @@ describe('PointsOfSaleForm validation tests', () => {
     fireEvent.blur(emailInput);
     fireEvent.change(websiteInput, { target: { value: 'https://site.com' } });
 
-    const verifyButton = screen.getByText('Verifica URL');
-    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-    fireEvent.click(verifyButton);
+    const openSpy = typeGoogleBusinessUrlAndVerify('example.com');
     expect(openSpy).toHaveBeenCalled();
     openSpy.mockRestore();
   });
@@ -616,6 +593,16 @@ describe('PointsOfSaleForm validation tests', () => {
 describe('PointsOfSaleForm integration tests', () => {
   let onFormChangeMock: jest.Mock;
   let onValidationChangeMock: jest.Mock;
+  const renderIntegrationForm = (props = {}) =>
+    render(
+      <PointsOfSaleForm
+        onFormChange={onFormChangeMock}
+        onValidationChange={onValidationChangeMock}
+        pointsOfSaleLoaded={false}
+        submitAttempt={0}
+        {...props}
+      />
+    );
 
   beforeEach(() => {
     onFormChangeMock = jest.fn();
@@ -640,14 +627,7 @@ describe('PointsOfSaleForm integration tests', () => {
   });
 
   it('should call onFormChange and onValidationChange on mount and after changes', async () => {
-    render(
-      <PointsOfSaleForm
-        onFormChange={onFormChangeMock}
-        onValidationChange={onValidationChangeMock}
-        pointsOfSaleLoaded={false}
-        submitAttempt={0}
-      />
-    );
+    renderIntegrationForm();
 
     expect(onFormChangeMock).toHaveBeenCalledTimes(1);
     expect(onValidationChangeMock).toHaveBeenCalledTimes(1);
@@ -661,14 +641,7 @@ describe('PointsOfSaleForm integration tests', () => {
   });
 
   it('should reset salesPoints when pointsOfSaleLoaded becomes true', async () => {
-    const { rerender } = render(
-      <PointsOfSaleForm
-        onFormChange={onFormChangeMock}
-        onValidationChange={onValidationChangeMock}
-        pointsOfSaleLoaded={false}
-        submitAttempt={0}
-      />
-    );
+    const { rerender } = renderIntegrationForm();
 
     rerender(
       <PointsOfSaleForm
@@ -736,14 +709,7 @@ describe('PointsOfSaleForm integration tests', () => {
   });
 
   it('should handle URL verification click', async () => {
-    render(
-      <PointsOfSaleForm
-        onFormChange={onFormChangeMock}
-        onValidationChange={onValidationChangeMock}
-        pointsOfSaleLoaded={false}
-        submitAttempt={0}
-      />
-    );
+    renderIntegrationForm();
 
     const geolinkInput = screen.getByLabelText('Scheda Google MYBusiness');
     fireEvent.change(geolinkInput, { target: { value: 'http://example.com' } });
@@ -755,14 +721,7 @@ describe('PointsOfSaleForm integration tests', () => {
   });
 
   it('should trigger validation when submitAttempt changes', async () => {
-    const { rerender } = render(
-      <PointsOfSaleForm
-        onFormChange={onFormChangeMock}
-        onValidationChange={onValidationChangeMock}
-        pointsOfSaleLoaded={false}
-        submitAttempt={0}
-      />
-    );
+    const { rerender } = renderIntegrationForm();
 
     expect(onValidationChangeMock).toHaveBeenCalled();
     onValidationChangeMock.mockClear();
@@ -823,22 +782,12 @@ describe('PointsOfSaleForm integration tests', () => {
 
 describe('PointsOfSaleForm targeted new-code coverage', () => {
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
-
-  const defaultProps = {
-    onFormChange: jest.fn(),
-    onValidationChange: jest.fn(),
-    pointsOfSaleLoaded: false,
-    submitAttempt: 0,
-  };
+  let defaultProps: ReturnType<typeof createDefaultProps>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUsePlacesAutocomplete.mockReturnValue({
-      options: [],
-      loading: false,
-      error: null,
-      search: jest.fn(),
-    });
+    defaultProps = createDefaultProps();
+    mockAutocompleteHook(mockedUsePlacesAutocomplete);
     (generateUniqueId as jest.Mock).mockReturnValue('id-1');
     (isValidEmail as jest.Mock).mockImplementation((value: string) => value.includes('@'));
     (isValidUrl as jest.Mock).mockImplementation((value: string) => value.startsWith('http'));
@@ -954,22 +903,12 @@ describe('PointsOfSaleForm targeted new-code coverage', () => {
 
 describe('PointsOfSaleForm near-100 coverage suite', () => {
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
-
-  const defaultProps = {
-    onFormChange: jest.fn(),
-    onValidationChange: jest.fn(),
-    pointsOfSaleLoaded: false,
-    submitAttempt: 0,
-  };
+  let defaultProps: ReturnType<typeof createDefaultProps>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUsePlacesAutocomplete.mockReturnValue({
-      options: [],
-      loading: false,
-      error: null,
-      search: jest.fn(),
-    });
+    defaultProps = createDefaultProps();
+    mockAutocompleteHook(mockedUsePlacesAutocomplete);
     (generateUniqueId as jest.Mock)
       .mockReturnValueOnce('id-1')
       .mockReturnValueOnce('id-2')
