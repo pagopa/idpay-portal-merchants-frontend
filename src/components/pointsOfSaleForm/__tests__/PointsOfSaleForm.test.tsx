@@ -168,6 +168,16 @@ const typeGoogleBusinessUrlAndVerify = (value: string) => {
   return openSpy;
 };
 
+const changeFieldByLabel = (label: string, name: string, value: string) => {
+  fireEvent.change(screen.getByLabelText(label), {
+    target: { name, value },
+  });
+};
+
+const changeMultipleFields = (fields: Array<[label: string, name: string, value: string]>) => {
+  fields.forEach(([label, name, value]) => changeFieldByLabel(label, name, value));
+};
+
 describe('PointsOfSaleForm full coverage', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
@@ -837,25 +847,14 @@ describe('PointsOfSaleForm targeted new-code coverage', () => {
     render(<PointsOfSaleForm {...defaultProps} />);
 
     fireEvent.click(screen.getByLabelText('Online'));
-    fireEvent.change(screen.getByLabelText('Indirizzo completo'), {
-      target: { name: 'website', value: 'https://valid.example' },
-    });
-
-    fireEvent.change(screen.getByLabelText('Nome insegna'), {
-      target: { name: 'franchiseName', value: 'Shop 1' },
-    });
-    fireEvent.change(screen.getByLabelText('Nome'), {
-      target: { name: 'contactName', value: 'Mario' },
-    });
-    fireEvent.change(screen.getByLabelText('Cognome'), {
-      target: { name: 'contactSurname', value: 'Rossi' },
-    });
-    fireEvent.change(screen.getByLabelText('E-mail'), {
-      target: { name: 'contactEmail', value: 'mario.rossi@test.it' },
-    });
-    fireEvent.change(screen.getByLabelText('Conferma e-mail'), {
-      target: { name: 'confirmContactEmail', value: 'mario.rossi@test.it' },
-    });
+    changeMultipleFields([
+      ['Indirizzo completo', 'website', 'https://valid.example'],
+      ['Nome insegna', 'franchiseName', 'Shop 1'],
+      ['Nome', 'contactName', 'Mario'],
+      ['Cognome', 'contactSurname', 'Rossi'],
+      ['E-mail', 'contactEmail', 'mario.rossi@test.it'],
+      ['Conferma e-mail', 'confirmContactEmail', 'mario.rossi@test.it'],
+    ]);
 
     fireEvent.click(screen.getByText('Aggiungi un altro punto vendita'));
 
@@ -931,19 +930,19 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
     const contactEmailInput = screen.getByLabelText('E-mail');
     const confirmEmailInput = screen.getByLabelText('Conferma e-mail');
 
-    fireEvent.change(franchiseInput, { target: { name: 'franchiseName', value: '' } });
-    fireEvent.change(franchiseInput, { target: { name: 'franchiseName', value: 'Shop A' } });
-
-    fireEvent.change(nameInput, { target: { name: 'contactName', value: '' } });
-    fireEvent.change(nameInput, { target: { name: 'contactName', value: 'Mario' } });
-
-    fireEvent.change(surnameInput, { target: { name: 'contactSurname', value: '' } });
-    fireEvent.change(surnameInput, { target: { name: 'contactSurname', value: 'Rossi' } });
+    changeMultipleFields([
+      ['Nome insegna', 'franchiseName', ''],
+      ['Nome insegna', 'franchiseName', 'Shop A'],
+      ['Nome', 'contactName', ''],
+      ['Nome', 'contactName', 'Mario'],
+      ['Cognome', 'contactSurname', ''],
+      ['Cognome', 'contactSurname', 'Rossi'],
+    ]);
 
     fireEvent.change(confirmEmailInput, {
       target: { name: 'confirmContactEmail', value: 'bad-confirm' },
     });
-    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'mail@test.it' } });
+    changeFieldByLabel('E-mail', 'contactEmail', 'mail@test.it');
     fireEvent.change(confirmEmailInput, {
       target: { name: 'confirmContactEmail', value: 'other@test.it' },
     });
@@ -954,9 +953,11 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
       target: { name: 'confirmContactEmail', value: '' },
     });
 
-    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'bad-email' } });
-    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'a@test.it' } });
-    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: '' } });
+    changeMultipleFields([
+      ['E-mail', 'contactEmail', 'bad-email'],
+      ['E-mail', 'contactEmail', 'a@test.it'],
+      ['E-mail', 'contactEmail', ''],
+    ]);
 
     fireEvent.change(franchiseInput, { target: { name: 'city', value: '' } });
     fireEvent.change(franchiseInput, { target: { name: 'city', value: 'Roma' } });
