@@ -108,6 +108,16 @@ jest.mock('../../Autocomplete/AutocompleteComponent', () => (props: any) => {
   );
 });
 
+const isAllowedTestUrl = (value: string): boolean => {
+  try {
+    const normalized = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    const hostname = new URL(normalized).hostname.toLowerCase();
+    return ['valid.example', 'maps.google.com', 'example.com'].includes(hostname);
+  } catch {
+    return false;
+  }
+};
+
 describe('PointsOfSaleForm full coverage', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
@@ -837,9 +847,7 @@ describe('PointsOfSaleForm targeted new-code coverage', () => {
   it('covers ONLINE/PHYSICAL validation branches and contact email switch logic', async () => {
     render(<PointsOfSaleForm {...defaultProps} />);
 
-    (isValidUrl as jest.Mock).mockImplementation(
-      (value: string) => value.includes('valid.example') || value.includes('maps.google.com')
-    );
+    (isValidUrl as jest.Mock).mockImplementation((value: string) => isAllowedTestUrl(value));
 
     const onlineRadio = screen.getByLabelText('Online');
     fireEvent.click(onlineRadio);
@@ -967,12 +975,7 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
       .mockReturnValueOnce('id-2')
       .mockReturnValue('id-3');
     (isValidEmail as jest.Mock).mockImplementation((value: string) => value.includes('@'));
-    (isValidUrl as jest.Mock).mockImplementation(
-      (value: string) =>
-        value.includes('valid.example') ||
-        value.includes('maps.google.com') ||
-        value.includes('example.com')
-    );
+    (isValidUrl as jest.Mock).mockImplementation((value: string) => isAllowedTestUrl(value));
   });
 
   it('covers switch cases for required fields and optional branch paths', async () => {
