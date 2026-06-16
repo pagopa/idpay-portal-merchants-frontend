@@ -167,7 +167,6 @@ class MerchantsApiClient {
 
   public async updateMerchantPointOfSales(
     initiativeId: string,
-    initiativeId: string,
     merchantId: string,
     pointOfSales: Array<PointOfSaleDTO>
   ): Promise<void> {

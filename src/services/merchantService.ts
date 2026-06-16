@@ -94,7 +94,6 @@ export const authPaymentBarCode = (
 
 export const updateMerchantPointOfSales = async (
   initiativeId: string,
-  initiativeId: string,
   merchantId: string,
   pointOfSales: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>
 ): Promise<void | { code?: string; message?: string }> => {
