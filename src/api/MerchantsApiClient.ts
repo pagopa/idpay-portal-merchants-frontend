@@ -166,10 +166,11 @@ class MerchantsApiClient {
   }
 
   public async updateMerchantPointOfSales(
+    initiativeId: string,
     merchantId: string,
     pointOfSales: Array<PointOfSaleDTO>
   ): Promise<void> {
-    await this.pointOfSales.putPointOfSales({ merchantId }, pointOfSales);
+    await this.pointOfSales.postPointOfSales({ merchantId, initiativeId }, pointOfSales);
   }
 
   public async getMerchantPointOfSales(
