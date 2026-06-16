@@ -6,6 +6,8 @@ import { generatePath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import { theme } from '@pagopa/mui-italia/theme';
 import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
@@ -29,26 +31,27 @@ const InitiativeOverview = () => {
   const [data, setData] = useState<MerchantDetailDTO & { onboardingDate: string } | undefined>();
   const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({});
   const [dataError, setDataError] = useState<MerchantIbanPatchDTO & { draftEmail?: string }>({});
+  const [isVisible, setIsVisible] = useState(false);
 
-    const loadDetails = async () => {
+  const loadDetails = async () => {
     if (!initiativeId) {
       return;
     }
-      try {
-        const response = await getMerchantDetail(initiativeId);
-        setData({
-          ...response,
-          onboardingDate: formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
-        });
-      } catch {
-        setAlert({
-          title: t('errors.genericTitle'),
-          text: t('errors.genericDescription'),
-          isOpen: true,
-          severity: 'error',
-        });
-      }
-    };
+    try {
+      const response = await getMerchantDetail(initiativeId);
+      setData({
+        ...response,
+        onboardingDate: formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
+      });
+    } catch {
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
+    }
+  };
 
   useEffect(() => {
     void loadDetails();
@@ -118,9 +121,14 @@ const InitiativeOverview = () => {
                   </Box>
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
-                    <IconButton sx={{ height: "fit-content" }} onClick={() => setIsIbanModalOpen(true)}>
-                      <CreateOutlinedIcon />
-                    </IconButton>
+                    <Box>
+                      <IconButton sx={{ height: "fit-content" }} onClick={(prev) => setIsVisible(!prev)}>
+                        {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon/>}
+                      </IconButton>
+                      <IconButton sx={{ height: "fit-content" }} onClick={() => setIsIbanModalOpen(true)}>
+                        <CreateOutlinedIcon />
+                      </IconButton>
+                    </Box>
                   </Box>
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
