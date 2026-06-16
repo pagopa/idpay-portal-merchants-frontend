@@ -15,7 +15,7 @@ import {
   ReportRequest,
   RewardBatchDTO,
   TransactionResponse,
-  ReportDTO,
+  ReportDTO, PointOfSaleDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 
@@ -95,7 +95,7 @@ export const authPaymentBarCode = (
 export const updateMerchantPointOfSales = async (
   initiativeId: string,
   merchantId: string,
-  pointOfSales: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>
+  pointOfSales: Array<PointOfSaleDTO>
 ): Promise<void | { code?: string; message?: string }> => {
   const result = await getMerchantsApi().updateMerchantPointOfSales( initiativeId, merchantId, pointOfSales);
 
@@ -106,7 +106,7 @@ export const getMerchantPointOfSales = async (
   merchantId: string,
   filters: GetPointOfSalesFilters
 ): Promise<{
-  content: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>;
+  content: Array<PointOfSaleDTO>;
   pageNo: number;
   pageSize: number;
   totalElements: number;
