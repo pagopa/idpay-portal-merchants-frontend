@@ -64,6 +64,46 @@ jest.mock('../../Autocomplete/AutocompleteComponent', () => (props: any) => {
       >
         clear
       </button>
+      <button
+        type="button"
+        aria-label="Trigger onChange null address"
+        onClick={() => props.onChange?.({})}
+      >
+        empty-address
+      </button>
+      <button
+        type="button"
+        aria-label="Trigger onChange partial with fallback"
+        onClick={() =>
+          props.onChange?.({
+            Address: {
+              Street: 'Corso Italia',
+              Locality: 'Milano',
+              PostalCode: '20100',
+              Region: {},
+              SubRegion: {},
+            },
+          })
+        }
+      >
+        partial-address
+      </button>
+      <button
+        type="button"
+        aria-label="Trigger onChange incomplete address"
+        onClick={() =>
+          props.onChange?.({
+            Address: {
+              Street: 'Via Incompleta',
+              Locality: 'Roma',
+              PostalCode: '00100',
+              Region: { Name: 'Lazio' },
+            },
+          })
+        }
+      >
+        incomplete-address
+      </button>
     </div>
   );
 });
@@ -770,3 +810,347 @@ describe('PointsOfSaleForm integration tests', () => {
     });
   });
 });
+
+describe('PointsOfSaleForm targeted new-code coverage', () => {
+  const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
+
+  const defaultProps = {
+    onFormChange: jest.fn(),
+    onValidationChange: jest.fn(),
+    pointsOfSaleLoaded: false,
+    submitAttempt: 0,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedUsePlacesAutocomplete.mockReturnValue({
+      options: [],
+      loading: false,
+      error: null,
+      search: jest.fn(),
+    });
+    (generateUniqueId as jest.Mock).mockReturnValue('id-1');
+    (isValidEmail as jest.Mock).mockImplementation((value: string) => value.includes('@'));
+    (isValidUrl as jest.Mock).mockImplementation((value: string) => value.startsWith('http'));
+  });
+
+  it('covers ONLINE/PHYSICAL validation branches and contact email switch logic', async () => {
+    render(<PointsOfSaleForm {...defaultProps} />);
+
+    (isValidUrl as jest.Mock).mockImplementation(
+      (value: string) => value.includes('valid.example') || value.includes('maps.google.com')
+    );
+
+    const onlineRadio = screen.getByLabelText('Online');
+    fireEvent.click(onlineRadio);
+
+    const websiteInput = screen.getByLabelText('Indirizzo completo');
+    fireEvent.change(websiteInput, { target: { name: 'website', value: '   ' } });
+    fireEvent.change(websiteInput, { target: { name: 'website', value: 'invalid-url' } });
+    fireEvent.change(websiteInput, { target: { name: 'website', value: 'https://valid.example' } });
+
+    const confirmEmailInput = screen.getByLabelText('Conferma e-mail');
+    fireEvent.change(confirmEmailInput, { target: { name: 'confirmContactEmail', value: 'a@test.it' } });
+
+    const contactEmailInput = screen.getByLabelText('E-mail');
+    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'not-an-email' } });
+    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'different@test.it' } });
+    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'a@test.it' } });
+    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: '' } });
+
+    fireEvent.change(contactEmailInput, { target: { name: 'unknownField', value: 'x' } });
+
+    const physicalRadio = screen.getByLabelText('Fisico');
+    fireEvent.click(physicalRadio);
+
+    const geolinkInput = screen.getByLabelText('Scheda Google MYBusiness');
+    fireEvent.change(geolinkInput, { target: { name: 'channelGeolink', value: 'maps.google.com/x' } });
+    fireEvent.change(geolinkInput, { target: { name: 'channelGeolink', value: '' } });
+
+    const phoneInput = screen.getByLabelText('Numero di telefono');
+    fireEvent.change(phoneInput, { target: { name: 'channelPhone', value: '123' } });
+    fireEvent.change(phoneInput, { target: { name: 'channelPhone', value: '1234567890123456' } });
+
+    await waitFor(() => {
+      expect(defaultProps.onValidationChange).toHaveBeenCalled();
+    });
+  });
+
+  it('covers reduce accumulation with mixed valid/invalid points', async () => {
+    render(<PointsOfSaleForm {...defaultProps} />);
+
+    fireEvent.click(screen.getByLabelText('Online'));
+    fireEvent.change(screen.getByLabelText('Indirizzo completo'), {
+      target: { name: 'website', value: 'https://valid.example' },
+    });
+
+    fireEvent.change(screen.getByLabelText('Nome insegna'), {
+      target: { name: 'franchiseName', value: 'Shop 1' },
+    });
+    fireEvent.change(screen.getByLabelText('Nome'), {
+      target: { name: 'contactName', value: 'Mario' },
+    });
+    fireEvent.change(screen.getByLabelText('Cognome'), {
+      target: { name: 'contactSurname', value: 'Rossi' },
+    });
+    fireEvent.change(screen.getByLabelText('E-mail'), {
+      target: { name: 'contactEmail', value: 'mario.rossi@test.it' },
+    });
+    fireEvent.change(screen.getByLabelText('Conferma e-mail'), {
+      target: { name: 'confirmContactEmail', value: 'mario.rossi@test.it' },
+    });
+
+    fireEvent.click(screen.getByText('Aggiungi un altro punto vendita'));
+
+    await waitFor(() => {
+      expect(screen.getAllByLabelText('Nome insegna')).toHaveLength(2);
+    });
+    const franchiseInputs = screen.getAllByLabelText('Nome insegna');
+    fireEvent.change(franchiseInputs[1], { target: { name: 'franchiseName', value: '' } });
+
+    await waitFor(() => {
+      expect(defaultProps.onValidationChange).toHaveBeenCalled();
+    });
+  });
+
+  it('covers handleChangeAddress fallback fields and address reset branch', async () => {
+    render(<PointsOfSaleForm {...defaultProps} />);
+
+    fireEvent.click(screen.getByText('Aggiungi un altro punto vendita'));
+    await waitFor(() => {
+      expect(screen.getAllByLabelText('Nome insegna')).toHaveLength(2);
+    });
+
+    fireEvent.click(screen.getAllByLabelText('Trigger onChange partial with fallback')[0]);
+
+    await waitFor(() => {
+      expect(screen.getAllByLabelText('Città')[0]).toHaveValue('Milano');
+      expect(screen.getAllByLabelText('CAP')[0]).toHaveValue('20100');
+      expect(screen.getAllByLabelText('Regione')[0]).toHaveValue('');
+      expect(screen.getAllByLabelText('Provincia')[0]).toHaveValue('');
+    });
+
+    fireEvent.click(screen.getAllByLabelText('Trigger onChange')[0]);
+    await waitFor(() => {
+      expect(screen.getAllByLabelText('Città')[0]).toHaveValue('Roma');
+    });
+
+    fireEvent.click(screen.getAllByLabelText('Trigger onChange null address')[0]);
+
+    await waitFor(() => {
+      expect(screen.getAllByLabelText('Città')[0]).toHaveValue('');
+      expect(screen.getAllByLabelText('CAP')[0]).toHaveValue('');
+    });
+  });
+});
+
+describe('PointsOfSaleForm near-100 coverage suite', () => {
+  const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
+
+  const defaultProps = {
+    onFormChange: jest.fn(),
+    onValidationChange: jest.fn(),
+    pointsOfSaleLoaded: false,
+    submitAttempt: 0,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedUsePlacesAutocomplete.mockReturnValue({
+      options: [],
+      loading: false,
+      error: null,
+      search: jest.fn(),
+    });
+    (generateUniqueId as jest.Mock)
+      .mockReturnValueOnce('id-1')
+      .mockReturnValueOnce('id-2')
+      .mockReturnValue('id-3');
+    (isValidEmail as jest.Mock).mockImplementation((value: string) => value.includes('@'));
+    (isValidUrl as jest.Mock).mockImplementation(
+      (value: string) =>
+        value.includes('valid.example') ||
+        value.includes('maps.google.com') ||
+        value.includes('example.com')
+    );
+  });
+
+  it('covers switch cases for required fields and optional branch paths', async () => {
+    render(<PointsOfSaleForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText('Autocomplete'), {
+      target: { value: 'Via Roma 1' },
+    });
+    fireEvent.click(screen.getByLabelText('Trigger onTextChange empty'));
+
+    const franchiseInput = screen.getByLabelText('Nome insegna');
+    const nameInput = screen.getByLabelText('Nome');
+    const surnameInput = screen.getByLabelText('Cognome');
+    const contactEmailInput = screen.getByLabelText('E-mail');
+    const confirmEmailInput = screen.getByLabelText('Conferma e-mail');
+
+    fireEvent.change(franchiseInput, { target: { name: 'franchiseName', value: '' } });
+    fireEvent.change(franchiseInput, { target: { name: 'franchiseName', value: 'Shop A' } });
+
+    fireEvent.change(nameInput, { target: { name: 'contactName', value: '' } });
+    fireEvent.change(nameInput, { target: { name: 'contactName', value: 'Mario' } });
+
+    fireEvent.change(surnameInput, { target: { name: 'contactSurname', value: '' } });
+    fireEvent.change(surnameInput, { target: { name: 'contactSurname', value: 'Rossi' } });
+
+    fireEvent.change(confirmEmailInput, {
+      target: { name: 'confirmContactEmail', value: 'bad-confirm' },
+    });
+    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'mail@test.it' } });
+    fireEvent.change(confirmEmailInput, {
+      target: { name: 'confirmContactEmail', value: 'other@test.it' },
+    });
+    fireEvent.change(confirmEmailInput, {
+      target: { name: 'confirmContactEmail', value: 'ok@test.it' },
+    });
+    fireEvent.change(confirmEmailInput, {
+      target: { name: 'confirmContactEmail', value: '' },
+    });
+
+    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'bad-email' } });
+    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'a@test.it' } });
+    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: '' } });
+
+    fireEvent.change(franchiseInput, { target: { name: 'city', value: '' } });
+    fireEvent.change(franchiseInput, { target: { name: 'city', value: 'Roma' } });
+    fireEvent.change(franchiseInput, { target: { name: 'zipCode', value: '' } });
+    fireEvent.change(franchiseInput, { target: { name: 'zipCode', value: '00100' } });
+    fireEvent.change(franchiseInput, { target: { name: 'region', value: '' } });
+    fireEvent.change(franchiseInput, { target: { name: 'region', value: 'Lazio' } });
+    fireEvent.change(franchiseInput, { target: { name: 'province', value: '' } });
+    fireEvent.change(franchiseInput, { target: { name: 'province', value: 'RM' } });
+    fireEvent.change(franchiseInput, { target: { name: 'address', value: '' } });
+    fireEvent.change(franchiseInput, { target: { name: 'address', value: 'Via Roma' } });
+
+    const websitePhysical = screen.getByLabelText('Sito web');
+    fireEvent.change(websitePhysical, { target: { name: 'website', value: 'invalid-url' } });
+    fireEvent.change(websitePhysical, { target: { name: 'website', value: 'https://valid.example' } });
+
+    const geolinkInput = screen.getByLabelText('Scheda Google MYBusiness');
+    fireEvent.change(geolinkInput, { target: { name: 'channelGeolink', value: 'invalid-url' } });
+    fireEvent.change(geolinkInput, {
+      target: { name: 'channelGeolink', value: 'https://maps.google.com/shop' },
+    });
+
+    const channelEmailInput = screen.getByLabelText('Email');
+    fireEvent.change(channelEmailInput, { target: { name: 'channelEmail', value: 'wrong' } });
+    fireEvent.blur(channelEmailInput);
+    fireEvent.change(channelEmailInput, { target: { name: 'channelEmail', value: 'ok@test.it' } });
+    fireEvent.blur(channelEmailInput);
+
+    const phoneInput = screen.getByLabelText('Numero di telefono');
+    fireEvent.change(phoneInput, { target: { name: 'channelPhone', value: '123' } });
+    fireEvent.blur(phoneInput);
+    fireEvent.change(phoneInput, { target: { name: 'channelPhone', value: '1234567890123456' } });
+    fireEvent.blur(phoneInput);
+    fireEvent.change(phoneInput, { target: { name: 'channelPhone', value: '1234567' } });
+    fireEvent.blur(phoneInput);
+    fireEvent.change(phoneInput, { target: { name: 'channelPhone', value: '' } });
+    fireEvent.blur(phoneInput);
+    fireEvent.keyDown(phoneInput, { key: 'e' });
+
+    const cityInput = screen.getByLabelText('Città');
+    const capInput = screen.getByLabelText('CAP');
+    const regionInput = screen.getByLabelText('Regione');
+    const provinceInput = screen.getByLabelText('Provincia');
+    cityInput.removeAttribute('disabled');
+    capInput.removeAttribute('disabled');
+    regionInput.removeAttribute('disabled');
+    provinceInput.removeAttribute('disabled');
+    fireEvent.change(cityInput, { target: { name: 'city', value: 'Roma' } });
+    fireEvent.change(capInput, { target: { name: 'zipCode', value: '00100' } });
+    fireEvent.change(regionInput, { target: { name: 'region', value: 'Lazio' } });
+    fireEvent.change(provinceInput, { target: { name: 'province', value: 'RM' } });
+
+    fireEvent.click(screen.getByLabelText('Online'));
+    const onlineWebsiteInput = screen.getByLabelText('Indirizzo completo');
+    fireEvent.change(onlineWebsiteInput, { target: { name: 'website', value: ' ' } });
+    fireEvent.change(onlineWebsiteInput, { target: { name: 'website', value: 'invalid-url' } });
+    fireEvent.change(onlineWebsiteInput, {
+      target: { name: 'website', value: 'https://valid.example' },
+    });
+
+    await waitFor(() => {
+      expect(defaultProps.onValidationChange).toHaveBeenCalled();
+    });
+  });
+
+  it('covers submit validation and pointsOfSaleLoaded reset branch', async () => {
+    const { rerender } = render(<PointsOfSaleForm {...defaultProps} submitAttempt={1} />);
+
+    await waitFor(() => {
+      expect(defaultProps.onValidationChange).toHaveBeenCalled();
+    });
+
+    rerender(<PointsOfSaleForm {...defaultProps} pointsOfSaleLoaded={true} submitAttempt={1} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Nome insegna')).toHaveValue('');
+    });
+  });
+
+  it('covers incomplete and complete address plus delete and URL verify guard', async () => {
+    render(<PointsOfSaleForm {...defaultProps} />);
+
+    fireEvent.click(screen.getByLabelText('Trigger onChange incomplete address'));
+    await waitFor(() => {
+      expect(screen.getByLabelText('Città')).toHaveValue('');
+    });
+
+    fireEvent.click(screen.getByLabelText('Trigger onChange'));
+    await waitFor(() => {
+      expect(screen.getByLabelText('Città')).toHaveValue('Roma');
+    });
+
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    const verifyButton = screen.getByText('Verifica URL');
+
+    fireEvent.change(screen.getByLabelText('Scheda Google MYBusiness'), {
+      target: { name: 'channelGeolink', value: 'bad' },
+    });
+    fireEvent.click(verifyButton);
+    expect(openSpy).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByLabelText('Scheda Google MYBusiness'), {
+      target: { name: 'channelGeolink', value: 'example.com/shop' },
+    });
+    fireEvent.click(verifyButton);
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://example.com/shop',
+      '_blank',
+      'noopener,noreferrer'
+    );
+
+    fireEvent.click(screen.getByText('Aggiungi un altro punto vendita'));
+    await waitFor(() => {
+      expect(screen.getAllByTestId('DeleteOutlineIcon')).toHaveLength(1);
+    });
+
+    fireEvent.change(screen.getAllByLabelText('Nome insegna')[0], {
+      target: { name: 'franchiseName', value: '' },
+    });
+
+    fireEvent.click(screen.getAllByTestId('DeleteOutlineIcon')[0]);
+    expect(screen.queryAllByTestId('DeleteOutlineIcon')).toHaveLength(0);
+  });
+
+  it('covers loading and error rendering branch of autocomplete block', () => {
+    mockedUsePlacesAutocomplete.mockReturnValue({
+      options: [],
+      loading: true,
+      error: 'autocomplete-error',
+      search: jest.fn(),
+    });
+
+    render(<PointsOfSaleForm {...defaultProps} />);
+
+    expect(screen.getByText('pages.pointOfSales.loadingText')).toBeInTheDocument();
+    expect(screen.getByText('autocomplete-error')).toBeInTheDocument();
+  });
+});
+
