@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, TextField, Typography } from "@mui/material";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
-import { EditModal, EditModalProps } from "../components/EditModal";
+import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
 import { isValidEmail } from "../../helpers";
 
@@ -81,6 +81,8 @@ export const EditEmailModal = ({isOpen, setIsOpen, onUpdate, data}: Props) => {
               }
             }}
             onChange={(e) => {
+              const { operativeEmail, ...rest } = error;
+              setError(rest);
               setMerchantData({ ...merchantData, operativeEmail: e.target.value });
             }}
             error={!!error?.operativeEmail}

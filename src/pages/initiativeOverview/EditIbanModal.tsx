@@ -1,7 +1,7 @@
 import { Box, TextField } from "@mui/material";
 import { useState } from "react";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
-import { EditModal, EditModalProps } from "../components/EditModal";
+import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
 
 type Props = EditModalProps & {
@@ -55,6 +55,8 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
           }
         }}
         onChange={(e) => {
+          const { ibanHolder, ...rest } = error;
+          setError(rest);
           setMerchantData({ ...merchantData, ibanHolder: e.target.value });
         }}
         error={!!error?.ibanHolder}
@@ -71,6 +73,8 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
           }
         }}
         onChange={(e) => {
+          const { iban, ...rest } = error;
+          setError(rest);
           setMerchantData({ ...merchantData, iban: e.target.value });
         }}
         error={!!error?.iban}

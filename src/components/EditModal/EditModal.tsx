@@ -1,7 +1,7 @@
 import { Box, Button } from "@mui/material";
 import { TitleBox } from "@pagopa/selfcare-common-frontend/lib";
 import { ReactNode } from "react";
-import ModalComponent from "../../components/modal/ModalComponent";
+import ModalComponent from "../modal/ModalComponent";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
 
 export type EditModalProps = {
@@ -36,7 +36,7 @@ export const EditModal = ({ isOpen, setIsOpen, onSave, title, desciption, childr
                 <Button
                     variant="contained"
                     sx={{ gridArea: 'exitBtn', justifySelf: 'end' }}
-                    data-testid="exit-button-test"
+                    data-testid="save-button-test"
                     onClick={onSave}
                 >
                     {t('actions.save')}
