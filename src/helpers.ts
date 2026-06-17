@@ -117,7 +117,7 @@ export const formatDate = (date: Date | undefined) => {
 };
 
 export const isValidEmail = (email: string) => {
-  const emailRegex = /^(?=.{1,255}$)[A-Za-z0-9]([A-Za-z0-9+_-]*(\.[A-Za-z0-9+_-]+)*)?@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+  const emailRegex = /^(?=.{1,255}$)[A-Za-z0-9]([A-Za-z0-9+_-]+(\.[A-Za-z0-9+_-]+)*)?@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
   return emailRegex.test(email);
 };
 
