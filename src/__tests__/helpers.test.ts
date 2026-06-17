@@ -15,6 +15,8 @@ import {
   truncateString,
   formatEuro,
   isReversableOrEditable,
+  isValidIban,
+  isValidIbanHolder,
 } from '../helpers';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 
@@ -67,7 +69,7 @@ describe('downloadQRCodeFromURL', () => {
     fetchSpy.mockRejectedValue(mockError);
 
     const { browserConsole } = require('../utils/consoleLogger');
-    const consoleSpy = jest.spyOn(browserConsole, 'error').mockImplementation(() => {});
+    const consoleSpy = jest.spyOn(browserConsole, 'error').mockImplementation(() => { });
 
     downloadQRCodeFromURL('https://example.com/qrcode');
     await new Promise(process.nextTick);
@@ -174,6 +176,45 @@ describe('isValidEmail', () => {
     expect(isValidEmail(email)).toBe(expected);
   });
 });
+
+describe('isValidIban', () => {
+  test.each([
+    { iban: 'IT12A123456789012345ABCDEFG', expected: true },
+    { iban: 'IT99Z9999900000111112222233', expected: true },
+    { iban: 'IT45B543219876500000XXXXYYY', expected: true },
+    { iban: 'IT01C111112222233333A1B2C3D', expected: true },
+    { iban: 'IT12A123456789012345ABCDEF', expected: false },
+    { iban: 'IT12A123456789012345ABCDEFGHIJKLMNO', expected: false },
+    { iban: 'FR12A123456789012345ABCDEFGHIJKL', expected: false },
+    { iban: 'it12A123456789012345ABCDEFGHIJKL', expected: false },
+    { iban: 'IT123123456789012345ABCDEFGHIJKL', expected: false },
+    { iban: 'IT12a123456789012345ABCDEFGHIJKL', expected: false },
+    { iban: 'IT12AXXXXX6789012345ABCDEFGHIJKL', expected: false },
+    { iban: 'IT12A12345YYYYY12345ABCDEFGHIJKL', expected: false },
+    { iban: 'IT12A123456789012345ABCDEF-GHIJK', expected: false },
+    { iban: 'IT12A123456789012345ABCDEF_GHIJK', expected: false },
+  ])('should validate "$iban" as $expected', ({ iban, expected }) => {
+    expect(isValidIban(iban)).toBe(expected);
+  });
+});
+
+describe('isValidIbanHolder', () => {
+  test.each([
+    { ibanHolder: 'Mario Rossi', expected: true },
+    { ibanHolder: 'Jean-Pierre', expected: true },
+    { ibanHolder: "D'Angelo", expected: true },
+    { ibanHolder: "María José", expected: true },
+    { ibanHolder: "Anna-Maria Rossi-Bianchi", expected: true },
+    { ibanHolder: "O'Connor", expected: true },
+    { ibanHolder: 'Mario123', expected: false },
+    { ibanHolder: 'Mario@Rossi', expected: false },
+    { ibanHolder: 'Mario!', expected: false },
+    { ibanHolder: 'Rossi_Bianchi', expected: false },
+  ])('should validate "$ibanHolder" as $expected', ({ ibanHolder, expected }) => {
+    expect(isValidIbanHolder(ibanHolder)).toBe(expected);
+  });
+});
+
 describe('isValidUrl', () => {
   test.each([
     { url: 'http://example.it', expected: true },

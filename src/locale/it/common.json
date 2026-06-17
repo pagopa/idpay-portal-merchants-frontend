@@ -137,7 +137,9 @@
         "fieldIban": {
           "placeholder": "Inserisci IBAN *"
         },
-        "requiredField": "Campo obbligatorio"
+        "requiredField": "Campo obbligatorio",
+        "notValidIban": "Inserisci un IBAN valido",
+        "notValidIbanHolder": "Inserisci un nome valido"
       }
     },
     "pointOfSales": {

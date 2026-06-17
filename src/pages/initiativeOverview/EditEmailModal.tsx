@@ -31,8 +31,8 @@ export const EditEmailModal = ({isOpen, setIsOpen, onUpdate, data}: Props) => {
         onUpdate(merchantData);
       } else {
         const dataError = isEmpty || !isEqual ? { operativeEmail: isEmpty ? 'pages.initiativeOverview.emailModal.requiredField' : 'pages.initiativeOverview.emailModal.notEqualEmail' } : {};
-        const draftError = isDraftEmpty ? { draftEmail: 'pages.initiativeOverview.emailModal.requiredField' } : {};
-        setError({ ...dataError, ...(!error?.draftEmail ? draftError : error) });
+        const draftError = isDraftEmpty || error?.draftEmail ? { draftEmail: error?.draftEmail || 'pages.initiativeOverview.emailModal.requiredField' } : {};
+        setError({ ...dataError, ...draftError });
       }
     };
     
@@ -65,7 +65,7 @@ export const EditEmailModal = ({isOpen, setIsOpen, onUpdate, data}: Props) => {
             onChange={(e) => {
               setDraftEmail(e.target.value);
               if (!isValidEmail(e.target.value)) {
-                setError({ ...error, draftEmail: 'pages.initiativeOverview.emailModal.notValidEmail' });
+                setError(prev => ({ ...prev, draftEmail: 'pages.initiativeOverview.emailModal.notValidEmail' }));
               } else {
                 const { draftEmail, ...rest } = error;
                 setError(rest);

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
 import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
+import { isValidIban, isValidIbanHolder } from "../../helpers";
 
 type Props = EditModalProps & {
   data?: MerchantDetailDTO & { onboardingDate: string }
@@ -12,6 +13,7 @@ type Props = EditModalProps & {
 export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
   const { t } = useScopedTranslation();
   const [error, setError] = useState<MerchantIbanPatchDTO>({});
+  console.log("🚀 ~ EditIbanModal ~ error:", error);
   const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({});
 
   useEffect(() => setMerchantData({
@@ -22,13 +24,13 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
   const onIbanUpdate = async (merchantData: MerchantIbanPatchDTO) => {
     const isHolderEmpty = !merchantData?.ibanHolder;
     const isIbanEmpty = !merchantData?.iban;
-    if (!isHolderEmpty && !isIbanEmpty) {
+    if (!isHolderEmpty && !isIbanEmpty && !error?.iban && !error?.ibanHolder) {
       const { iban, ibanHolder, ...rest } = error;
       setError(rest);
       onUpdate(merchantData);
     } else {
-      const ibanError = isIbanEmpty ? { iban: 'pages.initiativeOverview.ibanModal.requiredField' } : {};
-      const ibanHolderError = isHolderEmpty ? { ibanHolder: 'pages.initiativeOverview.ibanModal.requiredField' } : {};
+      const ibanError =  isIbanEmpty || error?.iban ? { iban: error?.iban || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
+      const ibanHolderError = isHolderEmpty || error?.ibanHolder ? { ibanHolder: error?.ibanHolder || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
       setError({ ...ibanError, ...ibanHolderError });
     }
   };
@@ -55,9 +57,13 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
           }
         }}
         onChange={(e) => {
-          const { ibanHolder, ...rest } = error;
-          setError(rest);
           setMerchantData({ ...merchantData, ibanHolder: e.target.value });
+          if (!isValidIbanHolder(e.target.value)) {
+            setError(prev => ({ ...prev, ibanHolder: 'pages.initiativeOverview.ibanModal.notValidIbanHolder' }));
+          } else {
+            const { ibanHolder, ...rest } = error;
+            setError(rest);
+          }
         }}
         error={!!error?.ibanHolder}
         helperText={error?.ibanHolder && t(error?.ibanHolder)}
@@ -73,9 +79,13 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
           }
         }}
         onChange={(e) => {
-          const { iban, ...rest } = error;
-          setError(rest);
           setMerchantData({ ...merchantData, iban: e.target.value });
+          if (!isValidIban(e.target.value)) {
+            setError(prev => ({ ...prev, iban: 'pages.initiativeOverview.ibanModal.notValidIban' }));
+          } else {
+            const { iban, ...rest } = error;
+            setError(rest);
+          }
         }}
         error={!!error?.iban}
         helperText={error?.iban && t(error?.iban)}

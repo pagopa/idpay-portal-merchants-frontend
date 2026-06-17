@@ -121,6 +121,16 @@ export const isValidEmail = (email: string) => {
   return emailRegex.test(email);
 };
 
+export const isValidIban = (iban: string) => {
+const ibanRegex = /^IT\d{2}[A-Z]\d{5}\d{5}[A-Z0-9]{12}$/;
+return ibanRegex.test(iban);
+};
+
+export const isValidIbanHolder = (ibanHolder: string) => {
+const ibanHolderRegex = /^[\p{L}'\s-]+$/u;
+return ibanHolderRegex.test(ibanHolder);
+};
+
 export const isValidUrl = (urlToCheck: string) => {
   const allowedDomain = ['it', 'com', 'info', 'io', 'net', 'eu', 'google'];
   try {
