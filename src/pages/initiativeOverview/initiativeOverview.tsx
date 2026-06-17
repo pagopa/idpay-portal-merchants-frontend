@@ -56,6 +56,7 @@ const InitiativeOverview = () => {
   };
 
   useEffect(() => {
+    setIsVisible(false);
     void loadDetails();
   }, [initiativeId]);
 
