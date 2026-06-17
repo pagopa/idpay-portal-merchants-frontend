@@ -17,7 +17,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
   useEffect(() => setMerchantData({
     iban: data?.iban,
     ibanHolder: data?.ibanHolder
-  }), [data]);
+  }), [data, isOpen]);
 
   const onIbanUpdate = async (merchantData: MerchantIbanPatchDTO) => {
     const isHolderEmpty = !merchantData?.ibanHolder;
