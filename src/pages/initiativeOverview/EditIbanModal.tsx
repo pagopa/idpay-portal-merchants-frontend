@@ -1,5 +1,5 @@
 import { Box, TextField } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
 import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
@@ -12,12 +12,12 @@ type Props = EditModalProps & {
 export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
   const { t } = useScopedTranslation();
   const [error, setError] = useState<MerchantIbanPatchDTO>({});
-  const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>(
-    {
-      iban: data?.iban,
-      ibanHolder: data?.ibanHolder
-    }
-  );
+  const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({});
+
+  useEffect(() => setMerchantData({
+    iban: data?.iban,
+    ibanHolder: data?.ibanHolder
+  }), [data]);
 
   const onIbanUpdate = async (merchantData: MerchantIbanPatchDTO) => {
     const isHolderEmpty = !merchantData?.ibanHolder;

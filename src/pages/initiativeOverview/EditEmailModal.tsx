@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, TextField, Typography } from "@mui/material";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
 import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
@@ -11,10 +11,12 @@ type Props = EditModalProps & {
 }
 
 export const EditEmailModal = ({isOpen, setIsOpen, onUpdate, data}: Props) => {
-  const [draftEmail, setDraftEmail] = useState<string | undefined>(data?.operativeEmail);
+  const [draftEmail, setDraftEmail] = useState<string | undefined>();
   const [error, setError] = useState<MerchantIbanPatchDTO & { draftEmail?: string }>({});
-  const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({operativeEmail: data?.operativeEmail});
+  const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({});
   const {t} = useScopedTranslation();
+
+  useEffect(() => setDraftEmail(data?.operativeEmail), [data]);
 
     const onEmailUpdate = async (merchantData: MerchantIbanPatchDTO) => {
       const isEqual = merchantData?.operativeEmail === draftEmail;
@@ -71,7 +73,6 @@ export const EditEmailModal = ({isOpen, setIsOpen, onUpdate, data}: Props) => {
             {t('pages.initiativeOverview.emailModal.fieldConfirm.label')}
           </Typography>
           <TextField
-            defaultValue={data?.operativeEmail}
             label={t('pages.initiativeOverview.emailModal.fieldConfirm.placeholder')}
             variant='outlined'
             onBlur={() => {

@@ -53,6 +53,9 @@ describe('EditModal', () => {
     const cancelBtn = screen.getByTestId('cancel-button-test')
     const saveBtn = screen.getByTestId('save-button-test')
 
+    const confirm = screen.getByLabelText('pages.initiativeOverview.emailModal.fieldConfirm.placeholder')
+    fireEvent.change(confirm, { target: { value: 'test@mail.it' } })
+
     fireEvent.click(saveBtn)
     expect(onUpdateMock).toHaveBeenCalled()
 
