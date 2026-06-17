@@ -16,7 +16,10 @@ export const EditEmailModal = ({isOpen, setIsOpen, onUpdate, data}: Props) => {
   const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({});
   const {t} = useScopedTranslation();
 
-  useEffect(() => setDraftEmail(data?.operativeEmail), [data]);
+  useEffect(() => {
+    setDraftEmail(data?.operativeEmail);
+    setMerchantData({});
+  }, [data]);
 
     const onEmailUpdate = async (merchantData: MerchantIbanPatchDTO) => {
       const isEqual = merchantData?.operativeEmail === draftEmail;
