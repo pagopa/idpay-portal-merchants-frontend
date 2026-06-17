@@ -109,7 +109,7 @@ const InitiativeOverview = () => {
                       {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
                     </Typography>
                   </Box>
-                  <Box display="flex" justifyContent="space-between">
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Box>
                       <Typography variant="body1">
                         {t('pages.initiativeOverview.operativeEmail')}
