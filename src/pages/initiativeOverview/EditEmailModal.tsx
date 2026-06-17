@@ -7,29 +7,27 @@ import { isValidEmail } from "../../helpers";
 
 type Props = EditModalProps & {
     data?: MerchantDetailDTO & { onboardingDate: string }
-    onUpdate: () => void
-    dataError: MerchantIbanPatchDTO & {draftEmail?: string}
-    setDataError: (errors: MerchantIbanPatchDTO & {draftEmail?: string}) => void
-    merchantData: MerchantIbanPatchDTO
-    setMerchantData: (data: MerchantIbanPatchDTO) => void
+    onUpdate: (data: MerchantIbanPatchDTO) => void
 }
 
-export const EditEmailModal = ({isOpen, setIsOpen, dataError, setDataError, merchantData, setMerchantData, onUpdate, data}: Props) => {
-  const [draftEmail, setDraftEmail] = useState<string | undefined>();
+export const EditEmailModal = ({isOpen, setIsOpen, onUpdate, data}: Props) => {
+  const [draftEmail, setDraftEmail] = useState<string | undefined>(data?.operativeEmail);
+  const [error, setError] = useState<MerchantIbanPatchDTO & { draftEmail?: string }>({});
+  const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({operativeEmail: data?.operativeEmail});
   const {t} = useScopedTranslation();
 
     const onEmailUpdate = async (merchantData: MerchantIbanPatchDTO) => {
       const isEqual = merchantData?.operativeEmail === draftEmail;
       const isEmpty = !merchantData?.operativeEmail;
       const isDraftEmpty = !draftEmail;
-      if (isEqual && !isEmpty && !isDraftEmpty) {
-        const { operativeEmail, draftEmail, ...rest } = dataError;
-        setDataError(rest);
-        onUpdate();
+      if (isEqual && !isEmpty && !isDraftEmpty && !error?.draftEmail) {
+        const { operativeEmail, draftEmail, ...rest } = error;
+        setError(rest);
+        onUpdate(merchantData);
       } else {
-        const dataError = isEmpty || !isEqual ? { operativeEmail: isEmpty ? 'pages.initiativeOverview.emailModal.requiredField' : 'pages.initiativeOverview.modal.notEqualEmail' } : {};
+        const dataError = isEmpty || !isEqual ? { operativeEmail: isEmpty ? 'pages.initiativeOverview.emailModal.requiredField' : 'pages.initiativeOverview.emailModal.notEqualEmail' } : {};
         const draftError = isDraftEmpty ? { draftEmail: 'pages.initiativeOverview.emailModal.requiredField' } : {};
-        setDataError({ ...dataError, ...dataError, ...draftError });
+        setError({ ...dataError, ...(!error?.draftEmail ? draftError : error) });
       }
     };
     
@@ -37,7 +35,7 @@ export const EditEmailModal = ({isOpen, setIsOpen, dataError, setDataError, merc
         isOpen={isOpen}
         setIsOpen={() => {
           setIsOpen(false);
-          setDataError({});
+          setError({});
         }}
         onSave={() => onEmailUpdate(merchantData)}
         title='pages.initiativeOverview.emailModal.title'
@@ -51,21 +49,21 @@ export const EditEmailModal = ({isOpen, setIsOpen, dataError, setDataError, merc
             defaultValue={data?.operativeEmail}
             label={t('pages.initiativeOverview.emailModal.fieldInsert.placeholder')}
             variant='outlined'
-            error={!!dataError?.draftEmail}
-            helperText={dataError?.draftEmail && t(dataError?.draftEmail)}
+            error={!!error?.draftEmail}
+            helperText={error?.draftEmail && t(error?.draftEmail)}
             onBlur={() => {
               if (!draftEmail) {
-                const { draftEmail, ...rest } = dataError;
-                setDataError(rest);
+                const { draftEmail, ...rest } = error;
+                setError(rest);
               }
             }}
             onChange={(e) => {
               setDraftEmail(e.target.value);
               if (!isValidEmail(e.target.value)) {
-                setDataError({ ...dataError, draftEmail: 'pages.initiativeOverview.emailModal.notValidEmail' });
+                setError({ ...error, draftEmail: 'pages.initiativeOverview.emailModal.notValidEmail' });
               } else {
-                const { draftEmail, ...rest } = dataError;
-                setDataError(rest);
+                const { draftEmail, ...rest } = error;
+                setError(rest);
               }
             }}
           />
@@ -78,15 +76,15 @@ export const EditEmailModal = ({isOpen, setIsOpen, dataError, setDataError, merc
             variant='outlined'
             onBlur={() => {
               if (!merchantData?.operativeEmail) {
-                const { operativeEmail, ...rest } = dataError;
-                setDataError(rest);
+                const { operativeEmail, ...rest } = error;
+                setError(rest);
               }
             }}
             onChange={(e) => {
               setMerchantData({ ...merchantData, operativeEmail: e.target.value });
             }}
-            error={!!dataError?.operativeEmail}
-            helperText={dataError?.operativeEmail && t(dataError?.operativeEmail)}
+            error={!!error?.operativeEmail}
+            helperText={error?.operativeEmail && t(error?.operativeEmail)}
           />
         </Box>
       </EditModal>;

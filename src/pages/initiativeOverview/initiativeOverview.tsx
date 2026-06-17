@@ -1,7 +1,7 @@
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import { theme } from '@pagopa/mui-italia/theme';
@@ -29,9 +29,11 @@ const InitiativeOverview = () => {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isIbanModalOpen, setIsIbanModalOpen] = useState(false);
   const [data, setData] = useState<MerchantDetailDTO & { onboardingDate: string } | undefined>();
-  const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({});
-  const [dataError, setDataError] = useState<MerchantIbanPatchDTO & { draftEmail?: string }>({});
   const [isVisible, setIsVisible] = useState(false);
+  const obscuredText = useMemo(() => ({
+    iban: "•".repeat((data?.iban || '').length),
+    ibanHolder: "•".repeat((data?.ibanHolder || '').length)
+  }), [data]);
 
   const loadDetails = async () => {
     if (!initiativeId) {
@@ -57,7 +59,7 @@ const InitiativeOverview = () => {
     void loadDetails();
   }, [initiativeId]);
 
-  const onUpdate = async () => {
+  const onUpdate = async (merchantData: MerchantIbanPatchDTO) => {
     setIsEmailModalOpen(false);
     setIsIbanModalOpen(false);
     try {
@@ -122,7 +124,7 @@ const InitiativeOverview = () => {
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
                     <Box>
-                      <IconButton sx={{ height: "fit-content" }} onClick={(prev) => setIsVisible(!prev)}>
+                      <IconButton sx={{ height: "fit-content" }} onClick={() => setIsVisible(prev => !prev)}>
                         {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon/>}
                       </IconButton>
                       <IconButton sx={{ height: "fit-content" }} onClick={() => setIsIbanModalOpen(true)}>
@@ -133,7 +135,7 @@ const InitiativeOverview = () => {
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
                     <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                      {data?.ibanHolder || MISSING_DATA_PLACEHOLDER}
+                      {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
                     </Typography>
                   </Box>
                   <Box>
@@ -143,7 +145,7 @@ const InitiativeOverview = () => {
                       noWrap
                       sx={{ fontWeight: theme.typography.fontWeightBold }}
                     >
-                      {formatIban(data?.iban)}
+                      {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
                     </Typography>
                   </Box>
                 </Box>
@@ -186,20 +188,12 @@ const InitiativeOverview = () => {
         setIsOpen={setIsEmailModalOpen}
         data={data}
         onUpdate={onUpdate}
-        dataError={dataError}
-        setDataError={setDataError}
-        merchantData={merchantData}
-        setMerchantData={setMerchantData}
       />
       <EditIbanModal
         isOpen={isIbanModalOpen}
         setIsOpen={setIsIbanModalOpen}
         data={data}
         onUpdate={onUpdate}
-        dataError={dataError}
-        setDataError={setDataError}
-        merchantData={merchantData}
-        setMerchantData={setMerchantData}
       />
     </Box>
   );

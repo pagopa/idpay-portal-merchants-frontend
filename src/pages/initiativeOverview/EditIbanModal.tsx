@@ -1,77 +1,81 @@
 import { Box, TextField } from "@mui/material";
+import { useState } from "react";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
 import { EditModal, EditModalProps } from "../components/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
 
 type Props = EditModalProps & {
-    data?: MerchantDetailDTO & { onboardingDate: string }
-    onUpdate: () => void
-    dataError: MerchantIbanPatchDTO
-    setDataError: (errors: MerchantIbanPatchDTO) => void
-    merchantData: MerchantIbanPatchDTO
-    setMerchantData: (data: MerchantIbanPatchDTO) => void
+  data?: MerchantDetailDTO & { onboardingDate: string }
+  onUpdate: (data: MerchantIbanPatchDTO) => void
 }
 
-export const EditIbanModal = ({isOpen, setIsOpen, dataError, setDataError, merchantData, setMerchantData, onUpdate, data}: Props) => {
-  const {t} = useScopedTranslation();
+export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
+  const { t } = useScopedTranslation();
+  const [error, setError] = useState<MerchantIbanPatchDTO>({});
+  const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>(
+    {
+      iban: data?.iban,
+      ibanHolder: data?.ibanHolder
+    }
+  );
 
-    const onIbanUpdate = async (merchantData: MerchantIbanPatchDTO) => {
-      const isHolderEmpty = !merchantData?.ibanHolder;
-      const isIbanEmpty = !merchantData?.iban;
-      if (!isHolderEmpty && !isIbanEmpty) {
-        const { iban, ibanHolder, ...rest } = dataError;
-        setDataError(rest);
-        onUpdate();
-      } else {
-        const ibanError = isIbanEmpty ? { iban: 'pages.initiativeOverview.ibanModal.requiredField' } : {};
-        const ibanHolderError = isHolderEmpty ? { ibanHolder: 'pages.initiativeOverview.ibanModal.requiredField' } : {};
-        setDataError({ ...ibanError, ...ibanHolderError });
-      }
-    };
-    
-    return <EditModal
-        isOpen={isOpen}
-        setIsOpen={() => {
-          setIsOpen(false);
-          setDataError({});
+  const onIbanUpdate = async (merchantData: MerchantIbanPatchDTO) => {
+    const isHolderEmpty = !merchantData?.ibanHolder;
+    const isIbanEmpty = !merchantData?.iban;
+    if (!isHolderEmpty && !isIbanEmpty) {
+      const { iban, ibanHolder, ...rest } = error;
+      setError(rest);
+      onUpdate(merchantData);
+    } else {
+      const ibanError = isIbanEmpty ? { iban: 'pages.initiativeOverview.ibanModal.requiredField' } : {};
+      const ibanHolderError = isHolderEmpty ? { ibanHolder: 'pages.initiativeOverview.ibanModal.requiredField' } : {};
+      setError({ ...ibanError, ...ibanHolderError });
+    }
+  };
+
+  return <EditModal
+    isOpen={isOpen}
+    setIsOpen={() => {
+      setIsOpen(false);
+      setError({});
+    }}
+    onSave={() => onIbanUpdate(merchantData)}
+    title='pages.initiativeOverview.ibanModal.title'
+    desciption='pages.initiativeOverview.ibanModal.description'
+  >
+    <Box display="flex" flexDirection="column" rowGap="1.5rem">
+      <TextField
+        defaultValue={data?.ibanHolder}
+        label={t('pages.initiativeOverview.ibanModal.fieldHolder.placeholder')}
+        variant='outlined'
+        onBlur={() => {
+          if (!merchantData?.ibanHolder) {
+            const { ibanHolder, ...rest } = error;
+            setError(rest);
+          }
         }}
-        onSave={() => onIbanUpdate(merchantData)}
-        title='pages.initiativeOverview.ibanModal.title'
-        desciption='pages.initiativeOverview.ibanModal.description'
-      >
-        <Box display="flex" flexDirection="column" rowGap="1.5rem">
-          <TextField
-            defaultValue={data?.ibanHolder}
-            label={t('pages.initiativeOverview.ibanModal.fieldHolder.placeholder')}
-            variant='outlined'
-            onBlur={() => {
-              if (!merchantData?.ibanHolder) {
-                const { ibanHolder, ...rest } = dataError;
-                setDataError(rest);
-              }
-            }}
-            onChange={(e) => {
-              setMerchantData({ ...merchantData, ibanHolder: e.target.value });
-            }}
-            error={!!dataError?.ibanHolder}
-            helperText={dataError?.ibanHolder && t(dataError?.ibanHolder)}
-          />
-          <TextField
-            defaultValue={data?.iban}
-            label={t('pages.initiativeOverview.ibanModal.fieldIban.placeholder')}
-            variant='outlined'
-            onBlur={() => {
-              if (!merchantData?.iban) {
-                const { iban, ...rest } = dataError;
-                setDataError(rest);
-              }
-            }}
-            onChange={(e) => {
-              setMerchantData({ ...merchantData, iban: e.target.value });
-            }}
-            error={!!dataError?.iban}
-            helperText={dataError?.iban && t(dataError?.iban)}
-          />
-        </Box>
-      </EditModal>;
+        onChange={(e) => {
+          setMerchantData({ ...merchantData, ibanHolder: e.target.value });
+        }}
+        error={!!error?.ibanHolder}
+        helperText={error?.ibanHolder && t(error?.ibanHolder)}
+      />
+      <TextField
+        defaultValue={data?.iban}
+        label={t('pages.initiativeOverview.ibanModal.fieldIban.placeholder')}
+        variant='outlined'
+        onBlur={() => {
+          if (!merchantData?.iban) {
+            const { iban, ...rest } = error;
+            setError(rest);
+          }
+        }}
+        onChange={(e) => {
+          setMerchantData({ ...merchantData, iban: e.target.value });
+        }}
+        error={!!error?.iban}
+        helperText={error?.iban && t(error?.iban)}
+      />
+    </Box>
+  </EditModal>;
 };
