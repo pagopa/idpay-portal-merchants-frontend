@@ -32,8 +32,8 @@ const createMockStore = (initialState?: any) => {
 };
 const store = createMockStore();
 
-describe('EditModal', () => {
-  it('should render EditModal component with right props', () => {
+describe('EditEmailModal', () => {
+  it('should render EditEmailModal component with right props', () => {
     render(<Provider store={store}>
       <EditEmailModal
         isOpen={true}

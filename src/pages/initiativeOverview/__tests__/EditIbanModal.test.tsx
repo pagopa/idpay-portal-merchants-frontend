@@ -32,8 +32,8 @@ const createMockStore = (initialState?: any) => {
 };
 const store = createMockStore();
 
-describe('EditModal', () => {
-  it('should render EditModal component with right props', () => {
+describe('EditIbanModal', () => {
+  it('should render EditIbanModal component with right props', () => {
     render(<Provider store={store}>
       <EditIbanModal
         isOpen={true}
