@@ -6,6 +6,8 @@ import * as hooks from '../../../hooks/useAutocomplete';
 import * as helpers from '../../../helpers';
 import { useAppSelector } from '../../../redux/hooks';
 
+const isValidEmail = jest.fn();
+
 jest.mock('../../../hooks/useAutocomplete');
 jest.mock('../../../helpers', () => ({
   ...jest.requireActual('../../../helpers'),
@@ -334,7 +336,7 @@ describe('PointsOfSaleForm full coverage', () => {
 
   it('should open channelGeolink URL only if valid', () => {
     render(<PointsOfSaleForm {...defaultProps} />);
-    const openSpy = clickVerifyUrlAndGetSpy('https://valid.com');
+    const openSpy = typeGoogleBusinessUrlAndVerify('https://valid.com');
 
     expect(openSpy).toHaveBeenCalledWith('https://valid.com', '_blank', 'noopener,noreferrer');
     openSpy.mockRestore();
