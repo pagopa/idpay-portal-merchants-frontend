@@ -148,6 +148,12 @@ const renderColumnCell = async (field: string, params: Record<string, unknown>) 
   return render(column.renderCell(params));
 };
 
+const renderReferentCell = async (row: Record<string, unknown>) =>
+  renderColumnCell('contactName', { row });
+
+const renderActionsCell = async (row: Record<string, unknown>) =>
+  renderColumnCell('actions', { row });
+
 const renderAndWaitTable = async () => {
   renderInitiativeStores();
   await waitForTable();
@@ -546,82 +552,29 @@ describe('Column rendering logic', () => {
     expect(unknownCell.container.textContent).toContain('-');
   });
 
-  test('il renderCell della colonna franchiseName gestisce i valori correttamente', async () => {
-    const cell = await renderColumnCell('franchiseName', { value: 'Store A' });
-    expect(cell.container.textContent).toContain('Store A');
-  });
+  test.each([
+    ['franchiseName', 'Store A', 'Store A'],
+    ['franchiseName', '', '-'],
+    ['address', 'Via Roma 1', 'Via Roma 1'],
+    ['website', 'www.example.com', 'www.example.com'],
+    ['city', 'Roma', 'Roma'],
+    ['contactEmail', 'test@example.com', 'test@example.com'],
+  ])(
+    'il renderCell della colonna %s mostra il valore atteso',
+    async (field, value, expectedText) => {
+      const cell = await renderColumnCell(field, { value });
+      expect(cell.container.textContent).toContain(expectedText);
+    }
+  );
 
-  test('il renderCell usa placeholder quando franchiseName e vuoto', async () => {
-    const cell = await renderColumnCell('franchiseName', { value: '' });
-    expect(cell.container.textContent).toContain('-');
-  });
-
-  test('il renderCell della colonna address gestisce i valori correttamente', async () => {
-    const cell = await renderColumnCell('address', { value: 'Via Roma 1' });
-    expect(cell.container.textContent).toContain('Via Roma 1');
-  });
-
-  test('il renderCell della colonna website gestisce i valori correttamente', async () => {
-    const cell = await renderColumnCell('website', { value: 'www.example.com' });
-    expect(cell.container.textContent).toContain('www.example.com');
-  });
-
-  test('il renderCell della colonna city gestisce i valori correttamente', async () => {
-    const cell = await renderColumnCell('city', { value: 'Roma' });
-    expect(cell.container.textContent).toContain('Roma');
-  });
-
-  test('il renderCell della colonna contactEmail gestisce i valori correttamente', async () => {
-    const cell = await renderColumnCell('contactEmail', { value: 'test@example.com' });
-    expect(cell.container.textContent).toContain('test@example.com');
-  });
-
-  test('il renderCell della colonna referent combina nome e cognome', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(
-      referentColumn.renderCell({
-        row: { contactName: 'Mario', contactSurname: 'Rossi' },
-      })
-    );
-    expect(cell.container.textContent).toContain('Mario Rossi');
-  });
-
-  test('il renderCell della colonna referent gestisce nome mancante', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(
-      referentColumn.renderCell({
-        row: { contactSurname: 'Rossi' },
-      })
-    );
-    expect(cell.container.textContent).toContain('Rossi');
-  });
-
-  test('il renderCell della colonna referent gestisce cognome mancante', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(
-      referentColumn.renderCell({
-        row: { contactName: 'Mario' },
-      })
-    );
-    expect(cell.container.textContent).toContain('Mario');
-  });
-
-  test('il renderCell della colonna referent gestisce entrambi i dati mancanti', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(referentColumn.renderCell({ row: {} }));
-    expect(cell.container.textContent).toContain('-');
+  test.each([
+    ['combina nome e cognome', { contactName: 'Mario', contactSurname: 'Rossi' }, 'Mario Rossi'],
+    ['gestisce nome mancante', { contactSurname: 'Rossi' }, 'Rossi'],
+    ['gestisce cognome mancante', { contactName: 'Mario' }, 'Mario'],
+    ['gestisce entrambi i dati mancanti', {}, '-'],
+  ])('il renderCell della colonna referent %s', async (_description, row, expectedText) => {
+    const cell = await renderReferentCell(row);
+    expect(cell.container.textContent).toContain(expectedText);
   });
 
   test('il renderCell della colonna type gestisce valore vuoto', async () => {
@@ -630,21 +583,13 @@ describe('Column rendering logic', () => {
   });
 
   test('il renderCell della colonna actions renderizza il bottone', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const actionsColumn = dataTableProps.columns.find((c: any) => c.field === 'actions');
-    const cell = render(actionsColumn.renderCell({ row: { id: '1' } }));
+    const cell = await renderActionsCell({ id: '1' });
     const button = cell.container.querySelector('button');
     expect(button).toBeInTheDocument();
   });
 
   test('il click sul bottone actions naviga al dettaglio punto vendita', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const actionsColumn = dataTableProps.columns.find((c: any) => c.field === 'actions');
-    const cell = render(actionsColumn.renderCell({ row: { id: 'pos-1' } }));
+    const cell = await renderActionsCell({ id: 'pos-1' });
     const button = cell.container.querySelector('button');
 
     expect(button).toBeInTheDocument();
