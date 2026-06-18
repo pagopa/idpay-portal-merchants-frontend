@@ -112,6 +112,16 @@ const waitForTable = () =>
 
 const waitForStoreA = () => waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
 
+const expectMerchantPointOfSalesCalledWith = async (query: Record<string, unknown>) => {
+  await waitFor(() => {
+    expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+      'initiative-123',
+      'merchant-id-01',
+      expect.objectContaining(query)
+    );
+  });
+};
+
 const renderAndWaitTable = async () => {
   renderInitiativeStores();
   await waitForTable();
@@ -315,13 +325,7 @@ describe('<InitiativeStores />', () => {
   test("gestisce l'ordinamento della tabella", async () => {
     await renderAndWaitTable();
     fireEvent.click(screen.getByTestId('sort-button'));
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'initiative-123',
-        'merchant-id-01',
-        expect.objectContaining({ sort: 'contactName,desc' })
-      );
-    });
+    await expectMerchantPointOfSalesCalledWith({ sort: 'contactName,desc' });
   });
 
   test('gestisce ordinamento su campo diverso da referent', async () => {
@@ -329,25 +333,13 @@ describe('<InitiativeStores />', () => {
 
     fireEvent.click(screen.getByTestId('sort-button-non-referent'));
 
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'initiative-123',
-        'merchant-id-01',
-        expect.objectContaining({ sort: 'city,asc' })
-      );
-    });
+    await expectMerchantPointOfSalesCalledWith({ sort: 'city,asc' });
   });
 
   test('gestisce la paginazione della tabella', async () => {
     await renderAndWaitTable();
     fireEvent.click(screen.getByTestId('paginate-button'));
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'initiative-123',
-        'merchant-id-01',
-        expect.objectContaining({ page: 2 })
-      );
-    });
+    await expectMerchantPointOfSalesCalledWith({ page: 2 });
   });
 
   test.skip('naviga al dettaglio del punto vendita al click su una riga', async () => {
