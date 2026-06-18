@@ -16,7 +16,8 @@ import {
   isReversableOrEditable,
   isValidRegex,
 } from '../helpers';
-import { EMAIL_REGEX, IBAN_HOLDER_REGEX, IBAN_REGEX, MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
+import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
+import config from "../locale/it/default/config.json";
 
 describe('copyTextToClipboard', () => {
   const writeTextMock = jest.fn();
@@ -171,7 +172,7 @@ describe('isValidEmail', () => {
     { email: '@example.com', expected: false },
     { email: 'test@example.google', expected: true },
   ])('should validate "$email" as $expected', ({ email, expected }) => {
-    expect(isValidRegex(email, EMAIL_REGEX)).toBe(expected);
+    expect(isValidRegex(email, new RegExp(config.regex.email))).toBe(expected);
   });
 });
 
@@ -192,7 +193,7 @@ describe('isValidIban', () => {
     { iban: 'IT12A123456789012345ABCDEF-GHIJK', expected: false },
     { iban: 'IT12A123456789012345ABCDEF_GHIJK', expected: false },
   ])('should validate "$iban" as $expected', ({ iban, expected }) => {
-    expect(isValidRegex(iban, IBAN_REGEX)).toBe(expected);
+    expect(isValidRegex(iban, new RegExp(config.regex.iban))).toBe(expected);
   });
 });
 
@@ -209,7 +210,7 @@ describe('isValidIbanHolder', () => {
     { ibanHolder: 'Mario!', expected: false },
     { ibanHolder: 'Rossi_Bianchi', expected: false },
   ])('should validate "$ibanHolder" as $expected', ({ ibanHolder, expected }) => {
-    expect(isValidRegex(ibanHolder, IBAN_HOLDER_REGEX)).toBe(expected);
+    expect(isValidRegex(ibanHolder, new RegExp(config.regex.ibanHolder, "u"))).toBe(expected);
   });
 });
 
