@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
 import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
-import { isValidIban, isValidIbanHolder } from "../../helpers";
+import { isValidRegex } from "../../helpers";
+import { IBAN_HOLDER_REGEX, IBAN_REGEX } from "../../utils/constants";
 
 type Props = EditModalProps & {
   data?: MerchantDetailDTO & { onboardingDate: string }
@@ -58,7 +59,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
         }}
         onChange={(e) => {
           setMerchantData({ ...merchantData, ibanHolder: e.target.value });
-          if (!isValidIbanHolder(e.target.value)) {
+          if (!isValidRegex(e.target.value, IBAN_HOLDER_REGEX)) {
             setError(prev => ({ ...prev, ibanHolder: 'pages.initiativeOverview.ibanModal.notValidIbanHolder' }));
           } else {
             const { ibanHolder, ...rest } = error;
@@ -80,7 +81,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
         }}
         onChange={(e) => {
           setMerchantData({ ...merchantData, iban: e.target.value });
-          if (!isValidIban(e.target.value)) {
+          if (!isValidRegex(e.target.value, IBAN_REGEX)) {
             setError(prev => ({ ...prev, iban: 'pages.initiativeOverview.ibanModal.notValidIban' }));
           } else {
             const { iban, ...rest } = error;

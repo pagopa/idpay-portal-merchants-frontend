@@ -3,7 +3,8 @@ import { Box, TextField, Typography } from "@mui/material";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
 import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
-import { isValidEmail } from "../../helpers";
+import { isValidRegex } from "../../helpers";
+import { EMAIL_REGEX } from "../../utils/constants";
 
 type Props = EditModalProps & {
     data?: MerchantDetailDTO & { onboardingDate: string }
@@ -64,7 +65,7 @@ export const EditEmailModal = ({isOpen, setIsOpen, onUpdate, data}: Props) => {
             }}
             onChange={(e) => {
               setDraftEmail(e.target.value);
-              if (!isValidEmail(e.target.value)) {
+              if (!isValidRegex(e.target.value, EMAIL_REGEX)) {
                 setError(prev => ({ ...prev, draftEmail: 'pages.initiativeOverview.emailModal.notValidEmail' }));
               } else {
                 const { draftEmail, ...rest } = error;

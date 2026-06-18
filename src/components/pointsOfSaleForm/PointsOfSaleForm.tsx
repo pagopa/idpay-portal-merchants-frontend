@@ -18,8 +18,8 @@ import { ButtonNaked } from '@pagopa/mui-italia/components';
 import { theme } from '@pagopa/mui-italia/theme';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
-import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
-import { POS_TYPE } from '../../utils/constants';
+import { isValidRegex, isValidUrl, generateUniqueId } from '../../helpers';
+import { EMAIL_REGEX, POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
 import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
@@ -192,7 +192,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           fieldErrors = { ...fieldErrors, channelGeolink: 'Devi inserire una URL valida' };
           isValid = false;
         }
-        if (sp?.channelEmail && !isValidEmail(sp?.channelEmail)) {
+        if (sp?.channelEmail && !isValidRegex(sp?.channelEmail, EMAIL_REGEX)) {
           fieldErrors = { ...fieldErrors, channelEmail: 'Devi inserire una email valida' };
           isValid = false;
         }
@@ -301,7 +301,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           } else {
             clearError(index, 'confirmContactEmail');
           }
-          if (!isValidEmail(value)) {
+          if (!isValidRegex(value, EMAIL_REGEX)) {
             updateError(index, 'contactEmail', 'Devi inserire una email valida');
           } else {
             clearError(index, 'contactEmail');
@@ -317,7 +317,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           [index]: value,
         }));
         if (value) {
-          if (!isValidEmail(value)) {
+          if (!isValidRegex(value, EMAIL_REGEX)) {
             updateError(index, 'confirmContactEmail', 'Devi inserire una email valida');
           } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
@@ -978,7 +978,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }
                         margin="dense"
                         onBlur={(e) => {
-                          if (e.target.value.trim() !== '' && !isValidEmail(e.target.value)) {
+                          if (e.target.value.trim() !== '' && !isValidRegex(e.target.value, EMAIL_REGEX)) {
                             updateError(index, 'channelEmail', 'Devi inserire una email valida');
                           } else {
                             clearError(index, 'channelEmail');

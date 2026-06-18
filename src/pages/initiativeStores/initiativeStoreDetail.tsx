@@ -19,10 +19,10 @@ import LabelValuePair from '../../components/labelValuePair/labelValuePair';
 import MerchantTransactions from '../../components/Transactions/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
-import { isValidEmail, handlePromptMessage } from '../../helpers';
+import { isValidRegex, handlePromptMessage } from '../../helpers';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/data-contracts';
-import { POS_TYPE } from '../../utils/constants';
+import { EMAIL_REGEX, POS_TYPE } from '../../utils/constants';
 import { browserConsole } from '../../utils/consoleLogger';
 import ROUTES from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
@@ -195,7 +195,7 @@ const InitiativeStoreDetail = () => {
       let currentFieldError = '';
       if (!trimmed) {
         currentFieldError = 'Il campo è obbligatorio';
-      } else if (!isValidEmail(trimmed)) {
+      } else if (!isValidRegex(trimmed, EMAIL_REGEX)) {
         currentFieldError = 'Inserisci un indirizzo email valido';
       }
 
@@ -204,7 +204,7 @@ const InitiativeStoreDetail = () => {
         [field]: currentFieldError,
       };
       const bothPresent = email && emailConfirm;
-      const bothValid = isValidEmail(email) && isValidEmail(emailConfirm);
+      const bothValid = isValidRegex(email, EMAIL_REGEX) && isValidRegex(emailConfirm, EMAIL_REGEX);
 
       if (bothPresent && bothValid && email !== emailConfirm) {
         return {
@@ -241,12 +241,12 @@ const InitiativeStoreDetail = () => {
     }
     if (!contactEmailModal.trim()) {
       addErrorModal('contactEmailModal', 'Il campo è obbligatorio');
-    } else if (!isValidEmail(contactEmailModal)) {
+    } else if (!isValidRegex(contactEmailModal, EMAIL_REGEX)) {
       addErrorModal('contactEmailModal', 'Inserisci un indirizzo email valido');
     }
     if (!contactEmailConfirmModal.trim()) {
       addErrorModal('contactEmailConfirmModal', 'Il campo è obbligatorio');
-    } else if (!isValidEmail(contactEmailConfirmModal)) {
+    } else if (!isValidRegex(contactEmailConfirmModal, EMAIL_REGEX)) {
       addErrorModal('contactEmailConfirmModal', 'Inserisci un indirizzo email valido');
     }
     if (contactEmailModal.trim() === storeDetail.contactEmail) {

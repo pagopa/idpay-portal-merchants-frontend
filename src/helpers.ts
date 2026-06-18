@@ -116,26 +116,7 @@ export const formatDate = (date: Date | undefined) => {
   return '';
 };
 
-export const isValidEmail = (email: string) => {
-  const emailRegex = /^(?=.{1,255}$)[A-Za-z0-9]([A-Za-z0-9+_-]+(\.[A-Za-z0-9+_-]+)*)?@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
-  return emailRegex.test(email);
-};
-
-export const isValidIban = (iban: string) => {
-  if (iban.length !== 27) {
-    return false;
-  }
-  const ibanRegex = /^IT\d{2}[A-Z]\d{5}\d{5}[A-Z0-9]{12}$/;
-  return ibanRegex.test(iban);
-};
-
-export const isValidIbanHolder = (ibanHolder: string) => {
-  if(ibanHolder.length > 50) {
-    return false;
-  }
-  const ibanHolderRegex = /^[\p{L}'\s-]+$/u;
-  return ibanHolderRegex.test(ibanHolder);
-};
+export const isValidRegex = (value: string, regex: RegExp) => regex.test(value);
 
 export const isValidUrl = (urlToCheck: string) => {
   const allowedDomain = ['it', 'com', 'info', 'io', 'net', 'eu', 'google'];

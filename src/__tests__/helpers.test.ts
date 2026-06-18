@@ -8,17 +8,15 @@ import {
   formattedCurrency,
   formatIban,
   formatDate,
-  isValidEmail,
   isValidUrl,
   generateUniqueId,
   handlePromptMessage,
   truncateString,
   formatEuro,
   isReversableOrEditable,
-  isValidIban,
-  isValidIbanHolder,
+  isValidRegex,
 } from '../helpers';
-import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
+import { EMAIL_REGEX, IBAN_HOLDER_REGEX, IBAN_REGEX, MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 
 describe('copyTextToClipboard', () => {
   const writeTextMock = jest.fn();
@@ -173,7 +171,7 @@ describe('isValidEmail', () => {
     { email: '@example.com', expected: false },
     { email: 'test@example.google', expected: true },
   ])('should validate "$email" as $expected', ({ email, expected }) => {
-    expect(isValidEmail(email)).toBe(expected);
+    expect(isValidRegex(email, EMAIL_REGEX)).toBe(expected);
   });
 });
 
@@ -194,7 +192,7 @@ describe('isValidIban', () => {
     { iban: 'IT12A123456789012345ABCDEF-GHIJK', expected: false },
     { iban: 'IT12A123456789012345ABCDEF_GHIJK', expected: false },
   ])('should validate "$iban" as $expected', ({ iban, expected }) => {
-    expect(isValidIban(iban)).toBe(expected);
+    expect(isValidRegex(iban, IBAN_REGEX)).toBe(expected);
   });
 });
 
@@ -211,7 +209,7 @@ describe('isValidIbanHolder', () => {
     { ibanHolder: 'Mario!', expected: false },
     { ibanHolder: 'Rossi_Bianchi', expected: false },
   ])('should validate "$ibanHolder" as $expected', ({ ibanHolder, expected }) => {
-    expect(isValidIbanHolder(ibanHolder)).toBe(expected);
+    expect(isValidRegex(ibanHolder, IBAN_HOLDER_REGEX)).toBe(expected);
   });
 });
 

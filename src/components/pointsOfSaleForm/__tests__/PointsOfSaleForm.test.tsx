@@ -1,7 +1,7 @@
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import PointsOfSaleForm from '../PointsOfSaleForm';
 import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
-import { generateUniqueId, isValidEmail, isValidUrl } from '../../../helpers';
+import { generateUniqueId, isValidRegex, isValidUrl } from '../../../helpers';
 import * as hooks from '../../../hooks/useAutocomplete';
 import * as helpers from '../../../helpers';
 import { useAppSelector } from '../../../redux/hooks';
@@ -10,7 +10,7 @@ jest.mock('../../../hooks/useAutocomplete');
 jest.mock('../../../helpers', () => ({
   ...jest.requireActual('../../../helpers'),
   generateUniqueId: jest.fn(),
-  isValidEmail: jest.fn(),
+  isValidRegex: jest.fn(),
   isValidUrl: jest.fn(),
 }));
 
@@ -88,7 +88,7 @@ describe('PointsOfSaleForm full coverage', () => {
       search: jest.fn(),
     });
     (generateUniqueId as jest.Mock).mockReturnValue('id-1');
-    (isValidEmail as jest.Mock).mockReturnValue(true);
+    (isValidRegex as jest.Mock).mockReturnValue(true);
     (isValidUrl as jest.Mock).mockReturnValue(true);
   });
 
@@ -123,7 +123,7 @@ describe('PointsOfSaleForm full coverage', () => {
   });
 
   it('should handle field validation errors', async () => {
-    (isValidEmail as jest.Mock).mockReturnValue(false);
+    (isValidRegex as jest.Mock).mockReturnValue(false);
     (isValidUrl as jest.Mock).mockReturnValue(false);
 
     render(<PointsOfSaleForm {...defaultProps} />);
@@ -273,7 +273,7 @@ describe('PointsOfSaleForm full coverage', () => {
   });
 
   it('should handle all field validations', async () => {
-    (isValidEmail as jest.Mock).mockReturnValue(false);
+    (isValidRegex as jest.Mock).mockReturnValue(false);
     (isValidUrl as jest.Mock).mockReturnValue(false);
 
     render(<PointsOfSaleForm {...defaultProps} />);
@@ -396,7 +396,7 @@ describe('PointsOfSaleForm additional coverage', () => {
       search: jest.fn(),
     });
     (generateUniqueId as jest.Mock).mockReturnValue('id-1');
-    (isValidEmail as jest.Mock).mockReturnValue(true);
+    (isValidRegex as jest.Mock).mockReturnValue(true);
     (isValidUrl as jest.Mock).mockReturnValue(true);
   });
 
@@ -407,7 +407,7 @@ describe('PointsOfSaleForm additional coverage', () => {
     fireEvent.blur(phoneInput);
 
     const channelEmailInput = screen.getByLabelText('Email');
-    (isValidEmail as jest.Mock).mockReturnValue(false);
+    (isValidRegex as jest.Mock).mockReturnValue(false);
     fireEvent.change(channelEmailInput, { target: { value: 'invalid-email' } });
     fireEvent.blur(channelEmailInput);
   });
@@ -479,7 +479,7 @@ describe('PointsOfSaleForm validation tests', () => {
       search: jest.fn(),
     });
     (generateUniqueId as jest.Mock).mockReturnValue('id-1');
-    (isValidEmail as jest.Mock).mockReturnValue(true);
+    (isValidRegex as jest.Mock).mockReturnValue(true);
     (isValidUrl as jest.Mock).mockReturnValue(true);
   });
 
@@ -515,14 +515,14 @@ describe('PointsOfSaleForm validation tests', () => {
     const emailInput = screen.getByLabelText('E-mail');
     const confirmEmailInput = screen.getByLabelText('Conferma e-mail');
 
-    (isValidEmail as jest.Mock).mockReturnValue(false);
+    (isValidRegex as jest.Mock).mockReturnValue(false);
     fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
     fireEvent.blur(emailInput);
 
     fireEvent.change(confirmEmailInput, { target: { value: 'another-invalid' } });
     fireEvent.blur(confirmEmailInput);
 
-    (isValidEmail as jest.Mock).mockReturnValue(true);
+    (isValidRegex as jest.Mock).mockReturnValue(true);
     fireEvent.change(confirmEmailInput, { target: { value: 'valid@example.com' } });
   });
 
@@ -579,7 +579,7 @@ describe('PointsOfSaleForm integration tests', () => {
     });
 
     jest.spyOn(helpers, 'isValidUrl').mockImplementation((url) => url.startsWith('http'));
-    jest.spyOn(helpers, 'isValidEmail').mockImplementation((email) => email.includes('@'));
+    jest.spyOn(helpers, 'isValidRegex').mockImplementation((email) => email.includes('@'));
     jest.spyOn(helpers, 'generateUniqueId').mockReturnValue('unique-id');
 
     window.open = jest.fn();
