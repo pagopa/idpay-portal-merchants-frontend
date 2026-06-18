@@ -1,42 +1,20 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import '../../../test-utils/mockEditModalDependencies';
+import { renderWithMockStore } from '../../../test-utils/editModalTestUtils';
 
 import { EditModal } from '../EditModal';
-import { configureStore } from '@reduxjs/toolkit';
-import { Provider } from 'react-redux';
 
 const onSaveMock = jest.fn()
 const setIsOpenMock = jest.fn()
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ initiative_id: 'test-id' }),
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(),
-}));
-
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: () => initialState,
-  });
-};
-const store = createMockStore();
-
 describe('EditModal', () => {
   it('should render EditModal component with right props', () => {
-    render(<Provider store={store}>
+    renderWithMockStore(
       <EditModal isOpen={true} setIsOpen={setIsOpenMock} title='Title' desciption='Description' onSave={onSaveMock}>
         <div>Test children</div>
-      </EditModal></Provider>)
+      </EditModal>
+    )
 
     expect(screen.getByText('Title')).toBeInTheDocument()
     expect(screen.getByText('Description')).toBeInTheDocument()
