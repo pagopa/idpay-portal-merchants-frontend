@@ -521,4 +521,18 @@ describe('MerchantsApiClient', () => {
       { headers: { 'initiative-id': 'init1' } }
     );
   });
+
+  it('updateMerchantData calls updateMerchantIban with the provided data', async () => {
+    mockMerchantDetailInstance.updateMerchantIban.mockResolvedValue({ data: {} });
+    const merchantData = { iban: 'IT99X0000000000000000000000' };
+
+    await expect(
+      api.updateMerchantData('init1', merchantData as any)
+    ).resolves.toBeUndefined();
+
+    expect(mockMerchantDetailInstance.updateMerchantIban).toHaveBeenCalledWith(
+      { initiativeId: 'init1' },
+      merchantData
+    );
+  });
 });
