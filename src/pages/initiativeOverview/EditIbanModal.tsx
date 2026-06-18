@@ -4,7 +4,7 @@ import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/mer
 import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
 import { isValidRegex } from "../../helpers";
-import { IBAN_HOLDER_REGEX, IBAN_REGEX } from "../../utils/constants";
+import { useInitiativeConfig } from "../../hooks/useInitiativeConfig";
 
 type Props = EditModalProps & {
   data?: MerchantDetailDTO & { onboardingDate: string }
@@ -14,8 +14,10 @@ type Props = EditModalProps & {
 export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
   const { t } = useScopedTranslation();
   const [error, setError] = useState<MerchantIbanPatchDTO>({});
-  console.log("🚀 ~ EditIbanModal ~ error:", error);
   const [merchantData, setMerchantData] = useState<MerchantIbanPatchDTO>({});
+  const { defaultConfig } = useInitiativeConfig();
+  const ibanRegex = new RegExp(defaultConfig.regex.iban);
+  const ibanHolderRegex = new RegExp(defaultConfig.regex.ibanHolder, "u");
 
   useEffect(() => setMerchantData({
     iban: data?.iban,
@@ -30,7 +32,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
       setError(rest);
       onUpdate(merchantData);
     } else {
-      const ibanError =  isIbanEmpty || error?.iban ? { iban: error?.iban || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
+      const ibanError = isIbanEmpty || error?.iban ? { iban: error?.iban || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
       const ibanHolderError = isHolderEmpty || error?.ibanHolder ? { ibanHolder: error?.ibanHolder || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
       setError({ ...ibanError, ...ibanHolderError });
     }
@@ -59,7 +61,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
         }}
         onChange={(e) => {
           setMerchantData({ ...merchantData, ibanHolder: e.target.value });
-          if (!isValidRegex(e.target.value, IBAN_HOLDER_REGEX)) {
+          if (!isValidRegex(e.target.value, ibanHolderRegex)) {
             setError(prev => ({ ...prev, ibanHolder: 'pages.initiativeOverview.ibanModal.notValidIbanHolder' }));
           } else {
             const { ibanHolder, ...rest } = error;
@@ -81,7 +83,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
         }}
         onChange={(e) => {
           setMerchantData({ ...merchantData, iban: e.target.value });
-          if (!isValidRegex(e.target.value, IBAN_REGEX)) {
+          if (!isValidRegex(e.target.value, ibanRegex)) {
             setError(prev => ({ ...prev, iban: 'pages.initiativeOverview.ibanModal.notValidIban' }));
           } else {
             const { iban, ...rest } = error;

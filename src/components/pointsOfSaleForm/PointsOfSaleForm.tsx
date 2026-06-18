@@ -19,11 +19,12 @@ import { theme } from '@pagopa/mui-italia/theme';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
 import { isValidRegex, isValidUrl, generateUniqueId } from '../../helpers';
-import { EMAIL_REGEX, POS_TYPE } from '../../utils/constants';
+import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
 import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
+import { useInitiativeConfig } from '../../hooks/useInitiativeConfig';
 
 type TypeEnum = PointOfSaleDTO['type'];
 const PHYSICAL: TypeEnum = 'PHYSICAL';
@@ -76,6 +77,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   const [errors, setErrors] = useState<FormErrors>({});
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
   const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
+  const { defaultConfig } = useInitiativeConfig();
+  const emailRegex = new RegExp(defaultConfig.regex.email);
 
   const mergedErrors = useMemo(() => ({ ...errors, ...externalErrors }), [errors, externalErrors]);
 
@@ -192,7 +195,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           fieldErrors = { ...fieldErrors, channelGeolink: 'Devi inserire una URL valida' };
           isValid = false;
         }
-        if (sp?.channelEmail && !isValidRegex(sp?.channelEmail, EMAIL_REGEX)) {
+        if (sp?.channelEmail && !isValidRegex(sp?.channelEmail, emailRegex)) {
           fieldErrors = { ...fieldErrors, channelEmail: 'Devi inserire una email valida' };
           isValid = false;
         }
@@ -301,7 +304,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           } else {
             clearError(index, 'confirmContactEmail');
           }
-          if (!isValidRegex(value, EMAIL_REGEX)) {
+          if (!isValidRegex(value, emailRegex)) {
             updateError(index, 'contactEmail', 'Devi inserire una email valida');
           } else {
             clearError(index, 'contactEmail');
@@ -317,7 +320,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           [index]: value,
         }));
         if (value) {
-          if (!isValidRegex(value, EMAIL_REGEX)) {
+          if (!isValidRegex(value, emailRegex)) {
             updateError(index, 'confirmContactEmail', 'Devi inserire una email valida');
           } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
@@ -978,7 +981,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }
                         margin="dense"
                         onBlur={(e) => {
-                          if (e.target.value.trim() !== '' && !isValidRegex(e.target.value, EMAIL_REGEX)) {
+                          if (e.target.value.trim() !== '' && !isValidRegex(e.target.value, emailRegex)) {
                             updateError(index, 'channelEmail', 'Devi inserire una email valida');
                           } else {
                             clearError(index, 'channelEmail');
