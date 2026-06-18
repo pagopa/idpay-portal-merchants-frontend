@@ -36,6 +36,6 @@ export const enum TYPE_TEXT {
 
 export const MIN_START_DATE = '2025-11-18';
 
-export const EMAIL_REGEX = /^(?=.{1,255}$)[A-Za-z0-9]([A-Za-z0-9+_-]+(\.[A-Za-z0-9+_-]+)*)?@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
-export const IBAN_REGEX = /^IT\d{2}[A-Z]\d{5}\d{5}[A-Z0-9]{12}$/;
-export const IBAN_HOLDER_REGEX = /^[\p{L}'\s-]+$/u;
+export const EMAIL_REGEX = new RegExp("^(?=.{1,255}$)[A-Za-z0-9]([A-Za-z0-9+_-]*(\\.[A-Za-z0-9+_-]+)*)?@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$");
+export const IBAN_REGEX = new RegExp("^IT\\d{2}[A-Z]\\d{5}\\d{5}[A-Z0-9]{12}$");
+export const IBAN_HOLDER_REGEX = new RegExp("^[\\p{L}'\\s-]+$", "u");
