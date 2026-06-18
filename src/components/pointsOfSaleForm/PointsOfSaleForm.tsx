@@ -61,6 +61,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       franchiseName: '',
       id: generateUniqueId(),
       address: '',
+      streetNumber: '',
       city: '',
       zipCode: '',
       region: '',
@@ -229,6 +230,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           type: PHYSICAL,
           franchiseName: '',
           address: '',
+          streetNumber: '',
           city: '',
           zipCode: '',
           region: '',
@@ -253,6 +255,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           ? {
               ...salesPoint,
               ['address']: '',
+              ['streetNumber']: '',
               ['city']: '',
               ['zipCode']: '',
               ['province']: '',
@@ -441,6 +444,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           id: generateUniqueId(),
           franchiseName: '',
           address: '',
+          streetNumber: '',
           city: '',
           zipCode: '',
           region: '',
@@ -480,9 +484,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           i === salesPointIndex
             ? {
                 ...sp,
-                address: addressObj.Address.Street.concat(
-                  `, ${addressObj.Address.AddressNumber ?? 'SNC'}`
-                ),
+                address: addressObj.Address.Street,
+                streetNumber: addressObj.Address.AddressNumber ?? '',
                 city: addressObj.Address.Locality ?? '',
                 zipCode: addressObj.Address.PostalCode ?? '',
                 region: addressObj.Address.Region?.Name ?? '',
@@ -498,6 +501,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
             ? {
                 ...sp,
                 address: '',
+                streetNumber: '',
                 city: '',
                 zipCode: '',
                 region: '',
