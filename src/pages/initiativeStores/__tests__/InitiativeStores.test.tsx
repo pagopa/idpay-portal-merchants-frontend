@@ -149,6 +149,7 @@ describe('<InitiativeStores />', () => {
       expect(screen.getByText('Store A')).toBeInTheDocument();
     });
     expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+      'initiative-123',
       'merchant-id-01',
       expect.objectContaining({ page: 0, sort: 'asc' })
     );
@@ -171,7 +172,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('gestisce il fallimento della chiamata API iniziale', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
     const error = new Error('API Failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
     renderInitiativeStores();
@@ -204,6 +205,7 @@ describe('<InitiativeStores />', () => {
     fireEvent.click(screen.getByTestId('paginate-button'));
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({ sort: 'asc' })
       );
@@ -221,6 +223,7 @@ describe('<InitiativeStores />', () => {
 
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({
           address: '',
@@ -255,6 +258,7 @@ describe('<InitiativeStores />', () => {
 
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({ city: 'Napoli', page: 0 })
       );
@@ -267,6 +271,7 @@ describe('<InitiativeStores />', () => {
     fireEvent.click(resetButton);
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({
           address: '',
@@ -312,6 +317,7 @@ describe('<InitiativeStores />', () => {
     fireEvent.click(screen.getByTestId('sort-button'));
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({ sort: 'contactName,desc' })
       );
@@ -325,6 +331,7 @@ describe('<InitiativeStores />', () => {
 
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({ sort: 'city,asc' })
       );
@@ -336,6 +343,7 @@ describe('<InitiativeStores />', () => {
     fireEvent.click(screen.getByTestId('paginate-button'));
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({ page: 2 })
       );
@@ -420,7 +428,7 @@ describe('<InitiativeStores />', () => {
 
   test('non mostra bottone add store quando loading', async () => {
     (merchantService.getMerchantPointOfSales as jest.Mock).mockImplementation(
-      () => new Promise(() => {})
+      () => new Promise(() => { })
     );
     renderInitiativeStores();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -594,6 +602,7 @@ describe('Column rendering logic', () => {
 
       await waitFor(() => {
         expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'initiative-123',
           'merchant-id-01',
           expect.objectContaining({
             page: 0,
@@ -610,6 +619,7 @@ describe('Column rendering logic', () => {
 
       await waitFor(() => {
         expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'initiative-123',
           'merchant-id-01',
           expect.objectContaining({
             page: 0,
@@ -626,6 +636,7 @@ describe('Column rendering logic', () => {
 
       await waitFor(() => {
         expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'initiative-123',
           'merchant-id-01',
           expect.objectContaining({
             page: 0,
@@ -649,6 +660,7 @@ describe('Column rendering logic', () => {
 
       await waitFor(() => {
         expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'initiative-123',
           'merchant-id-01',
           expect.objectContaining({
             page: 0,
@@ -691,6 +703,7 @@ describe('Column rendering logic', () => {
 
       await waitFor(() => {
         expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+          'initiative-123',
           'merchant-id-01',
           expect.objectContaining({
             page: 0,
