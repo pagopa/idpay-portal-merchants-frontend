@@ -485,7 +485,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
             ? {
                 ...sp,
                 address: addressObj.Address.Street,
-                streetNumber: addressObj.Address.AddressNumber ?? '',
+                streetNumber: addressObj.Address.AddressNumber ?? 'SNC',
                 city: addressObj.Address.Locality ?? '',
                 zipCode: addressObj.Address.PostalCode ?? '',
                 region: addressObj.Address.Region?.Name ?? '',
