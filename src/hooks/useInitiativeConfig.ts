@@ -4,7 +4,8 @@ import { InitiativeDTO } from '../api/generated/merchants/data-contracts';
 import config from '../locale/it/default/config.json';
 
 export function useInitiativeConfig<T>() {
-  const getConfig = useCallback(async (key: keyof typeof config, initiative: InitiativeDTO) => {
+  const defaultConfig = config;
+  const getConfig = useCallback(async (key: keyof typeof config, initiative?: InitiativeDTO) => {
     const initiativeName = buildNamespaceKey(
       initiative?.initiativeName || '',
       initiative?.startDate || ''
@@ -17,5 +18,5 @@ export function useInitiativeConfig<T>() {
     }
   }, []);
 
-  return { getConfig };
+  return { getConfig, defaultConfig };
 }

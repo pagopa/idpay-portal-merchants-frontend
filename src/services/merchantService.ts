@@ -16,6 +16,8 @@ import {
   RewardBatchDTO,
   TransactionResponse,
   ReportDTO,
+  MerchantIbanPatchDTO,
+  PointOfSaleDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 
@@ -93,10 +95,11 @@ export const authPaymentBarCode = (
   });
 
 export const updateMerchantPointOfSales = async (
+  initiativeId: string,
   merchantId: string,
-  pointOfSales: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>
+  pointOfSales: Array<PointOfSaleDTO>
 ): Promise<void | { code?: string; message?: string }> => {
-  const result = await getMerchantsApi().updateMerchantPointOfSales(merchantId, pointOfSales);
+  const result = await getMerchantsApi().updateMerchantPointOfSales(initiativeId, merchantId, pointOfSales);
 
   return result as void | { code?: string; message?: string };
 };
@@ -105,7 +108,7 @@ export const getMerchantPointOfSales = async (
   merchantId: string,
   filters: GetPointOfSalesFilters
 ): Promise<{
-  content: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>;
+  content: Array<PointOfSaleDTO>;
   pageNo: number;
   pageSize: number;
   totalElements: number;
@@ -216,3 +219,9 @@ export const updateInvoiceTransaction = (
   docNumber?: string
 ): Promise<{ code: string; message: string } | void> =>
   getMerchantsApi().updateInvoiceTransaction(transactionId, file, docNumber);
+
+  
+export const updateMerchantData = (
+  initaitiveId: string,
+  merchantData: MerchantIbanPatchDTO
+): Promise<void> => getMerchantsApi().updateMerchantData(initaitiveId, merchantData);

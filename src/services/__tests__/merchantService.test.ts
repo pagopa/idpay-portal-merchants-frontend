@@ -26,7 +26,11 @@ import {
   postponeTransaction,
   getMerchantPointOfSalesWithTransactions,
   getAllRewardBatches,
+  getMerchantReports,
+  generateMerchantReport,
+  downloadMerchantReport,
   updateInvoiceTransaction,
+  updateMerchantData,
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
@@ -58,7 +62,11 @@ const mockedApi = {
   postponeTransaction: jest.fn(),
   getMerchantPointOfSalesWithTransactions: jest.fn(),
   getAllRewardBatches: jest.fn(),
+  getMerchantReports: jest.fn(),
+  generateMerchantReport: jest.fn(),
+  downloadMerchantReport: jest.fn(),
   updateInvoiceTransaction: jest.fn(),
+  updateMerchantData: jest.fn(),
 };
 
 describe('merchantService', () => {
@@ -118,8 +126,8 @@ describe('merchantService', () => {
   });
 
   test('updateMerchantPointOfSales delegates correctly', async () => {
-    await updateMerchantPointOfSales('merchant', []);
-    expect(mockedApi.updateMerchantPointOfSales).toHaveBeenCalled();
+    await updateMerchantPointOfSales('initiative', 'merchant', []);
+    expect(mockedApi.updateMerchantPointOfSales).toHaveBeenCalledWith('initiative', 'merchant', []);
   });
 
   test('getMerchantPointOfSales delegates correctly', async () => {
@@ -137,6 +145,11 @@ describe('merchantService', () => {
     mockedApi.getMerchantPointOfSaleTransactionsProcessed.mockResolvedValue({});
     await getMerchantPointOfSaleTransactionsProcessed('1', 'pos', {} as any);
     expect(mockedApi.getMerchantPointOfSaleTransactionsProcessed).toHaveBeenCalled();
+  });
+
+  test('downloadInvoiceFile delegates correctly', async () => {
+    await downloadInvoiceFile('trx', 'pos');
+    expect(mockedApi.downloadInvoiceFile).toHaveBeenCalledWith('pos', 'trx');
   });
 
   test('getReportedUser delegates correctly', async () => {
@@ -175,8 +188,8 @@ describe('merchantService', () => {
   });
 
   test('postponeTransaction delegates correctly', async () => {
-    await postponeTransaction('1', 'batch', 'trx', '2024-12-31');
-    expect(mockedApi.postponeTransaction).toHaveBeenCalled();
+    await postponeTransaction('1', 'batch', 'trx');
+    expect(mockedApi.postponeTransaction).toHaveBeenCalledWith('1', 'batch', 'trx');
   });
 
   test('getMerchantPointOfSalesWithTransactions delegates correctly', async () => {
@@ -189,8 +202,30 @@ describe('merchantService', () => {
     expect(mockedApi.getAllRewardBatches).toHaveBeenCalled();
   });
 
+  test('getMerchantReports delegates correctly', async () => {
+    await getMerchantReports('1', 0, 10);
+    expect(mockedApi.getMerchantReports).toHaveBeenCalledWith('1', 0, 10);
+  });
+
+  test('generateMerchantReport delegates correctly', async () => {
+    const reportRequest = { fromDate: '2024-01-01', toDate: '2024-01-31' } as any;
+    await generateMerchantReport('1', reportRequest);
+    expect(mockedApi.generateMerchantReport).toHaveBeenCalledWith('1', reportRequest);
+  });
+
+  test('downloadMerchantReport delegates correctly', async () => {
+    await downloadMerchantReport('1', 'report-id');
+    expect(mockedApi.downloadMerchantReport).toHaveBeenCalledWith('1', 'report-id');
+  });
+
   test('updateInvoiceTransaction delegates correctly', async () => {
     await updateInvoiceTransaction('trx', {} as any);
     expect(mockedApi.updateInvoiceTransaction).toHaveBeenCalled();
+  });
+
+  test('updateMerchantData delegates correctly', async () => {
+    const merchantData = { iban: 'IT60X0542811101000000123456' } as any;
+    await updateMerchantData('1', merchantData);
+    expect(mockedApi.updateMerchantData).toHaveBeenCalledWith('1', merchantData);
   });
 });

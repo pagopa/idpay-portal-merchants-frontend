@@ -11,7 +11,7 @@ import {
 } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
-import { isValidEmail } from '../../../helpers';
+import { isValidRegex } from '../../../helpers';
 import { POS_TYPE } from '../../../utils/constants';
 import { StoreProvider } from '../StoreContext';
 import { handlePromptMessage } from '../../../helpers';
@@ -61,7 +61,7 @@ jest.mock('../InitiativeDetailCard', () => (props: any) => (
 const mockUseParams = useParams as jest.Mock;
 const mockParseJwt = parseJwt as jest.Mock;
 const mockStorage = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
-const mockIsValidEmail = isValidEmail as jest.Mock;
+const mockIsValidRegex = isValidRegex as jest.Mock;
 const mockGetById = getMerchantPointOfSalesById as jest.Mock;
 const mockGetTransactions = getMerchantPointOfSaleTransactionsProcessed as jest.Mock;
 const mockUpdate = updateMerchantPointOfSales as jest.Mock;
@@ -104,7 +104,7 @@ describe('InitiativeStoreDetail', () => {
     mockUseParams.mockReturnValue({ id: 'initiative1', store_id: 'store1' });
     mockParseJwt.mockReturnValue({ merchant_id: 'm1' });
     mockStorage.read.mockReturnValue('jwt');
-    mockIsValidEmail.mockReturnValue(true);
+    mockIsValidRegex.mockReturnValue(true);
     mockGetById.mockResolvedValue(mockStore);
     mockGetTransactions.mockResolvedValue({
       content: [{ trxDate: new Date(), updateDate: new Date() }],
@@ -161,14 +161,14 @@ describe('InitiativeStoreDetail', () => {
     const inputs = screen.getAllByRole('textbox');
     const emailField = inputs[2];
 
-    mockIsValidEmail.mockReturnValue(false);
+    mockIsValidRegex.mockReturnValue(false);
     await user.clear(emailField);
     await user.type(emailField, 'wrong');
     fireEvent.blur(emailField);
 
     expect(await screen.findByText('Inserisci un indirizzo email valido')).toBeInTheDocument();
 
-    mockIsValidEmail.mockReturnValue(true);
+    mockIsValidRegex.mockReturnValue(true);
     await user.clear(emailField);
     fireEvent.blur(emailField);
     expect(await screen.findByText('Il campo è obbligatorio')).toBeInTheDocument();

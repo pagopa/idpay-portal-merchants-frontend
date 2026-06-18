@@ -116,10 +116,7 @@ export const formatDate = (date: Date | undefined) => {
   return '';
 };
 
-export const isValidEmail = (email: string) => {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return emailRegex.test(email);
-};
+export const isValidRegex = (value: string, regex: RegExp) => regex.test(value);
 
 export const isValidUrl = (urlToCheck: string) => {
   const allowedDomain = ['it', 'com', 'info', 'io', 'net', 'eu', 'google'];
