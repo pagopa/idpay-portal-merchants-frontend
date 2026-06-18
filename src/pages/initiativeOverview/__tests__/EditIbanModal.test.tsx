@@ -1,47 +1,24 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import '../../../test-utils/mockEditModalDependencies';
+import { renderWithMockStore } from '../../../test-utils/editModalTestUtils';
 
 import { EditIbanModal } from '../EditIbanModal';
-import { configureStore } from '@reduxjs/toolkit';
-import { Provider } from 'react-redux';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/data-contracts';
 
 const onUpdateMock = jest.fn()
 const setIsOpenMock = jest.fn()
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ initiative_id: 'test-id' }),
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(),
-}));
-
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: () => initialState,
-  });
-};
-const store = createMockStore();
-
 describe('EditIbanModal', () => {
   it('should render EditIbanModal component with right props', () => {
-    render(<Provider store={store}>
+    renderWithMockStore(
       <EditIbanModal
         isOpen={true}
         setIsOpen={setIsOpenMock}
         onUpdate={onUpdateMock}
         data={{ iban: 'IT123', ibanHolder: 'Test' } as MerchantDetailDTO & { onboardingDate: string }}
       />
-    </Provider>)
+    )
 
     expect(screen.getByText('pages.initiativeOverview.ibanModal.title')).toBeInTheDocument()
     expect(screen.getByText('pages.initiativeOverview.ibanModal.description')).toBeInTheDocument()
@@ -59,14 +36,14 @@ describe('EditIbanModal', () => {
   })
 
   it('should show error', () => {
-    render(<Provider store={store}>
+    renderWithMockStore(
       <EditIbanModal
         isOpen={true}
         setIsOpen={setIsOpenMock}
         onUpdate={onUpdateMock}
         data={{ iban: '', ibanHolder: '' } as MerchantDetailDTO & { onboardingDate: string }}
       />
-    </Provider>)
+    )
 
     const holder = screen.getByLabelText('pages.initiativeOverview.ibanModal.fieldHolder.placeholder')
     const iban = screen.getByLabelText('pages.initiativeOverview.ibanModal.fieldIban.placeholder')

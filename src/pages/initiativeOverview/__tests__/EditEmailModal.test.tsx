@@ -1,47 +1,24 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import '../../../test-utils/mockEditModalDependencies';
+import { renderWithMockStore } from '../../../test-utils/editModalTestUtils';
 
 import { EditEmailModal } from '../EditEmailModal';
-import { configureStore } from '@reduxjs/toolkit';
-import { Provider } from 'react-redux';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/data-contracts';
 
 const onUpdateMock = jest.fn()
 const setIsOpenMock = jest.fn()
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ initiative_id: 'test-id' }),
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(),
-}));
-
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: () => initialState,
-  });
-};
-const store = createMockStore();
-
 describe('EditEmailModal', () => {
   it('should render EditEmailModal component with right props', () => {
-    render(<Provider store={store}>
+    renderWithMockStore(
       <EditEmailModal
         isOpen={true}
         setIsOpen={setIsOpenMock}
         onUpdate={onUpdateMock}
         data={{ operativeEmail: 'test@mail.it' } as MerchantDetailDTO & { onboardingDate: string }}
       />
-    </Provider>)
+    )
 
     expect(screen.getByText('pages.initiativeOverview.emailModal.title')).toBeInTheDocument()
     expect(screen.getByText('pages.initiativeOverview.emailModal.description')).toBeInTheDocument()
@@ -64,14 +41,14 @@ describe('EditEmailModal', () => {
   })
 
   it('should show error', () => {
-    render(<Provider store={store}>
+    renderWithMockStore(
       <EditEmailModal
         isOpen={true}
         setIsOpen={setIsOpenMock}
         onUpdate={onUpdateMock}
         data={{ operativeEmail: '' } as MerchantDetailDTO & { onboardingDate: string }}
       />
-    </Provider>)
+    )
 
     const insert = screen.getByLabelText('pages.initiativeOverview.emailModal.fieldInsert.placeholder')
     const confirm = screen.getByLabelText('pages.initiativeOverview.emailModal.fieldConfirm.placeholder')
@@ -103,16 +80,15 @@ describe('EditEmailModal', () => {
   })
 
   it('should show different errors', () => {
-    render(<Provider store={store}>
+    renderWithMockStore(
       <EditEmailModal
         isOpen={true}
         setIsOpen={setIsOpenMock}
         onUpdate={onUpdateMock}
         data={{ operativeEmail: 'test@mail.it' } as MerchantDetailDTO & { onboardingDate: string }}
       />
-    </Provider>)
+    )
 
-    const insert = screen.getByLabelText('pages.initiativeOverview.emailModal.fieldInsert.placeholder')
     const confirm = screen.getByLabelText('pages.initiativeOverview.emailModal.fieldConfirm.placeholder')
 
     fireEvent.change(confirm, { target: { value: 'email' } })
