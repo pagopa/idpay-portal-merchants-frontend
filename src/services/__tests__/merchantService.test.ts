@@ -132,12 +132,12 @@ describe('merchantService', () => {
 
   test('getMerchantPointOfSales delegates correctly', async () => {
     mockedApi.getMerchantPointOfSales.mockResolvedValue({});
-    await getMerchantPointOfSales('merchant', {} as any);
+    await getMerchantPointOfSales('init-1', 'merchant', {} as any);
     expect(mockedApi.getMerchantPointOfSales).toHaveBeenCalled();
   });
 
   test('getMerchantPointOfSalesById delegates correctly', async () => {
-    await getMerchantPointOfSalesById('merchant', 'pos');
+    await getMerchantPointOfSalesById('init-1', 'merchant', 'pos');
     expect(mockedApi.getMerchantPointOfSalesById).toHaveBeenCalled();
   });
 

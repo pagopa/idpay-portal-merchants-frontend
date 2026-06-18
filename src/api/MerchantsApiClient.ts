@@ -174,10 +174,12 @@ class MerchantsApiClient {
   }
 
   public async getMerchantPointOfSales(
+    initiativeId: string,
     merchantId: string,
     query?: Record<string, unknown>
   ): Promise<unknown> {
-    const res = await this.pointOfSales.getPointOfSales({
+    const res = await this.pointOfSales.getPointOfSalesByInitiative({
+      initiativeId,
       merchantId,
       ...(query ?? {}),
     });
@@ -185,10 +187,12 @@ class MerchantsApiClient {
   }
 
   public async getMerchantPointOfSalesById(
+    initiativeId: string,
     merchantId: string,
     pointOfSaleId: string
   ): Promise<PointOfSaleDTO> {
-    const res = await this.pointOfSales.getPointOfSale({
+    const res = await this.pointOfSales.getPointOfSaleByInitiative({
+      initiativeId,
       merchantId,
       pointOfSaleId,
     });

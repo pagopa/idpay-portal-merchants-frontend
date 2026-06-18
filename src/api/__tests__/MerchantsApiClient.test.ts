@@ -280,7 +280,7 @@ describe('MerchantsApiClient', () => {
     const mockData = { content: [] };
     mockPointOfSalesInstance.getPointOfSales.mockResolvedValue({ data: mockData });
 
-    const result = await api.getMerchantPointOfSales('merch1', { page: 0 });
+    const result = await api.getMerchantPointOfSales('init-1', 'merch1', { page: 0 });
 
     expect(result).toEqual(mockData);
     expect(mockPointOfSalesInstance.getPointOfSales).toHaveBeenCalledWith({
@@ -293,7 +293,7 @@ describe('MerchantsApiClient', () => {
     const mockData = { content: [] };
     mockPointOfSalesInstance.getPointOfSales.mockResolvedValue({ data: mockData });
 
-    const result = await api.getMerchantPointOfSales('merch1');
+    const result = await api.getMerchantPointOfSales('init-1', 'merch1');
 
     expect(result).toEqual(mockData);
   });
@@ -302,7 +302,7 @@ describe('MerchantsApiClient', () => {
     const mockData = { pointOfSaleId: 'pos1' };
     mockPointOfSalesInstance.getPointOfSale.mockResolvedValue({ data: mockData });
 
-    const result = await api.getMerchantPointOfSalesById('merch1', 'pos1');
+    const result = await api.getMerchantPointOfSalesById('init-1', 'merch1', 'pos1');
 
     expect(result).toEqual(mockData);
     expect(mockPointOfSalesInstance.getPointOfSale).toHaveBeenCalledWith({

@@ -105,6 +105,7 @@ export const updateMerchantPointOfSales = async (
 };
 
 export const getMerchantPointOfSales = async (
+  initiativeId: string,
   merchantId: string,
   filters: GetPointOfSalesFilters
 ): Promise<{
@@ -114,6 +115,7 @@ export const getMerchantPointOfSales = async (
   totalElements: number;
 }> => {
   const response = await getMerchantsApi().getMerchantPointOfSales(
+    initiativeId,
     merchantId,
     filters as unknown as Record<string, unknown>
   );
@@ -131,8 +133,8 @@ export const getMerchantPointOfSalesWithTransactions = (
 ): Promise<Array<FranchisePointOfSaleDTO>> =>
   getMerchantsApi().getMerchantPointOfSalesWithTransactions(rewardBatchId);
 
-export const getMerchantPointOfSalesById = (merchantId: string, pointOfSaleId: string) =>
-  getMerchantsApi().getMerchantPointOfSalesById(merchantId, pointOfSaleId);
+export const getMerchantPointOfSalesById = (initiativeId: string, merchantId: string, pointOfSaleId: string) =>
+  getMerchantsApi().getMerchantPointOfSalesById(initiativeId, merchantId, pointOfSaleId);
 
 export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,
