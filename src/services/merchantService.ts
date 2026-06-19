@@ -1,4 +1,5 @@
 import { getMerchantsApi } from '../api/MerchantsApiClient';
+import { ApiError } from '../api/ApiError';
 import {
   InitiativeDTO,
   MerchantStatisticsDTO,
@@ -99,12 +100,38 @@ export const updateMerchantPointOfSales = async (
   merchantId: string,
   pointOfSales: Array<PointOfSaleDTO>
 ): Promise<void | { code?: string; message?: string }> => {
-  const result = await getMerchantsApi().updateMerchantPointOfSales(initiativeId, merchantId, pointOfSales);
+  try {
+    const result = await getMerchantsApi().updateMerchantPointOfSales(
+      initiativeId,
+      merchantId,
+      pointOfSales
+    );
 
-  return result as void | { code?: string; message?: string };
+    return result as void | { code?: string; message?: string };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        code: error.code,
+        message:
+          (error.details as { message?: string } | undefined)?.message ??
+          error.message ??
+          undefined,
+      };
+    }
+
+    const apiErrorData = (error as { response?: { data?: { code?: string; message?: string } } })
+      ?.response?.data;
+
+    if (apiErrorData && (apiErrorData.code || apiErrorData.message)) {
+      return apiErrorData;
+    }
+
+    return { code: 'GENERIC_ERROR' };
+  }
 };
 
 export const getMerchantPointOfSales = async (
+  initiativeId: string,
   merchantId: string,
   filters: GetPointOfSalesFilters
 ): Promise<{
@@ -114,6 +141,7 @@ export const getMerchantPointOfSales = async (
   totalElements: number;
 }> => {
   const response = await getMerchantsApi().getMerchantPointOfSales(
+    initiativeId,
     merchantId,
     filters as unknown as Record<string, unknown>
   );
@@ -131,8 +159,8 @@ export const getMerchantPointOfSalesWithTransactions = (
 ): Promise<Array<FranchisePointOfSaleDTO>> =>
   getMerchantsApi().getMerchantPointOfSalesWithTransactions(rewardBatchId);
 
-export const getMerchantPointOfSalesById = (merchantId: string, pointOfSaleId: string) =>
-  getMerchantsApi().getMerchantPointOfSalesById(merchantId, pointOfSaleId);
+export const getMerchantPointOfSalesById = (initiativeId: string, merchantId: string, pointOfSaleId: string) =>
+  getMerchantsApi().getMerchantPointOfSalesById(initiativeId, merchantId, pointOfSaleId);
 
 export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,

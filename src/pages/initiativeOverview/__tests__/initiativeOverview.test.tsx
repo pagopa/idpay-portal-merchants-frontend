@@ -81,6 +81,18 @@ const mockMerchantDetail = {
   operativeEmail: 'merchant@test.it',
 };
 
+const mockMerchantDetailNoIBAN = {
+  ibanHolder: 'Mario Rossi',
+  activationDate: '2023-01-15T10:00:00Z',
+  operativeEmail: 'merchant@test.it',
+};
+
+const mockMerchantDetailNoEmail = {
+  iban: 'IT60X0542811101000000123456',
+  ibanHolder: 'Mario Rossi',
+  activationDate: '2023-01-15T10:00:00Z',
+};
+
 describe('InitiativeOverview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -129,6 +141,28 @@ describe('InitiativeOverview', () => {
       });
     });
   });
+
+  it('should show InfoBanner if IBAN is missing', async () => {
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetailNoIBAN);
+    renderComponent();
+
+    const bannerBtn = await screen.findByText('pages.initiativeOverview.ibanBanner.action')
+    expect(screen.getByText('pages.initiativeOverview.ibanBanner.description')).toBeInTheDocument();
+
+    fireEvent.click(bannerBtn);
+    expect(mockEditIbanModal.mock.calls.at(-1)[0].isOpen).toBe(true);
+  })
+
+  it('should show InfoBanner if email is missing', async () => {
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetailNoEmail);
+    renderComponent();
+
+    const bannerBtn = await screen.findByText('pages.initiativeOverview.emailBanner.action')
+    expect(screen.getByText('pages.initiativeOverview.emailBanner.description')).toBeInTheDocument();
+
+    fireEvent.click(bannerBtn);
+    expect(mockEditEmailModal.mock.calls.at(-1)[0].isOpen).toBe(true);
+  })
 
   it('toggles visibility of iban data and opens edit modals', async () => {
     renderComponent();
