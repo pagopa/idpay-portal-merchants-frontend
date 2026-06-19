@@ -116,7 +116,7 @@ const InitiativeOverview = () => {
                   description={t('pages.initiativeOverview.emailBanner.description')}
                   action={{
                     label: t('pages.initiativeOverview.emailBanner.action'),
-                    onClick: () => setIsIbanModalOpen(true)
+                    onClick: () => setIsEmailModalOpen(true)
                   }}
                 />)
             }
