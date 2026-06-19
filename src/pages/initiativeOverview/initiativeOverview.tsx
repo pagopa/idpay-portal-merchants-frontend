@@ -96,7 +96,7 @@ const InitiativeOverview = () => {
             <TitleBox
               title={t('pages.initiativeOverview.title')}
               subTitle={t('pages.initiativeOverview.subtitle')}
-              mbTitle={4}
+              mbTitle={2}
               mtTitle={2}
               mbSubTitle={1}
               variantTitle="h4"
