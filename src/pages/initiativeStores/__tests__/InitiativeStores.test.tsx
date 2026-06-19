@@ -1,11 +1,19 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material';
+import { theme } from '@pagopa/mui-italia/theme';
+import { createMemoryHistory } from 'history';
+import { Provider } from 'react-redux';
+import { Router } from 'react-router';
+import * as formikModule from 'formik';
 import InitiativeStores from '../InitiativeStores';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import { useLocation } from 'react-router-dom';
+import { createStore } from '../../../redux/store';
+import { browserConsole } from '../../../utils/consoleLogger';
 
 const mockId = 'initiative-123';
 let mockInitiativeId: string | undefined = mockId;
@@ -446,7 +454,7 @@ describe('<InitiativeStores />', () => {
     const firstSortPromise = dataTableProps.onSortModelChange([{ field: 'referent', sort: 'desc' }]);
     const secondSortPromise = dataTableProps.onSortModelChange([{ field: 'city', sort: 'asc' }]);
 
-    staleSortRequest.reject(new Error('stale request')); // requestId mismatch branch
+    staleSortRequest.reject(new Error('stale request'));
 
     await act(async () => {
       await Promise.allSettled([firstSortPromise, secondSortPromise]);
@@ -531,6 +539,107 @@ describe('<InitiativeStores />', () => {
         expect(parsed.sort).toBe('contactName,desc');
       }
     });
+  });
+
+  test('usa initiativeId vuoto nella fetch quando diventa undefined dopo il render', async () => {
+    const history = createMemoryHistory();
+    const store = createStore();
+    const view = render(
+      <ThemeProvider theme={theme}>
+        <Router history={history}>
+          <Provider store={store}>
+            <InitiativeStores />
+          </Provider>
+        </Router>
+      </ThemeProvider>
+    );
+
+    await waitForTable();
+
+    mockInitiativeId = undefined;
+    view.rerender(
+      <ThemeProvider theme={theme}>
+        <Router history={history}>
+          <Provider store={store}>
+            <InitiativeStores />
+          </Provider>
+        </Router>
+      </ThemeProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('paginate-button'));
+
+    await waitFor(() => {
+      expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
+        '',
+        'merchant-id-01',
+        expect.objectContaining({ page: 2 })
+      );
+    });
+  });
+
+  test('mostra alert se la fetch fallisce durante il sort', async () => {
+    const history = createMemoryHistory();
+    const store = createStore();
+    const view = render(
+      <ThemeProvider theme={theme}>
+        <Router history={history}>
+          <Provider store={store}>
+            <InitiativeStores />
+          </Provider>
+        </Router>
+      </ThemeProvider>
+    );
+
+    await waitForTable();
+
+    mockInitiativeId = undefined;
+    view.rerender(
+      <ThemeProvider theme={theme}>
+        <Router history={history}>
+          <Provider store={store}>
+            <InitiativeStores />
+          </Provider>
+        </Router>
+      </ThemeProvider>
+    );
+
+    (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValueOnce(
+      new Error('Sort failure')
+    );
+
+    fireEvent.click(screen.getByTestId('sort-button-non-referent'));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'errors.genericTitle',
+          text: 'errors.genericDescription',
+          severity: 'error',
+        })
+      );
+    });
+  });
+
+  test('esegue la callback onSubmit di useFormik', async () => {
+    const useFormikSpy = jest.spyOn(formikModule, 'useFormik');
+    const consoleLogSpy = jest.spyOn(browserConsole, 'log').mockImplementation(() => undefined);
+
+    renderInitiativeStores();
+
+    await waitFor(() => {
+      expect(useFormikSpy).toHaveBeenCalled();
+    });
+
+    const firstCallConfig = useFormikSpy.mock.calls[0][0] as {
+      onSubmit: (values: Record<string, unknown>) => void;
+    };
+    firstCallConfig.onSubmit({ city: 'Roma' });
+
+    expect(consoleLogSpy).toHaveBeenCalledWith('Eseguo ricerca con filtri:', { city: 'Roma' });
+
+    useFormikSpy.mockRestore();
+    consoleLogSpy.mockRestore();
   });
 });
 
@@ -697,7 +806,6 @@ describe('Column rendering logic', () => {
 
       sessionStorage.setItem('storesPagination', JSON.stringify(mockPagination));
 
-      // simulate unmount
       const { cleanup } = require('@testing-library/react');
       cleanup();
 

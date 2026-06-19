@@ -1,5 +1,3 @@
-/// <reference types="jest" />
-
 import { getMerchantsApi } from '../../api/MerchantsApiClient';
 import { ApiError } from '../../api/ApiError';
 import {
@@ -70,6 +68,17 @@ const mockedApi = {
   updateMerchantData: jest.fn(),
 };
 
+const expectUpdateMerchantPointOfSalesError = async (
+  rejectedValue: unknown,
+  expectedResult: { code?: string; message?: string }
+) => {
+  mockedApi.updateMerchantPointOfSales.mockRejectedValue(rejectedValue);
+
+  await expect(updateMerchantPointOfSales('initiative', 'merchant', [])).resolves.toEqual(
+    expectedResult
+  );
+};
+
 describe('merchantService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -132,25 +141,24 @@ describe('merchantService', () => {
   });
 
   test('updateMerchantPointOfSales returns API error payload when request fails', async () => {
-    mockedApi.updateMerchantPointOfSales.mockRejectedValue({
-      response: {
-        data: {
-          code: 'POINT_OF_SALE_ALREADY_REGISTERED',
-          message: 'PointOfSales with the same functional key already exists',
+    await expectUpdateMerchantPointOfSalesError(
+      {
+        response: {
+          data: {
+            code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+            message: 'PointOfSales with the same functional key already exists',
+          },
         },
       },
-    });
-
-    const result = await updateMerchantPointOfSales('initiative', 'merchant', []);
-
-    expect(result).toEqual({
-      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
-      message: 'PointOfSales with the same functional key already exists',
-    });
+      {
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: 'PointOfSales with the same functional key already exists',
+      }
+    );
   });
 
   test('updateMerchantPointOfSales maps ApiError details when request fails', async () => {
-    mockedApi.updateMerchantPointOfSales.mockRejectedValue(
+    await expectUpdateMerchantPointOfSalesError(
       new ApiError(
         400,
         'PointOfSales with the same functional key already exists',
@@ -159,14 +167,59 @@ describe('merchantService', () => {
           code: 'POINT_OF_SALE_ALREADY_REGISTERED',
           message: 'PointOfSales with the same functional key already exists',
         }
-      )
+      ),
+      {
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: 'PointOfSales with the same functional key already exists',
+      }
     );
+  });
 
-    const result = await updateMerchantPointOfSales('initiative', 'merchant', []);
+  test('updateMerchantPointOfSales falls back to ApiError message when details message is missing', async () => {
+    await expectUpdateMerchantPointOfSalesError(
+      new ApiError(
+        400,
+        'PointOfSales with the same functional key already exists',
+        'POINT_OF_SALE_ALREADY_REGISTERED' as any,
+        {
+          code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        }
+      ),
+      {
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: 'PointOfSales with the same functional key already exists',
+      }
+    );
+  });
 
-    expect(result).toEqual({
-      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
-      message: 'PointOfSales with the same functional key already exists',
+  test('updateMerchantPointOfSales returns empty message when ApiError has no details', async () => {
+    await expectUpdateMerchantPointOfSalesError(
+      new ApiError(400, '', 'POINT_OF_SALE_ALREADY_REGISTERED' as any),
+      {
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: '',
+      }
+    );
+  });
+
+  test('updateMerchantPointOfSales returns response payload when only message is available', async () => {
+    await expectUpdateMerchantPointOfSalesError(
+      {
+        response: {
+          data: {
+            message: 'PointOfSales with the same functional key already exists',
+          },
+        },
+      },
+      {
+        message: 'PointOfSales with the same functional key already exists',
+      }
+    );
+  });
+
+  test('updateMerchantPointOfSales returns generic error when payload is missing', async () => {
+    await expectUpdateMerchantPointOfSalesError(new Error('unexpected failure'), {
+      code: 'GENERIC_ERROR',
     });
   });
 
