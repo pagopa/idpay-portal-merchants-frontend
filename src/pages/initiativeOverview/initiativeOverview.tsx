@@ -94,7 +94,7 @@ const InitiativeOverview = () => {
               variantTitle="h4"
               variantSubTitle="body1"
             />
-            {(!data?.iban || !data?.operativeEmail) &&
+            {(data && (!data?.iban || !data?.operativeEmail)) &&
               (!data?.iban ?
                 <InfoBanner
                 severity='warning'
