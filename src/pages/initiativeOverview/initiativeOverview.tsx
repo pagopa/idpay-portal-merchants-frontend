@@ -8,6 +8,7 @@ import { theme } from '@pagopa/mui-italia/theme';
 import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import { MIAlert } from '@pagopa/mui-italia';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
@@ -17,7 +18,6 @@ import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from '../../api/generated/merchants/data-contracts';
-import { InfoBanner } from '../../components/InfoBanner/InfoBanner';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
 import { EditEmailModal } from './EditEmailModal';
 import { EditIbanModal } from './EditIbanModal';
@@ -103,20 +103,20 @@ const InitiativeOverview = () => {
             />
             {!isLoading && (!data?.iban || !data?.operativeEmail) &&
               (!data?.iban ?
-                <InfoBanner
+                <MIAlert
                   severity='warning'
                   description={t('pages.initiativeOverview.ibanBanner.description')}
-                  button={{
-                    title: t('pages.initiativeOverview.ibanBanner.action'),
+                  action={{
+                    label: t('pages.initiativeOverview.ibanBanner.action'),
                     onClick: () => setIsIbanModalOpen(true)
                   }}
                 /> :
-                <InfoBanner
+                <MIAlert
                   severity='info'
                   description={t('pages.initiativeOverview.emailBanner.description')}
-                  button={{
-                    title: t('pages.initiativeOverview.emailBanner.action'),
-                    onClick: () => setIsEmailModalOpen(true)
+                  action={{
+                    label: t('pages.initiativeOverview.emailBanner.action'),
+                    onClick: () => setIsIbanModalOpen(true)
                   }}
                 />)
             }
