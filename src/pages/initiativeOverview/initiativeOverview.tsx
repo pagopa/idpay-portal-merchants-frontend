@@ -31,6 +31,7 @@ const InitiativeOverview = () => {
   const [isIbanModalOpen, setIsIbanModalOpen] = useState(false);
   const [data, setData] = useState<MerchantDetailDTO & { onboardingDate: string } | undefined>();
   const [isVisible, setIsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const obscuredText = useMemo(() => ({
     iban: "•".repeat((data?.iban || '').length),
     ibanHolder: "•".repeat((data?.ibanHolder || '').length)
@@ -53,10 +54,13 @@ const InitiativeOverview = () => {
         isOpen: true,
         severity: 'error',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    setIsLoading(true);
     setIsVisible(false);
     void loadDetails();
   }, [initiativeId]);
@@ -64,6 +68,7 @@ const InitiativeOverview = () => {
   const onUpdate = async (merchantData: MerchantIbanPatchDTO) => {
     setIsEmailModalOpen(false);
     setIsIbanModalOpen(false);
+    setIsLoading(true);
     try {
       await updateMerchantData(initiativeId || '', merchantData).then(() => loadDetails());
       setAlert({
@@ -78,6 +83,8 @@ const InitiativeOverview = () => {
         isOpen: true,
         severity: 'error',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -94,23 +101,23 @@ const InitiativeOverview = () => {
               variantTitle="h4"
               variantSubTitle="body1"
             />
-            {(data && (!data?.iban || !data?.operativeEmail)) &&
+            {!isLoading && (!data?.iban || !data?.operativeEmail) &&
               (!data?.iban ?
                 <InfoBanner
-                severity='warning'
-                description={t('pages.initiativeOverview.ibanBanner.description')}
-                button={{
-                  title: t('pages.initiativeOverview.ibanBanner.action'),
-                  onClick: () => setIsIbanModalOpen(true)
-                }}
+                  severity='warning'
+                  description={t('pages.initiativeOverview.ibanBanner.description')}
+                  button={{
+                    title: t('pages.initiativeOverview.ibanBanner.action'),
+                    onClick: () => setIsIbanModalOpen(true)
+                  }}
                 /> :
                 <InfoBanner
-                severity='info'
-                description={t('pages.initiativeOverview.emailBanner.description')}
-                button={{
-                  title: t('pages.initiativeOverview.emailBanner.action'),
-                  onClick: () => setIsEmailModalOpen(true)
-                }}
+                  severity='info'
+                  description={t('pages.initiativeOverview.emailBanner.description')}
+                  button={{
+                    title: t('pages.initiativeOverview.emailBanner.action'),
+                    onClick: () => setIsEmailModalOpen(true)
+                  }}
                 />)
             }
           </Box>
