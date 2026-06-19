@@ -336,7 +336,7 @@ class MerchantsApiClient {
     userFiscalCode: string
   ): Promise<Array<ReportedUserDTO>> {
     const res = await this.reportedUser.getReportedUser(
-      { userFiscalCode },
+      { initiativeId, userFiscalCode },
       { headers: { 'initiative-id': initiativeId } }
     );
     return res.data;
@@ -347,7 +347,7 @@ class MerchantsApiClient {
     userFiscalCode: string
   ): Promise<ReportedUserCreateResponseDTO> {
     const res = await this.reportedUser.createReportedUser(
-      { userFiscalCode },
+      { initiativeId, userFiscalCode },
       { headers: { 'initiative-id': initiativeId } }
     );
     return res.data;
@@ -358,7 +358,7 @@ class MerchantsApiClient {
     userFiscalCode: string
   ): Promise<ReportedUserCreateResponseDTO> {
     const res = await this.reportedUser.deleteReportedUser(
-      { userFiscalCode },
+      { initiativeId, userFiscalCode },
       { headers: { 'initiative-id': initiativeId } }
     );
     return res.data;
