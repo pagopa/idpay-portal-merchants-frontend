@@ -274,6 +274,10 @@
         "descriptionTwo": "Questa operazione non comporta il blocco della relativa richiesta di rimborso.",
         "cancelText": "Annulla",
         "confirmText": "Conferma"
+      },
+      "ModalReport": {
+        "title": "Vuoi procedere con la segnalazione?",
+        "description": "Stai dichiarando che il soggetto <strong>{{cf}}</strong> non ha consegnato l’elettrodomestico obsoleto."
       }
     },
     "reportExport": {
