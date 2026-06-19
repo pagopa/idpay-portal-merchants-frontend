@@ -491,7 +491,7 @@ describe('MerchantsApiClient', () => {
 
     expect(result).toEqual(mockData);
     expect(mockReportedUserInstance.getReportedUser).toHaveBeenCalledWith(
-      { userFiscalCode: 'ABCDEF12G34H567I' },
+      { initiativeId: 'init1', userFiscalCode: 'ABCDEF12G34H567I' },
       { headers: { 'initiative-id': 'init1' } }
     );
   });
@@ -504,7 +504,7 @@ describe('MerchantsApiClient', () => {
 
     expect(result).toEqual(mockData);
     expect(mockReportedUserInstance.createReportedUser).toHaveBeenCalledWith(
-      { userFiscalCode: 'ABCDEF12G34H567I' },
+      { initiativeId: 'init1', userFiscalCode: 'ABCDEF12G34H567I' },
       { headers: { 'initiative-id': 'init1' } }
     );
   });
@@ -517,7 +517,7 @@ describe('MerchantsApiClient', () => {
 
     expect(result).toEqual(mockData);
     expect(mockReportedUserInstance.deleteReportedUser).toHaveBeenCalledWith(
-      { userFiscalCode: 'ABCDEF12G34H567I' },
+      { initiativeId: 'init1', userFiscalCode: 'ABCDEF12G34H567I' },
       { headers: { 'initiative-id': 'init1' } }
     );
   });
