@@ -238,8 +238,8 @@ describe('InitiativeStoresUpload', () => {
     await submitValidForm();
 
     expect(mockSetAlert).toHaveBeenCalledWith({
-      title: 'errors.duplicateEmailError',
-      text: expect.stringContaining('shop@example.com'),
+      title: 'errors.pointOfSaleAlreadyExistsError',
+      text: 'errors.pointOfSaleAlreadyExistsDescription',
       isOpen: true,
       severity: 'error',
     });
