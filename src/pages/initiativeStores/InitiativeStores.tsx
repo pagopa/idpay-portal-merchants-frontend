@@ -246,7 +246,7 @@ const InitiativeStores: React.FC = () => {
         setStoresLoading(true);
       }
 
-      const response = await getMerchantPointOfSales(merchantId, {
+      const response = await getMerchantPointOfSales(initiativeId || '', merchantId, {
         type: filters.type,
         city: filters.city,
         address: filters.address,

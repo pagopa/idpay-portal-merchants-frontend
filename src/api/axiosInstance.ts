@@ -8,6 +8,50 @@ import { ApiError } from './ApiError';
 
 export const axiosInstance = axios.create();
 
+const tryParseJson = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
+
+const decodeBytesToText = (bytes: Uint8Array): string => {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder().decode(bytes);
+  }
+
+  return String.fromCharCode(...Array.from(bytes));
+};
+
+const decodeErrorBody = (rawData: unknown): unknown => {
+  if (rawData == null) {
+    return rawData;
+  }
+
+  if (typeof rawData === 'string') {
+    return tryParseJson(rawData);
+  }
+
+  if (rawData instanceof ArrayBuffer) {
+    const text = decodeBytesToText(new Uint8Array(rawData)).split('\0').join('').trim();
+    return tryParseJson(text);
+  }
+
+  if (ArrayBuffer.isView(rawData)) {
+    const view = rawData as ArrayBufferView;
+    const text = decodeBytesToText(
+      new Uint8Array(view.buffer, view.byteOffset, view.byteLength)
+    )
+      .split('\0')
+      .join('')
+      .trim();
+    return tryParseJson(text);
+  }
+
+  return rawData;
+};
+
 axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = storageTokenOps.read();
 
@@ -48,7 +92,7 @@ axiosInstance.interceptors.response.use(
       window.location.assign(ENV.URL_FE.LOGOUT);
     }
 
-    const errorBody: any = error.response?.data;
+    const errorBody: any = decodeErrorBody(error.response?.data);
 
     if (errorBody?.code && errorBody?.message) {
       return Promise.reject(

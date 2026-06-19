@@ -1,13 +1,23 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material';
+import { theme } from '@pagopa/mui-italia/theme';
+import { createMemoryHistory } from 'history';
+import { Provider } from 'react-redux';
+import { Router } from 'react-router';
+import * as formikModule from 'formik';
 import InitiativeStores from '../InitiativeStores';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import { useLocation } from 'react-router-dom';
+import { createStore } from '../../../redux/store';
+import { browserConsole } from '../../../utils/consoleLogger';
 
 const mockId = 'initiative-123';
+let mockInitiativeId: string | undefined = mockId;
+const mockSetAlert = jest.fn();
 const mockHistory = {
   replace: jest.fn(),
   push: jest.fn(),
@@ -24,6 +34,14 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({ ...mockHistory }),
   useParams: () => ({ initiative_id: mockId }),
   useLocation: jest.fn(),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => ({ initiativeId: mockInitiativeId }),
+}));
+
+jest.mock('../../../hooks/useAlert', () => ({
+  useAlert: () => ({ setAlert: mockSetAlert }),
 }));
 
 let dataTableProps: any = {};
@@ -96,6 +114,8 @@ const mockPagination = { pageNo: 0, pageSize: 5, totalElements: 3, totalPages: 1
 
 const setupDefaultMocks = () => {
   jest.clearAllMocks();
+  sessionStorage.clear();
+  mockInitiativeId = mockId;
   mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
   mockStorageRead.mockReturnValue('DUMMY_TOKEN');
   (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
@@ -112,6 +132,36 @@ const waitForTable = () =>
 
 const waitForStoreA = () => waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
 
+const expectMerchantPointOfSalesCalledWith = async (query: Record<string, unknown>) => {
+  await waitFor(() => {
+    expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+      'initiative-123',
+      'merchant-id-01',
+      expect.objectContaining(query)
+    );
+  });
+};
+
+const expectDefaultStoresFetch = async () =>
+  expectMerchantPointOfSalesCalledWith({
+    page: 0,
+    sort: 'asc',
+  });
+
+const getColumn = (field: string) => dataTableProps.columns.find((column: any) => column.field === field);
+
+const renderColumnCell = async (field: string, params: Record<string, unknown>) => {
+  await renderAndWaitTable();
+  const column = getColumn(field);
+  return render(column.renderCell(params));
+};
+
+const renderReferentCell = async (row: Record<string, unknown>) =>
+  renderColumnCell('contactName', { row });
+
+const renderActionsCell = async (row: Record<string, unknown>) =>
+  renderColumnCell('actions', { row });
+
 const renderAndWaitTable = async () => {
   renderInitiativeStores();
   await waitForTable();
@@ -120,6 +170,45 @@ const renderAndWaitTable = async () => {
 const renderAndWaitStoreA = async () => {
   renderInitiativeStores();
   await waitForStoreA();
+};
+
+const renderWithUndefinedInitiativeId = async () => {
+  const history = createMemoryHistory();
+  const store = createStore();
+  const view = render(
+    <ThemeProvider theme={theme}>
+      <Router history={history}>
+        <Provider store={store}>
+          <InitiativeStores />
+        </Provider>
+      </Router>
+    </ThemeProvider>
+  );
+
+  await waitForTable();
+
+  mockInitiativeId = undefined;
+  view.rerender(
+    <ThemeProvider theme={theme}>
+      <Router history={history}>
+        <Provider store={store}>
+          <InitiativeStores />
+        </Provider>
+      </Router>
+    </ThemeProvider>
+  );
+
+  return view;
+};
+
+const applyCityFilter = async (city: string) => {
+  const cityInput = screen.getByLabelText('pages.initiativeStores.city');
+  fireEvent.change(cityInput, { target: { value: city } });
+
+  const applyButton = screen.getByTestId('apply-filters-test');
+  fireEvent.click(applyButton);
+
+  await expectMerchantPointOfSalesCalledWith({ city, page: 0 });
 };
 
 const setStoredPagination = (overrides: Record<string, unknown>) => {
@@ -136,6 +225,16 @@ const setStoredPagination = (overrides: Record<string, unknown>) => {
   return storedPagination;
 };
 
+const createDeferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};
+
 describe('<InitiativeStores />', () => {
   beforeEach(() => {
     setupDefaultMocks();
@@ -148,10 +247,7 @@ describe('<InitiativeStores />', () => {
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       expect(screen.getByText('Store A')).toBeInTheDocument();
     });
-    expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-      'merchant-id-01',
-      expect.objectContaining({ page: 0, sort: 'asc' })
-    );
+    await expectDefaultStoresFetch();
   });
 
   test('mostra lo stato vuoto se non ci sono punti vendita', async () => {
@@ -171,7 +267,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('gestisce il fallimento della chiamata API iniziale', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
     const error = new Error('API Failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
     renderInitiativeStores();
@@ -183,6 +279,7 @@ describe('<InitiativeStores />', () => {
 
   test('gestisce un errore API durante il reset dei filtri', async () => {
     await renderAndWaitTable();
+    await applyCityFilter('Roma');
 
     const error = new Error('Reset failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
@@ -191,7 +288,11 @@ describe('<InitiativeStores />', () => {
     fireEvent.click(resetButton);
 
     await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalled();
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+        })
+      );
     });
   });
 
@@ -204,6 +305,7 @@ describe('<InitiativeStores />', () => {
     fireEvent.click(screen.getByTestId('paginate-button'));
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({ sort: 'asc' })
       );
@@ -212,6 +314,7 @@ describe('<InitiativeStores />', () => {
 
   test('gestisce un errore nel .catch di handleFiltersReset', async () => {
     await renderAndWaitTable();
+    await applyCityFilter('Roma');
 
     const error = new Error('External catch failure');
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
@@ -221,6 +324,7 @@ describe('<InitiativeStores />', () => {
 
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({
           address: '',
@@ -246,27 +350,17 @@ describe('<InitiativeStores />', () => {
 
   test('applica i filtri e ricarica i dati', async () => {
     await renderAndWaitStoreA();
-
-    const cityInput = screen.getByLabelText('pages.initiativeStores.city');
-    fireEvent.change(cityInput, { target: { value: 'Napoli' } });
-
-    const applyButton = screen.getByTestId('apply-filters-test');
-    fireEvent.click(applyButton);
-
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({ city: 'Napoli', page: 0 })
-      );
-    });
+    await applyCityFilter('Napoli');
   });
 
   test('resetta i filtri e ricarica i dati iniziali', async () => {
     await renderAndWaitStoreA();
+    await applyCityFilter('Napoli');
     const resetButton = screen.getByTestId('reset-filters-test');
     fireEvent.click(resetButton);
     await waitFor(() => {
       expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
+        'initiative-123',
         'merchant-id-01',
         expect.objectContaining({
           address: '',
@@ -310,12 +404,7 @@ describe('<InitiativeStores />', () => {
   test("gestisce l'ordinamento della tabella", async () => {
     await renderAndWaitTable();
     fireEvent.click(screen.getByTestId('sort-button'));
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({ sort: 'contactName,desc' })
-      );
-    });
+    await expectMerchantPointOfSalesCalledWith({ sort: 'contactName,desc' });
   });
 
   test('gestisce ordinamento su campo diverso da referent', async () => {
@@ -323,23 +412,13 @@ describe('<InitiativeStores />', () => {
 
     fireEvent.click(screen.getByTestId('sort-button-non-referent'));
 
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({ sort: 'city,asc' })
-      );
-    });
+    await expectMerchantPointOfSalesCalledWith({ sort: 'city,asc' });
   });
 
   test('gestisce la paginazione della tabella', async () => {
     await renderAndWaitTable();
     fireEvent.click(screen.getByTestId('paginate-button'));
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({ page: 2 })
-      );
-    });
+    await expectMerchantPointOfSalesCalledWith({ page: 2 });
   });
 
   test.skip('naviga al dettaglio del punto vendita al click su una riga', async () => {
@@ -363,6 +442,57 @@ describe('<InitiativeStores />', () => {
         })
       );
     });
+  });
+
+  test('non effettua fetch quando initiativeId manca', async () => {
+    mockInitiativeId = undefined;
+    sessionStorage.setItem(
+      'storesPagination',
+      JSON.stringify({ pageNo: 1, pageSize: 10, totalElements: 10, initiativeId: mockId })
+    );
+
+    renderInitiativeStores();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(merchantService.getMerchantPointOfSales).not.toHaveBeenCalled();
+  });
+
+  test('gestisce page undefined in paginazione usando fallback a 0', async () => {
+    await renderAndWaitTable();
+
+    await act(async () => {
+      await dataTableProps.onPaginationPageChange(undefined as any);
+    });
+
+    await expectMerchantPointOfSalesCalledWith({ page: 0 });
+  });
+
+  test('ignora errori di richieste obsolete durante sort consecutivi', async () => {
+    const staleSortRequest = createDeferred<any>();
+
+    (merchantService.getMerchantPointOfSales as jest.Mock)
+      .mockResolvedValueOnce({ content: mockStores, ...mockPagination })
+      .mockImplementationOnce(() => staleSortRequest.promise)
+      .mockResolvedValueOnce({ content: mockStores, ...mockPagination });
+
+    await renderAndWaitTable();
+
+    const firstSortPromise = dataTableProps.onSortModelChange([{ field: 'referent', sort: 'desc' }]);
+    const secondSortPromise = dataTableProps.onSortModelChange([{ field: 'city', sort: 'asc' }]);
+
+    staleSortRequest.reject(new Error('stale request'));
+
+    await act(async () => {
+      await Promise.allSettled([firstSortPromise, secondSortPromise]);
+    });
+
+    await waitFor(() => {
+      expect((merchantService.getMerchantPointOfSales as jest.Mock).mock.calls.length).toBeGreaterThanOrEqual(3);
+    });
+    expect(mockSetAlert).not.toHaveBeenCalled();
   });
 
   test('naviga a censisci quando non ci sono store al click su link', async () => {
@@ -420,7 +550,7 @@ describe('<InitiativeStores />', () => {
 
   test('non mostra bottone add store quando loading', async () => {
     (merchantService.getMerchantPointOfSales as jest.Mock).mockImplementation(
-      () => new Promise(() => {})
+      () => new Promise(() => { })
     );
     renderInitiativeStores();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -439,6 +569,61 @@ describe('<InitiativeStores />', () => {
       }
     });
   });
+
+  test('usa initiativeId vuoto nella fetch quando diventa undefined dopo il render', async () => {
+    await renderWithUndefinedInitiativeId();
+
+    fireEvent.click(screen.getByTestId('paginate-button'));
+
+    await waitFor(() => {
+      expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
+        '',
+        'merchant-id-01',
+        expect.objectContaining({ page: 2 })
+      );
+    });
+  });
+
+  test('mostra alert se la fetch fallisce durante il sort', async () => {
+    await renderWithUndefinedInitiativeId();
+
+    (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValueOnce(
+      new Error('Sort failure')
+    );
+
+    fireEvent.click(screen.getByTestId('sort-button-non-referent'));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'errors.genericTitle',
+          text: 'errors.genericDescription',
+          severity: 'error',
+        })
+      );
+    });
+  });
+
+  test('esegue la callback onSubmit di useFormik', async () => {
+    const useFormikSpy = jest.spyOn(formikModule, 'useFormik');
+    const consoleLogSpy = jest.spyOn(browserConsole, 'log').mockImplementation(() => undefined);
+
+    renderInitiativeStores();
+
+    await waitFor(() => {
+      expect(useFormikSpy).toHaveBeenCalled();
+    });
+
+    const firstCallConfig = useFormikSpy.mock.calls[0][0] as {
+      onSubmit: (values: Record<string, unknown>) => void;
+    };
+    firstCallConfig.onSubmit({ city: 'Roma' });
+
+    expect(consoleLogSpy).toHaveBeenCalledWith('Eseguo ricerca con filtri:', { city: 'Roma' });
+
+    useFormikSpy.mockRestore();
+    consoleLogSpy.mockRestore();
+  });
 });
 
 describe('Column rendering logic', () => {
@@ -447,10 +632,8 @@ describe('Column rendering logic', () => {
   });
 
   test('il renderCell della colonna "type" formatta correttamente i valori', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const typeColumn = dataTableProps.columns.find((c: any) => c.field === 'type');
+    await renderAndWaitTable();
+    const typeColumn = getColumn('type');
     const physicalCell = render(typeColumn.renderCell({ value: 'PHYSICAL' }));
     expect(physicalCell.container.textContent).toContain('Fisico');
 
@@ -461,117 +644,54 @@ describe('Column rendering logic', () => {
     expect(unknownCell.container.textContent).toContain('-');
   });
 
-  test('il renderCell della colonna franchiseName gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
+  test.each([
+    ['franchiseName', 'Store A', 'Store A'],
+    ['franchiseName', '', '-'],
+    ['address', 'Via Roma 1', 'Via Roma 1'],
+    ['website', 'www.example.com', 'www.example.com'],
+    ['city', 'Roma', 'Roma'],
+    ['contactEmail', 'test@example.com', 'test@example.com'],
+  ])(
+    'il renderCell della colonna %s mostra il valore atteso',
+    async (field, value, expectedText) => {
+      const cell = await renderColumnCell(field, { value });
+      expect(cell.container.textContent).toContain(expectedText);
+    }
+  );
 
-    const franchiseColumn = dataTableProps.columns.find((c: any) => c.field === 'franchiseName');
-    const cell = render(franchiseColumn.renderCell({ value: 'Store A' }));
-    expect(cell.container.textContent).toContain('Store A');
-  });
-
-  test('il renderCell della colonna address gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const addressColumn = dataTableProps.columns.find((c: any) => c.field === 'address');
-    const cell = render(addressColumn.renderCell({ value: 'Via Roma 1' }));
-    expect(cell.container.textContent).toContain('Via Roma 1');
-  });
-
-  test('il renderCell della colonna website gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const websiteColumn = dataTableProps.columns.find((c: any) => c.field === 'website');
-    const cell = render(websiteColumn.renderCell({ value: 'www.example.com' }));
-    expect(cell.container.textContent).toContain('www.example.com');
-  });
-
-  test('il renderCell della colonna city gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const cityColumn = dataTableProps.columns.find((c: any) => c.field === 'city');
-    const cell = render(cityColumn.renderCell({ value: 'Roma' }));
-    expect(cell.container.textContent).toContain('Roma');
-  });
-
-  test('il renderCell della colonna contactEmail gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const emailColumn = dataTableProps.columns.find((c: any) => c.field === 'contactEmail');
-    const cell = render(emailColumn.renderCell({ value: 'test@example.com' }));
-    expect(cell.container.textContent).toContain('test@example.com');
-  });
-
-  test('il renderCell della colonna referent combina nome e cognome', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(
-      referentColumn.renderCell({
-        row: { contactName: 'Mario', contactSurname: 'Rossi' },
-      })
-    );
-    expect(cell.container.textContent).toContain('Mario Rossi');
-  });
-
-  test('il renderCell della colonna referent gestisce nome mancante', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(
-      referentColumn.renderCell({
-        row: { contactSurname: 'Rossi' },
-      })
-    );
-    expect(cell.container.textContent).toContain('Rossi');
-  });
-
-  test('il renderCell della colonna referent gestisce cognome mancante', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(
-      referentColumn.renderCell({
-        row: { contactName: 'Mario' },
-      })
-    );
-    expect(cell.container.textContent).toContain('Mario');
-  });
-
-  test('il renderCell della colonna referent gestisce entrambi i dati mancanti', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(referentColumn.renderCell({ row: {} }));
-    expect(cell.container.textContent).toContain('-');
+  test.each([
+    ['combina nome e cognome', { contactName: 'Mario', contactSurname: 'Rossi' }, 'Mario Rossi'],
+    ['gestisce nome mancante', { contactSurname: 'Rossi' }, 'Rossi'],
+    ['gestisce cognome mancante', { contactName: 'Mario' }, 'Mario'],
+    ['gestisce entrambi i dati mancanti', {}, '-'],
+  ])('il renderCell della colonna referent %s', async (_description, row, expectedText) => {
+    const cell = await renderReferentCell(row);
+    expect(cell.container.textContent).toContain(expectedText);
   });
 
   test('il renderCell della colonna type gestisce valore vuoto', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const typeColumn = dataTableProps.columns.find((c: any) => c.field === 'type');
-    const cell = render(typeColumn.renderCell({ value: '' }));
+    const cell = await renderColumnCell('type', { value: '' });
     expect(cell.container.textContent).toContain('-');
   });
 
   test('il renderCell della colonna actions renderizza il bottone', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const actionsColumn = dataTableProps.columns.find((c: any) => c.field === 'actions');
-    const cell = render(actionsColumn.renderCell({ row: { id: '1' } }));
+    const cell = await renderActionsCell({ id: '1' });
     const button = cell.container.querySelector('button');
     expect(button).toBeInTheDocument();
   });
+
+  test('il click sul bottone actions naviga al dettaglio punto vendita', async () => {
+    const cell = await renderActionsCell({ id: 'pos-1' });
+    const button = cell.container.querySelector('button');
+
+    expect(button).toBeInTheDocument();
+    fireEvent.click(button!);
+
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      `/portale-esercenti/${mockId}/punti-vendita/pos-1/`
+    );
+  });
+
 
   describe('sessionStorage behavior', () => {
     beforeEach(() => {
@@ -592,15 +712,7 @@ describe('Column rendering logic', () => {
 
       renderWithContext(<InitiativeStores />);
 
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
+      await expectDefaultStoresFetch();
     });
 
     test('ignora sessionStorage se initiativeId non corrisponde', async () => {
@@ -608,15 +720,7 @@ describe('Column rendering logic', () => {
 
       renderWithContext(<InitiativeStores />);
 
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
+      await expectDefaultStoresFetch();
     });
 
     test('ignora sessionStorage se pageNo è undefined', async () => {
@@ -624,15 +728,7 @@ describe('Column rendering logic', () => {
 
       renderWithContext(<InitiativeStores />);
 
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
+      await expectDefaultStoresFetch();
     });
 
     test('handles sessionStorage without sort field', async () => {
@@ -647,15 +743,7 @@ describe('Column rendering logic', () => {
 
       renderWithContext(<InitiativeStores />);
 
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
+      await expectDefaultStoresFetch();
     });
 
     test('does not set sortModel from sessionStorage sort string', async () => {
@@ -689,15 +777,7 @@ describe('Column rendering logic', () => {
 
       renderWithContext(<InitiativeStores />);
 
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
+      await expectDefaultStoresFetch();
     });
 
     test('rimuove sessionStorage quando il componente viene smontato (non andando al dettaglio)', async () => {
@@ -709,7 +789,6 @@ describe('Column rendering logic', () => {
 
       sessionStorage.setItem('storesPagination', JSON.stringify(mockPagination));
 
-      // simulate unmount
       const { cleanup } = require('@testing-library/react');
       cleanup();
 

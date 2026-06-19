@@ -2081,7 +2081,7 @@ paths:
               example:
                 code: MERCHANT_GENERIC_ERROR
                 message: An error occurred during the update
-  /reported-user/{userFiscalCode}:
+  /initiatives/{initiativeId}/reported-user/{userFiscalCode}:
     post:
       tags: [ reported-user ]
       summary: Create reported user
@@ -2090,13 +2090,17 @@ paths:
         IT: Segnala un utente (CF) per coppia merchant/iniziativa
       operationId: createReportedUser
       parameters:
+        - name: initiativeId
+          in: path
+          required: true
+          description: The ID of the initiative
+          schema: { type: string }
         - name: userFiscalCode
           in: path
           required: true
           description: Citizen fiscal code of the reported user
           schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
           example: RSSMRA85T10A562S
-        - $ref: '#/components/parameters/InitiativeIdHeader'
       responses:
         "200":
           description: Business outcome
@@ -2141,13 +2145,17 @@ paths:
         IT: Ricerca segnalazioni per codice fiscale (merchant/initiative via header)
       operationId: getReportedUser
       parameters:
+        - name: initiativeId
+          in: path
+          required: true
+          description: The ID of the initiative
+          schema: { type: string }
         - name: userFiscalCode
           in: path
           required: true
           description: Citizen fiscal code of the reported user
           schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
           example: RSSMRA85T10A562S
-        - $ref: '#/components/parameters/InitiativeIdHeader'
       responses:
         '200':
           description: Ok
@@ -2198,13 +2206,17 @@ paths:
         IT: Rimuove la segnalazione per il codice fiscale indicato
       operationId: deleteReportedUser
       parameters:
+        - name: initiativeId
+          in: path
+          required: true
+          description: The ID of the initiative
+          schema: { type: string }
         - name: userFiscalCode
           in: path
           required: true
           description: Citizen fiscal code of the reported user
           schema: { type: string, maxLength: 16, pattern: '^[A-Z0-9]{11,16}$' }
           example: RSSMRA85T10A562S
-        - $ref: '#/components/parameters/InitiativeIdHeader'
       responses:
         '200':
           description: Business outcome
