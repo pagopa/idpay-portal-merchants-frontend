@@ -1,93 +1,84 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
 import StoreIcon from '@mui/icons-material/Store';
 import { theme } from '@pagopa/mui-italia/theme';
+import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
-import { getMerchantDetail } from '../../services/merchantService';
+import { getMerchantDetail, updateMerchantData } from '../../services/merchantService';
 import { formatDate, formatIban } from '../../helpers';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
+import { MerchantDetailDTO, MerchantIbanPatchDTO } from '../../api/generated/merchants/data-contracts';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
+import { EditEmailModal } from './EditEmailModal';
+import { EditIbanModal } from './EditIbanModal';
 
 const InitiativeOverview = () => {
   const history = useHistory();
   const { t } = useScopedTranslation();
   const { initiativeId } = useCurrentInitiativeId();
   const { setAlert } = useAlert();
-  // const [amount, setAmount] = useState<number | undefined>(undefined);
-  // const [refunded, setRefunded] = useState<number | undefined>(undefined);
-  const [iban, setIban] = useState<string | undefined>();
-  const [ibanHolder, setIbanHolder] = useState<string | undefined>();
-  const [onboardingDate, setOnboardingDate] = useState<string | undefined>();
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [isIbanModalOpen, setIsIbanModalOpen] = useState(false);
+  const [data, setData] = useState<MerchantDetailDTO & { onboardingDate: string } | undefined>();
+  const [isVisible, setIsVisible] = useState(false);
+  const obscuredText = useMemo(() => ({
+    iban: "•".repeat((data?.iban || '').length),
+    ibanHolder: "•".repeat((data?.ibanHolder || '').length)
+  }), [data]);
 
-  useEffect(() => {
+  const loadDetails = async () => {
     if (!initiativeId) {
       return;
     }
+    try {
+      const response = await getMerchantDetail(initiativeId);
+      setData({
+        ...response,
+        onboardingDate: formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
+      });
+    } catch {
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
+    }
+  };
 
-    let active = true;
-
-    const load = async () => {
-      try {
-        const response = await getMerchantDetail(initiativeId);
-        if (!active) {
-          return;
-        }
-
-        setIban(response?.iban);
-        setIbanHolder(response?.ibanHolder);
-        setOnboardingDate(
-          formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
-        );
-      } catch {
-        if (!active) {
-          return;
-        }
-
-        setAlert({
-          title: t('errors.genericTitle'),
-          text: t('errors.genericDescription'),
-          isOpen: true,
-          severity: 'error',
-        });
-      }
-    };
-
-    void load();
-
-    return () => {
-      active = false;
-    };
+  useEffect(() => {
+    setIsVisible(false);
+    void loadDetails();
   }, [initiativeId]);
 
-  // useEffect(() => {
-  //   getMerchantInitiativeStatistics(id)
-  //     .then((response) => {
-  //       setAmount(response?.amountCents);
-  //       setRefunded(response?.refundedCents);
-  //     })
-  //     .catch((error) => {
-  //       setAmount(undefined);
-  //       setRefunded(undefined);
-  //       addError({
-  //         id: 'GET_MERCHANT_STATISTICS',
-  //         blocking: false,
-  //         error,
-  //         techDescription: 'An error occurred getting merchant statistics',
-  //         displayableTitle: t('errors.genericTitle'),
-  //         displayableDescription: t('errors.genericDescription'),
-  //         toNotify: true,
-  //         component: 'Toast',
-  //         showCloseIcon: true,
-  //       });
-  //     });
-  // }, [id]);
+  const onUpdate = async (merchantData: MerchantIbanPatchDTO) => {
+    setIsEmailModalOpen(false);
+    setIsIbanModalOpen(false);
+    try {
+      await updateMerchantData(initiativeId || '', merchantData).then(() => loadDetails());
+      setAlert({
+        text: t('pages.initiativeOverview.successAlert'),
+        isOpen: true,
+        severity: 'success',
+      });
+    } catch {
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      });
+    }
+  };
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -103,84 +94,66 @@ const InitiativeOverview = () => {
           />
         </Grid>
         <Grid item xs={6}>
-          <Box display={'flex'}>
+          <Box>
             <InitiativeOverviewCard
               title={t('pages.initiativeOverview.information')}
               titleVariant={'h5'}
             >
-              <Grid container gridColumn={'span 12'}>
-                <Grid item xs={4}>
-                  <Typography variant="body1">
-                    {t('pages.initiativeOverview.onboardingDate')}
-                  </Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {onboardingDate?.trim() === '' || !onboardingDate
-                      ? MISSING_DATA_PLACEHOLDER
-                      : onboardingDate}
-                  </Typography>
-                </Grid>
-                {/* <Grid item xs={12}>
-                  <Box my={2}>
-                    <Typography variant="overline">
-                      {t('pages.initiativeOverview.refundsStatusTitle')}
+              <Box>
+                <Box display="flex" flexDirection="column" rowGap="2rem">
+                  <Box>
+                    <Typography variant="body1">
+                      {t('pages.initiativeOverview.onboardingDate')}
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
+                      {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
                     </Typography>
                   </Box>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body1">
-                    {t('shared.refund.totalAmount')}
-                  </Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {formattedCurrency(amount, MISSING_EURO_PLACEHOLDER, true)}
-                  </Typography>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body1">
-                    {t('shared.refund.totalRefunded')}
-                  </Typography>
-                </Grid> 
-                <Grid item xs={8}>
-                  <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {formattedCurrency(refunded, MISSING_EURO_PLACEHOLDER, true)}
-                  </Typography>
-                </Grid> */}
-
-                <Grid item xs={12}>
-                  <Box my={2}>
-                    <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Box>
+                      <Typography variant="body1">
+                        {t('pages.initiativeOverview.operativeEmail')}
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
+                        {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Box>
+                    <IconButton sx={{ height: "fit-content" }} onClick={() => setIsEmailModalOpen(true)}>
+                      <CreateOutlinedIcon />
+                    </IconButton>
                   </Box>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                    {ibanHolder?.trim() === '' || !ibanHolder
-                      ? MISSING_DATA_PLACEHOLDER
-                      : ibanHolder}
-                  </Typography>
-                </Grid>
-
-                <Grid item xs={4}>
-                  <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography
-                    variant="body1"
-                    noWrap
-                    sx={{ fontWeight: theme.typography.fontWeightBold }}
-                  >
-                    {formatIban(iban)}
-                  </Typography>
-                </Grid>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
+                    <Box>
+                      <IconButton sx={{ height: "fit-content" }} onClick={() => setIsVisible(prev => !prev)}>
+                        {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon/>}
+                      </IconButton>
+                      <IconButton sx={{ height: "fit-content" }} onClick={() => setIsIbanModalOpen(true)}>
+                        <CreateOutlinedIcon />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                  <Box>
+                    <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
+                      {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
+                    <Typography
+                      variant="body1"
+                      noWrap
+                      sx={{ fontWeight: theme.typography.fontWeightBold }}
+                    >
+                      {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
+                    </Typography>
+                  </Box>
+                </Box>
                 <Grid item xs={12}>
                   <InitiativeOverviewInfo />
                 </Grid>
-              </Grid>
+              </Box>
             </InitiativeOverviewCard>
           </Box>
         </Grid>
@@ -200,7 +173,6 @@ const InitiativeOverview = () => {
                       generatePath(ROUTES.STORES_UPLOAD, { initiative_id: initiativeId })
                     );
                   }}
-                  // onClick={() => { history.push(`${BASE_ROUTE}/${id}/punti-vendita/censisci/`); }}
                   size="large"
                   fullWidth={false}
                   data-testid="add-stores-button"
@@ -212,6 +184,18 @@ const InitiativeOverview = () => {
           </InitiativeOverviewCard>
         </Grid>
       </Grid>
+      <EditEmailModal
+        isOpen={isEmailModalOpen}
+        setIsOpen={setIsEmailModalOpen}
+        data={data}
+        onUpdate={onUpdate}
+      />
+      <EditIbanModal
+        isOpen={isIbanModalOpen}
+        setIsOpen={setIsIbanModalOpen}
+        data={data}
+        onUpdate={onUpdate}
+      />
     </Box>
   );
 };

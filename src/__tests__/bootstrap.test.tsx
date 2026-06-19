@@ -46,11 +46,15 @@ import { ENV } from '../utils/env';
 
 describe('bootstrap', () => {
   let bootstrapModule: any;
+  let bootstrappedConfig: typeof CONFIG;
 
-  const importBootstrapIsolated = (): void => {
+  const importBootstrapIsolated = (): typeof CONFIG => {
     jest.isolateModules(() => {
       bootstrapModule = require('../bootstrap');
+      bootstrappedConfig = require('@pagopa/selfcare-common-frontend/lib/config/env').CONFIG;
     });
+
+    return bootstrappedConfig;
   };
 
   beforeEach(() => {
@@ -64,6 +68,7 @@ describe('bootstrap', () => {
     CONFIG.URL_FE.ASSISTANCE = 'https://selfcare/assistance';
     CONFIG.TEST.JWT = '';
     CONFIG.HEADER.LINK.PRODUCTURL = '/portale-esercenti';
+    bootstrappedConfig = CONFIG;
   });
 
   afterEach(() => {
@@ -76,41 +81,41 @@ describe('bootstrap', () => {
     });
 
     it('should set MOCK_USER correctly', () => {
-      expect(CONFIG.MOCKS.MOCK_USER).toBe(MOCK_USER);
+      expect(bootstrappedConfig.MOCKS.MOCK_USER).toBe(MOCK_USER);
     });
 
     it('should set URL_FE.LOGIN correctly', () => {
-      expect(CONFIG.URL_FE.LOGIN).toBe(ENV.URL_FE.LOGIN);
+      expect(bootstrappedConfig.URL_FE.LOGIN).toBe(ENV.URL_FE.LOGIN);
     });
 
     it('should set URL_FE.LOGOUT correctly', () => {
-      expect(CONFIG.URL_FE.LOGOUT).toBe(ENV.URL_FE.LOGOUT);
+      expect(bootstrappedConfig.URL_FE.LOGOUT).toBe(ENV.URL_FE.LOGOUT);
     });
 
     it('should set URL_FE.ASSISTANCE correctly', () => {
-      expect(CONFIG.URL_FE.ASSISTANCE).toBe(ENV.URL_FE.ASSISTANCE_MERCHANT);
+      expect(bootstrappedConfig.URL_FE.ASSISTANCE).toBe(ENV.URL_FE.ASSISTANCE_MERCHANT);
     });
 
     it('should set TEST.JWT correctly', () => {
-      expect(CONFIG.TEST.JWT).toBe(testToken);
+      expect(bootstrappedConfig.TEST.JWT).toBe(testToken);
     });
 
     it('should set HEADER.LINK.PRODUCTURL correctly', () => {
-      expect(CONFIG.HEADER.LINK.PRODUCTURL).toBe(ROUTES.HOME);
+      expect(bootstrappedConfig.HEADER.LINK.PRODUCTURL).toBe(ROUTES.HOME);
     });
   });
 
   describe('React application bootstrapping', () => {
     it('should successfully import and execute bootstrap module', () => {
-      importBootstrapIsolated();
+      const config = importBootstrapIsolated();
 
       expect(bootstrapModule).toBeDefined();
-      expect(CONFIG.MOCKS.MOCK_USER).toBe(MOCK_USER);
-      expect(CONFIG.URL_FE.LOGIN).toBe(ENV.URL_FE.LOGIN);
-      expect(CONFIG.URL_FE.LOGOUT).toBe(ENV.URL_FE.LOGOUT);
-      expect(CONFIG.URL_FE.ASSISTANCE).toBe(ENV.URL_FE.ASSISTANCE_MERCHANT);
-      expect(CONFIG.TEST.JWT).toBe(testToken);
-      expect(CONFIG.HEADER.LINK.PRODUCTURL).toBe(ROUTES.HOME);
+      expect(config.MOCKS.MOCK_USER).toBe(MOCK_USER);
+      expect(config.URL_FE.LOGIN).toBe(ENV.URL_FE.LOGIN);
+      expect(config.URL_FE.LOGOUT).toBe(ENV.URL_FE.LOGOUT);
+      expect(config.URL_FE.ASSISTANCE).toBe(ENV.URL_FE.ASSISTANCE_MERCHANT);
+      expect(config.TEST.JWT).toBe(testToken);
+      expect(config.HEADER.LINK.PRODUCTURL).toBe(ROUTES.HOME);
       expect(mockCreateRoot).toHaveBeenCalledWith(expect.any(HTMLElement));
       expect(mockRender).toHaveBeenCalled();
       expect(mockReportWebVitals).toHaveBeenCalled();

@@ -19,13 +19,14 @@ import LabelValuePair from '../../components/labelValuePair/labelValuePair';
 import MerchantTransactions from '../../components/Transactions/MerchantTransactions';
 import { parseJwt } from '../../utils/jwt-utils';
 import ModalComponent from '../../components/modal/ModalComponent';
-import { isValidEmail, handlePromptMessage } from '../../helpers';
+import { isValidRegex, handlePromptMessage } from '../../helpers';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/data-contracts';
 import { POS_TYPE } from '../../utils/constants';
 import { browserConsole } from '../../utils/consoleLogger';
 import ROUTES from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
+import { useInitiativeConfig } from '../../hooks/useInitiativeConfig';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
@@ -58,6 +59,8 @@ const InitiativeStoreDetail = () => {
   const { initiative_id, store_id } = useParams<RouteParams>();
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { setStoreId } = useStore();
+    const { defaultConfig } = useInitiativeConfig();
+    const emailRegex = new RegExp(defaultConfig.regex.email);
 
   useEffect(() => {
     void fetchStoreDetail();
@@ -195,7 +198,7 @@ const InitiativeStoreDetail = () => {
       let currentFieldError = '';
       if (!trimmed) {
         currentFieldError = 'Il campo è obbligatorio';
-      } else if (!isValidEmail(trimmed)) {
+      } else if (!isValidRegex(trimmed, emailRegex)) {
         currentFieldError = 'Inserisci un indirizzo email valido';
       }
 
@@ -204,7 +207,7 @@ const InitiativeStoreDetail = () => {
         [field]: currentFieldError,
       };
       const bothPresent = email && emailConfirm;
-      const bothValid = isValidEmail(email) && isValidEmail(emailConfirm);
+      const bothValid = isValidRegex(email, emailRegex) && isValidRegex(emailConfirm, emailRegex);
 
       if (bothPresent && bothValid && email !== emailConfirm) {
         return {
@@ -241,12 +244,12 @@ const InitiativeStoreDetail = () => {
     }
     if (!contactEmailModal.trim()) {
       addErrorModal('contactEmailModal', 'Il campo è obbligatorio');
-    } else if (!isValidEmail(contactEmailModal)) {
+    } else if (!isValidRegex(contactEmailModal, emailRegex)) {
       addErrorModal('contactEmailModal', 'Inserisci un indirizzo email valido');
     }
     if (!contactEmailConfirmModal.trim()) {
       addErrorModal('contactEmailConfirmModal', 'Il campo è obbligatorio');
-    } else if (!isValidEmail(contactEmailConfirmModal)) {
+    } else if (!isValidRegex(contactEmailConfirmModal, emailRegex)) {
       addErrorModal('contactEmailConfirmModal', 'Inserisci un indirizzo email valido');
     }
     if (contactEmailModal.trim() === storeDetail.contactEmail) {
@@ -288,7 +291,7 @@ const InitiativeStoreDetail = () => {
       return;
     }
 
-    const response = await updateMerchantPointOfSales(merchantId, obj);
+    const response = await updateMerchantPointOfSales(initiative_id, merchantId, obj);
     if (response) {
       if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
         setAlert({
