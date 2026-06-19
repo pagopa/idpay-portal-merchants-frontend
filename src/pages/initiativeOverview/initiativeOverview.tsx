@@ -17,6 +17,7 @@ import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from '../../api/generated/merchants/data-contracts';
+import { InfoBanner } from '../../components/InfoBanner/InfoBanner';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
 import { EditEmailModal } from './EditEmailModal';
 import { EditIbanModal } from './EditIbanModal';
@@ -84,14 +85,35 @@ const InitiativeOverview = () => {
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <TitleBox
-            title={t('pages.initiativeOverview.title')}
-            subTitle={t('pages.initiativeOverview.subtitle')}
-            mbTitle={2}
-            mtTitle={2}
-            variantTitle="h4"
-            variantSubTitle="body1"
-          />
+          <Box display="flex" flexDirection="column" rowGap="0.5rem">
+            <TitleBox
+              title={t('pages.initiativeOverview.title')}
+              subTitle={t('pages.initiativeOverview.subtitle')}
+              mbTitle={2}
+              mtTitle={2}
+              variantTitle="h4"
+              variantSubTitle="body1"
+            />
+            {(!data?.iban || !data?.operativeEmail) &&
+              (!data?.iban ?
+                <InfoBanner
+                severity='warning'
+                description={t('pages.initiativeOverview.ibanBanner.description')}
+                button={{
+                  title: t('pages.initiativeOverview.ibanBanner.action'),
+                  onClick: () => setIsIbanModalOpen(true)
+                }}
+                /> :
+                <InfoBanner
+                severity='info'
+                description={t('pages.initiativeOverview.emailBanner.description')}
+                button={{
+                  title: t('pages.initiativeOverview.emailBanner.action'),
+                  onClick: () => setIsEmailModalOpen(true)
+                }}
+                />)
+            }
+          </Box>
         </Grid>
         <Grid item xs={6}>
           <Box>
@@ -126,7 +148,7 @@ const InitiativeOverview = () => {
                     <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
                     <Box>
                       <IconButton sx={{ height: "fit-content" }} onClick={() => setIsVisible(prev => !prev)}>
-                        {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon/>}
+                        {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
                       </IconButton>
                       <IconButton sx={{ height: "fit-content" }} onClick={() => setIsIbanModalOpen(true)}>
                         <CreateOutlinedIcon />

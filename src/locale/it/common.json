@@ -113,6 +113,14 @@
       "totalRefunded": "Totale rimborsato",
       "onboardingDate": "Data di adesione",
       "successAlert": "Modifica avvenuta con successo",
+      "ibanBanner": {
+        "description": "Per ricevere i rimborsi, inserisci un IBAN valido.",
+        "action": "Inserisci IBAN"
+      },
+      "emailBanner": {
+        "description": "Inserisci l’e-mail operativa per ricevere le notifiche sullo stato dei tuoi punti vendita..",
+        "action": "Inserisci e-mail"
+      },
       "emailModal": {
         "title": "E-mail operativa",
         "description": "L’e-mail indicata sarà utilizzata per la comunicazione con i punti vendita.",
