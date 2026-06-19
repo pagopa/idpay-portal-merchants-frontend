@@ -124,7 +124,7 @@
         "action": "Inserisci IBAN"
       },
       "emailBanner": {
-        "description": "Inserisci l’e-mail operativa per ricevere le notifiche sullo stato dei tuoi punti vendita..",
+        "description": "Inserisci l’e-mail operativa per ricevere le notifiche sullo stato dei tuoi punti vendita.",
         "action": "Inserisci e-mail"
       },
       "emailModal": {
