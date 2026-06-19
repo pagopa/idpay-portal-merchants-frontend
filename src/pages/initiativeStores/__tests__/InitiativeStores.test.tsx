@@ -172,6 +172,35 @@ const renderAndWaitStoreA = async () => {
   await waitForStoreA();
 };
 
+const renderWithUndefinedInitiativeId = async () => {
+  const history = createMemoryHistory();
+  const store = createStore();
+  const view = render(
+    <ThemeProvider theme={theme}>
+      <Router history={history}>
+        <Provider store={store}>
+          <InitiativeStores />
+        </Provider>
+      </Router>
+    </ThemeProvider>
+  );
+
+  await waitForTable();
+
+  mockInitiativeId = undefined;
+  view.rerender(
+    <ThemeProvider theme={theme}>
+      <Router history={history}>
+        <Provider store={store}>
+          <InitiativeStores />
+        </Provider>
+      </Router>
+    </ThemeProvider>
+  );
+
+  return view;
+};
+
 const applyCityFilter = async (city: string) => {
   const cityInput = screen.getByLabelText('pages.initiativeStores.city');
   fireEvent.change(cityInput, { target: { value: city } });
@@ -542,30 +571,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('usa initiativeId vuoto nella fetch quando diventa undefined dopo il render', async () => {
-    const history = createMemoryHistory();
-    const store = createStore();
-    const view = render(
-      <ThemeProvider theme={theme}>
-        <Router history={history}>
-          <Provider store={store}>
-            <InitiativeStores />
-          </Provider>
-        </Router>
-      </ThemeProvider>
-    );
-
-    await waitForTable();
-
-    mockInitiativeId = undefined;
-    view.rerender(
-      <ThemeProvider theme={theme}>
-        <Router history={history}>
-          <Provider store={store}>
-            <InitiativeStores />
-          </Provider>
-        </Router>
-      </ThemeProvider>
-    );
+    await renderWithUndefinedInitiativeId();
 
     fireEvent.click(screen.getByTestId('paginate-button'));
 
@@ -579,30 +585,7 @@ describe('<InitiativeStores />', () => {
   });
 
   test('mostra alert se la fetch fallisce durante il sort', async () => {
-    const history = createMemoryHistory();
-    const store = createStore();
-    const view = render(
-      <ThemeProvider theme={theme}>
-        <Router history={history}>
-          <Provider store={store}>
-            <InitiativeStores />
-          </Provider>
-        </Router>
-      </ThemeProvider>
-    );
-
-    await waitForTable();
-
-    mockInitiativeId = undefined;
-    view.rerender(
-      <ThemeProvider theme={theme}>
-        <Router history={history}>
-          <Provider store={store}>
-            <InitiativeStores />
-          </Provider>
-        </Router>
-      </ThemeProvider>
-    );
+    await renderWithUndefinedInitiativeId();
 
     (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValueOnce(
       new Error('Sort failure')
