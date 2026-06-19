@@ -32,10 +32,6 @@ import { cleanupOnLogout } from '../../utils/logoutCleanup';
 import { axiosInstance } from '../axiosInstance';
 import { ApiError } from '../ApiError';
 
-// ---------------------------------------------------------------------------
-// Helpers to build a mock adapter
-// ---------------------------------------------------------------------------
-
 function makeSuccessAdapter(data: unknown = {}, status = 200) {
   return async (config: InternalAxiosRequestConfig): Promise<AxiosResponse> => ({
     data,
@@ -60,9 +56,14 @@ function makeErrorAdapter(status: number, data: unknown) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Request interceptor
-// ---------------------------------------------------------------------------
+function toNativeArrayBuffer(value: string): ArrayBuffer {
+  const buffer = new ArrayBuffer(value.length);
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < value.length; i += 1) {
+    bytes[i] = value.charCodeAt(i);
+  }
+  return buffer;
+}
 
 describe('axiosInstance – request interceptor', () => {
   it('returns config unchanged when no token is available', async () => {
@@ -94,10 +95,6 @@ describe('axiosInstance – request interceptor', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Response interceptor – success path
-// ---------------------------------------------------------------------------
-
 describe('axiosInstance – response interceptor (success)', () => {
   it('passes a 200 response through unchanged', async () => {
     (storageTokenOps.read as jest.Mock).mockReturnValue(null);
@@ -110,10 +107,6 @@ describe('axiosInstance – response interceptor (success)', () => {
     expect(response.data).toEqual({ id: 42 });
   });
 });
-
-// ---------------------------------------------------------------------------
-// Response interceptor – error paths
-// ---------------------------------------------------------------------------
 
 describe('axiosInstance – response interceptor (error handling)', () => {
   let assignMock: jest.Mock;
@@ -161,6 +154,99 @@ describe('axiosInstance – response interceptor (error handling)', () => {
     await expect(axiosInstance.get('/test')).rejects.toBeInstanceOf(ApiError);
   });
 
+  it('parses code and message when a 400 error body is returned as ArrayBuffer', async () => {
+    (axiosInstance.defaults as any).adapter = async (config: InternalAxiosRequestConfig) => {
+      const payload = JSON.stringify({
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: 'PointOfSales with the same functional key already exists',
+      });
+      const data = Buffer.from(payload, 'utf-8');
+      const response: AxiosResponse = {
+        data,
+        status: 400,
+        statusText: 'Bad Request',
+        headers: new AxiosHeaders(),
+        config,
+      };
+      const err = new AxiosError('Request failed with status code 400', '400', config, null, response);
+      throw err;
+    };
+
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+      status: 400,
+      message: 'PointOfSales with the same functional key already exists',
+      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+    });
+  });
+
+  it('handles a non-JSON string error body by returning it as-is', async () => {
+    (axiosInstance.defaults as any).adapter = makeErrorAdapter(400, 'plain-text-error');
+
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+      status: 400,
+      message: 'Request failed',
+      details: 'plain-text-error',
+    });
+  });
+
+  it('parses code and message from a real ArrayBuffer payload', async () => {
+    const payload = JSON.stringify({
+      code: 'ARRAY_BUFFER_CODE',
+      message: 'ArrayBuffer decoded',
+    });
+    const arrayBuffer = toNativeArrayBuffer(payload);
+
+    (axiosInstance.defaults as any).adapter = makeErrorAdapter(409, arrayBuffer);
+
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+      status: 409,
+    });
+    await expect(axiosInstance.get('/test')).rejects.toBeInstanceOf(ApiError);
+  });
+
+  it('decodes bytes without TextDecoder when unavailable', async () => {
+    const payload = JSON.stringify({
+      code: 'NO_DECODER',
+      message: 'Fallback decoder',
+    });
+    const arrayBuffer = toNativeArrayBuffer(payload);
+    const originalTextDecoder = (globalThis as any).TextDecoder;
+    (globalThis as any).TextDecoder = undefined;
+
+    try {
+      (axiosInstance.defaults as any).adapter = makeErrorAdapter(418, arrayBuffer);
+
+      await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+        status: 418,
+      });
+      await expect(axiosInstance.get('/test')).rejects.toBeInstanceOf(ApiError);
+    } finally {
+      (globalThis as any).TextDecoder = originalTextDecoder;
+    }
+  });
+
+  it('uses TextDecoder path for ArrayBuffer decoding', async () => {
+    const arrayBuffer = toNativeArrayBuffer('ignored');
+    const originalTextDecoder = (globalThis as any).TextDecoder;
+    (globalThis as any).TextDecoder = class {
+      decode() {
+        return '{"code":"TEXT_DECODER_CODE","message":"Decoded by TextDecoder"}';
+      }
+    };
+
+    try {
+      (axiosInstance.defaults as any).adapter = makeErrorAdapter(409, arrayBuffer);
+
+      await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+        status: 409,
+        message: 'Decoded by TextDecoder',
+        code: 'TEXT_DECODER_CODE',
+      });
+    } finally {
+      (globalThis as any).TextDecoder = originalTextDecoder;
+    }
+  });
+
   it('rejects with fallback ApiError when error body has no code or message', async () => {
     (axiosInstance.defaults as any).adapter = makeErrorAdapter(500, {});
 
@@ -171,7 +257,6 @@ describe('axiosInstance – response interceptor (error handling)', () => {
   });
 
   it('uses error.message as fallback when errorBody is null', async () => {
-    // makeErrorAdapter creates AxiosError with message 'Request failed'
     (axiosInstance.defaults as any).adapter = makeErrorAdapter(503, null);
 
     await expect(axiosInstance.get('/test')).rejects.toMatchObject({
@@ -181,11 +266,9 @@ describe('axiosInstance – response interceptor (error handling)', () => {
   });
 
   it('falls through to API Error literal when errorBody has code but no message and error.message is empty', async () => {
-    // Covers line 55 branch: code truthy but message falsy → goes to fallback path
-    // Covers line 62 branch: errorBody.message falsy AND error.message falsy → 'API Error'
     (axiosInstance.defaults as any).adapter = async (config: InternalAxiosRequestConfig) => {
       const response: AxiosResponse = {
-        data: { code: 'SOME_CODE' }, // code present, message absent
+        data: { code: 'SOME_CODE' },
         status: 503,
         statusText: 'Service Unavailable',
         headers: new AxiosHeaders(),
@@ -214,7 +297,6 @@ describe('axiosInstance – response interceptor (error handling)', () => {
   });
 
   it('uses status 500 as fallback when response is absent', async () => {
-    // Simulate a network error where there is no response at all
     (axiosInstance.defaults as any).adapter = async (config: InternalAxiosRequestConfig) => {
       const err = new AxiosError('Network Error', 'ERR_NETWORK', config, null, undefined);
       throw err;
@@ -223,6 +305,19 @@ describe('axiosInstance – response interceptor (error handling)', () => {
     await expect(axiosInstance.get('/test')).rejects.toMatchObject({
       status: 500,
       message: 'Network Error',
+    });
+  });
+
+  it('uses fallback status 500 in code+message branch when status is falsy', async () => {
+    (axiosInstance.defaults as any).adapter = makeErrorAdapter(0, {
+      code: 'ERR_ZERO_STATUS',
+      message: 'Zero status error',
+    });
+
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+      status: 500,
+      message: 'Zero status error',
+      code: 'ERR_ZERO_STATUS',
     });
   });
 });

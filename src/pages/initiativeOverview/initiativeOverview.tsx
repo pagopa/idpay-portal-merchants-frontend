@@ -8,6 +8,7 @@ import { theme } from '@pagopa/mui-italia/theme';
 import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import { MIAlert } from '@pagopa/mui-italia';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
@@ -30,6 +31,7 @@ const InitiativeOverview = () => {
   const [isIbanModalOpen, setIsIbanModalOpen] = useState(false);
   const [data, setData] = useState<MerchantDetailDTO & { onboardingDate: string } | undefined>();
   const [isVisible, setIsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const obscuredText = useMemo(() => ({
     iban: "•".repeat((data?.iban || '').length),
     ibanHolder: "•".repeat((data?.ibanHolder || '').length)
@@ -52,10 +54,13 @@ const InitiativeOverview = () => {
         isOpen: true,
         severity: 'error',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    setIsLoading(true);
     setIsVisible(false);
     void loadDetails();
   }, [initiativeId]);
@@ -63,6 +68,7 @@ const InitiativeOverview = () => {
   const onUpdate = async (merchantData: MerchantIbanPatchDTO) => {
     setIsEmailModalOpen(false);
     setIsIbanModalOpen(false);
+    setIsLoading(true);
     try {
       await updateMerchantData(initiativeId || '', merchantData).then(() => loadDetails());
       setAlert({
@@ -77,6 +83,8 @@ const InitiativeOverview = () => {
         isOpen: true,
         severity: 'error',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,14 +92,35 @@ const InitiativeOverview = () => {
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <TitleBox
-            title={t('pages.initiativeOverview.title')}
-            subTitle={t('pages.initiativeOverview.subtitle')}
-            mbTitle={2}
-            mtTitle={2}
-            variantTitle="h4"
-            variantSubTitle="body1"
-          />
+          <Box display="flex" flexDirection="column" rowGap="0.5rem">
+            <TitleBox
+              title={t('pages.initiativeOverview.title')}
+              subTitle={t('pages.initiativeOverview.subtitle')}
+              mbTitle={2}
+              mtTitle={2}
+              variantTitle="h4"
+              variantSubTitle="body1"
+            />
+            {!isLoading && (!data?.iban || !data?.operativeEmail) &&
+              (!data?.iban ?
+                <MIAlert
+                  severity='warning'
+                  description={t('pages.initiativeOverview.ibanBanner.description')}
+                  action={{
+                    label: t('pages.initiativeOverview.ibanBanner.action'),
+                    onClick: () => setIsIbanModalOpen(true)
+                  }}
+                /> :
+                <MIAlert
+                  severity='info'
+                  description={t('pages.initiativeOverview.emailBanner.description')}
+                  action={{
+                    label: t('pages.initiativeOverview.emailBanner.action'),
+                    onClick: () => setIsEmailModalOpen(true)
+                  }}
+                />)
+            }
+          </Box>
         </Grid>
         <Grid item xs={6}>
           <Box>
@@ -126,7 +155,7 @@ const InitiativeOverview = () => {
                     <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
                     <Box>
                       <IconButton sx={{ height: "fit-content" }} onClick={() => setIsVisible(prev => !prev)}>
-                        {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon/>}
+                        {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
                       </IconButton>
                       <IconButton sx={{ height: "fit-content" }} onClick={() => setIsIbanModalOpen(true)}>
                         <CreateOutlinedIcon />

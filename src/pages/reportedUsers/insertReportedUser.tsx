@@ -112,10 +112,10 @@ const InsertReportedUser: React.FC = () => {
     <Box maxWidth="75%" justifySelf="center">
       <ModalReportedUser
         open={showConfirmModal}
-        title={t('pages.reportedUsers.ModalReportedUser.title')}
+        title={t('pages.reportedUsers.ModalReport.title')}
         description={
           <Trans
-            i18nKey="pages.reportedUsers.ModalReportedUser.description"
+            i18nKey="pages.reportedUsers.ModalReport.description"
             values={{ cf: cfToReport ?? '' }}
             components={{ b: <b /> }}
           />

@@ -81,7 +81,7 @@ const InitiativeStoreDetail = () => {
     try {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
-      const response = await getMerchantPointOfSalesById(merchantId, store_id);
+      const response = await getMerchantPointOfSalesById(initiative_id, merchantId, store_id);
       if (response) {
         setStoreDetail(response);
       }

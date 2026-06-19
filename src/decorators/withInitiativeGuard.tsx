@@ -70,7 +70,7 @@ const WithInitiativeGuard: React.FC<Props> = ({ children, route }) => {
   }
 
   // 5️⃣ State OK
-  return <>{children}</>;
+  return <React.Fragment key={initiativeId}>{children}</React.Fragment>;
 };
 
 export default WithInitiativeGuard;
