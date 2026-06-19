@@ -106,11 +106,41 @@
       "storesSubtitle": "Inserisci i tuoi punti vendita direttamente sul portale.",
       "iban": "IBAN",
       "holder": "Intestatario",
+      "operativeEmail": "E-mail operativa",
       "refundsDataTitle": "Dati rimborso",
       "refundsStatusTitle": "Stato rimborsi",
       "totalAmount": "Totale erogato",
       "totalRefunded": "Totale rimborsato",
-      "onboardingDate": "Data di adesione"
+      "onboardingDate": "Data di adesione",
+      "successAlert": "Modifica avvenuta con successo",
+      "emailModal": {
+        "title": "E-mail operativa",
+        "description": "L’e-mail indicata sarà utilizzata per la comunicazione con i punti vendita.",
+        "fieldInsert": {
+          "label": "E-mail*",
+          "placeholder": "Inserisci e-mail"
+        },
+        "fieldConfirm": {
+          "label": "Conferma e-mail*",
+          "placeholder": "Conferma e-mail"
+        },
+        "notValidEmail": "Inserisci un'e-mail valida",
+        "notEqualEmail": "Le e-mail devono corrispondere",
+        "requiredField": "Campo obbligatorio"
+      },
+      "ibanModal": {
+        "title": "Inserisci IBAN",
+        "description": "L’IBAN indicato sarà utilizzato per l’accredito degli importi maturati tramite l’uso del buono. Assicurati che i dati siano corretti e intestati all’azienda.",
+        "fieldHolder": {
+          "placeholder": "Inserisci intestatario *"
+        },
+        "fieldIban": {
+          "placeholder": "Inserisci IBAN *"
+        },
+        "requiredField": "Campo obbligatorio",
+        "notValidIban": "Inserisci un IBAN valido",
+        "notValidIbanHolder": "Inserisci un nome valido"
+      }
     },
     "pointOfSales": {
       "type": "Tipologia di punto vendita",

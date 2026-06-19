@@ -166,10 +166,11 @@ class MerchantsApiClient {
   }
 
   public async updateMerchantPointOfSales(
+    initiativeId: string,
     merchantId: string,
     pointOfSales: Array<PointOfSaleDTO>
   ): Promise<void> {
-    await this.pointOfSales.putPointOfSales({ merchantId }, pointOfSales);
+    await this.pointOfSales.postPointOfSales({ merchantId, initiativeId }, pointOfSales);
   }
 
   public async getMerchantPointOfSales(
@@ -361,6 +362,13 @@ class MerchantsApiClient {
       { headers: { 'initiative-id': initiativeId } }
     );
     return res.data;
+  }
+
+  public async updateMerchantData(
+    initiativeId: string,
+    merchantData: MerchantIbanPatchDTO
+  ): Promise<void> {
+    await this.merchantDetail.updateMerchantIban({ initiativeId }, merchantData);
   }
 }
 

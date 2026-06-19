@@ -35,3 +35,4 @@ export const enum TYPE_TEXT {
 }
 
 export const MIN_START_DATE = '2025-11-18';
+

@@ -18,12 +18,13 @@ import { ButtonNaked } from '@pagopa/mui-italia/components';
 import { theme } from '@pagopa/mui-italia/theme';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
-import { isValidEmail, isValidUrl, generateUniqueId } from '../../helpers';
+import { isValidRegex, isValidUrl, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
 import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
+import { useInitiativeConfig } from '../../hooks/useInitiativeConfig';
 
 type TypeEnum = PointOfSaleDTO['type'];
 const PHYSICAL: TypeEnum = 'PHYSICAL';
@@ -60,6 +61,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       franchiseName: '',
       id: generateUniqueId(),
       address: '',
+      streetNumber: '',
       city: '',
       zipCode: '',
       region: '',
@@ -76,6 +78,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   const [errors, setErrors] = useState<FormErrors>({});
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
   const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
+  const { defaultConfig } = useInitiativeConfig();
+  const emailRegex = new RegExp(defaultConfig.regex.email);
 
   const mergedErrors = useMemo(() => ({ ...errors, ...externalErrors }), [errors, externalErrors]);
 
@@ -192,7 +196,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           fieldErrors = { ...fieldErrors, channelGeolink: 'Devi inserire una URL valida' };
           isValid = false;
         }
-        if (sp?.channelEmail && !isValidEmail(sp?.channelEmail)) {
+        if (sp?.channelEmail && !isValidRegex(sp?.channelEmail, emailRegex)) {
           fieldErrors = { ...fieldErrors, channelEmail: 'Devi inserire una email valida' };
           isValid = false;
         }
@@ -226,6 +230,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           type: PHYSICAL,
           franchiseName: '',
           address: '',
+          streetNumber: '',
           city: '',
           zipCode: '',
           region: '',
@@ -250,6 +255,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           ? {
               ...salesPoint,
               ['address']: '',
+              ['streetNumber']: '',
               ['city']: '',
               ['zipCode']: '',
               ['province']: '',
@@ -301,7 +307,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           } else {
             clearError(index, 'confirmContactEmail');
           }
-          if (!isValidEmail(value)) {
+          if (!isValidRegex(value, emailRegex)) {
             updateError(index, 'contactEmail', 'Devi inserire una email valida');
           } else {
             clearError(index, 'contactEmail');
@@ -317,7 +323,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           [index]: value,
         }));
         if (value) {
-          if (!isValidEmail(value)) {
+          if (!isValidRegex(value, emailRegex)) {
             updateError(index, 'confirmContactEmail', 'Devi inserire una email valida');
           } else if (salesPoints[index].contactEmail && value !== salesPoints[index].contactEmail) {
             updateError(index, 'confirmContactEmail', 'Le email non coincidono');
@@ -438,6 +444,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           id: generateUniqueId(),
           franchiseName: '',
           address: '',
+          streetNumber: '',
           city: '',
           zipCode: '',
           region: '',
@@ -477,9 +484,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           i === salesPointIndex
             ? {
                 ...sp,
-                address: addressObj.Address.Street.concat(
-                  `, ${addressObj.Address.AddressNumber ?? 'SNC'}`
-                ),
+                address: addressObj.Address.Street,
+                streetNumber: addressObj.Address.AddressNumber ?? 'SNC',
                 city: addressObj.Address.Locality ?? '',
                 zipCode: addressObj.Address.PostalCode ?? '',
                 region: addressObj.Address.Region?.Name ?? '',
@@ -495,6 +501,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
             ? {
                 ...sp,
                 address: '',
+                streetNumber: '',
                 city: '',
                 zipCode: '',
                 region: '',
@@ -978,7 +985,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }
                         margin="dense"
                         onBlur={(e) => {
-                          if (e.target.value.trim() !== '' && !isValidEmail(e.target.value)) {
+                          if (e.target.value.trim() !== '' && !isValidRegex(e.target.value, emailRegex)) {
                             updateError(index, 'channelEmail', 'Devi inserire una email valida');
                           } else {
                             clearError(index, 'channelEmail');
