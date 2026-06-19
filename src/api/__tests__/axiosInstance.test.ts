@@ -161,6 +161,31 @@ describe('axiosInstance – response interceptor (error handling)', () => {
     await expect(axiosInstance.get('/test')).rejects.toBeInstanceOf(ApiError);
   });
 
+  it('parses code and message when a 400 error body is returned as ArrayBuffer', async () => {
+    (axiosInstance.defaults as any).adapter = async (config: InternalAxiosRequestConfig) => {
+      const payload = JSON.stringify({
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: 'PointOfSales with the same functional key already exists',
+      });
+      const data = Buffer.from(payload, 'utf-8');
+      const response: AxiosResponse = {
+        data,
+        status: 400,
+        statusText: 'Bad Request',
+        headers: new AxiosHeaders(),
+        config,
+      };
+      const err = new AxiosError('Request failed with status code 400', '400', config, null, response);
+      throw err;
+    };
+
+    await expect(axiosInstance.get('/test')).rejects.toMatchObject({
+      status: 400,
+      message: 'PointOfSales with the same functional key already exists',
+      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+    });
+  });
+
   it('rejects with fallback ApiError when error body has no code or message', async () => {
     (axiosInstance.defaults as any).adapter = makeErrorAdapter(500, {});
 

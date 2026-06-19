@@ -1,4 +1,5 @@
 import { getMerchantsApi } from '../api/MerchantsApiClient';
+import { ApiError } from '../api/ApiError';
 import {
   InitiativeDTO,
   MerchantStatisticsDTO,
@@ -99,9 +100,34 @@ export const updateMerchantPointOfSales = async (
   merchantId: string,
   pointOfSales: Array<PointOfSaleDTO>
 ): Promise<void | { code?: string; message?: string }> => {
-  const result = await getMerchantsApi().updateMerchantPointOfSales(initiativeId, merchantId, pointOfSales);
+  try {
+    const result = await getMerchantsApi().updateMerchantPointOfSales(
+      initiativeId,
+      merchantId,
+      pointOfSales
+    );
 
-  return result as void | { code?: string; message?: string };
+    return result as void | { code?: string; message?: string };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        code: error.code,
+        message:
+          (error.details as { message?: string } | undefined)?.message ??
+          error.message ??
+          undefined,
+      };
+    }
+
+    const apiErrorData = (error as { response?: { data?: { code?: string; message?: string } } })
+      ?.response?.data;
+
+    if (apiErrorData && (apiErrorData.code || apiErrorData.message)) {
+      return apiErrorData;
+    }
+
+    return { code: 'GENERIC_ERROR' };
+  }
 };
 
 export const getMerchantPointOfSales = async (

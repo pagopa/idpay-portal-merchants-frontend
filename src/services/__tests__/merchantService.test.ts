@@ -1,6 +1,7 @@
 /// <reference types="jest" />
 
 import { getMerchantsApi } from '../../api/MerchantsApiClient';
+import { ApiError } from '../../api/ApiError';
 import {
   getMerchantInitiativeList,
   getMerchantTransactions,
@@ -128,6 +129,45 @@ describe('merchantService', () => {
   test('updateMerchantPointOfSales delegates correctly', async () => {
     await updateMerchantPointOfSales('initiative', 'merchant', []);
     expect(mockedApi.updateMerchantPointOfSales).toHaveBeenCalledWith('initiative', 'merchant', []);
+  });
+
+  test('updateMerchantPointOfSales returns API error payload when request fails', async () => {
+    mockedApi.updateMerchantPointOfSales.mockRejectedValue({
+      response: {
+        data: {
+          code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+          message: 'PointOfSales with the same functional key already exists',
+        },
+      },
+    });
+
+    const result = await updateMerchantPointOfSales('initiative', 'merchant', []);
+
+    expect(result).toEqual({
+      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+      message: 'PointOfSales with the same functional key already exists',
+    });
+  });
+
+  test('updateMerchantPointOfSales maps ApiError details when request fails', async () => {
+    mockedApi.updateMerchantPointOfSales.mockRejectedValue(
+      new ApiError(
+        400,
+        'PointOfSales with the same functional key already exists',
+        'POINT_OF_SALE_ALREADY_REGISTERED' as any,
+        {
+          code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+          message: 'PointOfSales with the same functional key already exists',
+        }
+      )
+    );
+
+    const result = await updateMerchantPointOfSales('initiative', 'merchant', []);
+
+    expect(result).toEqual({
+      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+      message: 'PointOfSales with the same functional key already exists',
+    });
   });
 
   test('getMerchantPointOfSales delegates correctly', async () => {
