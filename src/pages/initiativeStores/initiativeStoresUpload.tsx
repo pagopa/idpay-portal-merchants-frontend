@@ -133,8 +133,8 @@ const InitiativeStoresUpload: React.FC = () => {
       if (response) {
         if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
           setAlert({
-            title: t('errors.duplicateEmailError'),
-            text: `${response?.message} già associata ad altro punto vendita`,
+            title: t('errors.pointOfSaleAlreadyExistsError'),
+            text: t('errors.pointOfSaleAlreadyExistsDescription'),
             isOpen: true,
             severity: 'error',
           });
