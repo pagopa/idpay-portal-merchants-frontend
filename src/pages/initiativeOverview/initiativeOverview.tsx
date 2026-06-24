@@ -135,9 +135,7 @@ const InitiativeOverview = () => {
               titleVariant={'h5'}
             >
               {isLoading ?
-                <Box display='flex' alignItems='center' justifyContent='center' width='100%'>
-                  <CircularProgress />
-                </Box> :
+                <CircularProgress /> :
                 <Box>
                   <Box display="flex" flexDirection="column" rowGap="0.5rem">
                     <Box>
