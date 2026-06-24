@@ -348,6 +348,14 @@ paths:
             type: string
             maxLength: 255
             pattern: .*
+        - name: initiativeId
+          in: query
+          description: Filter by initiative ID
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+            pattern: .*
         - name: type
           in: query
           description: Filter by point of sale type
@@ -3776,9 +3784,14 @@ components:
           description: "ENG: The IBAN of the merchant <br> IT: L'IBAN dell'esercente"
         ibanHolder:
           type: string
+          minLength: 3
+          maxLength: 70
+          pattern: '^(?=.*\p{L})[\p{L}''\s-]{3,70}$'
           description: "ENG: The holder of the IBAN <br> IT: L'intestatario dell'IBAN"
         operativeEmail:
           type: string
+          maxLength: 255
+          pattern: '^(?=.{1,255}$)[A-Za-z0-9]([A-Za-z0-9+_-]*(\.[A-Za-z0-9+_-]+)*)?@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$'
           description: "ENG: The certified email address of the merchant <br> IT: L'indirizzo email PEC dell' esercente"
     PointOfSaleTransactionsProcessedListDTO:
       type: object

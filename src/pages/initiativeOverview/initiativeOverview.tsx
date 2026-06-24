@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Divider, IconButton, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useMemo, useState } from 'react';
@@ -147,6 +147,7 @@ const InitiativeOverview = () => {
                       {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
                     </Typography>
                   </Box>
+                  <Divider />
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Box minWidth={0}>
                       <Typography variant="body1">
@@ -181,6 +182,7 @@ const InitiativeOverview = () => {
                       </Typography>
                     </Tooltip>
                   </Box>
+                  <Divider />
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
                     <Tooltip title={isVisible && data?.iban}>
