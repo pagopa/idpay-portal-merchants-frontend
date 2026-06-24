@@ -8,7 +8,7 @@ import { useInitiativeConfig } from "../../hooks/useInitiativeConfig";
 
 type Props = EditModalProps & {
   data?: MerchantDetailDTO & { onboardingDate: string }
-  onUpdate: (data: MerchantIbanPatchDTO) => void
+  onUpdate: (data: MerchantIbanPatchDTO, key: keyof MerchantIbanPatchDTO) => void
 }
 
 export const EditEmailModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
@@ -31,7 +31,7 @@ export const EditEmailModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => 
     if (isEqual && !isEmpty && !isDraftEmpty && !error?.draftEmail) {
       const { operativeEmail, draftEmail, ...rest } = error;
       setError(rest);
-      onUpdate(merchantData);
+      onUpdate(merchantData, 'operativeEmail');
     } else {
       const dataError = isEmpty || !isEqual ? { operativeEmail: isEmpty ? 'pages.initiativeOverview.emailModal.requiredField' : 'pages.initiativeOverview.emailModal.notEqualEmail' } : {};
       const draftError = isDraftEmpty || error?.draftEmail ? { draftEmail: error?.draftEmail || 'pages.initiativeOverview.emailModal.requiredField' } : {};
