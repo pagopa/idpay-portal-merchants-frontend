@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Typography } from '@mui/material';
+import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useMemo, useState } from 'react';
@@ -36,6 +36,13 @@ const InitiativeOverview = () => {
     iban: "•".repeat((data?.iban || '').length),
     ibanHolder: "•".repeat((data?.ibanHolder || '').length)
   }), [data]);
+
+  const fieldsStyle = {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0
+  };
 
   const loadDetails = async () => {
     if (!initiativeId) {
@@ -89,7 +96,7 @@ const InitiativeOverview = () => {
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box width='100%' minWidth={0} maxWidth='100%'>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column">
@@ -140,13 +147,15 @@ const InitiativeOverview = () => {
                     </Typography>
                   </Box>
                   <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Box>
+                    <Box minWidth={0}>
                       <Typography variant="body1">
                         {t('pages.initiativeOverview.operativeEmail')}
                       </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                        {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
-                      </Typography>
+                      <Tooltip title={data?.operativeEmail} placement='bottom-start'>
+                        <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                          {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
+                        </Typography>
+                      </Tooltip>
                     </Box>
                     <IconButton onClick={() => setIsEmailModalOpen(true)}>
                       <EditOutlinedIcon />
@@ -165,19 +174,23 @@ const InitiativeOverview = () => {
                   </Box>
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                      {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
-                    </Typography>
+                    <Tooltip title={isVisible && data?.ibanHolder} placement='bottom-start'>
+                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                        {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Tooltip>
                   </Box>
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
-                    <Typography
-                      variant="body1"
-                      noWrap
-                      sx={{ fontWeight: theme.typography.fontWeightBold }}
-                    >
-                      {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
-                    </Typography>
+                    <Tooltip title={isVisible && data?.iban} placement='bottom-start'>
+                      <Typography
+                        variant="body1"
+                        noWrap
+                        sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}
+                      >
+                        {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Tooltip>
                   </Box>
                 </Box>
                 <Grid item xs={12}>
