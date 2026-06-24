@@ -348,6 +348,14 @@ paths:
             type: string
             maxLength: 255
             pattern: .*
+        - name: initiativeId
+          in: query
+          description: Filter by initiative ID
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+            pattern: .*
         - name: type
           in: query
           description: Filter by point of sale type

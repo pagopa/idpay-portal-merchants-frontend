@@ -186,6 +186,17 @@ class MerchantsApiClient {
     return res.data;
   }
 
+  public async getMerchantPointOfSalesCatalog(
+    merchantId: string,
+    query?: Record<string, unknown>
+  ): Promise<unknown> {
+    const res = await this.pointOfSales.getPointOfSales({
+      merchantId,
+      ...(query ?? {}),
+    });
+    return res.data;
+  }
+
   public async getMerchantPointOfSalesById(
     initiativeId: string,
     merchantId: string,
@@ -261,9 +272,11 @@ class MerchantsApiClient {
     rewardBatchId: string
   ): Promise<DownloadRewardBatchResponseDTO> {
     const res = await this.rewardBatches.approveDownloadRewardBatch({
-      initiativeId,
-      rewardBatchId,
-    });
+        initiativeId,
+        rewardBatchId,
+      },
+      { format: 'json' }
+    );
     return res.data;
   }
 

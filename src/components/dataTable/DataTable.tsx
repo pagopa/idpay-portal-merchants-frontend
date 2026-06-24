@@ -38,6 +38,7 @@ export interface DataTableProps {
   onRowsPerPageChange?: (pageSize: number) => void;
   onSelectionModelChange?: (selectionModel: GridSelectionModel) => void;
   singleSelectionModel?: GridInputSelectionModel;
+  rowsPerPageOptions?: Array<number>;
 }
 
 const DataTable = ({
@@ -55,6 +56,7 @@ const DataTable = ({
   isTransactionsPage = false,
   onRowsPerPageChange,
   singleSelectionModel,
+  rowsPerPageOptions,
 }: DataTableProps) => {
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
@@ -80,7 +82,7 @@ const DataTable = ({
         <DataGrid
           rows={rows}
           columns={columns}
-          rowsPerPageOptions={isTransactionsPage ? ELEMENT_PER_PAGE : [rowsPerPage]}
+          rowsPerPageOptions={rowsPerPageOptions ?? (isTransactionsPage ? ELEMENT_PER_PAGE : [rowsPerPage])}
           {...selectionProps}
           onSelectionModelChange={onSelectionModelChange}
           disableSelectionOnClick
@@ -130,11 +132,6 @@ const DataTable = ({
             },
             '& .MuiDataGrid-cell:focus-within': {
               outline: 'none',
-            },
-            '& .MuiDataGrid-columnHeaderCheckbox': {
-              '& span ': {
-                display: 'none',
-              },
             },
           }}
         />

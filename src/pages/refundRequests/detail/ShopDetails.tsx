@@ -42,7 +42,12 @@ import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts'
 import { browserConsole } from '../../../utils/consoleLogger';
 
 type StatusEnum = RewardBatchDTO['status'];
-const APPROVED_STATUS: StatusEnum = 'APPROVED';
+const ENABLED_DOWNLOAD_STATUSES: Array<StatusEnum> = [
+  'APPROVED',
+  'PENDING_REFUND',
+  'REFUNDED',
+  'NOT_REFUNDED',
+];
 const APPROVING_STATUS: StatusEnum = 'APPROVING';
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/data-contracts';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/data-contracts';
@@ -307,7 +312,10 @@ const ShopDetails: React.FC = () => {
             }}
             onClick={handleDownloadCsv}
             data-testid="download-csv-button-test"
-            disabled={store?.status !== APPROVED_STATUS || batchDownloadIsLoading}
+            disabled={
+              !ENABLED_DOWNLOAD_STATUSES.includes(store?.status as StatusEnum) ||
+              batchDownloadIsLoading
+            }
           >
             {t('pages.refundRequests.storeDetails.exportCSV')}
             <span style={{ marginLeft: '10px' }}>
