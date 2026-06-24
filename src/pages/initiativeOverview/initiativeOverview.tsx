@@ -41,6 +41,7 @@ const InitiativeOverview = () => {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    maxWidth: 'fit-content',
     minWidth: 0
   };
 
@@ -151,7 +152,7 @@ const InitiativeOverview = () => {
                       <Typography variant="body1">
                         {t('pages.initiativeOverview.operativeEmail')}
                       </Typography>
-                      <Tooltip title={data?.operativeEmail} placement='bottom-start'>
+                      <Tooltip title={data?.operativeEmail}>
                         <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
                           {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
                         </Typography>
@@ -174,7 +175,7 @@ const InitiativeOverview = () => {
                   </Box>
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
-                    <Tooltip title={isVisible && data?.ibanHolder} placement='bottom-start'>
+                    <Tooltip title={isVisible && data?.ibanHolder}>
                       <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
                         {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
                       </Typography>
@@ -182,12 +183,8 @@ const InitiativeOverview = () => {
                   </Box>
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
-                    <Tooltip title={isVisible && data?.iban} placement='bottom-start'>
-                      <Typography
-                        variant="body1"
-                        noWrap
-                        sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}
-                      >
+                    <Tooltip title={isVisible && data?.iban}>
+                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
                         {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
                       </Typography>
                     </Tooltip>
