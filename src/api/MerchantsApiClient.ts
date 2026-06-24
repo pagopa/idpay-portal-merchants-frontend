@@ -263,7 +263,9 @@ class MerchantsApiClient {
     const res = await this.rewardBatches.approveDownloadRewardBatch({
       initiativeId,
       rewardBatchId,
-    });
+    },
+      { format: 'json' }
+    );
     return res.data;
   }
 
