@@ -44,7 +44,7 @@
     "pointOfSaleError": "Errore punto vendita",
     "duplicateEmailError": "Errore email referente",
     "pointOfSaleAlreadyExistsError": "Errore censimento punto vendita",
-    "pointOfSaleAlreadyExistsDescription": "Esiste un punto vendita già censito"
+    "pointOfSaleAlreadyExistsDescription": "Il punto vendita risulta già censito."
   },
   "validation": {
     "required": "Campo obbligatorio",
@@ -183,7 +183,7 @@
       "subtitle": "Consulta i tuoi punti vendita",
       "addStore": "Inserisci i punti vendita",
       "addStoreList": "Aggiungi punti vendita",
-      "uploadStores": "Inserisci l’elenco dei tuoi punti vendita",
+      "uploadStores": "Inserisci i tuoi punti vendita",
       "addStoresSubtitle": "Inserisci i punti vendita autorizzati, fisici o online.",
       "noStoresInitiative": "Non ci sono punti vendita per questa iniziativa",
       "noStores": "Non ci sono punti vendita, ",
