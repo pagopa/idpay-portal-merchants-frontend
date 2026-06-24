@@ -8,7 +8,7 @@ import { useInitiativeConfig } from "../../hooks/useInitiativeConfig";
 
 type Props = EditModalProps & {
   data?: MerchantDetailDTO & { onboardingDate: string }
-  onUpdate: (data: MerchantIbanPatchDTO) => void
+  onUpdate: (data: MerchantIbanPatchDTO, key: keyof MerchantIbanPatchDTO) => void
 }
 
 export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
@@ -30,7 +30,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
     if (!isHolderEmpty && !isIbanEmpty && !error?.iban && !error?.ibanHolder) {
       const { iban, ibanHolder, ...rest } = error;
       setError(rest);
-      onUpdate(merchantData);
+      onUpdate(merchantData, 'iban');
     } else {
       const ibanError = isIbanEmpty || error?.iban ? { iban: error?.iban || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
       const ibanHolderError = isHolderEmpty || error?.ibanHolder ? { ibanHolder: error?.ibanHolder || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
