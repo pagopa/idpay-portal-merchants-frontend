@@ -65,14 +65,14 @@ const InitiativeOverview = () => {
     void loadDetails();
   }, [initiativeId]);
 
-  const onUpdate = async (merchantData: MerchantIbanPatchDTO) => {
+  const onUpdate = async (merchantData: MerchantIbanPatchDTO, key: keyof MerchantIbanPatchDTO) => {
     setIsEmailModalOpen(false);
     setIsIbanModalOpen(false);
     setIsLoading(true);
     try {
       await updateMerchantData(initiativeId || '', merchantData).then(() => loadDetails());
       setAlert({
-        text: t('pages.initiativeOverview.successAlert'),
+        text: t(`pages.initiativeOverview.successAlert.${key}.${!data?.[key] ? 'add' : 'edit'}`),
         isOpen: true,
         severity: 'success',
       });
