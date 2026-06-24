@@ -29,6 +29,7 @@ const ROUTES = {
   REVERSE: `${BASE_ROUTE}/:initiative_id/:pointOfSaleId/storna-transazione/:trxId`,
   EXPORT_REPORT: `${BASE_ROUTE}/:initiative_id/esporta-report`,
   SIDE_MENU_EXPORT_REPORT: `esporta-report`,
+  POS_CATALOG: `${BASE_ROUTE}/catalogo-punti-vendita`
 };
 
 export default ROUTES;
