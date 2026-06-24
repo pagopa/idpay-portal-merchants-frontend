@@ -214,7 +214,33 @@ describe('ShopDetails', () => {
     expect(
       await screen.findByText('pages.refundRequests.storeDetails.csv.alert')
     ).toBeInTheDocument();
+    expect(screen.getByTestId('download-csv-button-test')).toHaveProperty('disabled', true);
   });
+
+  it('should disable download button when status is not in ENABLED_DOWNLOAD_STATUSES', async () => {
+    getRewardBatchById.mockResolvedValue({
+      id: 'batch-1',
+      name: 'Batch 1',
+      status: 'TO_EVALUATE',
+    });
+
+    renderComponent();
+
+    const btn = await screen.findByTestId('download-csv-button-test');
+    expect(btn).toHaveProperty('disabled', true);
+  });
+
+  it.each(['PENDING_REFUND', 'REFUNDED', 'NOT_REFUNDED'])(
+    'should enable download button when status is %s',
+    async (status: string) => {
+      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status });
+
+      renderComponent();
+
+      const btn = await screen.findByTestId('download-csv-button-test');
+      expect(btn).toHaveProperty('disabled', false);
+    }
+  );
 
   it('should call handleDownloadCsv', async () => {
     getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
