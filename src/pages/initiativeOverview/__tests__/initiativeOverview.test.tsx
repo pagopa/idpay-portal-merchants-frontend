@@ -207,7 +207,7 @@ describe('InitiativeOverview', () => {
 
     const onUpdate = mockEditEmailModal.mock.calls.at(-1)[0].onUpdate;
     await act(async () => {
-      await onUpdate({ operativeEmail: 'updated@test.it' });
+      await onUpdate({ operativeEmail: 'updated@test.it' }, 'operativeEmail');
     });
 
     expect(merchantService.updateMerchantData).toHaveBeenCalledWith('initiative-123', {
@@ -215,7 +215,7 @@ describe('InitiativeOverview', () => {
     });
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalledWith({
-        text: 'pages.initiativeOverview.successAlert',
+        text: 'pages.initiativeOverview.successAlert.operativeEmail.edit',
         isOpen: true,
         severity: 'success',
       });
