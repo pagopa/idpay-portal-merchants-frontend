@@ -413,7 +413,9 @@ describe('MerchantsApiClient', () => {
     expect(mockRewardBatchesInstance.approveDownloadRewardBatch).toHaveBeenCalledWith({
       initiativeId: 'init1',
       rewardBatchId: 'batch1',
-    });
+    },
+    {format: "json"}
+  );
   });
 
   it('postponeTransaction calls rewardBatches method', async () => {
