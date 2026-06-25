@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Typography } from '@mui/material';
+import { Box, Button, Divider, IconButton, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useMemo, useState } from 'react';
@@ -37,6 +37,14 @@ const InitiativeOverview = () => {
     ibanHolder: "•".repeat((data?.ibanHolder || '').length)
   }), [data]);
 
+  const fieldsStyle = {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: 'fit-content',
+    minWidth: 0
+  };
+
   const loadDetails = async () => {
     if (!initiativeId) {
       return;
@@ -65,14 +73,14 @@ const InitiativeOverview = () => {
     void loadDetails();
   }, [initiativeId]);
 
-  const onUpdate = async (merchantData: MerchantIbanPatchDTO) => {
+  const onUpdate = async (merchantData: MerchantIbanPatchDTO, key: keyof MerchantIbanPatchDTO) => {
     setIsEmailModalOpen(false);
     setIsIbanModalOpen(false);
     setIsLoading(true);
     try {
       await updateMerchantData(initiativeId || '', merchantData).then(() => loadDetails());
       setAlert({
-        text: t('pages.initiativeOverview.successAlert'),
+        text: t(`pages.initiativeOverview.successAlert.${key}.${!data?.[key] ? 'add' : 'edit'}`),
         isOpen: true,
         severity: 'success',
       });
@@ -89,7 +97,7 @@ const InitiativeOverview = () => {
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box width='100%' minWidth={0} maxWidth='100%'>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column">
@@ -139,14 +147,17 @@ const InitiativeOverview = () => {
                       {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
                     </Typography>
                   </Box>
+                  <Divider />
                   <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Box>
+                    <Box minWidth={0}>
                       <Typography variant="body1">
                         {t('pages.initiativeOverview.operativeEmail')}
                       </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                        {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
-                      </Typography>
+                      <Tooltip title={data?.operativeEmail}>
+                        <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                          {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
+                        </Typography>
+                      </Tooltip>
                     </Box>
                     <IconButton onClick={() => setIsEmailModalOpen(true)}>
                       <EditOutlinedIcon />
@@ -165,19 +176,20 @@ const InitiativeOverview = () => {
                   </Box>
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                      {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
-                    </Typography>
+                    <Tooltip title={isVisible && data?.ibanHolder}>
+                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                        {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Tooltip>
                   </Box>
+                  <Divider />
                   <Box>
                     <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
-                    <Typography
-                      variant="body1"
-                      noWrap
-                      sx={{ fontWeight: theme.typography.fontWeightBold }}
-                    >
-                      {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
-                    </Typography>
+                    <Tooltip title={isVisible && data?.iban}>
+                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                        {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Tooltip>
                   </Box>
                 </Box>
                 <Grid item xs={12}>

@@ -171,7 +171,11 @@ const InitiativeStores: React.FC = () => {
         flex: 1,
         editable: false,
         disableColumnMenu: true,
-        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
+        renderCell: (params: any) =>
+          renderCellWithTooltip(
+            [params.value, params.row?.streetNumber].filter(Boolean).join(', '),
+            1
+          ),
       },
       {
         field: 'website',
@@ -253,7 +257,7 @@ const InitiativeStores: React.FC = () => {
         contactName: filters.contactName,
         sort: filters.sort,
         page: filters.page ?? 0,
-        size: PAGINATION_SIZE,
+        size: filters.size ?? PAGINATION_SIZE,
       });
 
       if (currentRequestId !== requestIdRef.current) {
@@ -327,6 +331,7 @@ const InitiativeStores: React.FC = () => {
     setStoresPagination((prev) => ({
       ...prev,
       pageNo: 0,
+      pageSize: storesPagination.pageSize,
     }));
   };
 
@@ -362,6 +367,7 @@ const InitiativeStores: React.FC = () => {
           ...appliedFilters,
           sort: sortKey,
           page: storesPagination.pageNo,
+          size: storesPagination.pageSize,
         },
         true
       );
@@ -387,6 +393,29 @@ const InitiativeStores: React.FC = () => {
         ...appliedFilters,
         sort: currentSort,
         page,
+        size: storesPagination.pageSize,
+      });
+    },
+    [storesPagination, initiativeId, currentSort, appliedFilters]
+  );
+
+  const handleRowsPerPageChange = useCallback(
+    async (pageSize: number) => {
+      const updatedPagination = {
+        ...storesPagination,
+        pageNo: 0,
+        pageSize,
+        initiativeId,
+        sort: currentSort,
+      };
+      setStoresPagination(updatedPagination);
+      sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
+
+      await fetchStores({
+        ...appliedFilters,
+        sort: currentSort,
+        page: 0,
+        size: pageSize,
       });
     },
     [storesPagination, initiativeId, currentSort, appliedFilters]
@@ -401,6 +430,8 @@ const InitiativeStores: React.FC = () => {
       ...appliedFilters,
       sort: currentSort,
       page: storesPagination.pageNo,
+      size: storesPagination.pageSize
+
     });
   }, [initiativeId, currentSort, appliedFilters]);
 
@@ -513,11 +544,13 @@ const InitiativeStores: React.FC = () => {
                 <DataTable
                   rows={stores}
                   columns={columns}
-                  rowsPerPage={PAGINATION_SIZE}
+                  rowsPerPage={storesPagination.pageSize}
                   onSortModelChange={handleSortModelChange}
                   paginationModel={storesPagination}
                   onPaginationPageChange={handlePaginationPageChange}
+                  onRowsPerPageChange={handleRowsPerPageChange}
                   sortModel={sortModel}
+                  isTransactionsPage={true}
                 />
               </Box>
             </>

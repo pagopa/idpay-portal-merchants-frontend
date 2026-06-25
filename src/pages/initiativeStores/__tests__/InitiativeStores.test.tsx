@@ -67,6 +67,9 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
       <button data-testid="paginate-button" onClick={() => props.onPaginationPageChange(2)}>
         Paginate
       </button>
+      <button data-testid="page-size-button" onClick={() => props.onRowsPerPageChange(25)}>
+        Change page size
+      </button>
       {props.rows.map((row: any) => (
         <div key={row.id} onClick={() => props.handleRowAction(row)}>
           {row.franchiseName}
@@ -331,7 +334,7 @@ describe('<InitiativeStores />', () => {
           city: '',
           contactName: '',
           page: 0,
-          size: 10,
+          size: mockPagination.pageSize,
           sort: 'asc',
           type: undefined,
         })
@@ -367,7 +370,7 @@ describe('<InitiativeStores />', () => {
           city: '',
           contactName: '',
           page: 0,
-          size: 10,
+          size: mockPagination.pageSize,
           sort: 'asc',
           type: undefined,
         })
@@ -419,6 +422,26 @@ describe('<InitiativeStores />', () => {
     await renderAndWaitTable();
     fireEvent.click(screen.getByTestId('paginate-button'));
     await expectMerchantPointOfSalesCalledWith({ page: 2 });
+  });
+
+  test('gestisce il cambio del numero di righe per pagina', async () => {
+    await renderAndWaitTable();
+    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValueOnce({
+      content: mockStores,
+      ...mockPagination,
+      pageSize: 25,
+    });
+
+    fireEvent.click(screen.getByTestId('page-size-button'));
+
+    await expectMerchantPointOfSalesCalledWith({ page: 0, size: 25 });
+    await waitFor(() => {
+      expect(dataTableProps.rowsPerPage).toBe(25);
+      expect(dataTableProps.paginationModel).toEqual(
+        expect.objectContaining({ pageNo: 0, pageSize: 25 })
+      );
+      expect(dataTableProps.isTransactionsPage).toBe(true);
+    });
   });
 
   test.skip('naviga al dettaglio del punto vendita al click su una riga', async () => {
@@ -647,7 +670,6 @@ describe('Column rendering logic', () => {
   test.each([
     ['franchiseName', 'Store A', 'Store A'],
     ['franchiseName', '', '-'],
-    ['address', 'Via Roma 1', 'Via Roma 1'],
     ['website', 'www.example.com', 'www.example.com'],
     ['city', 'Roma', 'Roma'],
     ['contactEmail', 'test@example.com', 'test@example.com'],
@@ -658,6 +680,16 @@ describe('Column rendering logic', () => {
       expect(cell.container.textContent).toContain(expectedText);
     }
   );
+
+  test.each([
+    ['combina indirizzo e civico', { value: 'Via Roma', row: { streetNumber: '10' } }, 'Via Roma, 10'],
+    ['mostra solo indirizzo senza civico', { value: 'Via Roma', row: {} }, 'Via Roma'],
+    ['mostra solo il civico senza indirizzo', { value: '', row: { streetNumber: '10' } }, '10'],
+    ['mostra il placeholder senza indirizzo e civico', { value: '', row: {} }, '-'],
+  ])('il renderCell della colonna address %s', async (_description, params, expectedText) => {
+    const cell = await renderColumnCell('address', params);
+    expect(cell.container.textContent).toContain(expectedText);
+  });
 
   test.each([
     ['combina nome e cognome', { contactName: 'Mario', contactSurname: 'Rossi' }, 'Mario Rossi'],
@@ -810,6 +842,26 @@ describe('Column rendering logic', () => {
         const parsed = JSON.parse(stored!);
         expect(parsed.pageNo).toBe(2);
         expect(parsed.initiativeId).toBe(mockId);
+      });
+    });
+
+    test('aggiorna sessionStorage quando cambia il numero di righe per pagina', async () => {
+      renderWithContext(<InitiativeStores />);
+
+      await waitForTable();
+      fireEvent.click(screen.getByTestId('page-size-button'));
+
+      await waitFor(() => {
+        const stored = sessionStorage.getItem('storesPagination');
+        expect(stored).not.toBeNull();
+        expect(JSON.parse(stored!)).toEqual(
+          expect.objectContaining({
+            pageNo: 0,
+            pageSize: 25,
+            initiativeId: mockId,
+            sort: 'asc',
+          })
+        );
       });
     });
 

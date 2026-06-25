@@ -132,7 +132,9 @@ const InitiativeStoreDetail = () => {
       ? [
           {
             label: t('pages.initiativeStores.address'),
-            value: obj?.address
+            value: [obj?.address, obj?.streetNumber]
+              .filter(Boolean)
+              .join(', ')
               .concat(` - ${obj?.zipCode}`)
               .concat(`, ${obj?.city}`)
               .concat(`, ${obj?.province}`),

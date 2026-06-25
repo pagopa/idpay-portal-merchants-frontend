@@ -123,7 +123,16 @@
       "totalAmount": "Totale erogato",
       "totalRefunded": "Totale rimborsato",
       "onboardingDate": "Data di adesione",
-      "successAlert": "Modifica avvenuta con successo",
+      "successAlert": {
+        "iban": {
+          "add": "Hai aggiunto l'IBAN.",
+          "edit": "Hai modificato l'IBAN."
+        },
+        "operativeEmail": {
+          "add": "Hai aggiunto l'e-mail operativa.",
+          "edit": "Hai modificato l'e-mail operativa."
+        }
+      },
       "ibanBanner": {
         "description": "Per ricevere i rimborsi, inserisci un IBAN valido.",
         "action": "Inserisci IBAN"

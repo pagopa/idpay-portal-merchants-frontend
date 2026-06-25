@@ -272,9 +272,9 @@ class MerchantsApiClient {
     rewardBatchId: string
   ): Promise<DownloadRewardBatchResponseDTO> {
     const res = await this.rewardBatches.approveDownloadRewardBatch({
-        initiativeId,
-        rewardBatchId,
-      },
+      initiativeId,
+      rewardBatchId,
+    },
       { format: 'json' }
     );
     return res.data;
