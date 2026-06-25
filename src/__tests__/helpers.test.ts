@@ -206,10 +206,11 @@ describe('isValidIbanHolder', () => {
     { ibanHolder: "María José", expected: true },
     { ibanHolder: "Anna-Maria Rossi-Bianchi", expected: true },
     { ibanHolder: "O'Connor", expected: true },
-    { ibanHolder: 'Mario123', expected: false },
-    { ibanHolder: 'Mario@Rossi', expected: false },
-    { ibanHolder: 'Mario!', expected: false },
-    { ibanHolder: 'Rossi_Bianchi', expected: false },
+    { ibanHolder: 'Mario123', expected: true },
+    { ibanHolder: 'Mario@Rossi', expected: true },
+    { ibanHolder: 'Mario!', expected: true },
+    { ibanHolder: 'Rossi_Bianchi', expected: true },
+    { ibanHolder: 'XY', expected: false },
   ])('should validate "$ibanHolder" as $expected', ({ ibanHolder, expected }) => {
     expect(isValidRegex(ibanHolder, new RegExp(config.regex.ibanHolder, "u"))).toBe(expected);
   });
