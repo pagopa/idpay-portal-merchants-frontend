@@ -15,6 +15,7 @@ import {
   formatEuro,
   isReversableOrEditable,
   isValidRegex,
+  spaceRemover,
 } from '../helpers';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 import config from "../locale/it/default/config.json";
@@ -341,4 +342,9 @@ describe('isReversableOrEditable', () => {
   test('returns false for undefined input', () => {
     expect(isReversableOrEditable(undefined)).toBe(false);
   });
+
+  test('spaceRemover', () => {
+    const text = '     TEST SPACE    '
+    expect(spaceRemover(text)).toBe('TESTSPACE')
+  })
 });
