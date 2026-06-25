@@ -1,4 +1,4 @@
-import { Box, Button, Divider, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Divider, IconButton, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useMemo, useState } from 'react';
@@ -76,7 +76,6 @@ const InitiativeOverview = () => {
   const onUpdate = async (merchantData: MerchantIbanPatchDTO, key: keyof MerchantIbanPatchDTO) => {
     setIsEmailModalOpen(false);
     setIsIbanModalOpen(false);
-    setIsLoading(true);
     try {
       await updateMerchantData(initiativeId || '', merchantData).then(() => loadDetails());
       setAlert({
@@ -91,8 +90,6 @@ const InitiativeOverview = () => {
         isOpen: true,
         severity: 'error',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -137,65 +134,68 @@ const InitiativeOverview = () => {
               title={t('pages.initiativeOverview.information')}
               titleVariant={'h5'}
             >
-              <Box>
-                <Box display="flex" flexDirection="column" rowGap="0.5rem">
-                  <Box>
-                    <Typography variant="body1">
-                      {t('pages.initiativeOverview.onboardingDate')}
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                      {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
-                    </Typography>
-                  </Box>
-                  <Divider />
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Box minWidth={0}>
-                      <Typography variant="body1">
-                        {t('pages.initiativeOverview.operativeEmail')}
-                      </Typography>
-                      <Tooltip title={data?.operativeEmail}>
-                        <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
-                          {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
-                        </Typography>
-                      </Tooltip>
-                    </Box>
-                    <IconButton onClick={() => setIsEmailModalOpen(true)}>
-                      <EditOutlinedIcon />
-                    </IconButton>
-                  </Box>
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
+              {isLoading ?
+                <CircularProgress /> :
+                <Box>
+                  <Box display="flex" flexDirection="column" rowGap="0.5rem">
                     <Box>
-                      <IconButton onClick={() => setIsVisible(prev => !prev)}>
-                        {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
-                      </IconButton>
-                      <IconButton onClick={() => setIsIbanModalOpen(true)}>
+                      <Typography variant="body1">
+                        {t('pages.initiativeOverview.onboardingDate')}
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
+                        {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Box>
+                    <Divider />
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Box minWidth={0}>
+                        <Typography variant="body1">
+                          {t('pages.initiativeOverview.operativeEmail')}
+                        </Typography>
+                        <Tooltip title={data?.operativeEmail}>
+                          <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                            {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
+                          </Typography>
+                        </Tooltip>
+                      </Box>
+                      <IconButton onClick={() => setIsEmailModalOpen(true)}>
                         <EditOutlinedIcon />
                       </IconButton>
                     </Box>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
+                      <Box>
+                        <IconButton onClick={() => setIsVisible(prev => !prev)}>
+                          {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+                        </IconButton>
+                        <IconButton onClick={() => setIsIbanModalOpen(true)}>
+                          <EditOutlinedIcon />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                    <Box>
+                      <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
+                      <Tooltip title={isVisible && data?.ibanHolder}>
+                        <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                          {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
+                        </Typography>
+                      </Tooltip>
+                    </Box>
+                    <Divider />
+                    <Box>
+                      <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
+                      <Tooltip title={isVisible && data?.iban}>
+                        <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                          {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
+                        </Typography>
+                      </Tooltip>
+                    </Box>
                   </Box>
-                  <Box>
-                    <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
-                    <Tooltip title={isVisible && data?.ibanHolder}>
-                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
-                        {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
-                      </Typography>
-                    </Tooltip>
-                  </Box>
-                  <Divider />
-                  <Box>
-                    <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
-                    <Tooltip title={isVisible && data?.iban}>
-                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
-                        {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
-                      </Typography>
-                    </Tooltip>
-                  </Box>
+                  <Grid item xs={12}>
+                    <InitiativeOverviewInfo />
+                  </Grid>
                 </Box>
-                <Grid item xs={12}>
-                  <InitiativeOverviewInfo />
-                </Grid>
-              </Box>
+              }
             </InitiativeOverviewCard>
           </Box>
         </Grid>
