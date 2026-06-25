@@ -3,7 +3,7 @@ import { Box, TextField, Typography } from "@mui/material";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
 import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
-import { isValidRegex } from "../../helpers";
+import { isValidRegex, spaceRemover } from "../../helpers";
 import { useInitiativeConfig } from "../../hooks/useInitiativeConfig";
 
 type Props = EditModalProps & {
@@ -54,6 +54,7 @@ export const EditEmailModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => 
         {t('pages.initiativeOverview.emailModal.fieldInsert.label')}
       </Typography>
       <TextField
+        value={draftEmail}
         defaultValue={data?.operativeEmail}
         label={t('pages.initiativeOverview.emailModal.fieldInsert.placeholder')}
         variant='outlined'
@@ -66,8 +67,9 @@ export const EditEmailModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => 
           }
         }}
         onChange={(e) => {
-          setDraftEmail(e.target.value);
-          if (!isValidRegex(e.target.value, emailRegex)) {
+          const normalizedValue = spaceRemover(e.target.value);
+          setDraftEmail(normalizedValue);
+          if (!isValidRegex(normalizedValue, emailRegex)) {
             setError(prev => ({ ...prev, draftEmail: 'pages.initiativeOverview.emailModal.notValidEmail' }));
           } else {
             const { draftEmail, ...rest } = error;
@@ -79,6 +81,7 @@ export const EditEmailModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => 
         {t('pages.initiativeOverview.emailModal.fieldConfirm.label')}
       </Typography>
       <TextField
+        value={merchantData?.operativeEmail}
         label={t('pages.initiativeOverview.emailModal.fieldConfirm.placeholder')}
         variant='outlined'
         onBlur={() => {
@@ -88,9 +91,10 @@ export const EditEmailModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => 
           }
         }}
         onChange={(e) => {
+          const normalizedValue = spaceRemover(e.target.value);
           const { operativeEmail, ...rest } = error;
           setError(rest);
-          setMerchantData({ ...merchantData, operativeEmail: e.target.value });
+          setMerchantData({ ...merchantData, operativeEmail: normalizedValue });
         }}
         error={!!error?.operativeEmail}
         helperText={error?.operativeEmail && t(error?.operativeEmail)}
