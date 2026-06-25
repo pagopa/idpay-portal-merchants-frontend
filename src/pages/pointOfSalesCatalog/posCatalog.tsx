@@ -237,13 +237,14 @@ const PosCatalog: React.FC = () => {
       }
 
       const response = await getMerchantPointOfSalesCatalog(merchantId, {
+        initiative: filters.initiative,
         type: filters.type,
         city: filters.city,
         address: filters.address,
         contactName: filters.contactName,
         sort: filters.sort,
         page: filters.page ?? 0,
-        size: PAGINATION_SIZE,
+        size: filters.size ?? rowsPerPage,
       });
 
       if (currentRequestId !== requestIdRef.current) {
@@ -358,11 +359,23 @@ const PosCatalog: React.FC = () => {
 
   const handleRowsPerPageChange = (pageSize: number) => {
     setRowsPerPage(pageSize);
-    setStoresPagination((prev) => ({
-      ...prev,
+
+    const updatedFilters = {
+      ...appliedFilters,
+      page: 0,
+      size: pageSize,
+    };
+
+    const updatedPagination = {
+      ...storesPagination,
       pageNo: 0,
       pageSize,
-    }));
+      sort: currentSort,
+    };
+
+    setAppliedFilters(updatedFilters);
+    setStoresPagination(updatedPagination);
+    sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
   };
 
   useEffect(() => {
@@ -370,8 +383,9 @@ const PosCatalog: React.FC = () => {
       ...appliedFilters,
       sort: currentSort,
       page: storesPagination.pageNo,
+      size: rowsPerPage,
     });
-  }, [currentSort, appliedFilters]);
+  }, [currentSort, appliedFilters, storesPagination.pageNo, rowsPerPage]);
 
   return (
     <Box sx={{ my: 2 }}>
@@ -415,6 +429,7 @@ const PosCatalog: React.FC = () => {
                   rows={stores}
                   columns={columns}
                   checkable
+                  isRowSelectable={() => false}
                   rowsPerPage={rowsPerPage}
                   rowsPerPageOptions={ELEMENT_PER_PAGE}
                   onRowsPerPageChange={handleRowsPerPageChange}

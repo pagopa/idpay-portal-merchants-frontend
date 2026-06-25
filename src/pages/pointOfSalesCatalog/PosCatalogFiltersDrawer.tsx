@@ -135,7 +135,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   <DetailDrawer
     isOpen={isOpen}
     setIsOpen={onClose}
-    title={selectedStore?.franchiseName || 'Dettaglio punto vendita'}
+    title={selectedStore?.franchiseName}
   >
     {selectedStore && (
       <>
