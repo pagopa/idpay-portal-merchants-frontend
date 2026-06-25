@@ -30,7 +30,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
     if (!isHolderEmpty && !isIbanEmpty && !error?.iban && !error?.ibanHolder) {
       const { iban, ibanHolder, ...rest } = error;
       setError(rest);
-      onUpdate({ ...merchantData, ibanHolder: merchantData?.ibanHolder?.replace(/\s+/g, ' ')}, 'iban');
+      onUpdate({ ...merchantData, ibanHolder: merchantData?.ibanHolder?.replace(/\s+/g, ' ').trimEnd()}, 'iban');
     } else {
       const ibanError = isIbanEmpty || error?.iban ? { iban: error?.iban || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
       const ibanHolderError = isHolderEmpty || error?.ibanHolder ? { ibanHolder: error?.ibanHolder || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
@@ -61,7 +61,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
           }
         }}
         onChange={(e) => {
-          const normalizedValue = e.target.value.trim();
+          const normalizedValue = e.target.value.trimStart();
           setMerchantData({ ...merchantData, ibanHolder: normalizedValue });
           if (!isValidRegex(normalizedValue, ibanHolderRegex)) {
             setError(prev => ({ ...prev, ibanHolder: 'pages.initiativeOverview.ibanModal.notValidIbanHolder' }));
