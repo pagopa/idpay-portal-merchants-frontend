@@ -200,4 +200,4 @@ const impossibleStatusCombination = (itemValues: any, batchStatus: any): boolean
     )
   );
 
-  export const spaceRemover = (value: string) => value.trim().replace(' ', '');
+  export const spaceRemover = (value: string) => value.trim().replace(/\s+/g, '');
