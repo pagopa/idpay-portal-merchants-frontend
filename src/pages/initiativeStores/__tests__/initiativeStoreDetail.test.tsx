@@ -74,6 +74,7 @@ const mockStore = {
   contactEmail: 'test@test.it',
   type: POS_TYPE.Physical,
   address: 'Via Roma',
+  streetNumber: '10',
   zipCode: '00100',
   city: 'Roma',
   province: 'RM',
@@ -130,6 +131,11 @@ describe('InitiativeStoreDetail', () => {
   test('renders store detail and calls APIs', async () => {
     renderWithProviders();
     expect(await screen.findByText('Mock Store')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'pages.initiativeStores.address:Via Roma, 10 - 00100, Roma, RM'
+      )
+    ).toBeInTheDocument();
     expect(mockGetById).toHaveBeenCalled();
     expect(mockGetTransactions).toHaveBeenCalled();
   });

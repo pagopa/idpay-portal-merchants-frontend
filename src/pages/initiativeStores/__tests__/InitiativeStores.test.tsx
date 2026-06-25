@@ -331,7 +331,7 @@ describe('<InitiativeStores />', () => {
           city: '',
           contactName: '',
           page: 0,
-          size: 10,
+          size: mockPagination.pageSize,
           sort: 'asc',
           type: undefined,
         })
@@ -367,7 +367,7 @@ describe('<InitiativeStores />', () => {
           city: '',
           contactName: '',
           page: 0,
-          size: 10,
+          size: mockPagination.pageSize,
           sort: 'asc',
           type: undefined,
         })
