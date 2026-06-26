@@ -33,8 +33,8 @@ const InitiativeOverview = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const obscuredText = useMemo(() => ({
-    iban: "•".repeat((data?.iban || '').length),
-    ibanHolder: "•".repeat((data?.ibanHolder || '').length)
+    iban: '•'.repeat((data?.iban || '').length),
+    ibanHolder: '•'.repeat((data?.ibanHolder || '').length)
   }), [data]);
 
   const fieldsStyle = {
@@ -95,17 +95,17 @@ const InitiativeOverview = () => {
 
   return (
     <Box width='100%' minWidth={0} maxWidth='100%'>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} height='100%'>
         <Grid item xs={12}>
-          <Box display="flex" flexDirection="column">
+          <Box display='flex' flexDirection='column'>
             <TitleBox
               title={t('pages.initiativeOverview.title')}
               subTitle={t('pages.initiativeOverview.subtitle')}
               mbTitle={2}
               mtTitle={2}
               mbSubTitle={1}
-              variantTitle="h4"
-              variantSubTitle="body1"
+              variantTitle='h4'
+              variantSubTitle='body1'
             />
             {!isLoading && (!data?.iban || !data?.operativeEmail) &&
               (!data?.iban ?
@@ -128,103 +128,110 @@ const InitiativeOverview = () => {
             }
           </Box>
         </Grid>
-        <Grid item xs={6}>
-          <Box>
-            <InitiativeOverviewCard
-              title={t('pages.initiativeOverview.information')}
-              titleVariant={'h5'}
+        {isLoading ?
+          <Grid item xs>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
             >
-              {isLoading ?
-                <CircularProgress /> :
-                <Box>
-                  <Box display="flex" flexDirection="column" rowGap="0.5rem">
-                    <Box>
-                      <Typography variant="body1">
-                        {t('pages.initiativeOverview.onboardingDate')}
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold }}>
-                        {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
-                      </Typography>
-                    </Box>
-                    <Divider />
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Box minWidth={0}>
-                        <Typography variant="body1">
-                          {t('pages.initiativeOverview.operativeEmail')}
-                        </Typography>
-                        <Tooltip title={data?.operativeEmail}>
-                          <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
-                            {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
-                          </Typography>
-                        </Tooltip>
-                      </Box>
-                      <IconButton onClick={() => setIsEmailModalOpen(true)}>
-                        <EditOutlinedIcon />
-                      </IconButton>
-                    </Box>
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Typography variant="overline">{t('commons.refundsDataTitle')}</Typography>
+              <CircularProgress />
+            </Box>
+          </Grid> :
+          <>
+            <Grid item xs={6}>
+              <Box>
+                <InitiativeOverviewCard
+                  title={t('pages.initiativeOverview.information')}
+                  titleVariant={'h5'}
+                >
+                  <Box>
+                    <Box display='flex' flexDirection='column' rowGap='0.5rem'>
                       <Box>
-                        <IconButton onClick={() => setIsVisible(prev => !prev)}>
-                          {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
-                        </IconButton>
-                        <IconButton onClick={() => setIsIbanModalOpen(true)}>
+                        <Typography variant='body1'>
+                          {t('pages.initiativeOverview.onboardingDate')}
+                        </Typography>
+                        <Typography variant='body1' sx={{ fontWeight: theme.typography.fontWeightBold }}>
+                          {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
+                        </Typography>
+                      </Box>
+                      <Divider />
+                      <Box display='flex' justifyContent='space-between' alignItems='center'>
+                        <Box minWidth={0}>
+                          <Typography variant='body1'>
+                            {t('pages.initiativeOverview.operativeEmail')}
+                          </Typography>
+                          <Tooltip title={data?.operativeEmail}>
+                            <Typography variant='body1' sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                              {data?.operativeEmail || MISSING_DATA_PLACEHOLDER}
+                            </Typography>
+                          </Tooltip>
+                        </Box>
+                        <IconButton onClick={() => setIsEmailModalOpen(true)}>
                           <EditOutlinedIcon />
                         </IconButton>
                       </Box>
+                      <Box display='flex' justifyContent='space-between' alignItems='center'>
+                        <Typography variant='overline'>{t('commons.refundsDataTitle')}</Typography>
+                        <Box>
+                          <IconButton onClick={() => setIsVisible(prev => !prev)}>
+                            {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+                          </IconButton>
+                          <IconButton onClick={() => setIsIbanModalOpen(true)}>
+                            <EditOutlinedIcon />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                      <Box>
+                        <Typography variant='body1'>{t('pages.initiativeOverview.holder')}</Typography>
+                        <Tooltip title={isVisible && data?.ibanHolder}>
+                          <Typography variant='body1' sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                            {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
+                          </Typography>
+                        </Tooltip>
+                      </Box>
+                      <Divider />
+                      <Box>
+                        <Typography variant='body1'>{t('pages.initiativeOverview.iban')}</Typography>
+                        <Tooltip title={isVisible && data?.iban}>
+                          <Typography variant='body1' sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
+                            {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
+                          </Typography>
+                        </Tooltip>
+                      </Box>
                     </Box>
-                    <Box>
-                      <Typography variant="body1">{t('pages.initiativeOverview.holder')}</Typography>
-                      <Tooltip title={isVisible && data?.ibanHolder}>
-                        <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
-                          {(isVisible ? data?.ibanHolder : obscuredText?.ibanHolder) || MISSING_DATA_PLACEHOLDER}
-                        </Typography>
-                      </Tooltip>
-                    </Box>
-                    <Divider />
-                    <Box>
-                      <Typography variant="body1">{t('pages.initiativeOverview.iban')}</Typography>
-                      <Tooltip title={isVisible && data?.iban}>
-                        <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightBold, ...fieldsStyle }}>
-                          {(isVisible ? formatIban(data?.iban) : obscuredText?.iban) || MISSING_DATA_PLACEHOLDER}
-                        </Typography>
-                      </Tooltip>
-                    </Box>
+                    <Grid item xs={12}>
+                      <InitiativeOverviewInfo />
+                    </Grid>
                   </Box>
-                  <Grid item xs={12}>
-                    <InitiativeOverviewInfo />
-                  </Grid>
-                </Box>
-              }
-            </InitiativeOverviewCard>
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-          <InitiativeOverviewCard
-            title={t('pages.initiativeOverview.stores')}
-            subtitle={t('pages.initiativeOverview.storesSubtitle')}
-            titleVariant={'h5'}
-          >
-            <Box mb={1} sx={{ display: 'grid', gridColumn: 'span 12' }}>
-              <Box display="inline-block">
-                <Button
-                  variant="contained"
-                  startIcon={<StorefrontOutlinedIcon />}
-                  onClick={() => {
-                    history.push(
-                      generatePath(ROUTES.STORES_UPLOAD, { initiative_id: initiativeId })
-                    );
-                  }}
-                  size="large"
-                  fullWidth={false}
-                  data-testid="add-stores-button"
-                >
-                  {t('pages.initiativeStores.uploadStores')}
-                </Button>
+                </InitiativeOverviewCard>
               </Box>
-            </Box>
-          </InitiativeOverviewCard>
-        </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <InitiativeOverviewCard
+                title={t('pages.initiativeOverview.stores')}
+                subtitle={t('pages.initiativeOverview.storesSubtitle')}
+                titleVariant={'h5'}
+              >
+                <Box mb={1} sx={{ display: 'grid', gridColumn: 'span 12' }}>
+                  <Box display='inline-block'>
+                    <Button
+                      variant='contained'
+                      startIcon={<StorefrontOutlinedIcon />}
+                      onClick={() => {
+                        history.push(
+                          generatePath(ROUTES.STORES_UPLOAD, { initiative_id: initiativeId })
+                        );
+                      }}
+                      size='large'
+                      fullWidth={false}
+                      data-testid='add-stores-button'
+                    >
+                      {t('pages.initiativeStores.uploadStores')}
+                    </Button>
+                  </Box>
+                </Box>
+              </InitiativeOverviewCard>
+            </Grid>
+          </>}
       </Grid>
       <EditEmailModal
         isOpen={isEmailModalOpen}
