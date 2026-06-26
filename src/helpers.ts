@@ -199,3 +199,5 @@ const impossibleStatusCombination = (itemValues: any, batchStatus: any): boolean
       itemValues?.rewardBatchTrxStatus
     )
   );
+
+  export const spaceRemover = (value: string) => value.trim().replace(/\s+/g, '');

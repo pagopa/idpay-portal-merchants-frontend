@@ -3786,7 +3786,7 @@ components:
           type: string
           minLength: 3
           maxLength: 70
-          pattern: '^(?=.*\p{L})[\p{L}''\s-]{3,70}$'
+          pattern: '^.{3,70}$'
           description: "ENG: The holder of the IBAN <br> IT: L'intestatario dell'IBAN"
         operativeEmail:
           type: string
