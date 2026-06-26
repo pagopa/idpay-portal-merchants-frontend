@@ -20,11 +20,6 @@ export default function DetailDrawer({
 }: DetailDrawerProps) {
   return (
     <Drawer anchor="right" open={isOpen} data-testid="detail-drawer">
-      <Box display="flex" flexDirection="row" justifyContent="flex-end" padding="0.5rem">
-        <IconButton data-testid="close-button" onClick={setIsOpen} sx={{ color: 'text.secondary' }}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
       <Box
         sx={{
           width: 375,
@@ -35,8 +30,18 @@ export default function DetailDrawer({
           flexDirection: 'column',
         }}
       >
-        <Box pb="1.5rem" bgcolor="white">
+        <Box
+          pb="1.5rem"
+          bgcolor="white"
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          columnGap="0.5rem"
+        >
           <Typography variant="h6">{title}</Typography>
+          <IconButton data-testid="close-button" onClick={setIsOpen} sx={{ color: 'text.secondary' }}>
+            <CloseIcon />
+          </IconButton>
         </Box>
         <Box
           sx={{

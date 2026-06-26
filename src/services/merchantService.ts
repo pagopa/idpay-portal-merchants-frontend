@@ -19,8 +19,13 @@ import {
   ReportDTO,
   MerchantIbanPatchDTO,
   PointOfSaleDTO,
+  PointOfSaleInitiativeDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
+
+type GetPointOfSalesCatalogFilters = Omit<GetPointOfSalesFilters, 'initiative'> & {
+  initiativeId?: string;
+};
 
 export type GetMerchantTransactionsProcessedParams = {
   initiativeId: string;
@@ -156,7 +161,7 @@ export const getMerchantPointOfSales = async (
 
 export const getMerchantPointOfSalesCatalog = async (
   merchantId: string,
-  filters: GetPointOfSalesFilters
+  filters: GetPointOfSalesCatalogFilters
 ): Promise<{
   content: Array<PointOfSaleDTO>;
   pageNo: number;
@@ -181,8 +186,17 @@ export const getMerchantPointOfSalesWithTransactions = (
 ): Promise<Array<FranchisePointOfSaleDTO>> =>
   getMerchantsApi().getMerchantPointOfSalesWithTransactions(rewardBatchId);
 
-export const getMerchantPointOfSalesById = (initiativeId: string, merchantId: string, pointOfSaleId: string) =>
-  getMerchantsApi().getMerchantPointOfSalesById(initiativeId, merchantId, pointOfSaleId);
+export const getMerchantPointOfSalesById = (
+  initiativeId: string,
+  merchantId: string,
+  pointOfSaleId: string
+) => getMerchantsApi().getMerchantPointOfSalesById(initiativeId, merchantId, pointOfSaleId);
+
+export const getPointOfSaleInitiatives = (
+  merchantId: string,
+  pointOfSaleId: string
+): Promise<Array<PointOfSaleInitiativeDTO>> =>
+  getMerchantsApi().getPointOfSaleInitiatives(merchantId, pointOfSaleId);
 
 export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,

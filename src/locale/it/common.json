@@ -106,7 +106,19 @@
     "posCatalog": {
       "title": "Catalogo punti vendita",
       "subtitle": "Qui trovi tutti i punti vendita censiti durante le iniziative.",
-      "noData": "Non ci sono punti vendita, aggiungili per iniziare."
+      "noData": "Non ci sono punti vendita, aggiungili per iniziare.",
+      "drawer": {
+        "associatedTo": "PUNTO VENDITA ASSOCIATO A:",
+        "storeData": "DATI PUNTO VENDITA",
+        "referentData": "REFERENTE",
+        "id": "ID",
+        "address": "Indirizzo",
+        "website": "Sito web",
+        "phone": "Telefono",
+        "name": "Nome",
+        "surname": "Cognome",
+        "email": "E-mail"
+      }
     },
     "initiativeOverview": {
       "subtitle": "Tieni sotto controllo tutte le tue attività da qui.",

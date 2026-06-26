@@ -101,7 +101,7 @@ const DataTable = ({
           localeText={{
             noRowsLabel: 'Nessun punto vendita da visualizzare.',
             MuiTablePagination: {
-              labelRowsPerPage: 'Elementi per pagina',
+              labelRowsPerPage: 'Righe per pagina',
               labelDisplayedRows(paginationInfo) {
                 return `${paginationInfo.from}-${paginationInfo.to} di ${paginationInfo.count}`;
               },

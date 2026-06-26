@@ -62,7 +62,7 @@ const PosCatalog: React.FC = () => {
   const initiativeOptions = useMemo(
     () =>
       (initiativesList ?? []).map((initiative) => ({
-        value: initiative.initiativeName ?? '',
+        value: initiative.initiativeId ?? '',
         label: initiative.initiativeName ?? '',
       })),
     [initiativesList]
@@ -100,7 +100,7 @@ const PosCatalog: React.FC = () => {
     }
 
     return getMerchantPointOfSalesCatalog(merchantId, {
-      initiative: filters.initiative,
+      initiativeId: filters.initiative,
       type: filters.type,
       city: filters.city,
       address: filters.address,
@@ -216,6 +216,8 @@ const PosCatalog: React.FC = () => {
                 isOpen={isDrawerOpen}
                 onClose={handleToggleDrawer}
                 selectedStore={selectedStore}
+                initiativeOptions={initiativeOptions}
+                merchantId={parseJwt(storageTokenOps.read())?.merchant_id ?? ''}
               />
             </>
           )}
