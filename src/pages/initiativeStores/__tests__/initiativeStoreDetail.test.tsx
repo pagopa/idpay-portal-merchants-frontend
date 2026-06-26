@@ -101,7 +101,6 @@ describe('InitiativeStoreDetail', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
     mockUseParams.mockReturnValue({ id: 'initiative1', store_id: 'store1' });
     mockParseJwt.mockReturnValue({ merchant_id: 'm1' });
     mockStorage.read.mockReturnValue('jwt');
@@ -110,11 +109,6 @@ describe('InitiativeStoreDetail', () => {
     mockGetTransactions.mockResolvedValue({
       content: [{ trxDate: new Date(), updateDate: new Date() }],
     });
-  });
-
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
   });
 
   const renderWithProviders = () =>
@@ -246,6 +240,10 @@ describe('InitiativeStoreDetail', () => {
 
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockUpdate).toHaveBeenCalled();
+    });
   });
 
   test('handles generic update error', async () => {
@@ -264,6 +262,10 @@ describe('InitiativeStoreDetail', () => {
 
     const submitButton = screen.getByTestId('update-button');
     await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockUpdate).toHaveBeenCalled();
+    });
   });
 
   test('handles fetchStoreDetail failure', async () => {

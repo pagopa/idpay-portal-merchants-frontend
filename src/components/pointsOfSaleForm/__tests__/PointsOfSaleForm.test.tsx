@@ -139,6 +139,15 @@ const mockAutocompleteHook = (mockedHook: jest.Mock, overrides = {}) => {
   return search;
 };
 
+const mockSequentialUniqueIds = (...ids: Array<string>) => {
+  const [firstId = 'id-1', ...restIds] = ids;
+  const mock = generateUniqueId as jest.Mock;
+  mock.mockReset();
+  mock.mockReturnValueOnce(firstId);
+  restIds.forEach((id) => mock.mockReturnValueOnce(id));
+  mock.mockImplementation(() => `id-${Math.random().toString(36).slice(2, 10)}`);
+};
+
 const setBooleanValidationMocks = (email = true, url = true) => {
   (isValidRegex as jest.Mock).mockReturnValue(email);
   (isValidUrl as jest.Mock).mockReturnValue(url);
@@ -189,7 +198,7 @@ describe('PointsOfSaleForm full coverage', () => {
     jest.clearAllMocks();
     defaultProps = createDefaultProps();
     mockAutocompleteHook(mockedUsePlacesAutocomplete);
-    (generateUniqueId as jest.Mock).mockReturnValue('id-1');
+    mockSequentialUniqueIds('id-1', 'id-2', 'id-3', 'id-4', 'id-5', 'id-6');
     setBooleanValidationMocks();
   });
 
@@ -464,7 +473,7 @@ describe('PointsOfSaleForm additional coverage', () => {
     jest.clearAllMocks();
     defaultProps = createDefaultProps();
     mockAutocompleteHook(mockedUsePlacesAutocomplete);
-    (generateUniqueId as jest.Mock).mockReturnValue('id-1');
+    mockSequentialUniqueIds('id-1', 'id-2', 'id-3', 'id-4', 'id-5', 'id-6');
     setBooleanValidationMocks();
   });
 
@@ -521,7 +530,7 @@ describe('PointsOfSaleForm validation tests', () => {
     jest.clearAllMocks();
     defaultProps = createDefaultProps();
     mockAutocompleteHook(mockedUsePlacesAutocomplete);
-    (generateUniqueId as jest.Mock).mockReturnValue('id-1');
+    mockSequentialUniqueIds('id-1', 'id-2', 'id-3', 'id-4', 'id-5', 'id-6');
     setBooleanValidationMocks();
   });
 
@@ -782,7 +791,7 @@ describe('PointsOfSaleForm targeted new-code coverage', () => {
     jest.clearAllMocks();
     defaultProps = createDefaultProps();
     mockAutocompleteHook(mockedUsePlacesAutocomplete);
-    (generateUniqueId as jest.Mock).mockReturnValue('id-1');
+    mockSequentialUniqueIds('id-1', 'id-2', 'id-3', 'id-4', 'id-5', 'id-6');
     (isValidEmail as jest.Mock).mockImplementation((value: string) => value.includes('@'));
     (isValidUrl as jest.Mock).mockImplementation((value: string) => value.startsWith('http'));
   });
@@ -892,10 +901,7 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
     jest.clearAllMocks();
     defaultProps = createDefaultProps();
     mockAutocompleteHook(mockedUsePlacesAutocomplete);
-    (generateUniqueId as jest.Mock)
-      .mockReturnValueOnce('id-1')
-      .mockReturnValueOnce('id-2')
-      .mockReturnValue('id-3');
+    mockSequentialUniqueIds('id-1', 'id-2', 'id-3', 'id-4', 'id-5', 'id-6');
     (isValidEmail as jest.Mock).mockImplementation((value: string) => value.includes('@'));
     (isValidUrl as jest.Mock).mockImplementation((value: string) => isAllowedTestUrl(value));
   });
@@ -1080,4 +1086,3 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
     expect(screen.getByText('autocomplete-error')).toBeInTheDocument();
   });
 });
-
