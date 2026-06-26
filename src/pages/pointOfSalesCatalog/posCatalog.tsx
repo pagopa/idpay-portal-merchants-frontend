@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
-import { Box, Stack, Paper, Typography, Tooltip, IconButton } from '@mui/material';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { Box, Stack, Paper, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { GridColDef, GridSortModel } from '@mui/x-data-grid';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -15,12 +13,15 @@ import { GetPointOfSalesFilters } from '../../types/types';
 import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
 import { parseJwt } from '../../utils/jwt-utils';
 import { getMerchantPointOfSalesCatalog } from '../../services/merchantService';
-import { ELEMENT_PER_PAGE, MISSING_DATA_PLACEHOLDER, PAGINATION_SIZE } from '../../utils/constants';
+import { ELEMENT_PER_PAGE, PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
 import { useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
-import { PosCatalogDrawer, PosCatalogFilters } from './PosCatalogFiltersDrawer';
+import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
+import buildPointOfSalesColumns from '../../components/pointsOfSale/pointOfSalesColumns';
+import usePointOfSalesTable from '../../components/pointsOfSale/usePointOfSalesTable';
+import { PosCatalogDrawer } from './PosCatalogFiltersDrawer';
 
 const initialValues: GetPointOfSalesFilters = {
   initiative: '',
@@ -35,22 +36,9 @@ const initialValues: GetPointOfSalesFilters = {
 
 const PosCatalog: React.FC = () => {
   const { setAlert } = useAlert();
-  const [stores, setStores] = useState<Array<PointOfSaleDTO>>([]);
-  const [storesPagination, setStoresPagination] = useState({
-    pageNo: 0,
-    pageSize: PAGINATION_SIZE,
-    totalElements: 0,
-  });
-  const [storesLoading, setStoresLoading] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(PAGINATION_SIZE);
-  const [currentSort, setCurrentSort] = useState<string>('asc');
-  const [sortModel, setSortModel] = useState<GridSortModel>([]);
-  const [filtersAppliedOnce, setFiltersAppliedOnce] = useState(false);
-  const [appliedFilters, setAppliedFilters] = useState<GetPointOfSalesFilters>(initialValues);
   const [selectedStore, setSelectedStore] = useState<PointOfSaleDTO | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const requestIdRef = useRef(0);
   const { t } = useScopedTranslation();
   const history = useHistory();
   const initiativesList = useAppSelector(intiativesListSelector);
@@ -71,45 +59,6 @@ const PosCatalog: React.FC = () => {
     }
   }, [location, history, setAlert, t]);
 
-  useEffect(() => {
-    const storedPagination = sessionStorage.getItem('storesPagination');
-    if (storedPagination && JSON.parse(storedPagination)?.pageNo !== undefined) {
-      const parsed = JSON.parse(storedPagination);
-      setStoresPagination(parsed);
-      setRowsPerPage(parsed.pageSize ?? PAGINATION_SIZE);
-
-      if (parsed.sort) {
-        setCurrentSort(parsed.sort);
-
-        const sortParts = parsed.sort.split(',');
-        if (sortParts.length === 2) {
-          const [field, order] = sortParts;
-          setSortModel([{ field, sort: order as 'asc' | 'desc' }]);
-        }
-      }
-    }
-
-    return () => {
-      sessionStorage.removeItem('storesPagination');
-    };
-  }, []);
-
-  const infoStyles = {
-    fontWeight: theme.typography.fontWeightRegular,
-    fontSize: theme.typography.fontSize,
-  };
-
-  const renderCellWithTooltip = useCallback(
-    (value: string, tooltipThreshold: number) => (
-      <Tooltip title={value && value.length >= tooltipThreshold ? value : MISSING_DATA_PLACEHOLDER}>
-        <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
-          {value && value !== '' ? value : MISSING_DATA_PLACEHOLDER}
-        </Typography>
-      </Tooltip>
-    ),
-    []
-  );
-
   const initiativeOptions = useMemo(
     () =>
       (initiativesList ?? []).map((initiative) => ({
@@ -119,166 +68,6 @@ const PosCatalog: React.FC = () => {
     [initiativesList]
   );
 
-  const openStoreDrawer = (store: PointOfSaleDTO) => {
-    setSelectedStore(store);
-    setIsDrawerOpen(true);
-  };
-
-  const handleToggleDrawer = () => {
-    setIsDrawerOpen(false);
-    setSelectedStore(null);
-  };
-
-  const columns: Array<GridColDef> = useMemo(
-    () => [
-      {
-        field: 'franchiseName',
-        headerName: t('pages.initiativeStores.franchiseName'),
-        flex: 1,
-        editable: false,
-        disableColumnMenu: true,
-        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-      },
-      {
-        field: 'type',
-        headerName: t('pages.initiativeStores.type'),
-        flex: 0.8,
-        editable: false,
-        disableColumnMenu: true,
-        renderCell: (params: any) =>
-          renderCellWithTooltip(
-            params.value === 'PHYSICAL'
-              ? 'Fisico'
-              : params.value === 'ONLINE'
-              ? 'Online'
-              : MISSING_DATA_PLACEHOLDER,
-            1
-          ),
-      },
-      {
-        field: 'address',
-        headerName: t('pages.initiativeStores.address'),
-        flex: 1,
-        editable: false,
-        disableColumnMenu: true,
-        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-      },
-      {
-        field: 'website',
-        headerName: t('pages.initiativeStores.addressURL'),
-        flex: 1.2,
-        editable: false,
-        disableColumnMenu: true,
-        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-      },
-      {
-        field: 'city',
-        headerName: t('pages.initiativeStores.city'),
-        flex: 1,
-        editable: false,
-        disableColumnMenu: true,
-        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-      },
-      {
-        field: 'contactName',
-        headerName: t('pages.initiativeStores.referent'),
-        flex: 1.2,
-        editable: false,
-        disableColumnMenu: true,
-        renderCell: (params: any) =>
-          renderCellWithTooltip(
-            `${params.row.contactName ? params.row.contactName : MISSING_DATA_PLACEHOLDER} ${
-              params.row.contactSurname ? params.row.contactSurname : MISSING_DATA_PLACEHOLDER
-            }`,
-            1
-          ),
-      },
-      {
-        field: 'contactEmail',
-        headerName: t('pages.initiativeStores.email'),
-        flex: 1.5,
-        editable: false,
-        disableColumnMenu: true,
-        renderCell: (params: any) => renderCellWithTooltip(params.value, 1),
-      },
-      {
-        field: 'actions',
-        headerName: '',
-        sortable: false,
-        filterable: false,
-        disableColumnMenu: true,
-        flex: 0.3,
-        renderCell: (params: any) => (
-          <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%' }}>
-            <IconButton onClick={() => openStoreDrawer(params.row)} size="small">
-              <ChevronRightIcon data-testid={params.row.id} color="primary" fontSize="inherit" />
-            </IconButton>
-          </Box>
-        ),
-      },
-    ],
-    [renderCellWithTooltip, t]
-  );
-
-  const fetchStores = async (filters: GetPointOfSalesFilters, fromSort?: boolean) => {
-    const currentRequestId = requestIdRef.current + 1;
-    // eslint-disable-next-line functional/immutable-data
-    requestIdRef.current = currentRequestId;
-
-    const userJwt = parseJwt(storageTokenOps.read());
-    const merchantId = userJwt?.merchant_id;
-    if (!merchantId) {
-      return;
-    }
-
-    try {
-      if (!fromSort) {
-        setStoresLoading(true);
-      }
-
-      const response = await getMerchantPointOfSalesCatalog(merchantId, {
-        initiative: filters.initiative,
-        type: filters.type,
-        city: filters.city,
-        address: filters.address,
-        contactName: filters.contactName,
-        sort: filters.sort,
-        page: filters.page ?? 0,
-        size: filters.size ?? rowsPerPage,
-      });
-
-      if (currentRequestId !== requestIdRef.current) {
-        return;
-      }
-
-      const { content, ...paginationData } = response;
-      setStores(content);
-      setStoresPagination(() => ({
-        ...paginationData,
-        pageNo: filters.page ?? 0,
-      }));
-
-      if (!fromSort) {
-        setStoresLoading(false);
-      }
-    } catch (error: any) {
-      if (currentRequestId !== requestIdRef.current) {
-        return;
-      }
-
-      if (!fromSort) {
-        setStoresLoading(false);
-      }
-
-      setAlert({
-        title: t('errors.genericTitle'),
-        text: t('errors.genericDescription'),
-        isOpen: true,
-        severity: 'error',
-      });
-    }
-  };
-
   const formik = useFormik<GetPointOfSalesFilters>({
     initialValues,
     onSubmit: (values) => {
@@ -286,28 +75,61 @@ const PosCatalog: React.FC = () => {
     },
   });
 
-  const handleFiltersApplied = (values: GetPointOfSalesFilters) => {
-    const updatedFilters = {
-      ...values,
-      page: 0,
-      size: rowsPerPage,
-    };
-    setAppliedFilters(updatedFilters);
-    setFiltersAppliedOnce(true);
-    setStoresPagination((prev) => ({
-      ...prev,
-      pageNo: 0,
-    }));
-  };
+  const handleFetchError = useCallback(
+    () =>
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      }),
+    [setAlert, t]
+  );
 
-  const handleFiltersReset = () => {
-    setFiltersAppliedOnce(false);
-    setAppliedFilters(initialValues);
-    setStoresPagination((prev) => ({
-      ...prev,
-      pageNo: 0,
-    }));
-  };
+  const fetchCatalogStores = useCallback(async (filters: GetPointOfSalesFilters) => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
+
+    if (!merchantId) {
+      return {
+        content: [],
+        pageNo: 0,
+        pageSize: filters.size ?? PAGINATION_SIZE,
+        totalElements: 0,
+      };
+    }
+
+    return getMerchantPointOfSalesCatalog(merchantId, {
+      initiative: filters.initiative,
+      type: filters.type,
+      city: filters.city,
+      address: filters.address,
+      contactName: filters.contactName,
+      sort: filters.sort,
+      page: filters.page ?? 0,
+      size: filters.size ?? PAGINATION_SIZE,
+    });
+  }, []);
+
+  const {
+    stores,
+    storesPagination,
+    storesLoading,
+    rowsPerPage,
+    sortModel,
+    filtersAppliedOnce,
+    handleFiltersApplied,
+    handleFiltersReset,
+    handleSortModelChange,
+    handlePaginationPageChange,
+    handleRowsPerPageChange,
+  } = usePointOfSalesTable({
+    initialValues,
+    initialPageSize: PAGINATION_SIZE,
+    storageKey: 'storesPagination',
+    onFetchError: handleFetchError,
+    fetchStores: fetchCatalogStores,
+  });
 
   const filtersSetted = () =>
     formik.values.initiative !== '' ||
@@ -316,76 +138,25 @@ const PosCatalog: React.FC = () => {
     formik.values.address !== '' ||
     formik.values.contactName !== '';
 
-  const handleSortModelChange = (newSortModel: GridSortModel) => {
-    if (newSortModel.length > 0) {
-      const { field, sort } = newSortModel[0];
-      const sortKey = field === 'referent' ? `contactName,${sort}` : `${field},${sort}`;
-      setCurrentSort(sortKey);
-      setSortModel(newSortModel);
+  const openStoreDrawer = useCallback((store: PointOfSaleDTO) => {
+    setSelectedStore(store);
+    setIsDrawerOpen(true);
+  }, []);
 
-      const updatedPagination = {
-        ...storesPagination,
-        sort: sortKey,
-        pageSize: rowsPerPage,
-      };
-      setStoresPagination(updatedPagination);
-      sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
-    } else {
-      browserConsole.log('Ordinamento rimosso.');
-      setCurrentSort('asc');
-      setSortModel([]);
-    }
-  };
+  const handleToggleDrawer = useCallback(() => {
+    setIsDrawerOpen(false);
+    setSelectedStore(null);
+  }, []);
 
-  const handlePaginationPageChange = useCallback(
-    async (page: number) => {
-      const updatedPagination = {
-        ...storesPagination,
-        pageNo: page,
-        sort: currentSort,
-      };
-      setStoresPagination(updatedPagination);
-      sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
-
-      await fetchStores({
-        ...appliedFilters,
-        sort: currentSort,
-        page,
-      });
-    },
-    [storesPagination, currentSort, appliedFilters]
+  const columns = useMemo(
+    () =>
+      buildPointOfSalesColumns({
+        t,
+        onActionClick: openStoreDrawer,
+        addressMode: 'catalog',
+      }),
+    [openStoreDrawer, t]
   );
-
-
-  const handleRowsPerPageChange = (pageSize: number) => {
-    setRowsPerPage(pageSize);
-
-    const updatedFilters = {
-      ...appliedFilters,
-      page: 0,
-      size: pageSize,
-    };
-
-    const updatedPagination = {
-      ...storesPagination,
-      pageNo: 0,
-      pageSize,
-      sort: currentSort,
-    };
-
-    setAppliedFilters(updatedFilters);
-    setStoresPagination(updatedPagination);
-    sessionStorage.setItem('storesPagination', JSON.stringify(updatedPagination));
-  };
-
-  useEffect(() => {
-    void fetchStores({
-      ...appliedFilters,
-      sort: currentSort,
-      page: storesPagination.pageNo,
-      size: rowsPerPage,
-    });
-  }, [currentSort, appliedFilters, storesPagination.pageNo, rowsPerPage]);
 
   return (
     <Box sx={{ my: 2 }}>
@@ -415,12 +186,13 @@ const PosCatalog: React.FC = () => {
             (stores.length === 0 && filtersSetted()) ||
             filtersAppliedOnce) && (
             <>
-              <PosCatalogFilters
+              <PointOfSalesFilters
                 onFiltersApplied={handleFiltersApplied}
                 onFiltersReset={handleFiltersReset}
                 formik={formik}
                 filtersAppliedOnce={filtersAppliedOnce}
                 initiativeOptions={initiativeOptions}
+                fields={['initiative', 'type', 'city', 'address', 'contactName']}
                 t={t}
               />
 
