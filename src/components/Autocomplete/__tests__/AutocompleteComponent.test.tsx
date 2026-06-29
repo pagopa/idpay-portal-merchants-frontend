@@ -74,7 +74,11 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
       >
         compare-options
       </button>
-      <button type="button" data-testid="filter-options" onClick={() => filterOptions?.(['one'])}>
+      <button
+        type="button"
+        data-testid="filter-options"
+        onClick={() => filterOptions?.(['one'])}
+      >
         filter-options
       </button>
     </div>
