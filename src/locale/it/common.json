@@ -186,11 +186,11 @@
         "contactSurname": "Inserisci il cognome del referente"
       },
       "saveErrors": {
-        "emailAlreadyRegisteredAlert": "L'email del referente è già associata a un altro punto vendita.",
-        "emailAlreadyRegisteredField": "L'e-mail è già associata a un punto vendita.",
-        "posAlreadyRegisteredOtherInitiativeAlert": "Il punto vendita risulta già censito in un'altra iniziativa.",
+        "emailAlreadyRegisteredAlert": "L'email del referente è già associata a un altro punto vendita",
+        "emailAlreadyRegisteredField": "L'email è già associata a un punto vendita",
+        "posAlreadyRegisteredOtherInitiativeAlert": "Il punto vendita risulta già censito in un'altra iniziativa",
         "posAlreadyRegisteredOtherInitiativeField": "Questo indirizzo è già associato a un punto vendita registrato in un'altra iniziativa",
-        "posAlreadyRegisteredAlert": "Il punto vendita risulta già censito nell'iniziativa.",
+        "posAlreadyRegisteredAlert": "Il punto vendita risulta già censito nell'iniziativa",
         "posAlreadyRegisteredField": "Questo indirizzo risulta già associato a un punto vendita"
       }
     },
