@@ -10,9 +10,10 @@ import {
   Button,
   Alert,
   Slide,
+  InputAdornment,
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { ArrowOutward } from '@mui/icons-material';
+import { ArrowOutward, Report as ReportIcon } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked } from '@pagopa/mui-italia/components';
 import { theme } from '@pagopa/mui-italia/theme';
@@ -465,6 +466,27 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   const getFieldError = (salesPointIndex: number, fieldName: string): string =>
     mergedErrors[salesPointIndex]?.[fieldName] ?? '';
 
+  const getErrorInputProps = (hasError: boolean) =>
+    hasError
+      ? {
+          sx: { position: 'relative' },
+          endAdornment: (
+            <InputAdornment
+              position="end"
+              sx={{
+                m: 0,
+                position: 'absolute',
+                right: 1.5,
+                top: '50%',
+                transform: 'translateY(-50%)',
+              }}
+            >
+              <ReportIcon color="error" data-testid="input-error-icon" fontSize="small" />
+            </InputAdornment>
+          ),
+        }
+      : undefined;
+
   const addAnotherSalesPoint = async () => {
     if (salesPoints.length < 5) {
       await search('');
@@ -638,6 +660,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                 }}
                 error={!!getFieldError(index, 'franchiseName')}
                 helperText={getFieldError(index, 'franchiseName')}
+                InputProps={getErrorInputProps(!!getFieldError(index, 'franchiseName'))}
               />
             </Grid>
             <Grid item xs={7} />
@@ -665,6 +688,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                   }}
                   error={!!getFieldError(index, 'website')}
                   helperText={getFieldError(index, 'website')}
+                  InputProps={getErrorInputProps(!!getFieldError(index, 'website'))}
                 />
               </>
             )}
@@ -721,6 +745,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'city')}
                         helperText={''}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'city'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-disabled': {
                             color: theme.palette.text.secondary,
@@ -744,6 +769,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'zipCode')}
                         helperText={''}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'zipCode'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-disabled': {
                             color: theme.palette.text.secondary,
@@ -767,6 +793,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'region')}
                         helperText={''}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'region'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-disabled': {
                             color: theme.palette.text.secondary,
@@ -790,6 +817,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'province')}
                         helperText={''}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'province'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-disabled': {
                             color: theme.palette.text.secondary,
@@ -827,6 +855,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!mergedErrors[index]?.contactEmail}
                         helperText={mergedErrors[index]?.contactEmail}
+                        InputProps={getErrorInputProps(!!mergedErrors[index]?.contactEmail)}
                         sx={{
                           ...requiredLabelSx,
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
@@ -850,6 +879,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'confirmContactEmail')}
                         helperText={getFieldError(index, 'confirmContactEmail')}
+                        InputProps={getErrorInputProps(
+                          !!getFieldError(index, 'confirmContactEmail')
+                        )}
                         sx={{
                           ...requiredLabelSx,
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
@@ -874,6 +906,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         error={!!getFieldError(index, 'contactName')}
                         helperText={getFieldError(index, 'contactName')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'contactName'))}
                         sx={{
                           ...requiredLabelSx,
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
@@ -897,6 +930,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         error={!!getFieldError(index, 'contactSurname')}
                         helperText={getFieldError(index, 'contactSurname')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'contactSurname'))}
                         sx={{
                           ...requiredLabelSx,
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
@@ -932,6 +966,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                           }
                           error={!!getFieldError(index, 'channelGeolink')}
                           helperText={getFieldError(index, 'channelGeolink')}
+                          InputProps={getErrorInputProps(!!getFieldError(index, 'channelGeolink'))}
                           sx={{
                             '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                               color: theme.palette.text.secondary,
@@ -1010,6 +1045,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }}
                         error={!!getFieldError(index, 'channelPhone')}
                         helperText={getFieldError(index, 'channelPhone')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'channelPhone'))}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -1035,6 +1071,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }}
                         error={!!getFieldError(index, 'channelEmail')}
                         helperText={getFieldError(index, 'channelEmail')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'channelEmail'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                             color: theme.palette.text.secondary,
@@ -1055,6 +1092,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         error={!!getFieldError(index, 'website')}
                         helperText={getFieldError(index, 'website')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'website'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                             color: theme.palette.text.secondary,
