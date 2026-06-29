@@ -19,8 +19,32 @@ import {
   ReportDTO,
   MerchantIbanPatchDTO,
   PointOfSaleDTO,
+  ValidationErrorDTO,
+  PointOfSaleErrorDTO,
+  ValidationErrorDetail,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
+
+const normalizePointOfSaleError = (
+  errorData?: ValidationErrorDTO | PointOfSaleErrorDTO
+): ValidationErrorDTO | PointOfSaleErrorDTO | undefined => {
+  if (!errorData) {
+    return undefined;
+  }
+
+  if (String(errorData.code) === 'VALIDATION_ERROR') {
+    const validationErrorData = errorData as ValidationErrorDTO & {
+      details?: Array<ValidationErrorDetail>;
+    };
+
+    return {
+      ...validationErrorData,
+      errors: validationErrorData.errors ?? validationErrorData.details ?? [],
+    };
+  }
+
+  return errorData;
+};
 
 export type GetMerchantTransactionsProcessedParams = {
   initiativeId: string;
@@ -99,7 +123,7 @@ export const updateMerchantPointOfSales = async (
   initiativeId: string,
   merchantId: string,
   pointOfSales: Array<PointOfSaleDTO>
-): Promise<void | { code?: string; message?: string }> => {
+): Promise<void | ValidationErrorDTO | PointOfSaleErrorDTO> => {
   try {
     const result = await getMerchantsApi().updateMerchantPointOfSales(
       initiativeId,
@@ -107,26 +131,33 @@ export const updateMerchantPointOfSales = async (
       pointOfSales
     );
 
-    return result as void | { code?: string; message?: string };
+    return result as void | ValidationErrorDTO | PointOfSaleErrorDTO;
   } catch (error) {
     if (error instanceof ApiError) {
+      const errorDetails = error.details as ValidationErrorDTO | PointOfSaleErrorDTO | undefined;
+
+      if (errorDetails?.code) {
+        return normalizePointOfSaleError({
+          ...errorDetails,
+          message: errorDetails.message ?? error.message ?? '',
+        } as ValidationErrorDTO | PointOfSaleErrorDTO);
+      }
+
       return {
-        code: error.code,
-        message:
-          (error.details as { message?: string } | undefined)?.message ??
-          error.message ??
-          undefined,
+        code: (error.code ?? 'POINT_OF_SALE_GENERIC_ERROR') as PointOfSaleErrorDTO['code'],
+        message: error.message ?? '',
       };
     }
 
-    const apiErrorData = (error as { response?: { data?: { code?: string; message?: string } } })
-      ?.response?.data;
+    const apiErrorData = (error as {
+      response?: { data?: ValidationErrorDTO | PointOfSaleErrorDTO };
+    })?.response?.data;
 
-    if (apiErrorData && (apiErrorData.code || apiErrorData.message)) {
-      return apiErrorData;
+    if (apiErrorData) {
+      return normalizePointOfSaleError(apiErrorData);
     }
 
-    return { code: 'GENERIC_ERROR' };
+    return { code: 'POINT_OF_SALE_GENERIC_ERROR', message: '' };
   }
 };
 

@@ -176,7 +176,23 @@
       "title": "Punto vendita",
       "signName": "Nome insegna",
       "website": "Indirizzo web",
-      "address": "Indirizzo"
+      "address": "Indirizzo",
+      "requiredErrors": {
+        "franchiseName": "Inserisci il nome dell'insegna",
+        "address": "Inserisci l'indirizzo completo dell'insegna",
+        "contactEmail": "Inserisci l'e-mail del referente",
+        "confirmContactEmail": "Conferma l'e-mail del referente",
+        "contactName": "Inserisci il nome del referente",
+        "contactSurname": "Inserisci il cognome del referente"
+      },
+      "saveErrors": {
+        "emailAlreadyRegisteredAlert": "L'email del referente è già associata a un altro punto vendita.",
+        "emailAlreadyRegisteredField": "L'e-mail è già associata a un punto vendita.",
+        "posAlreadyRegisteredOtherInitiativeAlert": "Il punto vendita risulta già censito in un'altra iniziativa.",
+        "posAlreadyRegisteredOtherInitiativeField": "Questo indirizzo è già associato a un punto vendita registrato in un'altra iniziativa",
+        "posAlreadyRegisteredAlert": "Il punto vendita risulta già censito nell'iniziativa.",
+        "posAlreadyRegisteredField": "Questo indirizzo risulta già associato a un punto vendita"
+      }
     },
     "initiativeStores": {
       "title": "Punti vendita",
