@@ -105,8 +105,17 @@ export default function AutocompleteComponent({
           size="small"
           error={inputError}
           helperText={getHelperText()}
-          required={required}
-          sx={{ marginTop: 2 }}
+          sx={{
+            marginTop: 2,
+            ...(required
+              ? {
+                  '& .MuiInputLabel-root::after': {
+                    content: '" *"',
+                    color: 'error.main',
+                  },
+                }
+              : {}),
+          }}
           InputProps={{
             ...params.InputProps,
             endAdornment: <>{loading ? <CircularProgress color="inherit" size={20} /> : null}</>,

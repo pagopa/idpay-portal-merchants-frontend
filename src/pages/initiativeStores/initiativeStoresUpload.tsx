@@ -19,7 +19,10 @@ import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { parseJwt } from '../../utils/jwt-utils';
 import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
-import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
+import {
+  PointOfSaleDTO,
+  ValidationErrorDetail,
+} from '../../api/generated/merchants/data-contracts';
 import { updateMerchantPointOfSales } from '../../services/merchantService';
 import ROUTES from '../../routes';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
@@ -36,6 +39,10 @@ interface FieldErrors {
   [fieldName: string]: string;
 }
 
+interface FormAlertMessages {
+  [salesPointIndex: number]: string;
+}
+
 interface RouteParams {
   initiative_id: string;
 }
@@ -47,6 +54,10 @@ const InitiativeStoresUpload: React.FC = () => {
   );
   const [salesPoints, setSalesPoints] = useState<Array<SalePointFormDTO>>([]);
   const [duplicateEmailErrors, setDuplicateEmailErrors] = useState<FormErrors>({});
+  const [apiValidationErrors, setApiValidationErrors] = useState<FormErrors>({});
+  const [apiValidationAlertMessages, setApiValidationAlertMessages] = useState<FormAlertMessages>(
+    {}
+  );
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const { t } = useScopedTranslation();
@@ -54,11 +65,28 @@ const InitiativeStoresUpload: React.FC = () => {
   const history = useHistory();
   const [submitAttempt, setSubmitAttempt] = useState(0);
 
+  const mergeFormErrors = (first: FormErrors, second: FormErrors): FormErrors => {
+    const indexes = new Set([...Object.keys(first), ...Object.keys(second)]);
+
+    return Array.from(indexes).reduce<FormErrors>(
+      (acc, index) => ({
+        ...acc,
+        [Number(index)]: {
+          ...first[Number(index)],
+          ...second[Number(index)],
+        },
+      }),
+      {}
+    );
+  };
+
   const onFormChange = useCallback(
     (newSalesPoints: Array<SalePointFormDTO>) => {
       if (pointsOfSaleLoaded) {
         setPointsOfSaleLoaded(false);
       }
+      setApiValidationErrors({});
+      setApiValidationAlertMessages({});
       setSalesPoints(newSalesPoints);
     },
     [pointsOfSaleLoaded]
@@ -67,6 +95,83 @@ const InitiativeStoresUpload: React.FC = () => {
   const onValidationChange = useCallback((isValid: boolean) => {
     setIsFormValid(isValid);
   }, []);
+
+  const getValidationErrorField = (
+    detail: ValidationErrorDetail,
+    salesPoint: SalePointFormDTO | undefined
+  ) => {
+    if (detail.code === 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE') {
+      return salesPoint?.type === 'ONLINE' ? 'website' : 'address';
+    }
+
+    if (detail.code === 'ONLINE_POS_ALREADY_REGISTERED') {
+      return 'website';
+    }
+
+    return detail.field ?? '';
+  };
+
+  const getValidationFieldMessage = (code?: string) => {
+    switch (code) {
+      case 'EMAIL_ALREADY_REGISTERED':
+        return t('pages.pointOfSales.saveErrors.emailAlreadyRegisteredField');
+      case 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE':
+        return t('pages.pointOfSales.saveErrors.posAlreadyRegisteredOtherInitiativeField');
+      case 'PHYSICAL_POS_ALREADY_REGISTERED':
+      case 'ONLINE_POS_ALREADY_REGISTERED':
+        return t('pages.pointOfSales.saveErrors.posAlreadyRegisteredField');
+      default:
+        return t('errors.genericDescription');
+    }
+  };
+
+  const getValidationAlertMessage = (code?: string) => {
+    switch (code) {
+      case 'EMAIL_ALREADY_REGISTERED':
+        return t('pages.pointOfSales.saveErrors.emailAlreadyRegisteredAlert');
+      case 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE':
+        return t('pages.pointOfSales.saveErrors.posAlreadyRegisteredOtherInitiativeAlert');
+      case 'PHYSICAL_POS_ALREADY_REGISTERED':
+      case 'ONLINE_POS_ALREADY_REGISTERED':
+        return t('pages.pointOfSales.saveErrors.posAlreadyRegisteredAlert');
+      default:
+        return t('errors.genericDescription');
+    }
+  };
+
+  const buildApiValidationState = (
+    details: Array<ValidationErrorDetail>
+  ): { errors: FormErrors; alertMessages: FormAlertMessages } =>
+    details.reduce(
+      (acc, detail) => {
+        const salesPointIndex = detail.index;
+        const field = getValidationErrorField(detail, salesPoints[salesPointIndex]);
+
+        if (!field && !detail.code) {
+          return acc;
+        }
+
+        return {
+          errors: field
+            ? {
+                ...acc.errors,
+                [salesPointIndex]: {
+                  ...acc.errors[salesPointIndex],
+                  [field]: getValidationFieldMessage(detail.code),
+                },
+              }
+            : acc.errors,
+          alertMessages: {
+            ...acc.alertMessages,
+            [salesPointIndex]: getValidationAlertMessage(detail.code),
+          },
+        };
+      },
+      { errors: {}, alertMessages: {} } as {
+        errors: FormErrors;
+        alertMessages: FormAlertMessages;
+      }
+    );
 
   // Calculate duplicate email errors
   useEffect(() => {
@@ -104,7 +209,12 @@ const InitiativeStoresUpload: React.FC = () => {
       // Use timeout to wait for useEffect to run
       await new Promise((resolve) => setTimeout(resolve, 50));
 
-      if (!isFormValid || Object.keys(duplicateEmailErrors).length > 0) {
+      if (
+        !isFormValid ||
+        Object.keys(duplicateEmailErrors).length > 0 ||
+        Object.keys(apiValidationErrors).length > 0 ||
+        Object.keys(apiValidationAlertMessages).length > 0
+      ) {
         return;
       }
       const userJwt = parseJwt(storageTokenOps.read());
@@ -129,9 +239,25 @@ const InitiativeStoresUpload: React.FC = () => {
         };
       });
 
-      const response = await updateMerchantPointOfSales( initiative_id, merchantId, normalizedSalesPoints);
+      const response = await updateMerchantPointOfSales(
+        initiative_id,
+        merchantId,
+        normalizedSalesPoints
+      );
       if (response) {
-        if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
+        const responseValidationDetails =
+          response?.code === 'VALIDATION_ERROR'
+            ? response.errors ??
+              (response as typeof response & { details?: Array<ValidationErrorDetail> }).details
+            : undefined;
+
+        if (responseValidationDetails?.length) {
+          const { errors, alertMessages } = buildApiValidationState(responseValidationDetails);
+          setApiValidationErrors(errors);
+          setApiValidationAlertMessages(alertMessages);
+          return;
+        }
+        if (String(response.code) === 'POINT_OF_SALE_ALREADY_REGISTERED') {
           setAlert({
             title: t('errors.pointOfSaleAlreadyExistsError'),
             text: t('errors.pointOfSaleAlreadyExistsDescription'),
@@ -261,7 +387,8 @@ const InitiativeStoresUpload: React.FC = () => {
             {uploadMethod === POS_UPDATE.Manual && (
               <Grid item xs={12}>
                 <PointsOfSaleForm
-                  externalErrors={duplicateEmailErrors}
+                  externalErrors={mergeFormErrors(duplicateEmailErrors, apiValidationErrors)}
+                  externalAlertMessages={apiValidationAlertMessages}
                   onFormChange={onFormChange}
                   onValidationChange={onValidationChange}
                   pointsOfSaleLoaded={pointsOfSaleLoaded}

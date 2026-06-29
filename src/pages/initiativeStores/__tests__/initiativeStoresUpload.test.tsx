@@ -91,6 +91,23 @@ jest.mock('../../../components/pointsOfSaleForm/PointsOfSaleForm', () => (props:
       >
         duplicates
       </button>
+      <button
+        data-testid="set-online-form"
+        onClick={() => {
+          props.onFormChange([
+            {
+              type: 'ONLINE',
+              contactEmail: 'online@example.com',
+              confirmContactEmail: 'online@example.com',
+              website: 'online.example.com',
+              channelGeolink: '',
+            },
+          ]);
+          props.onValidationChange(true);
+        }}
+      >
+        online
+      </button>
     </div>
   );
 });
@@ -262,5 +279,119 @@ describe('InitiativeStoresUpload', () => {
       severity: 'error',
     });
     expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it('maps API validation errors to field errors and alert messages', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      errors: [
+        {
+          index: 0,
+          field: 'contactEmail',
+          code: 'EMAIL_ALREADY_REGISTERED',
+        },
+        {
+          index: 0,
+          code: 'PHYSICAL_POS_ALREADY_REGISTERED',
+        },
+        {
+          index: 0,
+          code: 'UNKNOWN_CODE',
+        },
+      ],
+    });
+    renderComponent();
+
+    await submitValidForm();
+
+    await waitFor(() =>
+      expect(mockLatestFormProps.externalErrors).toEqual({
+        0: {
+          contactEmail: 'pages.pointOfSales.saveErrors.emailAlreadyRegisteredField',
+        },
+      })
+    );
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({
+      0: 'errors.genericDescription',
+    });
+    expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it('maps already-registered validation errors to the physical address field', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      details: [
+        {
+          index: 0,
+          code: 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
+        },
+      ],
+    });
+    renderComponent();
+
+    await submitValidForm();
+
+    await waitFor(() =>
+      expect(mockLatestFormProps.externalErrors).toEqual({
+        0: {
+          address: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredOtherInitiativeField',
+        },
+      })
+    );
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({
+      0: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredOtherInitiativeAlert',
+    });
+  });
+
+  it('maps already-registered validation errors to website for online stores', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      errors: [
+        {
+          index: 0,
+          code: 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
+        },
+        {
+          index: 0,
+          code: 'ONLINE_POS_ALREADY_REGISTERED',
+        },
+      ],
+    });
+    renderComponent();
+    fireEvent.click(screen.getByTestId('set-online-form'));
+
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    await waitFor(() =>
+      expect(mockLatestFormProps.externalErrors).toEqual({
+        0: {
+          website: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredField',
+        },
+      })
+    );
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({
+      0: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredAlert',
+    });
+  });
+
+  it('clears API validation errors after the form changes', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      errors: [
+        {
+          index: 0,
+          field: 'contactEmail',
+          code: 'EMAIL_ALREADY_REGISTERED',
+        },
+      ],
+    });
+    renderComponent();
+    await submitValidForm();
+    await waitFor(() => expect(mockLatestFormProps.externalErrors[0]).toBeDefined());
+
+    fireEvent.click(screen.getByTestId('set-valid-form'));
+
+    await waitFor(() => expect(mockLatestFormProps.externalErrors).toEqual({}));
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({});
   });
 });
