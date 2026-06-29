@@ -219,6 +219,7 @@ describe('AutocompleteComponent', () => {
   it('shows error message when inputError is true', () => {
     render(<AutocompleteComponent options={[]} inputError label="Campo" />);
     expect(screen.getByText('Campo obbligatorio')).toBeInTheDocument();
+    expect(screen.getByTestId('input-error-icon')).toBeInTheDocument();
   });
 
   it('shows custom error message if errorText is provided', () => {
