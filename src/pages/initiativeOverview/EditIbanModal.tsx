@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from "../../api/generated/merchants/data-contracts";
 import { EditModal, EditModalProps } from "../../components/EditModal/EditModal";
 import useScopedTranslation from "../../hooks/useScopedTranslation";
-import { isValidRegex } from "../../helpers";
+import { isValidRegex, spaceRemover } from "../../helpers";
 import { useInitiativeConfig } from "../../hooks/useInitiativeConfig";
 
 type Props = EditModalProps & {
@@ -30,7 +30,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
     if (!isHolderEmpty && !isIbanEmpty && !error?.iban && !error?.ibanHolder) {
       const { iban, ibanHolder, ...rest } = error;
       setError(rest);
-      onUpdate(merchantData, 'iban');
+      onUpdate({ ...merchantData, ibanHolder: merchantData?.ibanHolder?.replace(/\s+/g, ' ').trimEnd()}, 'iban');
     } else {
       const ibanError = isIbanEmpty || error?.iban ? { iban: error?.iban || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
       const ibanHolderError = isHolderEmpty || error?.ibanHolder ? { ibanHolder: error?.ibanHolder || 'pages.initiativeOverview.ibanModal.requiredField' } : {};
@@ -50,6 +50,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
   >
     <Box display="flex" flexDirection="column" rowGap="1.5rem">
       <TextField
+        value={merchantData?.ibanHolder}
         defaultValue={data?.ibanHolder}
         label={t('pages.initiativeOverview.ibanModal.fieldHolder.placeholder')}
         variant='outlined'
@@ -60,8 +61,9 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
           }
         }}
         onChange={(e) => {
-          setMerchantData({ ...merchantData, ibanHolder: e.target.value });
-          if (!isValidRegex(e.target.value, ibanHolderRegex)) {
+          const normalizedValue = e.target.value.trimStart();
+          setMerchantData({ ...merchantData, ibanHolder: normalizedValue });
+          if (!isValidRegex(normalizedValue, ibanHolderRegex)) {
             setError(prev => ({ ...prev, ibanHolder: 'pages.initiativeOverview.ibanModal.notValidIbanHolder' }));
           } else {
             const { ibanHolder, ...rest } = error;
@@ -72,6 +74,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
         helperText={error?.ibanHolder && t(error?.ibanHolder)}
       />
       <TextField
+        value={merchantData?.iban}
         defaultValue={data?.iban}
         label={t('pages.initiativeOverview.ibanModal.fieldIban.placeholder')}
         variant='outlined'
@@ -82,8 +85,9 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
           }
         }}
         onChange={(e) => {
-          setMerchantData({ ...merchantData, iban: e.target.value });
-          if (!isValidRegex(e.target.value, ibanRegex)) {
+          const normalizedValue = spaceRemover(e.target.value);
+          setMerchantData({ ...merchantData, iban: normalizedValue });
+          if (!isValidRegex(normalizedValue, ibanRegex)) {
             setError(prev => ({ ...prev, iban: 'pages.initiativeOverview.ibanModal.notValidIban' }));
           } else {
             const { iban, ...rest } = error;
