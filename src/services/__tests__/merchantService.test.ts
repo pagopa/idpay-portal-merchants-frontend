@@ -219,7 +219,8 @@ describe('merchantService', () => {
 
   test('updateMerchantPointOfSales returns generic error when payload is missing', async () => {
     await expectUpdateMerchantPointOfSalesError(new Error('unexpected failure'), {
-      code: 'GENERIC_ERROR',
+      code: 'POINT_OF_SALE_GENERIC_ERROR',
+      message: '',
     });
   });
 
