@@ -26,6 +26,7 @@ const Layout = ({ children }: Props) => {
   const match = matchPath(location.pathname, {
     path: [
       ROUTES.HOME,
+      ROUTES.POS_CATALOG,
       ROUTES.DISCOUNTS,
       ROUTES.OVERVIEW,
       ROUTES.STORES,

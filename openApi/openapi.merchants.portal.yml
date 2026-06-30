@@ -324,6 +324,116 @@ paths:
               example:
                 code: POINT_OF_SALE_GENERIC_ERROR
                 message: An error occurred during file reading
+  /{merchantId}/point-of-sales/{pointOfSaleId}/initiatives:
+    get:
+      tags:
+        - point-of-sales
+      summary: Retrieve initiatives linked to a point of sale
+      description: Returns the initiatives linked to the specified point of sale for the merchant.
+      operationId: getPointOfSaleInitiatives
+      security:
+        - Bearer: [ ]
+      parameters:
+        - name: merchantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pointOfSaleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response with linked initiatives
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleInitiativeListDTO"
+        "400":
+          description: Bad request - Invalid query parameters
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_BAD_REQUEST
+                message: Something went wrong handling request
+        "401":
+          description: Unauthorized - Authentication Failed
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_UNAUTHORIZED
+                message: Authentication Failed
+        "404":
+          description: Not Found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_NOT_FOUND
+                message: Point of sale with id 123 not found.
+        "429":
+          description: Too many Request - Rate limit exceeded
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/Access-Control-Allow-Origin'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+            Retry-After:
+              $ref: '#/components/headers/Retry-After'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_TOO_MANY_REQUESTS
+                message: Too many requests
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_GENERIC_ERROR
+                message: An error occurred during file reading
   /{merchantId}/point-of-sales:
     get:
       tags:
@@ -3075,6 +3185,24 @@ components:
       schema: { type: string, maxLength: 64, pattern: '^[A-Z0-9\-_]+$' }
       example: INITIATIVE_67890
   schemas:
+    PointOfSaleInitiativeListDTO:
+      type: object
+      properties:
+        initiatives:
+          type: array
+          items:
+            $ref: "#/components/schemas/PointOfSaleInitiativeDTO"
+    PointOfSaleInitiativeDTO:
+      type: object
+      properties:
+        initiativeId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     InitiativeDTO:
       type: object
       properties:
@@ -3730,6 +3858,10 @@ components:
             - POINT_OF_SALE_TOO_MANY_REQUESTS
             - POINT_OF_SALE_GENERIC_ERROR
             - POINT_OF_SALE_UNAUTHORIZED
+            - EMAIL_ALREADY_REGISTERED
+            - POS_ALREADY_REGISTERED_OTHER_INITIATIVE
+            - ONLINE_POS_ALREADY_REGISTERED
+            - PHYSICAL_POS_ALREADY_REGISTERED
           description: '"ENG: Error code:<br> POINT_OF_SALES_NOT_FOUND: The sale was not found,<br> MERCHANT_NOT_ONBOARDED: The merchant is not associated to the initiative,<br> POINT_OF_SALES_TOO_MANY_REQUESTS: Too many requests,<br> POINT_OF_SALES_INVALID_REQUEST: Something went wrong handling the request,<br> POINT_OF_SALES_GENERIC_ERROR: Application error,<br> - IT: Codice di errore:<br> POINT_OF_SALES_NOT_FOUND: Lo store non è stato trovato,<br> MERCHANT_NOT_ONBOARDED: L''esercente non è associato all''iniziativa,<br> POINT_OF_SALES_TOO_MANY_REQUESTS: Troppe richieste,<br> POINT_OF_SALES_INVALID_REQUEST: Qualcosa è andato storto durante l''invio della richiesta,<br> POINT_OF_SALES_GENERIC_ERROR: Errore applicativo"'
         message:
           type: string
