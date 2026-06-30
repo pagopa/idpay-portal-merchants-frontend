@@ -12,6 +12,7 @@ import {
   authPaymentBarCode,
   updateMerchantPointOfSales,
   getMerchantPointOfSales,
+  getMerchantPointOfSalesCatalog,
   getMerchantPointOfSalesById,
   getMerchantPointOfSaleTransactionsProcessed,
   downloadInvoiceFile,
@@ -48,6 +49,8 @@ const mockedApi = {
   authPaymentBarCode: jest.fn(),
   updateMerchantPointOfSales: jest.fn(),
   getMerchantPointOfSales: jest.fn(),
+  getMerchantPointOfSalesCatalog: jest.fn(),
+  getPointOfSaleInitiatives: jest.fn(),
   getMerchantPointOfSalesById: jest.fn(),
   getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
   downloadInvoiceFile: jest.fn(),
@@ -202,6 +205,57 @@ describe('merchantService', () => {
     );
   });
 
+  test('updateMerchantPointOfSales normalizes validation error details from ApiError', async () => {
+    mockedApi.updateMerchantPointOfSales.mockRejectedValue(
+      new ApiError(400, 'validation failed', 'VALIDATION_ERROR' as any, {
+        code: 'VALIDATION_ERROR',
+        details: [{ code: 'ERR_1', message: 'invalid row' }],
+      } as any)
+    );
+
+    await expect(updateMerchantPointOfSales('initiative', 'merchant', [])).resolves.toEqual(
+      expect.objectContaining({
+        code: 'VALIDATION_ERROR',
+        message: 'validation failed',
+        details: [{ code: 'ERR_1', message: 'invalid row' }],
+        errors: [{ code: 'ERR_1', message: 'invalid row' }],
+      })
+    );
+  });
+
+  test('updateMerchantPointOfSales returns empty validation errors array when details and errors are missing', async () => {
+    await expectUpdateMerchantPointOfSalesError(
+      {
+        response: {
+          data: {
+            code: 'VALIDATION_ERROR',
+          },
+        },
+      },
+      {
+        code: 'VALIDATION_ERROR',
+        errors: [],
+      }
+    );
+  });
+
+  test('updateMerchantPointOfSales preserves validation errors when already present in payload', async () => {
+    await expectUpdateMerchantPointOfSalesError(
+      {
+        response: {
+          data: {
+            code: 'VALIDATION_ERROR',
+            errors: [{ code: 'ERR_2', message: 'existing error' }],
+          },
+        },
+      },
+      {
+        code: 'VALIDATION_ERROR',
+        errors: [{ code: 'ERR_2', message: 'existing error' }],
+      }
+    );
+  });
+
   test('updateMerchantPointOfSales returns response payload when only message is available', async () => {
     await expectUpdateMerchantPointOfSalesError(
       {
@@ -224,15 +278,51 @@ describe('merchantService', () => {
     });
   });
 
-  test('getMerchantPointOfSales delegates correctly', async () => {
-    mockedApi.getMerchantPointOfSales.mockResolvedValue({});
-    await getMerchantPointOfSales('init-1', 'merchant', {} as any);
+  test('getMerchantPointOfSales maps response pagination fields', async () => {
+    mockedApi.getMerchantPointOfSales.mockResolvedValue({
+      content: [{ id: 'pos-1' }],
+      pageNumber: 2,
+      pageSize: 25,
+      totalElements: 120,
+    });
+
+    await expect(getMerchantPointOfSales('init-1', 'merchant', {} as any)).resolves.toEqual({
+      content: [{ id: 'pos-1' }],
+      pageNo: 2,
+      pageSize: 25,
+      totalElements: 120,
+    });
     expect(mockedApi.getMerchantPointOfSales).toHaveBeenCalled();
+  });
+
+  test('getMerchantPointOfSalesCatalog maps response pagination fields', async () => {
+    mockedApi.getMerchantPointOfSalesCatalog.mockResolvedValue({
+      content: [{ id: 'catalog-pos-1' }],
+      pageNumber: 1,
+      pageSize: 10,
+      totalElements: 11,
+    });
+
+    await expect(getMerchantPointOfSalesCatalog('merchant', {} as any)).resolves.toEqual({
+      content: [{ id: 'catalog-pos-1' }],
+      pageNo: 1,
+      pageSize: 10,
+      totalElements: 11,
+    });
+    expect(mockedApi.getMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant', {});
   });
 
   test('getMerchantPointOfSalesById delegates correctly', async () => {
     await getMerchantPointOfSalesById('init-1', 'merchant', 'pos');
     expect(mockedApi.getMerchantPointOfSalesById).toHaveBeenCalled();
+  });
+
+  test('getPointOfSaleInitiatives delegates correctly', async () => {
+    mockedApi.getPointOfSaleInitiatives.mockResolvedValue([]);
+    const { getPointOfSaleInitiatives } = require('../merchantService');
+
+    await getPointOfSaleInitiatives('merchant', 'pos');
+    expect(mockedApi.getPointOfSaleInitiatives).toHaveBeenCalledWith('merchant', 'pos');
   });
 
   test('getMerchantPointOfSaleTransactionsProcessed delegates correctly', async () => {

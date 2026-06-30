@@ -1,8 +1,9 @@
 /* eslint-disable no-prototype-builtins */
 import { List, Box } from '@mui/material';
 import { useHistory } from 'react-router-dom';
-import ListAltIcon from '@mui/icons-material/ListAlt';
 import { useState } from 'react';
+import MenuIcon from '@mui/icons-material/Menu';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import ROUTES from '../../routes';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import { useAppSelector } from '../../redux/hooks';
@@ -24,9 +25,16 @@ export default function SideMenu() {
             title={t('pages.initiativesList.title')}
             handleClick={() => history.replace(ROUTES.HOME)}
             isSelected={history.location.pathname === ROUTES.HOME}
-            icon={ListAltIcon}
+            icon={MenuIcon}
             level={0}
             data-testid="initiativeList-click-test"
+          />
+          <SidenavItem
+            title={t('pages.posCatalog.title')}
+            handleClick={() => history.replace(ROUTES.POS_CATALOG)}
+            isSelected={history.location.pathname === ROUTES.POS_CATALOG}
+            icon={Inventory2OutlinedIcon}
+            level={0}
           />
           {initiativesList &&
             initiativesList.map((item) => (
