@@ -188,8 +188,8 @@ const drawerInitiativeOptions = [
 
    it('renders online store details with website link and fetched initiatives', async () => {
     (getPointOfSaleInitiatives as jest.Mock).mockResolvedValue([
-      { initiativeId: 'Iniziativa 2', createdAt: '2024-02-02T00:00:00Z' },
-      { initiativeId: 'Iniziativa 1', createdAt: '2024-01-01T00:00:00Z' },
+      { initiativeId: 'Iniziativa 2', updatedAt: '2024-02-02T00:00:00Z' },
+      { initiativeId: 'Iniziativa 1', updatedAt: '2024-01-01T00:00:00Z' },
     ]);
 
     render(
@@ -232,15 +232,15 @@ const drawerInitiativeOptions = [
 
     expect(screen.getByText('Negozio fisico')).toBeInTheDocument();
     expect(screen.getByText('pages.posCatalog.drawer.address')).toBeInTheDocument();
-    expect(screen.getByText('Via Roma 1')).toBeInTheDocument();
+    expect(screen.getByText('Via Roma 1 - Milano')).toBeInTheDocument();
     expect(screen.getByText('pages.posCatalog.drawer.phone')).toBeInTheDocument();
     expect(screen.getByText('-')).toBeInTheDocument();
   });
 
   it('renders fallback initiative id and placeholders when fetched data is incomplete', async () => {
     (getPointOfSaleInitiatives as jest.Mock).mockResolvedValue([
-      { initiativeId: 'UNKNOWN_ID', createdAt: undefined },
-      { initiativeId: undefined, createdAt: '2024-03-03T00:00:00Z' },
+      { initiativeId: 'UNKNOWN_ID', updatedAt: undefined },
+      { initiativeId: undefined, updatedAt: '2024-03-03T00:00:00Z' },
     ]);
 
     render(
