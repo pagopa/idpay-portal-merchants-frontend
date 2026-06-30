@@ -1,88 +1,35 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { ListPointOfSaleDTO } from '../../../api/generated/merchants/data-contracts';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material';
+import { theme } from '@pagopa/mui-italia/theme';
 import PosCatalog from '../posCatalog';
 
-const buildPosCatalogResponse = (
-  overrides?: Partial<ListPointOfSaleDTO>
-): ListPointOfSaleDTO => ({
-  content: [
-    {
-      id: '1',
-      type: 'ONLINE',
-      franchiseName: 'Esercente point - de risi',
-      city: 'Milano',
-      address: 'Via Solferino 1',
-      website: 'https://example.com',
-      contactName: 'Mario',
-      contactSurname: 'Rossi',
-      contactEmail: 'mario.rossi@example.com',
-      channelPhone: '0212345678',
-    },
-    {
-      id: '2',
-      type: 'PHYSICAL',
-      franchiseName: 'Negozio fisico',
-      city: 'Roma',
-      address: 'Via Roma 10',
-      website: '',
-      contactName: 'Luigi',
-      contactSurname: 'Bianchi',
-      contactEmail: 'luigi.bianchi@example.com',
-      channelPhone: '0612345678',
-    },
-    {
-      id: '3',
-      type: 'PHYSICAL',
-      franchiseName: 'Esercente point - de risi',
-      city: 'Milano',
-      address: 'Via Solferino 2',
-      website: '',
-      contactName: 'Mario',
-      contactSurname: 'Verdi',
-      contactEmail: 'mario.verdi@example.com',
-      channelPhone: '0299988877',
-    },
-    ...Array.from({ length: 7 }, (_, index) => ({
-      id: `${index + 4}`,
-      type: 'PHYSICAL' as const,
-      franchiseName: `Store ${index + 4}`,
-      city: 'Torino',
-      address: `Via Test ${index + 4}`,
-      website: '',
-      contactName: `Nome ${index + 4}`,
-      contactSurname: `Cognome ${index + 4}`,
-      contactEmail: `store${index + 4}@example.com`,
-      channelPhone: '0112345678',
-    })),
-  ],
-  pageNumber: 0,
-  pageSize: 10,
-  totalElements: 10,
-  totalPages: 1,
-  ...overrides,
-});
-
-const mockReplace = jest.fn();
 const mockSetAlert = jest.fn();
-const mockRead = jest.fn();
-const mockUseAppSelector = jest.fn();
-const mockUseLocation = jest.fn();
+const mockReplace = jest.fn();
+const mockUsePointOfSalesTable = jest.fn();
+const mockBuildPointOfSalesColumns = jest.fn();
 const mockGetMerchantPointOfSalesCatalog = jest.fn();
+const mockParseJwt = jest.fn();
+const mockStorageRead = jest.fn();
+const mockUseFormik = jest.fn();
+const mockBrowserConsoleLog = jest.fn();
 
-jest.mock('@pagopa/selfcare-common-frontend/lib', () => ({
-  TitleBox: ({ title, subTitle }: { title: string; subTitle: string }) => (
-    <div>
-      <h1>{title}</h1>
-      <p>{subTitle}</p>
-    </div>
-  ),
+let dataTableProps: any = {};
+let filtersProps: any = {};
+let drawerProps: any = {};
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    replace: mockReplace,
+  }),
+  useLocation: jest.fn(() => ({ state: {}, pathname: '/pos-catalog' })),
 }));
 
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
-  storageTokenOps: {
-    read: () => mockRead(),
-  },
+jest.mock('../../../hooks/useAlert', () => ({
+  useAlert: () => ({
+    setAlert: mockSetAlert,
+  }),
 }));
 
 jest.mock('../../../hooks/useScopedTranslation', () => ({
@@ -92,322 +39,450 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/useAlert', () => ({
-  useAlert: () => ({
-    setAlert: mockSetAlert,
-  }),
+jest.mock('formik', () => ({
+  useFormik: (...args: Array<unknown>) => mockUseFormik(...args),
 }));
 
+const mockUseAppSelector = jest.fn(() => [
+  { initiativeId: 'initiative-1', initiativeName: 'Initiative One' },
+  { initiativeId: 'initiative-2', initiativeName: 'Initiative Two' },
+]);
+
 jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: () => mockUseAppSelector(),
+  useAppSelector: (...args: Array<unknown>) => mockUseAppSelector(...args),
 }));
 
 jest.mock('../../../redux/slices/initiativesSlice', () => ({
   intiativesListSelector: jest.fn(),
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    replace: mockReplace,
-  }),
-  useLocation: () => mockUseLocation(),
+jest.mock('../../../components/pointsOfSale/usePointOfSalesTable', () => ({
+  __esModule: true,
+  default: (...args: Array<unknown>) => mockUsePointOfSalesTable(...args),
 }));
 
-jest.mock('../../../utils/jwt-utils', () => ({
-  parseJwt: jest.fn(),
+jest.mock('../../../components/pointsOfSale/pointOfSalesColumns', () => ({
+  __esModule: true,
+  default: (...args: Array<unknown>) => mockBuildPointOfSalesColumns(...args),
+}));
+
+jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
+  dataTableProps = props;
+  return (
+    <div data-testid="mock-datatable">
+      <button
+        data-testid="sort-button"
+        onClick={() => props.onSortModelChange([{ field: 'referent', sort: 'desc' }])}
+      >
+        sort
+      </button>
+      <button
+        data-testid="page-button"
+        onClick={() => props.onPaginationPageChange(3)}
+      >
+        page
+      </button>
+      <button
+        data-testid="rows-button"
+        onClick={() => props.onRowsPerPageChange(25)}
+      >
+        rows
+      </button>
+      {props.rows.map((row: any) => (
+        <button
+          key={row.id}
+          data-testid={`row-action-${row.id}`}
+          onClick={() => props.columns[0]?.renderCell?.({ row })}
+        >
+          {row.franchiseName}
+        </button>
+      ))}
+    </div>
+  );
+});
+
+jest.mock('../../../components/pointsOfSale/PointOfSalesFilters', () => (props: any) => {
+  filtersProps = props;
+  return (
+    <div data-testid="mock-filters">
+      <button
+        data-testid="apply-filters"
+        onClick={() => props.onFiltersApplied(props.formik.values)}
+      >
+        apply
+      </button>
+      <button data-testid="reset-filters" onClick={() => props.onFiltersReset()}>
+        reset
+      </button>
+      <div data-testid="filters-applied-once">{String(props.filtersAppliedOnce)}</div>
+      <div data-testid="initiative-options-count">{props.initiativeOptions.length}</div>
+    </div>
+  );
+});
+
+jest.mock('../PosCatalogFiltersDrawer', () => ({
+  PosCatalogDrawer: (props: any) => {
+    drawerProps = props;
+    return props.isOpen ? (
+      <div data-testid="pos-catalog-drawer">
+        <div>{props.selectedStore?.franchiseName}</div>
+        <button data-testid="close-drawer" onClick={props.onClose}>
+          close
+        </button>
+        <div data-testid="drawer-merchant-id">{props.merchantId}</div>
+        <div data-testid="drawer-initiative-options">{props.initiativeOptions.length}</div>
+      </div>
+    ) : null;
+  },
 }));
 
 jest.mock('../../../services/merchantService', () => ({
-  getMerchantPointOfSalesCatalog: (...args: Array<any>) => mockGetMerchantPointOfSalesCatalog(...args),
+  getMerchantPointOfSalesCatalog: (...args: Array<unknown>) =>
+    mockGetMerchantPointOfSalesCatalog(...args),
 }));
 
-jest.mock('../../../components/dataTable/DataTable', () => ({
-  __esModule: true,
-  default: ({
-    rows,
-    columns,
-    onRowsPerPageChange,
-    onSortModelChange,
-    onPaginationPageChange,
-  }: {
-    rows: Array<any>;
-    columns: Array<any>;
-    onRowsPerPageChange?: (pageSize: number) => void;
-    onSortModelChange?: (model: Array<{ field: string; sort: 'asc' | 'desc' }>) => void;
-    onPaginationPageChange?: (page: number) => void;
-  }) => (
-    <div>
-      <div data-testid="rows-count">{rows.length}</div>
-      <button type="button" onClick={() => onRowsPerPageChange?.(10)}>
-        change-rows
-      </button>
-      <button
-        type="button"
-        onClick={() => onSortModelChange?.([{ field: 'franchiseName', sort: 'desc' }])}
-      >
-        sort-rows
-      </button>
-      <button type="button" onClick={() => onSortModelChange?.([])}>
-        clear-sort
-      </button>
-      <button type="button" onClick={() => onPaginationPageChange?.(1)}>
-        next-page
-      </button>
-      <div data-testid="rendered-cells">
-        {rows[0]
-          ? columns.slice(0, 7).map((column: any) => (
-              <div key={column.field}>
-                {column.renderCell({
-                  row: rows[0],
-                  value:
-                    column.field === 'contactName' ? rows[0].contactName : rows[0][column.field],
-                })}
-              </div>
-            ))
-          : null}
-      </div>
-      <div data-testid="open-drawer-cell">
-        {rows[0] ? columns[7].renderCell({ row: rows[0], value: undefined }) : null}
-      </div>
-    </div>
-  ),
+jest.mock('../../../utils/jwt-utils', () => ({
+  parseJwt: (...args: Array<unknown>) => mockParseJwt(...args),
 }));
 
-jest.mock('../PosCatalogFiltersDrawer', () => ({
-  __esModule: true,
-  PosCatalogFilters: ({
-    onFiltersApplied,
-    onFiltersReset,
-  }: {
-    onFiltersApplied: (values: any) => void;
-    onFiltersReset: () => void;
-  }) => (
-    <div>
-      <button
-        type="button"
-        onClick={() =>
-          onFiltersApplied({
-            initiative: 'Bonus Decoder',
-            type: 'PHYSICAL',
-            city: 'Milano',
-            address: 'Solferino',
-            contactName: 'Mario',
-            sort: 'asc',
-          })
-        }
-      >
-        apply-filters
-      </button>
-      <button type="button" onClick={onFiltersReset}>
-        reset-filters
-      </button>
-    </div>
-  ),
-  PosCatalogDrawer: ({
-    isOpen,
-    selectedStore,
-    onClose,
-  }: {
-    isOpen: boolean;
-    selectedStore: { franchiseName?: string } | null;
-    onClose: () => void;
-  }) =>
-    isOpen ? (
-      <div data-testid="pos-drawer">
-        <span>{selectedStore?.franchiseName}</span>
-        <button type="button" onClick={onClose}>
-          close-drawer
-        </button>
-      </div>
-    ) : null,
+jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
+  storageTokenOps: {
+    read: () => mockStorageRead(),
+  },
 }));
 
-describe('PosCatalog', () => {
+jest.mock('../../../utils/consoleLogger', () => ({
+  browserConsole: {
+    log: (...args: Array<unknown>) => mockBrowserConsoleLog(...args),
+  },
+}));
+
+const mockStores = [
+  {
+    id: 'store-1',
+    franchiseName: 'Store One',
+    type: 'PHYSICAL',
+    city: 'Rome',
+    address: 'Via Roma 1',
+    contactName: 'Mario',
+  },
+];
+
+const mockHandleFiltersApplied = jest.fn();
+const mockHandleFiltersReset = jest.fn();
+const mockHandleSortModelChange = jest.fn();
+const mockHandlePaginationPageChange = jest.fn();
+const mockHandleRowsPerPageChange = jest.fn();
+
+const defaultHookValue = {
+  stores: mockStores,
+  storesPagination: { pageNo: 0, pageSize: 10, totalElements: 1 },
+  storesLoading: false,
+  rowsPerPage: 10,
+  sortModel: [],
+  filtersAppliedOnce: false,
+  handleFiltersApplied: mockHandleFiltersApplied,
+  handleFiltersReset: mockHandleFiltersReset,
+  handleSortModelChange: mockHandleSortModelChange,
+  handlePaginationPageChange: mockHandlePaginationPageChange,
+  handleRowsPerPageChange: mockHandleRowsPerPageChange,
+};
+
+const defaultFormikValues = {
+  initiative: '',
+  type: undefined,
+  city: '',
+  address: '',
+  contactName: '',
+  page: 0,
+  size: 10,
+  sort: 'asc',
+};
+
+const renderComponent = () =>
+  render(
+    <ThemeProvider theme={theme}>
+      <PosCatalog />
+    </ThemeProvider>
+  );
+
+describe('<PosCatalog />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    sessionStorage.clear();
-    mockUseAppSelector.mockReturnValue([
-      { initiativeName: 'Bonus Decoder' },
-      { initiativeName: 'Iniziativa 1' },
+    dataTableProps = {};
+    filtersProps = {};
+    drawerProps = {};
+    mockStorageRead.mockReturnValue('mock-token');
+    mockParseJwt.mockReturnValue({ merchant_id: 'merchant-123' });
+    mockUseFormik.mockImplementation(({ initialValues, onSubmit }: any) => ({
+      values: initialValues ?? defaultFormikValues,
+      submitForm: () => onSubmit(initialValues ?? defaultFormikValues),
+    }));
+    mockGetMerchantPointOfSalesCatalog.mockResolvedValue({
+      content: mockStores,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 1,
+    });
+    mockUsePointOfSalesTable.mockReturnValue(defaultHookValue);
+    mockBuildPointOfSalesColumns.mockImplementation(({ onActionClick }: any) => [
+      {
+        field: 'actions',
+        renderCell: ({ row }: any) => {
+          onActionClick(row);
+          return row.franchiseName;
+        },
+      },
     ]);
-    const { parseJwt } = jest.requireMock('../../../utils/jwt-utils');
-    parseJwt.mockReturnValue({ merchant_id: 'merchant-id' });
-
-    mockGetMerchantPointOfSalesCatalog.mockImplementation(
-      async (_merchantId: string, filters: Record<string, unknown>) => {
-        if (filters.initiative === 'Bonus Decoder') {
-          return buildPosCatalogResponse({
-            content: [
-              {
-                id: '3',
-                type: 'PHYSICAL',
-                franchiseName: 'Esercente point - de risi',
-                city: 'Milano',
-                address: 'Via Solferino 2',
-                website: '',
-                contactName: 'Mario',
-                contactSurname: 'Verdi',
-                contactEmail: 'mario.verdi@example.com',
-                channelPhone: '0299988877',
-              },
-            ],
-            totalElements: 1,
-            totalPages: 1,
-          });
-        }
-
-        return buildPosCatalogResponse({
-          pageNumber: Number(filters.page ?? 0),
-          pageSize: Number(filters.size ?? 10),
-        });
-      }
-    );
+    const { useLocation } = jest.requireMock('react-router-dom');
+    useLocation.mockReturnValue({ state: {}, pathname: '/pos-catalog' });
   });
 
-  it('shows success alert when coming from upload flow', async () => {
-    mockUseLocation.mockReturnValue({ state: { showSuccessAlert: true }, pathname: '/pos' });
+  it('renders title, filters and table when stores are available', () => {
+    renderComponent();
 
-    render(<PosCatalog />);
-
-    await waitFor(() => {
-      expect(mockSetAlert).toHaveBeenCalledWith({
-        text: 'pages.initiativeStores.pointOfSalesUploadSuccess',
-        isOpen: true,
-        severity: 'success',
-      });
-    });
-
-    expect(mockReplace).toHaveBeenCalled();
-    await waitFor(() => {
-      expect(mockRead).toHaveBeenCalled();
-    });
     expect(screen.getByText('pages.posCatalog.title')).toBeInTheDocument();
-    expect(screen.getByTestId('rows-count')).toHaveTextContent('10');
-    expect(screen.getByText('Online')).toBeInTheDocument();
+    expect(screen.getByText('pages.posCatalog.subtitle')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+    expect(screen.getByTestId('initiative-options-count')).toBeInTheDocument();
+    expect(filtersProps.fields).toEqual([
+      'initiative',
+      'type',
+      'city',
+      'address',
+      'contactName',
+    ]);
+    expect(filtersProps.t('translation.key')).toBe('translation.key');
   });
 
-  it('restores pagination from session storage and handles sorting, pagination and rows-per-page', async () => {
-    mockUseLocation.mockReturnValue({ state: {}, pathname: '/pos' });
-    sessionStorage.setItem(
-      'storesPagination',
-      JSON.stringify({
-        pageNo: 1,
-        pageSize: 5,
-        totalElements: 15,
-        sort: 'franchiseName,desc',
+  it('shows the loader while stores are loading', () => {
+    mockUsePointOfSalesTable.mockReturnValue({
+      ...defaultHookValue,
+      stores: [],
+      storesLoading: true,
+    });
+
+    renderComponent();
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-datatable')).not.toBeInTheDocument();
+  });
+
+  it('shows the default empty state when no stores are available and no filters were applied', () => {
+    mockUsePointOfSalesTable.mockReturnValue({
+      ...defaultHookValue,
+      stores: [],
+      filtersAppliedOnce: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByText('pages.posCatalog.noData')).toBeInTheDocument();
+    expect(screen.queryByText('pages.initiativeStores.noStoresInitiative')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mock-filters')).not.toBeInTheDocument();
+  });
+
+  it('shows filters, table and filtered empty state when filters were already applied', () => {
+    mockUsePointOfSalesTable.mockReturnValue({
+      ...defaultHookValue,
+      stores: [],
+      filtersAppliedOnce: true,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativeStores.noStoresInitiative')).toBeInTheDocument();
+  });
+
+  it('shows filters and table when form values are set even with no stores', () => {
+    mockUsePointOfSalesTable.mockReturnValue({
+      ...defaultHookValue,
+      stores: [],
+      filtersAppliedOnce: false,
+    });
+    mockUseFormik.mockImplementation(({ onSubmit }: any) => ({
+      values: {
+        ...defaultFormikValues,
+        city: 'Rome',
+      },
+      submitForm: () =>
+        onSubmit({
+          ...defaultFormikValues,
+          city: 'Rome',
+        }),
+    }));
+
+    renderComponent();
+
+    expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+    expect(screen.getByText('pages.posCatalog.noData')).toBeInTheDocument();
+  });
+
+  it('passes hook handlers to filters and table callbacks', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('apply-filters'));
+    fireEvent.click(screen.getByTestId('reset-filters'));
+    fireEvent.click(screen.getByTestId('sort-button'));
+    fireEvent.click(screen.getByTestId('page-button'));
+    fireEvent.click(screen.getByTestId('rows-button'));
+
+    expect(mockHandleFiltersApplied).toHaveBeenCalled();
+    expect(mockHandleFiltersReset).toHaveBeenCalled();
+    expect(mockHandleSortModelChange).toHaveBeenCalledWith([{ field: 'referent', sort: 'desc' }]);
+    expect(mockHandlePaginationPageChange).toHaveBeenCalledWith(3);
+    expect(mockHandleRowsPerPageChange).toHaveBeenCalledWith(25);
+  });
+
+  it('opens and closes the drawer from the table action and passes merchant data', async () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('row-action-store-1'));
+
+    const drawer = screen.getByTestId('pos-catalog-drawer');
+    expect(drawer).toBeInTheDocument();
+    expect(within(drawer).getByText('Store One')).toBeInTheDocument();
+    expect(within(drawer).getByTestId('drawer-merchant-id')).toHaveTextContent('merchant-123');
+    expect(within(drawer).getByTestId('drawer-initiative-options')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('close-drawer'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('pos-catalog-drawer')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows success alert and clears location state when requested', () => {
+    const { useLocation } = jest.requireMock('react-router-dom');
+    useLocation.mockReturnValue({
+      state: { showSuccessAlert: true },
+      pathname: '/pos-catalog',
+    });
+
+    renderComponent();
+
+    expect(mockSetAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'pages.initiativeStores.pointOfSalesUploadSuccess',
+        severity: 'success',
+        isOpen: true,
       })
     );
-
-    render(<PosCatalog />);
-
-    await waitFor(() => {
-      expect(screen.getByText('sort-rows')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('sort-rows'));
-    await waitFor(() => {
-      expect(sessionStorage.getItem('storesPagination')).toContain('franchiseName,desc');
-    });
-
-    fireEvent.click(screen.getByText('clear-sort'));
-
-    await waitFor(() => {
-      expect(screen.getByText('next-page')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('next-page'));
-    await waitFor(() => {
-      expect(sessionStorage.getItem('storesPagination')).toContain('"pageNo":1');
-    });
-
-    fireEvent.click(screen.getByText('change-rows'));
-    await waitFor(() => {
-      expect(screen.getByTestId('rows-count')).toHaveTextContent('10');
-    });
-  });
-
-  it('applies filters, opens the drawer and closes it again', async () => {
-    mockUseLocation.mockReturnValue({ state: {}, pathname: '/pos' });
-
-    render(<PosCatalog />);
-
-    await waitFor(() => {
-      expect(screen.getByText('apply-filters')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('apply-filters'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('rows-count')).toHaveTextContent('1');
-    });
-
-    fireEvent.click(screen.getByTestId('3'));
-    expect(screen.getByTestId('pos-drawer')).toBeInTheDocument();
-    expect(screen.getAllByText('Esercente point - de risi')).toHaveLength(2);
-
-    fireEvent.click(screen.getByText('close-drawer'));
-    expect(screen.queryByTestId('pos-drawer')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('reset-filters'));
-    await waitFor(() => {
-      expect(screen.getByTestId('rows-count')).toHaveTextContent('10');
-    });
-  });
-
-  it('shows empty states for no data and for filters without results', async () => {
-    mockUseLocation.mockReturnValue({ state: {}, pathname: '/pos' });
-
-    render(<PosCatalog />);
-
-    await waitFor(() => {
-      expect(screen.getByText('apply-filters')).toBeInTheDocument();
-    });
-
-    mockGetMerchantPointOfSalesCatalog.mockResolvedValue({
-      content: [],
-      pageNo: 0,
-      pageSize: 0,
-      totalElements: 0,
-    });
-
-    fireEvent.click(screen.getByText('apply-filters'));
-
-    await waitFor(() => {
-      expect(screen.getByText('pages.initiativeStores.noStoresInitiative')).toBeInTheDocument();
-    });
-
-    mockGetMerchantPointOfSalesCatalog.mockResolvedValue({
-      content: [],
-      pageNo: 0,
-      pageSize: 0,
-      totalElements: 0,
-    });
-
-    fireEvent.click(screen.getByText('reset-filters'));
-
-    await waitFor(() => {
-      expect(screen.getByText('pages.posCatalog.noData')).toBeInTheDocument();
-    });
-  });
-
-  it('removes stored pagination on unmount', () => {
-    mockUseLocation.mockReturnValue({ state: {}, pathname: '/pos' });
-    sessionStorage.setItem(
-      'storesPagination',
-      JSON.stringify({
-        pageNo: 1,
-        pageSize: 5,
-        totalElements: 15,
+    expect(mockReplace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: expect.objectContaining({ showSuccessAlert: false }),
       })
     );
+  });
 
-    const { unmount } = render(<PosCatalog />);
+  it('builds the columns with catalog mode and action callback', () => {
+    renderComponent();
 
-    expect(sessionStorage.getItem('storesPagination')).toBeTruthy();
+    expect(mockBuildPointOfSalesColumns).toHaveBeenCalledWith(
+      expect.objectContaining({
+        addressMode: 'catalog',
+        onActionClick: expect.any(Function),
+        t: expect.any(Function),
+      })
+    );
+    expect(dataTableProps.checkable).toBe(true);
+    expect(dataTableProps.isRowSelectable()).toBe(false);
+  });
 
-    unmount();
+  it('provides a fetchStores callback to the table hook that returns an empty result without merchant id', async () => {
+    renderComponent();
 
-    expect(sessionStorage.getItem('storesPagination')).toBeNull();
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+    mockParseJwt.mockReturnValueOnce({});
+
+    const result = await hookArgs.fetchStores({
+      initiative: 'initiative-1',
+      type: 'ONLINE',
+      city: 'Rome',
+      address: 'Street',
+      contactName: 'Mario',
+      page: 1,
+      size: 20,
+      sort: 'desc',
+    });
+
+    expect(result).toEqual({
+      content: [],
+      pageNo: 0,
+      pageSize: 20,
+      totalElements: 0,
+    });
+    expect(mockGetMerchantPointOfSalesCatalog).not.toHaveBeenCalled();
+  });
+
+  it('provides a fetchStores callback to the table hook that calls the merchant service', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: 'initiative-1',
+      type: 'PHYSICAL',
+      city: 'Milan',
+      address: 'Via Milano',
+      contactName: 'Luigi',
+      page: 2,
+      size: 30,
+      sort: 'name,asc',
+    });
+
+    expect(mockStorageRead).toHaveBeenCalled();
+    expect(mockParseJwt).toHaveBeenCalledWith('mock-token');
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeId: 'initiative-1',
+      type: 'PHYSICAL',
+      city: 'Milan',
+      address: 'Via Milano',
+      contactName: 'Luigi',
+      sort: 'name,asc',
+      page: 2,
+      size: 30,
+    });
+  });
+
+  it('provides an onFetchError callback that opens a generic error alert', () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+    hookArgs.onFetchError();
+
+    expect(mockSetAlert).toHaveBeenLastCalledWith({
+      title: 'errors.genericTitle',
+      text: 'errors.genericDescription',
+      isOpen: true,
+      severity: 'error',
+    });
+  });
+
+  it('configures formik submit to log the submitted filters', () => {
+    renderComponent();
+
+    const formikArgs = mockUseFormik.mock.calls[0][0];
+    formikArgs.onSubmit({
+      ...defaultFormikValues,
+      initiative: 'initiative-1',
+    });
+
+    expect(mockBrowserConsoleLog).toHaveBeenCalledWith('Eseguo ricerca con filtri:', {
+      ...defaultFormikValues,
+      initiative: 'initiative-1',
+    });
+  });
+
+  it('handles an undefined initiatives list by passing no options to children', () => {
+    mockUseAppSelector.mockReturnValueOnce(undefined);
+
+    renderComponent();
+
+    expect(screen.getByTestId('initiative-options-count')).toHaveTextContent('0');
   });
 });
