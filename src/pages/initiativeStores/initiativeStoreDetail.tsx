@@ -335,7 +335,7 @@ const InitiativeStoreDetail = () => {
         ...transactionsFilters,
         page,
         sort: `${
-          field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
+          field !== 'fiscalCode' ? field : 'userId'
         },${sort}`,
       });
     } else {
@@ -353,7 +353,7 @@ const InitiativeStoreDetail = () => {
       void fetchStoreTransactions({
         ...transactionsFilters,
         sort: `${
-          field === 'elettrodomestico' ? 'productName' : field !== 'fiscalCode' ? field : 'userId'
+          field !== 'fiscalCode' ? field : 'userId'
         },${sort}`,
       });
     }
