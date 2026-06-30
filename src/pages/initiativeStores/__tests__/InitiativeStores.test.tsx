@@ -4,6 +4,8 @@ import { ThemeProvider } from '@mui/material';
 import { theme } from '@pagopa/mui-italia/theme';
 import InitiativeStores from '../InitiativeStores';
 import { browserConsole } from '../../../utils/consoleLogger';
+import { getMerchantPointOfSales } from '../../../services/merchantService';
+import { parseJwt } from '../../../utils/jwt-utils';
 
 const mockId = 'initiative-123';
 const mockSetAlert = jest.fn();
@@ -21,6 +23,7 @@ const mockUsePointOfSalesTable = jest.fn();
 const mockBuildPointOfSalesColumns = jest.fn();
 
 let dataTableProps: any = {};
+let usePointOfSalesTableArgs: any;
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -53,7 +56,10 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
 
 jest.mock('../../../components/pointsOfSale/usePointOfSalesTable', () => ({
   __esModule: true,
-  default: (...args: Array<unknown>) => mockUsePointOfSalesTable(...args),
+  default: (...args: Array<unknown>) => {
+    [usePointOfSalesTableArgs] = args;
+    return mockUsePointOfSalesTable(...args);
+  },
 }));
 
 jest.mock('../../../components/pointsOfSale/pointOfSalesColumns', () => ({
@@ -61,9 +67,20 @@ jest.mock('../../../components/pointsOfSale/pointOfSalesColumns', () => ({
   default: (...args: Array<unknown>) => mockBuildPointOfSalesColumns(...args),
 }));
 
+jest.mock('../../../services/merchantService', () => ({
+  getMerchantPointOfSales: jest.fn(),
+}));
+
+jest.mock('../../../utils/jwt-utils', () => ({
+  parseJwt: jest.fn(),
+}));
+
 jest.mock('../../../components/pointsOfSale/PointOfSalesFilters', () => (props: any) => (
   <div data-testid="mock-filters">
-    <button data-testid="apply-filters-test" onClick={() => props.onFiltersApplied(props.formik.values)}>
+    <button
+      data-testid="apply-filters-test"
+      onClick={() => props.onFiltersApplied(props.formik.values)}
+    >
       Apply
     </button>
     <button data-testid="reset-filters-test" onClick={() => props.onFiltersReset()}>
@@ -136,9 +153,17 @@ describe('<InitiativeStores />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataTableProps = {};
+    usePointOfSalesTableArgs = undefined;
     const { useLocation } = jest.requireMock('react-router-dom');
     useLocation.mockReturnValue({ state: {}, pathname: '/' });
     mockUsePointOfSalesTable.mockReturnValue(defaultHookValue);
+    (parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-123' });
+    (getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+      content: mockStores,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 1,
+    });
     mockBuildPointOfSalesColumns.mockReturnValue([
       {
         field: 'franchiseName',
@@ -265,6 +290,96 @@ describe('<InitiativeStores />', () => {
 
     expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
     consoleLogSpy.mockRestore();
+  });
+
+  test('configura usePointOfSalesTable con fetchStores e resetStorageOnUnmount corretti', () => {
+    renderComponent();
+
+    expect(usePointOfSalesTableArgs).toEqual(
+      expect.objectContaining({
+        storageKey: 'storesPagination',
+        storageContextField: 'initiativeId',
+        storageContextValue: mockId,
+        resetStorageOnUnmount: true,
+        suppressLoadingOnSort: true,
+        enabled: true,
+        resetDependencies: [mockId],
+        onFetchError: expect.any(Function),
+        fetchStores: expect.any(Function),
+      })
+    );
+  });
+
+  test('fetchStores returns empty pagination when merchant id is missing', async () => {
+    (parseJwt as jest.Mock).mockReturnValue({});
+    renderComponent();
+
+    await expect(
+      usePointOfSalesTableArgs.fetchStores({
+        type: undefined,
+        city: '',
+        address: '',
+        contactName: '',
+        page: 3,
+        size: 50,
+        sort: 'asc',
+      })
+    ).resolves.toEqual({
+      content: [],
+      pageNo: 0,
+      pageSize: 50,
+      totalElements: 0,
+    });
+
+    expect(getMerchantPointOfSales).not.toHaveBeenCalled();
+  });
+
+  test('fetchStores delegates to getMerchantPointOfSales with normalized filters', async () => {
+    renderComponent();
+
+    await usePointOfSalesTableArgs.fetchStores({
+      type: 'PHYSICAL',
+      city: 'Rome',
+      address: 'Via Roma',
+      contactName: 'Mario',
+      page: undefined,
+      size: undefined,
+      sort: 'desc',
+    });
+
+    expect(getMerchantPointOfSales).toHaveBeenCalledWith(mockId, 'merchant-123', {
+      type: 'PHYSICAL',
+      city: 'Rome',
+      address: 'Via Roma',
+      contactName: 'Mario',
+      sort: 'desc',
+      page: 0,
+      size: 10,
+    });
+  });
+
+  test('onFetchError shows generic error alert', () => {
+    renderComponent();
+
+    usePointOfSalesTableArgs.onFetchError();
+
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      title: 'errors.genericTitle',
+      text: 'errors.genericDescription',
+      isOpen: true,
+      severity: 'error',
+    });
+  });
+
+  test('passes goToStoreDetail action to built columns', () => {
+    renderComponent();
+
+    const onActionClick = mockBuildPointOfSalesColumns.mock.calls[0][0].onActionClick;
+    onActionClick({ id: 'store-42' });
+
+    expect(mockHistory.push).toHaveBeenCalledWith(
+      `/portale-esercenti/${mockId}/punti-vendita/store-42/`
+    );
   });
 
   test('passa le colonne costruite al DataTable', () => {

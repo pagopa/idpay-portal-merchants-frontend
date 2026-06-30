@@ -478,6 +478,53 @@ describe('<PosCatalog />', () => {
     });
   });
 
+  it('maps missing initiative id and name to empty option values', () => {
+    mockUseAppSelector.mockReturnValueOnce([
+      { initiativeId: undefined, initiativeName: undefined },
+    ]);
+
+    renderComponent();
+
+    expect(filtersProps.initiativeOptions).toEqual([{ value: '', label: '' }]);
+    expect(drawerProps.initiativeOptions).toEqual([{ value: '', label: '' }]);
+  });
+
+  it('uses default pagination values when fetch filters omit page and size', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: '',
+      type: undefined,
+      city: '',
+      address: '',
+      contactName: '',
+      sort: 'asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeId: '',
+      type: undefined,
+      city: '',
+      address: '',
+      contactName: '',
+      sort: 'asc',
+      page: 0,
+      size: 10,
+    });
+  });
+
+  it('passes an empty merchant id to the drawer when the token has no merchant_id', () => {
+    mockParseJwt.mockReturnValue({});
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('row-action-store-1'));
+
+    expect(screen.getByTestId('drawer-merchant-id')).toHaveTextContent('');
+  });
+
   it('handles an undefined initiatives list by passing no options to children', () => {
     mockUseAppSelector.mockReturnValueOnce(undefined);
 
