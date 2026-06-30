@@ -193,7 +193,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   const sortedInitiatives = useMemo(
     () =>
       [...initiatives].sort(
-        (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+        (a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime()
       ),
     [initiatives]
   );
@@ -217,9 +217,9 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
                 </Box>
               ) : (
                 sortedInitiatives.map((initiative) => (
-                  <Box key={`${initiative.initiativeId}-${initiative.createdAt}`}>
+                  <Box key={`${initiative.initiativeId}-${initiative.updatedAt}`}>
                     <Typography variant="body2" color="text.secondary">
-                      {safeFormatDate(initiative.createdAt, false)}
+                      {safeFormatDate(initiative.updatedAt, false)}
                     </Typography>
                     <Typography variant="body1">
                       {initiative.initiativeId
