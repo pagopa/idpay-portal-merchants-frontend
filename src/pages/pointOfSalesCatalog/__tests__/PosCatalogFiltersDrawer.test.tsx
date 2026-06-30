@@ -8,6 +8,13 @@ import {
 } from '../PosCatalogFiltersDrawer';
 import { MockPosCatalogStore } from '../mockPosCatalog';
 
+jest.mock('../../../hooks/useScopedTranslation', () => ({
+  __esModule: true,
+  default: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
 jest.mock('../../../components/Drawer/DetailDrawer', () => ({
   __esModule: true,
   default: ({
@@ -110,6 +117,11 @@ const physicalStore: MockPosCatalogStore = {
   adhesions: [{ date: '02/02/2026', initiativeName: 'Iniziativa 2' }],
 };
 
+const drawerInitiativeOptions = [
+  { value: 'Iniziativa 1', label: 'Iniziativa 1' },
+  { value: 'Iniziativa 2', label: 'Iniziativa 2' },
+];
+
 describe('PosCatalogFiltersDrawer', () => {
   it('renders filters and propagates apply/reset actions', () => {
     const onFiltersApplied = jest.fn();
@@ -153,21 +165,35 @@ describe('PosCatalogFiltersDrawer', () => {
 
   it('renders the closed drawer as empty', () => {
     const { container } = render(
-      <PosCatalogDrawer isOpen={false} onClose={jest.fn()} selectedStore={null} />
+      <PosCatalogDrawer
+        isOpen={false}
+        onClose={jest.fn()}
+        selectedStore={null}
+        initiativeOptions={drawerInitiativeOptions}
+        merchantId="merchant-123"
+      />
     );
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders online store details with website link', () => {
-    render(<PosCatalogDrawer isOpen onClose={jest.fn()} selectedStore={onlineStore} />);
+    render(
+      <PosCatalogDrawer
+        isOpen
+        onClose={jest.fn()}
+        selectedStore={onlineStore}
+        initiativeOptions={drawerInitiativeOptions}
+        merchantId="merchant-123"
+      />
+    );
 
     expect(screen.getByTestId('detail-drawer')).toBeInTheDocument();
     expect(screen.getByText('Negozio online')).toBeInTheDocument();
-    expect(screen.getByText('PUNTO VENDITA ASSOCIATO A:')).toBeInTheDocument();
-    expect(screen.getByText('DATI PUNTO VENDITA')).toBeInTheDocument();
-    expect(screen.getByText('REFERENTE')).toBeInTheDocument();
-    expect(screen.getByText('Sito web')).toBeInTheDocument();
+    expect(screen.getByText('pages.posCatalog.drawer.associatedTo')).toBeInTheDocument();
+    expect(screen.getByText('pages.posCatalog.drawer.storeData')).toBeInTheDocument();
+    expect(screen.getByText('pages.posCatalog.drawer.referentData')).toBeInTheDocument();
+    expect(screen.getByText('pages.posCatalog.drawer.website')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'www.shop.it' })).toHaveAttribute(
       'href',
       'https://www.shop.it'
@@ -176,12 +202,20 @@ describe('PosCatalogFiltersDrawer', () => {
   });
 
   it('renders physical store details with phone and placeholders', () => {
-    render(<PosCatalogDrawer isOpen onClose={jest.fn()} selectedStore={physicalStore} />);
+    render(
+      <PosCatalogDrawer
+        isOpen
+        onClose={jest.fn()}
+        selectedStore={physicalStore}
+        initiativeOptions={drawerInitiativeOptions}
+        merchantId="merchant-123"
+      />
+    );
 
     expect(screen.getByText('Negozio fisico')).toBeInTheDocument();
-    expect(screen.getByText('Indirizzo')).toBeInTheDocument();
+    expect(screen.getByText('pages.posCatalog.drawer.address')).toBeInTheDocument();
     expect(screen.getByText('Via Roma 1')).toBeInTheDocument();
-    expect(screen.getByText('Telefono')).toBeInTheDocument();
-    expect(screen.getByText('0612345678')).toBeInTheDocument();
+    expect(screen.getByText('pages.posCatalog.drawer.phone')).toBeInTheDocument();
+    expect(screen.getByText('-')).toBeInTheDocument();
   });
 });
