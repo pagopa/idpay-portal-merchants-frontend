@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import { Button, ButtonProps, IconButton, Typography } from '@mui/material';
+import { Button, ButtonProps, Divider, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 export type DetailDrawerProps = {
@@ -23,7 +23,7 @@ export default function DetailDrawer({
       <Box
         sx={{
           width: 375,
-          padding: '1.5rem',
+          padding: '1rem',
           overflowY: 'auto',
           height: '100%',
           display: 'flex',
@@ -43,8 +43,10 @@ export default function DetailDrawer({
             <CloseIcon />
           </IconButton>
         </Box>
+        <Divider />
         <Box
           sx={{
+            pt:'1.5rem',
             display: 'flex',
             flexDirection: 'column',
             width: '100%',

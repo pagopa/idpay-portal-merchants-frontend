@@ -107,8 +107,8 @@ const MerchantTransactions = ({
 
   const columns: Array<GridColDef> = [
     {
-      field: 'elettrodomestico',
-      headerName: 'Elettrodomestico',
+      field: 'productName',
+      headerName: 'Prodotto',
       flex: 2,
       editable: false,
       disableColumnMenu: true,
