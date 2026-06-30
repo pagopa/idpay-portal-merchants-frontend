@@ -1,18 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
   Typography,
   CircularProgress,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
 import { FormikProps } from 'formik';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
-import FiltersForm from '../initiativeDiscounts/FiltersForm';
+import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
 import {
   PointOfSaleDTO,
   PointOfSaleInitiativeDTO,
@@ -53,87 +47,15 @@ export const PosCatalogFilters: React.FC<PosCatalogFiltersProps> = ({
   initiativeOptions,
   t,
 }) => (
-  <FiltersForm
-    onFiltersApplied={onFiltersApplied}
-    onFiltersReset={onFiltersReset}
+  <PointOfSalesFilters
     formik={formik}
     filtersAppliedOnce={filtersAppliedOnce}
-  >
-    <Grid item xs={12} sm={6} md={4} lg={2}>
-      <FormControl fullWidth size="small">
-        <InputLabel id="initiative-label">Iniziativa</InputLabel>
-        <Select
-          labelId="initiative-label"
-          id="initiative-select"
-          label="Iniziativa"
-          name="initiative"
-          value={formik.values.initiative}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-        >
-          {initiativeOptions.map((initiative) => (
-            <MenuItem key={initiative.value} value={initiative.value}>
-              {initiative.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Grid>
-
-    <Grid item xs={12} sm={6} md={4} lg={2}>
-      <FormControl fullWidth size="small">
-        <InputLabel id="pos-type-label">{t('pages.initiativeStores.pointOfSaleType')}</InputLabel>
-        <Select
-          labelId="pos-type-label"
-          id="pos-type-select"
-          label={t('pages.initiativeStores.pointOfSaleType')}
-          name="type"
-          value={formik.values.type}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-        >
-          <MenuItem value="PHYSICAL">{t('pages.initiativeStores.physical')}</MenuItem>
-          <MenuItem value="ONLINE">{t('pages.initiativeStores.online')}</MenuItem>
-        </Select>
-      </FormControl>
-    </Grid>
-
-    <Grid item xs={12} sm={6} md={4} lg={2}>
-      <TextField
-        fullWidth
-        size="small"
-        label={t('pages.initiativeStores.city')}
-        name="city"
-        value={formik.values.city}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-      />
-    </Grid>
-
-    <Grid item xs={12} sm={6} md={4} lg={2}>
-      <TextField
-        fullWidth
-        size="small"
-        name="address"
-        label={t('pages.initiativeStores.address')}
-        value={formik.values.address}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-      />
-    </Grid>
-
-    <Grid item xs={12} sm={6} md={4} lg={2}>
-      <TextField
-        fullWidth
-        size="small"
-        label={t('pages.initiativeStores.referent')}
-        name="contactName"
-        value={formik.values.contactName}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-      />
-    </Grid>
-  </FiltersForm>
+    onFiltersApplied={onFiltersApplied}
+    onFiltersReset={onFiltersReset}
+    t={t}
+    fields={['initiative', 'type', 'city', 'address', 'contactName']}
+    initiativeOptions={initiativeOptions}
+  />
 );
 
 export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
