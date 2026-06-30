@@ -10,9 +10,10 @@ import {
   Button,
   Alert,
   Slide,
+  InputAdornment,
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { ArrowOutward } from '@mui/icons-material';
+import { ArrowOutward, Report as ReportIcon } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked } from '@pagopa/mui-italia/components';
 import { theme } from '@pagopa/mui-italia/theme';
@@ -35,6 +36,7 @@ interface PointsOfSaleFormProps {
   onValidationChange: (isValid: boolean) => void;
   pointsOfSaleLoaded: boolean;
   externalErrors?: FormErrors;
+  externalAlertMessages?: FormAlertMessages;
   submitAttempt: number;
 }
 
@@ -46,9 +48,14 @@ interface FieldErrors {
   [fieldName: string]: string;
 }
 
+interface FormAlertMessages {
+  [salesPointIndex: number]: string;
+}
+
 const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   submitAttempt,
   externalErrors,
+  externalAlertMessages,
   onFormChange,
   onValidationChange,
   pointsOfSaleLoaded,
@@ -80,6 +87,25 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
   const { defaultConfig } = useInitiativeConfig();
   const emailRegex = new RegExp(defaultConfig.regex.email);
+  const requiredFieldErrors = {
+    franchiseName: t('pages.pointOfSales.requiredErrors.franchiseName'),
+    address: t('pages.pointOfSales.requiredErrors.address'),
+    website: t('pages.pointOfSales.requiredErrors.address'),
+    contactEmail: t('pages.pointOfSales.requiredErrors.contactEmail'),
+    confirmContactEmail: t('pages.pointOfSales.requiredErrors.confirmContactEmail'),
+    contactName: t('pages.pointOfSales.requiredErrors.contactName'),
+    contactSurname: t('pages.pointOfSales.requiredErrors.contactSurname'),
+    city: t('validation.required'),
+    zipCode: t('validation.required'),
+    region: t('validation.required'),
+    province: t('validation.required'),
+  };
+  const requiredLabelSx = {
+    '& .MuiInputLabel-root::after': {
+      content: '" *"',
+      color: theme.palette.error.main,
+    },
+  };
 
   const mergedErrors = useMemo(() => ({ ...errors, ...externalErrors }), [errors, externalErrors]);
 
@@ -113,7 +139,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           (key) => !excludedErrorKeys.includes(key)
         );
 
-        return sp.type === PHYSICAL && hasNonExcludedErrors;
+        return (
+          Boolean(externalAlertMessages?.[idx]) || (sp.type === PHYSICAL && hasNonExcludedErrors)
+        );
       });
 
       setShowErrorAlert((prev) => {
@@ -125,7 +153,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
     } else {
       setShowErrorAlert([]);
     }
-  }, [errors, externalErrors, submitAttempt, salesPoints.length]);
+  }, [errors, externalErrors, externalAlertMessages, submitAttempt, salesPoints.length]);
 
   const validateForm = (showErrors: boolean): boolean => {
     let isValid = true;
@@ -134,52 +162,55 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       let fieldErrors: FieldErrors = {};
 
       if (!sp.contactEmail?.trim()) {
-        fieldErrors = { ...fieldErrors, contactEmail: 'Campo obbligatorio' };
+        fieldErrors = { ...fieldErrors, contactEmail: requiredFieldErrors.contactEmail };
         isValid = false;
       }
 
       if (!contactEmailConfirm[index]?.trim()) {
-        fieldErrors = { ...fieldErrors, confirmContactEmail: 'Campo obbligatorio' };
+        fieldErrors = {
+          ...fieldErrors,
+          confirmContactEmail: requiredFieldErrors.confirmContactEmail,
+        };
         isValid = false;
       }
 
       if (!sp.contactName?.trim()) {
-        fieldErrors = { ...fieldErrors, contactName: 'Campo obbligatorio' };
+        fieldErrors = { ...fieldErrors, contactName: requiredFieldErrors.contactName };
         isValid = false;
       }
       if (!sp.contactSurname?.trim()) {
-        fieldErrors = { ...fieldErrors, contactSurname: 'Campo obbligatorio' };
+        fieldErrors = { ...fieldErrors, contactSurname: requiredFieldErrors.contactSurname };
         isValid = false;
       }
       if (!sp.franchiseName?.trim()) {
-        fieldErrors = { ...fieldErrors, franchiseName: 'Campo obbligatorio' };
+        fieldErrors = { ...fieldErrors, franchiseName: requiredFieldErrors.franchiseName };
         isValid = false;
       }
       if (sp.type === PHYSICAL) {
         if (!sp.city?.trim()) {
-          fieldErrors = { ...fieldErrors, city: 'Campo obbligatorio' };
+          fieldErrors = { ...fieldErrors, city: requiredFieldErrors.city };
           isValid = false;
         }
         if (!sp.zipCode?.trim()) {
-          fieldErrors = { ...fieldErrors, zipCode: 'Campo obbligatorio' };
+          fieldErrors = { ...fieldErrors, zipCode: requiredFieldErrors.zipCode };
           isValid = false;
         }
         if (!sp.region?.trim()) {
-          fieldErrors = { ...fieldErrors, region: 'Campo obbligatorio' };
+          fieldErrors = { ...fieldErrors, region: requiredFieldErrors.region };
           isValid = false;
         }
         if (!sp.province?.trim()) {
-          fieldErrors = { ...fieldErrors, province: 'Campo obbligatorio' };
+          fieldErrors = { ...fieldErrors, province: requiredFieldErrors.province };
           isValid = false;
         }
         if (!sp.address?.trim()) {
-          fieldErrors = { ...fieldErrors, address: 'Campo obbligatorio' };
+          fieldErrors = { ...fieldErrors, address: requiredFieldErrors.address };
           isValid = false;
         }
       }
       if (sp.type === ONLINE) {
         if (!sp.website?.trim()) {
-          fieldErrors = { ...fieldErrors, website: 'Campo obbligatorio' };
+          fieldErrors = { ...fieldErrors, website: requiredFieldErrors.website };
           isValid = false;
         } else if (!isValidUrl(normalizeUrlHttps(sp.website))) {
           fieldErrors = { ...fieldErrors, website: 'Devi inserire una URL valida' };
@@ -189,7 +220,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       // eslint-disable-next-line sonarjs/no-collapsible-if
       if (sp.type === PHYSICAL) {
         if (!sp.address?.trim()) {
-          fieldErrors = { ...fieldErrors, address: 'Campo obbligatorio' };
+          fieldErrors = { ...fieldErrors, address: requiredFieldErrors.address };
           isValid = false;
         }
         if (sp.channelGeolink?.trim() && !isValidUrl(normalizeUrlHttp(sp.channelGeolink?.trim()))) {
@@ -286,7 +317,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       case 'website':
         if (salesPoints[index].type === 'ONLINE') {
           if (!value || value.trim().length === 0) {
-            updateError(index, 'website', 'Campo obbligatorio');
+            updateError(index, 'website', requiredFieldErrors.website);
           } else if (value && !isValidUrl(normalizeUrlHttps(value))) {
             updateError(index, 'website', 'Devi inserire una URL valida');
           } else {
@@ -313,7 +344,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
             clearError(index, 'contactEmail');
           }
         } else {
-          updateError(index, 'confirmContactEmail', 'Campo obbligatorio');
+          updateError(index, 'contactEmail', requiredFieldErrors.contactEmail);
+          updateError(index, 'confirmContactEmail', requiredFieldErrors.confirmContactEmail);
         }
 
         break;
@@ -331,26 +363,26 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
             clearError(index, 'confirmContactEmail');
           }
         } else {
-          updateError(index, 'confirmContactEmail', 'Campo obbligatorio');
+          updateError(index, 'confirmContactEmail', requiredFieldErrors.confirmContactEmail);
         }
         break;
       case 'contactName':
         if (!value.trim()) {
-          updateError(index, 'contactName', 'Campo obbligatorio');
+          updateError(index, 'contactName', requiredFieldErrors.contactName);
         } else {
           clearError(index, 'contactName');
         }
         break;
       case 'contactSurname':
         if (!value.trim()) {
-          updateError(index, 'contactSurname', 'Campo obbligatorio');
+          updateError(index, 'contactSurname', requiredFieldErrors.contactSurname);
         } else {
           clearError(index, 'contactSurname');
         }
         break;
       case 'franchiseName':
         if (!value.trim()) {
-          updateError(index, 'franchiseName', 'Campo obbligatorio');
+          updateError(index, 'franchiseName', requiredFieldErrors.franchiseName);
         } else {
           clearError(index, 'franchiseName');
         }
@@ -385,7 +417,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         break;
       case 'address':
         if (!value.trim()) {
-          updateError(index, 'address', 'Campo obbligatorio');
+          updateError(index, 'address', requiredFieldErrors.address);
         } else {
           clearError(index, 'address');
         }
@@ -433,6 +465,27 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 
   const getFieldError = (salesPointIndex: number, fieldName: string): string =>
     mergedErrors[salesPointIndex]?.[fieldName] ?? '';
+
+  const getErrorInputProps = (hasError: boolean) =>
+    hasError
+      ? {
+          sx: { position: 'relative' },
+          endAdornment: (
+            <InputAdornment
+              position="end"
+              sx={{
+                m: 0,
+                position: 'absolute',
+                right: 1.5,
+                top: '50%',
+                transform: 'translateY(-50%)',
+              }}
+            >
+              <ReportIcon color="error" data-testid="input-error-icon" fontSize="small" />
+            </InputAdornment>
+          ),
+        }
+      : undefined;
 
   const addAnotherSalesPoint = async () => {
     if (salesPoints.length < 5) {
@@ -578,7 +631,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
               <Grid item xs={12} pb={3}>
                 <Slide direction="left" in={showErrorAlert[index]} mountOnEnter unmountOnExit>
                   <Alert severity="error">
-                    {'Per continuare è necessario compilare tutti i campi obbligatori.'}
+                    {externalAlertMessages?.[index] ??
+                      'Per continuare è necessario compilare tutti i campi obbligatori.'}
                   </Alert>
                 </Slide>
               </Grid>
@@ -598,6 +652,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                 onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                 margin="normal"
                 sx={{
+                  ...requiredLabelSx,
                   mb: 2,
                   '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                     color: theme.palette.text.secondary,
@@ -605,6 +660,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                 }}
                 error={!!getFieldError(index, 'franchiseName')}
                 helperText={getFieldError(index, 'franchiseName')}
+                InputProps={getErrorInputProps(!!getFieldError(index, 'franchiseName'))}
               />
             </Grid>
             <Grid item xs={7} />
@@ -624,6 +680,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                   }
                   margin="normal"
                   sx={{
+                    ...requiredLabelSx,
                     mb: 2,
                     '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                       color: theme.palette.text.secondary,
@@ -631,6 +688,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                   }}
                   error={!!getFieldError(index, 'website')}
                   helperText={getFieldError(index, 'website')}
+                  InputProps={getErrorInputProps(!!getFieldError(index, 'website'))}
                 />
               </>
             )}
@@ -647,6 +705,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         <AutocompleteComponent
                           options={options}
                           label="Indirizzo completo"
+                          required
                           onChangeDebounce={(value) => search(value)}
                           onChange={(addressObj) => {
                             handleChangeAddress(index, addressObj);
@@ -686,6 +745,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'city')}
                         helperText={''}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'city'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-disabled': {
                             color: theme.palette.text.secondary,
@@ -709,6 +769,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'zipCode')}
                         helperText={''}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'zipCode'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-disabled': {
                             color: theme.palette.text.secondary,
@@ -732,6 +793,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'region')}
                         helperText={''}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'region'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-disabled': {
                             color: theme.palette.text.secondary,
@@ -755,6 +817,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'province')}
                         helperText={''}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'province'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-disabled': {
                             color: theme.palette.text.secondary,
@@ -792,7 +855,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!mergedErrors[index]?.contactEmail}
                         helperText={mergedErrors[index]?.contactEmail}
+                        InputProps={getErrorInputProps(!!mergedErrors[index]?.contactEmail)}
                         sx={{
+                          ...requiredLabelSx,
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                             color: theme.palette.text.secondary,
                           },
@@ -814,7 +879,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="normal"
                         error={!!getFieldError(index, 'confirmContactEmail')}
                         helperText={getFieldError(index, 'confirmContactEmail')}
+                        InputProps={getErrorInputProps(
+                          !!getFieldError(index, 'confirmContactEmail')
+                        )}
                         sx={{
+                          ...requiredLabelSx,
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                             color: theme.palette.text.secondary,
                           },
@@ -837,7 +906,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         error={!!getFieldError(index, 'contactName')}
                         helperText={getFieldError(index, 'contactName')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'contactName'))}
                         sx={{
+                          ...requiredLabelSx,
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                             color: theme.palette.text.secondary,
                           },
@@ -859,7 +930,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         error={!!getFieldError(index, 'contactSurname')}
                         helperText={getFieldError(index, 'contactSurname')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'contactSurname'))}
                         sx={{
+                          ...requiredLabelSx,
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                             color: theme.palette.text.secondary,
                           },
@@ -893,6 +966,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                           }
                           error={!!getFieldError(index, 'channelGeolink')}
                           helperText={getFieldError(index, 'channelGeolink')}
+                          InputProps={getErrorInputProps(!!getFieldError(index, 'channelGeolink'))}
                           sx={{
                             '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                               color: theme.palette.text.secondary,
@@ -971,6 +1045,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }}
                         error={!!getFieldError(index, 'channelPhone')}
                         helperText={getFieldError(index, 'channelPhone')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'channelPhone'))}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -985,7 +1060,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }
                         margin="dense"
                         onBlur={(e) => {
-                          if (e.target.value.trim() !== '' && !isValidRegex(e.target.value, emailRegex)) {
+                          if (
+                            e.target.value.trim() !== '' &&
+                            !isValidRegex(e.target.value, emailRegex)
+                          ) {
                             updateError(index, 'channelEmail', 'Devi inserire una email valida');
                           } else {
                             clearError(index, 'channelEmail');
@@ -993,6 +1071,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }}
                         error={!!getFieldError(index, 'channelEmail')}
                         helperText={getFieldError(index, 'channelEmail')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'channelEmail'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                             color: theme.palette.text.secondary,
@@ -1013,6 +1092,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         margin="dense"
                         error={!!getFieldError(index, 'website')}
                         helperText={getFieldError(index, 'website')}
+                        InputProps={getErrorInputProps(!!getFieldError(index, 'website'))}
                         sx={{
                           '& .MuiInputLabel-root.Mui-error, & .MuiFormLabel-root.Mui-error': {
                             color: theme.palette.text.secondary,

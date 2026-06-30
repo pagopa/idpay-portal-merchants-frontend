@@ -12,6 +12,10 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
     onInputChange,
     loading,
     renderInput,
+    isOptionEqualToValue,
+    filterOptions,
+    noOptionsText,
+    loadingText,
   } = props;
 
   return (
@@ -28,7 +32,8 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
         inputProps: {},
       })}
 
-      {loading ? <div role="progressbar">loading</div> : null}
+      {loading ? <div role="progressbar">{loadingText}</div> : null}
+      {!options.length ? <div>{noOptionsText}</div> : null}
 
       {open
         ? options.map((opt: any, i: number) => (
@@ -48,6 +53,33 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
 
       <button type="button" data-testid="type-abcde" onClick={() => onInputChange?.({}, 'abcde')}>
         type-abcde
+      </button>
+      <button type="button" data-testid="type-spaces" onClick={() => onInputChange?.({}, '     ')}>
+        type-spaces
+      </button>
+      <button
+        type="button"
+        data-testid="select-undefined"
+        onClick={() => {
+          getOptionLabel?.(undefined);
+          onChange?.({}, undefined);
+        }}
+      >
+        select-undefined
+      </button>
+      <button
+        type="button"
+        data-testid="compare-options"
+        onClick={() => isOptionEqualToValue?.({ address: 'same' }, { address: 'same' })}
+      >
+        compare-options
+      </button>
+      <button
+        type="button"
+        data-testid="filter-options"
+        onClick={() => filterOptions?.(['one'])}
+      >
+        filter-options
       </button>
     </div>
   );
@@ -118,6 +150,8 @@ describe('AutocompleteComponent', () => {
     render(<AutocompleteComponent options={[]} onChangeDebounce={onChangeDebounce} label="Test" />);
 
     fireEvent.click(screen.getByTestId('type-abcde'));
+    expect(screen.getAllByRole('progressbar')).toHaveLength(2);
+    expect(screen.getByText('Caricamento...')).toBeInTheDocument();
 
     act(() => {
       jest.advanceTimersByTime(799);
@@ -128,6 +162,32 @@ describe('AutocompleteComponent', () => {
       jest.advanceTimersByTime(1);
     });
     expect(onChangeDebounce).toHaveBeenCalledWith('abcde');
+  });
+
+  it('does not trigger onChangeDebounce when the trimmed input is empty', () => {
+    const onChangeDebounce = jest.fn();
+    render(<AutocompleteComponent options={[]} onChangeDebounce={onChangeDebounce} label="Test" />);
+
+    fireEvent.click(screen.getByTestId('type-spaces'));
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(onChangeDebounce).not.toHaveBeenCalled();
+    expect(screen.queryByRole('progressbar')).toBeNull();
+  });
+
+  it('handles debounceable input even when no debounce callback is provided', () => {
+    render(<AutocompleteComponent options={[]} label="Test" />);
+
+    fireEvent.click(screen.getByTestId('type-abcde'));
+
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+
+    expect(screen.getByText('Nessuna opzione')).toBeInTheDocument();
   });
 
   it('does not trigger onChangeDebounce when optionValue equals inputValue', () => {
@@ -159,6 +219,7 @@ describe('AutocompleteComponent', () => {
   it('shows error message when inputError is true', () => {
     render(<AutocompleteComponent options={[]} inputError label="Campo" />);
     expect(screen.getByText('Campo obbligatorio')).toBeInTheDocument();
+    expect(screen.getByTestId('input-error-icon')).toBeInTheDocument();
   });
 
   it('shows custom error message if errorText is provided', () => {
@@ -178,5 +239,15 @@ describe('AutocompleteComponent', () => {
     fireEvent.click(screen.getByText('Via Roma 1'));
 
     expect(onChange).toHaveBeenCalledWith({ Address: { Label: 'Via Roma 1' } });
+  });
+
+  it('handles optional callbacks and empty option labels safely', () => {
+    render(<AutocompleteComponent options={[]} required label="Seleziona" />);
+
+    fireEvent.click(screen.getByTestId('select-undefined'));
+    fireEvent.click(screen.getByTestId('compare-options'));
+    fireEvent.click(screen.getByTestId('filter-options'));
+
+    expect(screen.getByLabelText('Seleziona')).toBeInTheDocument();
   });
 });

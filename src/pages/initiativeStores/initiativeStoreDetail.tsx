@@ -295,7 +295,7 @@ const InitiativeStoreDetail = () => {
 
     const response = await updateMerchantPointOfSales(initiative_id, merchantId, obj);
     if (response) {
-      if (response?.code === 'POINT_OF_SALE_ALREADY_REGISTERED') {
+      if (String(response.code) === 'POINT_OF_SALE_ALREADY_REGISTERED') {
         setAlert({
           title: t('errors.duplicateEmailError'),
           text: `${response?.message} è già associata ad altro punto vendita`,

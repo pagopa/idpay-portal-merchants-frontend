@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
+import InputAdornment from '@mui/material/InputAdornment';
+import ReportIcon from '@mui/icons-material/Report';
 import { MANDATORY_FIELD } from '../../utils/constants';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 
@@ -105,11 +107,41 @@ export default function AutocompleteComponent({
           size="small"
           error={inputError}
           helperText={getHelperText()}
-          required={required}
-          sx={{ marginTop: 2 }}
+          sx={{
+            marginTop: 2,
+            ...(required
+              ? {
+                  '& .MuiInputLabel-root::after': {
+                    content: '" *"',
+                    color: 'error.main',
+                  },
+                }
+              : {}),
+          }}
           InputProps={{
             ...params.InputProps,
-            endAdornment: <>{loading ? <CircularProgress color="inherit" size={20} /> : null}</>,
+            sx: { position: 'relative' },
+            endAdornment: (
+              <>
+                {loading ? (
+                  <CircularProgress color="inherit" size={20} sx={{ ml: 'auto' }} />
+                ) : null}
+                {inputError ? (
+                  <InputAdornment
+                    position="end"
+                    sx={{
+                      m: 0,
+                      position: 'absolute',
+                      right: 1.5,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                    }}
+                  >
+                    <ReportIcon color="error" data-testid="input-error-icon" fontSize="small" />
+                  </InputAdornment>
+                ) : null}
+              </>
+            ),
           }}
         />
       )}

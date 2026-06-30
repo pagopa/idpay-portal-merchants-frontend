@@ -170,7 +170,6 @@ const INCOMPLETE_ADDRESS_EVENT = {
   target: { Address: { Street: 'Via Roma' } },
 };
 
-
 const typeGoogleBusinessUrlAndVerify = (value: string) => {
   const geoInput = screen.getByLabelText('Scheda Google MYBusiness');
   fireEvent.change(geoInput, { target: { value } });
@@ -501,6 +500,7 @@ describe('PointsOfSaleForm additional coverage', () => {
     const externalErrors = { 0: { contactEmail: 'Errore esterno' } };
     render(<PointsOfSaleForm {...defaultProps} externalErrors={externalErrors} />);
     expect(screen.getByLabelText('E-mail').getAttribute('aria-invalid')).toBeTruthy();
+    expect(screen.getByTestId('input-error-icon')).toBeInTheDocument();
   });
 
   it('should handle multiple physical sales points with channels', async () => {
@@ -810,11 +810,17 @@ describe('PointsOfSaleForm targeted new-code coverage', () => {
     fireEvent.change(websiteInput, { target: { name: 'website', value: 'https://valid.example' } });
 
     const confirmEmailInput = screen.getByLabelText('Conferma e-mail');
-    fireEvent.change(confirmEmailInput, { target: { name: 'confirmContactEmail', value: 'a@test.it' } });
+    fireEvent.change(confirmEmailInput, {
+      target: { name: 'confirmContactEmail', value: 'a@test.it' },
+    });
 
     const contactEmailInput = screen.getByLabelText('E-mail');
-    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'not-an-email' } });
-    fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'different@test.it' } });
+    fireEvent.change(contactEmailInput, {
+      target: { name: 'contactEmail', value: 'not-an-email' },
+    });
+    fireEvent.change(contactEmailInput, {
+      target: { name: 'contactEmail', value: 'different@test.it' },
+    });
     fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: 'a@test.it' } });
     fireEvent.change(contactEmailInput, { target: { name: 'contactEmail', value: '' } });
 
@@ -824,7 +830,9 @@ describe('PointsOfSaleForm targeted new-code coverage', () => {
     fireEvent.click(physicalRadio);
 
     const geolinkInput = screen.getByLabelText('Scheda Google MYBusiness');
-    fireEvent.change(geolinkInput, { target: { name: 'channelGeolink', value: 'maps.google.com/x' } });
+    fireEvent.change(geolinkInput, {
+      target: { name: 'channelGeolink', value: 'maps.google.com/x' },
+    });
     fireEvent.change(geolinkInput, { target: { name: 'channelGeolink', value: '' } });
 
     const phoneInput = screen.getByLabelText('Numero di telefono');
@@ -962,7 +970,9 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
 
     const websitePhysical = screen.getByLabelText('Sito web');
     fireEvent.change(websitePhysical, { target: { name: 'website', value: 'invalid-url' } });
-    fireEvent.change(websitePhysical, { target: { name: 'website', value: 'https://valid.example' } });
+    fireEvent.change(websitePhysical, {
+      target: { name: 'website', value: 'https://valid.example' },
+    });
 
     const geolinkInput = screen.getByLabelText('Scheda Google MYBusiness');
     fireEvent.change(geolinkInput, { target: { name: 'channelGeolink', value: 'invalid-url' } });
