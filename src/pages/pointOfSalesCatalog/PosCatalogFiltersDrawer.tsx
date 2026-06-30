@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { theme } from '@pagopa/mui-italia/theme';
 import {
   Box,
   Typography,
@@ -143,7 +144,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
                     <Typography variant="body2" color="text.secondary">
                       {safeFormatDate(initiative.updatedAt, false)}
                     </Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
                       {initiative.initiativeId
                         ? initiativeNameById[initiative.initiativeId] || initiative.initiativeId
                         : MISSING_DATA_PLACEHOLDER}
@@ -161,7 +162,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
             <Typography variant="body2" color="text.secondary">
               {t('pages.posCatalog.drawer.id')}
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
               {selectedStore.id || MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>
@@ -171,9 +172,16 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
                 ? t('pages.posCatalog.drawer.address')
                 : t('pages.posCatalog.drawer.website')}
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
               {selectedStore.type === 'PHYSICAL' ? (
-                selectedStore.address || MISSING_DATA_PLACEHOLDER
+                [
+                  [selectedStore.address, selectedStore.streetNumber].filter(Boolean).join(', '),
+                  [selectedStore.zipCode, selectedStore.city, selectedStore.province]
+                    .filter(Boolean)
+                    .join(', '),
+                ]
+                  .filter(Boolean)
+                  .join(' - ') || MISSING_DATA_PLACEHOLDER
               ) : (
                 <a
                   href={`https://${(selectedStore.website || '').replace(/^https?:\/\//, '')}`}
@@ -190,7 +198,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
               <Typography variant="body2" color="text.secondary">
                 {t('pages.posCatalog.drawer.phone')}
               </Typography>
-              <Typography variant="body1">
+              <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
                 {selectedStore.channelPhone || MISSING_DATA_PLACEHOLDER}
               </Typography>
             </Box>
@@ -203,7 +211,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
             <Typography variant="body2" color="text.secondary">
               {t('pages.posCatalog.drawer.name')}
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
               {selectedStore.contactName || MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>
@@ -211,7 +219,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
             <Typography variant="body2" color="text.secondary">
               {t('pages.posCatalog.drawer.surname')}
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
               {selectedStore.contactSurname || MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>
@@ -219,7 +227,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
             <Typography variant="body2" color="text.secondary">
               {t('pages.posCatalog.drawer.email')}
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
               {selectedStore.contactEmail || MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>

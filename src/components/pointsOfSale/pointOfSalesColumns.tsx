@@ -8,7 +8,6 @@ import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 type BuildPointOfSalesColumnsArgs = {
   t: (key: string) => string;
   onActionClick: (store: PointOfSaleDTO) => void;
-  addressMode: 'catalog' | 'initiative';
 };
 
 const infoStyles = {
@@ -27,7 +26,6 @@ const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
 export const buildPointOfSalesColumns = ({
   t,
   onActionClick,
-  addressMode,
 }: BuildPointOfSalesColumnsArgs): Array<GridColDef> => [
   {
     field: 'franchiseName',
@@ -61,9 +59,7 @@ export const buildPointOfSalesColumns = ({
     disableColumnMenu: true,
     renderCell: (params: any) =>
       renderCellWithTooltip(
-        addressMode === 'initiative'
-          ? [params.value, params.row?.streetNumber].filter(Boolean).join(', ')
-          : params.value,
+        [params.value, params.row?.streetNumber].filter(Boolean).join(', '),
         1
       ),
   },

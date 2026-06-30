@@ -387,7 +387,6 @@ describe('<InitiativeStores />', () => {
 
     expect(mockBuildPointOfSalesColumns).toHaveBeenCalledWith(
       expect.objectContaining({
-        addressMode: 'initiative',
         onActionClick: expect.any(Function),
       })
     );

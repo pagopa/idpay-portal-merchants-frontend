@@ -156,7 +156,6 @@ const InitiativeStores: React.FC = () => {
       buildPointOfSalesColumns({
         t,
         onActionClick: goToStoreDetail,
-        addressMode: 'initiative',
       }),
     [goToStoreDetail, t]
   );

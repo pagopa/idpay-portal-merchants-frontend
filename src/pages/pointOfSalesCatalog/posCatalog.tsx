@@ -153,7 +153,6 @@ const PosCatalog: React.FC = () => {
       buildPointOfSalesColumns({
         t,
         onActionClick: openStoreDrawer,
-        addressMode: 'catalog',
       }),
     [openStoreDrawer, t]
   );

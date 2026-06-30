@@ -379,12 +379,11 @@ describe('<PosCatalog />', () => {
     );
   });
 
-  it('builds the columns with catalog mode and action callback', () => {
+  it('builds the columns with action callback', () => {
     renderComponent();
 
     expect(mockBuildPointOfSalesColumns).toHaveBeenCalledWith(
       expect.objectContaining({
-        addressMode: 'catalog',
         onActionClick: expect.any(Function),
         t: expect.any(Function),
       })

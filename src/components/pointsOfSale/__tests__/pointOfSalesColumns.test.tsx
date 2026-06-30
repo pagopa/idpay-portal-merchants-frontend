@@ -11,11 +11,10 @@ describe('buildPointOfSalesColumns', () => {
     jest.clearAllMocks();
   });
 
-  const getColumns = (addressMode: 'catalog' | 'initiative' = 'catalog') =>
+  const getColumns = () =>
     buildPointOfSalesColumns({
       t,
       onActionClick,
-      addressMode,
     });
 
   test('renders fallback placeholder when franchise name is missing', () => {
@@ -41,13 +40,13 @@ describe('buildPointOfSalesColumns', () => {
     expect(screen.getByText(MISSING_DATA_PLACEHOLDER)).toBeInTheDocument();
   });
 
-  test('renders initiative address with street number and catalog address without composition', () => {
-    const initiativeColumns = getColumns('initiative');
-    const initiativeAddressColumn = initiativeColumns.find((column) => column.field === 'address');
+  test('renders address with street number composition', () => {
+    const columns = getColumns();
+    const addressColumn = columns.find((column) => column.field === 'address');
 
     const { rerender } = render(
       <>
-        {initiativeAddressColumn?.renderCell?.({
+        {addressColumn?.renderCell?.({
           value: 'Via Roma',
           row: { streetNumber: '10' },
         } as any)}
@@ -56,14 +55,11 @@ describe('buildPointOfSalesColumns', () => {
 
     expect(screen.getByText('Via Roma, 10')).toBeInTheDocument();
 
-    const catalogColumns = getColumns('catalog');
-    const catalogAddressColumn = catalogColumns.find((column) => column.field === 'address');
-
     rerender(
       <>
-        {catalogAddressColumn?.renderCell?.({
+        {addressColumn?.renderCell?.({
           value: 'Via Milano',
-          row: { streetNumber: '99' },
+          row: {},
         } as any)}
       </>
     );
