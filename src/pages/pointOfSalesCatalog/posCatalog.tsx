@@ -1,34 +1,30 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import {
-  Box,
-  Button,
-  Stack,
-  Paper,
-  Typography,
-  Link,
-} from '@mui/material';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { theme } from '@pagopa/mui-italia/theme';
+import { Box, Stack, Paper, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import StoreIcon from '@mui/icons-material/Store';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation } from 'react-router-dom';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
-import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import DataTable from '../../components/dataTable/DataTable';
-import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
-import buildPointOfSalesColumns from '../../components/pointsOfSale/pointOfSalesColumns';
-import usePointOfSalesTable from '../../components/pointsOfSale/usePointOfSalesTable';
 import { GetPointOfSalesFilters } from '../../types/types';
 import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
 import { parseJwt } from '../../utils/jwt-utils';
-import { getMerchantPointOfSales } from '../../services/merchantService';
-import { BASE_ROUTE } from '../../routes';
-import { PAGINATION_SIZE } from '../../utils/constants';
+import { getMerchantPointOfSalesCatalog } from '../../services/merchantService';
+import { ELEMENT_PER_PAGE, PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
+import { useAppSelector } from '../../redux/hooks';
+import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
+import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
+import buildPointOfSalesColumns from '../../components/pointsOfSale/pointOfSalesColumns';
+import usePointOfSalesTable from '../../components/pointsOfSale/usePointOfSalesTable';
+import { PosCatalogDrawer } from './PosCatalogFiltersDrawer';
 
 const initialValues: GetPointOfSalesFilters = {
+  initiative: '',
   type: undefined,
   city: '',
   address: '',
@@ -38,12 +34,14 @@ const initialValues: GetPointOfSalesFilters = {
   sort: 'asc',
 };
 
-const InitiativeStores: React.FC = () => {
+const PosCatalog: React.FC = () => {
   const { setAlert } = useAlert();
-  const isGoingToDetail = useRef(false);
+  const [selectedStore, setSelectedStore] = useState<PointOfSaleDTO | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const { t } = useScopedTranslation();
   const history = useHistory();
-  const { initiativeId } = useCurrentInitiativeId();
+  const initiativesList = useAppSelector(intiativesListSelector);
 
   const location = useLocation<{ showSuccessAlert?: boolean }>();
   useEffect(() => {
@@ -60,6 +58,15 @@ const InitiativeStores: React.FC = () => {
       });
     }
   }, [location, history, setAlert, t]);
+
+  const initiativeOptions = useMemo(
+    () =>
+      (initiativesList ?? []).map((initiative) => ({
+        value: initiative.initiativeId ?? '',
+        label: initiative.initiativeName ?? '',
+      })),
+    [initiativesList]
+  );
 
   const formik = useFormik<GetPointOfSalesFilters>({
     initialValues,
@@ -79,32 +86,30 @@ const InitiativeStores: React.FC = () => {
     [setAlert, t]
   );
 
-  const fetchInitiativeStores = useCallback(
-    async (filters: GetPointOfSalesFilters) => {
-      const userJwt = parseJwt(storageTokenOps.read());
-      const merchantId = userJwt?.merchant_id;
+  const fetchCatalogStores = useCallback(async (filters: GetPointOfSalesFilters) => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
 
-      if (!merchantId || !initiativeId) {
-        return {
-          content: [],
-          pageNo: 0,
-          pageSize: filters.size ?? PAGINATION_SIZE,
-          totalElements: 0,
-        };
-      }
+    if (!merchantId) {
+      return {
+        content: [],
+        pageNo: 0,
+        pageSize: filters.size ?? PAGINATION_SIZE,
+        totalElements: 0,
+      };
+    }
 
-      return getMerchantPointOfSales(initiativeId, merchantId, {
-        type: filters.type,
-        city: filters.city,
-        address: filters.address,
-        contactName: filters.contactName,
-        sort: filters.sort,
-        page: filters.page ?? 0,
-        size: filters.size ?? PAGINATION_SIZE,
-      });
-    },
-    [initiativeId]
-  );
+    return getMerchantPointOfSalesCatalog(merchantId, {
+      initiativeId: filters.initiative,
+      type: filters.type,
+      city: filters.city,
+      address: filters.address,
+      contactName: filters.contactName,
+      sort: filters.sort,
+      page: filters.page ?? 0,
+      size: filters.size ?? PAGINATION_SIZE,
+    });
+  }, []);
 
   const {
     stores,
@@ -122,42 +127,34 @@ const InitiativeStores: React.FC = () => {
     initialValues,
     initialPageSize: PAGINATION_SIZE,
     storageKey: 'storesPagination',
-    storageContextField: 'initiativeId',
-    storageContextValue: initiativeId,
-    resetStorageOnUnmount: !isGoingToDetail.current,
-    suppressLoadingOnSort: true,
-    enabled: Boolean(initiativeId),
-    resetDependencies: [initiativeId],
     onFetchError: handleFetchError,
-    fetchStores: fetchInitiativeStores,
+    fetchStores: fetchCatalogStores,
   });
 
-  const goToAddStorePage = useCallback(() => {
-    history.push(`${BASE_ROUTE}/${initiativeId}/punti-vendita/censisci/`);
-  }, [history, initiativeId]);
-
-  const goToStoreDetail = useCallback(
-    (store: PointOfSaleDTO) => {
-      // eslint-disable-next-line functional/immutable-data
-      isGoingToDetail.current = true;
-      history.push(`${BASE_ROUTE}/${initiativeId}/punti-vendita/${store.id}/`);
-    },
-    [history, initiativeId]
-  );
-
   const filtersSetted = () =>
+    formik.values.initiative !== '' ||
     formik.values.type !== undefined ||
     formik.values.city !== '' ||
     formik.values.address !== '' ||
     formik.values.contactName !== '';
 
+  const openStoreDrawer = useCallback((store: PointOfSaleDTO) => {
+    setSelectedStore(store);
+    setIsDrawerOpen(true);
+  }, []);
+
+  const handleToggleDrawer = useCallback(() => {
+    setIsDrawerOpen(false);
+    setSelectedStore(null);
+  }, []);
+
   const columns = useMemo(
     () =>
       buildPointOfSalesColumns({
         t,
-        onActionClick: goToStoreDetail,
+        onActionClick: openStoreDrawer,
       }),
-    [goToStoreDetail, t]
+    [openStoreDrawer, t]
   );
 
   return (
@@ -169,23 +166,12 @@ const InitiativeStores: React.FC = () => {
         alignItems={{ xs: 'flex-start', md: 'center' }}
       >
         <TitleBox
-          title={t('pages.initiativeStores.title')}
-          subTitle={t('pages.initiativeStores.subtitle')}
+          title={t('pages.posCatalog.title')}
+          subTitle={t('pages.posCatalog.subtitle')}
           mbTitle={2}
           variantTitle="h4"
           variantSubTitle="body1"
         />
-        {stores.length > 0 && !storesLoading && (
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => goToAddStorePage()}
-            startIcon={<StoreIcon />}
-            sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '200px' } }}
-          >
-            {t('pages.initiativeStores.addStoreList')}
-          </Button>
-        )}
       </Stack>
       {storesLoading ? (
         <Box
@@ -204,7 +190,8 @@ const InitiativeStores: React.FC = () => {
                 onFiltersReset={handleFiltersReset}
                 formik={formik}
                 filtersAppliedOnce={filtersAppliedOnce}
-                fields={['type', 'city', 'address', 'contactName']}
+                initiativeOptions={initiativeOptions}
+                fields={['initiative', 'type', 'city', 'address', 'contactName']}
                 t={t}
               />
 
@@ -212,15 +199,25 @@ const InitiativeStores: React.FC = () => {
                 <DataTable
                   rows={stores}
                   columns={columns}
+                  checkable
+                  isRowSelectable={() => false}
                   rowsPerPage={rowsPerPage}
+                  rowsPerPageOptions={ELEMENT_PER_PAGE}
+                  onRowsPerPageChange={handleRowsPerPageChange}
                   onSortModelChange={handleSortModelChange}
                   paginationModel={storesPagination}
                   onPaginationPageChange={handlePaginationPageChange}
-                  onRowsPerPageChange={handleRowsPerPageChange}
                   sortModel={sortModel}
-                  isTransactionsPage={true}
                 />
               </Box>
+
+              <PosCatalogDrawer
+                isOpen={isDrawerOpen}
+                onClose={handleToggleDrawer}
+                selectedStore={selectedStore}
+                initiativeOptions={initiativeOptions}
+                merchantId={parseJwt(storageTokenOps.read())?.merchant_id ?? ''}
+              />
             </>
           )}
         </>
@@ -229,29 +226,25 @@ const InitiativeStores: React.FC = () => {
         <Paper
           sx={{
             my: 4,
-            p: 3,
+            p: 4,
             textAlign: 'center',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            border: `1px solid ${theme.palette.divider}`,
           }}
         >
-          <Stack spacing={0.5} direction="row">
-            <Typography variant="body2">
-              {!filtersAppliedOnce
-                ? t('pages.initiativeStores.noStores')
-                : t('pages.initiativeStores.noStoresInitiative')}
-              {!filtersAppliedOnce && (
-                <Link
-                  onClick={() => goToAddStorePage()}
-                  className="cursor-pointer"
-                  variant="body2"
-                  sx={{ fontWeight: '600' }}
-                >
-                  {t('pages.initiativeStores.addStoreNoResults')}
-                </Link>
-              )}
-            </Typography>
+          <Stack spacing={1} alignItems="center">
+            {!filtersAppliedOnce ? (
+              <>
+                <ErrorOutlineOutlinedIcon sx={{ color: 'text.disabled', fontSize: 28 }} />
+                <Typography variant="body2">{t('pages.posCatalog.noData')}</Typography>
+              </>
+            ) : (
+              <Typography variant="body2">
+                {t('pages.initiativeStores.noStoresInitiative')}
+              </Typography>
+            )}
           </Stack>
         </Paper>
       )}
@@ -259,4 +252,4 @@ const InitiativeStores: React.FC = () => {
   );
 };
 
-export default InitiativeStores;
+export default PosCatalog;

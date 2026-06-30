@@ -22,8 +22,13 @@ import {
   ValidationErrorDTO,
   PointOfSaleErrorDTO,
   ValidationErrorDetail,
+  PointOfSaleInitiativeDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
+
+type GetPointOfSalesCatalogFilters = Omit<GetPointOfSalesFilters, 'initiative'> & {
+  initiativeId?: string;
+};
 
 const normalizePointOfSaleError = (
   errorData?: ValidationErrorDTO | PointOfSaleErrorDTO
@@ -185,13 +190,44 @@ export const getMerchantPointOfSales = async (
   };
 };
 
+export const getMerchantPointOfSalesCatalog = async (
+  merchantId: string,
+  filters: GetPointOfSalesCatalogFilters
+): Promise<{
+  content: Array<PointOfSaleDTO>;
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+}> => {
+  const response = await getMerchantsApi().getMerchantPointOfSalesCatalog(
+    merchantId,
+    filters as unknown as Record<string, unknown>
+  );
+
+  return {
+    content: (response as any)?.content ?? [],
+    pageNo: (response as any)?.pageNumber ?? 0,
+    pageSize: (response as any)?.pageSize ?? 0,
+    totalElements: (response as any)?.totalElements ?? 0,
+  };
+};
+
 export const getMerchantPointOfSalesWithTransactions = (
   rewardBatchId: string
 ): Promise<Array<FranchisePointOfSaleDTO>> =>
   getMerchantsApi().getMerchantPointOfSalesWithTransactions(rewardBatchId);
 
-export const getMerchantPointOfSalesById = (initiativeId: string, merchantId: string, pointOfSaleId: string) =>
-  getMerchantsApi().getMerchantPointOfSalesById(initiativeId, merchantId, pointOfSaleId);
+export const getMerchantPointOfSalesById = (
+  initiativeId: string,
+  merchantId: string,
+  pointOfSaleId: string
+) => getMerchantsApi().getMerchantPointOfSalesById(initiativeId, merchantId, pointOfSaleId);
+
+export const getPointOfSaleInitiatives = (
+  merchantId: string,
+  pointOfSaleId: string
+): Promise<Array<PointOfSaleInitiativeDTO>> =>
+  getMerchantsApi().getPointOfSaleInitiatives(merchantId, pointOfSaleId);
 
 export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,

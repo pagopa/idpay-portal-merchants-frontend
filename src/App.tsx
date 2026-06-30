@@ -20,6 +20,7 @@ import ROUTES from './routes';
 import { useGetInitiativesQuery } from './redux/api/initiativesApi';
 import WithInitiativeGuard from './decorators/withInitiativeGuard';
 import { routesConfig } from './routesConfig';
+import PosCatalog from './pages/pointOfSalesCatalog/posCatalog';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
@@ -68,6 +69,10 @@ const SecuredRoutes = withLogin(
                 <WithInitiativeGuard route={key}>{render()}</WithInitiativeGuard>
               </Route>
             ))}
+
+            <Route path={routes.POS_CATALOG}>
+              <PosCatalog />
+            </Route>
 
             <Route path="*">
               <Redirect to={routes.HOME} />

@@ -19,6 +19,7 @@ import {
   PointOfSaleDTO,
   TransactionResponse,
   PointOfSaleTransactionsProcessedListDTO,
+  PointOfSaleInitiativeDTO,
 } from './generated/merchants/data-contracts';
 
 import { MerchantInitiatives } from './generated/merchants/MerchantInitiatives';
@@ -184,6 +185,28 @@ class MerchantsApiClient {
       ...(query ?? {}),
     });
     return res.data;
+  }
+
+  public async getMerchantPointOfSalesCatalog(
+    merchantId: string,
+    query?: Record<string, unknown>
+  ): Promise<unknown> {
+    const res = await this.pointOfSales.getPointOfSales({
+      merchantId,
+      ...(query ?? {}),
+    });
+    return res.data;
+  }
+
+  public async getPointOfSaleInitiatives(
+    merchantId: string,
+    pointOfSaleId: string
+  ): Promise<Array<PointOfSaleInitiativeDTO>> {
+    const res = await this.pointOfSales.getPointOfSaleInitiatives({
+      merchantId,
+      pointOfSaleId,
+    });
+    return res.data?.initiatives ?? [];
   }
 
   public async getMerchantPointOfSalesById(

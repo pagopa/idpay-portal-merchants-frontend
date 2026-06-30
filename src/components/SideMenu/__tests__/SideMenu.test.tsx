@@ -577,6 +577,22 @@ describe('Test suite for SideMenu component', () => {
 
     expect(screen.getAllByTestId('accordion-click-test').length).toBeGreaterThan(0);
   });
+
+  test('renders accordion items even when an initiative has no initiativeId', async () => {
+    const initiativesWithoutId = [
+      {
+        ...mockedInitiativesList[0],
+        initiativeId: undefined,
+        initiativeName: 'Initiative without id',
+      },
+    ];
+
+    const { store } = renderWithContext(<SideMenu />);
+    store.dispatch(setInitiativesList(initiativesWithoutId as any));
+
+    expect(await screen.findByText('Initiative without id')).toBeInTheDocument();
+    expect(screen.getAllByTestId('accordion-click-test')).toHaveLength(1);
+  });
 });
 
 describe('SideMenu - extra branch coverage', () => {

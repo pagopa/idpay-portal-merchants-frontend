@@ -64,6 +64,8 @@ jest.mock('../generated/merchants/PointOfSales', () => ({
   PointOfSales: jest.fn().mockImplementation(function (this: any) {
     this.postPointOfSales = jest.fn();
     this.getPointOfSalesByInitiative = jest.fn();
+    this.getPointOfSales = jest.fn();
+    this.getPointOfSaleInitiatives = jest.fn();
     this.getPointOfSaleByInitiative = jest.fn();
     mockPointOfSalesInstance = this;
   }),
@@ -297,6 +299,52 @@ describe('MerchantsApiClient', () => {
     const result = await api.getMerchantPointOfSales('init-1', 'merch1');
 
     expect(result).toEqual(mockData);
+  });
+
+  it('getMerchantPointOfSalesCatalog returns data and forwards query params', async () => {
+    const mockData = { content: [{ pointOfSaleId: 'pos1' }] };
+    mockPointOfSalesInstance.getPointOfSales.mockResolvedValue({ data: mockData });
+
+    const result = await api.getMerchantPointOfSalesCatalog('merch1', { page: 2, size: 20 });
+
+    expect(result).toEqual(mockData);
+    expect(mockPointOfSalesInstance.getPointOfSales).toHaveBeenCalledWith({
+      merchantId: 'merch1',
+      page: 2,
+      size: 20,
+    });
+  });
+
+  it('getMerchantPointOfSalesCatalog works without query', async () => {
+    const mockData = { content: [] };
+    mockPointOfSalesInstance.getPointOfSales.mockResolvedValue({ data: mockData });
+
+    const result = await api.getMerchantPointOfSalesCatalog('merch1');
+
+    expect(result).toEqual(mockData);
+    expect(mockPointOfSalesInstance.getPointOfSales).toHaveBeenCalledWith({
+      merchantId: 'merch1',
+    });
+  });
+
+  it('getPointOfSaleInitiatives returns initiatives array or empty array when missing', async () => {
+    const mockData = { initiatives: [{ initiativeId: 'init-1' }] };
+    mockPointOfSalesInstance.getPointOfSaleInitiatives.mockResolvedValueOnce({ data: mockData });
+    mockPointOfSalesInstance.getPointOfSaleInitiatives.mockResolvedValueOnce({ data: {} });
+
+    const result = await api.getPointOfSaleInitiatives('merch1', 'pos1');
+    const emptyResult = await api.getPointOfSaleInitiatives('merch1', 'pos2');
+
+    expect(result).toEqual(mockData.initiatives);
+    expect(emptyResult).toEqual([]);
+    expect(mockPointOfSalesInstance.getPointOfSaleInitiatives).toHaveBeenNthCalledWith(1, {
+      merchantId: 'merch1',
+      pointOfSaleId: 'pos1',
+    });
+    expect(mockPointOfSalesInstance.getPointOfSaleInitiatives).toHaveBeenNthCalledWith(2, {
+      merchantId: 'merch1',
+      pointOfSaleId: 'pos2',
+    });
   });
 
   it('getMerchantPointOfSalesById returns data', async () => {
