@@ -16,6 +16,24 @@ describe('LabelValuePair', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
+  test('should apply ellipsis styles to label and plain value', () => {
+    const label = 'Etichetta molto lunga';
+    const value = 'Valore molto lungo';
+
+    render(<LabelValuePair label={label} value={value} isLink={false} />);
+
+    expect(screen.getByText(`${label}:`)).toHaveStyle({
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(screen.getByText(value)).toHaveStyle({
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+  });
+
   test('should render a link when isLink is true', () => {
     const label = 'Sito Web';
     const value = 'https://www.pagopa.it';
@@ -28,6 +46,19 @@ describe('LabelValuePair', () => {
     expect(linkElement).toBeInTheDocument();
     expect(linkElement).toHaveAttribute('href', value);
     expect(linkElement).toHaveAttribute('target', 'blank');
+  });
+
+  test('should apply ellipsis styles to link values', () => {
+    const label = 'Sito Web';
+    const value = 'https://www.pagopa.it/path/molto/lungo';
+
+    render(<LabelValuePair label={label} value={value} isLink={true} />);
+
+    expect(screen.getByRole('link', { name: value })).toHaveStyle({
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
   });
 
   test('should render the placeholder for a missing value when isLink is false', () => {

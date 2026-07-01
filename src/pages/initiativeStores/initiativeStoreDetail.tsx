@@ -383,11 +383,23 @@ const InitiativeStoreDetail = () => {
           variantTitle="h4"
         />
       </Box>
-      <Grid container spacing={6} mb={3}>
-        <Grid item xs={12} md={12} lg={6}>
+      <Box
+        mb={3}
+        sx={{ maxWidth: '100%', minWidth: 0, overflow: 'hidden', width: '100%' }}
+      >
+        <Box
+          sx={{
+            display: 'grid',
+            gap: 6,
+            gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) minmax(0, 1fr)' },
+            maxWidth: '100%',
+            minWidth: 0,
+            width: '100%',
+          }}
+        >
           <InitiativeDetailCard titleBox={'DATI PUNTO VENDITA'}>
-            <Box>
-              <Grid container spacing={1}>
+            <Box sx={{ minWidth: 0, width: '100%' }}>
+              <Grid container spacing={1} sx={{ minWidth: 0 }}>
                 {storeDetail &&
                   getKeyValue(storeDetail).map((field: any) => (
                     <LabelValuePair
@@ -402,59 +414,78 @@ const InitiativeStoreDetail = () => {
               </Grid>
             </Box>
           </InitiativeDetailCard>
-        </Grid>
-        <Grid item xs={12} md={12} lg={6}>
-          <Box
-            py={3}
-            px={4}
-            sx={{ backgroundColor: theme.palette.background.paper, height: '100%' }}
-          >
-            <Grid container>
-              <Grid item xs={9}>
-                <Box mb={2}>
-                  <Typography variant="body1" fontWeight={theme.typography.fontWeightBold}>
-                    {'REFERENTE'}
-                  </Typography>
-                </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Box
+              py={3}
+              px={4}
+              sx={{
+                backgroundColor: theme.palette.background.paper,
+                boxSizing: 'border-box',
+                height: '100%',
+                maxWidth: '100%',
+                minWidth: 0,
+                overflow: 'hidden',
+                width: '100%',
+              }}
+            >
+              <Grid container sx={{ minWidth: 0 }}>
+                <Grid item xs={9} sx={{ minWidth: 0 }}>
+                  <Box mb={2}>
+                    <Typography
+                      variant="body1"
+                      fontWeight={theme.typography.fontWeightBold}
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {'REFERENTE'}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={3} sx={{ minWidth: 0 }}>
+                  <Box display="flex" flexDirection="row" justifyContent="flex-end">
+                    <ButtonNaked
+                      onClick={() => {
+                        setModalIsOpen(true);
+                        // resetModalFieldsAndErrors();
+                        setFieldErrors({});
+                        setContactEmailModal(storeDetail.contactEmail);
+                        setContactEmailConfirmModal(storeDetail.contactEmail);
+                        setContactNameModal(storeDetail.contactName);
+                        setContactSurnameModal(storeDetail.contactSurname);
+                      }}
+                      size="medium"
+                      // sx={{ display: 'flex', justifyContent: 'end', alignItems: 'start' }}
+                      startIcon={<Edit />}
+                      color="primary"
+                    >
+                      Modifica
+                    </ButtonNaked>
+                  </Box>
+                </Grid>
               </Grid>
-              <Grid item xs={3}>
-                <Box display="flex" flexDirection="row" justifyContent="flex-end">
-                  <ButtonNaked
-                    onClick={() => {
-                      setModalIsOpen(true);
-                      // resetModalFieldsAndErrors();
-                      setFieldErrors({});
-                      setContactEmailModal(storeDetail.contactEmail);
-                      setContactEmailConfirmModal(storeDetail.contactEmail);
-                      setContactNameModal(storeDetail.contactName);
-                      setContactSurnameModal(storeDetail.contactSurname);
-                    }}
-                    size="medium"
-                    // sx={{ display: 'flex', justifyContent: 'end', alignItems: 'start' }}
-                    startIcon={<Edit />}
-                    color="primary"
-                  >
-                    Modifica
-                  </ButtonNaked>
-                </Box>
-              </Grid>
-            </Grid>
-            <Box>
-              <Grid container spacing={1}>
-                {storeDetail &&
-                  getKeyValueReferent(storeDetail).map((referent: any) => (
-                    <LabelValuePair
-                      key={`${referent?.label}-${referent?.value}`}
-                      label={referent?.label}
-                      value={referent?.value}
-                      isLink={false}
-                    />
-                  ))}
-              </Grid>
+              <Box sx={{ minWidth: 0, width: '100%' }}>
+                <Grid container spacing={1} sx={{ minWidth: 0 }}>
+                  {storeDetail &&
+                    getKeyValueReferent(storeDetail).map((referent: any) => (
+                      <LabelValuePair
+                        key={`${referent?.label}-${referent?.value}`}
+                        label={referent?.label}
+                        value={referent?.value}
+                        isLink={false}
+                        labelXs={6}
+                        valueMaxWidth="18rem"
+                        valueXs={6}
+                      />
+                    ))}
+                </Grid>
+              </Box>
             </Box>
           </Box>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
       <Box mt={5}>
         <Typography fontWeight={theme.typography.fontWeightBold} variant="h6">
           {t('pages.initiativeStoreDetail.transactionHistory')}

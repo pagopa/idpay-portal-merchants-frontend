@@ -8,38 +8,56 @@ interface LabelValuePairProps {
   label: string;
   value: string;
   isLink: boolean;
+  labelXs?: number;
+  valueMaxWidth?: string | number;
+  valueXs?: number;
 }
 
-const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, isLink }) => (
+const ellipsisSx = {
+  display: 'block',
+  maxWidth: '100%',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const LabelValuePair: FC<LabelValuePairProps> = ({
+  label,
+  value,
+  isLink,
+  labelXs = 5,
+  valueMaxWidth = '100%',
+  valueXs = 7,
+}) => (
   <>
-    <Grid item xs={5}>
-      <Box mb={1}>
-        <Typography variant="body2">{label}:</Typography>
+    <Grid item xs={labelXs} sx={{ minWidth: 0 }}>
+      <Box mb={1} sx={{ minWidth: 0, width: '100%' }}>
+        <Typography variant="body2" sx={ellipsisSx}>
+          {label}:
+        </Typography>
       </Box>
     </Grid>
     {!isLink ? (
-      <Grid item xs={7}>
-        <Box display="flex" mb={1}>
+      <Grid item xs={valueXs} sx={{ minWidth: 0 }}>
+        <Box display="flex" mb={1} sx={{ maxWidth: valueMaxWidth, minWidth: 0, width: '100%' }}>
           <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}>
-            <Typography fontWeight={theme.typography.fontWeightMedium} variant="body2">
+            <Typography
+              fontWeight={theme.typography.fontWeightMedium}
+              variant="body2"
+              sx={ellipsisSx}
+            >
               {value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}
             </Typography>
           </Tooltip>
         </Box>
       </Grid>
     ) : (
-      <Grid item xs={7}>
+      <Grid item xs={valueXs} sx={{ minWidth: 0 }}>
         <Box
           mb={1}
-          display={'-webkit-box'}
-          overflow={'hidden'}
-          textOverflow={'ellipsis'}
+          display="flex"
           color={theme.palette.primary.main}
-          sx={{
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            wordBreak: 'break-word',
-          }}
+          sx={{ maxWidth: valueMaxWidth, minWidth: 0, width: '100%' }}
         >
           <Tooltip title={value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}>
             <Link
@@ -47,6 +65,7 @@ const LabelValuePair: FC<LabelValuePairProps> = ({ label, value, isLink }) => (
               href={`${value}`}
               underline="hover"
               target="blank"
+              sx={ellipsisSx}
             >
               {value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value}
             </Link>
