@@ -9,7 +9,8 @@ import {
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import StoreIcon from '@mui/icons-material/Store';
+import AddIcon from '@mui/icons-material/Add';
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -175,12 +176,12 @@ const InitiativeStores: React.FC = () => {
           variantTitle="h4"
           variantSubTitle="body1"
         />
-        {stores.length > 0 && !storesLoading && (
+        {!storesLoading && (
           <Button
             variant="contained"
             size="small"
             onClick={() => goToAddStorePage()}
-            startIcon={<StoreIcon />}
+            startIcon={<AddIcon fontSize='large' />}
             sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '200px' } }}
           >
             {t('pages.initiativeStores.addStoreList')}
@@ -234,24 +235,24 @@ const InitiativeStores: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            border: '1px solid',
+            borderColor: 'divider',
+            boxShadow: 'none',
           }}
         >
-          <Stack spacing={0.5} direction="row">
+          <Stack spacing={1} alignItems="center">
+            <ErrorOutlineOutlinedIcon fontVariant='h5' color='disabled' />
             <Typography variant="body2">
-              {!filtersAppliedOnce
-                ? t('pages.initiativeStores.noStores')
-                : t('pages.initiativeStores.noStoresInitiative')}
-              {!filtersAppliedOnce && (
-                <Link
-                  onClick={() => goToAddStorePage()}
-                  className="cursor-pointer"
-                  variant="body2"
-                  sx={{ fontWeight: '600' }}
-                >
-                  {t('pages.initiativeStores.addStoreNoResults')}
-                </Link>
-              )}
+              {t('pages.initiativeStores.noStores')}{t('pages.initiativeStores.addStoreNoResults')}.
             </Typography>
+            <Link
+              onClick={() => goToAddStorePage()}
+              className="cursor-pointer"
+              variant="body2"
+              sx={{ fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'none' } }}
+            >
+              {t('pages.initiativeStores.addStoreList')}
+            </Link>
           </Stack>
         </Paper>
       )}

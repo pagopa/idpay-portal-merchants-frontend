@@ -1,6 +1,5 @@
-import { Box, Button, Typography, TextField } from '@mui/material';
+import { Box, Button, Tooltip, Typography, TextField } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
 import { useParams, Prompt } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia/theme';
@@ -377,11 +376,28 @@ const InitiativeStoreDetail = () => {
           backLabel={t('actions.back')}
           items={[t('pages.initiativeStores.title'), storeDetail?.franchiseName]}
         />
-        <TitleBox
-          title={storeDetail?.franchiseName ? storeDetail?.franchiseName : ''}
-          mtTitle={2}
-          variantTitle="h4"
-        />
+        <Tooltip title={storeDetail?.franchiseName ?? ''} placement="bottom">
+          <Box
+            sx={{
+              display: 'inline-block',
+              maxWidth: 'calc(95vw - 300px)',
+              minWidth: 0,
+              mt: 2,
+              verticalAlign: 'bottom',
+            }}
+          >
+            <Typography
+              variant="h4"
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {storeDetail?.franchiseName ? storeDetail?.franchiseName : ''}
+            </Typography>
+          </Box>
+        </Tooltip>
       </Box>
       <Box
         mb={3}
