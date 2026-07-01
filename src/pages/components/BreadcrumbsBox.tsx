@@ -11,8 +11,22 @@ interface Props {
 const BreadcrumbsBox = ({ backLabel, items }: Props) => {
   const history = useHistory();
   return (
-    <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
-      <Breadcrumbs aria-label="breadcrumb">
+    <Box sx={{ display: 'grid', gridColumn: 'span 12', maxWidth: '100%', minWidth: 0 }}>
+      <Breadcrumbs
+        aria-label="breadcrumb"
+        sx={{
+          maxWidth: '100%',
+          minWidth: 0,
+          '& .MuiBreadcrumbs-li': {
+            minWidth: 0,
+          },
+          '& .MuiBreadcrumbs-ol': {
+            flexWrap: 'nowrap',
+            maxWidth: '100%',
+            minWidth: 0,
+          },
+        }}
+      >
         <Box onClick={() => history.goBack()} sx={{ display: 'inline-flex', cursor: 'pointer' }}>
           <ButtonNaked
             startIcon={<ArrowBackIcon />}
@@ -28,7 +42,7 @@ const BreadcrumbsBox = ({ backLabel, items }: Props) => {
             sx={{
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              maxWidth: 'calc(95vw - 300px)',
+              maxWidth: index === items.length - 1 ? 'min(55vw, calc(95vw - 300px))' : '25vw',
               minWidth: '0',
               whiteSpace: 'nowrap',
             }}
