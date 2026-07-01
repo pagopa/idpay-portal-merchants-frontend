@@ -10,6 +10,7 @@ import {
 import CircularProgress from '@mui/material/CircularProgress';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import StoreIcon from '@mui/icons-material/Store';
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -175,7 +176,7 @@ const InitiativeStores: React.FC = () => {
           variantTitle="h4"
           variantSubTitle="body1"
         />
-        {stores.length > 0 && !storesLoading && (
+        {!storesLoading && (
           <Button
             variant="contained"
             size="small"
@@ -234,24 +235,24 @@ const InitiativeStores: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            border: '1px solid',
+            borderColor: 'divider',
+            boxShadow: 'none',
           }}
         >
-          <Stack spacing={0.5} direction="row">
+          <Stack spacing={1} alignItems="center">
+            <ErrorOutlineOutlinedIcon sx={{ color: 'text.disabled', fontSize: 24 }} />
             <Typography variant="body2">
-              {!filtersAppliedOnce
-                ? t('pages.initiativeStores.noStores')
-                : t('pages.initiativeStores.noStoresInitiative')}
-              {!filtersAppliedOnce && (
-                <Link
-                  onClick={() => goToAddStorePage()}
-                  className="cursor-pointer"
-                  variant="body2"
-                  sx={{ fontWeight: '600' }}
-                >
-                  {t('pages.initiativeStores.addStoreNoResults')}
-                </Link>
-              )}
+              {t('pages.initiativeStores.noStores')}{t('pages.initiativeStores.addStoreNoResults')}.
             </Typography>
+            <Link
+              onClick={() => goToAddStorePage()}
+              className="cursor-pointer"
+              variant="body2"
+              sx={{ fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'none' } }}
+            >
+              {t('pages.initiativeStores.addStoreList')}
+            </Link>
           </Stack>
         </Paper>
       )}
