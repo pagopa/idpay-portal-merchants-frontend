@@ -528,8 +528,8 @@ describe('MerchantTransactions', () => {
       return column.renderCell({ value, row });
     };
 
-    render(renderColumn('productName', 'Long product name'));
-    expect(screen.getByText('Long product name')).toBeInTheDocument();
+    const productCell = render(renderColumn('productName', 'Long product name'));
+    expect(productCell.container).toHaveTextContent('Long product name');
 
     render(renderColumn('effectiveAmountCents', 12345));
     expect(screen.getByText('123.45')).toBeInTheDocument();
