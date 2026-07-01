@@ -5,6 +5,7 @@ import {
   Select,
   MenuItem,
   TextField,
+  Typography,
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { FormikProps } from 'formik';
@@ -44,6 +45,26 @@ const fieldLayout: Record<
   contactName: { xs: 12, sm: 6, md: 4, lg: 2 },
 };
 
+const selectValueEllipsisSx = {
+  '& .MuiSelect-select': {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    display: 'block',
+  },
+};
+
+const menuItemLabelEllipsisSx = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const getInitiativeLabel = (
+  value: string,
+  initiativeOptions: Array<InitiativeOption>
+) => initiativeOptions.find((initiative) => initiative.value === value)?.label ?? value;
+
 const renderField = (
   field: PointOfSalesFilterField,
   formik: FormikProps<GetPointOfSalesFilters>,
@@ -63,9 +84,23 @@ const renderField = (
             value={formik.values.initiative ?? ''}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
+            sx={selectValueEllipsisSx}
+            renderValue={(selected) => (
+              <Typography
+                component="span"
+                noWrap
+                sx={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              >
+                {getInitiativeLabel(selected, initiativeOptions)}
+              </Typography>
+            )}
           >
             {initiativeOptions.map((initiative) => (
-              <MenuItem key={initiative.value} value={initiative.value}>
+              <MenuItem
+                key={initiative.value}
+                value={initiative.value}
+                sx={menuItemLabelEllipsisSx}
+              >
                 {initiative.label}
               </MenuItem>
             ))}
@@ -84,6 +119,7 @@ const renderField = (
             value={formik.values.type}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
+            sx={selectValueEllipsisSx}
           >
             <MenuItem value="PHYSICAL">{t('pages.initiativeStores.physical')}</MenuItem>
             <MenuItem value="ONLINE">{t('pages.initiativeStores.online')}</MenuItem>
