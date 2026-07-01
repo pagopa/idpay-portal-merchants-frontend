@@ -206,6 +206,16 @@ const renderComponent = () =>
     </ThemeProvider>
   );
 
+const expectEmptyStateMessage = () => {
+  expect(
+    screen.getByText((_, element) =>
+      element?.tagName.toLowerCase() === 'p' &&
+      element?.textContent ===
+      'pages.initiativeStores.noStorespages.initiativeStores.addStoreNoResults.'
+    )
+  ).toBeInTheDocument();
+};
+
 describe('<PosCatalog />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -278,7 +288,7 @@ describe('<PosCatalog />', () => {
 
     renderComponent();
 
-    expect(screen.getByText('pages.posCatalog.noData')).toBeInTheDocument();
+    expectEmptyStateMessage();
     expect(screen.queryByText('pages.initiativeStores.noStoresInitiative')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mock-filters')).not.toBeInTheDocument();
   });
@@ -294,7 +304,7 @@ describe('<PosCatalog />', () => {
 
     expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
     expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
-    expect(screen.getByText('pages.initiativeStores.noStoresInitiative')).toBeInTheDocument();
+    expectEmptyStateMessage();
   });
 
   it('shows filters and table when form values are set even with no stores', () => {
@@ -319,7 +329,7 @@ describe('<PosCatalog />', () => {
 
     expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
     expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
-    expect(screen.getByText('pages.posCatalog.noData')).toBeInTheDocument();
+    expectEmptyStateMessage();
   });
 
   it('passes hook handlers to filters and table callbacks', () => {
