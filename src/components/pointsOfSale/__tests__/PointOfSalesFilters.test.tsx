@@ -113,6 +113,37 @@ describe('PointOfSalesFilters', () => {
     expect(onFiltersReset).toHaveBeenCalledTimes(1);
   });
 
+  test('falls back to the raw initiative value when no matching option exists', () => {
+    const formik = {
+      values: {
+        initiative: 'initiative-missing',
+        type: undefined,
+        city: '',
+        address: '',
+        contactName: '',
+        sort: 'asc',
+      },
+      handleChange: jest.fn(),
+      handleBlur: jest.fn(),
+    } as any;
+
+    render(
+      <PointOfSalesFilters
+        formik={formik}
+        filtersAppliedOnce={false}
+        onFiltersApplied={jest.fn()}
+        onFiltersReset={jest.fn()}
+        t={(key: string) => key}
+        fields={['initiative']}
+        initiativeOptions={[{ value: 'initiative-1', label: 'Initiative 1' }]}
+      />
+    );
+
+    expect(screen.getByLabelText('Iniziativa')).toBeInTheDocument();
+    expect(screen.getByText('initiative-missing')).toBeInTheDocument();
+    expect(screen.queryByText('Initiative 1')).not.toBeInTheDocument();
+  });
+
   test('renders empty initiative select when no initiative options are provided', () => {
     const formik = {
       values: {
