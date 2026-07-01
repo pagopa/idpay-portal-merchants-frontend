@@ -44,13 +44,25 @@ const fieldLayout: Record<
   contactName: { xs: 12, sm: 6, md: 4, lg: 2 },
 };
 
+const selectTextSafeAreaSx = {
+  maxWidth: 'calc(100% - 25%)',
+};
+
 const selectValueEllipsisSx = {
   '& .MuiSelect-select': {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     display: 'block',
+    paddingRight: '40px !important',
   },
+};
+
+const selectLabelEllipsisSx = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap'
+  ...selectTextSafeAreaSx,
 };
 
 const menuItemLabelEllipsisSx = {
@@ -74,7 +86,9 @@ const renderField = (
     case 'initiative':
       return (
         <FormControl fullWidth size="small">
-          <InputLabel id="initiative-label">Iniziativa</InputLabel>
+          <InputLabel id="initiative-label" sx={selectLabelEllipsisSx}>
+            Iniziativa
+          </InputLabel>
           <Select
             labelId="initiative-label"
             id="initiative-select"
@@ -91,6 +105,7 @@ const renderField = (
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
+                  maxWidth: 'calc(100% - 32px)',
                 }}
               >
                 {getInitiativeLabel(selected, initiativeOptions)}
@@ -112,7 +127,9 @@ const renderField = (
     case 'type':
       return (
         <FormControl fullWidth size="small">
-          <InputLabel id="pos-type-label">{t('pages.initiativeStores.pointOfSaleType')}</InputLabel>
+          <InputLabel id="pos-type-label" sx={selectLabelEllipsisSx}>
+            {t('pages.initiativeStores.pointOfSaleType')}
+          </InputLabel>
           <Select
             labelId="pos-type-label"
             id="pos-type-select"
