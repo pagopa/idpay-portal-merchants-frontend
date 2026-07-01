@@ -5,7 +5,6 @@ import {
   Select,
   MenuItem,
   TextField,
-  Typography,
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import { FormikProps } from 'formik';
@@ -86,13 +85,16 @@ const renderField = (
             onBlur={formik.handleBlur}
             sx={selectValueEllipsisSx}
             renderValue={(selected) => (
-              <Typography
-                component="span"
-                noWrap
-                sx={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              <span
+                style={{
+                  display: 'block',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
               >
                 {getInitiativeLabel(selected, initiativeOptions)}
-              </Typography>
+              </span>
             )}
           >
             {initiativeOptions.map((initiative) => (
