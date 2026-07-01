@@ -105,6 +105,16 @@ const MerchantTransactions = ({
     );
   };
 
+  const buildCurrencyColumn = (field: string, headerNameKey: string): GridColDef => ({
+    field,
+    headerName: t(headerNameKey),
+    flex: 0.5,
+    editable: false,
+    disableColumnMenu: true,
+    sortable: false,
+    renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+  });
+
   const columns: Array<GridColDef> = [
     {
       field: 'productName',
@@ -132,33 +142,15 @@ const MerchantTransactions = ({
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
-    {
-      field: 'effectiveAmountCents',
-      headerName: t('commons.transactionsTableHeaders.effectiveAmountCents'),
-      flex: 0.5,
-      editable: false,
-      disableColumnMenu: true,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
-    },
-    {
-      field: 'rewardAmountCents',
-      headerName: t('commons.transactionsTableHeaders.rewardAmountCents'),
-      flex: 0.5,
-      editable: false,
-      disableColumnMenu: true,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
-    },
-    {
-      field: 'authorizedAmountCents',
-      headerName: t('commons.transactionsTableHeaders.authorizedAmountCents'),
-      flex: 0.5,
-      editable: false,
-      disableColumnMenu: true,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
-    },
+    buildCurrencyColumn(
+      'effectiveAmountCents',
+      'commons.transactionsTableHeaders.effectiveAmountCents'
+    ),
+    buildCurrencyColumn('rewardAmountCents', 'commons.transactionsTableHeaders.rewardAmountCents'),
+    buildCurrencyColumn(
+      'authorizedAmountCents',
+      'commons.transactionsTableHeaders.authorizedAmountCents'
+    ),
     {
       field: 'status',
       headerName: t('commons.transactionsTableHeaders.status'),
