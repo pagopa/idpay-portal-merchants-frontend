@@ -88,6 +88,12 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
       >
         rows
       </button>
+      <button
+        data-testid="selection-button"
+        onClick={() => props.onSelectionModelChange(['store-1', 'store-2'])}
+      >
+        selection
+      </button>
       {props.rows.map((row: any) => (
         <button
           key={row.id}
@@ -243,6 +249,8 @@ describe('<PosCatalog />', () => {
 
     expect(screen.getByText('pages.posCatalog.title')).toBeInTheDocument();
     expect(screen.getByText('pages.posCatalog.subtitle')).toBeInTheDocument();
+    expect(screen.queryByText('pages.posCatalog.actions.exclude')).not.toBeInTheDocument();
+    expect(screen.queryByText('pages.posCatalog.actions.associate')).not.toBeInTheDocument();
     expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
     expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
     expect(screen.getByTestId('initiative-options-count')).toBeInTheDocument();
@@ -338,6 +346,66 @@ describe('<PosCatalog />', () => {
     expect(mockHandleRowsPerPageChange).toHaveBeenCalledWith(25);
   });
 
+  it('shows selection actions and opens empty association modal', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+
+    expect(screen.getByText('pages.posCatalog.actions.exclude (2)')).toBeInTheDocument();
+    const associateButton = screen.getByText('pages.posCatalog.actions.associate (2)');
+    expect(associateButton).toBeInTheDocument();
+
+    fireEvent.click(associateButton);
+
+    expect(screen.getByTestId('associate-selected-pos-modal')).toBeInTheDocument();
+  });
+
+  it('hides selection actions when filters are applied or reset', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    expect(screen.getByText('pages.posCatalog.actions.exclude (2)')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('apply-filters'));
+    expect(screen.queryByText('pages.posCatalog.actions.exclude')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    expect(screen.getByText('pages.posCatalog.actions.associate (2)')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('reset-filters'));
+    expect(screen.queryByText('pages.posCatalog.actions.associate')).not.toBeInTheDocument();
+  });
+
+  it('hides selection actions when page changes', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    expect(screen.getByText('pages.posCatalog.actions.associate (2)')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('page-button'));
+
+    expect(screen.queryByText('pages.posCatalog.actions.associate')).not.toBeInTheDocument();
+    expect(mockHandlePaginationPageChange).toHaveBeenCalledWith(3);
+  });
+
+  it('hides selection actions when rows per page or sort changes', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    expect(screen.getByText('pages.posCatalog.actions.associate (2)')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('rows-button'));
+    expect(screen.queryByText('pages.posCatalog.actions.associate')).not.toBeInTheDocument();
+    expect(mockHandleRowsPerPageChange).toHaveBeenCalledWith(25);
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    expect(screen.getByText('pages.posCatalog.actions.exclude (2)')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('sort-button'));
+    expect(screen.queryByText('pages.posCatalog.actions.exclude')).not.toBeInTheDocument();
+    expect(mockHandleSortModelChange).toHaveBeenCalledWith([{ field: 'referent', sort: 'desc' }]);
+  });
+
   it('opens and closes the drawer from the table action and passes merchant data', async () => {
     renderComponent();
 
@@ -389,7 +457,9 @@ describe('<PosCatalog />', () => {
       })
     );
     expect(dataTableProps.checkable).toBe(true);
-    expect(dataTableProps.isRowSelectable()).toBe(false);
+    expect(dataTableProps.isRowSelectable).toBeUndefined();
+    expect(dataTableProps.onSelectionModelChange).toEqual(expect.any(Function));
+    expect(dataTableProps.selectionModel).toEqual([]);
   });
 
   it('provides a fetchStores callback to the table hook that returns an empty result without merchant id', async () => {

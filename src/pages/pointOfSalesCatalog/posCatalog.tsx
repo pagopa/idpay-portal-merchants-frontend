@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
-import { Box, Stack, Paper, Typography } from '@mui/material';
+import { Box, Button, Modal, Stack, Paper, Typography } from '@mui/material';
+import { GridSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import CircularProgress from '@mui/material/CircularProgress';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
@@ -38,6 +39,8 @@ const PosCatalog: React.FC = () => {
   const { setAlert } = useAlert();
   const [selectedStore, setSelectedStore] = useState<PointOfSaleDTO | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedStoreIds, setSelectedStoreIds] = useState<GridSelectionModel>([]);
+  const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
 
   const { t } = useScopedTranslation();
   const history = useHistory();
@@ -148,6 +151,49 @@ const PosCatalog: React.FC = () => {
     setSelectedStore(null);
   }, []);
 
+  const handleSelectionModelChange = useCallback((selectionModel: GridSelectionModel) => {
+    setSelectedStoreIds(selectionModel);
+  }, []);
+
+  const handleCatalogFiltersApplied = useCallback(
+    (values: GetPointOfSalesFilters) => {
+      setSelectedStoreIds([]);
+      handleFiltersApplied(values);
+    },
+    [handleFiltersApplied]
+  );
+
+  const handleCatalogFiltersReset = useCallback(() => {
+    setSelectedStoreIds([]);
+    handleFiltersReset();
+  }, [handleFiltersReset]);
+
+  const handleCatalogPaginationPageChange = useCallback(
+    (page: number) => {
+      setSelectedStoreIds([]);
+      handlePaginationPageChange(page);
+    },
+    [handlePaginationPageChange]
+  );
+
+  const handleCatalogRowsPerPageChange = useCallback(
+    (pageSize: number) => {
+      setSelectedStoreIds([]);
+      handleRowsPerPageChange(pageSize);
+    },
+    [handleRowsPerPageChange]
+  );
+
+  const handleCatalogSortModelChange = useCallback(
+    (model: GridSortModel) => {
+      setSelectedStoreIds([]);
+      handleSortModelChange(model);
+    },
+    [handleSortModelChange]
+  );
+
+  const selectedStoresCountLabel = ` (${selectedStoreIds.length})`;
+
   const columns = useMemo(
     () =>
       buildPointOfSalesColumns({
@@ -172,6 +218,16 @@ const PosCatalog: React.FC = () => {
           variantTitle="h4"
           variantSubTitle="body1"
         />
+        {selectedStoreIds.length > 0 && (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Button variant="outlined" color="error" sx={{whiteSpace: "nowrap"}}>
+              {`${t('pages.posCatalog.actions.exclude')}${selectedStoresCountLabel}`}
+            </Button>
+            <Button variant="contained" onClick={() => setIsAssociateModalOpen(true)} sx={{whiteSpace: "nowrap"}}>
+              {`${t('pages.posCatalog.actions.associate')}${selectedStoresCountLabel}`}
+            </Button>
+          </Stack>
+        )}
       </Stack>
       {storesLoading ? (
         <Box
@@ -186,8 +242,8 @@ const PosCatalog: React.FC = () => {
             filtersAppliedOnce) && (
             <>
               <PointOfSalesFilters
-                onFiltersApplied={handleFiltersApplied}
-                onFiltersReset={handleFiltersReset}
+                onFiltersApplied={handleCatalogFiltersApplied}
+                onFiltersReset={handleCatalogFiltersReset}
                 formik={formik}
                 filtersAppliedOnce={filtersAppliedOnce}
                 initiativeOptions={initiativeOptions}
@@ -200,13 +256,14 @@ const PosCatalog: React.FC = () => {
                   rows={stores}
                   columns={columns}
                   checkable
-                  isRowSelectable={() => false}
                   rowsPerPage={rowsPerPage}
                   rowsPerPageOptions={ELEMENT_PER_PAGE}
-                  onRowsPerPageChange={handleRowsPerPageChange}
-                  onSortModelChange={handleSortModelChange}
+                  onRowsPerPageChange={handleCatalogRowsPerPageChange}
+                  onSelectionModelChange={handleSelectionModelChange}
+                  selectionModel={selectedStoreIds}
+                  onSortModelChange={handleCatalogSortModelChange}
                   paginationModel={storesPagination}
-                  onPaginationPageChange={handlePaginationPageChange}
+                  onPaginationPageChange={handleCatalogPaginationPageChange}
                   sortModel={sortModel}
                 />
               </Box>
@@ -220,6 +277,26 @@ const PosCatalog: React.FC = () => {
               />
             </>
           )}
+          <Modal
+            open={isAssociateModalOpen}
+            onClose={() => setIsAssociateModalOpen(false)}
+            aria-labelledby="associate-selected-pos-modal"
+          >
+            <Box
+              data-testid="associate-selected-pos-modal"
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 400,
+                minHeight: 160,
+                bgcolor: 'background.paper',
+                boxShadow: 24,
+                p: 4,
+              }}
+            />
+          </Modal>
         </>
       )}
       {!storesLoading && stores?.length === 0 && (

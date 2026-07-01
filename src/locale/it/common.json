@@ -107,6 +107,10 @@
       "title": "Catalogo punti vendita",
       "subtitle": "Qui trovi tutti i punti vendita censiti durante le iniziative.",
       "noData": "Non ci sono punti vendita, aggiungili per iniziare.",
+      "actions": {
+        "associate": "Associa",
+        "exclude": "Escludi"
+      },
       "drawer": {
         "associatedTo": "PUNTO VENDITA ASSOCIATO A:",
         "storeData": "DATI PUNTO VENDITA",

@@ -26,15 +26,22 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
     isOpen,
     title,
     children,
+    buttons,
   }: {
     isOpen: boolean;
     title: string;
     children: React.ReactNode;
+    buttons?: Array<any>;
   }) =>
     isOpen ? (
       <div data-testid="detail-drawer">
         <div>{title}</div>
         {children}
+        {buttons?.map((button, index) => (
+          <button key={`${button.title}-${index}`} data-testid={button.dataTestId} onClick={button.onClick}>
+            {button.title}
+          </button>
+        ))}
       </div>
     ) : null,
 }));
@@ -235,6 +242,25 @@ const drawerInitiativeOptions = [
     expect(screen.getByText('Via Roma 1 - Milano')).toBeInTheDocument();
     expect(screen.getByText('pages.posCatalog.drawer.phone')).toBeInTheDocument();
     expect(screen.getByText('-')).toBeInTheDocument();
+  });
+
+  it('renders drawer actions and opens empty association modal', () => {
+    render(
+      <PosCatalogDrawer
+        isOpen
+        onClose={jest.fn()}
+        selectedStore={physicalStore}
+        initiativeOptions={drawerInitiativeOptions}
+        merchantId="merchant-123"
+      />
+    );
+
+    expect(screen.getByTestId('exclude-store-button')).toHaveTextContent(
+      'pages.posCatalog.actions.exclude'
+    );
+    fireEvent.click(screen.getByTestId('associate-store-button'));
+
+    expect(screen.getByTestId('associate-pos-modal')).toBeInTheDocument();
   });
 
   it('renders fallback initiative id and placeholders when fetched data is incomplete', async () => {

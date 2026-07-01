@@ -4,6 +4,7 @@ import {
   Box,
   Typography,
   CircularProgress,
+  Modal,
 } from '@mui/material';
 import { FormikProps } from 'formik';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
@@ -69,6 +70,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   const { t } = useScopedTranslation();
   const [initiatives, setInitiatives] = useState<Array<PointOfSaleInitiativeDTO>>([]);
   const [isLoadingInitiatives, setIsLoadingInitiatives] = useState(false);
+  const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -88,7 +90,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
         const response = await getPointOfSaleInitiatives(merchantId, selectedStore.id);
 
         if (isMounted) {
-          setInitiatives(response);
+          setInitiatives(Array.isArray(response) ? response : []);
         }
       } catch {
         if (isMounted) {
@@ -122,38 +124,57 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   );
 
   return (
-    <DetailDrawer
-      isOpen={isOpen}
-      setIsOpen={onClose}
-      title={selectedStore?.franchiseName}
-    >
-      {selectedStore && (
-        <>
-          {(isLoadingInitiatives || sortedInitiatives.length > 0) && (
-            <>
-              <Typography variant="overline" color="text.secondary">
-                {t('pages.posCatalog.drawer.associatedTo')}
-              </Typography>
-              {isLoadingInitiatives ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                  <CircularProgress size={24} />
-                </Box>
-              ) : (
-                sortedInitiatives.map((initiative) => (
-                  <Box key={`${initiative.initiativeId}-${initiative.updatedAt}`}>
-                    <Typography variant="body2" color="text.secondary">
-                      {safeFormatDate(initiative.updatedAt, false)}
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
-                      {initiative.initiativeId
-                        ? initiativeNameById[initiative.initiativeId] || initiative.initiativeId
-                        : MISSING_DATA_PLACEHOLDER}
-                    </Typography>
+    <>
+      <DetailDrawer
+        isOpen={isOpen}
+        setIsOpen={onClose}
+        title={selectedStore?.franchiseName}
+        buttonsLayout="row"
+        buttons={[
+          {
+            title: t('pages.posCatalog.actions.exclude'),
+            dataTestId: 'exclude-store-button',
+            variant: 'outlined',
+            color: 'error',
+          },
+          {
+            title: t('pages.posCatalog.actions.associate'),
+            dataTestId: 'associate-store-button',
+            variant: 'contained',
+            onClick: () => setIsAssociateModalOpen(true),
+          },
+        ]}
+      >
+        {selectedStore && (
+          <>
+            {(isLoadingInitiatives || sortedInitiatives.length > 0) && (
+              <>
+                <Typography variant="overline" color="text.secondary">
+                  {t('pages.posCatalog.drawer.associatedTo')}
+                </Typography>
+                {isLoadingInitiatives ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                    <CircularProgress size={24} />
                   </Box>
-                ))
-              )}
-            </>
-          )}
+                ) : (
+                  sortedInitiatives.map((initiative) => (
+                    <Box key={`${initiative.initiativeId}-${initiative.updatedAt}`}>
+                      <Typography variant="body2" color="text.secondary">
+                        {safeFormatDate(initiative.updatedAt, false)}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontWeight: theme.typography.fontWeightMedium }}
+                      >
+                        {initiative.initiativeId
+                          ? initiativeNameById[initiative.initiativeId] || initiative.initiativeId
+                          : MISSING_DATA_PLACEHOLDER}
+                      </Typography>
+                    </Box>
+                  ))
+                )}
+              </>
+            )}
 
           <Typography variant="overline" color="text.secondary">
             {t('pages.posCatalog.drawer.storeData')}
@@ -231,8 +252,29 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
               {selectedStore.contactEmail || MISSING_DATA_PLACEHOLDER}
             </Typography>
           </Box>
-        </>
-      )}
-    </DetailDrawer>
+          </>
+        )}
+      </DetailDrawer>
+      <Modal
+        open={isAssociateModalOpen}
+        onClose={() => setIsAssociateModalOpen(false)}
+        aria-labelledby="associate-pos-modal"
+      >
+        <Box
+          data-testid="associate-pos-modal"
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            minHeight: 160,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+          }}
+        />
+      </Modal>
+    </>
   );
 };
