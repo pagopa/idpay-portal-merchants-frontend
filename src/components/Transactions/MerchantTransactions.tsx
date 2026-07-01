@@ -108,7 +108,7 @@ const MerchantTransactions = ({
   const columns: Array<GridColDef> = [
     {
       field: 'productName',
-      headerName: 'Prodotto',
+      headerName: t('commons.transactionsTableHeaders.productName'),
       flex: 2,
       editable: false,
       disableColumnMenu: true,
@@ -117,7 +117,7 @@ const MerchantTransactions = ({
     },
     {
       field: 'trxChargeDate',
-      headerName: 'Data e ora',
+      headerName: t('commons.transactionsTableHeaders.trxChargeDate'),
       flex: 1,
       editable: false,
       disableColumnMenu: true,
@@ -125,7 +125,7 @@ const MerchantTransactions = ({
     },
     {
       field: 'fiscalCode',
-      headerName: 'Beneficiario',
+      headerName: t('commons.transactionsTableHeaders.fiscalCode'),
       flex: 1.2,
       editable: false,
       sortable: false,
@@ -134,7 +134,7 @@ const MerchantTransactions = ({
     },
     {
       field: 'effectiveAmountCents',
-      headerName: 'Totale della spesa',
+      headerName: t('commons.transactionsTableHeaders.effectiveAmountCents'),
       flex: 0.5,
       editable: false,
       disableColumnMenu: true,
@@ -143,7 +143,7 @@ const MerchantTransactions = ({
     },
     {
       field: 'rewardAmountCents',
-      headerName: 'Sconto applicato',
+      headerName: t('commons.transactionsTableHeaders.rewardAmountCents'),
       flex: 0.5,
       editable: false,
       disableColumnMenu: true,
@@ -152,7 +152,7 @@ const MerchantTransactions = ({
     },
     {
       field: 'authorizedAmountCents',
-      headerName: 'Importo autorizzato',
+      headerName: t('commons.transactionsTableHeaders.authorizedAmountCents'),
       flex: 0.5,
       editable: false,
       disableColumnMenu: true,
@@ -161,7 +161,7 @@ const MerchantTransactions = ({
     },
     {
       field: 'status',
-      headerName: 'Stato',
+      headerName: t('commons.transactionsTableHeaders.status'),
       flex: 1.1,
       editable: false,
       disableColumnMenu: true,
