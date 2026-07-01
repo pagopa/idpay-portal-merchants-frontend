@@ -61,7 +61,7 @@ const selectValueEllipsisSx = {
 const selectLabelEllipsisSx = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
   ...selectTextSafeAreaSx,
 };
 
