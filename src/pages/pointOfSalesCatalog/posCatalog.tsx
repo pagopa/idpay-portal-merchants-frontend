@@ -1,10 +1,25 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
-import { Box, Button, Modal, Stack, Paper, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Paper,
+  Select,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
 import { GridSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import CircularProgress from '@mui/material/CircularProgress';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import CloseIcon from '@mui/icons-material/Close';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
+import { MIAlert } from '@pagopa/mui-italia';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -41,6 +56,7 @@ const PosCatalog: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedStoreIds, setSelectedStoreIds] = useState<GridSelectionModel>([]);
   const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
+  const [selectedInitiativeId, setSelectedInitiativeId] = useState('');
 
   const { t } = useScopedTranslation();
   const history = useHistory();
@@ -192,6 +208,15 @@ const PosCatalog: React.FC = () => {
     [handleSortModelChange]
   );
 
+  const handleAssociateModalClose = useCallback(() => {
+    setIsAssociateModalOpen(false);
+    setSelectedInitiativeId('');
+  }, []);
+
+  const handleInitiativeChange = useCallback((event: SelectChangeEvent) => {
+    setSelectedInitiativeId(event.target.value);
+  }, []);
+
   const selectedStoresCountLabel = ` (${selectedStoreIds.length})`;
 
   const columns = useMemo(
@@ -279,8 +304,8 @@ const PosCatalog: React.FC = () => {
           )}
           <Modal
             open={isAssociateModalOpen}
-            onClose={() => setIsAssociateModalOpen(false)}
-            aria-labelledby="associate-selected-pos-modal"
+            onClose={handleAssociateModalClose}
+            aria-labelledby="associate-selected-pos-modal-title"
           >
             <Box
               data-testid="associate-selected-pos-modal"
@@ -289,13 +314,79 @@ const PosCatalog: React.FC = () => {
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: 400,
-                minHeight: 160,
+                width: { xs: 'calc(100% - 32px)', sm: 608 },
+                maxWidth: 'calc(100% - 32px)',
                 bgcolor: 'background.paper',
+                borderRadius: 2,
                 boxShadow: 24,
-                p: 4,
+                p: 3.5,
+                outline: 'none',
               }}
-            />
+            >
+              <Stack spacing={2.5}>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                  <Box>
+                    <Typography
+                      id="associate-selected-pos-modal-title"
+                      variant="h5"
+                      sx={{ fontWeight: theme.typography.fontWeightBold, mb: 0.75 }}
+                    >
+                      {t('pages.posCatalog.associateModal.title')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('pages.posCatalog.associateModal.description')}
+                    </Typography>
+                  </Box>
+                  <IconButton
+                    aria-label={t('actions.close')}
+                    onClick={handleAssociateModalClose}
+                    sx={{ ml: 2, mt: -1 }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Stack>
+
+                <FormControl fullWidth size="small">
+                  <InputLabel id="associate-initiative-label">
+                    {t('pages.posCatalog.associateModal.initiativeLabel')}{' '}
+                    <Box component="span" sx={{ color: theme.palette.error.main }}>
+                      *
+                    </Box>
+                  </InputLabel>
+                  <Select
+                    labelId="associate-initiative-label"
+                    value={selectedInitiativeId}
+                    label={t('pages.posCatalog.associateModal.initiativeLabel')}
+                    onChange={handleInitiativeChange}
+                    sx={{
+                      '& .MuiSelect-select': {
+                        py: 1.25,
+                      },
+                    }}
+                  >
+                    {initiativeOptions.map((initiative) => (
+                      <MenuItem key={initiative.value} value={initiative.value}>
+                        {initiative.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <MIAlert
+                  severity="info"
+                  description={t('pages.posCatalog.associateModal.infoBanner')}
+                />
+
+                <Stack direction="row" spacing={2} justifyContent="flex-end">
+                  <Button size="small" onClick={handleAssociateModalClose}>
+                    {t('actions.cancel')}
+                  </Button>
+                  <Button size="small" variant="contained">
+                    {t('actions.confirm')}
+                  </Button>
+                </Stack>
+              </Stack>
+            </Box>
           </Modal>
         </>
       )}

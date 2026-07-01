@@ -111,6 +111,12 @@
         "associate": "Associa",
         "exclude": "Escludi"
       },
+      "associateModal": {
+        "title": "Associa punti vendita a un'iniziativa",
+        "description": "I punti vendita selezionati verranno associati all'iniziativa selezionata.",
+        "initiativeLabel": "Iniziativa",
+        "infoBanner": "Se in seguito escludi uno o più punti vendita dall'iniziativa, li ritroverai sempre nel catalogo e potrai riassociarli in qualsiasi momento."
+      },
       "drawer": {
         "associatedTo": "PUNTO VENDITA ASSOCIATO A:",
         "storeData": "DATI PUNTO VENDITA",

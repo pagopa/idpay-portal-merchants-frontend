@@ -218,6 +218,10 @@ describe('<PosCatalog />', () => {
     dataTableProps = {};
     filtersProps = {};
     drawerProps = {};
+    mockUseAppSelector.mockReturnValue([
+      { initiativeId: 'initiative-1', initiativeName: 'Initiative One' },
+      { initiativeId: 'initiative-2', initiativeName: 'Initiative Two' },
+    ]);
     mockStorageRead.mockReturnValue('mock-token');
     mockParseJwt.mockReturnValue({ merchant_id: 'merchant-123' });
     mockUseFormik.mockImplementation(({ initialValues, onSubmit }: any) => ({
@@ -346,7 +350,7 @@ describe('<PosCatalog />', () => {
     expect(mockHandleRowsPerPageChange).toHaveBeenCalledWith(25);
   });
 
-  it('shows selection actions and opens empty association modal', () => {
+  it('shows selection actions and opens the association modal with initiative options', () => {
     renderComponent();
 
     fireEvent.click(screen.getByTestId('selection-button'));
@@ -357,7 +361,20 @@ describe('<PosCatalog />', () => {
 
     fireEvent.click(associateButton);
 
-    expect(screen.getByTestId('associate-selected-pos-modal')).toBeInTheDocument();
+    const modal = screen.getByTestId('associate-selected-pos-modal');
+    expect(modal).toBeInTheDocument();
+    expect(within(modal).getByText('pages.posCatalog.associateModal.title')).toBeInTheDocument();
+    expect(within(modal).getByText('pages.posCatalog.associateModal.description')).toBeInTheDocument();
+    expect(within(modal).getByText('pages.posCatalog.associateModal.infoBanner')).toBeInTheDocument();
+    expect(
+      within(modal).getAllByText('pages.posCatalog.associateModal.initiativeLabel').length
+    ).toBeGreaterThan(0);
+    expect(within(modal).getByText('actions.cancel')).toBeInTheDocument();
+    expect(within(modal).getByText('actions.confirm')).toBeInTheDocument();
+    expect(filtersProps.initiativeOptions).toEqual([
+      { value: 'initiative-1', label: 'Initiative One' },
+      { value: 'initiative-2', label: 'Initiative Two' },
+    ]);
   });
 
   it('hides selection actions when filters are applied or reset', () => {
