@@ -57,24 +57,27 @@ jest.mock('../../../pages/components/EmptyList', () => (props: any) => (
   <div data-testid="empty-list">{props.message}</div>
 ));
 
-jest.mock('../TransactionDataTable', () => (props: any) => (
-  <div data-testid="transaction-data-table">
-    <button onClick={() => props.onSortModelChange([{ field: 'updateDate', sort: 'desc' }])}>
-      Sort Action
-    </button>
-    <button onClick={() => props.onPaginationPageChange(2)}>Pagination Action</button>
-    <button onClick={() => props.handleRowAction(props.rows[0])}>Row Action</button>
-    {props.columns.map((col: any) => {
-      return (
-        <div key={col.field} data-testid={`col-${col.field}`}>
-          {col.valueGetter
-            ? props?.rows[0]?.additionalProperties?.productName
-            : props?.rows[0]?.[col.field]}
-        </div>
-      );
-    })}
-  </div>
-));
+jest.mock('../TransactionDataTable', () => (props: any) => {
+  mockTransactionDataTableProps = props;
+  return (
+    <div data-testid="transaction-data-table">
+      <button onClick={() => props.onSortModelChange([{ field: 'updateDate', sort: 'desc' }])}>
+        Sort Action
+      </button>
+      <button onClick={() => props.onPaginationPageChange(2)}>Pagination Action</button>
+      <button onClick={() => props.handleRowAction(props.rows[0])}>Row Action</button>
+      {props.columns.map((col: any) => {
+        return (
+          <div key={col.field} data-testid={`col-${col.field}`}>
+            {col.valueGetter
+              ? props?.rows[0]?.additionalProperties?.productName
+              : props?.rows[0]?.[col.field]}
+          </div>
+        );
+      })}
+    </div>
+  );
+});
 
 jest.mock(
   '../TransactionDetail',
@@ -93,6 +96,7 @@ jest.mock(
 const MockedCustomChip = CustomChip as jest.Mock;
 const mockedGetStatus = getStatus as jest.Mock;
 const MockedTooltip = Tooltip as jest.Mock;
+let mockTransactionDataTableProps: any;
 
 describe('MerchantTransactions', () => {
   const handleFiltersApplied = jest.fn();
@@ -114,6 +118,7 @@ describe('MerchantTransactions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockTransactionDataTableProps = undefined;
     mockedGetStatus.mockImplementation((status) => ({
       label: status,
       color: 'green',
@@ -512,6 +517,40 @@ describe('MerchantTransactions', () => {
     );
 
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
+  });
+
+  it('covers column renderers for tooltip, currency, status and action cells', async () => {
+    renderComponent();
+
+    const row = mockTransactions[0];
+    const getColumn = (field: string) =>
+      mockTransactionDataTableProps.columns.find((col: any) => col.field === field);
+    const renderColumn = (field: string, value: any = row[field]) =>
+      getColumn(field).renderCell({ value, row });
+
+    expect(getColumn('productName').valueGetter({ row })).toBe('Frigorifero');
+
+    MockedTooltip.mockClear();
+    render(renderColumn('productName', 'Long product name'));
+    render(renderColumn('trxChargeDate', 'Long charge date'));
+    render(renderColumn('fiscalCode', 'AAAAAA00A00A000A'));
+    expect(MockedTooltip).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Long product name' }),
+      expect.anything()
+    );
+
+    render(renderColumn('effectiveAmountCents', 12345));
+    expect(screen.getByText('123.45')).toBeInTheDocument();
+
+    render(renderColumn('status', 'REFUNDED'));
+    expect(MockedCustomChip).toHaveBeenCalledWith(
+      expect.objectContaining({ label: 'REFUNDED' }),
+      expect.anything()
+    );
+
+    const actionCell = render(renderColumn('actions'));
+    await userEvent.click(actionCell.container.querySelector('button') as HTMLButtonElement);
+    await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
   });
 
   it('updates transactions when props change', () => {
