@@ -45,7 +45,7 @@ const fieldLayout: Record<
 };
 
 const selectTextSafeAreaSx = {
-  maxWidth: 'calc(100% - 25%)',
+  maxWidth: '75%',
 };
 
 const selectValueEllipsisSx = {
