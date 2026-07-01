@@ -235,16 +235,11 @@ const PosCatalog: React.FC = () => {
           }}
         >
           <Stack spacing={1} alignItems="center">
-            {!filtersAppliedOnce ? (
-              <>
-                <ErrorOutlineOutlinedIcon sx={{ color: 'text.disabled', fontSize: 28 }} />
-                <Typography variant="body2">{t('pages.posCatalog.noData')}</Typography>
-              </>
-            ) : (
-              <Typography variant="body2">
-                {t('pages.initiativeStores.noStoresInitiative')}
-              </Typography>
-            )}
+            <ErrorOutlineOutlinedIcon fontVariant='h5' color='disabled' />
+            <Typography variant="body2">
+              {t('pages.initiativeStores.noStores')}
+              {t('pages.initiativeStores.addStoreNoResults')}.
+            </Typography>
           </Stack>
         </Paper>
       )}

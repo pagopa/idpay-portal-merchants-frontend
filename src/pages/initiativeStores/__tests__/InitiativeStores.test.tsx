@@ -149,6 +149,16 @@ const renderComponent = () =>
     </ThemeProvider>
   );
 
+const expectEmptyStateMessage = () => {
+  expect(
+    screen.getByText((_, element) =>
+      element?.tagName.toLowerCase() === 'p' &&
+      element?.textContent ===
+      'pages.initiativeStores.noStorespages.initiativeStores.addStoreNoResults.'
+    )
+  ).toBeInTheDocument();
+};
+
 describe('<InitiativeStores />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -213,8 +223,8 @@ describe('<InitiativeStores />', () => {
 
     renderComponent();
 
-    expect(screen.getByText('pages.initiativeStores.noStores')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('pages.initiativeStores.addStoreNoResults'));
+    expectEmptyStateMessage();
+    fireEvent.click(screen.getAllByText('pages.initiativeStores.addStoreList')[1]);
 
     expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/${mockId}/punti-vendita/censisci/`
@@ -231,8 +241,8 @@ describe('<InitiativeStores />', () => {
 
     renderComponent();
 
-    expect(screen.getByText('pages.initiativeStores.noStoresInitiative')).toBeInTheDocument();
-    expect(screen.queryByText('pages.initiativeStores.addStoreNoResults')).not.toBeInTheDocument();
+    expectEmptyStateMessage();
+    expect(screen.getAllByText('pages.initiativeStores.addStoreList')).toHaveLength(2);
   });
 
   test('invoca gli handler del hook tramite filtri e tabella', () => {
