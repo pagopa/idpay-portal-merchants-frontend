@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import StoreIcon from '@mui/icons-material/Store';
+import AddIcon from '@mui/icons-material/Add';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
@@ -181,7 +181,7 @@ const InitiativeStores: React.FC = () => {
             variant="contained"
             size="small"
             onClick={() => goToAddStorePage()}
-            startIcon={<StoreIcon />}
+            startIcon={<AddIcon fontSize='large' />}
             sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '200px' } }}
           >
             {t('pages.initiativeStores.addStoreList')}
