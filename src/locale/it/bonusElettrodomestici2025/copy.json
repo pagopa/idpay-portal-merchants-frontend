@@ -1,6 +1,16 @@
 {
   "commons": {
-    "title": "Bonus Elettrodomestici"
+    "title": "Bonus Elettrodomestici",
+    "transactionsTableHeaders": {
+      "productName": "Elettrodomestico",
+      "trxChargeDate": "Data e ora",
+      "fiscalCode": "Beneficiario",
+      "effectiveAmountCents": "Totale della spesa",
+      "rewardAmountCents": "Sconto applicato",
+      "authorizedAmountCents": "Importo autorizzato",
+      "status": "Stato"
+
+    }
   },
   "pages" : {
     "tos": {
