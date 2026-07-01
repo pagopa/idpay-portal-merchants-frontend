@@ -523,13 +523,21 @@ describe('MerchantTransactions', () => {
     renderComponent();
 
     const row = mockTransactions[0];
-    const renderColumn = (field: string, value: any = row[field]) => {
-      const column = mockTransactionDataTableProps.columns.find((col: any) => col.field === field);
-      return column.renderCell({ value, row });
-    };
+    const getColumn = (field: string) =>
+      mockTransactionDataTableProps.columns.find((col: any) => col.field === field);
+    const renderColumn = (field: string, value: any = row[field]) =>
+      getColumn(field).renderCell({ value, row });
 
-    const productCell = render(renderColumn('productName', 'Long product name'));
-    expect(productCell.container).toHaveTextContent('Long product name');
+    expect(getColumn('productName').valueGetter({ row })).toBe('Frigorifero');
+
+    MockedTooltip.mockClear();
+    render(renderColumn('productName', 'Long product name'));
+    render(renderColumn('trxChargeDate', 'Long charge date'));
+    render(renderColumn('fiscalCode', 'AAAAAA00A00A000A'));
+    expect(MockedTooltip).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Long product name' }),
+      expect.anything()
+    );
 
     render(renderColumn('effectiveAmountCents', 12345));
     expect(screen.getByText('123.45')).toBeInTheDocument();
@@ -541,7 +549,7 @@ describe('MerchantTransactions', () => {
     );
 
     const actionCell = render(renderColumn('actions'));
-    await userEvent.click(actionCell.getByRole('button'));
+    await userEvent.click(actionCell.container.querySelector('button') as HTMLButtonElement);
     await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
   });
 
