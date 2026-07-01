@@ -241,7 +241,7 @@ const InitiativeStores: React.FC = () => {
           }}
         >
           <Stack spacing={1} alignItems="center">
-            <ErrorOutlineOutlinedIcon sx={{ color: 'text.disabled', fontSize: 24 }} />
+            <ErrorOutlineOutlinedIcon fontVariant='h5' color='disabled' />
             <Typography variant="body2">
               {t('pages.initiativeStores.noStores')}{t('pages.initiativeStores.addStoreNoResults')}.
             </Typography>
