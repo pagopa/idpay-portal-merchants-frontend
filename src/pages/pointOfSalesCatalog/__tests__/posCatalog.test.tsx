@@ -388,6 +388,9 @@ describe('<PosCatalog />', () => {
   it('associates selected stores to the selected initiative on confirm', async () => {
     renderComponent();
 
+    fireEvent.click(screen.getByTestId('row-action-store-1'));
+    expect(screen.getByTestId('pos-catalog-drawer')).toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId('selection-button'));
     fireEvent.click(screen.getByText('pages.posCatalog.actions.associate (2)'));
 
@@ -412,6 +415,7 @@ describe('<PosCatalog />', () => {
     });
     expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
     expect(screen.queryByTestId('associate-selected-pos-modal')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pos-catalog-drawer')).not.toBeInTheDocument();
   });
 
   it('shows already associated stores before the success alert when the response contains them', async () => {

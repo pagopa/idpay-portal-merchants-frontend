@@ -263,6 +263,7 @@ const PosCatalog: React.FC = () => {
 
       setSelectedStoreIds([]);
       handleAssociateModalClose();
+      handleToggleDrawer();
 
       if (alreadyAssociated.length > 0) {
         setAssociationSuccessData({ associatedCount, initiativeName });
@@ -274,7 +275,13 @@ const PosCatalog: React.FC = () => {
       handleFiltersApplied(formik.values);
       showAssociationSuccessAlert(associatedCount, initiativeName);
     },
-    [formik.values, handleAssociateModalClose, handleFiltersApplied, showAssociationSuccessAlert]
+    [
+      formik.values,
+      handleAssociateModalClose,
+      handleFiltersApplied,
+      handleToggleDrawer,
+      showAssociationSuccessAlert,
+    ]
   );
 
   const handleAssociateConfirm = useCallback(async () => {

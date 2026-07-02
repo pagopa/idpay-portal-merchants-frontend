@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useFormik } from 'formik';
 import { GetPointOfSalesFilters } from '../../../types/types';
  import {
@@ -7,7 +7,9 @@ import { GetPointOfSalesFilters } from '../../../types/types';
    PosCatalogFilters,
  } from '../PosCatalogFiltersDrawer';
  import { MockPosCatalogStore } from '../mockPosCatalog';
- import { getPointOfSaleInitiatives } from '../../../services/merchantService';
+ import { associatePos, getPointOfSaleInitiatives } from '../../../services/merchantService';
+
+const mockSetAlert = jest.fn();
 
 jest.mock('../../../hooks/useScopedTranslation', () => ({
   __esModule: true,
@@ -18,7 +20,14 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
 
  jest.mock('../../../services/merchantService', () => ({
    getPointOfSaleInitiatives: jest.fn(),
+   associatePos: jest.fn(),
  }));
+
+jest.mock('../../../hooks/useAlert', () => ({
+  useAlert: () => ({
+    setAlert: mockSetAlert,
+  }),
+}));
 
  jest.mock('../../../components/Drawer/DetailDrawer', () => ({
   __esModule: true,
@@ -244,7 +253,12 @@ const drawerInitiativeOptions = [
     expect(screen.getByText('-')).toBeInTheDocument();
   });
 
-  it('renders drawer actions and opens empty association modal', () => {
+  it('associates the selected store to an initiative from the drawer modal', async () => {
+    (associatePos as jest.Mock).mockResolvedValue({
+      associated: [{ pointOfSaleId: '2', pointOfSaleName: 'Negozio fisico' }],
+      notAssociated: [],
+    });
+
     render(
       <PosCatalogDrawer
         isOpen
@@ -260,7 +274,24 @@ const drawerInitiativeOptions = [
     );
     fireEvent.click(screen.getByTestId('associate-store-button'));
 
-    expect(screen.getByTestId('associate-pos-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('associate-selected-pos-modal')).toBeInTheDocument();
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.associateModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Iniziativa 1'));
+    fireEvent.click(screen.getByText('actions.confirm'));
+
+    await waitFor(() => {
+      expect(associatePos).toHaveBeenCalledWith('Iniziativa 1', 'merchant-123', ['2']);
+    });
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: 'pages.posCatalog.associateSuccess',
+      isOpen: true,
+      severity: 'success',
+    });
   });
 
   it('renders fallback initiative id and placeholders when fetched data is incomplete', async () => {
