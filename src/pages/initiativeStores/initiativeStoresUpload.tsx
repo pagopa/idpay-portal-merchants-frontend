@@ -17,7 +17,7 @@ import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia/theme';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { parseJwt } from '../../utils/jwt-utils';
-import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
+import { normalizeUrlHttps } from '../../utils/formatUtils';
 import PointsOfSaleForm from '../../components/pointsOfSaleForm/PointsOfSaleForm';
 import {
   PointOfSaleDTO,
@@ -234,7 +234,7 @@ const InitiativeStoresUpload: React.FC = () => {
         return {
           ...rest,
           website: normalizeUrlHttps(sp.website),
-          channelGeolink: normalizeUrlHttp(sp.channelGeolink),
+          channelGeolink: normalizeUrlHttps(sp.channelGeolink),
           type: sp.type as any,
         };
       });
