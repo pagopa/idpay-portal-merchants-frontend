@@ -1,8 +1,17 @@
 {
   "commons": {
-    "title": "Bonus Decoder"
+    "title": "Bonus Decoder",
+    "transactionsTableHeaders": {
+      "productName": "Prodotto",
+      "trxChargeDate": "Data e ora",
+      "fiscalCode": "Beneficiario",
+      "effectiveAmountCents": "Totale della spesa",
+      "rewardAmountCents": "Sconto applicato",
+      "authorizedAmountCents": "Importo autorizzato",
+      "status": "Stato"
+    }
   },
-  "pages" : {
+  "pages": {
     "tos": {
       "and": "e l’",
       "backHome": "Torna alla home",
