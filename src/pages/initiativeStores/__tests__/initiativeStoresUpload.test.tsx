@@ -115,7 +115,6 @@ jest.mock('../../../components/pointsOfSaleForm/PointsOfSaleForm', () => (props:
 const readTokenMock = storageTokenOps.read as jest.Mock;
 const parseJwtMock = jwtUtils.parseJwt as jest.Mock;
 const updateMerchantPointOfSalesMock = merchantService.updateMerchantPointOfSales as jest.Mock;
-const normalizeUrlHttpMock = formatUtils.normalizeUrlHttp as jest.Mock;
 const normalizeUrlHttpsMock = formatUtils.normalizeUrlHttps as jest.Mock;
 
 const renderComponent = () => render(<InitiativeStoresUpload />);
@@ -135,7 +134,6 @@ describe('InitiativeStoresUpload', () => {
     readTokenMock.mockReturnValue('fake-token');
     parseJwtMock.mockReturnValue({ merchant_id: 'merchant-1' });
     updateMerchantPointOfSalesMock.mockResolvedValue(undefined);
-    normalizeUrlHttpMock.mockImplementation((value) => `http:${value}`);
     normalizeUrlHttpsMock.mockImplementation((value) => `https:${value}`);
     jest.spyOn(window, 'open').mockImplementation(() => null);
   });
@@ -215,19 +213,15 @@ describe('InitiativeStoresUpload', () => {
     await submitValidForm();
 
     expect(normalizeUrlHttpsMock).toHaveBeenCalledWith('example.com');
-    expect(normalizeUrlHttpMock).toHaveBeenCalledWith('maps.example.com');
-    expect(updateMerchantPointOfSalesMock).toHaveBeenCalledWith(
-      'test-initiative',
-      'merchant-1',
-      [
-        {
-          type: 'PHYSICAL',
-          contactEmail: 'shop@example.com',
-          website: 'https:example.com',
-          channelGeolink: 'http:maps.example.com',
-        },
-      ]
-    );
+    expect(normalizeUrlHttpsMock).toHaveBeenCalledWith('maps.example.com');
+    expect(updateMerchantPointOfSalesMock).toHaveBeenCalledWith('test-initiative', 'merchant-1', [
+      {
+        type: 'PHYSICAL',
+        contactEmail: 'shop@example.com',
+        website: 'https:example.com',
+        channelGeolink: 'https:maps.example.com',
+      },
+    ]);
     expect(pushMock).toHaveBeenCalledWith({
       pathname: expect.stringContaining('/portale-esercenti/test-initiative/punti-vendita'),
       state: { showSuccessAlert: true },

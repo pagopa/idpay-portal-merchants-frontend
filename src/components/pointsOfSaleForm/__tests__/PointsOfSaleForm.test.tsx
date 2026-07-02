@@ -1064,6 +1064,26 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
     expect(openSpy).not.toHaveBeenCalled();
 
     fireEvent.change(screen.getByLabelText('Scheda Google MYBusiness'), {
+      target: { name: 'channelGeolink', value: 'http://example.com/shop' },
+    });
+    fireEvent.click(verifyButton);
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://example.com/shop',
+      '_blank',
+      'noopener,noreferrer'
+    );
+
+    fireEvent.change(screen.getByLabelText('Scheda Google MYBusiness'), {
+      target: { name: 'channelGeolink', value: 'example.com/shop' },
+    });
+    fireEvent.click(verifyButton);
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://example.com/shop',
+      '_blank',
+      'noopener,noreferrer'
+    );
+
+    fireEvent.change(screen.getByLabelText('Scheda Google MYBusiness'), {
       target: { name: 'channelGeolink', value: 'https://example.com/shop' },
     });
     fireEvent.click(verifyButton);
