@@ -109,9 +109,18 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 
   const mergedErrors = useMemo(() => ({ ...errors, ...externalErrors }), [errors, externalErrors]);
 
-  const isValidConfiguredUrl = (url?: string): boolean => {
+  const addHttpsIfMissing = (url?: string): string => {
     const trimmedUrl = url?.trim() ?? '';
-    return trimmedUrl !== '' && urlRegex.test(trimmedUrl);
+    return trimmedUrl !== '' &&
+      !trimmedUrl.startsWith('http://') &&
+      !trimmedUrl.startsWith('https://')
+      ? `https://${trimmedUrl}`
+      : trimmedUrl;
+  };
+
+  const isValidConfiguredUrl = (url?: string): boolean => {
+    const normalizedUrl = addHttpsIfMissing(url);
+    return normalizedUrl !== '' && urlRegex.test(normalizedUrl);
   };
 
   useEffect(() => {
@@ -987,9 +996,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                           color="primary"
                           endIcon={<ArrowOutward fontSize="small" />}
                           onClick={() => {
-                            const url = salesPoint.channelGeolink?.trim().startsWith('http')
-                              ? salesPoint.channelGeolink?.trim()
-                              : `https://${salesPoint.channelGeolink?.trim()}`;
+                            const url = addHttpsIfMissing(salesPoint.channelGeolink);
                             if (url && isValidConfiguredUrl(salesPoint.channelGeolink)) {
                               window.open(url, '_blank', 'noopener,noreferrer');
                             }
