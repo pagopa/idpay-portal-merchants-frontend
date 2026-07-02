@@ -10,7 +10,8 @@
     "exit": "Esci",
     "modify": "Modifica",
     "removeFiltersBtn": "Rimuovi filtri",
-    "filterBtn": "Filtra"
+    "filterBtn": "Filtra",
+    "okClose": "Ok, chiudi"
   },
   "commons": {
     "refundsDataTitle": "dati rimborso",
@@ -107,6 +108,21 @@
       "title": "Catalogo punti vendita",
       "subtitle": "Qui trovi tutti i punti vendita censiti durante le iniziative.",
       "noData": "Non ci sono punti vendita, aggiungili per iniziare.",
+      "actions": {
+        "associate": "Associa",
+        "exclude": "Escludi"
+      },
+      "associateSuccess": "Sono stati associati {{count}} punti vendita a {{initiativeName}}.",
+      "associateModal": {
+        "title": "Associa punti vendita a un'iniziativa",
+        "description": "I punti vendita selezionati verranno associati all'iniziativa selezionata.",
+        "initiativeLabel": "Iniziativa",
+        "infoBanner": "Se in seguito escludi uno o più punti vendita dall'iniziativa, li ritroverai sempre nel catalogo e potrai riassociarli in qualsiasi momento."
+      },
+      "alreadyAssociatedModal": {
+        "title": "Punti vendita già associati",
+        "description": "I seguenti punti vendita selezionati sono già associati all'iniziativa scelta."
+      },
       "drawer": {
         "associatedTo": "PUNTO VENDITA ASSOCIATO A:",
         "storeData": "DATI PUNTO VENDITA",
