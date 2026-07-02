@@ -1,34 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
-import {
-  Box,
-  Button,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Modal,
-  Paper,
-  Select,
-  Stack,
-  Typography,
-} from '@mui/material';
-import { SelectChangeEvent } from '@mui/material/Select';
+import { Box, Button, Paper, Stack, Typography } from '@mui/material';
 import { GridSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import CircularProgress from '@mui/material/CircularProgress';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
-import CloseIcon from '@mui/icons-material/Close';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { MIAlert } from '@pagopa/mui-italia';
 import { useFormik } from 'formik';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { useHistory, useLocation } from 'react-router-dom';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import DataTable from '../../components/dataTable/DataTable';
 import { GetPointOfSalesFilters } from '../../types/types';
-import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
+import {
+  PointOfSaleDTO,
+  PointOfSaleOnboardingResultDTO,
+} from '../../api/generated/merchants/data-contracts';
 import { parseJwt } from '../../utils/jwt-utils';
-import { getMerchantPointOfSalesCatalog } from '../../services/merchantService';
+import { associatePos, getMerchantPointOfSalesCatalog } from '../../services/merchantService';
 import { ELEMENT_PER_PAGE, PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
@@ -38,6 +26,10 @@ import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilte
 import buildPointOfSalesColumns from '../../components/pointsOfSale/pointOfSalesColumns';
 import usePointOfSalesTable from '../../components/pointsOfSale/usePointOfSalesTable';
 import { PosCatalogDrawer } from './PosCatalogFiltersDrawer';
+import AssociateSelectedPosModal from './AssociateSelectedPosModal';
+import AlreadyAssociatedPosModal, {
+  AlreadyAssociatedPointOfSale,
+} from './AlreadyAssociatedPosModal';
 
 const initialValues: GetPointOfSalesFilters = {
   initiative: '',
@@ -57,6 +49,16 @@ const PosCatalog: React.FC = () => {
   const [selectedStoreIds, setSelectedStoreIds] = useState<GridSelectionModel>([]);
   const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
   const [selectedInitiativeId, setSelectedInitiativeId] = useState('');
+  const [isAssociatingPos, setIsAssociatingPos] = useState(false);
+  const [alreadyAssociatedStores, setAlreadyAssociatedStores] = useState<
+    Array<AlreadyAssociatedPointOfSale>
+  >([]);
+  const [associationSuccessData, setAssociationSuccessData] = useState<{
+    associatedCount: number;
+    initiativeName: string;
+  } | null>(null);
+  const [pendingAssociationRefreshFilters, setPendingAssociationRefreshFilters] =
+    useState<GetPointOfSalesFilters | null>(null);
 
   const { t } = useScopedTranslation();
   const history = useHistory();
@@ -213,9 +215,101 @@ const PosCatalog: React.FC = () => {
     setSelectedInitiativeId('');
   }, []);
 
-  const handleInitiativeChange = useCallback((event: SelectChangeEvent) => {
-    setSelectedInitiativeId(event.target.value);
+  const handleInitiativeChange = useCallback((initiativeId: string) => {
+    setSelectedInitiativeId(initiativeId);
   }, []);
+
+  const showAssociationSuccessAlert = useCallback(
+    (associatedCount: number, initiativeName: string) =>
+      setAlert({
+        text: t('pages.posCatalog.associateSuccess', {
+          count: associatedCount,
+          initiativeName,
+        }),
+        isOpen: true,
+        severity: 'success',
+      }),
+    [setAlert, t]
+  );
+
+  const handleAlreadyAssociatedModalClose = useCallback(() => {
+    setAlreadyAssociatedStores([]);
+
+    if (associationSuccessData) {
+      showAssociationSuccessAlert(
+        associationSuccessData.associatedCount,
+        associationSuccessData.initiativeName
+      );
+      setAssociationSuccessData(null);
+    }
+
+    if (pendingAssociationRefreshFilters) {
+      handleFiltersApplied(pendingAssociationRefreshFilters);
+      setPendingAssociationRefreshFilters(null);
+    }
+  }, [
+    associationSuccessData,
+    handleFiltersApplied,
+    pendingAssociationRefreshFilters,
+    showAssociationSuccessAlert,
+  ]);
+
+  const handleAssociationResult = useCallback(
+    (result: PointOfSaleOnboardingResultDTO, initiativeName: string) => {
+      const alreadyAssociated = (result.notAssociated ?? []).filter(
+        (pointOfSale) => pointOfSale.reason === 'ALREADY_ASSOCIATED'
+      );
+      const associatedCount = result.associated?.length ?? 0;
+
+      setSelectedStoreIds([]);
+      handleAssociateModalClose();
+
+      if (alreadyAssociated.length > 0) {
+        setAssociationSuccessData({ associatedCount, initiativeName });
+        setPendingAssociationRefreshFilters(formik.values);
+        setAlreadyAssociatedStores(alreadyAssociated);
+        return;
+      }
+
+      handleFiltersApplied(formik.values);
+      showAssociationSuccessAlert(associatedCount, initiativeName);
+    },
+    [formik.values, handleAssociateModalClose, handleFiltersApplied, showAssociationSuccessAlert]
+  );
+
+  const handleAssociateConfirm = useCallback(async () => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
+    const initiativeName =
+      initiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)?.label ??
+      '';
+
+    if (!merchantId || !selectedInitiativeId || selectedStoreIds.length === 0) {
+      handleFetchError();
+      return;
+    }
+
+    setIsAssociatingPos(true);
+
+    try {
+      const result = await associatePos(
+        selectedInitiativeId,
+        merchantId,
+        selectedStoreIds.map((id) => String(id))
+      );
+      handleAssociationResult(result, initiativeName);
+    } catch (_error) {
+      handleFetchError();
+    } finally {
+      setIsAssociatingPos(false);
+    }
+  }, [
+    handleAssociationResult,
+    handleFetchError,
+    initiativeOptions,
+    selectedInitiativeId,
+    selectedStoreIds,
+  ]);
 
   const selectedStoresCountLabel = ` (${selectedStoreIds.length})`;
 
@@ -245,10 +339,14 @@ const PosCatalog: React.FC = () => {
         />
         {selectedStoreIds.length > 0 && (
           <Stack direction="row" spacing={2} alignItems="center">
-            <Button variant="outlined" color="error" sx={{whiteSpace: "nowrap"}}>
+            <Button variant="outlined" color="error" sx={{ whiteSpace: 'nowrap' }}>
               {`${t('pages.posCatalog.actions.exclude')}${selectedStoresCountLabel}`}
             </Button>
-            <Button variant="contained" onClick={() => setIsAssociateModalOpen(true)} sx={{whiteSpace: "nowrap"}}>
+            <Button
+              variant="contained"
+              onClick={() => setIsAssociateModalOpen(true)}
+              sx={{ whiteSpace: 'nowrap' }}
+            >
               {`${t('pages.posCatalog.actions.associate')}${selectedStoresCountLabel}`}
             </Button>
           </Stack>
@@ -302,92 +400,19 @@ const PosCatalog: React.FC = () => {
               />
             </>
           )}
-          <Modal
+          <AssociateSelectedPosModal
             open={isAssociateModalOpen}
+            initiativeOptions={initiativeOptions}
+            selectedInitiativeId={selectedInitiativeId}
+            isLoading={isAssociatingPos}
             onClose={handleAssociateModalClose}
-            aria-labelledby="associate-selected-pos-modal-title"
-          >
-            <Box
-              data-testid="associate-selected-pos-modal"
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: { xs: 'calc(100% - 32px)', sm: 608 },
-                maxWidth: 'calc(100% - 32px)',
-                bgcolor: 'background.paper',
-                borderRadius: 2,
-                boxShadow: 24,
-                p: 3.5,
-                outline: 'none',
-              }}
-            >
-              <Stack spacing={2.5}>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                  <Box>
-                    <Typography
-                      id="associate-selected-pos-modal-title"
-                      variant="h5"
-                      sx={{ fontWeight: theme.typography.fontWeightBold, mb: 0.75 }}
-                    >
-                      {t('pages.posCatalog.associateModal.title')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('pages.posCatalog.associateModal.description')}
-                    </Typography>
-                  </Box>
-                  <IconButton
-                    aria-label={t('actions.close')}
-                    onClick={handleAssociateModalClose}
-                    sx={{ ml: 2, mt: -1 }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </Stack>
-
-                <FormControl fullWidth size="small">
-                  <InputLabel id="associate-initiative-label">
-                    {t('pages.posCatalog.associateModal.initiativeLabel')}{' '}
-                    <Box component="span" sx={{ color: theme.palette.error.main }}>
-                      *
-                    </Box>
-                  </InputLabel>
-                  <Select
-                    labelId="associate-initiative-label"
-                    value={selectedInitiativeId}
-                    label={t('pages.posCatalog.associateModal.initiativeLabel')}
-                    onChange={handleInitiativeChange}
-                    sx={{
-                      '& .MuiSelect-select': {
-                        py: 1.25,
-                      },
-                    }}
-                  >
-                    {initiativeOptions.map((initiative) => (
-                      <MenuItem key={initiative.value} value={initiative.value}>
-                        {initiative.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <MIAlert
-                  severity="info"
-                  description={t('pages.posCatalog.associateModal.infoBanner')}
-                />
-
-                <Stack direction="row" spacing={2} justifyContent="flex-end">
-                  <Button size="small" onClick={handleAssociateModalClose}>
-                    {t('actions.cancel')}
-                  </Button>
-                  <Button size="small" variant="contained">
-                    {t('actions.confirm')}
-                  </Button>
-                </Stack>
-              </Stack>
-            </Box>
-          </Modal>
+            onInitiativeChange={handleInitiativeChange}
+            onConfirm={handleAssociateConfirm}
+          />
+          <AlreadyAssociatedPosModal
+            stores={alreadyAssociatedStores}
+            onClose={handleAlreadyAssociatedModalClose}
+          />
         </>
       )}
       {!storesLoading && stores?.length === 0 && (

@@ -9,6 +9,7 @@ const mockReplace = jest.fn();
 const mockUsePointOfSalesTable = jest.fn();
 const mockBuildPointOfSalesColumns = jest.fn();
 const mockGetMerchantPointOfSalesCatalog = jest.fn();
+const mockAssociatePos = jest.fn();
 const mockParseJwt = jest.fn();
 const mockStorageRead = jest.fn();
 const mockUseFormik = jest.fn();
@@ -76,16 +77,10 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
       >
         sort
       </button>
-      <button
-        data-testid="page-button"
-        onClick={() => props.onPaginationPageChange(3)}
-      >
+      <button data-testid="page-button" onClick={() => props.onPaginationPageChange(3)}>
         page
       </button>
-      <button
-        data-testid="rows-button"
-        onClick={() => props.onRowsPerPageChange(25)}
-      >
+      <button data-testid="rows-button" onClick={() => props.onRowsPerPageChange(25)}>
         rows
       </button>
       <button
@@ -145,6 +140,7 @@ jest.mock('../PosCatalogFiltersDrawer', () => ({
 jest.mock('../../../services/merchantService', () => ({
   getMerchantPointOfSalesCatalog: (...args: Array<unknown>) =>
     mockGetMerchantPointOfSalesCatalog(...args),
+  associatePos: (...args: Array<unknown>) => mockAssociatePos(...args),
 }));
 
 jest.mock('../../../utils/jwt-utils', () => ({
@@ -234,6 +230,10 @@ describe('<PosCatalog />', () => {
       pageSize: 10,
       totalElements: 1,
     });
+    mockAssociatePos.mockResolvedValue({
+      associated: [{ pointOfSaleId: 'store-1', pointOfSaleName: 'Store One' }],
+      notAssociated: [],
+    });
     mockUsePointOfSalesTable.mockReturnValue(defaultHookValue);
     mockBuildPointOfSalesColumns.mockImplementation(({ onActionClick }: any) => [
       {
@@ -258,13 +258,7 @@ describe('<PosCatalog />', () => {
     expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
     expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
     expect(screen.getByTestId('initiative-options-count')).toBeInTheDocument();
-    expect(filtersProps.fields).toEqual([
-      'initiative',
-      'type',
-      'city',
-      'address',
-      'contactName',
-    ]);
+    expect(filtersProps.fields).toEqual(['initiative', 'type', 'city', 'address', 'contactName']);
     expect(filtersProps.t('translation.key')).toBe('translation.key');
   });
 
@@ -364,8 +358,12 @@ describe('<PosCatalog />', () => {
     const modal = screen.getByTestId('associate-selected-pos-modal');
     expect(modal).toBeInTheDocument();
     expect(within(modal).getByText('pages.posCatalog.associateModal.title')).toBeInTheDocument();
-    expect(within(modal).getByText('pages.posCatalog.associateModal.description')).toBeInTheDocument();
-    expect(within(modal).getByText('pages.posCatalog.associateModal.infoBanner')).toBeInTheDocument();
+    expect(
+      within(modal).getByText('pages.posCatalog.associateModal.description')
+    ).toBeInTheDocument();
+    expect(
+      within(modal).getByText('pages.posCatalog.associateModal.infoBanner')
+    ).toBeInTheDocument();
     expect(
       within(modal).getAllByText('pages.posCatalog.associateModal.initiativeLabel').length
     ).toBeGreaterThan(0);
@@ -375,6 +373,142 @@ describe('<PosCatalog />', () => {
       { value: 'initiative-1', label: 'Initiative One' },
       { value: 'initiative-2', label: 'Initiative Two' },
     ]);
+  });
+
+  it('associates selected stores to the selected initiative on confirm', async () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.associate (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.associateModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(screen.getByText('actions.confirm'));
+
+    await waitFor(() => {
+      expect(mockAssociatePos).toHaveBeenCalledWith('initiative-1', 'merchant-123', [
+        'store-1',
+        'store-2',
+      ]);
+    });
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: 'pages.posCatalog.associateSuccess',
+      isOpen: true,
+      severity: 'success',
+    });
+    expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
+    expect(screen.queryByTestId('associate-selected-pos-modal')).not.toBeInTheDocument();
+  });
+
+  it('shows already associated stores before the success alert when the response contains them', async () => {
+    mockAssociatePos.mockResolvedValueOnce({
+      associated: [{ pointOfSaleId: 'store-1', pointOfSaleName: 'Store One' }],
+      notAssociated: [
+        {
+          pointOfSaleId: 'store-2',
+          pointOfSaleName: 'Store Already',
+          reason: 'ALREADY_ASSOCIATED',
+          address: 'Via Roma',
+          streetNumber: '10',
+          city: 'Rome',
+          type: 'PHYSICAL',
+        },
+        {
+          pointOfSaleId: 'store-3',
+          pointOfSaleName: 'Store Online',
+          reason: 'ALREADY_ASSOCIATED',
+          website: 'www.shop.it',
+          type: 'ONLINE',
+        },
+        {
+          pointOfSaleId: 'store-4',
+          pointOfSaleName: 'Store Invalid',
+          reason: 'INVALID',
+          address: 'Via Torino',
+          streetNumber: '20',
+          city: 'Turin',
+          type: 'PHYSICAL',
+        },
+      ],
+    });
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.associate (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.associateModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(screen.getByText('actions.confirm'));
+
+    const alreadyAssociatedModal = await screen.findByTestId('already-associated-pos-modal');
+
+    expect(
+      within(alreadyAssociatedModal).getByText('pages.posCatalog.alreadyAssociatedModal.title')
+    ).toBeInTheDocument();
+    expect(
+      within(alreadyAssociatedModal).getByText(
+        'pages.posCatalog.alreadyAssociatedModal.description'
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(alreadyAssociatedModal).getByText('Store Already - Via Roma 10, Rome')
+    ).toBeInTheDocument();
+    expect(
+      within(alreadyAssociatedModal).getByText('Store Online - www.shop.it')
+    ).toBeInTheDocument();
+    expect(
+      within(alreadyAssociatedModal).queryByText('Store Invalid - Via Torino 20, Turin')
+    ).not.toBeInTheDocument();
+    expect(mockSetAlert).not.toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
+    expect(mockHandleFiltersApplied).not.toHaveBeenCalled();
+
+    fireEvent.click(within(alreadyAssociatedModal).getByText('actions.okClose'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('already-associated-pos-modal')).not.toBeInTheDocument();
+    });
+    expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: 'pages.posCatalog.associateSuccess',
+      isOpen: true,
+      severity: 'success',
+    });
+  });
+
+  it('shows a generic error and does not call associate service when merchant id is missing', async () => {
+    mockParseJwt.mockReturnValue({});
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.associate (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.associateModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(screen.getByText('actions.confirm'));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      });
+    });
+    expect(mockAssociatePos).not.toHaveBeenCalled();
   });
 
   it('hides selection actions when filters are applied or reset', () => {
