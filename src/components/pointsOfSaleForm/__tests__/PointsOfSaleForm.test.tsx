@@ -458,7 +458,7 @@ describe('PointsOfSaleForm full coverage', () => {
   it('should handle Verifica URL button', () => {
     (isValidUrl as jest.Mock).mockReturnValue(true);
     render(<PointsOfSaleForm {...defaultProps} />);
-    const openSpy = typeGoogleBusinessUrlAndVerify('example.com');
+    const openSpy = typeGoogleBusinessUrlAndVerify('https://example.com');
     expect(openSpy).toHaveBeenCalled();
     openSpy.mockRestore();
   });
@@ -491,7 +491,7 @@ describe('PointsOfSaleForm additional coverage', () => {
   it('should trigger Verifica URL click with valid and invalid URL', () => {
     (isValidUrl as jest.Mock).mockReturnValue(true);
     render(<PointsOfSaleForm {...defaultProps} />);
-    const openSpy = typeGoogleBusinessUrlAndVerify('example.com');
+    const openSpy = typeGoogleBusinessUrlAndVerify('https://example.com');
     expect(openSpy).toHaveBeenCalled();
     openSpy.mockRestore();
   });
@@ -567,14 +567,14 @@ describe('PointsOfSaleForm validation tests', () => {
 
     (isValidUrl as jest.Mock).mockReturnValue(true);
 
-    fireEvent.change(urlInput, { target: { value: 'example.com' } });
+    fireEvent.change(urlInput, { target: { value: 'https://example.com' } });
     fireEvent.change(phoneInput, { target: { value: '1234567' } });
     fireEvent.blur(phoneInput);
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.blur(emailInput);
     fireEvent.change(websiteInput, { target: { value: 'https://site.com' } });
 
-    const openSpy = typeGoogleBusinessUrlAndVerify('example.com');
+    const openSpy = typeGoogleBusinessUrlAndVerify('https://example.com');
     expect(openSpy).toHaveBeenCalled();
     openSpy.mockRestore();
   });
@@ -715,12 +715,16 @@ describe('PointsOfSaleForm integration tests', () => {
     renderIntegrationForm();
 
     const geolinkInput = screen.getByLabelText('Scheda Google MYBusiness');
-    fireEvent.change(geolinkInput, { target: { value: 'http://example.com' } });
+    fireEvent.change(geolinkInput, { target: { value: 'https://example.com' } });
 
     const verifyButton = screen.getByText('Verifica URL');
     fireEvent.click(verifyButton);
 
-    expect(window.open).toHaveBeenCalledWith('http://example.com', '_blank', 'noopener,noreferrer');
+    expect(window.open).toHaveBeenCalledWith(
+      'https://example.com',
+      '_blank',
+      'noopener,noreferrer'
+    );
   });
 
   it('should trigger validation when submitAttempt changes', async () => {
@@ -1060,7 +1064,27 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
     expect(openSpy).not.toHaveBeenCalled();
 
     fireEvent.change(screen.getByLabelText('Scheda Google MYBusiness'), {
+      target: { name: 'channelGeolink', value: 'http://example.com/shop' },
+    });
+    fireEvent.click(verifyButton);
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://example.com/shop',
+      '_blank',
+      'noopener,noreferrer'
+    );
+
+    fireEvent.change(screen.getByLabelText('Scheda Google MYBusiness'), {
       target: { name: 'channelGeolink', value: 'example.com/shop' },
+    });
+    fireEvent.click(verifyButton);
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://example.com/shop',
+      '_blank',
+      'noopener,noreferrer'
+    );
+
+    fireEvent.change(screen.getByLabelText('Scheda Google MYBusiness'), {
+      target: { name: 'channelGeolink', value: 'https://example.com/shop' },
     });
     fireEvent.click(verifyButton);
     expect(openSpy).toHaveBeenCalledWith(

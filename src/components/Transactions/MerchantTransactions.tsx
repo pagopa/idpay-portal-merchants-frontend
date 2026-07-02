@@ -105,10 +105,20 @@ const MerchantTransactions = ({
     );
   };
 
+  const buildCurrencyColumn = (field: string, headerNameKey: string): GridColDef => ({
+    field,
+    headerName: t(headerNameKey),
+    flex: 0.5,
+    editable: false,
+    disableColumnMenu: true,
+    sortable: false,
+    renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
+  });
+
   const columns: Array<GridColDef> = [
     {
       field: 'productName',
-      headerName: 'Prodotto',
+      headerName: t('commons.transactionsTableHeaders.productName'),
       flex: 2,
       editable: false,
       disableColumnMenu: true,
@@ -117,7 +127,7 @@ const MerchantTransactions = ({
     },
     {
       field: 'trxChargeDate',
-      headerName: 'Data e ora',
+      headerName: t('commons.transactionsTableHeaders.trxChargeDate'),
       flex: 1,
       editable: false,
       disableColumnMenu: true,
@@ -125,43 +135,25 @@ const MerchantTransactions = ({
     },
     {
       field: 'fiscalCode',
-      headerName: 'Beneficiario',
+      headerName: t('commons.transactionsTableHeaders.fiscalCode'),
       flex: 1.2,
       editable: false,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value, 11),
     },
-    {
-      field: 'effectiveAmountCents',
-      headerName: 'Totale della spesa',
-      flex: 0.5,
-      editable: false,
-      disableColumnMenu: true,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
-    },
-    {
-      field: 'rewardAmountCents',
-      headerName: 'Sconto applicato',
-      flex: 0.5,
-      editable: false,
-      disableColumnMenu: true,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
-    },
-    {
-      field: 'authorizedAmountCents',
-      headerName: 'Importo autorizzato',
-      flex: 0.5,
-      editable: false,
-      disableColumnMenu: true,
-      sortable: false,
-      renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
-    },
+    buildCurrencyColumn(
+      'effectiveAmountCents',
+      'commons.transactionsTableHeaders.effectiveAmountCents'
+    ),
+    buildCurrencyColumn('rewardAmountCents', 'commons.transactionsTableHeaders.rewardAmountCents'),
+    buildCurrencyColumn(
+      'authorizedAmountCents',
+      'commons.transactionsTableHeaders.authorizedAmountCents'
+    ),
     {
       field: 'status',
-      headerName: 'Stato',
+      headerName: t('commons.transactionsTableHeaders.status'),
       flex: 1.1,
       editable: false,
       disableColumnMenu: true,

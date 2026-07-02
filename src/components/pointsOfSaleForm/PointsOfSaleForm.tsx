@@ -19,11 +19,10 @@ import { ButtonNaked } from '@pagopa/mui-italia/components';
 import { theme } from '@pagopa/mui-italia/theme';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
-import { isValidRegex, isValidUrl, generateUniqueId } from '../../helpers';
+import { isValidRegex, generateUniqueId } from '../../helpers';
 import { POS_TYPE } from '../../utils/constants';
 import AutocompleteComponent from '../Autocomplete/AutocompleteComponent';
 import { usePlacesAutocomplete } from '../../hooks/useAutocomplete';
-import { normalizeUrlHttp, normalizeUrlHttps } from '../../utils/formatUtils';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useInitiativeConfig } from '../../hooks/useInitiativeConfig';
 
@@ -87,6 +86,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
   const { defaultConfig } = useInitiativeConfig();
   const emailRegex = new RegExp(defaultConfig.regex.email);
+  const urlRegex = new RegExp(defaultConfig.regex.url);
   const requiredFieldErrors = {
     franchiseName: t('pages.pointOfSales.requiredErrors.franchiseName'),
     address: t('pages.pointOfSales.requiredErrors.address'),
@@ -108,6 +108,21 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   };
 
   const mergedErrors = useMemo(() => ({ ...errors, ...externalErrors }), [errors, externalErrors]);
+
+  const addHttpsIfMissing = (url?: string): string => {
+    const trimmedUrl = url?.trim() ?? '';
+    if (trimmedUrl.startsWith('http://')) {
+      return trimmedUrl.replace('http://', 'https://');
+    }
+    return trimmedUrl !== '' && !trimmedUrl.startsWith('https://')
+      ? `https://${trimmedUrl}`
+      : trimmedUrl;
+  };
+
+  const isValidConfiguredUrl = (url?: string): boolean => {
+    const normalizedUrl = addHttpsIfMissing(url);
+    return normalizedUrl !== '' && urlRegex.test(normalizedUrl);
+  };
 
   useEffect(() => {
     onFormChange(salesPoints);
@@ -212,7 +227,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         if (!sp.website?.trim()) {
           fieldErrors = { ...fieldErrors, website: requiredFieldErrors.website };
           isValid = false;
-        } else if (!isValidUrl(normalizeUrlHttps(sp.website))) {
+        } else if (!isValidConfiguredUrl(sp.website)) {
           fieldErrors = { ...fieldErrors, website: 'Devi inserire una URL valida' };
           isValid = false;
         }
@@ -223,7 +238,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           fieldErrors = { ...fieldErrors, address: requiredFieldErrors.address };
           isValid = false;
         }
-        if (sp.channelGeolink?.trim() && !isValidUrl(normalizeUrlHttp(sp.channelGeolink?.trim()))) {
+        if (sp.channelGeolink?.trim() && !isValidConfiguredUrl(sp.channelGeolink)) {
           fieldErrors = { ...fieldErrors, channelGeolink: 'Devi inserire una URL valida' };
           isValid = false;
         }
@@ -238,7 +253,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
           fieldErrors = { ...fieldErrors, channelPhone: 'Il numero deve avere tra 7 e 15 cifre' };
           isValid = false;
         }
-        if (sp?.website && !isValidUrl(normalizeUrlHttps(sp.website))) {
+        if (sp?.website && !isValidConfiguredUrl(sp.website)) {
           fieldErrors = { ...fieldErrors, website: 'Devi inserire una URL valida' };
           isValid = false;
         }
@@ -305,7 +320,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         break;
       case 'channelGeolink':
         if (value) {
-          if (!isValidUrl(normalizeUrlHttp(value))) {
+          if (!isValidConfiguredUrl(value)) {
             updateError(index, 'channelGeolink', 'Devi inserire una URL valida');
           } else {
             clearError(index, 'channelGeolink');
@@ -318,13 +333,13 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         if (salesPoints[index].type === 'ONLINE') {
           if (!value || value.trim().length === 0) {
             updateError(index, 'website', requiredFieldErrors.website);
-          } else if (value && !isValidUrl(normalizeUrlHttps(value))) {
+          } else if (value && !isValidConfiguredUrl(value)) {
             updateError(index, 'website', 'Devi inserire una URL valida');
           } else {
             clearError(index, 'website');
           }
         } else {
-          if (value && !isValidUrl(normalizeUrlHttps(value))) {
+          if (value && !isValidConfiguredUrl(value)) {
             updateError(index, 'website', 'Devi inserire una URL valida');
           } else {
             clearError(index, 'website');
@@ -982,10 +997,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                           color="primary"
                           endIcon={<ArrowOutward fontSize="small" />}
                           onClick={() => {
-                            const url = salesPoint.channelGeolink?.trim().startsWith('http')
-                              ? salesPoint.channelGeolink?.trim()
-                              : `https://${salesPoint.channelGeolink?.trim()}`;
-                            if (url && isValidUrl(url)) {
+                            const url = addHttpsIfMissing(salesPoint.channelGeolink);
+                            if (url && isValidConfiguredUrl(salesPoint.channelGeolink)) {
                               window.open(url, '_blank', 'noopener,noreferrer');
                             }
                           }}
