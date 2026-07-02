@@ -111,9 +111,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 
   const addHttpsIfMissing = (url?: string): string => {
     const trimmedUrl = url?.trim() ?? '';
-    return trimmedUrl !== '' &&
-      !trimmedUrl.startsWith('http://') &&
-      !trimmedUrl.startsWith('https://')
+    if (trimmedUrl.startsWith('http://')) {
+      return trimmedUrl.replace('http://', 'https://');
+    }
+    return trimmedUrl !== '' && !trimmedUrl.startsWith('https://')
       ? `https://${trimmedUrl}`
       : trimmedUrl;
   };
