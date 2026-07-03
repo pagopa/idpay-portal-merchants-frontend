@@ -305,15 +305,21 @@ describe('InitiativeStoreDetail', () => {
     expect(await screen.findAllByText('Il campo è obbligatorio')).toHaveLength(4);
   });
 
-  test('blocks update when email equals current store email', async () => {
+  test('allows update when email equals current referent email', async () => {
     const user = userEvent.setup({ delay: null });
     renderWithProviders();
 
     await openEditModal(user);
     await user.click(screen.getByTestId('update-button'));
 
-    expect(mockPatchPointOfSaleReferent).not.toHaveBeenCalled();
-    expect(await screen.findAllByText('E-mail già censita')).toHaveLength(2);
+    await waitFor(() => {
+      expect(mockPatchPointOfSaleReferent).toHaveBeenCalledWith('m1', 'store1', {
+        contactName: 'Mario',
+        contactSurname: 'Rossi',
+        contactEmail: 'test@test.it',
+      });
+    });
+    expect(screen.queryByText('E-mail già censita')).not.toBeInTheDocument();
   });
 
   test('handles successful update flow and refreshes detail', async () => {
@@ -360,7 +366,7 @@ describe('InitiativeStoreDetail', () => {
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalledWith({
         title: 'errors.duplicateEmailError',
-        text: 'mail è già associata ad altro punto vendita',
+        text: 'different@test.it è già associata ad altro punto vendita',
         isOpen: true,
         severity: 'error',
       });
