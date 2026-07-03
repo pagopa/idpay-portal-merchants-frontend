@@ -31,7 +31,7 @@ const initialValues: GetPointOfSalesFilters = {
   contactName: '',
   page: 0,
   size: PAGINATION_SIZE,
-  sort: 'asc',
+  sort: 'franchiseName,asc',
 };
 
 const PosCatalog: React.FC = () => {

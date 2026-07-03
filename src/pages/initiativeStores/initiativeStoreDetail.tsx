@@ -11,7 +11,7 @@ import useScopedTranslation from '../../hooks/useScopedTranslation';
 import {
   getMerchantPointOfSalesById,
   getMerchantPointOfSaleTransactionsProcessed,
-  updateMerchantPointOfSales,
+  patchPointOfSaleReferent,
 } from '../../services/merchantService';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import LabelValuePair from '../../components/labelValuePair/labelValuePair';
@@ -58,8 +58,8 @@ const InitiativeStoreDetail = () => {
   const { initiative_id, store_id } = useParams<RouteParams>();
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { setStoreId } = useStore();
-    const { defaultConfig } = useInitiativeConfig();
-    const emailRegex = new RegExp(defaultConfig.regex.email);
+  const { defaultConfig } = useInitiativeConfig();
+  const emailRegex = new RegExp(defaultConfig.regex.email);
 
   useEffect(() => {
     void fetchStoreDetail();
@@ -129,28 +129,28 @@ const InitiativeStoreDetail = () => {
     { label: t('pages.initiativeStores.id'), value: obj?.id },
     ...(obj?.type === POS_TYPE.Physical
       ? [
-          {
-            label: t('pages.initiativeStores.address'),
-            value: [obj?.address, obj?.streetNumber]
-              .filter(Boolean)
-              .join(', ')
-              .concat(` - ${obj?.zipCode}`)
-              .concat(`, ${obj?.city}`)
-              .concat(`, ${obj?.province}`),
-          },
-          {
-            label: t('pages.initiativeStores.phone'),
-            value: obj?.channelPhone,
-          },
-          {
-            label: t('pages.initiativeStores.contactEmail'),
-            value: obj?.channelEmail,
-          },
-          {
-            label: t('pages.initiativeStores.geoLink'),
-            value: obj?.channelGeolink,
-          },
-        ]
+        {
+          label: t('pages.initiativeStores.address'),
+          value: [obj?.address, obj?.streetNumber]
+            .filter(Boolean)
+            .join(', ')
+            .concat(` - ${obj?.zipCode}`)
+            .concat(`, ${obj?.city}`)
+            .concat(`, ${obj?.province}`),
+        },
+        {
+          label: t('pages.initiativeStores.phone'),
+          value: obj?.channelPhone,
+        },
+        {
+          label: t('pages.initiativeStores.contactEmail'),
+          value: obj?.channelEmail,
+        },
+        {
+          label: t('pages.initiativeStores.geoLink'),
+          value: obj?.channelGeolink,
+        },
+      ]
       : []),
     { label: t('pages.initiativeStores.website'), value: obj?.website },
   ];
@@ -273,14 +273,11 @@ const InitiativeStoreDetail = () => {
     }
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
-    const obj = [
-      {
-        ...storeDetail,
-        contactName: contactNameModal,
-        contactSurname: contactSurnameModal,
-        contactEmail: contactEmailModal,
-      },
-    ];
+    const body = {
+      contactName: contactNameModal,
+      contactSurname: contactSurnameModal,
+      contactEmail: contactEmailModal,
+    };
     if (storeDetail.contactEmail === contactEmailConfirmModal) {
       setAlert({
         title: t('errors.duplicateEmailError'),
@@ -292,12 +289,24 @@ const InitiativeStoreDetail = () => {
       return;
     }
 
-    const response = await updateMerchantPointOfSales(initiative_id, merchantId, obj);
-    if (response) {
-      if (String(response.code) === 'POINT_OF_SALE_ALREADY_REGISTERED') {
+    try {
+      await patchPointOfSaleReferent(merchantId, store_id, body);
+
+      setModalIsOpen(false);
+      setAlert({
+        text: t('pages.initiativeStores.referentChangeSuccess'),
+        isOpen: true,
+        severity: 'success',
+      });
+      void fetchStoreDetail();
+    } catch (error: any) {
+      const errorCode = error?.code ?? error?.response?.data?.code;
+      const errorMessage = error?.message ?? error?.response?.data?.message ?? '';
+
+      if (String(errorCode) === 'POINT_OF_SALE_ALREADY_REGISTERED') {
         setAlert({
           title: t('errors.duplicateEmailError'),
-          text: `${response?.message} è già associata ad altro punto vendita`,
+          text: `${errorMessage} è già associata ad altro punto vendita`,
           isOpen: true,
           severity: 'error',
         });
@@ -311,14 +320,6 @@ const InitiativeStoreDetail = () => {
           severity: 'error',
         });
       }
-    } else {
-      setModalIsOpen(false);
-      setAlert({
-        text: t('pages.initiativeStores.referentChangeSuccess'),
-        isOpen: true,
-        severity: 'success',
-      });
-      void fetchStoreDetail();
     }
   };
 
@@ -333,9 +334,7 @@ const InitiativeStoreDetail = () => {
       void fetchStoreTransactions({
         ...transactionsFilters,
         page,
-        sort: `${
-          field !== 'fiscalCode' ? field : 'userId'
-        },${sort}`,
+        sort: `${field !== 'fiscalCode' ? field : 'userId'},${sort}`,
       });
     } else {
       void fetchStoreTransactions({
@@ -351,9 +350,7 @@ const InitiativeStoreDetail = () => {
       const { field, sort } = newSortModel[0];
       void fetchStoreTransactions({
         ...transactionsFilters,
-        sort: `${
-          field !== 'fiscalCode' ? field : 'userId'
-        },${sort}`,
+        sort: `${field !== 'fiscalCode' ? field : 'userId'},${sort}`,
       });
     }
   };
@@ -399,10 +396,7 @@ const InitiativeStoreDetail = () => {
           </Box>
         </Tooltip>
       </Box>
-      <Box
-        mb={3}
-        sx={{ maxWidth: '100%', minWidth: 0, overflow: 'hidden', width: '100%' }}
-      >
+      <Box mb={3} sx={{ maxWidth: '100%', minWidth: 0, overflow: 'hidden', width: '100%' }}>
         <Box
           sx={{
             display: 'grid',
@@ -537,6 +531,7 @@ const InitiativeStoreDetail = () => {
             <TextField
               fullWidth
               size="small"
+              required={true}
               label={t('pages.initiativeStores.contactName')}
               value={contactNameModal}
               onChange={(e) => setContactNameModal(e.target.value)}
@@ -552,6 +547,7 @@ const InitiativeStoreDetail = () => {
             <TextField
               fullWidth
               size="small"
+              required={true}
               label={t('pages.initiativeStores.contactSurname')}
               value={contactSurnameModal}
               onBlur={() => handleBlur('contactSurnameModal', contactSurnameModal)}

@@ -67,6 +67,7 @@ jest.mock('../generated/merchants/PointOfSales', () => ({
     this.getPointOfSales = jest.fn();
     this.getPointOfSaleInitiatives = jest.fn();
     this.getPointOfSaleByInitiative = jest.fn();
+    this.patchPointOfSaleReferent = jest.fn();
     mockPointOfSalesInstance = this;
   }),
 }));
@@ -192,9 +193,10 @@ describe('MerchantsApiClient', () => {
     const result = await api.getMerchantTransactionsProcessed('init1', { page: 0 });
 
     expect(result).toEqual(mockData);
-    expect(mockMerchantTransactionsInstance.getMerchantTransactionsProcessed).toHaveBeenCalledWith(
-      { initiativeId: 'init1', page: 0 }
-    );
+    expect(mockMerchantTransactionsInstance.getMerchantTransactionsProcessed).toHaveBeenCalledWith({
+      initiativeId: 'init1',
+      page: 0,
+    });
   });
 
   it('getMerchantTransactionsProcessed works without query', async () => {
@@ -458,12 +460,13 @@ describe('MerchantsApiClient', () => {
     const result = await api.downloadBatchCsv('init1', 'batch1');
 
     expect(result).toEqual(mockData);
-    expect(mockRewardBatchesInstance.approveDownloadRewardBatch).toHaveBeenCalledWith({
-      initiativeId: 'init1',
-      rewardBatchId: 'batch1',
-    },
-    {format: "json"}
-  );
+    expect(mockRewardBatchesInstance.approveDownloadRewardBatch).toHaveBeenCalledWith(
+      {
+        initiativeId: 'init1',
+        rewardBatchId: 'batch1',
+      },
+      { format: 'json' }
+    );
   });
 
   it('postponeTransaction calls rewardBatches method', async () => {
@@ -578,13 +581,29 @@ describe('MerchantsApiClient', () => {
     mockMerchantDetailInstance.updateMerchantIban.mockResolvedValue({ data: {} });
     const merchantData = { iban: 'IT99X0000000000000000000000' };
 
-    await expect(
-      api.updateMerchantData('init1', merchantData as any)
-    ).resolves.toBeUndefined();
+    await expect(api.updateMerchantData('init1', merchantData as any)).resolves.toBeUndefined();
 
     expect(mockMerchantDetailInstance.updateMerchantIban).toHaveBeenCalledWith(
       { initiativeId: 'init1' },
       merchantData
+    );
+  });
+
+  it('patchPointOfSaleReferent calls pointOfSales method', async () => {
+    const mockData = { pointOfSaleId: 'pos1' };
+    const body = {
+      contactName: 'Mario',
+      contactSurname: 'Rossi',
+      contactEmail: 'new@test.it',
+    };
+    mockPointOfSalesInstance.patchPointOfSaleReferent.mockResolvedValue({ data: mockData });
+
+    const result = await api.patchPointOfSaleReferent('merch1', 'pos1', body as any);
+
+    expect(result).toEqual(mockData);
+    expect(mockPointOfSalesInstance.patchPointOfSaleReferent).toHaveBeenCalledWith(
+      { merchantId: 'merch1', pointOfSaleId: 'pos1' },
+      body
     );
   });
 });

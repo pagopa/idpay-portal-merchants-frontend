@@ -19,6 +19,7 @@ import {
   ReportDTO,
   MerchantIbanPatchDTO,
   PointOfSaleDTO,
+  PointOfSaleReferentPatchDTO,
   ValidationErrorDTO,
   PointOfSaleErrorDTO,
   ValidationErrorDetail,
@@ -154,9 +155,11 @@ export const updateMerchantPointOfSales = async (
       };
     }
 
-    const apiErrorData = (error as {
-      response?: { data?: ValidationErrorDTO | PointOfSaleErrorDTO };
-    })?.response?.data;
+    const apiErrorData = (
+      error as {
+        response?: { data?: ValidationErrorDTO | PointOfSaleErrorDTO };
+      }
+    )?.response?.data;
 
     if (apiErrorData) {
       return normalizePointOfSaleError(apiErrorData);
@@ -314,9 +317,14 @@ export const updateInvoiceTransaction = (
   docNumber?: string
 ): Promise<{ code: string; message: string } | void> =>
   getMerchantsApi().updateInvoiceTransaction(transactionId, file, docNumber);
-
-  
 export const updateMerchantData = (
   initaitiveId: string,
   merchantData: MerchantIbanPatchDTO
 ): Promise<void> => getMerchantsApi().updateMerchantData(initaitiveId, merchantData);
+
+export const patchPointOfSaleReferent = (
+  merchantId: string,
+  pointOfSaleId: string,
+  body: PointOfSaleReferentPatchDTO
+): Promise<PointOfSaleDTO> =>
+  getMerchantsApi().patchPointOfSaleReferent(merchantId, pointOfSaleId, body);

@@ -17,6 +17,7 @@ import {
   DownloadInvoiceResponseDTO,
   GetFranchisePointOfSaleData,
   PointOfSaleDTO,
+  PointOfSaleReferentPatchDTO,
   TransactionResponse,
   PointOfSaleTransactionsProcessedListDTO,
   PointOfSaleInitiativeDTO,
@@ -283,10 +284,11 @@ class MerchantsApiClient {
     initiativeId: string,
     rewardBatchId: string
   ): Promise<DownloadRewardBatchResponseDTO> {
-    const res = await this.rewardBatches.approveDownloadRewardBatch({
-      initiativeId,
-      rewardBatchId,
-    },
+    const res = await this.rewardBatches.approveDownloadRewardBatch(
+      {
+        initiativeId,
+        rewardBatchId,
+      },
       { format: 'json' }
     );
     return res.data;
@@ -398,6 +400,18 @@ class MerchantsApiClient {
     merchantData: MerchantIbanPatchDTO
   ): Promise<void> {
     await this.merchantDetail.updateMerchantIban({ initiativeId }, merchantData);
+  }
+
+  public async patchPointOfSaleReferent(
+    merchantId: string,
+    pointOfSaleId: string,
+    body: PointOfSaleReferentPatchDTO
+  ): Promise<PointOfSaleDTO> {
+    const res = await this.pointOfSales.patchPointOfSaleReferent(
+      { merchantId, pointOfSaleId },
+      body
+    );
+    return res.data;
   }
 }
 

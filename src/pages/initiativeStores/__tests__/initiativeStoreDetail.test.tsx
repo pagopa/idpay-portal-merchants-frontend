@@ -7,7 +7,7 @@ import { useParams, MemoryRouter } from 'react-router-dom';
 import {
   getMerchantPointOfSalesById,
   getMerchantPointOfSaleTransactionsProcessed,
-  updateMerchantPointOfSales,
+  patchPointOfSaleReferent,
 } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
@@ -38,7 +38,7 @@ jest.mock('react-i18next', () => ({
 jest.mock('../../../services/merchantService', () => ({
   getMerchantPointOfSalesById: jest.fn(),
   getMerchantPointOfSaleTransactionsProcessed: jest.fn(),
-  updateMerchantPointOfSales: jest.fn(),
+  patchPointOfSaleReferent: jest.fn(),
 }));
 jest.mock('../../../utils/jwt-utils');
 jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
@@ -108,7 +108,7 @@ const mockIsValidRegex = isValidRegex as jest.Mock;
 const mockHandlePromptMessage = handlePromptMessage as jest.Mock;
 const mockGetById = getMerchantPointOfSalesById as jest.Mock;
 const mockGetTransactions = getMerchantPointOfSaleTransactionsProcessed as jest.Mock;
-const mockUpdate = updateMerchantPointOfSales as jest.Mock;
+const mockPatchPointOfSaleReferent = patchPointOfSaleReferent as jest.Mock;
 
 const mockStore = {
   id: 'store1',
@@ -170,11 +170,11 @@ describe('InitiativeStoreDetail', () => {
 
     expect(await screen.findByText('Mock Store')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'pages.initiativeStores.address:Via Roma, 10 - 00100, Roma, RM:false'
-      )
+      screen.getByText('pages.initiativeStores.address:Via Roma, 10 - 00100, Roma, RM:false')
     ).toBeInTheDocument();
-    expect(screen.getByText('pages.initiativeStores.website:http://site.it:true')).toBeInTheDocument();
+    expect(
+      screen.getByText('pages.initiativeStores.website:http://site.it:true')
+    ).toBeInTheDocument();
     expect(
       screen.getByText('pages.initiativeStores.geoLink:https://maps.google.com:true')
     ).toBeInTheDocument();
@@ -201,7 +201,9 @@ describe('InitiativeStoreDetail', () => {
     renderWithProviders();
 
     expect(await screen.findByText('Mock Store')).toBeInTheDocument();
-    expect(screen.getByText('pages.initiativeStores.website:plain-site.it:false')).toBeInTheDocument();
+    expect(
+      screen.getByText('pages.initiativeStores.website:plain-site.it:false')
+    ).toBeInTheDocument();
     expect(screen.queryByText(/pages\.initiativeStores\.address:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/pages\.initiativeStores\.phone:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/pages\.initiativeStores\.geoLink:/)).not.toBeInTheDocument();
@@ -299,7 +301,7 @@ describe('InitiativeStoreDetail', () => {
 
     await user.click(screen.getByTestId('update-button'));
 
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockPatchPointOfSaleReferent).not.toHaveBeenCalled();
     expect(await screen.findAllByText('Il campo è obbligatorio')).toHaveLength(4);
   });
 
@@ -310,13 +312,13 @@ describe('InitiativeStoreDetail', () => {
     await openEditModal(user);
     await user.click(screen.getByTestId('update-button'));
 
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockPatchPointOfSaleReferent).not.toHaveBeenCalled();
     expect(await screen.findAllByText('E-mail già censita')).toHaveLength(2);
   });
 
   test('handles successful update flow and refreshes detail', async () => {
     const user = userEvent.setup({ delay: null });
-    mockUpdate.mockResolvedValueOnce(undefined);
+    mockPatchPointOfSaleReferent.mockResolvedValueOnce(undefined);
 
     renderWithProviders();
 
@@ -325,14 +327,11 @@ describe('InitiativeStoreDetail', () => {
     await user.click(screen.getByTestId('update-button'));
 
     await waitFor(() => {
-      expect(mockUpdate).toHaveBeenCalledWith('initiative1', 'm1', [
-        {
-          ...mockStore,
-          contactName: 'Mario',
-          contactSurname: 'Rossi',
-          contactEmail: 'new@test.it',
-        },
-      ]);
+      expect(mockPatchPointOfSaleReferent).toHaveBeenCalledWith('m1', 'store1', {
+        contactName: 'Mario',
+        contactSurname: 'Rossi',
+        contactEmail: 'new@test.it',
+      });
     });
 
     await waitFor(() => {
@@ -347,7 +346,7 @@ describe('InitiativeStoreDetail', () => {
 
   test('handles duplicate email error returned by update service', async () => {
     const user = userEvent.setup({ delay: null });
-    mockUpdate.mockResolvedValueOnce({
+    mockPatchPointOfSaleReferent.mockRejectedValueOnce({
       code: 'POINT_OF_SALE_ALREADY_REGISTERED',
       message: 'mail',
     });
@@ -370,7 +369,7 @@ describe('InitiativeStoreDetail', () => {
 
   test('handles generic update error returned by update service', async () => {
     const user = userEvent.setup({ delay: null });
-    mockUpdate.mockResolvedValueOnce({ code: 'OTHER' });
+    mockPatchPointOfSaleReferent.mockRejectedValueOnce({ code: 'OTHER' });
 
     renderWithProviders();
 
@@ -500,12 +499,14 @@ describe('InitiativeStoreDetail', () => {
 
   test('handlePromptMessage does not remove sessionStorage when staying in stores', () => {
     const spy = jest.spyOn(window.sessionStorage.__proto__, 'removeItem');
-    mockHandlePromptMessage.mockImplementation(({ pathname }: { pathname: string }, storesPath: string) => {
-      if (pathname !== storesPath) {
-        sessionStorage.removeItem('storesPagination');
+    mockHandlePromptMessage.mockImplementation(
+      ({ pathname }: { pathname: string }, storesPath: string) => {
+        if (pathname !== storesPath) {
+          sessionStorage.removeItem('storesPagination');
+        }
+        return true;
       }
-      return true;
-    });
+    );
 
     handlePromptMessage({ pathname: '/stores' }, '/stores');
     expect(spy).not.toHaveBeenCalled();
