@@ -32,10 +32,13 @@ type UsePointOfSalesTableArgs = {
   enabled?: boolean;
 };
 
+const DEFAULT_SORT_KEY = 'franchiseName,asc';
+
 const defaultPagination = (pageSize: number): PointOfSalesPagination => ({
   pageNo: 0,
   pageSize,
   totalElements: 0,
+  sort: DEFAULT_SORT_KEY,
 });
 
 const getSortModelFromSortKey = (sort?: string): GridSortModel => {
@@ -71,8 +74,10 @@ const usePointOfSalesTable = ({
   );
   const [storesLoading, setStoresLoading] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(initialPageSize);
-  const [currentSort, setCurrentSort] = useState<string>('asc');
-  const [sortModel, setSortModel] = useState<GridSortModel>([]);
+  const [currentSort, setCurrentSort] = useState<string>(initialValues.sort ?? DEFAULT_SORT_KEY);
+  const [sortModel, setSortModel] = useState<GridSortModel>(
+    getSortModelFromSortKey(initialValues.sort ?? DEFAULT_SORT_KEY)
+  );
   const [filtersAppliedOnce, setFiltersAppliedOnce] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<GetPointOfSalesFilters>(initialValues);
 
@@ -116,8 +121,8 @@ const usePointOfSalesTable = ({
     ) {
       setStoresPagination(defaultPagination(initialPageSize));
       setRowsPerPage(initialPageSize);
-      setCurrentSort('asc');
-      setSortModel([]);
+      setCurrentSort(initialValues.sort ?? DEFAULT_SORT_KEY);
+      setSortModel(getSortModelFromSortKey(initialValues.sort ?? DEFAULT_SORT_KEY));
       return;
     }
 
@@ -130,7 +135,7 @@ const usePointOfSalesTable = ({
         setSortModel(getSortModelFromSortKey(parsed.sort));
       }
     }
-  }, [storageKey, storageContextField, storageContextValue, initialPageSize]);
+  }, [storageKey, storageContextField, storageContextValue, initialPageSize, initialValues.sort]);
 
   useEffect(() => {
     loadStoredPagination();
@@ -149,8 +154,8 @@ const usePointOfSalesTable = ({
 
     setAppliedFilters(initialValues);
     setFiltersAppliedOnce(false);
-    setCurrentSort('asc');
-    setSortModel([]);
+    setCurrentSort(initialValues.sort ?? DEFAULT_SORT_KEY);
+    setSortModel(getSortModelFromSortKey(initialValues.sort ?? DEFAULT_SORT_KEY));
     setStoresPagination(defaultPagination(initialPageSize));
     setRowsPerPage(initialPageSize);
   }, [enabled, initialPageSize, ...resetDependencies]);
@@ -250,8 +255,8 @@ const usePointOfSalesTable = ({
         setStoresPagination(updatedPagination);
         persistPagination(updatedPagination);
       } else {
-        setCurrentSort('asc');
-        setSortModel([]);
+        setCurrentSort(initialValues.sort ?? DEFAULT_SORT_KEY);
+        setSortModel(getSortModelFromSortKey(initialValues.sort ?? DEFAULT_SORT_KEY));
       }
     },
     [persistPagination, rowsPerPage, storesPagination]
