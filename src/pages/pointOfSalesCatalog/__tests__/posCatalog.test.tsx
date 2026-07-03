@@ -45,8 +45,8 @@ jest.mock('formik', () => ({
 }));
 
 const mockUseAppSelector = jest.fn(() => [
-  { initiativeId: 'initiative-1', initiativeName: 'Initiative One' },
-  { initiativeId: 'initiative-2', initiativeName: 'Initiative Two' },
+  { initiativeId: 'initiative-1', initiativeName: 'Initiative One', status: 'PUBLISHED' },
+  { initiativeId: 'initiative-2', initiativeName: 'Initiative Two', status: 'PUBLISHED' },
 ]);
 
 jest.mock('../../../redux/hooks', () => ({
@@ -225,8 +225,8 @@ describe('<PosCatalog />', () => {
     filtersProps = {};
     drawerProps = {};
     mockUseAppSelector.mockReturnValue([
-      { initiativeId: 'initiative-1', initiativeName: 'Initiative One' },
-      { initiativeId: 'initiative-2', initiativeName: 'Initiative Two' },
+      { initiativeId: 'initiative-1', initiativeName: 'Initiative One', status: 'PUBLISHED' },
+      { initiativeId: 'initiative-2', initiativeName: 'Initiative Two', status: 'PUBLISHED' },
     ]);
     mockStorageRead.mockReturnValue('mock-token');
     mockParseJwt.mockReturnValue({ merchant_id: 'merchant-123' });
@@ -392,6 +392,22 @@ describe('<PosCatalog />', () => {
     ]);
   });
 
+  it('removes closed initiatives from initiative options', () => {
+    mockUseAppSelector.mockReturnValueOnce([
+      { initiativeId: 'initiative-1', initiativeName: 'Initiative One', status: 'PUBLISHED' },
+      { initiativeId: 'initiative-2', initiativeName: 'Initiative Two', status: 'CLOSED' },
+    ]);
+
+    renderComponent();
+
+    expect(filtersProps.initiativeOptions).toEqual([
+      { value: 'initiative-1', label: 'Initiative One' },
+    ]);
+    expect(drawerProps.initiativeOptions).toEqual([
+      { value: 'initiative-1', label: 'Initiative One' },
+    ]);
+  });
+
   it('associates selected stores to the selected initiative on confirm', async () => {
     renderComponent();
 
@@ -530,6 +546,34 @@ describe('<PosCatalog />', () => {
       });
     });
     expect(mockAssociatePos).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('associate-selected-pos-modal')).not.toBeInTheDocument();
+  });
+
+  it('closes the association modal when association fails', async () => {
+    mockAssociatePos.mockRejectedValueOnce(new Error('association failed'));
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.associate (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.associateModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(screen.getByText('actions.confirm'));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      });
+    });
+    expect(screen.queryByTestId('associate-selected-pos-modal')).not.toBeInTheDocument();
   });
 
   it('hides selection actions when filters are applied or reset', () => {
@@ -721,7 +765,7 @@ describe('<PosCatalog />', () => {
 
   it('maps missing initiative id and name to empty option values', () => {
     mockUseAppSelector.mockReturnValueOnce([
-      { initiativeId: undefined, initiativeName: undefined },
+      { initiativeId: undefined, initiativeName: undefined, status: 'PUBLISHED' },
     ]);
 
     renderComponent();

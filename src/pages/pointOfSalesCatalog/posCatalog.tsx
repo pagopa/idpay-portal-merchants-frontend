@@ -12,6 +12,7 @@ import useScopedTranslation from '../../hooks/useScopedTranslation';
 import DataTable from '../../components/dataTable/DataTable';
 import { GetPointOfSalesFilters } from '../../types/types';
 import {
+  InitiativeDTO,
   PointOfSaleDTO,
   PointOfSaleOnboardingResultDTO,
 } from '../../api/generated/merchants/data-contracts';
@@ -30,6 +31,9 @@ import AssociateSelectedPosModal from './AssociateSelectedPosModal';
 import AlreadyAssociatedPosModal, {
   AlreadyAssociatedPointOfSale,
 } from './AlreadyAssociatedPosModal';
+
+type StatusEnum = InitiativeDTO['status'];
+const PUBLISHED: StatusEnum = 'PUBLISHED';
 
 const initialValues: GetPointOfSalesFilters = {
   initiative: '',
@@ -82,10 +86,12 @@ const PosCatalog: React.FC = () => {
 
   const initiativeOptions = useMemo(
     () =>
-      (initiativesList ?? []).map((initiative) => ({
-        value: initiative.initiativeId ?? '',
-        label: initiative.initiativeName ?? '',
-      })),
+      (initiativesList ?? [])
+        .filter((initiative) => initiative.status === PUBLISHED)
+        .map((initiative) => ({
+          value: initiative.initiativeId ?? '',
+          label: initiative.initiativeName ?? '',
+        })),
     [initiativesList]
   );
 
@@ -292,6 +298,7 @@ const PosCatalog: React.FC = () => {
       '';
 
     if (!merchantId || !selectedInitiativeId || selectedStoreIds.length === 0) {
+      handleAssociateModalClose();
       handleFetchError();
       return;
     }
@@ -306,12 +313,14 @@ const PosCatalog: React.FC = () => {
       );
       handleAssociationResult(result, initiativeName);
     } catch (_error) {
+      handleAssociateModalClose();
       handleFetchError();
     } finally {
       setIsAssociatingPos(false);
     }
   }, [
     handleAssociationResult,
+    handleAssociateModalClose,
     handleFetchError,
     initiativeOptions,
     selectedInitiativeId,
