@@ -181,7 +181,7 @@ const defaultHookValue = {
   storesPagination: { pageNo: 0, pageSize: 10, totalElements: 1 },
   storesLoading: false,
   rowsPerPage: 10,
-  sortModel: [],
+  sortModel: [{ field: 'franchiseName', sort: 'asc' }],
   filtersAppliedOnce: false,
   handleFiltersApplied: mockHandleFiltersApplied,
   handleFiltersReset: mockHandleFiltersReset,
@@ -198,7 +198,7 @@ const defaultFormikValues = {
   contactName: '',
   page: 0,
   size: 10,
-  sort: 'asc',
+  sort: 'franchiseName,asc',
 };
 
 const renderComponent = () =>
@@ -261,6 +261,13 @@ describe('<PosCatalog />', () => {
   it('renders title, filters and table when stores are available', () => {
     renderComponent();
 
+    expect(mockUsePointOfSalesTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        initialValues: expect.objectContaining({
+          sort: 'franchiseName,asc',
+        }),
+      })
+    );
     expect(screen.getByText('pages.posCatalog.title')).toBeInTheDocument();
     expect(screen.getByText('pages.posCatalog.subtitle')).toBeInTheDocument();
     expect(screen.queryByText('pages.posCatalog.actions.exclude')).not.toBeInTheDocument();
@@ -778,7 +785,7 @@ describe('<PosCatalog />', () => {
       city: '',
       address: '',
       contactName: '',
-      sort: 'asc',
+      sort: 'franchiseName,asc',
     });
 
     expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
@@ -787,7 +794,7 @@ describe('<PosCatalog />', () => {
       city: '',
       address: '',
       contactName: '',
-      sort: 'asc',
+      sort: 'franchiseName,asc',
       page: 0,
       size: 10,
     });

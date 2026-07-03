@@ -35,7 +35,7 @@ describe('usePointOfSalesTable', () => {
 
     expect(fetchStores).toHaveBeenCalledWith({
       ...initialValues,
-      sort: 'asc',
+      sort: 'franchiseName,asc',
       page: 0,
       size: 10,
     });
@@ -99,11 +99,11 @@ describe('usePointOfSalesTable', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current.currentSort).toBe('asc');
-    expect(result.current.sortModel).toEqual([]);
+    expect(result.current.currentSort).toBe('franchiseName,asc');
+    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
     expect(fetchStores).toHaveBeenCalledWith({
       ...initialValues,
-      sort: 'asc',
+      sort: 'franchiseName,asc',
       page: 0,
       size: 10,
     });
@@ -139,11 +139,11 @@ describe('usePointOfSalesTable', () => {
     await waitForNextUpdate();
 
     expect(result.current.rowsPerPage).toBe(10);
-    expect(result.current.currentSort).toBe('asc');
-    expect(result.current.sortModel).toEqual([]);
+    expect(result.current.currentSort).toBe('franchiseName,asc');
+    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
     expect(fetchStores).toHaveBeenCalledWith({
       ...initialValues,
-      sort: 'asc',
+      sort: 'franchiseName,asc',
       page: 0,
       size: 10,
     });
@@ -179,11 +179,11 @@ describe('usePointOfSalesTable', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current.currentSort).toBe('asc');
-    expect(result.current.sortModel).toEqual([]);
+    expect(result.current.currentSort).toBe('franchiseName,asc');
+    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
     expect(fetchStores).toHaveBeenCalledWith({
       ...initialValues,
-      sort: 'asc',
+      sort: 'franchiseName,asc',
       page: 0,
       size: 10,
     });
@@ -220,8 +220,8 @@ describe('usePointOfSalesTable', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current.currentSort).toBe('asc');
-    expect(result.current.sortModel).toEqual([]);
+    expect(result.current.currentSort).toBe('franchiseName,asc');
+    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
   });
 
   test('handles filters applied and resets pagination page', async () => {
@@ -258,7 +258,7 @@ describe('usePointOfSalesTable', () => {
       merchantName: 'updated merchant',
       page: 0,
       size: 10,
-      sort: 'asc',
+      sort: 'franchiseName,asc',
     });
   });
 
@@ -364,8 +364,8 @@ describe('usePointOfSalesTable', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current.currentSort).toBe('asc');
-    expect(result.current.sortModel).toEqual([]);
+    expect(result.current.currentSort).toBe('franchiseName,asc');
+    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
   });
 
   test('handles page change and persists pagination', async () => {
@@ -394,11 +394,11 @@ describe('usePointOfSalesTable', () => {
     expect(JSON.parse(sessionStorage.getItem('pos-table') as string)).toMatchObject({
       pageNo: 4,
       pageSize: 10,
-      sort: 'asc',
+      sort: 'franchiseName,asc',
     });
     expect(fetchStores).toHaveBeenLastCalledWith({
       ...initialValues,
-      sort: 'asc',
+      sort: 'franchiseName,asc',
       page: 4,
       size: 10,
     });
@@ -440,11 +440,11 @@ describe('usePointOfSalesTable', () => {
     expect(JSON.parse(sessionStorage.getItem('pos-table') as string)).toMatchObject({
       pageNo: 0,
       pageSize: 25,
-      sort: 'asc',
+      sort: 'franchiseName,asc',
     });
     expect(fetchStores).toHaveBeenLastCalledWith({
       ...initialValues,
-      sort: 'asc',
+      sort: 'franchiseName,asc',
       page: 0,
       size: 25,
     });
@@ -700,8 +700,8 @@ describe('usePointOfSalesTable', () => {
     await waitForNextUpdate();
 
     expect(result.current.rowsPerPage).toBe(10);
-    expect(result.current.currentSort).toBe('asc');
-    expect(result.current.sortModel).toEqual([]);
+    expect(result.current.currentSort).toBe('franchiseName,asc');
+    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
     expect(result.current.filtersAppliedOnce).toBe(false);
     expect(result.current.appliedFilters).toEqual(initialValues);
     expect(result.current.storesPagination).toEqual({

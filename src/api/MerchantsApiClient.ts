@@ -17,6 +17,7 @@ import {
   DownloadInvoiceResponseDTO,
   GetFranchisePointOfSaleData,
   PointOfSaleDTO,
+  PointOfSaleReferentPatchDTO,
   TransactionResponse,
   PointOfSaleTransactionsProcessedListDTO,
   PointOfSaleInitiativeDTO,
@@ -409,6 +410,18 @@ class MerchantsApiClient {
     const res = await this.pointOfSales.pointOfSalesOnboarding(
       { merchantId, initiativeId },
       pointOfSaleIds
+    );
+    return res.data;
+  }
+
+  public async patchPointOfSaleReferent(
+    merchantId: string,
+    pointOfSaleId: string,
+    body: PointOfSaleReferentPatchDTO
+  ): Promise<PointOfSaleDTO> {
+    const res = await this.pointOfSales.patchPointOfSaleReferent(
+      { merchantId, pointOfSaleId },
+      body
     );
     return res.data;
   }
