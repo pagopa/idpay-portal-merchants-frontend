@@ -21,6 +21,7 @@ import {
   TransactionResponse,
   PointOfSaleTransactionsProcessedListDTO,
   PointOfSaleInitiativeDTO,
+  PointOfSaleOnboardingResultDTO,
 } from './generated/merchants/data-contracts';
 
 import { MerchantInitiatives } from './generated/merchants/MerchantInitiatives';
@@ -284,11 +285,10 @@ class MerchantsApiClient {
     initiativeId: string,
     rewardBatchId: string
   ): Promise<DownloadRewardBatchResponseDTO> {
-    const res = await this.rewardBatches.approveDownloadRewardBatch(
-      {
-        initiativeId,
-        rewardBatchId,
-      },
+    const res = await this.rewardBatches.approveDownloadRewardBatch({
+      initiativeId,
+      rewardBatchId,
+    },
       { format: 'json' }
     );
     return res.data;
@@ -400,6 +400,18 @@ class MerchantsApiClient {
     merchantData: MerchantIbanPatchDTO
   ): Promise<void> {
     await this.merchantDetail.updateMerchantIban({ initiativeId }, merchantData);
+  }
+
+  public async associatePos(
+    initiativeId: string,
+    merchantId: string,
+    pointOfSaleIds: Array<string>
+  ): Promise<PointOfSaleOnboardingResultDTO> {
+    const res = await this.pointOfSales.pointOfSalesOnboarding(
+      { merchantId, initiativeId },
+      pointOfSaleIds
+    );
+    return res.data;
   }
 
   public async patchPointOfSaleReferent(

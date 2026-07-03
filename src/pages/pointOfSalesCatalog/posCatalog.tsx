@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
-import { Box, Stack, Paper, Typography } from '@mui/material';
+import { Box, Button, Paper, Stack, Typography } from '@mui/material';
+import { GridSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import CircularProgress from '@mui/material/CircularProgress';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
@@ -10,9 +11,12 @@ import { useHistory, useLocation } from 'react-router-dom';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import DataTable from '../../components/dataTable/DataTable';
 import { GetPointOfSalesFilters } from '../../types/types';
-import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
+import {
+  PointOfSaleDTO,
+  PointOfSaleOnboardingResultDTO,
+} from '../../api/generated/merchants/data-contracts';
 import { parseJwt } from '../../utils/jwt-utils';
-import { getMerchantPointOfSalesCatalog } from '../../services/merchantService';
+import { associatePos, getMerchantPointOfSalesCatalog } from '../../services/merchantService';
 import { ELEMENT_PER_PAGE, PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
@@ -22,6 +26,10 @@ import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilte
 import buildPointOfSalesColumns from '../../components/pointsOfSale/pointOfSalesColumns';
 import usePointOfSalesTable from '../../components/pointsOfSale/usePointOfSalesTable';
 import { PosCatalogDrawer } from './PosCatalogFiltersDrawer';
+import AssociateSelectedPosModal from './AssociateSelectedPosModal';
+import AlreadyAssociatedPosModal, {
+  AlreadyAssociatedPointOfSale,
+} from './AlreadyAssociatedPosModal';
 
 const initialValues: GetPointOfSalesFilters = {
   initiative: '',
@@ -38,6 +46,19 @@ const PosCatalog: React.FC = () => {
   const { setAlert } = useAlert();
   const [selectedStore, setSelectedStore] = useState<PointOfSaleDTO | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedStoreIds, setSelectedStoreIds] = useState<GridSelectionModel>([]);
+  const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
+  const [selectedInitiativeId, setSelectedInitiativeId] = useState('');
+  const [isAssociatingPos, setIsAssociatingPos] = useState(false);
+  const [alreadyAssociatedStores, setAlreadyAssociatedStores] = useState<
+    Array<AlreadyAssociatedPointOfSale>
+  >([]);
+  const [associationSuccessData, setAssociationSuccessData] = useState<{
+    associatedCount: number;
+    initiativeName: string;
+  } | null>(null);
+  const [pendingAssociationRefreshFilters, setPendingAssociationRefreshFilters] =
+    useState<GetPointOfSalesFilters | null>(null);
 
   const { t } = useScopedTranslation();
   const history = useHistory();
@@ -148,6 +169,157 @@ const PosCatalog: React.FC = () => {
     setSelectedStore(null);
   }, []);
 
+  const handleSelectionModelChange = useCallback((selectionModel: GridSelectionModel) => {
+    setSelectedStoreIds(selectionModel);
+  }, []);
+
+  const handleCatalogFiltersApplied = useCallback(
+    (values: GetPointOfSalesFilters) => {
+      setSelectedStoreIds([]);
+      handleFiltersApplied(values);
+    },
+    [handleFiltersApplied]
+  );
+
+  const handleCatalogFiltersReset = useCallback(() => {
+    setSelectedStoreIds([]);
+    handleFiltersReset();
+  }, [handleFiltersReset]);
+
+  const handleCatalogPaginationPageChange = useCallback(
+    (page: number) => {
+      setSelectedStoreIds([]);
+      handlePaginationPageChange(page);
+    },
+    [handlePaginationPageChange]
+  );
+
+  const handleCatalogRowsPerPageChange = useCallback(
+    (pageSize: number) => {
+      setSelectedStoreIds([]);
+      handleRowsPerPageChange(pageSize);
+    },
+    [handleRowsPerPageChange]
+  );
+
+  const handleCatalogSortModelChange = useCallback(
+    (model: GridSortModel) => {
+      setSelectedStoreIds([]);
+      handleSortModelChange(model);
+    },
+    [handleSortModelChange]
+  );
+
+  const handleAssociateModalClose = useCallback(() => {
+    setIsAssociateModalOpen(false);
+    setSelectedInitiativeId('');
+  }, []);
+
+  const handleInitiativeChange = useCallback((initiativeId: string) => {
+    setSelectedInitiativeId(initiativeId);
+  }, []);
+
+  const showAssociationSuccessAlert = useCallback(
+    (associatedCount: number, initiativeName: string) =>
+      setAlert({
+        text: t('pages.posCatalog.associateSuccess', {
+          count: associatedCount,
+          initiativeName,
+        }),
+        isOpen: true,
+        severity: 'success',
+      }),
+    [setAlert, t]
+  );
+
+  const handleAlreadyAssociatedModalClose = useCallback(() => {
+    setAlreadyAssociatedStores([]);
+
+    if (associationSuccessData) {
+      showAssociationSuccessAlert(
+        associationSuccessData.associatedCount,
+        associationSuccessData.initiativeName
+      );
+      setAssociationSuccessData(null);
+    }
+
+    if (pendingAssociationRefreshFilters) {
+      handleFiltersApplied(pendingAssociationRefreshFilters);
+      setPendingAssociationRefreshFilters(null);
+    }
+  }, [
+    associationSuccessData,
+    handleFiltersApplied,
+    pendingAssociationRefreshFilters,
+    showAssociationSuccessAlert,
+  ]);
+
+  const handleAssociationResult = useCallback(
+    (result: PointOfSaleOnboardingResultDTO, initiativeName: string) => {
+      const alreadyAssociated = (result.notAssociated ?? []).filter(
+        (pointOfSale) => pointOfSale.reason === 'ALREADY_ASSOCIATED'
+      );
+      const associatedCount = result.associated?.length ?? 0;
+
+      setSelectedStoreIds([]);
+      handleAssociateModalClose();
+      handleToggleDrawer();
+
+      if (alreadyAssociated.length > 0) {
+        setAssociationSuccessData({ associatedCount, initiativeName });
+        setPendingAssociationRefreshFilters(formik.values);
+        setAlreadyAssociatedStores(alreadyAssociated);
+        return;
+      }
+
+      handleFiltersApplied(formik.values);
+      showAssociationSuccessAlert(associatedCount, initiativeName);
+    },
+    [
+      formik.values,
+      handleAssociateModalClose,
+      handleFiltersApplied,
+      handleToggleDrawer,
+      showAssociationSuccessAlert,
+    ]
+  );
+
+  const handleAssociateConfirm = useCallback(async () => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
+    const initiativeName =
+      initiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)?.label ??
+      '';
+
+    if (!merchantId || !selectedInitiativeId || selectedStoreIds.length === 0) {
+      handleFetchError();
+      return;
+    }
+
+    setIsAssociatingPos(true);
+
+    try {
+      const result = await associatePos(
+        selectedInitiativeId,
+        merchantId,
+        selectedStoreIds.map((id) => String(id))
+      );
+      handleAssociationResult(result, initiativeName);
+    } catch (_error) {
+      handleFetchError();
+    } finally {
+      setIsAssociatingPos(false);
+    }
+  }, [
+    handleAssociationResult,
+    handleFetchError,
+    initiativeOptions,
+    selectedInitiativeId,
+    selectedStoreIds,
+  ]);
+
+  const selectedStoresCountLabel = ` (${selectedStoreIds.length})`;
+
   const columns = useMemo(
     () =>
       buildPointOfSalesColumns({
@@ -172,6 +344,20 @@ const PosCatalog: React.FC = () => {
           variantTitle="h4"
           variantSubTitle="body1"
         />
+        {selectedStoreIds.length > 0 && (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Button variant="outlined" color="error" sx={{ whiteSpace: 'nowrap' }}>
+              {`${t('pages.posCatalog.actions.exclude')}${selectedStoresCountLabel}`}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setIsAssociateModalOpen(true)}
+              sx={{ whiteSpace: 'nowrap' }}
+            >
+              {`${t('pages.posCatalog.actions.associate')}${selectedStoresCountLabel}`}
+            </Button>
+          </Stack>
+        )}
       </Stack>
       {storesLoading ? (
         <Box
@@ -186,8 +372,8 @@ const PosCatalog: React.FC = () => {
             filtersAppliedOnce) && (
             <>
               <PointOfSalesFilters
-                onFiltersApplied={handleFiltersApplied}
-                onFiltersReset={handleFiltersReset}
+                onFiltersApplied={handleCatalogFiltersApplied}
+                onFiltersReset={handleCatalogFiltersReset}
                 formik={formik}
                 filtersAppliedOnce={filtersAppliedOnce}
                 initiativeOptions={initiativeOptions}
@@ -200,13 +386,14 @@ const PosCatalog: React.FC = () => {
                   rows={stores}
                   columns={columns}
                   checkable
-                  isRowSelectable={() => false}
                   rowsPerPage={rowsPerPage}
                   rowsPerPageOptions={ELEMENT_PER_PAGE}
-                  onRowsPerPageChange={handleRowsPerPageChange}
-                  onSortModelChange={handleSortModelChange}
+                  onRowsPerPageChange={handleCatalogRowsPerPageChange}
+                  onSelectionModelChange={handleSelectionModelChange}
+                  selectionModel={selectedStoreIds}
+                  onSortModelChange={handleCatalogSortModelChange}
                   paginationModel={storesPagination}
-                  onPaginationPageChange={handlePaginationPageChange}
+                  onPaginationPageChange={handleCatalogPaginationPageChange}
                   sortModel={sortModel}
                 />
               </Box>
@@ -220,6 +407,19 @@ const PosCatalog: React.FC = () => {
               />
             </>
           )}
+          <AssociateSelectedPosModal
+            open={isAssociateModalOpen}
+            initiativeOptions={initiativeOptions}
+            selectedInitiativeId={selectedInitiativeId}
+            isLoading={isAssociatingPos}
+            onClose={handleAssociateModalClose}
+            onInitiativeChange={handleInitiativeChange}
+            onConfirm={handleAssociateConfirm}
+          />
+          <AlreadyAssociatedPosModal
+            stores={alreadyAssociatedStores}
+            onClose={handleAlreadyAssociatedModalClose}
+          />
         </>
       )}
       {!storesLoading && stores?.length === 0 && (

@@ -9,6 +9,7 @@ export type DetailDrawerProps = {
   title?: string;
   children?: React.ReactNode;
   buttons?: Array<(ButtonProps & { dataTestId?: string }) | never>;
+  buttonsLayout?: 'column' | 'row';
 };
 
 export default function DetailDrawer({
@@ -17,6 +18,7 @@ export default function DetailDrawer({
   title,
   children,
   buttons,
+  buttonsLayout = 'column',
 }: DetailDrawerProps) {
   return (
     <Drawer anchor="right" open={isOpen} data-testid="detail-drawer">
@@ -64,9 +66,11 @@ export default function DetailDrawer({
             bottom: 0,
             width: '100%',
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: buttonsLayout,
+            justifyContent: buttonsLayout === 'row' ? 'flex-end' : 'initial',
             padding: '1.5rem',
             rowGap: '1rem',
+            columnGap: '1rem',
             backgroundColor: 'white',
           }}
           data-testid="buttons-box"

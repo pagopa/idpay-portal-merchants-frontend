@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useFormik } from 'formik';
 import { GetPointOfSalesFilters } from '../../../types/types';
  import {
@@ -7,7 +7,9 @@ import { GetPointOfSalesFilters } from '../../../types/types';
    PosCatalogFilters,
  } from '../PosCatalogFiltersDrawer';
  import { MockPosCatalogStore } from '../mockPosCatalog';
- import { getPointOfSaleInitiatives } from '../../../services/merchantService';
+ import { associatePos, getPointOfSaleInitiatives } from '../../../services/merchantService';
+
+const mockSetAlert = jest.fn();
 
 jest.mock('../../../hooks/useScopedTranslation', () => ({
   __esModule: true,
@@ -18,7 +20,14 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
 
  jest.mock('../../../services/merchantService', () => ({
    getPointOfSaleInitiatives: jest.fn(),
+   associatePos: jest.fn(),
  }));
+
+jest.mock('../../../hooks/useAlert', () => ({
+  useAlert: () => ({
+    setAlert: mockSetAlert,
+  }),
+}));
 
  jest.mock('../../../components/Drawer/DetailDrawer', () => ({
   __esModule: true,
@@ -26,15 +35,22 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
     isOpen,
     title,
     children,
+    buttons,
   }: {
     isOpen: boolean;
     title: string;
     children: React.ReactNode;
+    buttons?: Array<any>;
   }) =>
     isOpen ? (
       <div data-testid="detail-drawer">
         <div>{title}</div>
         {children}
+        {buttons?.map((button, index) => (
+          <button key={`${button.title}-${index}`} data-testid={button.dataTestId} onClick={button.onClick}>
+            {button.title}
+          </button>
+        ))}
       </div>
     ) : null,
 }));
@@ -235,6 +251,47 @@ const drawerInitiativeOptions = [
     expect(screen.getByText('Via Roma 1 - Milano')).toBeInTheDocument();
     expect(screen.getByText('pages.posCatalog.drawer.phone')).toBeInTheDocument();
     expect(screen.getByText('-')).toBeInTheDocument();
+  });
+
+  it('associates the selected store to an initiative from the drawer modal', async () => {
+    (associatePos as jest.Mock).mockResolvedValue({
+      associated: [{ pointOfSaleId: '2', pointOfSaleName: 'Negozio fisico' }],
+      notAssociated: [],
+    });
+
+    render(
+      <PosCatalogDrawer
+        isOpen
+        onClose={jest.fn()}
+        selectedStore={physicalStore}
+        initiativeOptions={drawerInitiativeOptions}
+        merchantId="merchant-123"
+      />
+    );
+
+    expect(screen.getByTestId('exclude-store-button')).toHaveTextContent(
+      'pages.posCatalog.actions.exclude'
+    );
+    fireEvent.click(screen.getByTestId('associate-store-button'));
+
+    expect(screen.getByTestId('associate-selected-pos-modal')).toBeInTheDocument();
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.associateModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Iniziativa 1'));
+    fireEvent.click(screen.getByText('actions.confirm'));
+
+    await waitFor(() => {
+      expect(associatePos).toHaveBeenCalledWith('Iniziativa 1', 'merchant-123', ['2']);
+    });
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: 'pages.posCatalog.associateSuccess',
+      isOpen: true,
+      severity: 'success',
+    });
   });
 
   it('renders fallback initiative id and placeholders when fetched data is incomplete', async () => {

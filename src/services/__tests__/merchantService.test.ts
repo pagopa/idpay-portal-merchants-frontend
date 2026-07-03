@@ -31,6 +31,7 @@ import {
   downloadMerchantReport,
   updateInvoiceTransaction,
   updateMerchantData,
+  associatePos,
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
@@ -69,6 +70,7 @@ const mockedApi = {
   downloadMerchantReport: jest.fn(),
   updateInvoiceTransaction: jest.fn(),
   updateMerchantData: jest.fn(),
+  associatePos: jest.fn(),
 };
 
 const expectUpdateMerchantPointOfSalesError = async (
@@ -323,6 +325,17 @@ describe('merchantService', () => {
 
     await getPointOfSaleInitiatives('merchant', 'pos');
     expect(mockedApi.getPointOfSaleInitiatives).toHaveBeenCalledWith('merchant', 'pos');
+  });
+
+  test('associatePos delegates correctly', async () => {
+    const result = {
+      associated: [{ pointOfSaleId: 'pos1', pointOfSaleName: 'Store 1' }],
+      notAssociated: [],
+    };
+    mockedApi.associatePos.mockResolvedValue(result);
+
+    await expect(associatePos('init-1', 'merchant', ['pos1'])).resolves.toEqual(result);
+    expect(mockedApi.associatePos).toHaveBeenCalledWith('init-1', 'merchant', ['pos1']);
   });
 
   test('getMerchantPointOfSaleTransactionsProcessed delegates correctly', async () => {

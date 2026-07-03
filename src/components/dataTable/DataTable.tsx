@@ -37,6 +37,7 @@ export interface DataTableProps {
   isTransactionsPage?: boolean;
   onRowsPerPageChange?: (pageSize: number) => void;
   onSelectionModelChange?: (selectionModel: GridSelectionModel) => void;
+  selectionModel?: GridSelectionModel;
   singleSelectionModel?: GridInputSelectionModel;
   rowsPerPageOptions?: Array<number>;
 }
@@ -55,6 +56,7 @@ const DataTable = ({
   isRowSelectable,
   isTransactionsPage = false,
   onRowsPerPageChange,
+  selectionModel,
   singleSelectionModel,
   rowsPerPageOptions,
 }: DataTableProps) => {
@@ -72,7 +74,7 @@ const DataTable = ({
   const selectionProps = {
     checkboxSelection: checkable,
     isRowSelectable,
-    selectionModel: singleSelect ? singleSelectionModel : undefined,
+    selectionModel: singleSelect ? singleSelectionModel : selectionModel,
     disableMultipleSelection: singleSelect,
   };
 

@@ -3510,6 +3510,15 @@ components:
               streetNumber:
                 type: string
                 description: "ENG: The street number of the point of sale <br> IT: Il numero civico del punto vendita"
+              website:
+                type: string
+                description: "ENG: The website of the point of sale <br> IT: Il sito web del punto vendita"
+              type:
+                type: string
+                enum:
+                  - PHYSICAL
+                  - ONLINE
+                description: "ENG: The type of the point of sale <br> IT: Il tipo del punto vendita"
     PointOfSaleInitiativeListDTO:
       type: object
       properties:

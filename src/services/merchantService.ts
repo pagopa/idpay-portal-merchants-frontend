@@ -24,6 +24,7 @@ import {
   PointOfSaleErrorDTO,
   ValidationErrorDetail,
   PointOfSaleInitiativeDTO,
+  PointOfSaleOnboardingResultDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 
@@ -232,6 +233,13 @@ export const getPointOfSaleInitiatives = (
 ): Promise<Array<PointOfSaleInitiativeDTO>> =>
   getMerchantsApi().getPointOfSaleInitiatives(merchantId, pointOfSaleId);
 
+export const associatePos = (
+  initiativeId: string,
+  merchantId: string,
+  pointOfSaleIds: Array<string>
+): Promise<PointOfSaleOnboardingResultDTO> =>
+  getMerchantsApi().associatePos(initiativeId, merchantId, pointOfSaleIds);
+
 export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,
   pointOfSaleId: string,
@@ -317,6 +325,7 @@ export const updateInvoiceTransaction = (
   docNumber?: string
 ): Promise<{ code: string; message: string } | void> =>
   getMerchantsApi().updateInvoiceTransaction(transactionId, file, docNumber);
+
 export const updateMerchantData = (
   initaitiveId: string,
   merchantData: MerchantIbanPatchDTO

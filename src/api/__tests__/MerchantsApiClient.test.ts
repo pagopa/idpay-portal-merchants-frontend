@@ -67,6 +67,7 @@ jest.mock('../generated/merchants/PointOfSales', () => ({
     this.getPointOfSales = jest.fn();
     this.getPointOfSaleInitiatives = jest.fn();
     this.getPointOfSaleByInitiative = jest.fn();
+    this.pointOfSalesOnboarding = jest.fn();
     this.patchPointOfSaleReferent = jest.fn();
     mockPointOfSalesInstance = this;
   }),
@@ -347,6 +348,25 @@ describe('MerchantsApiClient', () => {
       merchantId: 'merch1',
       pointOfSaleId: 'pos2',
     });
+  });
+
+  it('associatePos returns data and forwards onboarding body', async () => {
+    const mockData = {
+      associated: [{ pointOfSaleId: 'pos1', pointOfSaleName: 'Store 1' }],
+      notAssociated: [],
+    };
+    mockPointOfSalesInstance.pointOfSalesOnboarding.mockResolvedValue({ data: mockData });
+
+    const result = await api.associatePos('init-1', 'merch1', ['pos1', 'pos2']);
+
+    expect(result).toEqual(mockData);
+    expect(mockPointOfSalesInstance.pointOfSalesOnboarding).toHaveBeenCalledWith(
+      {
+        merchantId: 'merch1',
+        initiativeId: 'init-1',
+      },
+      ['pos1', 'pos2']
+    );
   });
 
   it('getMerchantPointOfSalesById returns data', async () => {
