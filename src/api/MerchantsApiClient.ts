@@ -20,6 +20,7 @@ import {
   TransactionResponse,
   PointOfSaleTransactionsProcessedListDTO,
   PointOfSaleInitiativeDTO,
+  PointOfSaleOnboardingResultDTO,
 } from './generated/merchants/data-contracts';
 
 import { MerchantInitiatives } from './generated/merchants/MerchantInitiatives';
@@ -398,6 +399,18 @@ class MerchantsApiClient {
     merchantData: MerchantIbanPatchDTO
   ): Promise<void> {
     await this.merchantDetail.updateMerchantIban({ initiativeId }, merchantData);
+  }
+
+  public async associatePos(
+    initiativeId: string,
+    merchantId: string,
+    pointOfSaleIds: Array<string>
+  ): Promise<PointOfSaleOnboardingResultDTO> {
+    const res = await this.pointOfSales.pointOfSalesOnboarding(
+      { merchantId, initiativeId },
+      pointOfSaleIds
+    );
+    return res.data;
   }
 }
 
