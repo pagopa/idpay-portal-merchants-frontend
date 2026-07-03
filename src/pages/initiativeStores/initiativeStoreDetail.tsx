@@ -253,10 +253,6 @@ const InitiativeStoreDetail = () => {
     } else if (!isValidRegex(contactEmailConfirmModal, emailRegex)) {
       addErrorModal('contactEmailConfirmModal', 'Inserisci un indirizzo email valido');
     }
-    if (contactEmailModal.trim() === storeDetail.contactEmail) {
-      addErrorModal('contactEmailModal', 'E-mail già censita');
-      addErrorModal('contactEmailConfirmModal', 'E-mail già censita');
-    }
 
     if (
       contactEmailModal.trim() &&
@@ -278,16 +274,6 @@ const InitiativeStoreDetail = () => {
       contactSurname: contactSurnameModal,
       contactEmail: contactEmailModal,
     };
-    if (storeDetail.contactEmail === contactEmailConfirmModal) {
-      setAlert({
-        title: t('errors.duplicateEmailError'),
-        text: `${storeDetail.contactEmail} è già associata ad altro punto vendita`,
-        isOpen: true,
-        severity: 'error',
-      });
-      setModalIsOpen(false);
-      return;
-    }
 
     try {
       await patchPointOfSaleReferent(merchantId, store_id, body);
@@ -301,12 +287,11 @@ const InitiativeStoreDetail = () => {
       void fetchStoreDetail();
     } catch (error: any) {
       const errorCode = error?.code ?? error?.response?.data?.code;
-      const errorMessage = error?.message ?? error?.response?.data?.message ?? '';
 
       if (String(errorCode) === 'POINT_OF_SALE_ALREADY_REGISTERED') {
         setAlert({
           title: t('errors.duplicateEmailError'),
-          text: `${errorMessage} è già associata ad altro punto vendita`,
+          text: `${contactEmailModal} è già associata ad altro punto vendita`,
           isOpen: true,
           severity: 'error',
         });
