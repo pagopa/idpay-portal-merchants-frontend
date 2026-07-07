@@ -1,10 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
-import {
-  Box,
-  Typography,
-  CircularProgress,
-} from '@mui/material';
+import { Box, Typography, CircularProgress, Tooltip } from '@mui/material';
 import { FormikProps } from 'formik';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
 import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
@@ -74,6 +70,14 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
 }) => {
   const { t } = useScopedTranslation();
   const { setAlert } = useAlert();
+  const getDisplayValue = (value?: string) =>
+    value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value;
+  const ellipsisSx = {
+    display: 'block',
+    maxWidth: '100%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  };
   const [initiatives, setInitiatives] = useState<Array<PointOfSaleInitiativeDTO>>([]);
   const [isLoadingInitiatives, setIsLoadingInitiatives] = useState(false);
   const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
@@ -127,7 +131,10 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   }, [initiativesRefreshKey, isOpen, merchantId, selectedStore]);
 
   const initiativeNameById = useMemo(
-    () => Object.fromEntries(initiativeOptions.map((initiative) => [initiative.value, initiative.label])),
+    () =>
+      Object.fromEntries(
+        initiativeOptions.map((initiative) => [initiative.value, initiative.label])
+      ),
     [initiativeOptions]
   );
 
@@ -272,96 +279,158 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
                       <Typography variant="body2" color="text.secondary">
                         {safeFormatDate(initiative.updatedAt, false)}
                       </Typography>
-                      <Typography
-                        variant="body1"
-                        sx={{ fontWeight: theme.typography.fontWeightMedium }}
+                      <Tooltip
+                        title={getDisplayValue(
+                          initiative.initiativeId
+                            ? initiativeNameById[initiative.initiativeId] || initiative.initiativeId
+                            : MISSING_DATA_PLACEHOLDER
+                        )}
                       >
-                        {initiative.initiativeId
-                          ? initiativeNameById[initiative.initiativeId] || initiative.initiativeId
-                          : MISSING_DATA_PLACEHOLDER}
-                      </Typography>
+                        <Typography
+                          variant="body1"
+                          sx={{ ...ellipsisSx, fontWeight: theme.typography.fontWeightMedium }}
+                        >
+                          {getDisplayValue(
+                            initiative.initiativeId
+                              ? initiativeNameById[initiative.initiativeId] ||
+                                  initiative.initiativeId
+                              : MISSING_DATA_PLACEHOLDER
+                          )}
+                        </Typography>
+                      </Tooltip>
                     </Box>
                   ))
                 )}
               </>
             )}
 
-          <Typography variant="overline" color="text.secondary">
-            {t('pages.posCatalog.drawer.storeData')}
-          </Typography>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              {t('pages.posCatalog.drawer.id')}
+            <Typography variant="overline" color="text.secondary">
+              {t('pages.posCatalog.drawer.storeData')}
             </Typography>
-            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
-              {selectedStore.id || MISSING_DATA_PLACEHOLDER}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              {selectedStore.type === 'PHYSICAL'
-                ? t('pages.posCatalog.drawer.address')
-                : t('pages.posCatalog.drawer.website')}
-            </Typography>
-            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
-              {selectedStore.type === 'PHYSICAL' ? (
-                [
-                  [selectedStore.address, selectedStore.streetNumber].filter(Boolean).join(', '),
-                  [selectedStore.zipCode, selectedStore.city, selectedStore.province]
-                    .filter(Boolean)
-                    .join(', '),
-                ]
-                  .filter(Boolean)
-                  .join(' - ') || MISSING_DATA_PLACEHOLDER
-              ) : (
-                <a
-                  href={`https://${(selectedStore.website || '').replace(/^https?:\/\//, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {selectedStore.website || MISSING_DATA_PLACEHOLDER}
-                </a>
-              )}
-            </Typography>
-          </Box>
-          {selectedStore.type === 'PHYSICAL' && (
             <Box>
               <Typography variant="body2" color="text.secondary">
-                {t('pages.posCatalog.drawer.phone')}
+                {t('pages.posCatalog.drawer.id')}
               </Typography>
-              <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
-                {selectedStore.channelPhone || MISSING_DATA_PLACEHOLDER}
-              </Typography>
+              <Tooltip title={getDisplayValue(selectedStore.id)}>
+                <Typography
+                  variant="body1"
+                  sx={{ ...ellipsisSx, fontWeight: theme.typography.fontWeightMedium }}
+                >
+                  {getDisplayValue(selectedStore.id)}
+                </Typography>
+              </Tooltip>
             </Box>
-          )}
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {selectedStore.type === 'PHYSICAL'
+                  ? t('pages.posCatalog.drawer.address')
+                  : t('pages.posCatalog.drawer.website')}
+              </Typography>
+              <Tooltip
+                title={
+                  selectedStore.type === 'PHYSICAL'
+                    ? getDisplayValue(
+                        [
+                          [selectedStore.address, selectedStore.streetNumber]
+                            .filter(Boolean)
+                            .join(', '),
+                          [selectedStore.zipCode, selectedStore.city, selectedStore.province]
+                            .filter(Boolean)
+                            .join(', '),
+                        ]
+                          .filter(Boolean)
+                          .join(' - ')
+                      )
+                    : getDisplayValue(selectedStore.website)
+                }
+              >
+                <Typography
+                  variant="body1"
+                  sx={{ ...ellipsisSx, fontWeight: theme.typography.fontWeightMedium }}
+                >
+                  {selectedStore.type === 'PHYSICAL' ? (
+                    getDisplayValue(
+                      [
+                        [selectedStore.address, selectedStore.streetNumber]
+                          .filter(Boolean)
+                          .join(', '),
+                        [selectedStore.zipCode, selectedStore.city, selectedStore.province]
+                          .filter(Boolean)
+                          .join(', '),
+                      ]
+                        .filter(Boolean)
+                        .join(' - ')
+                    )
+                  ) : (
+                    <a
+                      href={`https://${(selectedStore.website || '').replace(/^https?:\/\//, '')}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {getDisplayValue(selectedStore.website)}
+                    </a>
+                  )}
+                </Typography>
+              </Tooltip>
+            </Box>
+            {selectedStore.type === 'PHYSICAL' && (
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  {t('pages.posCatalog.drawer.phone')}
+                </Typography>
+                <Tooltip title={getDisplayValue(selectedStore.channelPhone)}>
+                  <Typography
+                    variant="body1"
+                    sx={{ ...ellipsisSx, fontWeight: theme.typography.fontWeightMedium }}
+                  >
+                    {getDisplayValue(selectedStore.channelPhone)}
+                  </Typography>
+                </Tooltip>
+              </Box>
+            )}
 
-          <Typography variant="overline" color="text.secondary">
-            {t('pages.posCatalog.drawer.referentData')}
-          </Typography>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              {t('pages.posCatalog.drawer.name')}
+            <Typography variant="overline" color="text.secondary">
+              {t('pages.posCatalog.drawer.referentData')}
             </Typography>
-            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
-              {selectedStore.contactName || MISSING_DATA_PLACEHOLDER}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              {t('pages.posCatalog.drawer.surname')}
-            </Typography>
-            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
-              {selectedStore.contactSurname || MISSING_DATA_PLACEHOLDER}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              {t('pages.posCatalog.drawer.email')}
-            </Typography>
-            <Typography variant="body1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
-              {selectedStore.contactEmail || MISSING_DATA_PLACEHOLDER}
-            </Typography>
-          </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t('pages.posCatalog.drawer.name')}
+              </Typography>
+              <Tooltip title={getDisplayValue(selectedStore.contactName)}>
+                <Typography
+                  variant="body1"
+                  sx={{ ...ellipsisSx, fontWeight: theme.typography.fontWeightMedium }}
+                >
+                  {getDisplayValue(selectedStore.contactName)}
+                </Typography>
+              </Tooltip>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t('pages.posCatalog.drawer.surname')}
+              </Typography>
+              <Tooltip title={getDisplayValue(selectedStore.contactSurname)}>
+                <Typography
+                  variant="body1"
+                  sx={{ ...ellipsisSx, fontWeight: theme.typography.fontWeightMedium }}
+                >
+                  {getDisplayValue(selectedStore.contactSurname)}
+                </Typography>
+              </Tooltip>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t('pages.posCatalog.drawer.email')}
+              </Typography>
+              <Tooltip title={getDisplayValue(selectedStore.contactEmail)}>
+                <Typography
+                  variant="body1"
+                  sx={{ ...ellipsisSx, fontWeight: theme.typography.fontWeightMedium }}
+                >
+                  {getDisplayValue(selectedStore.contactEmail)}
+                </Typography>
+              </Tooltip>
+            </Box>
           </>
         )}
       </DetailDrawer>
