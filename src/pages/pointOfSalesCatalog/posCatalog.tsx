@@ -18,7 +18,11 @@ import {
 } from '../../api/generated/merchants/data-contracts';
 import { parseJwt } from '../../utils/jwt-utils';
 import { associatePos, getMerchantPointOfSalesCatalog } from '../../services/merchantService';
-import { ELEMENT_PER_PAGE, PAGINATION_SIZE } from '../../utils/constants';
+import {
+  ASSOCIATION_SUCCESS_ALERT_TIMEOUT,
+  ELEMENT_PER_PAGE,
+  PAGINATION_SIZE,
+} from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
 import { useAppSelector } from '../../redux/hooks';
@@ -34,6 +38,7 @@ import AlreadyAssociatedPosModal, {
 
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
+const ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK = 5000;
 
 const initialValues: GetPointOfSalesFilters = {
   initiative: '',
@@ -61,6 +66,8 @@ const PosCatalog: React.FC = () => {
     associatedCount: number;
     initiativeName: string;
   } | null>(null);
+  const [alreadyAssociatedInitiativeName, setAlreadyAssociatedInitiativeName] = useState('');
+  const [shouldShowAlreadyAssociatedStores, setShouldShowAlreadyAssociatedStores] = useState(true);
   const [pendingAssociationRefreshFilters, setPendingAssociationRefreshFilters] =
     useState<GetPointOfSalesFilters | null>(null);
 
@@ -85,6 +92,15 @@ const PosCatalog: React.FC = () => {
   }, [location, history, setAlert, t]);
 
   const initiativeOptions = useMemo(
+    () =>
+      (initiativesList ?? []).map((initiative) => ({
+        value: initiative.initiativeId ?? '',
+        label: initiative.initiativeName ?? '',
+      })),
+    [initiativesList]
+  );
+
+  const publishedInitiativeOptions = useMemo(
     () =>
       (initiativesList ?? [])
         .filter((initiative) => initiative.status === PUBLISHED)
@@ -234,12 +250,15 @@ const PosCatalog: React.FC = () => {
         }),
         isOpen: true,
         severity: 'success',
+        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT ?? ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK,
       }),
     [setAlert, t]
   );
 
   const handleAlreadyAssociatedModalClose = useCallback(() => {
     setAlreadyAssociatedStores([]);
+    setAlreadyAssociatedInitiativeName('');
+    setShouldShowAlreadyAssociatedStores(true);
 
     if (associationSuccessData) {
       showAssociationSuccessAlert(
@@ -272,14 +291,18 @@ const PosCatalog: React.FC = () => {
       handleToggleDrawer();
 
       if (alreadyAssociated.length > 0) {
-        setAssociationSuccessData({ associatedCount, initiativeName });
+        setAssociationSuccessData(associatedCount > 0 ? { associatedCount, initiativeName } : null);
+        setAlreadyAssociatedInitiativeName(initiativeName);
+        setShouldShowAlreadyAssociatedStores(associatedCount > 0);
         setPendingAssociationRefreshFilters(formik.values);
         setAlreadyAssociatedStores(alreadyAssociated);
         return;
       }
 
       handleFiltersApplied(formik.values);
-      showAssociationSuccessAlert(associatedCount, initiativeName);
+      if (associatedCount > 0) {
+        showAssociationSuccessAlert(associatedCount, initiativeName);
+      }
     },
     [
       formik.values,
@@ -294,8 +317,8 @@ const PosCatalog: React.FC = () => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     const initiativeName =
-      initiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)?.label ??
-      '';
+      publishedInitiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)
+        ?.label ?? '';
 
     if (!merchantId || !selectedInitiativeId || selectedStoreIds.length === 0) {
       handleAssociateModalClose();
@@ -322,7 +345,7 @@ const PosCatalog: React.FC = () => {
     handleAssociationResult,
     handleAssociateModalClose,
     handleFetchError,
-    initiativeOptions,
+    publishedInitiativeOptions,
     selectedInitiativeId,
     selectedStoreIds,
   ]);
@@ -412,14 +435,16 @@ const PosCatalog: React.FC = () => {
                 onClose={handleToggleDrawer}
                 selectedStore={selectedStore}
                 initiativeOptions={initiativeOptions}
+                publishedInitiativeOptions={publishedInitiativeOptions}
                 merchantId={parseJwt(storageTokenOps.read())?.merchant_id ?? ''}
               />
             </>
           )}
           <AssociateSelectedPosModal
             open={isAssociateModalOpen}
-            initiativeOptions={initiativeOptions}
+            initiativeOptions={publishedInitiativeOptions}
             selectedInitiativeId={selectedInitiativeId}
+            selectedStoresCount={selectedStoreIds.length}
             isLoading={isAssociatingPos}
             onClose={handleAssociateModalClose}
             onInitiativeChange={handleInitiativeChange}
@@ -427,6 +452,8 @@ const PosCatalog: React.FC = () => {
           />
           <AlreadyAssociatedPosModal
             stores={alreadyAssociatedStores}
+            initiativeName={alreadyAssociatedInitiativeName}
+            showStores={shouldShowAlreadyAssociatedStores}
             onClose={handleAlreadyAssociatedModalClose}
           />
         </>
@@ -444,7 +471,7 @@ const PosCatalog: React.FC = () => {
           }}
         >
           <Stack spacing={1} alignItems="center">
-            <ErrorOutlineOutlinedIcon fontVariant='h5' color='disabled' />
+            <ErrorOutlineOutlinedIcon fontVariant="h5" color="disabled" />
             <Typography variant="body2">
               {t('pages.initiativeStores.noStores')}
               {t('pages.initiativeStores.addStoreNoResults')}.

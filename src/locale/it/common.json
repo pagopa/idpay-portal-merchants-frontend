@@ -114,16 +114,25 @@
         "associate": "Associa",
         "exclude": "Escludi"
       },
-      "associateSuccess": "Sono stati associati {{count}} punti vendita a {{initiativeName}}.",
+      "associateSuccess_one": "È stato associato {{count}} punto vendita a {{initiativeName}}.",
+      "associateSuccess_other": "Sono stati associati {{count}} punti vendita a {{initiativeName}}.",
       "associateModal": {
-        "title": "Associa punti vendita a un'iniziativa",
-        "description": "I punti vendita selezionati verranno associati all'iniziativa selezionata.",
+        "title_one": "Associa punto vendita a un'iniziativa",
+        "title_other": "Associa punti vendita a un'iniziativa",
+        "description_one": "Il punto vendita selezionato verrà associato all'iniziativa selezionata.",
+        "description_other": "I punti vendita selezionati verranno associati all'iniziativa selezionata.",
         "initiativeLabel": "Iniziativa",
         "infoBanner": "Se in seguito escludi uno o più punti vendita dall'iniziativa, li ritroverai sempre nel catalogo e potrai riassociarli in qualsiasi momento."
       },
       "alreadyAssociatedModal": {
-        "title": "Punti vendita già associati",
-        "description": "I seguenti punti vendita selezionati sono già associati all'iniziativa scelta."
+        "title_one": "Punto vendita già associato",
+        "title_other": "Punti vendita già associati",
+        "description_one": "Il seguente punto vendita selezionato è già associato all'iniziativa scelta.",
+        "description_other": "I seguenti punti vendita selezionati sono già associati all'iniziativa scelta.",
+        "allAlreadyAssociatedTitle_one": "Punto vendita già associato",
+        "allAlreadyAssociatedTitle_other": "Punti vendita già associati",
+        "allAlreadyAssociatedDescription_one": "Il punto vendita selezionato è già associato all'iniziativa {{initiativeName}}.",
+        "allAlreadyAssociatedDescription_other": "I punti vendita selezionati sono già associati all'iniziativa {{initiativeName}}."
       },
       "drawer": {
         "associatedTo": "PUNTO VENDITA ASSOCIATO A:",

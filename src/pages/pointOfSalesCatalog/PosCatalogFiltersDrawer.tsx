@@ -10,7 +10,8 @@ import {
   PointOfSaleOnboardingResultDTO,
 } from '../../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters } from '../../types/types';
-import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { ASSOCIATION_SUCCESS_ALERT_TIMEOUT, MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { formatCatalogDrawerAddress } from '../../utils/addressUtils';
 import { associatePos, getPointOfSaleInitiatives } from '../../services/merchantService';
 import { safeFormatDate } from '../../utils/formatUtils';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
@@ -24,6 +25,7 @@ type InitiativeOption = {
   value: string;
   label: string;
 };
+const ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK = 5000;
 
 type PosCatalogFiltersProps = {
   formik: FormikProps<GetPointOfSalesFilters>;
@@ -39,6 +41,7 @@ type PosCatalogDrawerProps = {
   onClose: () => void;
   selectedStore: PointOfSaleDTO | null;
   initiativeOptions: Array<InitiativeOption>;
+  publishedInitiativeOptions: Array<InitiativeOption>;
   merchantId: string;
 };
 
@@ -66,6 +69,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   onClose,
   selectedStore,
   initiativeOptions,
+  publishedInitiativeOptions,
   merchantId,
 }) => {
   const { t } = useScopedTranslation();
@@ -78,6 +82,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   };
+  const selectedStoreAddress = selectedStore ? formatCatalogDrawerAddress(selectedStore) : '';
   const [initiatives, setInitiatives] = useState<Array<PointOfSaleInitiativeDTO>>([]);
   const [isLoadingInitiatives, setIsLoadingInitiatives] = useState(false);
   const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
@@ -90,6 +95,8 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
     associatedCount: number;
     initiativeName: string;
   } | null>(null);
+  const [alreadyAssociatedInitiativeName, setAlreadyAssociatedInitiativeName] = useState('');
+  const [shouldShowAlreadyAssociatedStores, setShouldShowAlreadyAssociatedStores] = useState(true);
   const [initiativesRefreshKey, setInitiativesRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -171,12 +178,15 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
         }),
         isOpen: true,
         severity: 'success',
+        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT ?? ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK,
       }),
     [setAlert, t]
   );
 
   const handleAlreadyAssociatedModalClose = useCallback(() => {
     setAlreadyAssociatedStores([]);
+    setAlreadyAssociatedInitiativeName('');
+    setShouldShowAlreadyAssociatedStores(true);
 
     if (associationSuccessData) {
       showAssociationSuccessAlert(
@@ -200,21 +210,25 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
       onClose();
 
       if (alreadyAssociated.length > 0) {
-        setAssociationSuccessData({ associatedCount, initiativeName });
+        setAssociationSuccessData(associatedCount > 0 ? { associatedCount, initiativeName } : null);
+        setAlreadyAssociatedInitiativeName(initiativeName);
+        setShouldShowAlreadyAssociatedStores(associatedCount > 0);
         setAlreadyAssociatedStores(alreadyAssociated);
         return;
       }
 
       setInitiativesRefreshKey((current) => current + 1);
-      showAssociationSuccessAlert(associatedCount, initiativeName);
+      if (associatedCount > 0) {
+        showAssociationSuccessAlert(associatedCount, initiativeName);
+      }
     },
     [handleAssociateModalClose, onClose, showAssociationSuccessAlert]
   );
 
   const handleAssociateConfirm = useCallback(async () => {
     const initiativeName =
-      initiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)?.label ??
-      '';
+      publishedInitiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)
+        ?.label ?? '';
 
     if (!merchantId || !selectedStore?.id || !selectedInitiativeId) {
       handleFetchError();
@@ -234,8 +248,8 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   }, [
     handleAssociationResult,
     handleFetchError,
-    initiativeOptions,
     merchantId,
+    publishedInitiativeOptions,
     selectedInitiativeId,
     selectedStore?.id,
   ]);
@@ -329,18 +343,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
               <Tooltip
                 title={
                   selectedStore.type === 'PHYSICAL'
-                    ? getDisplayValue(
-                        [
-                          [selectedStore.address, selectedStore.streetNumber]
-                            .filter(Boolean)
-                            .join(', '),
-                          [selectedStore.zipCode, selectedStore.city, selectedStore.province]
-                            .filter(Boolean)
-                            .join(', '),
-                        ]
-                          .filter(Boolean)
-                          .join(' - ')
-                      )
+                    ? getDisplayValue(selectedStoreAddress)
                     : getDisplayValue(selectedStore.website)
                 }
               >
@@ -349,18 +352,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
                   sx={{ ...ellipsisSx, fontWeight: theme.typography.fontWeightMedium }}
                 >
                   {selectedStore.type === 'PHYSICAL' ? (
-                    getDisplayValue(
-                      [
-                        [selectedStore.address, selectedStore.streetNumber]
-                          .filter(Boolean)
-                          .join(', '),
-                        [selectedStore.zipCode, selectedStore.city, selectedStore.province]
-                          .filter(Boolean)
-                          .join(', '),
-                      ]
-                        .filter(Boolean)
-                        .join(' - ')
-                    )
+                    getDisplayValue(selectedStoreAddress)
                   ) : (
                     <a
                       href={`https://${(selectedStore.website || '').replace(/^https?:\/\//, '')}`}
@@ -436,8 +428,9 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
       </DetailDrawer>
       <AssociateSelectedPosModal
         open={isAssociateModalOpen}
-        initiativeOptions={initiativeOptions}
+        initiativeOptions={publishedInitiativeOptions}
         selectedInitiativeId={selectedInitiativeId}
+        selectedStoresCount={1}
         isLoading={isAssociatingPos}
         onClose={handleAssociateModalClose}
         onInitiativeChange={setSelectedInitiativeId}
@@ -445,6 +438,8 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
       />
       <AlreadyAssociatedPosModal
         stores={alreadyAssociatedStores}
+        initiativeName={alreadyAssociatedInitiativeName}
+        showStores={shouldShowAlreadyAssociatedStores}
         onClose={handleAlreadyAssociatedModalClose}
       />
     </>
