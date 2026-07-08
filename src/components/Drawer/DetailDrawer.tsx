@@ -1,7 +1,17 @@
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import { Button, ButtonProps, Divider, IconButton, Typography } from '@mui/material';
+import { Button, ButtonProps, Divider, IconButton, Tooltip, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { theme } from '@pagopa/mui-italia/theme';
+import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+
+const ellipsisSx = {
+  display: 'block',
+  maxWidth: 'calc(100% - 1rem)',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  maxHeight: '7rem',
+};
 
 export type DetailDrawerProps = {
   isOpen: boolean;
@@ -40,15 +50,24 @@ export default function DetailDrawer({
           justifyContent="space-between"
           columnGap="0.5rem"
         >
-          <Typography variant="h6">{title}</Typography>
-          <IconButton data-testid="close-button" onClick={setIsOpen} sx={{ color: 'text.secondary' }}>
+          <Tooltip title={title?.trim() === '' || !title ? MISSING_DATA_PLACEHOLDER : title}>
+            <Typography fontWeight={theme.typography.fontWeightMedium} variant="h6" sx={ellipsisSx}>
+              {title?.trim() === '' || !title ? MISSING_DATA_PLACEHOLDER : title}
+            </Typography>
+          </Tooltip>
+
+          <IconButton
+            data-testid="close-button"
+            onClick={setIsOpen}
+            sx={{ color: 'text.secondary', flexShrink: 0 }}
+          >
             <CloseIcon />
           </IconButton>
         </Box>
         <Divider />
         <Box
           sx={{
-            pt:'1.5rem',
+            pt: '1.5rem',
             display: 'flex',
             flexDirection: 'column',
             width: '100%',
