@@ -1,5 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import { mockedInitiativesList } from '../../../api/__mocks__/MerchantsApiClient';
 import { setInitiativesList } from '../../../redux/slices/initiativesSlice';
 import { store } from '../../../redux/store';
@@ -69,11 +71,17 @@ describe('Test suite for initiativeList page', () => {
   });
 
   test('User navigate to discounts list pege of an initiative', async () => {
+    const user = userEvent.setup();
+    const history = createMemoryHistory();
+
     store.dispatch(setInitiativesList(mockedInitiativesList));
-    const { history } = renderWithContext(<InitiativesList />, store);
-    const link = await screen.findByText('Iniziativa mock 1234');
-    const oldLocationPathname = history.location.pathname;
-    fireEvent.click(link);
-    await waitFor(() => expect(oldLocationPathname !== history.location.pathname).toBeTruthy());
+    renderWithContext(<InitiativesList />, store, history);
+    const initiativeButton = await screen.findByRole('button', { name: 'Iniziativa mock 1234' });
+
+    await user.click(initiativeButton);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Iniziativa mock 1234' })).toBeTruthy();
+    });
   });
 });

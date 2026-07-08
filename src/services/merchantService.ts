@@ -1,6 +1,7 @@
 import { getMerchantsApi } from '../api/MerchantsApiClient';
 import { ApiError } from '../api/ApiError';
 import {
+  GetMerchantInitiativesAvailableParams,
   InitiativeDTO,
   MerchantStatisticsDTO,
   MerchantDetailDTO,
@@ -25,6 +26,8 @@ import {
   ValidationErrorDetail,
   PointOfSaleInitiativeDTO,
   PointOfSaleOnboardingResultDTO,
+  OnboardingResponse,
+  PageResponseInitiativeResponse,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 
@@ -68,6 +71,11 @@ export type GetMerchantTransactionsProcessedParams = {
 
 export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> =>
   getMerchantsApi().getMerchantInitiativeList();
+
+export const getMerchantInitiativesAvailable = (
+  query?: GetMerchantInitiativesAvailableParams
+): Promise<Array<PageResponseInitiativeResponse>> =>
+  getMerchantsApi().getMerchantInitiativesAvailable(query);
 
 export const getMerchantTransactions = (
   initiativeId: string,
@@ -337,3 +345,7 @@ export const patchPointOfSaleReferent = (
   body: PointOfSaleReferentPatchDTO
 ): Promise<PointOfSaleDTO> =>
   getMerchantsApi().patchPointOfSaleReferent(merchantId, pointOfSaleId, body);
+
+export const putMerchantOnboardingRequest = (initiativeId: string): Promise<OnboardingResponse> =>
+  getMerchantsApi().putMerchantOnboardingRequest(initiativeId);
+

@@ -1,6 +1,7 @@
 import { ENV } from '../utils/env';
 import {
   InitiativeDTO,
+  GetMerchantInitiativesAvailableParams,
   MerchantStatisticsDTO,
   MerchantDetailDTO,
   MerchantTransactionsListDTO,
@@ -22,9 +23,12 @@ import {
   PointOfSaleTransactionsProcessedListDTO,
   PointOfSaleInitiativeDTO,
   PointOfSaleOnboardingResultDTO,
+  OnboardingResponse,
+  PageResponseInitiativeResponse,
 } from './generated/merchants/data-contracts';
 
 import { MerchantInitiatives } from './generated/merchants/MerchantInitiatives';
+import { MerchantInitiativesOnboarding } from './generated/merchants/MerchantInitiativesOnboarding';
 import { MerchantInitiativeStatistics } from './generated/merchants/MerchantInitiativeStatistics';
 import { MerchantDetail } from './generated/merchants/MerchantDetail';
 import { MerchantTransactions } from './generated/merchants/MerchantTransactions';
@@ -38,6 +42,7 @@ import { axiosFetchAdapter } from './axiosFetchAdapter';
 
 class MerchantsApiClient {
   private merchantInitiatives: MerchantInitiatives;
+  private merchantInitiativesOnboarding: MerchantInitiativesOnboarding;
   private merchantStatistics: MerchantInitiativeStatistics;
   private merchantDetail: MerchantDetail;
   private merchantTransactions: MerchantTransactions;
@@ -55,6 +60,7 @@ class MerchantsApiClient {
     };
 
     this.merchantInitiatives = new MerchantInitiatives(baseConfig);
+    this.merchantInitiativesOnboarding = new MerchantInitiativesOnboarding(baseConfig);
     this.merchantStatistics = new MerchantInitiativeStatistics(baseConfig);
     this.merchantDetail = new MerchantDetail(baseConfig);
     this.merchantTransactions = new MerchantTransactions(baseConfig);
@@ -68,6 +74,13 @@ class MerchantsApiClient {
 
   public async getMerchantInitiativeList(): Promise<Array<InitiativeDTO>> {
     const res = await this.merchantInitiatives.getMerchantInitiativeList();
+    return res.data;
+  }
+
+  public async getMerchantInitiativesAvailable(
+    query?: GetMerchantInitiativesAvailableParams
+  ): Promise<Array<PageResponseInitiativeResponse>> {
+    const res = await this.merchantInitiatives.getMerchantInitiativesAvailable(query ?? {});
     return res.data;
   }
 
@@ -423,6 +436,13 @@ class MerchantsApiClient {
       { merchantId, pointOfSaleId },
       body
     );
+    return res.data;
+  }
+
+  public async putMerchantOnboardingRequest(initiativeId: string): Promise<OnboardingResponse> {
+    const res = await this.merchantInitiativesOnboarding.putMerchantOnboardingRequest({
+      initiativeId,
+    });
     return res.data;
   }
 }
