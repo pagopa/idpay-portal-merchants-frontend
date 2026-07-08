@@ -16,6 +16,8 @@ export const MISSING_EURO_PLACEHOLDER = '0,00 €';
 
 export const ELEMENT_PER_PAGE = [10, 25, 50, 100];
 
+export const ASSOCIATION_SUCCESS_ALERT_TIMEOUT = 6000;
+
 export const enum POS_UPDATE {
   Csv = 'csv',
   Manual = 'manual',
@@ -35,4 +37,3 @@ export const enum TYPE_TEXT {
 }
 
 export const MIN_START_DATE = '2025-11-18';
-
