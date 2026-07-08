@@ -102,7 +102,9 @@
       "validityPeriod": "Periodo di Validità",
       "subtitle": "Visualizza e gestisci le iniziative di supporto alla spesa a cui hai aderito.",
       "title": "Iniziative",
-      "initiativeName": "Nome"
+      "initiativeName": "Nome",
+      "myInitiativesTab": "Le tue iniziative",
+      "newInitiativesTab": "Nuove iniziative"
     },
     "posCatalog": {
       "title": "Catalogo punti vendita",
@@ -300,7 +302,7 @@
         "detailCardTitleDx": "dati rimborso",
         "posType": "Tipo"
       },
-      "invoiceDetailConfirmModal" : {
+      "invoiceDetailConfirmModal": {
         "title": "Conferma spostamento",
         "description": "Confermi di voler spostare la transazione al mese successivo?"
       }
@@ -316,14 +318,14 @@
       "discountCode": "Codice sconto",
       "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
       "reportUserSubtitle": "Segnala un utente che non ha presentato l'elettrodomestico obsoleto.",
-      "mtTitle":"La segnalazione servirà solo ai fini di controllo e monitoraggio e non influenza la richiesta di rimborso al suo acquisto.",
-      "searchTitle":"Qual è il codice fiscale?",
-      "searchDescription":"Inserire il codice fiscale dell'utente",
-      "validCf":"La segnalazione è stata registrata",
-      "removedCf":"La segnalazione è stata rimossa",
+      "mtTitle": "La segnalazione servirà solo ai fini di controllo e monitoraggio e non influenza la richiesta di rimborso al suo acquisto.",
+      "searchTitle": "Qual è il codice fiscale?",
+      "searchDescription": "Inserire il codice fiscale dell'utente",
+      "validCf": "La segnalazione è stata registrata",
+      "removedCf": "La segnalazione è stata rimossa",
       "invalid": "Codice fiscale non valido",
       "noResultUser": "Codice fiscale assente",
-      "insertCf":"Campo obbligatorio",
+      "insertCf": "Campo obbligatorio",
       "alreadyRegistered": "Il codice fiscale è già stato registrato",
       "alreadyPresent": "Codice fiscale presente presso altro esercente",
       "ModalReportedUser": {
@@ -369,14 +371,14 @@
   },
   "modifyDocument": {
     "breadcrumbLabel": "Modifica documento",
-    "title":"Carica la fattura",
+    "title": "Carica la fattura",
     "invoiceTitle": "Qual è il numero  della fattura?",
     "invoiceSubtitle": "",
     "insertInvoice": "Inserisci il numero della fattura",
     "invoiceLabel": "Numero della fattura",
     "creditNote": "Carica il documento",
-    "replaceFile":"Sostituisci",
-    "creditNoteTitle":"",
+    "replaceFile": "Sostituisci",
+    "creditNoteTitle": "",
     "creditNoteSubtitle": "Carica il file della fattura elettronica relativa a questo acquisto. Assicurati che il documento sia in formato .xml o .pdf e conforme agli standard della fatturazione elettronica.",
     "manualLink": "Dubbi? Vai sul manuale",
     "uploadFile": "Trascina qui il file .xml o .pdf della fattura da caricare o ",

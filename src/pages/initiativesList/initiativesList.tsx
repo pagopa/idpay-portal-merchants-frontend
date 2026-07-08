@@ -11,6 +11,8 @@ import {
   TableRow,
   TableSortLabel,
   TextField,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
@@ -102,7 +104,43 @@ const InitiativesList = () => {
   const [initiativeListFiltered, setInitiativeListFiltered] = useState<Array<Data>>([]);
   const history = useHistory();
   const { t } = useScopedTranslation();
+  const [value, setValue] = useState(0);
   const initiativesListSel = useAppSelector(intiativesListSelector);
+
+  interface TabPanelProps {
+    children?: React.ReactNode;
+    index: number;
+    value: number;
+  }
+
+  const TabPanel = (props: TabPanelProps) => {
+    const { children, value, index, ...other } = props;
+
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`tabpanel-${index}`}
+        aria-labelledby={`tab-${index}`}
+        {...other}
+      >
+        {value === index && (
+          <Box>
+            <Box>{children}</Box>
+          </Box>
+        )}
+      </div>
+    );
+  };
+
+  const a11yProps = (index: number) => ({
+    id: `tab-${index}`,
+    'aria-controls': `tabpanel-${index}`,
+  });
+
+  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
   useEffect(() => {
     if (Array.isArray(initiativesListSel)) {
@@ -213,88 +251,121 @@ const InitiativesList = () => {
         </Box>
       </Box>
 
-      <Paper
-        sx={{
-          width: '100%',
-          mb: 2,
-          pb: 3,
-          backgroundColor: grey.A100,
-        }}
-      >
-        <TableContainer>
-          {initiativeListFiltered.length > 0 ? (
-            <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
-              <EnhancedTableHead
-                order={order}
-                orderBy={orderBy}
-                onRequestSort={handleRequestSort}
-              />
-              <TableBody sx={{ backgroundColor: 'white' }}>
-                {stableSort(initiativeListFiltered, getComparator(order, orderBy)).map(
-                  (row, index) => {
-                    const labelId = `enhanced-table-row-${index}`;
-                    return (
-                      <TableRow tabIndex={-1} key={row.id} sx={{}}>
-                        <TableCell id={labelId} scope="row">
-                          <Box
-                            component="button"
-                            type="button"
-                            sx={{
-                              color: 'primary.main',
-                              fontWeight: 600,
-                              fontSize: '1em',
-                              textAlign: 'left',
-                              background: 'none',
-                              border: 'none',
-                              padding: 0,
-                              cursor: 'pointer',
-                            }}
-                            onClick={() => {
-                              history.push(
-                                generatePath(ROUTES.OVERVIEW, {
-                                  initiative_id: row.initiativeId,
-                                })
-                              );
-                            }}
-                            data-testid="initiative-btn-test"
-                          >
-                            {row.initiativeName}
-                          </Box>
-                        </TableCell>
-                        <TableCell>{row.organizationName}</TableCell>
-                        <TableCell>{row.spendingPeriod}</TableCell>
-                        <TableCell>{renderInitiativeStatus(row.status as StatusEnum)}</TableCell>
-                      </TableRow>
-                    );
-                  }
-                )}
-              </TableBody>
-            </Table>
-          ) : (
-            <Box
+      <Box sx={{ display: 'grid', gridColumn: 'span 12', height: 'auto', alignItems: 'start' }}>
+        <Box sx={{ width: '100%', borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            aria-label="merchant initiatives tabs"
+            variant="fullWidth"
+          >
+            <Tab
+              label={t('pages.initiativesList.myInitiativesTab')}
+              {...a11yProps(0)}
+              data-testid="merchant-initiatives-1"
+            />
+            <Tab
+              label={t('pages.initiativesList.newInitiativesTab')}
+              {...a11yProps(1)}
+              data-testid="merchant-initiatives-2"
+            />
+          </Tabs>
+        </Box>
+        <Box sx={{ width: '100%' }}>
+          {/* <TabPanel value={value} index={0}>
+            <MerchantTransactions id={id} />
+          </TabPanel> */}
+          <TabPanel value={value} index={0}>
+            <Paper
               sx={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(12, 1fr)',
-                justifyContent: 'center',
                 width: '100%',
-                backgroundColor: 'white',
-                p: 2,
+                mb: 2,
+                pb: 3,
+                backgroundColor: grey.A100,
               }}
             >
-              <Box
-                sx={{
-                  display: 'inline',
-                  gridColumn: 'span 12',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                }}
-              >
-                <EmptyList message={t('pages.initiativesList.emptyList')} />
-              </Box>
-            </Box>
-          )}
-        </TableContainer>
-      </Paper>
+              <TableContainer>
+                {initiativeListFiltered.length > 0 ? (
+                  <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+                    <EnhancedTableHead
+                      order={order}
+                      orderBy={orderBy}
+                      onRequestSort={handleRequestSort}
+                    />
+                    <TableBody sx={{ backgroundColor: 'white' }}>
+                      {stableSort(initiativeListFiltered, getComparator(order, orderBy)).map(
+                        (row, index) => {
+                          const labelId = `enhanced-table-row-${index}`;
+                          return (
+                            <TableRow tabIndex={-1} key={row.id} sx={{}}>
+                              <TableCell id={labelId} scope="row">
+                                <Box
+                                  component="button"
+                                  type="button"
+                                  sx={{
+                                    color: 'primary.main',
+                                    fontWeight: 600,
+                                    fontSize: '1em',
+                                    textAlign: 'left',
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: 0,
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => {
+                                    history.push(
+                                      generatePath(ROUTES.OVERVIEW, {
+                                        initiative_id: row.initiativeId,
+                                      })
+                                    );
+                                  }}
+                                  data-testid="initiative-btn-test"
+                                >
+                                  {row.initiativeName}
+                                </Box>
+                              </TableCell>
+                              <TableCell>{row.organizationName}</TableCell>
+                              <TableCell>{row.spendingPeriod}</TableCell>
+                              <TableCell>
+                                {renderInitiativeStatus(row.status as StatusEnum)}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }
+                      )}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(12, 1fr)',
+                      justifyContent: 'center',
+                      width: '100%',
+                      backgroundColor: 'white',
+                      p: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'inline',
+                        gridColumn: 'span 12',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <EmptyList message={t('pages.initiativesList.emptyList')} />
+                    </Box>
+                  </Box>
+                )}
+              </TableContainer>
+            </Paper>
+          </TabPanel>
+          <TabPanel value={value} index={1}>
+            <h1>TAB CONTENT 2</h1>
+          </TabPanel>
+        </Box>
+      </Box>
     </Box>
   );
 };
