@@ -360,11 +360,11 @@ const InitiativeStoreDetail = () => {
         />
         <Tooltip title={storeDetail?.franchiseName ?? ''} placement="bottom">
           <Box
+            my={2}
             sx={{
               display: 'inline-block',
               maxWidth: 'calc(95vw - 300px)',
               minWidth: 0,
-              mt: 2,
               verticalAlign: 'bottom',
             }}
           >
