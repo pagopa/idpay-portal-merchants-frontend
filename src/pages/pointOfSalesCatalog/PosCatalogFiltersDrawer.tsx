@@ -25,6 +25,7 @@ type InitiativeOption = {
   value: string;
   label: string;
 };
+const ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK = 5000;
 
 type PosCatalogFiltersProps = {
   formik: FormikProps<GetPointOfSalesFilters>;
@@ -177,7 +178,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
         }),
         isOpen: true,
         severity: 'success',
-        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT,
+        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT ?? ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK,
       }),
     [setAlert, t]
   );

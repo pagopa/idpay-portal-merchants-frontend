@@ -38,6 +38,7 @@ import AlreadyAssociatedPosModal, {
 
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
+const ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK = 5000;
 
 const initialValues: GetPointOfSalesFilters = {
   initiative: '',
@@ -249,7 +250,7 @@ const PosCatalog: React.FC = () => {
         }),
         isOpen: true,
         severity: 'success',
-        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT,
+        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT ?? ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK,
       }),
     [setAlert, t]
   );
