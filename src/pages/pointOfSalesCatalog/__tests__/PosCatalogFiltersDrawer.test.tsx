@@ -2,12 +2,9 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useFormik } from 'formik';
 import { GetPointOfSalesFilters } from '../../../types/types';
- import {
-   PosCatalogDrawer,
-   PosCatalogFilters,
- } from '../PosCatalogFiltersDrawer';
- import { MockPosCatalogStore } from '../mockPosCatalog';
- import { associatePos, getPointOfSaleInitiatives } from '../../../services/merchantService';
+import { PosCatalogDrawer, PosCatalogFilters } from '../PosCatalogFiltersDrawer';
+import { MockPosCatalogStore } from '../mockPosCatalog';
+import { associatePos, getPointOfSaleInitiatives } from '../../../services/merchantService';
 
 const mockSetAlert = jest.fn();
 
@@ -18,10 +15,10 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
   }),
 }));
 
- jest.mock('../../../services/merchantService', () => ({
-   getPointOfSaleInitiatives: jest.fn(),
-   associatePos: jest.fn(),
- }));
+jest.mock('../../../services/merchantService', () => ({
+  getPointOfSaleInitiatives: jest.fn(),
+  associatePos: jest.fn(),
+}));
 
 jest.mock('../../../hooks/useAlert', () => ({
   useAlert: () => ({
@@ -29,7 +26,7 @@ jest.mock('../../../hooks/useAlert', () => ({
   }),
 }));
 
- jest.mock('../../../components/Drawer/DetailDrawer', () => ({
+jest.mock('../../../components/Drawer/DetailDrawer', () => ({
   __esModule: true,
   default: ({
     isOpen,
@@ -47,7 +44,11 @@ jest.mock('../../../hooks/useAlert', () => ({
         <div>{title}</div>
         {children}
         {buttons?.map((button, index) => (
-          <button key={`${button.title}-${index}`} data-testid={button.dataTestId} onClick={button.onClick}>
+          <button
+            key={`${button.title}-${index}`}
+            data-testid={button.dataTestId}
+            onClick={button.onClick}
+          >
             {button.title}
           </button>
         ))}
@@ -143,7 +144,7 @@ const drawerInitiativeOptions = [
   { value: 'Iniziativa 2', label: 'Iniziativa 2' },
 ];
 
- describe('PosCatalogFiltersDrawer', () => {
+describe('PosCatalogFiltersDrawer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -195,6 +196,7 @@ const drawerInitiativeOptions = [
         onClose={jest.fn()}
         selectedStore={null}
         initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
         merchantId="merchant-123"
       />
     );
@@ -202,7 +204,7 @@ const drawerInitiativeOptions = [
     expect(container).toBeEmptyDOMElement();
   });
 
-   it('renders online store details with website link and fetched initiatives', async () => {
+  it('renders online store details with website link and fetched initiatives', async () => {
     (getPointOfSaleInitiatives as jest.Mock).mockResolvedValue([
       { initiativeId: 'Iniziativa 2', updatedAt: '2024-02-02T00:00:00Z' },
       { initiativeId: 'Iniziativa 1', updatedAt: '2024-01-01T00:00:00Z' },
@@ -214,6 +216,7 @@ const drawerInitiativeOptions = [
         onClose={jest.fn()}
         selectedStore={onlineStore}
         initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
         merchantId="merchant-123"
       />
     );
@@ -242,6 +245,7 @@ const drawerInitiativeOptions = [
         onClose={jest.fn()}
         selectedStore={physicalStore}
         initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
         merchantId="merchant-123"
       />
     );
@@ -265,6 +269,7 @@ const drawerInitiativeOptions = [
         onClose={jest.fn()}
         selectedStore={physicalStore}
         initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
         merchantId="merchant-123"
       />
     );
@@ -291,6 +296,7 @@ const drawerInitiativeOptions = [
       text: 'pages.posCatalog.associateSuccess',
       isOpen: true,
       severity: 'success',
+      timeout: 6000,
     });
   });
 
@@ -313,6 +319,7 @@ const drawerInitiativeOptions = [
           contactEmail: '',
         }}
         initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
         merchantId="merchant-123"
       />
     );
@@ -331,6 +338,7 @@ const drawerInitiativeOptions = [
         onClose={jest.fn()}
         selectedStore={onlineStore}
         initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
         merchantId="merchant-123"
       />
     );
@@ -347,6 +355,7 @@ const drawerInitiativeOptions = [
         onClose={jest.fn()}
         selectedStore={onlineStore}
         initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
         merchantId="merchant-123"
       />
     );
@@ -357,6 +366,7 @@ const drawerInitiativeOptions = [
         onClose={jest.fn()}
         selectedStore={{ ...onlineStore, id: undefined as any }}
         initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
         merchantId="merchant-123"
       />
     );
@@ -367,6 +377,7 @@ const drawerInitiativeOptions = [
         onClose={jest.fn()}
         selectedStore={onlineStore}
         initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
         merchantId=""
       />
     );

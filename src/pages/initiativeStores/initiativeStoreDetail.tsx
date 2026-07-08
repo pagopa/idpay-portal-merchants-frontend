@@ -22,6 +22,7 @@ import { isValidRegex, handlePromptMessage } from '../../helpers';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/data-contracts';
 import { POS_TYPE } from '../../utils/constants';
+import { formatInitiativeStoreDetailAddress } from '../../utils/addressUtils';
 import { browserConsole } from '../../utils/consoleLogger';
 import ROUTES from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
@@ -129,28 +130,23 @@ const InitiativeStoreDetail = () => {
     { label: t('pages.initiativeStores.id'), value: obj?.id },
     ...(obj?.type === POS_TYPE.Physical
       ? [
-        {
-          label: t('pages.initiativeStores.address'),
-          value: [obj?.address, obj?.streetNumber]
-            .filter(Boolean)
-            .join(', ')
-            .concat(` - ${obj?.zipCode}`)
-            .concat(`, ${obj?.city}`)
-            .concat(`, ${obj?.province}`),
-        },
-        {
-          label: t('pages.initiativeStores.phone'),
-          value: obj?.channelPhone,
-        },
-        {
-          label: t('pages.initiativeStores.contactEmail'),
-          value: obj?.channelEmail,
-        },
-        {
-          label: t('pages.initiativeStores.geoLink'),
-          value: obj?.channelGeolink,
-        },
-      ]
+          {
+            label: t('pages.initiativeStores.address'),
+            value: formatInitiativeStoreDetailAddress(obj),
+          },
+          {
+            label: t('pages.initiativeStores.phone'),
+            value: obj?.channelPhone,
+          },
+          {
+            label: t('pages.initiativeStores.contactEmail'),
+            value: obj?.channelEmail,
+          },
+          {
+            label: t('pages.initiativeStores.geoLink'),
+            value: obj?.channelGeolink,
+          },
+        ]
       : []),
     { label: t('pages.initiativeStores.website'), value: obj?.website },
   ];
