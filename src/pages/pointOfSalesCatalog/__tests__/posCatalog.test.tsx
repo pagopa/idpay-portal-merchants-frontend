@@ -132,6 +132,9 @@ jest.mock('../PosCatalogFiltersDrawer', () => ({
         </button>
         <div data-testid="drawer-merchant-id">{props.merchantId}</div>
         <div data-testid="drawer-initiative-options">{props.initiativeOptions.length}</div>
+        <div data-testid="drawer-published-initiative-options">
+          {props.publishedInitiativeOptions.length}
+        </div>
       </div>
     ) : null;
   },
@@ -210,10 +213,11 @@ const renderComponent = () =>
 
 const expectEmptyStateMessage = () => {
   expect(
-    screen.getByText((_, element) =>
-      element?.tagName.toLowerCase() === 'p' &&
-      element?.textContent ===
-      'pages.initiativeStores.noStorespages.initiativeStores.addStoreNoResults.'
+    screen.getByText(
+      (_, element) =>
+        element?.tagName.toLowerCase() === 'p' &&
+        element?.textContent ===
+          'pages.initiativeStores.noStorespages.initiativeStores.addStoreNoResults.'
     )
   ).toBeInTheDocument();
 };
@@ -392,7 +396,7 @@ describe('<PosCatalog />', () => {
     ]);
   });
 
-  it('removes closed initiatives from initiative options', () => {
+  it('keeps closed initiatives in filters and removes them from association options', () => {
     mockUseAppSelector.mockReturnValueOnce([
       { initiativeId: 'initiative-1', initiativeName: 'Initiative One', status: 'PUBLISHED' },
       { initiativeId: 'initiative-2', initiativeName: 'Initiative Two', status: 'CLOSED' },
@@ -402,8 +406,13 @@ describe('<PosCatalog />', () => {
 
     expect(filtersProps.initiativeOptions).toEqual([
       { value: 'initiative-1', label: 'Initiative One' },
+      { value: 'initiative-2', label: 'Initiative Two' },
     ]);
     expect(drawerProps.initiativeOptions).toEqual([
+      { value: 'initiative-1', label: 'Initiative One' },
+      { value: 'initiative-2', label: 'Initiative Two' },
+    ]);
+    expect(drawerProps.publishedInitiativeOptions).toEqual([
       { value: 'initiative-1', label: 'Initiative One' },
     ]);
   });
@@ -435,6 +444,7 @@ describe('<PosCatalog />', () => {
       text: 'pages.posCatalog.associateSuccess',
       isOpen: true,
       severity: 'success',
+      timeout: 6000,
     });
     expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
     expect(screen.queryByTestId('associate-selected-pos-modal')).not.toBeInTheDocument();
@@ -518,7 +528,57 @@ describe('<PosCatalog />', () => {
       text: 'pages.posCatalog.associateSuccess',
       isOpen: true,
       severity: 'success',
+      timeout: 6000,
     });
+  });
+
+  it('shows the compact already associated modal without success alert when no store is associated', async () => {
+    mockAssociatePos.mockResolvedValueOnce({
+      associated: [],
+      notAssociated: [
+        {
+          pointOfSaleId: 'store-1',
+          pointOfSaleName: 'Store Already',
+          reason: 'ALREADY_ASSOCIATED',
+          address: 'Via Roma',
+          streetNumber: '10',
+          city: 'Rome',
+          type: 'PHYSICAL',
+        },
+      ],
+    });
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.associate (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.associateModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(screen.getByText('actions.confirm'));
+
+    const alreadyAssociatedModal = await screen.findByTestId('already-associated-pos-modal');
+
+    expect(
+      within(alreadyAssociatedModal).getByText(
+        'pages.posCatalog.alreadyAssociatedModal.allAlreadyAssociatedDescription'
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(alreadyAssociatedModal).queryByText('Store Already - Via Roma 10, Rome')
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(within(alreadyAssociatedModal).getByText('actions.okClose'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('already-associated-pos-modal')).not.toBeInTheDocument();
+    });
+    expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
+    expect(mockSetAlert).not.toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
   });
 
   it('shows a generic error and does not call associate service when merchant id is missing', async () => {
@@ -772,6 +832,7 @@ describe('<PosCatalog />', () => {
 
     expect(filtersProps.initiativeOptions).toEqual([{ value: '', label: '' }]);
     expect(drawerProps.initiativeOptions).toEqual([{ value: '', label: '' }]);
+    expect(drawerProps.publishedInitiativeOptions).toEqual([{ value: '', label: '' }]);
   });
 
   it('uses default pagination values when fetch filters omit page and size', async () => {

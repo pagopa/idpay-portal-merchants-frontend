@@ -4,6 +4,7 @@ import { theme } from '@pagopa/mui-italia/theme';
 import { GridColDef } from '@mui/x-data-grid';
 import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { formatStreetAddress } from '../../utils/addressUtils';
 
 type BuildPointOfSalesColumnsArgs = {
   t: (key: string) => string;
@@ -59,7 +60,7 @@ export const buildPointOfSalesColumns = ({
     disableColumnMenu: true,
     renderCell: (params: any) =>
       renderCellWithTooltip(
-        [params.value, params.row?.streetNumber].filter(Boolean).join(', '),
+        formatStreetAddress({ address: params.value, streetNumber: params.row?.streetNumber }),
         1
       ),
   },

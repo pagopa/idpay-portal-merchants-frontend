@@ -12,6 +12,7 @@ export type AlertComponentProps = {
   containerStyle?: SxProps<Theme>;
   contentStyle?: SxProps<Theme>;
   onClose?: () => void;
+  timeout?: number;
 };
 
 const severityMap = {
