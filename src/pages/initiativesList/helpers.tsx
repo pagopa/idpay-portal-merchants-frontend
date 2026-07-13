@@ -2,15 +2,37 @@ export interface Data {
   initiativeId: string;
   initiativeName: string;
   organizationName: string;
-  spendingPeriod: string;
-  serviceId: string;
+  spendingPeriod?: string;
+  serviceId?: string;
   status: string;
+  onboardStatus: string;
   id: number;
 }
 
+const parseItalianDate = (value: string): number => {
+  const [day, month, year] = value.split('/').map(Number);
+  if (!day || !month || !year) {
+    return Number.NEGATIVE_INFINITY;
+  }
+  return new Date(year, month - 1, day).getTime();
+};
+
 export function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  const dA = a[orderBy] as unknown as string;
-  const dB = b[orderBy] as unknown as string;
+  const dA = String((a[orderBy] as unknown as string | undefined) ?? '');
+  const dB = String((b[orderBy] as unknown as string | undefined) ?? '');
+
+  if (orderBy === 'spendingPeriod') {
+    const dATime = parseItalianDate(dA);
+    const dBTime = parseItalianDate(dB);
+    if (dBTime < dATime) {
+      return -1;
+    }
+    if (dBTime > dATime) {
+      return 1;
+    }
+    return 0;
+  }
+
   if (dB.toLowerCase() < dA.toLowerCase()) {
     return -1;
   }
@@ -22,10 +44,10 @@ export function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 
 export type Order = 'asc' | 'desc';
 
-export function getComparator<Key extends keyof any>(
+export function getComparator<T, Key extends keyof T>(
   order: Order,
   orderBy: Key
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
+): (a: T, b: T) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);

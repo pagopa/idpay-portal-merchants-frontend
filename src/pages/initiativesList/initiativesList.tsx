@@ -1,6 +1,7 @@
 import {
   Box,
   Chip,
+  CircularProgress,
   InputAdornment,
   Paper,
   Table,
@@ -13,11 +14,14 @@ import {
   TextField,
   Tabs,
   Tab,
+  Typography,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import SearchIcon from '@mui/icons-material/Search';
-import { grey } from '@mui/material/colors';
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useEffect, useState } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
@@ -30,13 +34,52 @@ type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
 const CLOSED: StatusEnum = 'CLOSED';
 import ROUTES from '../../routes';
+import { getMerchantInitiativesAvailable } from '../../services/merchantService';
 import { Data, EnhancedTableProps, HeadCell, Order, getComparator, stableSort } from './helpers';
+import { NEW_INITIATIVES_TEMPORARY_MOCK } from './newInitiativesTemporaryMock';
 
-function EnhancedTableHead(props: EnhancedTableProps) {
-  const { order, orderBy, onRequestSort } = props;
+const USE_NEW_INITIATIVES_TEMP_MOCK = true;
+
+function SortableTableHead({
+  order,
+  orderBy,
+  onRequestSort,
+  headCells,
+}: EnhancedTableProps & { headCells: ReadonlyArray<HeadCell> }) {
   const createSortHandler = (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
   };
+
+  return (
+    <TableHead sx={{ backgroundColor: '#E8EBF1' }}>
+      <TableRow>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align="left"
+            padding="normal"
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={{ ...visuallyHidden }}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
+
+function EnhancedTableHead(props: EnhancedTableProps) {
   const { t } = useScopedTranslation();
 
   const headCells: ReadonlyArray<HeadCell> = [
@@ -66,32 +109,46 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     },
   ];
 
+  return <SortableTableHead {...props} headCells={headCells} />;
+}
+
+function NewInitiativesTableHead(props: EnhancedTableProps) {
+  const { order, orderBy, onRequestSort } = props;
+  const { t } = useScopedTranslation();
+  const createSortHandler = (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, property);
+  };
+
   return (
-    <TableHead sx={{ backgroundColor: grey.A100 }}>
+    <TableHead sx={{ backgroundColor: '#E8EBF1' }}>
       <TableRow>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align="left"
-            padding="normal"
-            sortDirection={orderBy === headCell.id ? order : false}
+        <TableCell
+          align="left"
+          padding="normal"
+          sortDirection={orderBy === 'initiativeName' ? order : false}
+        >
+          <TableSortLabel
+            active={orderBy === 'initiativeName'}
+            direction={orderBy === 'initiativeName' ? order : 'asc'}
+            onClick={createSortHandler('initiativeName')}
           >
-            <TableSortLabel
-              active={orderBy === headCell.id && headCell.id !== 'spendingPeriod'}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
-              hideSortIcon={headCell.id === 'spendingPeriod'}
-              disabled={headCell.id === 'spendingPeriod'}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={{ ...visuallyHidden }}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
+            {t('pages.initiativesList.initiativeName')}
+          </TableSortLabel>
+        </TableCell>
+        <TableCell
+          align="left"
+          padding="normal"
+          sortDirection={orderBy === 'organizationName' ? order : false}
+        >
+          <TableSortLabel
+            active={orderBy === 'organizationName'}
+            direction={orderBy === 'organizationName' ? order : 'asc'}
+            onClick={createSortHandler('organizationName')}
+          >
+            {t('pages.initiativesList.organizationName')}
+          </TableSortLabel>
+        </TableCell>
+        <TableCell align="right" padding="normal" />
       </TableRow>
     </TableHead>
   );
@@ -105,7 +162,22 @@ const InitiativesList = () => {
   const history = useHistory();
   const { t } = useScopedTranslation();
   const [value, setValue] = useState(0);
+  const [newInitiativesLoading, setNewInitiativesLoading] = useState(false);
+  const [newInitiativesLoaded, setNewInitiativesLoaded] = useState(false);
+  const [newInitiativesList, setNewInitiativesList] = useState<Array<Data>>([]);
   const initiativesListSel = useAppSelector(intiativesListSelector);
+
+  const initiativesTablePaperSx = {
+    display: 'flex',
+    pb: 1,
+    pl: 1,
+    pr: 1,
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    alignSelf: 'stretch',
+    width: '100%',
+    backgroundColor: '#E8EBF1',
+  } as const;
 
   interface TabPanelProps {
     children?: React.ReactNode;
@@ -138,23 +210,70 @@ const InitiativesList = () => {
     'aria-controls': `tabpanel-${index}`,
   });
 
+  const loadNewInitiatives = async () => {
+    if (newInitiativesLoading) {
+      return;
+    }
+
+    if (USE_NEW_INITIATIVES_TEMP_MOCK) {
+      setNewInitiativesList(NEW_INITIATIVES_TEMPORARY_MOCK);
+      setNewInitiativesLoaded(true);
+      return;
+    }
+
+    setNewInitiativesLoading(true);
+
+    try {
+      const response = await getMerchantInitiativesAvailable({
+        page: 0,
+        size: 1000,
+      });
+
+      const mappedInitiativeList: Array<Data> = response
+        .flatMap((page) => page.content ?? [])
+        .map((item, index) => ({
+          initiativeId: item.initiativeId || '',
+          initiativeName: item.initiativeName || '',
+          organizationName: item.organizationName || '',
+          status: item.status ?? '',
+          onboardStatus: item.onboardStatus ?? '',
+          id: index,
+        }));
+
+      setNewInitiativesList(mappedInitiativeList);
+    } catch {
+      // Keep UI fallback (empty state) without surfacing runtime overlay.
+      setNewInitiativesList([]);
+    } finally {
+      setNewInitiativesLoaded(true);
+      setNewInitiativesLoading(false);
+    }
+  };
+
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+
+    if (newValue === 1 && !newInitiativesLoaded) {
+      void loadNewInitiatives();
+    }
   };
 
   useEffect(() => {
     if (Array.isArray(initiativesListSel)) {
-      const mappedInitativeList = initiativesListSel?.map((item, index) => ({
-        initiativeId: item.initiativeId || '',
-        initiativeName: item.initiativeName || '',
-        organizationName: item.organizationName || '',
-        spendingPeriod: `${
-          item.startDate ? new Date(item.startDate).toLocaleDateString('fr-FR') : ''
-        } - ${item.endDate ? new Date(item.endDate).toLocaleDateString('fr-FR') : ''}`,
-        serviceId: item.serviceId || '',
-        status: (item.status as StatusEnum) ?? '',
-        id: index,
-      }));
+      const mappedInitativeList = initiativesListSel?.map((item, index) => {
+        const creationDate = (item as InitiativeDTO & { creationDate?: string }).creationDate;
+
+        return {
+          initiativeId: item.initiativeId || '',
+          initiativeName: item.initiativeName || '',
+          organizationName: item.organizationName || '',
+          spendingPeriod: creationDate ? new Date(creationDate).toLocaleDateString('fr-FR') : '',
+          serviceId: item.serviceId || '',
+          status: (item.status as StatusEnum) ?? '',
+          onboardStatus: '',
+          id: index,
+        };
+      });
       setInitiativeList(mappedInitativeList);
       setInitiativeListFiltered(mappedInitativeList);
     }
@@ -205,6 +324,14 @@ const InitiativesList = () => {
       default:
         return null;
     }
+  };
+
+  const openInitiativeOverview = (initiativeId: string) => {
+    history.push(
+      generatePath(ROUTES.OVERVIEW, {
+        initiative_id: initiativeId,
+      })
+    );
   };
 
   return (
@@ -276,14 +403,7 @@ const InitiativesList = () => {
             <MerchantTransactions id={id} />
           </TabPanel> */}
           <TabPanel value={value} index={0}>
-            <Paper
-              sx={{
-                width: '100%',
-                mb: 2,
-                pb: 3,
-                backgroundColor: grey.A100,
-              }}
-            >
+            <Paper sx={initiativesTablePaperSx}>
               <TableContainer>
                 {initiativeListFiltered.length > 0 ? (
                   <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
@@ -312,13 +432,7 @@ const InitiativesList = () => {
                                     padding: 0,
                                     cursor: 'pointer',
                                   }}
-                                  onClick={() => {
-                                    history.push(
-                                      generatePath(ROUTES.OVERVIEW, {
-                                        initiative_id: row.initiativeId,
-                                      })
-                                    );
-                                  }}
+                                  onClick={() => openInitiativeOverview(row.initiativeId)}
                                   data-testid="initiative-btn-test"
                                 >
                                   {row.initiativeName}
@@ -362,7 +476,142 @@ const InitiativesList = () => {
             </Paper>
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <h1>TAB CONTENT 2</h1>
+            <Paper sx={initiativesTablePaperSx}>
+              {newInitiativesLoading ? (
+                <Box
+                  sx={{
+                    backgroundColor: 'white',
+                    border: '1px solid #D7DDE8',
+                    p: 3,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <CircularProgress size={24} />
+                  <Typography
+                    variant="h6"
+                    color="text.secondary"
+                    sx={{ fontSize: '1rem !important' }}
+                  >
+                    {t('pages.initiativesList.newInitiativesLoadingTitle')}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    textAlign="center"
+                    sx={{ fontSize: '0.875rem' }}
+                  >
+                    {t('pages.initiativesList.newInitiativesLoadingSubtitle')}
+                  </Typography>
+                </Box>
+              ) : (
+                <TableContainer sx={{ backgroundColor: 'white' }}>
+                  {newInitiativesList.length > 0 ? (
+                    <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle-new-initiatives">
+                      <NewInitiativesTableHead
+                        order={order}
+                        orderBy={orderBy}
+                        onRequestSort={handleRequestSort}
+                      />
+                      <TableBody sx={{ backgroundColor: 'white' }}>
+                        {stableSort(newInitiativesList, getComparator(order, orderBy)).map(
+                          (row, index) => {
+                            const labelId = `new-initiatives-row-${index}`;
+                            return (
+                              <TableRow tabIndex={-1} key={row.id}>
+                                <TableCell id={labelId} scope="row">
+                                  <Box
+                                    component="button"
+                                    type="button"
+                                    sx={{
+                                      color: 'primary.main',
+                                      fontWeight: 600,
+                                      fontSize: '1em',
+                                      textAlign: 'left',
+                                      background: 'none',
+                                      border: 'none',
+                                      padding: 0,
+                                      cursor: 'pointer',
+                                    }}
+                                    onClick={() => openInitiativeOverview(row.initiativeId)}
+                                  >
+                                    {row.initiativeName}
+                                  </Box>
+                                </TableCell>
+                                <TableCell>{row.organizationName}</TableCell>
+                                <TableCell align="right">
+                                  {row.onboardStatus === 'ONBOARDABLE' ? (
+                                    <Box
+                                      component="button"
+                                      type="button"
+                                      sx={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 0.5,
+                                        color: 'primary.main',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontWeight: 600,
+                                        fontSize: '1em',
+                                        p: 0,
+                                      }}
+                                      onClick={() => openInitiativeOverview(row.initiativeId)}
+                                    >
+                                      Aderisci
+                                      <ArrowForwardIcon sx={{ fontSize: '1rem' }} />
+                                    </Box>
+                                  ) : (
+                                    <InfoOutlinedIcon color="primary" sx={{ fontSize: '1.1rem' }} />
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          }
+                        )}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <Paper
+                      sx={{
+                        my: 2,
+                        p: 3,
+                        textAlign: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: 'none',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <ErrorOutlineOutlinedIcon fontVariant="h5" color="disabled" />
+                        <Typography variant="body2" sx={{ fontSize: '1rem !important' }}>
+                          {t('pages.initiativesList.emptyList')}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          textAlign="center"
+                          sx={{ fontSize: '0.875rem' }}
+                        >
+                          {t('pages.initiativesList.newInitiativesEmptySubtitle')}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  )}
+                </TableContainer>
+              )}
+            </Paper>
           </TabPanel>
         </Box>
       </Box>

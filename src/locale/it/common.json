@@ -99,12 +99,15 @@
       "initiativeStatus": "Stato",
       "organizationName": "Creata da",
       "searchByInitiativeName": "Cerca per nome dell'iniziativa",
-      "validityPeriod": "Periodo di Validità",
+      "validityPeriod": "Data di adesione",
       "subtitle": "Visualizza e gestisci le iniziative di supporto alla spesa a cui hai aderito.",
       "title": "Iniziative",
       "initiativeName": "Nome",
       "myInitiativesTab": "Le tue iniziative",
-      "newInitiativesTab": "Nuove iniziative"
+      "newInitiativesTab": "Nuove iniziative",
+      "newInitiativesLoadingTitle": "Verifica in corso",
+      "newInitiativesLoadingSubtitle": "Stiamo controllando le iniziative disponibili per il tuo profilo",
+      "newInitiativesEmptySubtitle": "Al momento non ci sono iniziative dedicate al tuo profilo. Ricontrolla in futuro."
     },
     "posCatalog": {
       "title": "Catalogo punti vendita",
