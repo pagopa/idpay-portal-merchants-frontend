@@ -13,11 +13,16 @@ import DataTable from '../../components/dataTable/DataTable';
 import { GetPointOfSalesFilters } from '../../types/types';
 import {
   InitiativeDTO,
+  PointOfSaleExclusionResultDTO,
   PointOfSaleDTO,
   PointOfSaleOnboardingResultDTO,
 } from '../../api/generated/merchants/data-contracts';
 import { parseJwt } from '../../utils/jwt-utils';
-import { associatePos, getMerchantPointOfSalesCatalog } from '../../services/merchantService';
+import {
+  associatePos,
+  excludePos,
+  getMerchantPointOfSalesCatalog,
+} from '../../services/merchantService';
 import {
   ASSOCIATION_SUCCESS_ALERT_TIMEOUT,
   ELEMENT_PER_PAGE,
@@ -35,6 +40,9 @@ import AssociateSelectedPosModal from './AssociateSelectedPosModal';
 import AlreadyAssociatedPosModal, {
   AlreadyAssociatedPointOfSale,
 } from './AlreadyAssociatedPosModal';
+import PointOfSaleExclusionResultModal, {
+  NotExcludedPointOfSale,
+} from './PointOfSaleExclusionResultModal';
 
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
@@ -57,8 +65,10 @@ const PosCatalog: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedStoreIds, setSelectedStoreIds] = useState<GridSelectionModel>([]);
   const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
+  const [isExcludeModalOpen, setIsExcludeModalOpen] = useState(false);
   const [selectedInitiativeId, setSelectedInitiativeId] = useState('');
   const [isAssociatingPos, setIsAssociatingPos] = useState(false);
+  const [isExcludingPos, setIsExcludingPos] = useState(false);
   const [alreadyAssociatedStores, setAlreadyAssociatedStores] = useState<
     Array<AlreadyAssociatedPointOfSale>
   >([]);
@@ -69,6 +79,13 @@ const PosCatalog: React.FC = () => {
   const [alreadyAssociatedInitiativeName, setAlreadyAssociatedInitiativeName] = useState('');
   const [shouldShowAlreadyAssociatedStores, setShouldShowAlreadyAssociatedStores] = useState(true);
   const [pendingAssociationRefreshFilters, setPendingAssociationRefreshFilters] =
+    useState<GetPointOfSalesFilters | null>(null);
+  const [notExcludedStores, setNotExcludedStores] = useState<Array<NotExcludedPointOfSale>>([]);
+  const [exclusionSuccessData, setExclusionSuccessData] = useState<{
+    excludedCount: number;
+    initiativeName: string;
+  } | null>(null);
+  const [pendingExclusionRefreshFilters, setPendingExclusionRefreshFilters] =
     useState<GetPointOfSalesFilters | null>(null);
 
   const { t } = useScopedTranslation();
@@ -237,6 +254,11 @@ const PosCatalog: React.FC = () => {
     setSelectedInitiativeId('');
   }, []);
 
+  const handleExcludeModalClose = useCallback(() => {
+    setIsExcludeModalOpen(false);
+    setSelectedInitiativeId('');
+  }, []);
+
   const handleInitiativeChange = useCallback((initiativeId: string) => {
     setSelectedInitiativeId(initiativeId);
   }, []);
@@ -253,6 +275,26 @@ const PosCatalog: React.FC = () => {
         timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT ?? ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK,
       }),
     [setAlert, t]
+  );
+
+  const showExclusionSuccessAlert = useCallback(
+    (excludedCount: number, initiativeName: string) =>
+      setAlert({
+        text: t('pages.posCatalog.excludeSuccess', {
+          count: excludedCount,
+          initiativeName,
+        }),
+        isOpen: true,
+        severity: 'success',
+        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT ?? ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK,
+      }),
+    [setAlert, t]
+  );
+
+  const getNotExcludedStores = useCallback(
+    (result: PointOfSaleExclusionResultDTO): Array<NotExcludedPointOfSale> =>
+      (result.notExcludedPointOfSales ?? []) as Array<NotExcludedPointOfSale>,
+    []
   );
 
   const handleAlreadyAssociatedModalClose = useCallback(() => {
@@ -277,6 +319,28 @@ const PosCatalog: React.FC = () => {
     handleFiltersApplied,
     pendingAssociationRefreshFilters,
     showAssociationSuccessAlert,
+  ]);
+
+  const handleExclusionResultModalClose = useCallback(() => {
+    setNotExcludedStores([]);
+
+    if (exclusionSuccessData) {
+      showExclusionSuccessAlert(
+        exclusionSuccessData.excludedCount,
+        exclusionSuccessData.initiativeName
+      );
+      setExclusionSuccessData(null);
+    }
+
+    if (pendingExclusionRefreshFilters) {
+      handleFiltersApplied(pendingExclusionRefreshFilters);
+      setPendingExclusionRefreshFilters(null);
+    }
+  }, [
+    exclusionSuccessData,
+    handleFiltersApplied,
+    pendingExclusionRefreshFilters,
+    showExclusionSuccessAlert,
   ]);
 
   const handleAssociationResult = useCallback(
@@ -350,6 +414,74 @@ const PosCatalog: React.FC = () => {
     selectedStoreIds,
   ]);
 
+  const handleExclusionResult = useCallback(
+    (result: PointOfSaleExclusionResultDTO, initiativeName: string) => {
+      const excludedCount = result.excludedPointOfSales?.length ?? 0;
+      const notExcludedResultStores = getNotExcludedStores(result);
+
+      setSelectedStoreIds([]);
+      handleExcludeModalClose();
+      handleToggleDrawer();
+
+      if (notExcludedResultStores.length > 0) {
+        setExclusionSuccessData(excludedCount > 0 ? { excludedCount, initiativeName } : null);
+        setPendingExclusionRefreshFilters(formik.values);
+        setNotExcludedStores(notExcludedResultStores);
+        return;
+      }
+
+      handleFiltersApplied(formik.values);
+      if (excludedCount > 0) {
+        showExclusionSuccessAlert(excludedCount, initiativeName);
+      }
+    },
+    [
+      formik.values,
+      getNotExcludedStores,
+      handleExcludeModalClose,
+      handleFiltersApplied,
+      handleToggleDrawer,
+      showExclusionSuccessAlert,
+    ]
+  );
+
+  const handleExcludeConfirm = useCallback(async () => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
+    const initiativeName =
+      publishedInitiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)
+        ?.label ?? '';
+
+    if (!merchantId || !selectedInitiativeId || selectedStoreIds.length === 0) {
+      handleExcludeModalClose();
+      handleFetchError();
+      return;
+    }
+
+    setIsExcludingPos(true);
+
+    try {
+      const result = await excludePos(
+        selectedInitiativeId,
+        merchantId,
+        selectedStoreIds.map((id) => String(id))
+      );
+      handleExclusionResult(result, initiativeName);
+    } catch (_error) {
+      handleExcludeModalClose();
+      handleFetchError();
+    } finally {
+      setIsExcludingPos(false);
+    }
+  }, [
+    handleExcludeModalClose,
+    handleExclusionResult,
+    handleFetchError,
+    publishedInitiativeOptions,
+    selectedInitiativeId,
+    selectedStoreIds,
+  ]);
+
   const selectedStoresCountLabel = ` (${selectedStoreIds.length})`;
 
   const columns = useMemo(
@@ -378,7 +510,12 @@ const PosCatalog: React.FC = () => {
         />
         {selectedStoreIds.length > 0 && (
           <Stack direction="row" spacing={2} alignItems="center">
-            <Button variant="outlined" color="error" sx={{ whiteSpace: 'nowrap' }}>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => setIsExcludeModalOpen(true)}
+              sx={{ whiteSpace: 'nowrap' }}
+            >
               {`${t('pages.posCatalog.actions.exclude')}${selectedStoresCountLabel}`}
             </Button>
             <Button
@@ -450,11 +587,31 @@ const PosCatalog: React.FC = () => {
             onInitiativeChange={handleInitiativeChange}
             onConfirm={handleAssociateConfirm}
           />
+          <AssociateSelectedPosModal
+            open={isExcludeModalOpen}
+            initiativeOptions={publishedInitiativeOptions}
+            selectedInitiativeId={selectedInitiativeId}
+            selectedStoresCount={selectedStoreIds.length}
+            isLoading={isExcludingPos}
+            onClose={handleExcludeModalClose}
+            onInitiativeChange={handleInitiativeChange}
+            onConfirm={handleExcludeConfirm}
+            copyKey="excludeModal"
+            confirmLabelKey="pages.posCatalog.actions.exclude"
+            confirmColor="error"
+            dataTestId="exclude-selected-pos-modal"
+            titleId="exclude-selected-pos-modal-title"
+          />
           <AlreadyAssociatedPosModal
             stores={alreadyAssociatedStores}
             initiativeName={alreadyAssociatedInitiativeName}
             showStores={shouldShowAlreadyAssociatedStores}
             onClose={handleAlreadyAssociatedModalClose}
+          />
+          <PointOfSaleExclusionResultModal
+            stores={notExcludedStores}
+            hasExcludedStores={Boolean(exclusionSuccessData)}
+            onClose={handleExclusionResultModalClose}
           />
         </>
       )}

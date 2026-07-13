@@ -1,10 +1,14 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useFormik } from 'formik';
 import { GetPointOfSalesFilters } from '../../../types/types';
 import { PosCatalogDrawer, PosCatalogFilters } from '../PosCatalogFiltersDrawer';
 import { MockPosCatalogStore } from '../mockPosCatalog';
-import { associatePos, getPointOfSaleInitiatives } from '../../../services/merchantService';
+import {
+  associatePos,
+  excludePos,
+  getPointOfSaleInitiatives,
+} from '../../../services/merchantService';
 
 const mockSetAlert = jest.fn();
 
@@ -18,6 +22,7 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
 jest.mock('../../../services/merchantService', () => ({
   getPointOfSaleInitiatives: jest.fn(),
   associatePos: jest.fn(),
+  excludePos: jest.fn(),
 }));
 
 jest.mock('../../../hooks/useAlert', () => ({
@@ -259,7 +264,7 @@ describe('PosCatalogFiltersDrawer', () => {
 
   it('associates the selected store to an initiative from the drawer modal', async () => {
     (associatePos as jest.Mock).mockResolvedValue({
-      associated: [{ pointOfSaleId: '2', pointOfSaleName: 'Negozio fisico' }],
+      associated: [{ pointOfSaleId: '2', franchiseName: 'Negozio fisico' }],
       notAssociated: [],
     });
 
@@ -298,6 +303,91 @@ describe('PosCatalogFiltersDrawer', () => {
       severity: 'success',
       timeout: 6000,
     });
+  });
+
+  it('excludes the selected store from an initiative from the drawer modal', async () => {
+    (excludePos as jest.Mock).mockResolvedValue({
+      excludedPointOfSales: [{ pointOfSaleId: '2', franchiseName: 'Negozio fisico' }],
+      notExcludedPointOfSales: [],
+    });
+
+    const onClose = jest.fn();
+
+    render(
+      <PosCatalogDrawer
+        isOpen
+        onClose={onClose}
+        selectedStore={physicalStore}
+        initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
+        merchantId="merchant-123"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('exclude-store-button'));
+
+    const modal = screen.getByTestId('exclude-selected-pos-modal');
+    expect(modal).toBeInTheDocument();
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.excludeModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Iniziativa 1'));
+    fireEvent.click(within(modal).getByText('pages.posCatalog.actions.exclude'));
+
+    await waitFor(() => {
+      expect(excludePos).toHaveBeenCalledWith('Iniziativa 1', 'merchant-123', ['2']);
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: 'pages.posCatalog.excludeSuccess',
+      isOpen: true,
+      severity: 'success',
+      timeout: 6000,
+    });
+  });
+
+  it('does not show a success alert when the drawer exclusion excludes no store', async () => {
+    (excludePos as jest.Mock).mockResolvedValue({
+      excludedPointOfSales: [],
+      notExcludedPointOfSales: [{ pointOfSaleId: '2', reason: 'ALREADY_EXCLUDED' }],
+    });
+
+    render(
+      <PosCatalogDrawer
+        isOpen
+        onClose={jest.fn()}
+        selectedStore={physicalStore}
+        initiativeOptions={drawerInitiativeOptions}
+        publishedInitiativeOptions={drawerInitiativeOptions}
+        merchantId="merchant-123"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('exclude-store-button'));
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.excludeModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Iniziativa 1'));
+    fireEvent.click(
+      within(screen.getByTestId('exclude-selected-pos-modal')).getByText(
+        'pages.posCatalog.actions.exclude'
+      )
+    );
+
+    await waitFor(() => {
+      expect(excludePos).toHaveBeenCalledWith('Iniziativa 1', 'merchant-123', ['2']);
+    });
+    expect(mockSetAlert).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'pages.posCatalog.excludeSuccess',
+        severity: 'success',
+      })
+    );
   });
 
   it('renders fallback initiative id and placeholders when fetched data is incomplete', async () => {

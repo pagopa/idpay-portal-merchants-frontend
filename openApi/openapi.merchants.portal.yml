@@ -15,6 +15,36 @@ tags:
   - name: point-of-sales
     description: Operations on merchant points of sale
 
+  - name: point-of-sale-transactions
+    description: Operations on transactions associated with a point of sale
+
+  - name: merchant-initiatives
+    description: Operations on the initiatives available to a merchant
+
+  - name: merchant-initiatives-onboarding
+    description: Onboarding operations on merchant initiatives
+
+  - name: merchant-initiative-statistics
+    description: Statistics of a merchant on a given initiative
+
+  - name: reward-batches
+    description: Operations on merchant reward batches
+
+  - name: merchant-transactions
+    description: Operations on merchant transactions
+
+  - name: transaction
+    description: Generic operations on a single transaction
+
+  - name: merchant-report
+    description: Generation and download of merchant transaction reports
+
+  - name: merchant-detail
+    description: Merchant detail and IBAN management on an initiative
+
+  - name: reported-user
+    description: Management of reported users for a merchant/initiative pair
+
 paths:
   /{merchantId}/initiatives/{initiativeId}/point-of-sales/onboarding:
     post:
@@ -144,6 +174,110 @@ paths:
               example:
                 code: POINT_OF_SALE_GENERIC_ERROR
                 message: An internal error occured
+  /{merchantId}/initiatives/{initiativeId}/point-of-sales/exclusion:
+    post:
+      tags:
+        - point-of-sales
+      summary: Exclude a list of points of sale from an initiative
+      description: Exclude a list of previously registered points of sale from the specified initiative.
+      operationId: excludePointsOfSales
+      parameters:
+        - name: merchantId
+          in: path
+          description: The merchant ID
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+            pattern: "^[a-zA-Z0-9]+$"
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+            pattern: "^[a-zA-Z0-9]+$"
+        - name: x-merchant-id
+          in: header
+          description: Optional token merchant ID for mismatch validation
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+            example:
+              - "POS1"
+              - "POS2"
+      responses:
+        "200":
+          description: Successfully processed exclusion request (partial or total)
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleExclusionResultDTO"
+        "400":
+          description: Bad request - Invalid input data or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_BAD_REQUEST
+                message: Something went wrong handling request
+        "401":
+          description: Unauthorized - Authentication Failed
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-RateLimit-Limit:
+              $ref: "#/components/headers/X-RateLimit-Limit"
+            X-RateLimit-Remaining:
+              $ref: "#/components/headers/X-RateLimit-Remaining"
+            X-RateLimit-Reset:
+              $ref: "#/components/headers/X-RateLimit-Reset"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_NOT_FOUND
+                message: Point of sale with id 123 not found.
+        "429":
+          description: Too many Request - Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_TOO_MANY_REQUESTS
+                message: Too many requests
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointOfSaleErrorDTO"
+              example:
+                code: POINT_OF_SALE_GENERIC_ERROR
+                message: An error occurred during the request
   /{merchantId}/initiatives/{initiativeId}/point-of-sales:
     post:
       tags:
@@ -1459,6 +1593,80 @@ paths:
               example:
                 code: MERCHANT_GENERIC_ERROR
                 message: An error occurred
+  /initiatives/available:
+    get:
+      tags:
+        - merchant-initiatives
+      summary: Returns the list of available initiatives for the current organization
+      operationId: getMerchantInitiativesAvailable
+      description: >
+        ENG: Returns the list of available initiatives  for the current organization.
+        IT: Restituisce la lista delle iniziative disponibili per l'organizzazione corrente
+      parameters:
+        - in: query
+          name: initiativeName
+          required: false
+          schema:
+            type: string
+          description: Initiative Name
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Page number (0-based)
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            default: 20
+          description: Page size
+        - in: query
+          name: sort
+          required: false
+          schema:
+            type: string
+          description: Sorting criteria (e.g. startDate,desc)
+      responses:
+        '200':
+          $ref: '#/components/responses/GET_initiatives_available_200_Response'
+        '400':
+          $ref: '#/components/responses/GET_initiatives_available_400_Response'
+        '401':
+          $ref: '#/components/responses/GET_initiatives_available_401_Response'
+        '429':
+          $ref: '#/components/responses/GET_initiatives_available_429_Response'
+        '500':
+          $ref: '#/components/responses/GET_initiatives_available_500_Response'
+  /initiatives/{initiativeId}/onboarding:
+    put:
+      tags:
+        - merchant-initiatives-onboarding
+      summary: Onboards the current user on the given initiative
+      operationId: putMerchantOnboardingRequest
+      description: >
+        ENG: Performs the onboarding of the current user on the initiative identified by initiativeId.
+        IT: Effettua l'onboarding dell'utente corrente sull'iniziativa identificata da initiativeId
+      parameters:
+        - in: path
+          name: initiativeId
+          required: true
+          schema:
+            type: string
+          description: Initiative Id
+      responses:
+        '200':
+          $ref: '#/components/responses/PUT_initiative_onboarding_200_Response'
+        '400':
+          $ref: '#/components/responses/PUT_initiative_onboarding_400_Response'
+        '401':
+          $ref: '#/components/responses/PUT_initiative_onboarding_401_Response'
+        '429':
+          $ref: '#/components/responses/PUT_initiative_onboarding_429_Response'
+        '500':
+          $ref: '#/components/responses/PUT_initiative_onboarding_500_Response'
   /initiatives/{initiativeId}/statistics:
     get:
       tags:
@@ -3415,6 +3623,198 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/TransactionErrorDTO"
+    GET_initiatives_available_200_Response:
+      description: Ok
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PageResponseInitiativeResponse'
+            maxItems: 25
+    GET_initiatives_available_400_Response:
+      description: Bad request
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+    GET_initiatives_available_401_Response:
+      description: Authentication failed
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+    GET_initiatives_available_429_Response:
+      description: Too many Request
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        Retry-After:
+          $ref: '#/components/headers/Retry-After'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+    GET_initiatives_available_500_Response:
+      description: Server ERROR
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+    PUT_initiative_onboarding_200_Response:
+      description: Onboarding effettuato con successo
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OnboardingResponse'
+    PUT_initiative_onboarding_400_Response:
+      description: Bad request
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+    PUT_initiative_onboarding_401_Response:
+      description: Authentication failed
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+
+    PUT_initiative_onboarding_403_Response:
+      description: Utente non autorizzato ad effettuare l'onboarding (es. non in possesso dei requisiti)
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+
+    PUT_initiative_onboarding_404_Response:
+      description: Iniziativa non trovata
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+    PUT_initiative_onboarding_409_Response:
+      description: Utente già onboardato sull'iniziativa
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+    PUT_initiative_onboarding_429_Response:
+      description: Too many Request
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
+        Retry-After:
+          $ref: '#/components/headers/Retry-After'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/X-RateLimit-Limit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/X-RateLimit-Remaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/X-RateLimit-Reset'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+    PUT_initiative_onboarding_500_Response:
+      description: Server ERROR
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDTO'
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: '#/components/headers/Access-Control-Allow-Origin'
   headers:
     X-RateLimit-Limit:
       description: The maximum number of requests allowed in the current period
@@ -3479,7 +3879,7 @@ components:
             properties:
               pointOfSaleId:
                 type: string
-              pointOfSaleName:
+              franchiseName:
                 type: string
         notAssociated:
           type: array
@@ -3489,7 +3889,7 @@ components:
             properties:
               pointOfSaleId:
                 type: string
-              pointOfSaleName:
+              franchiseName:
                 type: string
               reason:
                 type: string
@@ -4696,6 +5096,56 @@ components:
           description: >
             ENG: Total number of available pages. <br>
             IT: Numero totale delle pagine disponibili.
+    OnboardingResponse:
+      type: object
+      properties:
+        initiativeId:
+          type: string
+          example: "123"
+        status:
+          type: string
+          example: "ONBOARDING_OK"
+        onboardingDate:
+          type: string
+          format: date-time
+          example: "2024-06-01T10:15:30Z"
+    PageResponseInitiativeResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/InitiativeResponse'
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          example: 100
+    InitiativeResponse:
+      type: object
+      properties:
+        initiativeId:
+          type: string
+          example: "123"
+        initiativeName:
+          type: string
+          example: "Bonus TV"
+        organizationName:
+          type: string
+          example: "Bonus TV"
+        status:
+          type: string
+          example: "PUBLISHED"
+        onboardStatus:
+          type: string
+          enum:
+            - ONBOARDABLE
+            - NOT_ONBOARDABLE
     ErrorDTO:
       type: object
       required:
@@ -4729,6 +5179,55 @@ components:
         - startPeriod
         - endPeriod
         - reportType
+    PointOfSaleExclusionResultDTO:
+      type: object
+      properties:
+        excludedPointOfSales:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExcludedPointOfSaleDetailDTO"
+        notExcludedPointOfSales:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotExcludedPointOfSaleDTO"
+    ExcludedPointOfSaleDetailDTO:
+      type: object
+      properties:
+        pointOfSaleId:
+          type: string
+        franchiseName:
+          type: string
+    NotExcludedPointOfSaleDTO:
+      type: object
+      required:
+        - pointOfSaleId
+        - franchiseName
+        - reason
+      properties:
+        pointOfSaleId:
+          type: string
+        franchiseName:
+          type: string
+        type:
+          type: string
+        address:
+          type: string
+        streetNumber:
+          type: string
+        city:
+          type: string
+        website:
+          type: string
+        reason:
+          $ref: "#/components/schemas/PosOnboardingExclusionRejectionReason"
+    PosOnboardingExclusionRejectionReason:
+      type: string
+      enum:
+        - ALREADY_EXCLUDED
+        - NOT_FOUND
+        - INVALID
+        - GENERIC_ERROR
+        - HAS_TRANSACTIONS
   securitySchemes:
     Bearer:
       type: apiKey

@@ -5,6 +5,7 @@ import { FormikProps } from 'formik';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
 import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
 import {
+  PointOfSaleExclusionResultDTO,
   PointOfSaleDTO,
   PointOfSaleInitiativeDTO,
   PointOfSaleOnboardingResultDTO,
@@ -12,7 +13,11 @@ import {
 import { GetPointOfSalesFilters } from '../../types/types';
 import { ASSOCIATION_SUCCESS_ALERT_TIMEOUT, MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { formatCatalogDrawerAddress } from '../../utils/addressUtils';
-import { associatePos, getPointOfSaleInitiatives } from '../../services/merchantService';
+import {
+  associatePos,
+  excludePos,
+  getPointOfSaleInitiatives,
+} from '../../services/merchantService';
 import { safeFormatDate } from '../../utils/formatUtils';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useAlert } from '../../hooks/useAlert';
@@ -20,6 +25,9 @@ import AssociateSelectedPosModal from './AssociateSelectedPosModal';
 import AlreadyAssociatedPosModal, {
   AlreadyAssociatedPointOfSale,
 } from './AlreadyAssociatedPosModal';
+import PointOfSaleExclusionResultModal, {
+  NotExcludedPointOfSale,
+} from './PointOfSaleExclusionResultModal';
 
 type InitiativeOption = {
   value: string;
@@ -86,8 +94,10 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   const [initiatives, setInitiatives] = useState<Array<PointOfSaleInitiativeDTO>>([]);
   const [isLoadingInitiatives, setIsLoadingInitiatives] = useState(false);
   const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
+  const [isExcludeModalOpen, setIsExcludeModalOpen] = useState(false);
   const [selectedInitiativeId, setSelectedInitiativeId] = useState('');
   const [isAssociatingPos, setIsAssociatingPos] = useState(false);
+  const [isExcludingPos, setIsExcludingPos] = useState(false);
   const [alreadyAssociatedStores, setAlreadyAssociatedStores] = useState<
     Array<AlreadyAssociatedPointOfSale>
   >([]);
@@ -97,6 +107,11 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   } | null>(null);
   const [alreadyAssociatedInitiativeName, setAlreadyAssociatedInitiativeName] = useState('');
   const [shouldShowAlreadyAssociatedStores, setShouldShowAlreadyAssociatedStores] = useState(true);
+  const [notExcludedStores, setNotExcludedStores] = useState<Array<NotExcludedPointOfSale>>([]);
+  const [exclusionSuccessData, setExclusionSuccessData] = useState<{
+    excludedCount: number;
+    initiativeName: string;
+  } | null>(null);
   const [initiativesRefreshKey, setInitiativesRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -158,6 +173,11 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
     setSelectedInitiativeId('');
   }, []);
 
+  const handleExcludeModalClose = useCallback(() => {
+    setIsExcludeModalOpen(false);
+    setSelectedInitiativeId('');
+  }, []);
+
   const handleFetchError = useCallback(
     () =>
       setAlert({
@@ -183,6 +203,20 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
     [setAlert, t]
   );
 
+  const showExclusionSuccessAlert = useCallback(
+    (excludedCount: number, initiativeName: string) =>
+      setAlert({
+        text: t('pages.posCatalog.excludeSuccess', {
+          count: excludedCount,
+          initiativeName,
+        }),
+        isOpen: true,
+        severity: 'success',
+        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT ?? ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK,
+      }),
+    [setAlert, t]
+  );
+
   const handleAlreadyAssociatedModalClose = useCallback(() => {
     setAlreadyAssociatedStores([]);
     setAlreadyAssociatedInitiativeName('');
@@ -198,6 +232,20 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
 
     setInitiativesRefreshKey((current) => current + 1);
   }, [associationSuccessData, showAssociationSuccessAlert]);
+
+  const handleExclusionResultModalClose = useCallback(() => {
+    setNotExcludedStores([]);
+
+    if (exclusionSuccessData) {
+      showExclusionSuccessAlert(
+        exclusionSuccessData.excludedCount,
+        exclusionSuccessData.initiativeName
+      );
+      setExclusionSuccessData(null);
+    }
+
+    setInitiativesRefreshKey((current) => current + 1);
+  }, [exclusionSuccessData, showExclusionSuccessAlert]);
 
   const handleAssociationResult = useCallback(
     (result: PointOfSaleOnboardingResultDTO, initiativeName: string) => {
@@ -254,6 +302,66 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
     selectedStore?.id,
   ]);
 
+  const handleExclusionResult = useCallback(
+    (result: PointOfSaleExclusionResultDTO, initiativeName: string) => {
+      const excludedCount = result.excludedPointOfSales?.length ?? 0;
+      const notExcludedResultStores = (result.notExcludedPointOfSales ?? []).map((pointOfSale) => ({
+        pointOfSaleId: pointOfSale.pointOfSaleId,
+        reason: pointOfSale.reason,
+        franchiseName: pointOfSale.franchiseName ?? selectedStore?.franchiseName,
+        type: pointOfSale.type ?? selectedStore?.type,
+        address: pointOfSale.address ?? selectedStore?.address,
+        streetNumber: pointOfSale.streetNumber ?? selectedStore?.streetNumber,
+        city: pointOfSale.city ?? selectedStore?.city,
+        website: pointOfSale.website ?? selectedStore?.website,
+      }));
+
+      handleExcludeModalClose();
+      onClose();
+
+      if (notExcludedResultStores.length > 0) {
+        setExclusionSuccessData(excludedCount > 0 ? { excludedCount, initiativeName } : null);
+        setNotExcludedStores(notExcludedResultStores);
+        return;
+      }
+
+      setInitiativesRefreshKey((current) => current + 1);
+      if (excludedCount > 0) {
+        showExclusionSuccessAlert(excludedCount, initiativeName);
+      }
+    },
+    [handleExcludeModalClose, onClose, selectedStore, showExclusionSuccessAlert]
+  );
+
+  const handleExcludeConfirm = useCallback(async () => {
+    const initiativeName =
+      publishedInitiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)
+        ?.label ?? '';
+
+    if (!merchantId || !selectedStore?.id || !selectedInitiativeId) {
+      handleFetchError();
+      return;
+    }
+
+    setIsExcludingPos(true);
+
+    try {
+      const result = await excludePos(selectedInitiativeId, merchantId, [selectedStore.id]);
+      handleExclusionResult(result, initiativeName);
+    } catch (_error) {
+      handleFetchError();
+    } finally {
+      setIsExcludingPos(false);
+    }
+  }, [
+    handleExclusionResult,
+    handleFetchError,
+    merchantId,
+    publishedInitiativeOptions,
+    selectedInitiativeId,
+    selectedStore?.id,
+  ]);
+
   return (
     <>
       <DetailDrawer
@@ -267,6 +375,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
             dataTestId: 'exclude-store-button',
             variant: 'outlined',
             color: 'error',
+            onClick: () => setIsExcludeModalOpen(true),
           },
           {
             title: t('pages.posCatalog.actions.associate'),
@@ -436,11 +545,31 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
         onInitiativeChange={setSelectedInitiativeId}
         onConfirm={handleAssociateConfirm}
       />
+      <AssociateSelectedPosModal
+        open={isExcludeModalOpen}
+        initiativeOptions={publishedInitiativeOptions}
+        selectedInitiativeId={selectedInitiativeId}
+        selectedStoresCount={1}
+        isLoading={isExcludingPos}
+        onClose={handleExcludeModalClose}
+        onInitiativeChange={setSelectedInitiativeId}
+        onConfirm={handleExcludeConfirm}
+        copyKey="excludeModal"
+        confirmLabelKey="pages.posCatalog.actions.exclude"
+        confirmColor="error"
+        dataTestId="exclude-selected-pos-modal"
+        titleId="exclude-selected-pos-modal-title"
+      />
       <AlreadyAssociatedPosModal
         stores={alreadyAssociatedStores}
         initiativeName={alreadyAssociatedInitiativeName}
         showStores={shouldShowAlreadyAssociatedStores}
         onClose={handleAlreadyAssociatedModalClose}
+      />
+      <PointOfSaleExclusionResultModal
+        stores={notExcludedStores}
+        hasExcludedStores={Boolean(exclusionSuccessData)}
+        onClose={handleExclusionResultModalClose}
       />
     </>
   );
