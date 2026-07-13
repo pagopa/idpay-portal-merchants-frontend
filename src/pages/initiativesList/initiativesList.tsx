@@ -38,6 +38,14 @@ type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
 const CLOSED: StatusEnum = 'CLOSED';
 
+const filterInitiativesBySearch = (list: Array<Data>, searchValue: string) => {
+  const search = searchValue.toLocaleLowerCase();
+
+  return search.length > 0
+    ? list.filter((record) => record?.initiativeName?.toLowerCase().includes(search))
+    : [...list];
+};
+
 function SortableTableHead({
   order,
   orderBy,
@@ -115,9 +123,11 @@ const InitiativesList = () => {
   const [orderBy, setOrderBy] = useState<keyof Data>('initiativeName');
   const [initiativeList, setInitiativeList] = useState<Array<Data>>([]);
   const [initiativeListFiltered, setInitiativeListFiltered] = useState<Array<Data>>([]);
+  const [newInitiativesListFiltered, setNewInitiativesListFiltered] = useState<Array<Data>>([]);
   const history = useHistory();
   const { t } = useScopedTranslation();
   const [value, setValue] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
   const [newInitiativesLoading, setNewInitiativesLoading] = useState(false);
   const [newInitiativesLoaded, setNewInitiativesLoaded] = useState(false);
   const [newInitiativesList, setNewInitiativesList] = useState<Array<Data>>([]);
@@ -185,6 +195,7 @@ const InitiativesList = () => {
     if (USE_NEW_INITIATIVES_TEMP_MOCK) {
       setNewInitiativesList(NEW_INITIATIVES_TEMPORARY_MOCK);
       setNewInitiativesLoaded(true);
+      setNewInitiativesListFiltered(NEW_INITIATIVES_TEMPORARY_MOCK);
       return;
     }
 
@@ -208,9 +219,11 @@ const InitiativesList = () => {
         }));
 
       setNewInitiativesList(mappedInitiativeList);
+      setNewInitiativesListFiltered(mappedInitiativeList);
     } catch {
       // Keep UI fallback (empty state) without surfacing runtime overlay.
       setNewInitiativesList([]);
+      setNewInitiativesListFiltered([]);
     } finally {
       setNewInitiativesLoaded(true);
       setNewInitiativesLoading(false);
@@ -219,6 +232,7 @@ const InitiativesList = () => {
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+    setSearchValue('');
 
     if (newValue === 1 && !newInitiativesLoaded) {
       void loadNewInitiatives();
@@ -242,27 +256,20 @@ const InitiativesList = () => {
         };
       });
       setInitiativeList(mappedInitativeList);
-      setInitiativeListFiltered(mappedInitativeList);
     }
   }, [initiativesListSel]);
 
   const handleSearchInitiatives = (s: string) => {
-    const search = s.toLocaleLowerCase();
-    if (search.length > 0) {
-      const listFiltered: Array<Data> = [];
-      initiativeList?.forEach((record) => {
-        if (record?.initiativeName?.toLowerCase().includes(search)) {
-          // eslint-disable-next-line functional/immutable-data
-          listFiltered.push(record);
-        }
-      });
-      setInitiativeListFiltered([...listFiltered]);
-    } else {
-      if (Array.isArray(initiativeList)) {
-        setInitiativeListFiltered([...initiativeList]);
-      }
-    }
+    setSearchValue(s);
   };
+
+  useEffect(() => {
+    setInitiativeListFiltered(filterInitiativesBySearch(initiativeList, searchValue));
+  }, [initiativeList, searchValue]);
+
+  useEffect(() => {
+    setNewInitiativesListFiltered(filterInitiativesBySearch(newInitiativesList, searchValue));
+  }, [newInitiativesList, searchValue]);
 
   const handleRequestSort = (_event: React.MouseEvent<unknown>, property: keyof Data) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -330,6 +337,7 @@ const InitiativesList = () => {
             placeholder={t('pages.initiativesList.searchByInitiativeName')}
             variant="outlined"
             size="small"
+            value={searchValue}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -445,7 +453,7 @@ const InitiativesList = () => {
           <TabPanel value={value} index={1}>
             <NewInitiativesTabContent
               isLoading={newInitiativesLoading}
-              initiatives={newInitiativesList}
+              initiatives={newInitiativesListFiltered}
               order={order}
               orderBy={orderBy}
               onRequestSort={handleRequestSort}

@@ -160,14 +160,12 @@ describe('FiltersForm', () => {
 
     render(
       <FiltersForm formik={formik}>
-        {/* Child con name -> verrà clonato */}
         <input
           name="field1"
           data-testid="cloned-input"
           onChange={mockOnChange}
           onBlur={mockOnBlur}
         />
-        {/* Child senza name -> non viene clonato */}
         <div data-testid="not-cloned">Non clonato</div>
       </FiltersForm>
     );

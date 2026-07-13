@@ -63,7 +63,6 @@ const FiltersForm = <T extends Record<string, any>>({
     <Grid sx={{ my: 4, width: '100%' }} container spacing={2}>
       {enhancedChildren}
       <Grid item xs={12} sm={6} md={3} lg={1}>
-        {/* Bottone "Applica Filtri" */}
         <Button
           sx={{ height: '44.5px', gridColumn: 'span 1', width: '100%' }}
           variant="outlined"
@@ -76,7 +75,6 @@ const FiltersForm = <T extends Record<string, any>>({
         </Button>
       </Grid>
       <Grid item xs={12} sm={6} md={3} lg={1}>
-        {/* Bottone "Rimuovi Filtri" */}
         <ButtonNaked
           component="button"
           sx={{

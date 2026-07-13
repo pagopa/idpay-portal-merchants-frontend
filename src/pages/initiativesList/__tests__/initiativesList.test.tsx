@@ -44,6 +44,34 @@ describe('Test suite for initiativeList page', () => {
     expect(searchField.value).toBe('');
   });
 
+  test('User searches initiatives in the new initiatives tab', async () => {
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+    renderWithContext(<InitiativesList />, store);
+
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+
+    const searchField = screen.getByTestId('search-initiatives') as HTMLInputElement;
+    fireEvent.change(searchField, { target: { value: 'Prova' } });
+
+    await waitFor(() => {
+      expect(screen.queryByText('Bonus Decoder')).not.toBeInTheDocument();
+      expect(screen.getByText('Bonus Prova')).toBeInTheDocument();
+    });
+  });
+
+  test('Search field is reset when user changes tab', async () => {
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+    renderWithContext(<InitiativesList />, store);
+
+    const searchField = screen.getByTestId('search-initiatives') as HTMLInputElement;
+    fireEvent.change(searchField, { target: { value: 'Iniziativa mock 1234' } });
+    expect(searchField.value).toBe('Iniziativa mock 1234');
+
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+    expect(searchField.value).toBe('');
+  });
+
+
   test('User sorts initiatives by name', async () => {
     store.dispatch(setInitiativesList(mockedInitiativesList));
     renderWithContext(<InitiativesList />, store);

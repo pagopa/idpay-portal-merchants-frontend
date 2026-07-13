@@ -1,9 +1,11 @@
 import type React from 'react';
-import { Box, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Box, Button, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
+import DialogComponent from '../../components/Dialog/DialogComponent';
 import { Data, EnhancedTableProps } from './helpers';
 
 type Props = {
@@ -78,6 +80,7 @@ const NewInitiativesTabContent = ({
   onAdhere,
 }: Props) => {
   const { t } = useScopedTranslation();
+  const [isNotOnboardableModalOpen, setIsNotOnboardableModalOpen] = useState(false);
 
   return (
     <Paper
@@ -181,7 +184,21 @@ const NewInitiativesTabContent = ({
                             Aderisci
                           </Box>
                         ) : (
-                          <InfoOutlinedIcon color="primary" sx={{ fontSize: '1.1rem' }} />
+                          <button
+                            type="button"
+                            onClick={() => setIsNotOnboardableModalOpen(true)}
+                            data-testid="not-onboardable-info-btn"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: 0,
+                            }}
+                          >
+                            <InfoOutlinedIcon color="primary" sx={{ fontSize: '1.1rem' }} />
+                          </button>
                         )}
                       </TableCell>
                     </TableRow>
@@ -226,6 +243,25 @@ const NewInitiativesTabContent = ({
           )}
         </TableContainer>
       )}
+
+      <DialogComponent
+        open={isNotOnboardableModalOpen}
+        titleId="not-onboardable-dialog-title"
+        title="Perche non posso aderire all'iniziativa?"
+        description="Non possiedi i codici ATECO necessari per aderire a questa iniziativa."
+        closeLabel="Ok, chiudi"
+        onClose={() => setIsNotOnboardableModalOpen(false)}
+        dataTestId="not-onboardable-modal"
+        actions={
+          <Button
+            variant="contained"
+            onClick={() => setIsNotOnboardableModalOpen(false)}
+            data-testid="not-onboardable-modal-close-btn"
+          >
+            Ok, chiudi
+          </Button>
+        }
+      />
     </Paper>
   );
 };
