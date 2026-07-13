@@ -483,7 +483,6 @@ describe('merchantService', () => {
   });
 
   test('updateMerchantPointOfSales returns error code when error code is falsy but exists in error', async () => {
-    // Tests lines 162-163: when errorDetails?.code exists but error.code is falsy
     await expectUpdateMerchantPointOfSalesError(
       new ApiError(400, 'error message', undefined as any, undefined),
       {
@@ -494,7 +493,6 @@ describe('merchantService', () => {
   });
 
   test('updateMerchantPointOfSales returns result as void when successful', async () => {
-    // Tests line 157: the return of result as void
     mockedApi.updateMerchantPointOfSales.mockResolvedValue(undefined);
 
     const result = await updateMerchantPointOfSales('initiative', 'merchant', []);

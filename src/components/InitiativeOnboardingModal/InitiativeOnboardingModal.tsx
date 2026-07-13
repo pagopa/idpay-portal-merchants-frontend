@@ -29,14 +29,6 @@ type Props = {
   onConfirm: () => void;
 };
 
-/**
- * Confirmation modal for the "aderire a un'iniziativa" action.
- *
- * Renders a DialogComponent with:
- *  - Title: "Vuoi aderire a <initiativeName>?"
- *  - Optional body: initiative description (if provided)
- *  - Actions: "Annulla" + "Conferma"
- */
 const InitiativeOnboardingModal: React.FC<Props> = ({
   open,
   initiative,

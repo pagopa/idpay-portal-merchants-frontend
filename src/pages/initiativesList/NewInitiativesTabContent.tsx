@@ -10,6 +10,7 @@ import { Data, EnhancedTableProps } from './helpers';
 
 type Props = {
   isLoading: boolean;
+  isError: boolean;
   initiatives: Array<Data>;
   order: EnhancedTableProps['order'];
   orderBy: EnhancedTableProps['orderBy'];
@@ -72,6 +73,7 @@ function NewInitiativesTableHead(props: EnhancedTableProps) {
 
 const NewInitiativesTabContent = ({
   isLoading,
+  isError,
   initiatives,
   order,
   orderBy,
@@ -123,6 +125,45 @@ const NewInitiativesTabContent = ({
             {t('pages.initiativesList.newInitiativesLoadingSubtitle')}
           </Typography>
         </Box>
+      ) : isError ? (
+        <Paper
+          sx={{
+            my: 2,
+            p: 3,
+            width: '100%',
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: 'none',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
+            <ErrorOutlineOutlinedIcon fontVariant="h5" color="disabled" />
+            <Typography
+              variant="body2"
+              textAlign="center"
+              sx={{ fontSize: '1rem !important', width: '100%' }}
+            >
+              {t('pages.initiativesList.newInitiativesErrorTitle')}
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              textAlign="center"
+              sx={{ fontSize: '0.875rem', width: '100%' }}
+            >
+              {t('pages.initiativesList.newInitiativesErrorSubtitle')}
+            </Typography>
+          </Box>
+        </Paper>
       ) : (
         <TableContainer sx={{ backgroundColor: 'white' }}>
           {initiatives.length > 0 ? (
@@ -181,7 +222,7 @@ const NewInitiativesTabContent = ({
                               })
                             }
                           >
-                            Aderisci
+                            {t('pages.initiativesList.actions.adhere')}
                           </Box>
                         ) : (
                           <button
@@ -247,9 +288,9 @@ const NewInitiativesTabContent = ({
       <DialogComponent
         open={isNotOnboardableModalOpen}
         titleId="not-onboardable-dialog-title"
-        title="Perche non posso aderire all'iniziativa?"
-        description="Non possiedi i codici ATECO necessari per aderire a questa iniziativa."
-        closeLabel="Ok, chiudi"
+        title={t('pages.initiativesList.notOnboardableModal.title')}
+        description={t('pages.initiativesList.notOnboardableModal.description')}
+        closeLabel={t('actions.okClose')}
         onClose={() => setIsNotOnboardableModalOpen(false)}
         dataTestId="not-onboardable-modal"
         actions={
@@ -258,7 +299,7 @@ const NewInitiativesTabContent = ({
             onClick={() => setIsNotOnboardableModalOpen(false)}
             data-testid="not-onboardable-modal-close-btn"
           >
-            Ok, chiudi
+            {t('actions.okClose')}
           </Button>
         }
       />
@@ -267,4 +308,3 @@ const NewInitiativesTabContent = ({
 };
 
 export default NewInitiativesTabContent;
-

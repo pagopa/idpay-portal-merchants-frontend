@@ -130,6 +130,7 @@ const InitiativesList = () => {
   const [searchValue, setSearchValue] = useState('');
   const [newInitiativesLoading, setNewInitiativesLoading] = useState(false);
   const [newInitiativesLoaded, setNewInitiativesLoaded] = useState(false);
+  const [newInitiativesLoadError, setNewInitiativesLoadError] = useState(false);
   const [newInitiativesList, setNewInitiativesList] = useState<Array<Data>>([]);
   const initiativesListSel = useAppSelector(intiativesListSelector);
 
@@ -193,6 +194,7 @@ const InitiativesList = () => {
     }
 
     if (USE_NEW_INITIATIVES_TEMP_MOCK) {
+      setNewInitiativesLoadError(false);
       setNewInitiativesList(NEW_INITIATIVES_TEMPORARY_MOCK);
       setNewInitiativesLoaded(true);
       setNewInitiativesListFiltered(NEW_INITIATIVES_TEMPORARY_MOCK);
@@ -200,6 +202,7 @@ const InitiativesList = () => {
     }
 
     setNewInitiativesLoading(true);
+    setNewInitiativesLoadError(false);
 
     try {
       const response = await getMerchantInitiativesAvailable({
@@ -220,8 +223,9 @@ const InitiativesList = () => {
 
       setNewInitiativesList(mappedInitiativeList);
       setNewInitiativesListFiltered(mappedInitiativeList);
+      setNewInitiativesLoadError(false);
     } catch {
-      // Keep UI fallback (empty state) without surfacing runtime overlay.
+      setNewInitiativesLoadError(true);
       setNewInitiativesList([]);
       setNewInitiativesListFiltered([]);
     } finally {
@@ -374,9 +378,6 @@ const InitiativesList = () => {
           </Tabs>
         </Box>
         <Box sx={{ width: '100%' }}>
-          {/* <TabPanel value={value} index={0}>
-            <MerchantTransactions id={id} />
-          </TabPanel> */}
           <TabPanel value={value} index={0}>
             <Paper sx={initiativesTablePaperSx}>
               <TableContainer>
@@ -453,6 +454,7 @@ const InitiativesList = () => {
           <TabPanel value={value} index={1}>
             <NewInitiativesTabContent
               isLoading={newInitiativesLoading}
+              isError={newInitiativesLoadError}
               initiatives={newInitiativesListFiltered}
               order={order}
               orderBy={orderBy}
@@ -464,7 +466,6 @@ const InitiativesList = () => {
          </Box>
        </Box>
 
-      {/* ── Onboarding confirmation modal (BND-1129) ── */}
       <InitiativeOnboardingModal
         open={modalOpen}
         initiative={selectedInitiative}
@@ -473,7 +474,6 @@ const InitiativesList = () => {
         onConfirm={confirmOnboarding}
       />
 
-      {/* ── Onboarding success / error alert ── */}
       <AlertComponent
         isOpen={onboardingAlertState.open}
         severity={onboardingAlertState.severity}

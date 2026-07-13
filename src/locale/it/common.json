@@ -107,14 +107,23 @@
       "newInitiativesTab": "Nuove iniziative",
       "newInitiativesLoadingTitle": "Verifica in corso",
       "newInitiativesLoadingSubtitle": "Stiamo controllando le iniziative disponibili per il tuo profilo",
+      "newInitiativesErrorTitle": "Non è stato possibile recuperare le iniziative",
+      "newInitiativesErrorSubtitle": "Riprova tra qualche minuto.",
       "newInitiativesEmptySubtitle": "Al momento non ci sono iniziative dedicate al tuo profilo. Ricontrolla in futuro.",
       "adhereBtn": "Aderisci",
       "onboarding": {
         "modalTitle": "Vuoi aderire a {{initiativeName}}?",
-        "successTitle": "Adesione effettuata",
-        "successMessage": "Hai aderito all'iniziativa {{initiativeName}}.",
-        "errorTitle": "Errore durante l'adesione",
-        "errorMessage": "Si è verificato un errore. Riprova."
+        "successTitle": "Hai aderito a <{{initiativeName}}>.",
+        "successMessage": "",
+        "errorTitle": "Non è stato possibile aderire all'iniziativa, riprova più tardi.",
+        "errorMessage": ""
+      },
+      "actions": {
+        "adhere": "Aderisci"
+      },
+      "notOnboardableModal": {
+        "title": "Perche non posso aderire all'iniziativa?",
+        "description": "Non possiedi i codici ATECO necessari per aderire a questa iniziativa."
       }
     },
     "posCatalog": {
