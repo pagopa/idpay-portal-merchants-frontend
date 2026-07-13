@@ -1,6 +1,19 @@
 import type React from 'react';
 import { useState } from 'react';
-import { Box, Button, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Typography,
+} from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -88,9 +101,7 @@ const NewInitiativesTabContent = ({
     <Paper
       sx={{
         display: 'flex',
-        pb: 1,
-        pl: 1,
-        pr: 1,
+        p: 1,
         flexDirection: 'column',
         alignItems: 'flex-end',
         alignSelf: 'stretch',

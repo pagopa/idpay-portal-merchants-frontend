@@ -33,7 +33,7 @@ import { Data, EnhancedTableProps, HeadCell, Order, getComparator, stableSort } 
 import NewInitiativesTabContent from './NewInitiativesTabContent';
 import { NEW_INITIATIVES_TEMPORARY_MOCK } from './newInitiativesTemporaryMock';
 
-const USE_NEW_INITIATIVES_TEMP_MOCK = true;
+const USE_NEW_INITIATIVES_TEMP_MOCK = false;
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
 const CLOSED: StatusEnum = 'CLOSED';
@@ -147,9 +147,7 @@ const InitiativesList = () => {
 
   const initiativesTablePaperSx = {
     display: 'flex',
-    pb: 1,
-    pl: 1,
-    pr: 1,
+    p: 1,
     flexDirection: 'column',
     alignItems: 'flex-end',
     alignSelf: 'stretch',
@@ -462,9 +460,9 @@ const InitiativesList = () => {
               onOpenInitiativeOverview={openInitiativeOverview}
               onAdhere={openOnboardingModal}
             />
-           </TabPanel>
-         </Box>
-       </Box>
+          </TabPanel>
+        </Box>
+      </Box>
 
       <InitiativeOnboardingModal
         open={modalOpen}
