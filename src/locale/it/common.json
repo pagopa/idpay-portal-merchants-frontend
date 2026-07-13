@@ -107,7 +107,15 @@
       "newInitiativesTab": "Nuove iniziative",
       "newInitiativesLoadingTitle": "Verifica in corso",
       "newInitiativesLoadingSubtitle": "Stiamo controllando le iniziative disponibili per il tuo profilo",
-      "newInitiativesEmptySubtitle": "Al momento non ci sono iniziative dedicate al tuo profilo. Ricontrolla in futuro."
+      "newInitiativesEmptySubtitle": "Al momento non ci sono iniziative dedicate al tuo profilo. Ricontrolla in futuro.",
+      "adhereBtn": "Aderisci",
+      "onboarding": {
+        "modalTitle": "Vuoi aderire a {{initiativeName}}?",
+        "successTitle": "Adesione effettuata",
+        "successMessage": "Hai aderito all'iniziativa {{initiativeName}}.",
+        "errorTitle": "Errore durante l'adesione",
+        "errorMessage": "Si è verificato un errore. Riprova."
+      }
     },
     "posCatalog": {
       "title": "Catalogo punti vendita",
