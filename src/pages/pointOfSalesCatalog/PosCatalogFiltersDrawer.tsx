@@ -28,6 +28,7 @@ import AlreadyAssociatedPosModal, {
 import PointOfSaleExclusionResultModal, {
   NotExcludedPointOfSale,
 } from './PointOfSaleExclusionResultModal';
+import { isDisplayableExclusionReason } from './pointOfSaleFeedbackUtils';
 
 type InitiativeOption = {
   value: string;
@@ -310,16 +311,18 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   const handleExclusionResult = useCallback(
     (result: PointOfSaleExclusionResultDTO, initiativeName: string) => {
       const excludedCount = result.excludedPointOfSales?.length ?? 0;
-      const notExcludedResultStores = (result.notExcludedPointOfSales ?? []).map((pointOfSale) => ({
-        pointOfSaleId: pointOfSale.pointOfSaleId,
-        reason: pointOfSale.reason,
-        franchiseName: pointOfSale.franchiseName ?? selectedStore?.franchiseName,
-        type: pointOfSale.type ?? selectedStore?.type,
-        address: pointOfSale.address ?? selectedStore?.address,
-        streetNumber: pointOfSale.streetNumber ?? selectedStore?.streetNumber,
-        city: pointOfSale.city ?? selectedStore?.city,
-        website: pointOfSale.website ?? selectedStore?.website,
-      }));
+      const notExcludedResultStores = (result.notExcludedPointOfSales ?? [])
+        .filter((pointOfSale) => isDisplayableExclusionReason(pointOfSale.reason))
+        .map((pointOfSale) => ({
+          pointOfSaleId: pointOfSale.pointOfSaleId,
+          reason: pointOfSale.reason,
+          franchiseName: pointOfSale.franchiseName ?? selectedStore?.franchiseName,
+          type: pointOfSale.type ?? selectedStore?.type,
+          address: pointOfSale.address ?? selectedStore?.address,
+          streetNumber: pointOfSale.streetNumber ?? selectedStore?.streetNumber,
+          city: pointOfSale.city ?? selectedStore?.city,
+          website: pointOfSale.website ?? selectedStore?.website,
+        }));
 
       handleExcludeModalClose();
       onClose();

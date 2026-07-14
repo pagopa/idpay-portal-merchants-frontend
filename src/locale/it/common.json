@@ -151,10 +151,7 @@
         "notCompletedDescription_other": "Non puoi escludere i seguenti punti vendita:",
         "reasons": {
           "ALREADY_EXCLUDED": "Già escluso",
-          "HAS_TRANSACTIONS": "Transazioni in corso",
-          "NOT_FOUND": "Non trovato",
-          "INVALID": "Non valido",
-          "GENERIC_ERROR": "Non escluso"
+          "HAS_TRANSACTIONS": "Transazioni in corso"
         }
       },
       "drawer": {

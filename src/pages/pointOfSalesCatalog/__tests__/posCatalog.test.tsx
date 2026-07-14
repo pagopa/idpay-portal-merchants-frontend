@@ -497,7 +497,11 @@ describe('<PosCatalog />', () => {
   it('shows the exclusion result modal and refreshes after close when no selected store is excluded', async () => {
     mockExcludePos.mockResolvedValueOnce({
       excludedPointOfSales: [],
-      notExcludedPointOfSales: [{ pointOfSaleId: 'store-1', reason: 'ALREADY_EXCLUDED' }],
+      notExcludedPointOfSales: [
+        { pointOfSaleId: 'store-1', reason: 'ALREADY_EXCLUDED' },
+        { pointOfSaleId: 'store-2', reason: 'HAS_TRANSACTIONS' },
+        { pointOfSaleId: 'store-3', reason: 'NOT_FOUND' },
+      ],
     });
 
     renderComponent();
@@ -534,6 +538,16 @@ describe('<PosCatalog />', () => {
         'pages.posCatalog.exclusionResultModal.reasons.ALREADY_EXCLUDED'
       )
     ).toBeInTheDocument();
+    expect(
+      within(exclusionResultModal).getByText(
+        'pages.posCatalog.exclusionResultModal.reasons.HAS_TRANSACTIONS'
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(exclusionResultModal).queryByText(
+        'pages.posCatalog.exclusionResultModal.reasons.NOT_FOUND'
+      )
+    ).not.toBeInTheDocument();
 
     fireEvent.click(within(exclusionResultModal).getByText('actions.okClose'));
 

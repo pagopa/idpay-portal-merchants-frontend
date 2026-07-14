@@ -1,4 +1,5 @@
 import { formatAlreadyAssociatedAddress, formatStreetAddress } from '../../utils/addressUtils';
+import { PosOnboardingExclusionRejectionReason } from '../../api/generated/merchants/data-contracts';
 
 export type PointOfSaleFeedbackItem = {
   pointOfSaleId?: string;
@@ -9,6 +10,12 @@ export type PointOfSaleFeedbackItem = {
   streetNumber?: string | null;
   website?: string | null;
 };
+
+export const isDisplayableExclusionReason = (
+  reason: PosOnboardingExclusionRejectionReason
+) =>
+  reason === PosOnboardingExclusionRejectionReason.ALREADY_EXCLUDED ||
+  reason === PosOnboardingExclusionRejectionReason.HAS_TRANSACTIONS;
 
 type LabelOptions = {
   includeCity?: boolean;

@@ -43,6 +43,7 @@ import AlreadyAssociatedPosModal, {
 import PointOfSaleExclusionResultModal, {
   NotExcludedPointOfSale,
 } from './PointOfSaleExclusionResultModal';
+import { isDisplayableExclusionReason } from './pointOfSaleFeedbackUtils';
 
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
@@ -298,7 +299,9 @@ const PosCatalog: React.FC = () => {
 
   const getNotExcludedStores = useCallback(
     (result: PointOfSaleExclusionResultDTO): Array<NotExcludedPointOfSale> =>
-      (result.notExcludedPointOfSales ?? []) as Array<NotExcludedPointOfSale>,
+      (result.notExcludedPointOfSales ?? []).filter((pointOfSale) =>
+        isDisplayableExclusionReason(pointOfSale.reason)
+      ) as Array<NotExcludedPointOfSale>,
     []
   );
 
