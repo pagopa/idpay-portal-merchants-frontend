@@ -10,6 +10,7 @@ const mockUsePointOfSalesTable = jest.fn();
 const mockBuildPointOfSalesColumns = jest.fn();
 const mockGetMerchantPointOfSalesCatalog = jest.fn();
 const mockAssociatePos = jest.fn();
+const mockExcludePos = jest.fn();
 const mockParseJwt = jest.fn();
 const mockStorageRead = jest.fn();
 const mockUseFormik = jest.fn();
@@ -144,6 +145,7 @@ jest.mock('../../../services/merchantService', () => ({
   getMerchantPointOfSalesCatalog: (...args: Array<unknown>) =>
     mockGetMerchantPointOfSalesCatalog(...args),
   associatePos: (...args: Array<unknown>) => mockAssociatePos(...args),
+  excludePos: (...args: Array<unknown>) => mockExcludePos(...args),
 }));
 
 jest.mock('../../../utils/jwt-utils', () => ({
@@ -245,8 +247,12 @@ describe('<PosCatalog />', () => {
       totalElements: 1,
     });
     mockAssociatePos.mockResolvedValue({
-      associated: [{ pointOfSaleId: 'store-1', pointOfSaleName: 'Store One' }],
+      associated: [{ pointOfSaleId: 'store-1', franchiseName: 'Store One' }],
       notAssociated: [],
+    });
+    mockExcludePos.mockResolvedValue({
+      excludedPointOfSales: [{ pointOfSaleId: 'store-1', franchiseName: 'Store One' }],
+      notExcludedPointOfSales: [],
     });
     mockUsePointOfSalesTable.mockReturnValue(defaultHookValue);
     mockBuildPointOfSalesColumns.mockImplementation(({ onActionClick }: any) => [
@@ -451,13 +457,118 @@ describe('<PosCatalog />', () => {
     expect(screen.queryByTestId('pos-catalog-drawer')).not.toBeInTheDocument();
   });
 
+  it('excludes selected stores from the selected initiative on confirm', async () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.exclude (2)'));
+
+    const modal = screen.getByTestId('exclude-selected-pos-modal');
+    expect(within(modal).getByText('pages.posCatalog.excludeModal.title')).toBeInTheDocument();
+    expect(
+      within(modal).getByText('pages.posCatalog.excludeModal.description')
+    ).toBeInTheDocument();
+    expect(within(modal).getByText('pages.posCatalog.excludeModal.infoBanner')).toBeInTheDocument();
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.excludeModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(within(modal).getByText('pages.posCatalog.actions.exclude'));
+
+    await waitFor(() => {
+      expect(mockExcludePos).toHaveBeenCalledWith('initiative-1', 'merchant-123', [
+        'store-1',
+        'store-2',
+      ]);
+    });
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: 'pages.posCatalog.excludeSuccess',
+      isOpen: true,
+      severity: 'success',
+      timeout: 6000,
+    });
+    expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
+    expect(screen.queryByTestId('exclude-selected-pos-modal')).not.toBeInTheDocument();
+  });
+
+  it('shows the exclusion result modal and refreshes after close when no selected store is excluded', async () => {
+    mockExcludePos.mockResolvedValueOnce({
+      excludedPointOfSales: [],
+      notExcludedPointOfSales: [
+        { pointOfSaleId: 'store-1', reason: 'ALREADY_EXCLUDED' },
+        { pointOfSaleId: 'store-2', reason: 'HAS_TRANSACTIONS' },
+        { pointOfSaleId: 'store-3', reason: 'NOT_FOUND' },
+      ],
+    });
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.exclude (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.excludeModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(
+      within(screen.getByTestId('exclude-selected-pos-modal')).getByText(
+        'pages.posCatalog.actions.exclude'
+      )
+    );
+
+    await waitFor(() => {
+      expect(mockExcludePos).toHaveBeenCalledWith('initiative-1', 'merchant-123', [
+        'store-1',
+        'store-2',
+      ]);
+    });
+    const exclusionResultModal = await screen.findByTestId('point-of-sale-exclusion-result-modal');
+    expect(
+      within(exclusionResultModal).getByText(
+        'pages.posCatalog.exclusionResultModal.notCompletedTitle'
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(exclusionResultModal).getByText(
+        'pages.posCatalog.exclusionResultModal.reasons.ALREADY_EXCLUDED'
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(exclusionResultModal).getByText(
+        'pages.posCatalog.exclusionResultModal.reasons.HAS_TRANSACTIONS'
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(exclusionResultModal).queryByText(
+        'pages.posCatalog.exclusionResultModal.reasons.NOT_FOUND'
+      )
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(within(exclusionResultModal).getByText('actions.okClose'));
+
+    await waitFor(() => {
+      expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
+    });
+    expect(mockSetAlert).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'pages.posCatalog.excludeSuccess',
+        severity: 'success',
+      })
+    );
+  });
+
   it('shows already associated stores before the success alert when the response contains them', async () => {
     mockAssociatePos.mockResolvedValueOnce({
-      associated: [{ pointOfSaleId: 'store-1', pointOfSaleName: 'Store One' }],
+      associated: [{ pointOfSaleId: 'store-1', franchiseName: 'Store One' }],
       notAssociated: [
         {
           pointOfSaleId: 'store-2',
-          pointOfSaleName: 'Store Already',
+          franchiseName: 'Store Already',
           reason: 'ALREADY_ASSOCIATED',
           address: 'Via Roma',
           streetNumber: '10',
@@ -466,14 +577,14 @@ describe('<PosCatalog />', () => {
         },
         {
           pointOfSaleId: 'store-3',
-          pointOfSaleName: 'Store Online',
+          franchiseName: 'Store Online',
           reason: 'ALREADY_ASSOCIATED',
           website: 'www.shop.it',
           type: 'ONLINE',
         },
         {
           pointOfSaleId: 'store-4',
-          pointOfSaleName: 'Store Invalid',
+          franchiseName: 'Store Invalid',
           reason: 'INVALID',
           address: 'Via Torino',
           streetNumber: '20',
@@ -538,7 +649,7 @@ describe('<PosCatalog />', () => {
       notAssociated: [
         {
           pointOfSaleId: 'store-1',
-          pointOfSaleName: 'Store Already',
+          franchiseName: 'Store Already',
           reason: 'ALREADY_ASSOCIATED',
           address: 'Via Roma',
           streetNumber: '10',

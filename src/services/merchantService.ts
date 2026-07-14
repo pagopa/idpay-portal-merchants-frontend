@@ -25,6 +25,7 @@ import {
   ValidationErrorDetail,
   PointOfSaleInitiativeDTO,
   PointOfSaleOnboardingResultDTO,
+  PointOfSaleExclusionResultDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 
@@ -239,6 +240,13 @@ export const associatePos = (
   pointOfSaleIds: Array<string>
 ): Promise<PointOfSaleOnboardingResultDTO> =>
   getMerchantsApi().associatePos(initiativeId, merchantId, pointOfSaleIds);
+
+export const excludePos = (
+  initiativeId: string,
+  merchantId: string,
+  pointOfSaleIds: Array<string>
+): Promise<PointOfSaleExclusionResultDTO> =>
+  getMerchantsApi().excludePos(initiativeId, merchantId, pointOfSaleIds);
 
 export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,
