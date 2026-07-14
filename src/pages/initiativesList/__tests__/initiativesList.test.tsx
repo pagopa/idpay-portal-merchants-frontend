@@ -33,8 +33,8 @@ describe('Test suite for initiativeList page', () => {
   test('Render component', () => {
     renderWithContext(<InitiativesList />);
 
-    expect(screen.getByText('pages.initiativesList.title')).toBeInTheDocument();
-    expect(screen.getByText('pages.initiativesList.subtitle')).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativesList.title')).toBeTruthy();
+    expect(screen.getByText('pages.initiativesList.subtitle')).toBeTruthy();
   });
 
   test('User searches an initiative by name that shows results', async () => {
@@ -63,24 +63,22 @@ describe('Test suite for initiativeList page', () => {
   });
 
   test('User searches initiatives in the new initiatives tab', async () => {
-    mockedGetMerchantInitiativesAvailable.mockResolvedValue([
-      {
-        content: [
-          {
-            initiativeId: '1',
-            initiativeName: 'Bonus Decoder',
-            organizationName: 'PagoPA',
-            onboardStatus: 'ONBOARDABLE',
-          },
-          {
-            initiativeId: '2',
-            initiativeName: 'Bonus Prova',
-            organizationName: 'PagoPA',
-            onboardStatus: 'ONBOARDABLE',
-          },
-        ],
-      },
-    ] as Array<any>);
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({
+      content: [
+        {
+          initiativeId: '1',
+          initiativeName: 'Bonus Decoder',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+        {
+          initiativeId: '2',
+          initiativeName: 'Bonus Prova',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+    } as any);
 
     store.dispatch(setInitiativesList(mockedInitiativesList));
     renderWithContext(<InitiativesList />, store);
@@ -93,13 +91,67 @@ describe('Test suite for initiativeList page', () => {
     fireEvent.change(searchField, { target: { value: 'Prova' } });
 
     await waitFor(() => {
-      expect(screen.queryByText('Bonus Decoder')).not.toBeInTheDocument();
-      expect(screen.getByText('Bonus Prova')).toBeInTheDocument();
+      expect(screen.queryByText('Bonus Decoder')).toBeNull();
+      expect(screen.getByText('Bonus Prova')).toBeTruthy();
     });
   });
 
+  test('New initiatives tab keeps onboardable initiatives visible when a not-onboardable initiative exists', async () => {
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({
+      content: [
+        {
+          initiativeId: '1',
+          initiativeName: 'Bonus Not Onboardable',
+          organizationName: 'PagoPA',
+          onboardStatus: 'NOT_ONBOARDABLE',
+        },
+        {
+          initiativeId: '2',
+          initiativeName: 'Bonus Onboardable',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+    } as any);
+
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+    renderWithContext(<InitiativesList />, store);
+
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+
+    expect(await screen.findByText('Bonus Not Onboardable')).toBeTruthy();
+    expect(screen.getByText('Bonus Onboardable')).toBeTruthy();
+    expect(screen.queryByText('pages.initiativesList.emptyList')).toBeNull();
+  });
+
+  test('Reloads new initiatives tab when the tab is reopened and data exists', async () => {
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({
+      content: [
+        {
+          initiativeId: '1',
+          initiativeName: 'Bonus Decoder',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+    } as any);
+
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+    renderWithContext(<InitiativesList />, store);
+
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+    expect(await screen.findByText('Bonus Decoder')).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId('merchant-initiatives-1'));
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+
+    expect(mockedGetMerchantInitiativesAvailable).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Bonus Decoder')).toBeTruthy();
+    expect(screen.queryByText('pages.initiativesList.emptyList')).toBeNull();
+  });
+
   test('Search field is reset when user changes tab', async () => {
-    mockedGetMerchantInitiativesAvailable.mockResolvedValue([] as Array<any>);
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({ content: [] } as any);
 
     store.dispatch(setInitiativesList(mockedInitiativesList));
     renderWithContext(<InitiativesList />, store);
@@ -124,12 +176,8 @@ describe('Test suite for initiativeList page', () => {
     fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
 
     expect(mockedGetMerchantInitiativesAvailable).toHaveBeenCalledTimes(1);
-    expect(
-      screen.getByText('pages.initiativesList.newInitiativesLoadingTitle')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.initiativesList.newInitiativesLoadingSubtitle')
-    ).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativesList.newInitiativesLoadingTitle')).toBeTruthy();
+    expect(screen.getByText('pages.initiativesList.newInitiativesLoadingSubtitle')).toBeTruthy();
   });
 
   test('Shows error feedback when new initiatives request fails', async () => {
@@ -139,33 +187,25 @@ describe('Test suite for initiativeList page', () => {
 
     fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
 
-    expect(
-      await screen.findByText('pages.initiativesList.newInitiativesErrorTitle')
-    ).toBeInTheDocument();
-    expect(screen.getByText('pages.initiativesList.newInitiativesErrorSubtitle')).toBeInTheDocument();
+    expect(await screen.findByText('pages.initiativesList.newInitiativesErrorTitle')).toBeTruthy();
+    expect(screen.getByText('pages.initiativesList.newInitiativesErrorSubtitle')).toBeTruthy();
     expect(mockedGetMerchantInitiativesAvailable).toHaveBeenCalledTimes(1);
   });
 
   test('Shows empty feedback when new initiatives request succeeds with no results', async () => {
-    mockedGetMerchantInitiativesAvailable.mockResolvedValue([
-      {
-        content: [],
-      },
-    ] as Array<any>);
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({ content: [] } as any);
 
     renderWithContext(<InitiativesList />, store);
 
     fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
 
-    expect(await screen.findByText('pages.initiativesList.emptyList')).toBeInTheDocument();
-    expect(
-      screen.getByText('pages.initiativesList.newInitiativesEmptySubtitle')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('pages.initiativesList.emptyList')).toBeTruthy();
+    expect(screen.getByText('pages.initiativesList.newInitiativesEmptySubtitle')).toBeTruthy();
   });
 
   test('Shows success toast after onboarding API resolves', async () => {
-    mockedGetMerchantInitiativesAvailable.mockResolvedValue([
-      {
+    mockedGetMerchantInitiativesAvailable
+      .mockResolvedValueOnce({
         content: [
           {
             initiativeId: '1',
@@ -174,8 +214,17 @@ describe('Test suite for initiativeList page', () => {
             onboardStatus: 'ONBOARDABLE',
           },
         ],
-      },
-    ] as Array<any>);
+      } as any)
+      .mockResolvedValueOnce({
+        content: [
+          {
+            initiativeId: '2',
+            initiativeName: 'Bonus Refresh',
+            organizationName: 'PagoPA',
+            onboardStatus: 'ONBOARDABLE',
+          },
+        ],
+      } as any);
     mockedPutMerchantOnboardingRequest.mockResolvedValue({ status: 'APPROVED' } as any);
 
     renderWithContext(<InitiativesList />, store);
@@ -186,23 +235,24 @@ describe('Test suite for initiativeList page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'pages.initiativesList.actions.adhere' }));
     fireEvent.click(screen.getByTestId('onboarding-confirm-btn'));
 
-    expect(await screen.findByTestId('alert')).toBeInTheDocument();
-    expect(screen.getByText('pages.initiativesList.onboarding.successTitle')).toBeInTheDocument();
+    expect(await screen.findByTestId('alert')).toBeTruthy();
+    expect(screen.getByText('pages.initiativesList.onboarding.successTitle')).toBeTruthy();
+    expect(screen.getByTestId('merchant-initiatives-1').getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByTestId('merchant-initiatives-2').getAttribute('aria-selected')).toBe('false');
+    expect(mockedGetMerchantInitiativesAvailable).toHaveBeenCalledTimes(2);
   });
 
   test('Shows error toast after onboarding API rejects', async () => {
-    mockedGetMerchantInitiativesAvailable.mockResolvedValue([
-      {
-        content: [
-          {
-            initiativeId: '1',
-            initiativeName: 'Bonus Decoder',
-            organizationName: 'PagoPA',
-            onboardStatus: 'ONBOARDABLE',
-          },
-        ],
-      },
-    ] as Array<any>);
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({
+      content: [
+        {
+          initiativeId: '1',
+          initiativeName: 'Bonus Decoder',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+    } as any);
     mockedPutMerchantOnboardingRequest.mockRejectedValue(new Error('onboarding error'));
 
     renderWithContext(<InitiativesList />, store);
@@ -213,8 +263,8 @@ describe('Test suite for initiativeList page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'pages.initiativesList.actions.adhere' }));
     fireEvent.click(screen.getByTestId('onboarding-confirm-btn'));
 
-    expect(await screen.findByTestId('alert')).toBeInTheDocument();
-    expect(screen.getByText('pages.initiativesList.onboarding.errorTitle')).toBeInTheDocument();
+    expect(await screen.findByTestId('alert')).toBeTruthy();
+    expect(screen.getByText('pages.initiativesList.onboarding.errorTitle')).toBeTruthy();
   });
 
   test('User sorts initiatives by name', async () => {

@@ -206,7 +206,7 @@ const NewInitiativesTabContent = ({
                           {row.initiativeName}
                         </Box>
                       </TableCell>
-                      <TableCell>{row.organizationName}</TableCell>
+                      <TableCell>{row.organizationName?.trim() ? row.organizationName : '-'}</TableCell>
                       <TableCell align="right">
                         {row.onboardStatus === 'ONBOARDABLE' ? (
                           <Box

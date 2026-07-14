@@ -113,7 +113,7 @@
       "adhereBtn": "Aderisci",
       "onboarding": {
         "modalTitle": "Vuoi aderire a {{initiativeName}}?",
-        "successTitle": "Hai aderito a <{{initiativeName}}>.",
+        "successTitle": "Hai aderito a {{initiativeName}}.",
         "successMessage": "",
         "errorTitle": "Non è stato possibile aderire all'iniziativa, riprova più tardi.",
         "errorMessage": ""

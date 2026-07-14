@@ -147,10 +147,15 @@ describe('MerchantsApiClient', () => {
      const result = await api.getMerchantInitiativesAvailable({ page: 0, size: 10 });
 
      expect(result).toEqual(mockData);
-     expect(mockMerchantInitiativesInstance.getMerchantInitiativesAvailable).toHaveBeenCalledWith({
-       page: 0,
-       size: 10,
-     });
+     expect(mockMerchantInitiativesInstance.getMerchantInitiativesAvailable).toHaveBeenCalledWith(
+       {
+         page: 0,
+         size: 10,
+       },
+       {
+         format: 'json',
+       }
+     );
    });
 
    it('getMerchantInitiativesAvailable works without query params', async () => {
@@ -162,7 +167,12 @@ describe('MerchantsApiClient', () => {
      const result = await api.getMerchantInitiativesAvailable();
 
      expect(result).toEqual(mockData);
-     expect(mockMerchantInitiativesInstance.getMerchantInitiativesAvailable).toHaveBeenCalledWith({});
+     expect(mockMerchantInitiativesInstance.getMerchantInitiativesAvailable).toHaveBeenCalledWith(
+       {},
+       {
+         format: 'json',
+       }
+     );
    });
 
   it('getMerchantInitiativeStatistics returns data', async () => {

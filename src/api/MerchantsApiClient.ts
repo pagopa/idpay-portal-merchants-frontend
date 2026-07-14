@@ -80,7 +80,9 @@ class MerchantsApiClient {
   public async getMerchantInitiativesAvailable(
     query?: GetMerchantInitiativesAvailableParams
   ): Promise<Array<PageResponseInitiativeResponse>> {
-    const res = await this.merchantInitiatives.getMerchantInitiativesAvailable(query ?? {});
+    const res = await this.merchantInitiatives.getMerchantInitiativesAvailable(query ?? {}, {
+      format: 'json',
+    });
     return res.data;
   }
 

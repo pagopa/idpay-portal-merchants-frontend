@@ -16,13 +16,14 @@ import {
 } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import SearchIcon from '@mui/icons-material/Search';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
 import { visuallyHidden } from '@mui/utils';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import useInitiativeOnboarding from '../../hooks/useInitiativeOnboarding';
-import { useAppSelector } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
+import { initiativesApi } from '../../redux/api/initiativesApi';
 import EmptyList from '../components/EmptyList';
 import { InitiativeDTO } from '../../api/generated/merchants/data-contracts';
 import InitiativeOnboardingModal from '../../components/InitiativeOnboardingModal/InitiativeOnboardingModal';
@@ -41,6 +42,24 @@ const filterInitiativesBySearch = (list: Array<Data>, searchValue: string) => {
   return search.length > 0
     ? list.filter((record) => record?.initiativeName?.toLowerCase().includes(search))
     : [...list];
+};
+
+const normalizeAvailableInitiatives = (response: unknown) => {
+  const responseItems = Array.isArray(response) ? response : [response];
+
+  return responseItems.flatMap((item) => {
+    if (!item || typeof item !== 'object') {
+      return [];
+    }
+
+    const content = (item as { content?: Array<unknown> }).content;
+
+    if (Array.isArray(content)) {
+      return content;
+    }
+
+    return [item];
+  });
 };
 
 function SortableTableHead({
@@ -130,17 +149,7 @@ const InitiativesList = () => {
   const [newInitiativesLoadError, setNewInitiativesLoadError] = useState(false);
   const [newInitiativesList, setNewInitiativesList] = useState<Array<Data>>([]);
   const initiativesListSel = useAppSelector(intiativesListSelector);
-
-  const {
-    modalOpen,
-    selectedInitiative,
-    isOnboardingLoading,
-    onboardingAlertState,
-    openOnboardingModal,
-    closeOnboardingModal,
-    confirmOnboarding,
-    closeOnboardingAlert,
-  } = useInitiativeOnboarding();
+  const dispatch = useAppDispatch();
 
   const initiativesTablePaperSx = {
     display: 'flex',
@@ -197,16 +206,16 @@ const InitiativesList = () => {
         size: 1000,
       });
 
-      const mappedInitiativeList: Array<Data> = response
-        .flatMap((page) => page.content ?? [])
-        .map((item, index) => ({
-          initiativeId: item.initiativeId || '',
-          initiativeName: item.initiativeName || '',
-          organizationName: item.organizationName || '',
-          status: item.status ?? '',
-          onboardStatus: item.onboardStatus ?? '',
+      const mappedInitiativeList: Array<Data> = normalizeAvailableInitiatives(response).map<Data>(
+        (item, index) => ({
+          initiativeId: (item as { initiativeId?: string }).initiativeId || '',
+          initiativeName: (item as { initiativeName?: string }).initiativeName || '',
+          organizationName: (item as { organizationName?: string }).organizationName || '',
+          status: String((item as { status?: StatusEnum }).status ?? ''),
+          onboardStatus: (item as { onboardStatus?: string }).onboardStatus ?? '',
           id: index,
-        }));
+        })
+      );
 
       setNewInitiativesList(mappedInitiativeList);
       setNewInitiativesListFiltered(mappedInitiativeList);
@@ -221,11 +230,29 @@ const InitiativesList = () => {
     }
   };
 
+  const handleOnboardingSuccess = useCallback(() => {
+    // Refresh both tabs data after a successful onboarding.
+    dispatch(initiativesApi.util.invalidateTags(['Initiatives']));
+    void loadNewInitiatives();
+    setValue(0);
+  }, [dispatch, loadNewInitiatives]);
+
+  const {
+    modalOpen,
+    selectedInitiative,
+    isOnboardingLoading,
+    onboardingAlertState,
+    openOnboardingModal,
+    closeOnboardingModal,
+    confirmOnboarding,
+    closeOnboardingAlert,
+  } = useInitiativeOnboarding(handleOnboardingSuccess);
+
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
     setSearchValue('');
 
-    if (newValue === 1 && !newInitiativesLoaded) {
+    if (newValue === 1 && (!newInitiativesLoaded || newInitiativesList.length === 0)) {
       void loadNewInitiatives();
     }
   };
@@ -329,17 +356,19 @@ const InitiativesList = () => {
             variant="outlined"
             size="small"
             value={searchValue}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
             onChange={(e) => {
               handleSearchInitiatives(e.target.value);
             }}
-            inputProps={{ 'data-testid': 'search-initiatives' }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: { 'data-testid': 'search-initiatives' },
+            }}
           />
         </Box>
       </Box>
