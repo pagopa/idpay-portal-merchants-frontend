@@ -475,7 +475,6 @@ const InitiativesList = () => {
               order={order}
               orderBy={orderBy}
               onRequestSort={handleRequestSort}
-              onOpenInitiativeOverview={openInitiativeOverview}
               onAdhere={openOnboardingModal}
             />
           </TabPanel>

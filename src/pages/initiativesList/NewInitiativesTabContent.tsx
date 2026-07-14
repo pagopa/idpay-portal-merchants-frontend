@@ -15,8 +15,10 @@ import {
   Typography,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { theme } from '@pagopa/mui-italia/theme';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import DialogComponent from '../../components/Dialog/DialogComponent';
 import { Data, EnhancedTableProps } from './helpers';
@@ -28,7 +30,6 @@ type Props = {
   order: EnhancedTableProps['order'];
   orderBy: EnhancedTableProps['orderBy'];
   onRequestSort: EnhancedTableProps['onRequestSort'];
-  onOpenInitiativeOverview: (initiativeId: string) => void;
   onAdhere: (initiative: { initiativeId: string; initiativeName: string }) => void;
 };
 
@@ -89,7 +90,6 @@ const NewInitiativesTabContent = ({
   order,
   orderBy,
   onRequestSort,
-  onOpenInitiativeOverview,
   onAdhere,
 }: Props) => {
   const { t } = useScopedTranslation();
@@ -191,17 +191,14 @@ const NewInitiativesTabContent = ({
                         <Box
                           component="button"
                           type="button"
+                          fontWeight={theme.typography.fontWeightMedium}
                           sx={{
-                            color: 'primary.main',
-                            fontWeight: 600,
                             fontSize: '1em',
                             textAlign: 'left',
                             background: 'none',
                             border: 'none',
                             padding: 0,
-                            cursor: 'pointer',
                           }}
-                          onClick={() => onOpenInitiativeOverview(row.initiativeId)}
                         >
                           {row.initiativeName}
                         </Box>
@@ -232,6 +229,7 @@ const NewInitiativesTabContent = ({
                             }
                           >
                             {t('pages.initiativesList.actions.adhere')}
+                            <ArrowForwardIcon sx={{ fontSize: '1.1rem' }} />
                           </Box>
                         ) : (
                           <button
