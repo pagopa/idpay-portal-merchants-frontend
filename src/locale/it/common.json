@@ -114,6 +114,8 @@
       },
       "associateSuccess_one": "È stato associato {{count}} punto vendita a {{initiativeName}}.",
       "associateSuccess_other": "Sono stati associati {{count}} punti vendita a {{initiativeName}}.",
+      "excludeSuccess_one": "È stato escluso {{count}} punto vendita da {{initiativeName}}.",
+      "excludeSuccess_other": "Sono stati esclusi {{count}} punti vendita da {{initiativeName}}.",
       "associateModal": {
         "title_one": "Associa punto vendita a un'iniziativa",
         "title_other": "Associa punti vendita a un'iniziativa",
@@ -121,6 +123,14 @@
         "description_other": "I punti vendita selezionati verranno associati all'iniziativa selezionata.",
         "initiativeLabel": "Iniziativa",
         "infoBanner": "Se in seguito escludi uno o più punti vendita dall'iniziativa, li ritroverai sempre nel catalogo e potrai riassociarli in qualsiasi momento."
+      },
+      "excludeModal": {
+        "title_one": "Escludi punto vendita da un'iniziativa",
+        "title_other": "Escludi punti vendita da un'iniziativa",
+        "description_one": "Il punto vendita selezionato verrà escluso dall'iniziativa selezionata.",
+        "description_other": "I punti vendita selezionati verranno esclusi dall'iniziativa selezionata.",
+        "initiativeLabel": "Iniziativa",
+        "infoBanner": "I punti vendita resteranno disponibili nella pagina dedicata e potranno essere riassociati in qualsiasi momento tramite il pulsante \"Associa\"."
       },
       "alreadyAssociatedModal": {
         "title_one": "Punto vendita già associato",
@@ -131,6 +141,18 @@
         "allAlreadyAssociatedTitle_other": "Punti vendita già associati",
         "allAlreadyAssociatedDescription_one": "Il punto vendita selezionato è già associato all'iniziativa {{initiativeName}}.",
         "allAlreadyAssociatedDescription_other": "I punti vendita selezionati sono già associati all'iniziativa {{initiativeName}}."
+      },
+      "exclusionResultModal": {
+        "partialTitle_one": "Il punto vendita non può essere escluso",
+        "partialTitle_other": "Alcuni punti vendita non possono essere esclusi",
+        "notCompletedTitle_one": "Il punto vendita non può essere escluso",
+        "notCompletedTitle_other": "Tutti i punti vendita non possono essere esclusi",
+        "notCompletedDescription_one": "Non puoi escludere il seguente punto vendita:",
+        "notCompletedDescription_other": "Non puoi escludere i seguenti punti vendita:",
+        "reasons": {
+          "ALREADY_EXCLUDED": "Già escluso",
+          "HAS_TRANSACTIONS": "Transazioni in corso"
+        }
       },
       "drawer": {
         "associatedTo": "PUNTO VENDITA ASSOCIATO A:",
@@ -309,7 +331,7 @@
         "detailCardTitleDx": "dati rimborso",
         "posType": "Tipo"
       },
-      "invoiceDetailConfirmModal" : {
+      "invoiceDetailConfirmModal": {
         "title": "Conferma spostamento",
         "description": "Confermi di voler spostare la transazione al mese successivo?"
       }
@@ -325,14 +347,14 @@
       "discountCode": "Codice sconto",
       "noUsers": "Segnala un utente o cerca un Codice Fiscale già segnalato.",
       "reportUserSubtitle": "Segnala un utente che non ha presentato l'elettrodomestico obsoleto.",
-      "mtTitle":"La segnalazione servirà solo ai fini di controllo e monitoraggio e non influenza la richiesta di rimborso al suo acquisto.",
-      "searchTitle":"Qual è il codice fiscale?",
-      "searchDescription":"Inserire il codice fiscale dell'utente",
-      "validCf":"La segnalazione è stata registrata",
-      "removedCf":"La segnalazione è stata rimossa",
+      "mtTitle": "La segnalazione servirà solo ai fini di controllo e monitoraggio e non influenza la richiesta di rimborso al suo acquisto.",
+      "searchTitle": "Qual è il codice fiscale?",
+      "searchDescription": "Inserire il codice fiscale dell'utente",
+      "validCf": "La segnalazione è stata registrata",
+      "removedCf": "La segnalazione è stata rimossa",
       "invalid": "Codice fiscale non valido",
       "noResultUser": "Codice fiscale assente",
-      "insertCf":"Campo obbligatorio",
+      "insertCf": "Campo obbligatorio",
       "alreadyRegistered": "Il codice fiscale è già stato registrato",
       "alreadyPresent": "Codice fiscale presente presso altro esercente",
       "ModalReportedUser": {
@@ -378,14 +400,14 @@
   },
   "modifyDocument": {
     "breadcrumbLabel": "Modifica documento",
-    "title":"Carica la fattura",
+    "title": "Carica la fattura",
     "invoiceTitle": "Qual è il numero  della fattura?",
     "invoiceSubtitle": "",
     "insertInvoice": "Inserisci il numero della fattura",
     "invoiceLabel": "Numero della fattura",
     "creditNote": "Carica il documento",
-    "replaceFile":"Sostituisci",
-    "creditNoteTitle":"",
+    "replaceFile": "Sostituisci",
+    "creditNoteTitle": "",
     "creditNoteSubtitle": "Carica il file della fattura elettronica relativa a questo acquisto. Assicurati che il documento sia in formato .xml o .pdf e conforme agli standard della fatturazione elettronica.",
     "manualLink": "Dubbi? Vai sul manuale",
     "uploadFile": "Trascina qui il file .xml o .pdf della fattura da caricare o ",

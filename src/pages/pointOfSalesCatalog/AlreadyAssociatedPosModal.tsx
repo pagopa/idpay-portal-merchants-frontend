@@ -2,17 +2,12 @@ import React from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
 import { Box, Button, DialogContent, Typography } from '@mui/material';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
-import { formatAlreadyAssociatedAddress } from '../../utils/addressUtils';
 import DialogComponent from '../../components/Dialog/DialogComponent';
+import { getPointOfSaleFeedbackLabel, PointOfSaleFeedbackItem } from './pointOfSaleFeedbackUtils';
 
-export type AlreadyAssociatedPointOfSale = {
+export type AlreadyAssociatedPointOfSale = PointOfSaleFeedbackItem & {
   pointOfSaleId?: string;
-  pointOfSaleName?: string;
-  type?: 'PHYSICAL' | 'ONLINE' | string;
-  address?: string | null;
-  city?: string | null;
-  streetNumber?: string | null;
-  website?: string | null;
+  franchiseName?: string;
 };
 
 type Props = {
@@ -21,9 +16,6 @@ type Props = {
   showStores?: boolean;
   onClose: () => void;
 };
-
-const getAlreadyAssociatedPointOfSaleDetail = (pointOfSale: AlreadyAssociatedPointOfSale) =>
-  pointOfSale.type === 'ONLINE' ? pointOfSale.website : formatAlreadyAssociatedAddress(pointOfSale);
 
 const AlreadyAssociatedPosModal: React.FC<Props> = ({
   stores,
@@ -90,9 +82,7 @@ const AlreadyAssociatedPosModal: React.FC<Props> = ({
                     textOverflow: 'ellipsis',
                   }}
                 >
-                  {[pointOfSale.pointOfSaleName, getAlreadyAssociatedPointOfSaleDetail(pointOfSale)]
-                    .filter(Boolean)
-                    .join(' - ')}
+                  {getPointOfSaleFeedbackLabel(pointOfSale)}
                 </Typography>
               </Box>
             ))}
