@@ -239,6 +239,26 @@ describe('isValidUrl', () => {
 });
 
 describe('generateUniqueId', () => {
+  beforeEach(() => {
+    const mockGetRandomValues = jest.fn((arr: Uint32Array) => {
+      for (let i = 0; i < arr.length; i++) {
+        arr[i] = Math.floor(Math.random() * 0xffffffff);
+      }
+      return arr;
+    });
+    Object.defineProperty(window, 'crypto', {
+      value: {
+        getRandomValues: mockGetRandomValues,
+      },
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('should generate a unique id', () => {
     const id1 = generateUniqueId();
     const id2 = generateUniqueId();
@@ -247,10 +267,22 @@ describe('generateUniqueId', () => {
     expect(id1).not.toEqual(id2);
   });
 
-  test('should generate a predictable id when Date and Math are mocked', () => {
+  test('should generate a predictable id when Date and crypto are mocked', () => {
     jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
-    jest.spyOn(Math, 'random').mockReturnValue(0.123456789);
-    expect(generateUniqueId()).toBe('17000000000004fzzzxj');
+    const mockGetRandomValues = jest.fn((arr: Uint32Array) => {
+      arr[0] = 83174131;
+      return arr;
+    });
+    Object.defineProperty(window, 'crypto', {
+      value: {
+        getRandomValues: mockGetRandomValues,
+      },
+      writable: true,
+      configurable: true,
+    });
+    const result = generateUniqueId();
+    expect(result).toMatch(/^1700000000000[a-z0-9]{1,8}$/);
+    expect(mockGetRandomValues).toHaveBeenCalled();
   });
 });
 
