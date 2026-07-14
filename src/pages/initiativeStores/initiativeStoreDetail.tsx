@@ -1,6 +1,6 @@
 import { Box, Button, Tooltip, Typography, TextField } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, Prompt } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
@@ -61,6 +61,10 @@ const InitiativeStoreDetail = () => {
   const { setStoreId } = useStore();
   const { defaultConfig } = useInitiativeConfig();
   const emailRegex = new RegExp(defaultConfig.regex.email);
+
+  const areFieldsEqual = useMemo(() => storeDetail?.contactName !== contactNameModal.trim() ||
+    storeDetail?.contactSurname !== contactSurnameModal.trim() ||
+    storeDetail?.contactEmail !== contactEmailModal, [contactNameModal, contactSurnameModal, contactEmailModal, storeDetail]);
 
   useEffect(() => {
     void fetchStoreDetail();
@@ -130,23 +134,23 @@ const InitiativeStoreDetail = () => {
     { label: t('pages.initiativeStores.id'), value: obj?.id },
     ...(obj?.type === POS_TYPE.Physical
       ? [
-          {
-            label: t('pages.initiativeStores.address'),
-            value: formatInitiativeStoreDetailAddress(obj),
-          },
-          {
-            label: t('pages.initiativeStores.phone'),
-            value: obj?.channelPhone,
-          },
-          {
-            label: t('pages.initiativeStores.contactEmail'),
-            value: obj?.channelEmail,
-          },
-          {
-            label: t('pages.initiativeStores.geoLink'),
-            value: obj?.channelGeolink,
-          },
-        ]
+        {
+          label: t('pages.initiativeStores.address'),
+          value: formatInitiativeStoreDetailAddress(obj),
+        },
+        {
+          label: t('pages.initiativeStores.phone'),
+          value: obj?.channelPhone,
+        },
+        {
+          label: t('pages.initiativeStores.contactEmail'),
+          value: obj?.channelEmail,
+        },
+        {
+          label: t('pages.initiativeStores.geoLink'),
+          value: obj?.channelGeolink,
+        },
+      ]
       : []),
     { label: t('pages.initiativeStores.website'), value: obj?.website },
   ];
@@ -250,11 +254,7 @@ const InitiativeStoreDetail = () => {
       addErrorModal('contactEmailConfirmModal', 'Inserisci un indirizzo email valido');
     }
 
-    if (
-      contactEmailModal.trim() &&
-      contactEmailConfirmModal.trim() &&
-      contactEmailModal !== contactEmailConfirmModal
-    ) {
+    if (contactEmailModal !== contactEmailConfirmModal) {
       addErrorModal('contactEmailModal', 'Le email non coincidono');
       addErrorModal('contactEmailConfirmModal', 'Le email non coincidono');
     }
@@ -266,8 +266,8 @@ const InitiativeStoreDetail = () => {
     const userJwt = parseJwt(storageTokenOps.read());
     const merchantId = userJwt?.merchant_id;
     const body = {
-      contactName: contactNameModal,
-      contactSurname: contactSurnameModal,
+      contactName: contactNameModal.trim(),
+      contactSurname: contactSurnameModal.trim(),
       contactEmail: contactEmailModal,
     };
 
@@ -515,7 +515,7 @@ const InitiativeStoreDetail = () => {
               required={true}
               label={t('pages.initiativeStores.contactName')}
               value={contactNameModal}
-              onChange={(e) => setContactNameModal(e.target.value)}
+              onChange={(e) => setContactNameModal(e.target.value.trimStart().replace(/\s+/g, ' '))}
               onBlur={() => handleBlur('contactNameModal', contactNameModal)}
               error={Boolean(fieldErrors.contactNameModal)}
               helperText={fieldErrors.contactNameModal}
@@ -532,7 +532,7 @@ const InitiativeStoreDetail = () => {
               label={t('pages.initiativeStores.contactSurname')}
               value={contactSurnameModal}
               onBlur={() => handleBlur('contactSurnameModal', contactSurnameModal)}
-              onChange={(e) => setContactSurnameModal(e.target.value)}
+              onChange={(e) => setContactSurnameModal(e.target.value.trimStart().replace(/\s+/g, ' '))}
               error={Boolean(fieldErrors.contactSurnameModal)}
               helperText={fieldErrors.contactSurnameModal}
             />
@@ -549,7 +549,7 @@ const InitiativeStoreDetail = () => {
               value={contactEmailModal}
               onBlur={() => handleBlur('contactEmailModal', contactEmailModal)}
               onChange={(e) => {
-                setContactEmailModal(e.target.value);
+                setContactEmailModal(e.target.value.replace(/\s+/g, ''));
                 setFieldErrors((prev) => ({
                   ...prev,
                   contactEmailModal: '',
@@ -572,7 +572,7 @@ const InitiativeStoreDetail = () => {
               value={contactEmailConfirmModal}
               onBlur={() => handleBlur('contactEmailConfirmModal', contactEmailConfirmModal)}
               onChange={(e) => {
-                setContactEmailConfirmModal(e.target.value);
+                setContactEmailConfirmModal(e.target.value.replace(/\s+/g, ''));
                 setFieldErrors((prev) => ({
                   ...prev,
                   contactEmailConfirmModal: '',
@@ -594,7 +594,7 @@ const InitiativeStoreDetail = () => {
           >
             {t('actions.cancel')}
           </Button>
-          <Button variant="contained" data-testid="update-button" onClick={handleUpdateReferent}>
+          <Button disabled={!areFieldsEqual} variant="contained" data-testid="update-button" onClick={handleUpdateReferent}>
             {t('actions.modify')}
           </Button>
         </Box>

@@ -305,23 +305,6 @@ describe('InitiativeStoreDetail', () => {
     expect(await screen.findAllByText('Il campo è obbligatorio')).toHaveLength(4);
   });
 
-  test('allows update when email equals current referent email', async () => {
-    const user = userEvent.setup({ delay: null });
-    renderWithProviders();
-
-    await openEditModal(user);
-    await user.click(screen.getByTestId('update-button'));
-
-    await waitFor(() => {
-      expect(mockPatchPointOfSaleReferent).toHaveBeenCalledWith('m1', 'store1', {
-        contactName: 'Mario',
-        contactSurname: 'Rossi',
-        contactEmail: 'test@test.it',
-      });
-    });
-    expect(screen.queryByText('E-mail già censita')).not.toBeInTheDocument();
-  });
-
   test('handles successful update flow and refreshes detail', async () => {
     const user = userEvent.setup({ delay: null });
     mockPatchPointOfSaleReferent.mockResolvedValueOnce(undefined);
