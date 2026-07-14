@@ -80,6 +80,50 @@ describe('NewInitiativesTabContent', () => {
     expect(onRequestSort.mock.calls[1][1]).toBe('organizationName');
   });
 
+  test('shows active sort state for initiative name in ascending order', () => {
+    const props = buildProps({
+      initiatives: [
+        {
+          id: 0,
+          initiativeId: 'initiative-1',
+          initiativeName: 'Bonus Decoder',
+          organizationName: 'MIMIT',
+          status: '',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+      order: 'asc',
+      orderBy: 'initiativeName',
+    });
+
+    renderWithContext(<NewInitiativesTabContent {...props} />);
+
+    expect(screen.getByText('sorted ascending')).toBeInTheDocument();
+    expect(screen.queryByText('sorted descending')).not.toBeInTheDocument();
+  });
+
+  test('shows active sort state for organization name in descending order', () => {
+    const props = buildProps({
+      initiatives: [
+        {
+          id: 0,
+          initiativeId: 'initiative-1',
+          initiativeName: 'Bonus Decoder',
+          organizationName: 'MIMIT',
+          status: '',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+      order: 'desc',
+      orderBy: 'organizationName',
+    });
+
+    renderWithContext(<NewInitiativesTabContent {...props} />);
+
+    expect(screen.getByText('sorted descending')).toBeInTheDocument();
+    expect(screen.queryByText('sorted ascending')).not.toBeInTheDocument();
+  });
+
   test('handles ONBOARDABLE row actions', () => {
     const onAdhere = jest.fn();
     const onOpenInitiativeOverview = jest.fn();
@@ -131,6 +175,30 @@ describe('NewInitiativesTabContent', () => {
     expect(screen.getByTestId('not-onboardable-modal')).toBeInTheDocument();
     expect(screen.getByText('pages.initiativesList.notOnboardableModal.title')).toBeInTheDocument();
 
+    fireEvent.click(screen.getByLabelText('actions.okClose'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('not-onboardable-modal')).not.toBeInTheDocument();
+    });
+  });
+
+  test('closes not-onboardable modal from footer action button', async () => {
+    const props = buildProps({
+      initiatives: [
+        {
+          id: 0,
+          initiativeId: 'initiative-2',
+          initiativeName: 'Bonus Prova',
+          organizationName: 'MIMIT',
+          status: '',
+          onboardStatus: 'NOT_ONBOARDABLE',
+        },
+      ],
+    });
+
+    renderWithContext(<NewInitiativesTabContent {...props} />);
+
+    fireEvent.click(screen.getByTestId('not-onboardable-info-btn'));
     fireEvent.click(screen.getByTestId('not-onboardable-modal-close-btn'));
 
     await waitFor(() => {

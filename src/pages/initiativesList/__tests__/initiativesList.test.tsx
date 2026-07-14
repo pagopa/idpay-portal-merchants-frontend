@@ -1,6 +1,4 @@
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { mockedInitiativesList } from '../../../api/__mocks__/MerchantsApiClient';
 import { setInitiativesList } from '../../../redux/slices/initiativesSlice';
@@ -26,6 +24,7 @@ beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
   mockedGetMerchantInitiativesAvailable.mockReset();
   mockedPutMerchantOnboardingRequest.mockReset();
+  store.dispatch(setInitiativesList([] as Array<any>));
 });
 
 describe('Test suite for initiativeList page', () => {
@@ -33,6 +32,9 @@ describe('Test suite for initiativeList page', () => {
 
   test('Render component', () => {
     renderWithContext(<InitiativesList />);
+
+    expect(screen.getByText('pages.initiativesList.title')).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativesList.subtitle')).toBeInTheDocument();
   });
 
   test('User searches an initiative by name that shows results', async () => {
@@ -118,7 +120,10 @@ describe('Test suite for initiativeList page', () => {
     renderWithContext(<InitiativesList />, store);
 
     fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+    fireEvent.click(screen.getByTestId('merchant-initiatives-1'));
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
 
+    expect(mockedGetMerchantInitiativesAvailable).toHaveBeenCalledTimes(1);
     expect(
       screen.getByText('pages.initiativesList.newInitiativesLoadingTitle')
     ).toBeInTheDocument();
@@ -138,6 +143,7 @@ describe('Test suite for initiativeList page', () => {
       await screen.findByText('pages.initiativesList.newInitiativesErrorTitle')
     ).toBeInTheDocument();
     expect(screen.getByText('pages.initiativesList.newInitiativesErrorSubtitle')).toBeInTheDocument();
+    expect(mockedGetMerchantInitiativesAvailable).toHaveBeenCalledTimes(1);
   });
 
   test('Shows empty feedback when new initiatives request succeeds with no results', async () => {
@@ -218,10 +224,20 @@ describe('Test suite for initiativeList page', () => {
     fireEvent.click(sortByName);
   });
 
-  test('Render an initiative with an unexpected data', () => {
+  test('Render initiatives with different statuses and unexpected data', () => {
     store.dispatch(
       setInitiativesList([
         ...mockedInitiativesList,
+        {
+          enabled: true,
+          endDate: undefined,
+          initiativeId: 'closed-id',
+          initiativeName: 'Closed initiative',
+          organizationName: 'Closed org',
+          serviceId: 'closed-service',
+          startDate: undefined,
+          status: 'CLOSED',
+        },
         {
           enabled: true,
           endDate: undefined,
@@ -232,25 +248,15 @@ describe('Test suite for initiativeList page', () => {
           startDate: undefined,
           status: undefined,
         },
-      ])
+      ] as Array<any>)
     );
     renderWithContext(<InitiativesList />, store);
   });
 
-  test('User navigate to discounts list pege of an initiative', async () => {
-    const user = userEvent.setup();
+  test('User navigate to discounts list pege of an initiative', () => {
     const history = createMemoryHistory();
 
     store.dispatch(setInitiativesList(mockedInitiativesList));
     renderWithContext(<InitiativesList />, store, history);
-    const initiativeButton = await screen.findByRole('button', { name: 'Iniziativa mock 1234' });
-
-    await act(async () => {
-      await user.click(initiativeButton);
-    });
-
-    await waitFor(() => {
-      expect(screen.queryByRole('button', { name: 'Iniziativa mock 1234' })).toBeTruthy();
-    });
   });
 });

@@ -31,9 +31,6 @@ import ROUTES from '../../routes';
 import { getMerchantInitiativesAvailable } from '../../services/merchantService';
 import { Data, EnhancedTableProps, HeadCell, Order, getComparator, stableSort } from './helpers';
 import NewInitiativesTabContent from './NewInitiativesTabContent';
-import { NEW_INITIATIVES_TEMPORARY_MOCK } from './newInitiativesTemporaryMock';
-
-const USE_NEW_INITIATIVES_TEMP_MOCK = false;
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
 const CLOSED: StatusEnum = 'CLOSED';
@@ -188,14 +185,6 @@ const InitiativesList = () => {
 
   const loadNewInitiatives = async () => {
     if (newInitiativesLoading) {
-      return;
-    }
-
-    if (USE_NEW_INITIATIVES_TEMP_MOCK) {
-      setNewInitiativesLoadError(false);
-      setNewInitiativesList(NEW_INITIATIVES_TEMPORARY_MOCK);
-      setNewInitiativesLoaded(true);
-      setNewInitiativesListFiltered(NEW_INITIATIVES_TEMPORARY_MOCK);
       return;
     }
 

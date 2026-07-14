@@ -39,45 +39,43 @@ function NewInitiativesTableHead(props: EnhancedTableProps) {
     onRequestSort(event, property);
   };
 
+  const sortableColumns: Array<{
+    id: Extract<keyof Data, 'initiativeName' | 'organizationName'>;
+    label: string;
+  }> = [
+    {
+      id: 'initiativeName',
+      label: t('pages.initiativesList.initiativeName'),
+    },
+    {
+      id: 'organizationName',
+      label: t('pages.initiativesList.organizationName'),
+    },
+  ];
+
   return (
     <TableHead sx={{ backgroundColor: '#E8EBF1' }}>
       <TableRow>
-        <TableCell
-          align="left"
-          padding="normal"
-          sortDirection={orderBy === 'initiativeName' ? order : false}
-        >
-          <TableSortLabel
-            active={orderBy === 'initiativeName'}
-            direction={orderBy === 'initiativeName' ? order : 'asc'}
-            onClick={createSortHandler('initiativeName')}
-          >
-            {t('pages.initiativesList.initiativeName')}
-            {orderBy === 'initiativeName' ? (
-              <Box component="span" sx={{ ...visuallyHidden }}>
-                {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-              </Box>
-            ) : null}
-          </TableSortLabel>
-        </TableCell>
-        <TableCell
-          align="left"
-          padding="normal"
-          sortDirection={orderBy === 'organizationName' ? order : false}
-        >
-          <TableSortLabel
-            active={orderBy === 'organizationName'}
-            direction={orderBy === 'organizationName' ? order : 'asc'}
-            onClick={createSortHandler('organizationName')}
-          >
-            {t('pages.initiativesList.organizationName')}
-            {orderBy === 'organizationName' ? (
-              <Box component="span" sx={{ ...visuallyHidden }}>
-                {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-              </Box>
-            ) : null}
-          </TableSortLabel>
-        </TableCell>
+        {sortableColumns.map(({ id, label }) => {
+          const isActive = orderBy === id;
+
+          return (
+            <TableCell align="left" padding="normal" sortDirection={isActive ? order : false} key={id}>
+              <TableSortLabel
+                active={isActive}
+                direction={isActive ? order : 'asc'}
+                onClick={createSortHandler(id)}
+              >
+                {label}
+                {isActive ? (
+                  <Box component="span" sx={{ ...visuallyHidden }}>
+                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                  </Box>
+                ) : null}
+              </TableSortLabel>
+            </TableCell>
+          );
+        })}
         <TableCell align="right" padding="normal" />
       </TableRow>
     </TableHead>
