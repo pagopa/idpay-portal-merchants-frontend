@@ -24,7 +24,7 @@ import {
   PointOfSaleOnboardingResultDTO,
   OnboardingResponse,
   PageResponseInitiativeResponse,
-  PointOfSaleExclusionResultDTO,
+  PointOfSaleExclusionResultDTO, GetMerchantInitiativesAvailableParams,
 } from './generated/merchants/data-contracts';
 
 import { MerchantInitiatives } from './generated/merchants/MerchantInitiatives';
