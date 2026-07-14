@@ -249,6 +249,11 @@ const PosCatalog: React.FC = () => {
     [handleSortModelChange]
   );
 
+  const handleCatalogOperationCompleted = useCallback(
+    () => handleFiltersApplied(formik.values),
+    [formik.values, handleFiltersApplied]
+  );
+
   const handleAssociateModalClose = useCallback(() => {
     setIsAssociateModalOpen(false);
     setSelectedInitiativeId('');
@@ -570,6 +575,7 @@ const PosCatalog: React.FC = () => {
               <PosCatalogDrawer
                 isOpen={isDrawerOpen}
                 onClose={handleToggleDrawer}
+                onOperationCompleted={handleCatalogOperationCompleted}
                 selectedStore={selectedStore}
                 initiativeOptions={initiativeOptions}
                 publishedInitiativeOptions={publishedInitiativeOptions}
@@ -610,7 +616,6 @@ const PosCatalog: React.FC = () => {
           />
           <PointOfSaleExclusionResultModal
             stores={notExcludedStores}
-            hasExcludedStores={Boolean(exclusionSuccessData)}
             onClose={handleExclusionResultModalClose}
           />
         </>

@@ -145,12 +145,10 @@
       "exclusionResultModal": {
         "partialTitle_one": "Il punto vendita non può essere escluso",
         "partialTitle_other": "Alcuni punti vendita non possono essere esclusi",
-        "partialDescription_one": "Il punto vendita risulta già escluso dall'iniziativa oppure contiene transazioni registrate che ne impediscono l'esclusione.",
-        "partialDescription_other": "Alcuni punti vendita risultano già esclusi dall'iniziativa mentre altri contengono transazioni registrate che ne impediscono l'esclusione.",
         "notCompletedTitle_one": "Il punto vendita non può essere escluso",
         "notCompletedTitle_other": "Tutti i punti vendita non possono essere esclusi",
-        "notCompletedDescription_one": "Non puoi escludere il punto vendita selezionato",
-        "notCompletedDescription_other": "Non puoi escludere i punti vendita selezionati",
+        "notCompletedDescription_one": "Non puoi escludere il seguente punto vendita:",
+        "notCompletedDescription_other": "Non puoi escludere i seguenti punti vendita:",
         "reasons": {
           "ALREADY_EXCLUDED": "Già escluso",
           "HAS_TRANSACTIONS": "Transazioni in corso",

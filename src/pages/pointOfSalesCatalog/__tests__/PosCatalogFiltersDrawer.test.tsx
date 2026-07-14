@@ -268,10 +268,13 @@ describe('PosCatalogFiltersDrawer', () => {
       notAssociated: [],
     });
 
+    const onOperationCompleted = jest.fn();
+
     render(
       <PosCatalogDrawer
         isOpen
         onClose={jest.fn()}
+        onOperationCompleted={onOperationCompleted}
         selectedStore={physicalStore}
         initiativeOptions={drawerInitiativeOptions}
         publishedInitiativeOptions={drawerInitiativeOptions}
@@ -303,6 +306,7 @@ describe('PosCatalogFiltersDrawer', () => {
       severity: 'success',
       timeout: 6000,
     });
+    expect(onOperationCompleted).toHaveBeenCalledTimes(1);
   });
 
   it('excludes the selected store from an initiative from the drawer modal', async () => {
@@ -312,11 +316,13 @@ describe('PosCatalogFiltersDrawer', () => {
     });
 
     const onClose = jest.fn();
+    const onOperationCompleted = jest.fn();
 
     render(
       <PosCatalogDrawer
         isOpen
         onClose={onClose}
+        onOperationCompleted={onOperationCompleted}
         selectedStore={physicalStore}
         initiativeOptions={drawerInitiativeOptions}
         publishedInitiativeOptions={drawerInitiativeOptions}
@@ -347,6 +353,7 @@ describe('PosCatalogFiltersDrawer', () => {
       severity: 'success',
       timeout: 6000,
     });
+    expect(onOperationCompleted).toHaveBeenCalledTimes(1);
   });
 
   it('does not show a success alert when the drawer exclusion excludes no store', async () => {
@@ -355,10 +362,13 @@ describe('PosCatalogFiltersDrawer', () => {
       notExcludedPointOfSales: [{ pointOfSaleId: '2', reason: 'ALREADY_EXCLUDED' }],
     });
 
+    const onOperationCompleted = jest.fn();
+
     render(
       <PosCatalogDrawer
         isOpen
         onClose={jest.fn()}
+        onOperationCompleted={onOperationCompleted}
         selectedStore={physicalStore}
         initiativeOptions={drawerInitiativeOptions}
         publishedInitiativeOptions={drawerInitiativeOptions}
@@ -388,6 +398,14 @@ describe('PosCatalogFiltersDrawer', () => {
         severity: 'success',
       })
     );
+    expect(onOperationCompleted).not.toHaveBeenCalled();
+
+    fireEvent.click(
+      within(screen.getByTestId('point-of-sale-exclusion-result-modal')).getByText(
+        'actions.okClose'
+      )
+    );
+    expect(onOperationCompleted).toHaveBeenCalledTimes(1);
   });
 
   it('renders fallback initiative id and placeholders when fetched data is incomplete', async () => {

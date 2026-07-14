@@ -47,6 +47,7 @@ type PosCatalogFiltersProps = {
 type PosCatalogDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
+  onOperationCompleted?: () => void;
   selectedStore: PointOfSaleDTO | null;
   initiativeOptions: Array<InitiativeOption>;
   publishedInitiativeOptions: Array<InitiativeOption>;
@@ -75,6 +76,7 @@ export const PosCatalogFilters: React.FC<PosCatalogFiltersProps> = ({
 export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   isOpen,
   onClose,
+  onOperationCompleted,
   selectedStore,
   initiativeOptions,
   publishedInitiativeOptions,
@@ -231,7 +233,8 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
     }
 
     setInitiativesRefreshKey((current) => current + 1);
-  }, [associationSuccessData, showAssociationSuccessAlert]);
+    onOperationCompleted?.();
+  }, [associationSuccessData, onOperationCompleted, showAssociationSuccessAlert]);
 
   const handleExclusionResultModalClose = useCallback(() => {
     setNotExcludedStores([]);
@@ -245,7 +248,8 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
     }
 
     setInitiativesRefreshKey((current) => current + 1);
-  }, [exclusionSuccessData, showExclusionSuccessAlert]);
+    onOperationCompleted?.();
+  }, [exclusionSuccessData, onOperationCompleted, showExclusionSuccessAlert]);
 
   const handleAssociationResult = useCallback(
     (result: PointOfSaleOnboardingResultDTO, initiativeName: string) => {
@@ -266,11 +270,12 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
       }
 
       setInitiativesRefreshKey((current) => current + 1);
+      onOperationCompleted?.();
       if (associatedCount > 0) {
         showAssociationSuccessAlert(associatedCount, initiativeName);
       }
     },
-    [handleAssociateModalClose, onClose, showAssociationSuccessAlert]
+    [handleAssociateModalClose, onClose, onOperationCompleted, showAssociationSuccessAlert]
   );
 
   const handleAssociateConfirm = useCallback(async () => {
@@ -326,11 +331,12 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
       }
 
       setInitiativesRefreshKey((current) => current + 1);
+      onOperationCompleted?.();
       if (excludedCount > 0) {
         showExclusionSuccessAlert(excludedCount, initiativeName);
       }
     },
-    [handleExcludeModalClose, onClose, selectedStore, showExclusionSuccessAlert]
+    [handleExcludeModalClose, onClose, onOperationCompleted, selectedStore, showExclusionSuccessAlert]
   );
 
   const handleExcludeConfirm = useCallback(async () => {
@@ -568,7 +574,6 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
       />
       <PointOfSaleExclusionResultModal
         stores={notExcludedStores}
-        hasExcludedStores={Boolean(exclusionSuccessData)}
         onClose={handleExclusionResultModalClose}
       />
     </>

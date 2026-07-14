@@ -13,7 +13,6 @@ export type NotExcludedPointOfSale = NotExcludedPointOfSaleDTO & PointOfSaleFeed
 
 type Props = {
   stores: Array<NotExcludedPointOfSale>;
-  hasExcludedStores: boolean;
   onClose: () => void;
 };
 
@@ -38,7 +37,6 @@ const reasonChipSx = (reason: PosOnboardingExclusionRejectionReason) => {
 
 const PointOfSaleExclusionResultModal: React.FC<Props> = ({
   stores,
-  hasExcludedStores,
   onClose,
 }) => {
   const { t } = useScopedTranslation();
@@ -47,12 +45,8 @@ const PointOfSaleExclusionResultModal: React.FC<Props> = ({
     return null;
   }
 
-  const titleKey = hasExcludedStores
-    ? 'pages.posCatalog.exclusionResultModal.partialTitle'
-    : 'pages.posCatalog.exclusionResultModal.notCompletedTitle';
-  const descriptionKey = hasExcludedStores
-    ? 'pages.posCatalog.exclusionResultModal.partialDescription'
-    : 'pages.posCatalog.exclusionResultModal.notCompletedDescription';
+  const titleKey = 'pages.posCatalog.exclusionResultModal.notCompletedTitle';
+  const descriptionKey = 'pages.posCatalog.exclusionResultModal.notCompletedDescription';
 
   return (
     <DialogComponent
