@@ -1,3 +1,5 @@
+import { jest, describe, test, expect } from '@jest/globals';
+import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
@@ -13,7 +15,6 @@ const buildProps = (
   order: 'asc' as const,
   orderBy: 'initiativeName',
   onRequestSort: jest.fn(),
-  onOpenInitiativeOverview: jest.fn(),
   onAdhere: jest.fn(),
   ...overrides,
 });
@@ -126,7 +127,6 @@ describe('NewInitiativesTabContent', () => {
 
   test('handles ONBOARDABLE row actions', () => {
     const onAdhere = jest.fn();
-    const onOpenInitiativeOverview = jest.fn();
 
     const props = buildProps({
       initiatives: [
@@ -140,13 +140,9 @@ describe('NewInitiativesTabContent', () => {
         },
       ],
       onAdhere,
-      onOpenInitiativeOverview,
     });
 
     renderWithContext(<NewInitiativesTabContent {...props} />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Bonus Decoder' }));
-    expect(onOpenInitiativeOverview).toHaveBeenCalledWith('initiative-1');
 
     fireEvent.click(screen.getByRole('button', { name: 'pages.initiativesList.actions.adhere' }));
     expect(onAdhere).toHaveBeenCalledWith({
