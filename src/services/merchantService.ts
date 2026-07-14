@@ -1,6 +1,7 @@
 import { getMerchantsApi } from '../api/MerchantsApiClient';
 import { ApiError } from '../api/ApiError';
 import {
+  GetMerchantInitiativesAvailableParams,
   InitiativeDTO,
   MerchantStatisticsDTO,
   MerchantDetailDTO,
@@ -25,6 +26,9 @@ import {
   ValidationErrorDetail,
   PointOfSaleInitiativeDTO,
   PointOfSaleOnboardingResultDTO,
+  OnboardingResponse,
+  PageResponseInitiativeResponse,
+  PointOfSaleExclusionResultDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 
@@ -68,6 +72,11 @@ export type GetMerchantTransactionsProcessedParams = {
 
 export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> =>
   getMerchantsApi().getMerchantInitiativeList();
+
+export const getMerchantInitiativesAvailable = (
+  query?: GetMerchantInitiativesAvailableParams
+): Promise<Array<PageResponseInitiativeResponse>> =>
+  getMerchantsApi().getMerchantInitiativesAvailable(query);
 
 export const getMerchantTransactions = (
   initiativeId: string,
@@ -240,6 +249,13 @@ export const associatePos = (
 ): Promise<PointOfSaleOnboardingResultDTO> =>
   getMerchantsApi().associatePos(initiativeId, merchantId, pointOfSaleIds);
 
+export const excludePos = (
+  initiativeId: string,
+  merchantId: string,
+  pointOfSaleIds: Array<string>
+): Promise<PointOfSaleExclusionResultDTO> =>
+  getMerchantsApi().excludePos(initiativeId, merchantId, pointOfSaleIds);
+
 export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,
   pointOfSaleId: string,
@@ -337,3 +353,7 @@ export const patchPointOfSaleReferent = (
   body: PointOfSaleReferentPatchDTO
 ): Promise<PointOfSaleDTO> =>
   getMerchantsApi().patchPointOfSaleReferent(merchantId, pointOfSaleId, body);
+
+export const putMerchantOnboardingRequest = (initiativeId: string): Promise<OnboardingResponse> =>
+  getMerchantsApi().putMerchantOnboardingRequest(initiativeId);
+

@@ -846,7 +846,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
               </Grid>
             )}
 
-            {/* Contatti referente */}
             <Grid item xs={12}>
               <Box mb={3} mt={2}>
                 <Typography variant="h6" gutterBottom>
@@ -958,7 +957,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                 </Grid>
               </Box>
             </Grid>
-            {/* Contatti punto vendita */}
             {salesPoint.type === 'PHYSICAL' && (
               <Grid item xs={12}>
                 <Box mt={2}>

@@ -72,7 +72,7 @@ const DialogComponent: React.FC<Props> = ({
           </Box>
           {showCloseIcon && (
             <IconButton aria-label={closeLabel} onClick={onClose} sx={{ mr: -1 }}>
-              <CloseIcon />
+              <CloseIcon sx={{ color: 'text.primary' }} />
             </IconButton>
           )}
         </Stack>

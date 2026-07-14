@@ -2,6 +2,7 @@ import { getMerchantsApi } from '../../api/MerchantsApiClient';
 import { ApiError } from '../../api/ApiError';
 import {
   getMerchantInitiativeList,
+  getMerchantInitiativesAvailable,
   getMerchantTransactions,
   getMerchantTransactionsProcessed,
   getMerchantInitiativeStatistics,
@@ -32,6 +33,9 @@ import {
   updateInvoiceTransaction,
   updateMerchantData,
   associatePos,
+  patchPointOfSaleReferent,
+  putMerchantOnboardingRequest,
+  excludePos,
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
@@ -40,6 +44,7 @@ jest.mock('../../api/MerchantsApiClient', () => ({
 
 const mockedApi = {
   getMerchantInitiativeList: jest.fn(),
+  getMerchantInitiativesAvailable: jest.fn(),
   getMerchantTransactions: jest.fn(),
   getMerchantTransactionsProcessed: jest.fn(),
   getMerchantInitiativeStatistics: jest.fn(),
@@ -71,11 +76,14 @@ const mockedApi = {
   updateInvoiceTransaction: jest.fn(),
   updateMerchantData: jest.fn(),
   associatePos: jest.fn(),
+  excludePos: jest.fn(),
+  patchPointOfSaleReferent: jest.fn(),
+  putMerchantOnboardingRequest: jest.fn(),
 };
 
 const expectUpdateMerchantPointOfSalesError = async (
   rejectedValue: unknown,
-  expectedResult: { code?: string; message?: string }
+  expectedResult: Record<string, any>
 ) => {
   mockedApi.updateMerchantPointOfSales.mockRejectedValue(rejectedValue);
 
@@ -209,10 +217,15 @@ describe('merchantService', () => {
 
   test('updateMerchantPointOfSales normalizes validation error details from ApiError', async () => {
     mockedApi.updateMerchantPointOfSales.mockRejectedValue(
-      new ApiError(400, 'validation failed', 'VALIDATION_ERROR' as any, {
-        code: 'VALIDATION_ERROR',
-        details: [{ code: 'ERR_1', message: 'invalid row' }],
-      } as any)
+      new ApiError(
+        400,
+        'validation failed',
+        'VALIDATION_ERROR' as any,
+        {
+          code: 'VALIDATION_ERROR',
+          details: [{ code: 'ERR_1', message: 'invalid row' }],
+        } as any
+      )
     );
 
     await expect(updateMerchantPointOfSales('initiative', 'merchant', [])).resolves.toEqual(
@@ -329,13 +342,24 @@ describe('merchantService', () => {
 
   test('associatePos delegates correctly', async () => {
     const result = {
-      associated: [{ pointOfSaleId: 'pos1', pointOfSaleName: 'Store 1' }],
+      associated: [{ pointOfSaleId: 'pos1', franchiseName: 'Store 1' }],
       notAssociated: [],
     };
     mockedApi.associatePos.mockResolvedValue(result);
 
     await expect(associatePos('init-1', 'merchant', ['pos1'])).resolves.toEqual(result);
     expect(mockedApi.associatePos).toHaveBeenCalledWith('init-1', 'merchant', ['pos1']);
+  });
+
+  test('excludePos delegates correctly', async () => {
+    const result = {
+      excludedPointOfSales: [{ pointOfSaleId: 'pos1', franchiseName: 'Store 1' }],
+      notExcludedPointOfSales: [],
+    };
+    mockedApi.excludePos.mockResolvedValue(result);
+
+    await expect(excludePos('init-1', 'merchant', ['pos1'])).resolves.toEqual(result);
+    expect(mockedApi.excludePos).toHaveBeenCalledWith('init-1', 'merchant', ['pos1']);
   });
 
   test('getMerchantPointOfSaleTransactionsProcessed delegates correctly', async () => {
@@ -424,5 +448,72 @@ describe('merchantService', () => {
     const merchantData = { iban: 'IT60X0542811101000000123456' } as any;
     await updateMerchantData('1', merchantData);
     expect(mockedApi.updateMerchantData).toHaveBeenCalledWith('1', merchantData);
+  });
+
+  test('getMerchantInitiativesAvailable delegates correctly', async () => {
+    mockedApi.getMerchantInitiativesAvailable.mockResolvedValue([]);
+    await getMerchantInitiativesAvailable({ initiativeName: 'Test' });
+    expect(mockedApi.getMerchantInitiativesAvailable).toHaveBeenCalledWith({ initiativeName: 'Test' });
+  });
+
+  test('getMerchantPointOfSales returns defaults when fields are missing', async () => {
+    mockedApi.getMerchantPointOfSales.mockResolvedValue({});
+
+    await expect(getMerchantPointOfSales('init-1', 'merchant', {} as any)).resolves.toEqual({
+      content: [],
+      pageNo: 0,
+      pageSize: 0,
+      totalElements: 0,
+    });
+    expect(mockedApi.getMerchantPointOfSales).toHaveBeenCalled();
+  });
+
+  test('getMerchantPointOfSalesCatalog returns defaults when fields are missing', async () => {
+    mockedApi.getMerchantPointOfSalesCatalog.mockResolvedValue({});
+
+    await expect(getMerchantPointOfSalesCatalog('merchant', {} as any)).resolves.toEqual({
+      content: [],
+      pageNo: 0,
+      pageSize: 0,
+      totalElements: 0,
+    });
+    expect(mockedApi.getMerchantPointOfSalesCatalog).toHaveBeenCalled();
+  });
+
+  test('patchPointOfSaleReferent delegates correctly', async () => {
+    const body = { referentName: 'John Doe' } as any;
+    const expectedResult = { id: 'pos-1', name: 'Store 1' } as any;
+    mockedApi.patchPointOfSaleReferent.mockResolvedValue(expectedResult);
+
+    await expect(patchPointOfSaleReferent('merchant', 'pos-1', body)).resolves.toEqual(
+      expectedResult
+    );
+    expect(mockedApi.patchPointOfSaleReferent).toHaveBeenCalledWith('merchant', 'pos-1', body);
+  });
+
+  test('putMerchantOnboardingRequest delegates correctly', async () => {
+    const expectedResult = { status: 'APPROVED' } as any;
+    mockedApi.putMerchantOnboardingRequest.mockResolvedValue(expectedResult);
+
+    await expect(putMerchantOnboardingRequest('initiative-1')).resolves.toEqual(expectedResult);
+    expect(mockedApi.putMerchantOnboardingRequest).toHaveBeenCalledWith('initiative-1');
+  });
+
+  test('updateMerchantPointOfSales returns error code when error code is falsy but exists in error', async () => {
+    await expectUpdateMerchantPointOfSalesError(
+      new ApiError(400, 'error message', undefined as any, undefined),
+      {
+        code: 'POINT_OF_SALE_GENERIC_ERROR',
+        message: 'error message',
+      }
+    );
+  });
+
+  test('updateMerchantPointOfSales returns result as void when successful', async () => {
+    mockedApi.updateMerchantPointOfSales.mockResolvedValue(undefined);
+
+    const result = await updateMerchantPointOfSales('initiative', 'merchant', []);
+    expect(result).toBeUndefined();
+    expect(mockedApi.updateMerchantPointOfSales).toHaveBeenCalledWith('initiative', 'merchant', []);
   });
 });
