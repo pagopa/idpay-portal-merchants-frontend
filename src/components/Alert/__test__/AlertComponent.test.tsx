@@ -1,7 +1,16 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import AlertComponent from '../AlertComponent';
 
 describe('ErrorAlert', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
   it('should render the error component with the correct message', async () => {
     const testTitle = 'This is a test error title.';
     const testMessage = 'This is a test error message.';
@@ -28,5 +37,25 @@ describe('ErrorAlert', () => {
 
     expect(alertMessage).toBeInTheDocument();
     expect(alertTitle).toBeInTheDocument();
+  });
+
+  it('should auto close after timeout', () => {
+    const onClose = jest.fn();
+
+    render(
+      <AlertComponent
+        title="Auto close"
+        severity="error"
+        isOpen={true}
+        onClose={onClose}
+        timeout={1000}
+      />
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

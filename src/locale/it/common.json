@@ -99,10 +99,32 @@
       "initiativeStatus": "Stato",
       "organizationName": "Creata da",
       "searchByInitiativeName": "Cerca per nome dell'iniziativa",
-      "validityPeriod": "Periodo di Validità",
+      "validityPeriod": "Data di adesione",
       "subtitle": "Visualizza e gestisci le iniziative di supporto alla spesa a cui hai aderito.",
       "title": "Iniziative",
-      "initiativeName": "Nome"
+      "initiativeName": "Nome",
+      "myInitiativesTab": "Le tue iniziative",
+      "newInitiativesTab": "Nuove iniziative",
+      "newInitiativesLoadingTitle": "Verifica in corso",
+      "newInitiativesLoadingSubtitle": "Stiamo controllando le iniziative disponibili per il tuo profilo",
+      "newInitiativesErrorTitle": "Non è stato possibile recuperare le iniziative",
+      "newInitiativesErrorSubtitle": "Riprova tra qualche minuto.",
+      "newInitiativesEmptySubtitle": "Al momento non ci sono iniziative dedicate al tuo profilo. Ricontrolla in futuro.",
+      "adhereBtn": "Aderisci",
+      "onboarding": {
+        "modalTitle": "Vuoi aderire a {{initiativeName}}?",
+        "successTitle": "Hai aderito a {{initiativeName}}.",
+        "successMessage": "",
+        "errorTitle": "Non è stato possibile aderire all'iniziativa, riprova più tardi.",
+        "errorMessage": ""
+      },
+      "actions": {
+        "adhere": "Aderisci"
+      },
+      "notOnboardableModal": {
+        "title": "Perche non posso aderire all'iniziativa?",
+        "description": "Non possiedi i codici ATECO necessari per aderire a questa iniziativa."
+      }
     },
     "posCatalog": {
       "title": "Catalogo punti vendita",
