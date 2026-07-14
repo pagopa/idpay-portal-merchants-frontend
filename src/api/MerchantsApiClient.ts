@@ -1,7 +1,6 @@
 import { ENV } from '../utils/env';
 import {
   InitiativeDTO,
-  GetMerchantInitiativesAvailableParams,
   MerchantStatisticsDTO,
   MerchantDetailDTO,
   MerchantTransactionsListDTO,
@@ -25,6 +24,7 @@ import {
   PointOfSaleOnboardingResultDTO,
   OnboardingResponse,
   PageResponseInitiativeResponse,
+  PointOfSaleExclusionResultDTO,
 } from './generated/merchants/data-contracts';
 
 import { MerchantInitiatives } from './generated/merchants/MerchantInitiatives';
@@ -300,10 +300,11 @@ class MerchantsApiClient {
     initiativeId: string,
     rewardBatchId: string
   ): Promise<DownloadRewardBatchResponseDTO> {
-    const res = await this.rewardBatches.approveDownloadRewardBatch({
-      initiativeId,
-      rewardBatchId,
-    },
+    const res = await this.rewardBatches.approveDownloadRewardBatch(
+      {
+        initiativeId,
+        rewardBatchId,
+      },
       { format: 'json' }
     );
     return res.data;
@@ -423,6 +424,18 @@ class MerchantsApiClient {
     pointOfSaleIds: Array<string>
   ): Promise<PointOfSaleOnboardingResultDTO> {
     const res = await this.pointOfSales.pointOfSalesOnboarding(
+      { merchantId, initiativeId },
+      pointOfSaleIds
+    );
+    return res.data;
+  }
+
+  public async excludePos(
+    initiativeId: string,
+    merchantId: string,
+    pointOfSaleIds: Array<string>
+  ): Promise<PointOfSaleExclusionResultDTO> {
+    const res = await this.pointOfSales.excludePointsOfSales(
       { merchantId, initiativeId },
       pointOfSaleIds
     );

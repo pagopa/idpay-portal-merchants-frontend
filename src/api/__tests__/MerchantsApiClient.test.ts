@@ -77,6 +77,7 @@ jest.mock('../generated/merchants/PointOfSales', () => ({
     this.getPointOfSaleInitiatives = jest.fn();
     this.getPointOfSaleByInitiative = jest.fn();
     this.pointOfSalesOnboarding = jest.fn();
+    this.excludePointsOfSales = jest.fn();
     this.patchPointOfSaleReferent = jest.fn();
     mockPointOfSalesInstance = this;
   }),
@@ -398,7 +399,7 @@ describe('MerchantsApiClient', () => {
 
   it('associatePos returns data and forwards onboarding body', async () => {
     const mockData = {
-      associated: [{ pointOfSaleId: 'pos1', pointOfSaleName: 'Store 1' }],
+      associated: [{ pointOfSaleId: 'pos1', franchiseName: 'Store 1' }],
       notAssociated: [],
     };
     mockPointOfSalesInstance.pointOfSalesOnboarding.mockResolvedValue({ data: mockData });
@@ -407,6 +408,31 @@ describe('MerchantsApiClient', () => {
 
     expect(result).toEqual(mockData);
     expect(mockPointOfSalesInstance.pointOfSalesOnboarding).toHaveBeenCalledWith(
+      {
+        merchantId: 'merch1',
+        initiativeId: 'init-1',
+      },
+      ['pos1', 'pos2']
+    );
+  });
+
+  it('excludePos returns data and forwards exclusion body', async () => {
+    const mockData = {
+      excludedPointOfSales: [{ pointOfSaleId: 'pos1', franchiseName: 'Store 1' }],
+      notExcludedPointOfSales: [
+        {
+          pointOfSaleId: 'pos2',
+          franchiseName: 'Store 2',
+          reason: 'HAS_TRANSACTIONS',
+        },
+      ],
+    };
+    mockPointOfSalesInstance.excludePointsOfSales.mockResolvedValue({ data: mockData });
+
+    const result = await api.excludePos('init-1', 'merch1', ['pos1', 'pos2']);
+
+    expect(result).toEqual(mockData);
+    expect(mockPointOfSalesInstance.excludePointsOfSales).toHaveBeenCalledWith(
       {
         merchantId: 'merch1',
         initiativeId: 'init-1',

@@ -35,6 +35,7 @@ import {
   associatePos,
   patchPointOfSaleReferent,
   putMerchantOnboardingRequest,
+  excludePos,
 } from '../merchantService';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
@@ -75,6 +76,7 @@ const mockedApi = {
   updateInvoiceTransaction: jest.fn(),
   updateMerchantData: jest.fn(),
   associatePos: jest.fn(),
+  excludePos: jest.fn(),
   patchPointOfSaleReferent: jest.fn(),
   putMerchantOnboardingRequest: jest.fn(),
 };
@@ -95,7 +97,6 @@ describe('merchantService', () => {
     jest.clearAllMocks();
     (getMerchantsApi as jest.Mock).mockReturnValue(mockedApi);
   });
-
 
   test('getMerchantInitiativeList delegates correctly', async () => {
     mockedApi.getMerchantInitiativeList.mockResolvedValue([]);
@@ -216,10 +217,15 @@ describe('merchantService', () => {
 
   test('updateMerchantPointOfSales normalizes validation error details from ApiError', async () => {
     mockedApi.updateMerchantPointOfSales.mockRejectedValue(
-      new ApiError(400, 'validation failed', 'VALIDATION_ERROR' as any, {
-        code: 'VALIDATION_ERROR',
-        details: [{ code: 'ERR_1', message: 'invalid row' }],
-      } as any)
+      new ApiError(
+        400,
+        'validation failed',
+        'VALIDATION_ERROR' as any,
+        {
+          code: 'VALIDATION_ERROR',
+          details: [{ code: 'ERR_1', message: 'invalid row' }],
+        } as any
+      )
     );
 
     await expect(updateMerchantPointOfSales('initiative', 'merchant', [])).resolves.toEqual(
@@ -336,13 +342,24 @@ describe('merchantService', () => {
 
   test('associatePos delegates correctly', async () => {
     const result = {
-      associated: [{ pointOfSaleId: 'pos1', pointOfSaleName: 'Store 1' }],
+      associated: [{ pointOfSaleId: 'pos1', franchiseName: 'Store 1' }],
       notAssociated: [],
     };
     mockedApi.associatePos.mockResolvedValue(result);
 
     await expect(associatePos('init-1', 'merchant', ['pos1'])).resolves.toEqual(result);
     expect(mockedApi.associatePos).toHaveBeenCalledWith('init-1', 'merchant', ['pos1']);
+  });
+
+  test('excludePos delegates correctly', async () => {
+    const result = {
+      excludedPointOfSales: [{ pointOfSaleId: 'pos1', franchiseName: 'Store 1' }],
+      notExcludedPointOfSales: [],
+    };
+    mockedApi.excludePos.mockResolvedValue(result);
+
+    await expect(excludePos('init-1', 'merchant', ['pos1'])).resolves.toEqual(result);
+    expect(mockedApi.excludePos).toHaveBeenCalledWith('init-1', 'merchant', ['pos1']);
   });
 
   test('getMerchantPointOfSaleTransactionsProcessed delegates correctly', async () => {
