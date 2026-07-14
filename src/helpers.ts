@@ -132,8 +132,11 @@ export const isValidUrl = (urlToCheck: string) => {
   return true;
 };
 
-export const generateUniqueId = () =>
-  Date.now().toString() + Math.random().toString(36).substring(2, 9);
+export const generateUniqueId = () => {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return Date.now().toString() + array[0].toString(36).substring(0, 8);
+};
 
 export const handlePromptMessage = (location: { pathname: string }, targetPage: string) => {
   const match = matchPath(location.pathname, {
