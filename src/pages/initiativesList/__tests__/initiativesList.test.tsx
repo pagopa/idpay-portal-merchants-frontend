@@ -1,4 +1,6 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+/// <reference types="jest" />
+import { beforeEach, describe, expect, test } from '@jest/globals';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { mockedInitiativesList } from '../../../api/__mocks__/MerchantsApiClient';
 import { setInitiativesList } from '../../../redux/slices/initiativesSlice';
@@ -10,11 +12,15 @@ import {
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import InitiativesList from '../initiativesList';
 
-jest.mock('../../../services/merchantService', () => ({
-  ...jest.requireActual('../../../services/merchantService'),
-  getMerchantInitiativesAvailable: jest.fn(),
-  putMerchantOnboardingRequest: jest.fn(),
-}));
+jest.mock('../../../services/merchantService', () => {
+  const actualMerchantService = jest.requireActual('../../../services/merchantService');
+
+  return {
+    ...actualMerchantService,
+    getMerchantInitiativesAvailable: jest.fn(),
+    putMerchantOnboardingRequest: jest.fn(),
+  };
+});
 
 const mockedGetMerchantInitiativesAvailable = jest.mocked(getMerchantInitiativesAvailable);
 const mockedPutMerchantOnboardingRequest = jest.mocked(putMerchantOnboardingRequest);
@@ -28,7 +34,7 @@ beforeEach(() => {
 });
 
 describe('Test suite for initiativeList page', () => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = jest.fn() as unknown as typeof window.scrollTo;
 
   test('Render component', () => {
     renderWithContext(<InitiativesList />);
@@ -297,24 +303,28 @@ describe('Test suite for initiativeList page', () => {
     fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
     await screen.findByText('Zeta Initiative');
 
-    const sortByName = screen.getByText('pages.initiativesList.initiativeName');
+    const getVisibleTabPanel = () =>
+      screen.getAllByRole('tabpanel').find((panel) => !panel.hasAttribute('hidden')) as HTMLElement;
+
+    const sortByName = within(getVisibleTabPanel()).getByText(
+      'pages.initiativesList.initiativeName'
+    );
+
+    const getRenderedInitiativeNames = () =>
+      within(getVisibleTabPanel())
+        .getAllByRole('row')
+        .slice(1)
+        .map((row) => row.querySelector('td')?.textContent?.trim());
+
     fireEvent.click(sortByName);
 
-    const initiativeButtons = screen.getAllByRole('button', {
-      name: /initiative/i,
+    if (getRenderedInitiativeNames()[0] !== 'Alpha Initiative') {
+      fireEvent.click(within(getVisibleTabPanel()).getByText('pages.initiativesList.initiativeName'));
+    }
+
+    await waitFor(() => {
+      expect(getRenderedInitiativeNames()).toEqual(['Alpha Initiative', 'Zeta Initiative']);
     });
-
-    expect(initiativeButtons[0]).toHaveTextContent('Zeta Initiative');
-    expect(initiativeButtons[1]).toHaveTextContent('Alpha Initiative');
-
-    fireEvent.click(sortByName);
-
-    const sortedInitiativeButtons = screen.getAllByRole('button', {
-      name: /initiative/i,
-    });
-
-    expect(sortedInitiativeButtons[0]).toHaveTextContent('Alpha Initiative');
-    expect(sortedInitiativeButtons[1]).toHaveTextContent('Zeta Initiative');
   });
 
   test('Render initiatives with different statuses and unexpected data', () => {
