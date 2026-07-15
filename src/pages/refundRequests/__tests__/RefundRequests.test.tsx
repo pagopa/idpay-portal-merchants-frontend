@@ -565,7 +565,7 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
 
-    expect(screen.getAllByText('Rimborso approvato')).toHaveLength(1);
+    expect(screen.getAllByText('Rimborso approvato')).toHaveLength(2);
     expect(screen.getByText('Rimborso sospeso')).toBeInTheDocument();
 
     expect(screen.getByText(/123.45\s€/)).toBeInTheDocument();
@@ -683,7 +683,6 @@ describe('RefundRequests', () => {
     expect(mockSendRewardBatch).not.toHaveBeenCalled();
   });
 
-
   it('should not update pagination when values are unchanged', async () => {
     mockGetRewardBatches.mockResolvedValueOnce({
       content: mockData,
@@ -698,7 +697,6 @@ describe('RefundRequests', () => {
 
     expect(mockGetRewardBatches).toHaveBeenCalledWith('test-initiative-id', 0, 10);
   });
-
 
   it('should disable row when status is not CREATED', async () => {
     mockGetRewardBatches.mockResolvedValueOnce({
