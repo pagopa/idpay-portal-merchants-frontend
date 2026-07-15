@@ -30,6 +30,7 @@ import {
 } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import { useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
@@ -62,6 +63,9 @@ const initialValues: GetPointOfSalesFilters = {
 
 const PosCatalog: React.FC = () => {
   const { setAlert } = useAlert();
+  const { isActionDisabled } = useUserPermissions();
+  const isAssociateDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_ASSOCIATE);
+  const isExcludeDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_EXCLUDE);
   const [selectedStore, setSelectedStore] = useState<PointOfSaleDTO | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedStoreIds, setSelectedStoreIds] = useState<GridSelectionModel>([]);
@@ -521,6 +525,7 @@ const PosCatalog: React.FC = () => {
             <Button
               variant="outlined"
               color="error"
+              disabled={isExcludeDisabled}
               onClick={() => setIsExcludeModalOpen(true)}
               sx={{ whiteSpace: 'nowrap' }}
             >
@@ -528,6 +533,7 @@ const PosCatalog: React.FC = () => {
             </Button>
             <Button
               variant="contained"
+              disabled={isAssociateDisabled}
               onClick={() => setIsAssociateModalOpen(true)}
               sx={{ whiteSpace: 'nowrap' }}
             >

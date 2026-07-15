@@ -12,6 +12,7 @@ import { ENV } from '../../utils/env';
 import { browserConsole } from '../../utils/consoleLogger';
 import { cleanupOnLogout } from '../../utils/logoutCleanup';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
+import { useUserPermissions } from '../../hooks/useUserPermissions';
 import { CustomHeaderAccount } from './CustomHeaderAccount';
 
 type Props = WithPartiesProps & {
@@ -23,6 +24,7 @@ type Props = WithPartiesProps & {
 
 const CustomHeader = ({ onExit, loggedUser }: /* , parties */ Props) => {
   const { t } = useScopedTranslation();
+  const { role } = useUserPermissions();
   const products = useAppSelector(partiesSelectors.selectPartySelectedProducts);
   const selectedParty = useAppSelector(partiesSelectors.selectPartySelected);
   const [party2Show, setParty2Show] = useState<Array<Party>>();
@@ -60,6 +62,18 @@ const CustomHeader = ({ onExit, loggedUser }: /* , parties */ Props) => {
       ),
     [products]
   );
+
+  const toRoleLabel = (roleKey?: string) => {
+    if (!roleKey) {
+      return '';
+    }
+    const normalizedRole = roleKey.toLowerCase();
+    const translationKey = `roles.${normalizedRole}`;
+    const translated = t(translationKey);
+    return translated !== translationKey ? translated : roleKey;
+  };
+
+  const effectiveRoleLabel = toRoleLabel(role);
 
   return (
     <>
@@ -101,7 +115,8 @@ const CustomHeader = ({ onExit, loggedUser }: /* , parties */ Props) => {
           party2Show.map((party) => ({
             id: party.partyId,
             name: party.description,
-            productRole: party?.roles?.map((r) => t(`roles.${r.roleKey}`)).join(','),
+            productRole:
+              effectiveRoleLabel || party?.roles?.map((r) => toRoleLabel(r.roleKey)).join(','),
             logoUrl: party.urlLogo,
           }))
         }

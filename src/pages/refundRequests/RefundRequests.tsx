@@ -27,11 +27,13 @@ import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
 import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { useAlert } from '../../hooks/useAlert';
 import { BASE_ROUTE } from '../../routes';
-import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { ENABLED_DOWNLOAD_STATUSES, MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../utils/consoleLogger';
 import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import { RefundRequestsModal } from './RefundRequestModal';
+
+type StatusEnum = RewardBatchDTO['status'];
 
 const posTypeMapper: Record<string, string> = {
   PHYSICAL: 'Fisico',
@@ -105,9 +107,12 @@ const RefundRequests = () => {
       if (response?.content) {
         const mappedResponse = response.content.map((value) => ({
           ...value,
-          approvedAmountCents: value.status === 'APPROVED' ? value.approvedAmountCents : undefined,
-          suspendedAmountCents:
-            value.status === 'APPROVED' ? value.suspendedAmountCents : undefined,
+          approvedAmountCents: ENABLED_DOWNLOAD_STATUSES.includes(value.status as StatusEnum)
+            ? value.approvedAmountCents
+            : undefined,
+          suspendedAmountCents: ENABLED_DOWNLOAD_STATUSES.includes(value.status as StatusEnum)
+            ? value.suspendedAmountCents
+            : undefined,
         }));
 
         setRewardBatches(mappedResponse);
