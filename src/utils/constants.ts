@@ -1,3 +1,5 @@
+import type { RewardBatchDTO } from '../api/generated/merchants/data-contracts';
+
 const IS_DEVELOP = process.env.NODE_ENV === 'development';
 
 export const testToken = '';
@@ -28,6 +30,15 @@ export const enum POS_TYPE {
 export const PAGINATION_SIZE = 10;
 
 export const MANDATORY_FIELD = 'Il campo è obbligatorio';
+
+type RewardBatchStatus = RewardBatchDTO['status'];
+
+export const ENABLED_DOWNLOAD_STATUSES: Array<RewardBatchStatus> = [
+  'APPROVED',
+  'PENDING_REFUND',
+  'REFUNDED',
+  'NOT_REFUNDED',
+];
 
 export const enum TYPE_TEXT {
   Text = 'text',
