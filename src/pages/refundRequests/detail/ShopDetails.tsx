@@ -30,6 +30,7 @@ import InvoiceDataTable from '../invoiceDataTable';
 import { formatDate, truncateString } from '../../../helpers';
 import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-contracts';
 import { parseJwt } from '../../../utils/jwt-utils';
+import { ENABLED_DOWNLOAD_STATUSES } from '../../../utils/constants';
 import {
   downloadBatchCsv,
   getRewardBatchById,
@@ -42,12 +43,6 @@ import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts'
 import { browserConsole } from '../../../utils/consoleLogger';
 
 type StatusEnum = RewardBatchDTO['status'];
-const ENABLED_DOWNLOAD_STATUSES: Array<StatusEnum> = [
-  'APPROVED',
-  'PENDING_REFUND',
-  'REFUNDED',
-  'NOT_REFUNDED',
-];
 const APPROVING_STATUS: StatusEnum = 'APPROVING';
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/data-contracts';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/data-contracts';
