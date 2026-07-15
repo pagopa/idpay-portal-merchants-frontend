@@ -1,4 +1,6 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+/// <reference types="jest" />
+import { beforeEach, describe, expect, test } from '@jest/globals';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { mockedInitiativesList } from '../../../api/__mocks__/MerchantsApiClient';
 import { setInitiativesList } from '../../../redux/slices/initiativesSlice';
@@ -10,11 +12,15 @@ import {
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import InitiativesList from '../initiativesList';
 
-jest.mock('../../../services/merchantService', () => ({
-  ...jest.requireActual('../../../services/merchantService'),
-  getMerchantInitiativesAvailable: jest.fn(),
-  putMerchantOnboardingRequest: jest.fn(),
-}));
+jest.mock('../../../services/merchantService', () => {
+  const actualMerchantService = jest.requireActual('../../../services/merchantService');
+
+  return {
+    ...actualMerchantService,
+    getMerchantInitiativesAvailable: jest.fn(),
+    putMerchantOnboardingRequest: jest.fn(),
+  };
+});
 
 const mockedGetMerchantInitiativesAvailable = jest.mocked(getMerchantInitiativesAvailable);
 const mockedPutMerchantOnboardingRequest = jest.mocked(putMerchantOnboardingRequest);
@@ -28,7 +34,7 @@ beforeEach(() => {
 });
 
 describe('Test suite for initiativeList page', () => {
-  window.scrollTo = jest.fn();
+  window.scrollTo = jest.fn() as unknown as typeof window.scrollTo;
 
   test('Render component', () => {
     renderWithContext(<InitiativesList />);
@@ -203,6 +209,45 @@ describe('Test suite for initiativeList page', () => {
     expect(screen.getByText('pages.initiativesList.newInitiativesEmptySubtitle')).toBeTruthy();
   });
 
+  test('New initiatives request normalizes array response and ignores invalid items', async () => {
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue([
+      null,
+      {
+        initiativeId: 'raw-initiative-id',
+        initiativeName: 'Raw Initiative',
+        organizationName: 'Raw Org',
+        onboardStatus: 'ONBOARDABLE',
+      },
+    ] as any);
+
+    renderWithContext(<InitiativesList />, store);
+
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+
+    expect(await screen.findByText('Raw Initiative')).toBeTruthy();
+    expect(screen.queryByText('pages.initiativesList.emptyList')).toBeNull();
+  });
+
+  test('New initiatives mapping handles missing fields with safe fallbacks', async () => {
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({
+      content: [
+        {},
+        {
+          initiativeId: 'visible-id',
+          initiativeName: 'Visible Initiative',
+          organizationName: 'Visible Org',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+    } as any);
+
+    renderWithContext(<InitiativesList />, store);
+
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+
+    expect(await screen.findByText('Visible Initiative')).toBeTruthy();
+  });
+
   test('Shows success toast after onboarding API resolves', async () => {
     mockedGetMerchantInitiativesAvailable
       .mockResolvedValueOnce({
@@ -274,6 +319,79 @@ describe('Test suite for initiativeList page', () => {
     fireEvent.click(sortByName);
   });
 
+  test('Switching to new initiatives tab resets sort when current column is not supported', async () => {
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({
+      content: [
+        {
+          initiativeId: 'new-initiative-1',
+          initiativeName: 'New Initiative',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+    } as any);
+
+    store.dispatch(setInitiativesList(mockedInitiativesList));
+    renderWithContext(<InitiativesList />, store);
+
+    fireEvent.click(screen.getByText('pages.initiativesList.initiativeStatus'));
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+
+    await screen.findByText('New Initiative');
+
+    const getVisibleTabPanel = () =>
+      screen.getAllByRole('tabpanel').find((panel) => !panel.hasAttribute('hidden')) as HTMLElement;
+
+    expect(await within(getVisibleTabPanel()).findByText('sorted ascending')).toBeTruthy();
+  });
+
+  test('User sorts initiatives in the new initiatives tab by name', async () => {
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({
+      content: [
+        {
+          initiativeId: '1',
+          initiativeName: 'Zeta Initiative',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+        {
+          initiativeId: '2',
+          initiativeName: 'Alpha Initiative',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+    } as any);
+
+    renderWithContext(<InitiativesList />, store);
+
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+    await screen.findByText('Zeta Initiative');
+
+    const getVisibleTabPanel = () =>
+      screen.getAllByRole('tabpanel').find((panel) => !panel.hasAttribute('hidden')) as HTMLElement;
+
+    const sortByName = within(getVisibleTabPanel()).getByText(
+      'pages.initiativesList.initiativeName'
+    );
+
+    const getRenderedInitiativeNames = () =>
+      within(getVisibleTabPanel())
+        .getAllByRole('row')
+        .slice(1)
+        .map((row) => row.querySelector('td')?.textContent?.trim());
+
+    fireEvent.click(sortByName);
+
+    if (getRenderedInitiativeNames()[0] !== 'Alpha Initiative') {
+      fireEvent.click(within(getVisibleTabPanel()).getByText('pages.initiativesList.initiativeName'));
+    }
+
+    await waitFor(() => {
+      expect(getRenderedInitiativeNames()).toEqual(['Alpha Initiative', 'Zeta Initiative']);
+    });
+  });
+
   test('Render initiatives with different statuses and unexpected data', () => {
     store.dispatch(
       setInitiativesList([
@@ -303,10 +421,33 @@ describe('Test suite for initiativeList page', () => {
     renderWithContext(<InitiativesList />, store);
   });
 
+  test('Render initiative without creationDate', () => {
+    store.dispatch(
+      setInitiativesList([
+        {
+          enabled: true,
+          initiativeId: 'no-date-id',
+          initiativeName: 'No date initiative',
+          organizationName: 'No date org',
+          serviceId: 'no-date-service',
+          status: 'PUBLISHED',
+        },
+      ] as Array<any>)
+    );
+
+    renderWithContext(<InitiativesList />, store);
+
+    expect(screen.getByText('No date initiative')).toBeTruthy();
+  });
+
   test('User navigate to discounts list pege of an initiative', () => {
     const history = createMemoryHistory();
 
     store.dispatch(setInitiativesList(mockedInitiativesList));
     renderWithContext(<InitiativesList />, store, history);
+
+    fireEvent.click(screen.getAllByTestId('initiative-btn-test')[0]);
+
+    expect(history.location.pathname).toContain('/panoramica');
   });
 });
