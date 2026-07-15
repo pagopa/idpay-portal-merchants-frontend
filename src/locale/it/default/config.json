@@ -9,5 +9,42 @@
         "ibanHolder": "^.{3,70}$",
         "email": "^(?=.{1,255}$)[A-Za-z0-9]([A-Za-z0-9+_-]*(\\.[A-Za-z0-9+_-]+)*)?@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$",
         "url": "^https:\\/\\/(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}(?:\\/[^\\s]*)?$"
+    },
+    "roles": {
+        "name": "merchant",
+        "logicalName": "Merchant portal user",
+        "subRoles": {
+            "admin": {
+                "logicalName": "Amministratore",
+                "permissions": { "disabledActions": [] }
+            },
+            "operator": {
+                "logicalName": "Operatore",
+                "permissions": { "disabledActions": [] }
+            },
+            "support": {
+                "logicalName": "Utenza di supporto (sola lettura)",
+                "permissions": {
+                    "disabledActions": [
+                        "initiative.adhere",
+                        "initiative.newTab",
+                        "posCatalog.associate",
+                        "posCatalog.exclude",
+                        "overview.editEmail",
+                        "overview.editIban",
+                        "overview.uploadStores",
+                        "stores.add",
+                        "storeDetail.editReferent",
+                        "transaction.reverse",
+                        "transaction.modifyDoc",
+                        "transaction.postpone",
+                        "refund.sendBatch",
+                        "reportedUser.report",
+                        "reportedUser.delete",
+                        "report.generate"
+                    ]
+                }
+            }
+        }
     }
 }

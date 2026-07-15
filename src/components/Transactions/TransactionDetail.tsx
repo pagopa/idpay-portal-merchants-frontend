@@ -10,6 +10,7 @@ import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { downloadInvoiceFile } from '../../services/merchantService';
 import { useStore } from '../../pages/initiativeStores/StoreContext';
 import { useAlert } from '../../hooks/useAlert';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import DetailDrawer, { DetailDrawerProps } from '../Drawer/DetailDrawer';
 import { isReversableOrEditable } from '../../helpers';
 import getStatus from './useStatus';
@@ -26,6 +27,9 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
 
   const { initiative_id: merchantId } = useParams<{ initiative_id: string }>();
   const [isLoading, setIsLoading] = useState(false);
+  const { isActionDisabled } = useUserPermissions();
+  const isModifyDocDisabled = isActionDisabled(PERMISSION_KEYS.TRANSACTION_MODIFY_DOC);
+  const isReverseDisabled = isActionDisabled(PERMISSION_KEYS.TRANSACTION_REVERSE);
 
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
@@ -35,6 +39,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
               variant: 'contained',
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
+              disabled: isModifyDocDisabled,
               onClick: () => {
                 const path = routes.MODIFY_DOCUMENT.replace(':initiative_id', merchantId)
                   .replace(':pointOfSaleId', storeId)
@@ -46,7 +51,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
             },
           ]
         : [],
-    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history, isModifyDocDisabled]
   );
 
   const reverseButton: DetailDrawerProps['buttons'] = useMemo(
@@ -56,6 +61,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
             {
               title: 'Storna',
               dataTestId: 'reverse-btn',
+              disabled: isReverseDisabled,
               onClick: () => {
                 const path = routes.REVERSE.replace(':initiative_id', merchantId)
                   .replace(':pointOfSaleId', storeId)
@@ -65,7 +71,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
             },
           ]
         : [],
-    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history, isReverseDisabled]
   );
 
   const getStatusChip = () => {

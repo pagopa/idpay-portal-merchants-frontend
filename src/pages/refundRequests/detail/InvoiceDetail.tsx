@@ -12,6 +12,7 @@ import { formatValues, currencyFormatter, getEndOfNextMonth } from '../../../uti
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-contracts';
 import { useAlert } from '../../../hooks/useAlert';
+import { useUserPermissions, PERMISSION_KEYS } from '../../../hooks/useUserPermissions';
 import ModalComponent from '../../../components/modal/ModalComponent';
 import { formatDate, isReversableOrEditable } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/data-contracts';
@@ -50,6 +51,10 @@ export default function InvoiceDetail({
   const currentInitiative = useCurrentInitiative();
   const history = useHistory();
   const { initiative_id } = useParams<{ initiative_id: string; batch_id: string }>();
+  const { isActionDisabled } = useUserPermissions();
+  const isModifyDocDisabled = isActionDisabled(PERMISSION_KEYS.TRANSACTION_MODIFY_DOC);
+  const isReverseDisabled = isActionDisabled(PERMISSION_KEYS.TRANSACTION_REVERSE);
+  const isPostponeDisabled = isActionDisabled(PERMISSION_KEYS.TRANSACTION_POSTPONE);
 
   useEffect(() => {
     if (currentInitiative?.endDate) {
@@ -77,7 +82,7 @@ export default function InvoiceDetail({
       isPostponeBtnVisible
         ? [
             {
-              disabled: isNextMonthDisabled,
+              disabled: isNextMonthDisabled || isPostponeDisabled,
               onClick: () => setInvoiceTransactionModal(true),
               variant: 'contained',
               title: 'Sposta al mese successivo',
@@ -85,7 +90,7 @@ export default function InvoiceDetail({
             },
           ]
         : [],
-    [isNextMonthDisabled, isPostponeBtnVisible]
+    [isNextMonthDisabled, isPostponeBtnVisible, isPostponeDisabled]
   );
   const editButton: DetailDrawerProps['buttons'] = useMemo(
     () =>
@@ -95,6 +100,7 @@ export default function InvoiceDetail({
               variant: 'contained',
               title: 'Modifica documento',
               dataTestId: 'change-file-btn',
+              disabled: isModifyDocDisabled,
               onClick: () => {
                 const path = routes.MODIFY_DOCUMENT.replace(':initiative_id', initiative_id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
@@ -106,7 +112,7 @@ export default function InvoiceDetail({
             },
           ]
         : [],
-    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history, isModifyDocDisabled]
   );
 
   const reverseButton: DetailDrawerProps['buttons'] = useMemo(
@@ -116,6 +122,7 @@ export default function InvoiceDetail({
             {
               title: 'Storna',
               dataTestId: 'reverse-btn',
+              disabled: isReverseDisabled,
               onClick: () => {
                 const path = routes.REVERSE.replace(':initiative_id', initiative_id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
@@ -125,7 +132,7 @@ export default function InvoiceDetail({
             },
           ]
         : [],
-    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history]
+    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history, isReverseDisabled]
   );
 
   const handlePostponeTransaction = async () => {

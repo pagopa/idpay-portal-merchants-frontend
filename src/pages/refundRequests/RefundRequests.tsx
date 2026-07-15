@@ -30,6 +30,7 @@ import { BASE_ROUTE } from '../../routes';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../utils/consoleLogger';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import { RefundRequestsModal } from './RefundRequestModal';
 
 const posTypeMapper: Record<string, string> = {
@@ -42,6 +43,8 @@ const RefundRequests = () => {
   const { initiativeId } = useCurrentInitiativeId();
   const history = useHistory();
   const { t } = useScopedTranslation();
+  const { isActionDisabled } = useUserPermissions();
+  const isSendBatchDisabled = isActionDisabled(PERMISSION_KEYS.REFUND_SEND_BATCH);
 
   const requestIdRef = useRef<number>(0);
 
@@ -395,6 +398,7 @@ const RefundRequests = () => {
           <Button
             variant="contained"
             size="small"
+            disabled={isSendBatchDisabled}
             onClick={() =>
               setModal({
                 isOpen: true,

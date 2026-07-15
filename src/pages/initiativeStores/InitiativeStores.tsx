@@ -28,6 +28,7 @@ import { BASE_ROUTE } from '../../routes';
 import { PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -45,6 +46,8 @@ const InitiativeStores: React.FC = () => {
   const { t } = useScopedTranslation();
   const history = useHistory();
   const { initiativeId } = useCurrentInitiativeId();
+  const { isActionDisabled } = useUserPermissions();
+  const isAddStoreDisabled = isActionDisabled(PERMISSION_KEYS.STORES_ADD);
 
   const location = useLocation<{ showSuccessAlert?: boolean }>();
   useEffect(() => {
@@ -180,6 +183,7 @@ const InitiativeStores: React.FC = () => {
           <Button
             variant="contained"
             size="small"
+            disabled={isAddStoreDisabled}
             onClick={() => goToAddStorePage()}
             startIcon={<AddIcon fontSize='large' />}
             sx={{ width: { xs: '100%', md: 'auto', alignSelf: 'start', minWidth: '200px' } }}
@@ -245,14 +249,16 @@ const InitiativeStores: React.FC = () => {
             <Typography variant="body2">
               {t('pages.initiativeStores.noStores')}{t('pages.initiativeStores.addStoreNoResults')}.
             </Typography>
-            <Link
-              onClick={() => goToAddStorePage()}
-              className="cursor-pointer"
-              variant="body2"
-              sx={{ fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'none' } }}
-            >
-              {t('pages.initiativeStores.addStoreList')}
-            </Link>
+            {!isAddStoreDisabled && (
+              <Link
+                onClick={() => goToAddStorePage()}
+                className="cursor-pointer"
+                variant="body2"
+                sx={{ fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'none' } }}
+              >
+                {t('pages.initiativeStores.addStoreList')}
+              </Link>
+            )}
           </Stack>
         </Paper>
       )}
