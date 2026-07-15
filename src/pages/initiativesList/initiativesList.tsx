@@ -252,6 +252,15 @@ const InitiativesList = () => {
     setValue(newValue);
     setSearchValue('');
 
+    if (
+      newValue === 1 &&
+      orderBy !== 'initiativeName' &&
+      orderBy !== 'organizationName'
+    ) {
+      setOrder('asc');
+      setOrderBy('initiativeName');
+    }
+
     if (newValue === 1 && (!newInitiativesLoaded || newInitiativesList.length === 0)) {
       void loadNewInitiatives();
     }
@@ -471,7 +480,15 @@ const InitiativesList = () => {
             <NewInitiativesTabContent
               isLoading={newInitiativesLoading}
               isError={newInitiativesLoadError}
-              initiatives={newInitiativesListFiltered}
+              initiatives={stableSort(
+                newInitiativesListFiltered,
+                getComparator(
+                  order,
+                  orderBy === 'initiativeName' || orderBy === 'organizationName'
+                    ? orderBy
+                    : 'initiativeName'
+                )
+              )}
               order={order}
               orderBy={orderBy}
               onRequestSort={handleRequestSort}

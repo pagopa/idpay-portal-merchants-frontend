@@ -274,6 +274,49 @@ describe('Test suite for initiativeList page', () => {
     fireEvent.click(sortByName);
   });
 
+  test('User sorts initiatives in the new initiatives tab by name', async () => {
+    mockedGetMerchantInitiativesAvailable.mockResolvedValue({
+      content: [
+        {
+          initiativeId: '1',
+          initiativeName: 'Zeta Initiative',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+        {
+          initiativeId: '2',
+          initiativeName: 'Alpha Initiative',
+          organizationName: 'PagoPA',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+    } as any);
+
+    renderWithContext(<InitiativesList />, store);
+
+    fireEvent.click(screen.getByTestId('merchant-initiatives-2'));
+    await screen.findByText('Zeta Initiative');
+
+    const sortByName = screen.getByText('pages.initiativesList.initiativeName');
+    fireEvent.click(sortByName);
+
+    const initiativeButtons = screen.getAllByRole('button', {
+      name: /initiative/i,
+    });
+
+    expect(initiativeButtons[0]).toHaveTextContent('Zeta Initiative');
+    expect(initiativeButtons[1]).toHaveTextContent('Alpha Initiative');
+
+    fireEvent.click(sortByName);
+
+    const sortedInitiativeButtons = screen.getAllByRole('button', {
+      name: /initiative/i,
+    });
+
+    expect(sortedInitiativeButtons[0]).toHaveTextContent('Alpha Initiative');
+    expect(sortedInitiativeButtons[1]).toHaveTextContent('Zeta Initiative');
+  });
+
   test('Render initiatives with different statuses and unexpected data', () => {
     store.dispatch(
       setInitiativesList([
