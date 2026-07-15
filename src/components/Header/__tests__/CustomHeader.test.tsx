@@ -151,6 +151,20 @@ jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
   useCurrentInitiativeId: () => 'initiative-1',
 }));
 
+jest.mock('../../../hooks/useUserPermissions', () => {
+  const actual = jest.requireActual('../../../hooks/useUserPermissions');
+  return {
+    __esModule: true,
+    ...actual,
+    useUserPermissions: () => ({
+      role: 'admin',
+      logicalRoleName: 'admin',
+      isSupportUser: false,
+      isActionDisabled: () => false,
+    }),
+  };
+});
+
 describe('CustomHeader', () => {
   const mockOnExit = jest.fn((callback) => callback());
   const mockLoggedUser: User = {

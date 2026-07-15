@@ -11,6 +11,20 @@ const mockSetAlert = jest.fn();
 const mockEditEmailModal = jest.fn();
 const mockEditIbanModal = jest.fn();
 
+jest.mock('../../../hooks/useUserPermissions', () => {
+  const actual = jest.requireActual('../../../hooks/useUserPermissions');
+  return {
+    __esModule: true,
+    ...actual,
+    useUserPermissions: () => ({
+      role: 'admin',
+      logicalRoleName: 'admin',
+      isSupportUser: false,
+      isActionDisabled: () => false,
+    }),
+  };
+});
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
   withTranslation: () => (Component: any) => {
