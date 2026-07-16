@@ -1,3 +1,5 @@
+pointOfSalesFilters.test.tsx;
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useFormik } from 'formik';
@@ -170,16 +172,61 @@ describe('PointOfSalesFilters', () => {
     );
 
     expect(screen.getByLabelText('Iniziativa')).toBeInTheDocument();
-    expect(screen.queryByText('Initiative 1')).not.toBeInTheDocument();
-    expect(screen.queryByText('Initiative 2')).not.toBeInTheDocument();
+
+    fireEvent.mouseDown(screen.getByLabelText('Iniziativa'));
+
+    expect(
+      screen.getByRole('option', { name: 'pages.initiativesFilters.allInitiatives' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'pages.initiativesFilters.noInitiative' })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Initiative 1' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Initiative 2' })).not.toBeInTheDocument();
+  });
+
+  test('renders fixed initiative options first and removes duplicated fixed values', () => {
+    const formik = {
+      values: {
+        initiative: '',
+        type: undefined,
+        city: '',
+        address: '',
+        contactName: '',
+        sort: 'asc',
+      },
+      handleChange: jest.fn(),
+      handleBlur: jest.fn(),
+    } as any;
+
+    render(
+      <PointOfSalesFilters
+        formik={formik}
+        filtersAppliedOnce={false}
+        onFiltersApplied={jest.fn()}
+        onFiltersReset={jest.fn()}
+        t={(key: string) => key}
+        fields={['initiative']}
+        initiativeOptions={[
+          { value: 'ALL_INITIATIVES', label: 'All from backend' },
+          { value: 'NO_INITIATIVE', label: 'None from backend' },
+          { value: 'initiative-1', label: 'Initiative 1' },
+        ]}
+      />
+    );
+
+    fireEvent.mouseDown(screen.getByLabelText('Iniziativa'));
+
+    const options = screen.getAllByRole('option').map((option) => option.textContent);
+    expect(options).toEqual([
+      'pages.initiativesFilters.allInitiatives',
+      'pages.initiativesFilters.noInitiative',
+      'Initiative 1',
+    ]);
   });
 
   test('returns null for unsupported field values', () => {
-    render(
-      <TestComponent
-        fields={['city', 'unsupported-field' as PointOfSalesFilterField]}
-      />
-    );
+    render(<TestComponent fields={['city', 'unsupported-field' as PointOfSalesFilterField]} />);
 
     expect(screen.getByLabelText('pages.initiativeStores.city')).toBeInTheDocument();
     expect(screen.getAllByRole('textbox')).toHaveLength(1);

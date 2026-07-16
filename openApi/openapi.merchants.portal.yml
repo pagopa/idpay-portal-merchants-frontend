@@ -728,6 +728,15 @@ paths:
             type: string
             maxLength: 255
             pattern: .*
+        - name: initiativeFilter
+          in: query
+          description: Filter enum for ALL_INITIATIVES and NO_INITIATIVE
+          required: false
+          schema:
+            type: string
+            enum:
+              - ALL_INITIATIVES
+              - NO_INITIATIVE
         - name: type
           in: query
           description: Filter by point of sale type
