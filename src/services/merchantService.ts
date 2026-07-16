@@ -34,6 +34,20 @@ import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../ty
 
 type GetPointOfSalesCatalogFilters = Omit<GetPointOfSalesFilters, 'initiative'> & {
   initiativeId?: string;
+  initiativeFilter?: 'ALL_INITIATIVES' | 'NO_INITIATIVE';
+};
+
+const normalizeCatalogInitiativeFilters = (
+  filters: GetPointOfSalesCatalogFilters
+): GetPointOfSalesCatalogFilters => {
+  if (!filters.initiativeId) {
+    return filters;
+  }
+
+  return {
+    ...filters,
+    initiativeFilter: undefined,
+  };
 };
 
 const normalizePointOfSaleError = (
@@ -212,9 +226,11 @@ export const getMerchantPointOfSalesCatalog = async (
   pageSize: number;
   totalElements: number;
 }> => {
+  const normalizedFilters = normalizeCatalogInitiativeFilters(filters);
+
   const response = await getMerchantsApi().getMerchantPointOfSalesCatalog(
     merchantId,
-    filters as unknown as Record<string, unknown>
+    normalizedFilters as unknown as Record<string, unknown>
   );
 
   return {
@@ -356,4 +372,3 @@ export const patchPointOfSaleReferent = (
 
 export const putMerchantOnboardingRequest = (initiativeId: string): Promise<OnboardingResponse> =>
   getMerchantsApi().putMerchantOnboardingRequest(initiativeId);
-
