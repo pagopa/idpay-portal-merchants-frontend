@@ -961,7 +961,6 @@ describe('<PosCatalog />', () => {
     });
 
     expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
-      initiativeId: '',
       type: undefined,
       city: '',
       address: '',
@@ -969,6 +968,62 @@ describe('<PosCatalog />', () => {
       sort: 'franchiseName,asc',
       page: 0,
       size: 10,
+    });
+  });
+
+  it('maps ALL_INITIATIVES to initiativeFilter when fetching stores', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: 'ALL_INITIATIVES',
+      type: 'PHYSICAL',
+      city: 'Milan',
+      address: 'Via Milano',
+      contactName: 'Luigi',
+      page: 2,
+      size: 30,
+      sort: 'name,asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'ALL_INITIATIVES',
+      type: 'PHYSICAL',
+      city: 'Milan',
+      address: 'Via Milano',
+      contactName: 'Luigi',
+      sort: 'name,asc',
+      page: 2,
+      size: 30,
+    });
+  });
+
+  it('maps NO_INITIATIVE to initiativeFilter when fetching stores', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: 'NO_INITIATIVE',
+      type: 'ONLINE',
+      city: 'Rome',
+      address: 'Via Roma',
+      contactName: 'Mario',
+      page: 1,
+      size: 20,
+      sort: 'name,desc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'NO_INITIATIVE',
+      type: 'ONLINE',
+      city: 'Rome',
+      address: 'Via Roma',
+      contactName: 'Mario',
+      sort: 'name,desc',
+      page: 1,
+      size: 20,
     });
   });
 

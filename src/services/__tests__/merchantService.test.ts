@@ -453,7 +453,9 @@ describe('merchantService', () => {
   test('getMerchantInitiativesAvailable delegates correctly', async () => {
     mockedApi.getMerchantInitiativesAvailable.mockResolvedValue([]);
     await getMerchantInitiativesAvailable({ initiativeName: 'Test' });
-    expect(mockedApi.getMerchantInitiativesAvailable).toHaveBeenCalledWith({ initiativeName: 'Test' });
+    expect(mockedApi.getMerchantInitiativesAvailable).toHaveBeenCalledWith({
+      initiativeName: 'Test',
+    });
   });
 
   test('getMerchantPointOfSales returns defaults when fields are missing', async () => {
@@ -478,6 +480,20 @@ describe('merchantService', () => {
       totalElements: 0,
     });
     expect(mockedApi.getMerchantPointOfSalesCatalog).toHaveBeenCalled();
+  });
+
+  test('getMerchantPointOfSalesCatalog prioritizes initiativeId over initiativeFilter', async () => {
+    mockedApi.getMerchantPointOfSalesCatalog.mockResolvedValue({});
+
+    await getMerchantPointOfSalesCatalog('merchant', {
+      initiativeId: 'initiative-1',
+      initiativeFilter: 'ALL_INITIATIVES',
+    } as any);
+
+    expect(mockedApi.getMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant', {
+      initiativeId: 'initiative-1',
+      initiativeFilter: undefined,
+    });
   });
 
   test('patchPointOfSaleReferent delegates correctly', async () => {

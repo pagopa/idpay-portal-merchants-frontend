@@ -75,6 +75,10 @@
     "initiativeStatus": {
       "closed": "Terminata",
       "published": "In corso"
+    },
+    "initiativesFilters": {
+      "allInitiatives": "Associati a tutte le iniziative",
+      "noInitiative": "Non associati"
     }
   },
   "pages": {
