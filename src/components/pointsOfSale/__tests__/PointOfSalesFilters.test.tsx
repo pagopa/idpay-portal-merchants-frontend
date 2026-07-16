@@ -1,5 +1,3 @@
-pointOfSalesFilters.test.tsx;
-
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useFormik } from 'formik';
@@ -176,10 +174,10 @@ describe('PointOfSalesFilters', () => {
     fireEvent.mouseDown(screen.getByLabelText('Iniziativa'));
 
     expect(
-      screen.getByRole('option', { name: 'pages.initiativesFilters.allInitiatives' })
+      screen.getByRole('option', { name: 'enums.initiativesFilters.allInitiatives' })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('option', { name: 'pages.initiativesFilters.noInitiative' })
+      screen.getByRole('option', { name: 'enums.initiativesFilters.noInitiative' })
     ).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'Initiative 1' })).not.toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'Initiative 2' })).not.toBeInTheDocument();
@@ -219,8 +217,8 @@ describe('PointOfSalesFilters', () => {
 
     const options = screen.getAllByRole('option').map((option) => option.textContent);
     expect(options).toEqual([
-      'pages.initiativesFilters.allInitiatives',
-      'pages.initiativesFilters.noInitiative',
+      'enums.initiativesFilters.allInitiatives',
+      'enums.initiativesFilters.noInitiative',
       'Initiative 1',
     ]);
   });
