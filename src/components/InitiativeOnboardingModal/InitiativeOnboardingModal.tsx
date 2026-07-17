@@ -5,9 +5,10 @@ import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { InitiativeForOnboarding } from '../../hooks/useInitiativeOnboarding';
 import bonusDecoder2026Copy from '../../locale/it/bonusDecoder2026/copy.json';
 import bonusElettrodomestici2025Copy from '../../locale/it/bonusElettrodomestici2025/copy.json';
+import bonusDefaultCopy from '../../locale/it/default/copy.json';
 
 const ONBOARDING_BODY_MESSAGES: Record<string, string> = {
-  'bonus decoder': bonusDecoder2026Copy.pages.initiativeOverview.info.description,
+  'bonus decoder': bonusDecoder2026Copy.pages.initiativesList.onboardingModal.description,
   'bonus elettrodomestici': bonusElettrodomestici2025Copy.pages.initiativeOverview.info.description,
 };
 
@@ -19,8 +20,7 @@ const getOnboardingBodyMessage = (initiative: InitiativeForOnboarding | null) =>
   }
 
   return ONBOARDING_BODY_MESSAGES[normalizedInitiativeName] ??
-    initiative?.description ??
-    'Stai per aderire al bonus selezionato. Clicca su conferma per completare l\'adesione.';
+    initiative?.description ?? bonusDefaultCopy.pages.initiativesList.onboardingModal.description;
 };
 
 type Props = {
@@ -80,7 +80,7 @@ const InitiativeOnboardingModal: React.FC<Props> = ({
       {bodyMessage ? (
         <DialogContent sx={{ px: 3.5, pt: 0, pb: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            {bodyMessage}
+            {t(bodyMessage)}
           </Typography>
         </DialogContent>
       ) : null}
