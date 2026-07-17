@@ -17,6 +17,7 @@ import { formatDate, formatIban } from '../../helpers';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import { MerchantDetailDTO, MerchantIbanPatchDTO } from '../../api/generated/merchants/data-contracts';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
 import { EditEmailModal } from './EditEmailModal';
@@ -27,6 +28,10 @@ const InitiativeOverview = () => {
   const { t } = useScopedTranslation();
   const { initiativeId } = useCurrentInitiativeId();
   const { setAlert } = useAlert();
+  const { isActionDisabled } = useUserPermissions();
+  const isEditEmailDisabled = isActionDisabled(PERMISSION_KEYS.OVERVIEW_EDIT_EMAIL);
+  const isEditIbanDisabled = isActionDisabled(PERMISSION_KEYS.OVERVIEW_EDIT_IBAN);
+  const isUploadStoresDisabled = isActionDisabled(PERMISSION_KEYS.OVERVIEW_UPLOAD_STORES);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isIbanModalOpen, setIsIbanModalOpen] = useState(false);
   const [data, setData] = useState<MerchantDetailDTO & { onboardingDate: string } | undefined>();
@@ -112,7 +117,7 @@ const InitiativeOverview = () => {
                 <MIAlert
                   severity='warning'
                   description={t('pages.initiativeOverview.ibanBanner.description')}
-                  action={{
+                  action={isEditIbanDisabled ? undefined : {
                     label: t('pages.initiativeOverview.ibanBanner.action'),
                     onClick: () => setIsIbanModalOpen(true)
                   }}
@@ -120,7 +125,7 @@ const InitiativeOverview = () => {
                 <MIAlert
                   severity='info'
                   description={t('pages.initiativeOverview.emailBanner.description')}
-                  action={{
+                  action={isEditEmailDisabled ? undefined : {
                     label: t('pages.initiativeOverview.emailBanner.action'),
                     onClick: () => setIsEmailModalOpen(true)
                   }}
@@ -165,7 +170,7 @@ const InitiativeOverview = () => {
                             </Typography>
                           </Tooltip>
                         </Box>
-                        <IconButton onClick={() => setIsEmailModalOpen(true)}>
+                        <IconButton disabled={isEditEmailDisabled} onClick={() => setIsEmailModalOpen(true)}>
                           <EditOutlinedIcon />
                         </IconButton>
                       </Box>
@@ -175,7 +180,7 @@ const InitiativeOverview = () => {
                           <IconButton onClick={() => setIsVisible(prev => !prev)}>
                             {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
                           </IconButton>
-                          <IconButton onClick={() => setIsIbanModalOpen(true)}>
+                          <IconButton disabled={isEditIbanDisabled} onClick={() => setIsIbanModalOpen(true)}>
                             <EditOutlinedIcon />
                           </IconButton>
                         </Box>
@@ -216,6 +221,7 @@ const InitiativeOverview = () => {
                     <Button
                       variant='contained'
                       startIcon={<StorefrontOutlinedIcon />}
+                      disabled={isUploadStoresDisabled}
                       onClick={() => {
                         history.push(
                           generatePath(ROUTES.STORES_UPLOAD, { initiative_id: initiativeId })

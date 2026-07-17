@@ -30,8 +30,10 @@ import InitiativeOnboardingModal from '../../components/InitiativeOnboardingModa
 import AlertComponent from '../../components/Alert/AlertComponent';
 import ROUTES from '../../routes';
 import { getMerchantInitiativesAvailable } from '../../services/merchantService';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import { Data, EnhancedTableProps, HeadCell, Order, getComparator, stableSort } from './helpers';
 import NewInitiativesTabContent from './NewInitiativesTabContent';
+
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
 const CLOSED: StatusEnum = 'CLOSED';
@@ -150,6 +152,9 @@ const InitiativesList = () => {
   const [newInitiativesList, setNewInitiativesList] = useState<Array<Data>>([]);
   const initiativesListSel = useAppSelector(intiativesListSelector);
   const dispatch = useAppDispatch();
+  const { isActionDisabled } = useUserPermissions();
+  const isNewInitiativesTabDisabled = isActionDisabled(PERMISSION_KEYS.INITIATIVE_NEW_TAB);
+  const isAdhereDisabled = isActionDisabled(PERMISSION_KEYS.INITIATIVE_ADHERE);
 
   const initiativesTablePaperSx = {
     display: 'flex',
@@ -399,6 +404,7 @@ const InitiativesList = () => {
               label={t('pages.initiativesList.newInitiativesTab')}
               {...a11yProps(1)}
               data-testid="merchant-initiatives-2"
+              disabled={isNewInitiativesTabDisabled}
             />
           </Tabs>
         </Box>
@@ -493,6 +499,7 @@ const InitiativesList = () => {
               orderBy={orderBy}
               onRequestSort={handleRequestSort}
               onAdhere={openOnboardingModal}
+              isAdhereDisabled={isAdhereDisabled}
             />
           </TabPanel>
         </Box>

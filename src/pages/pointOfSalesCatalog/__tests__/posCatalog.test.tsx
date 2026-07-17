@@ -403,7 +403,7 @@ describe('<PosCatalog />', () => {
   });
 
   it('keeps closed initiatives in filters and removes them from association options', () => {
-    mockUseAppSelector.mockReturnValueOnce([
+    mockUseAppSelector.mockReturnValue([
       { initiativeId: 'initiative-1', initiativeName: 'Initiative One', status: 'PUBLISHED' },
       { initiativeId: 'initiative-2', initiativeName: 'Initiative Two', status: 'CLOSED' },
     ]);
@@ -935,7 +935,7 @@ describe('<PosCatalog />', () => {
   });
 
   it('maps missing initiative id and name to empty option values', () => {
-    mockUseAppSelector.mockReturnValueOnce([
+    mockUseAppSelector.mockReturnValue([
       { initiativeId: undefined, initiativeName: undefined, status: 'PUBLISHED' },
     ]);
 
@@ -1038,7 +1038,7 @@ describe('<PosCatalog />', () => {
   });
 
   it('handles an undefined initiatives list by passing no options to children', () => {
-    mockUseAppSelector.mockReturnValueOnce(undefined);
+    mockUseAppSelector.mockReturnValue(undefined);
 
     renderComponent();
 
