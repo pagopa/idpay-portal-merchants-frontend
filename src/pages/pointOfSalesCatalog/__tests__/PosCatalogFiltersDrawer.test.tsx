@@ -31,6 +31,20 @@ jest.mock('../../../hooks/useAlert', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/useUserPermissions', () => {
+  const actual = jest.requireActual('../../../hooks/useUserPermissions');
+  return {
+    __esModule: true,
+    ...actual,
+    useUserPermissions: () => ({
+      role: 'admin',
+      logicalRoleName: 'admin',
+      isSupportUser: false,
+      isActionDisabled: () => false,
+    }),
+  };
+});
+
 jest.mock('../../../components/Drawer/DetailDrawer', () => ({
   __esModule: true,
   default: ({

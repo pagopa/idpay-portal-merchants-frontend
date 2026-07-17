@@ -151,6 +151,37 @@ describe('NewInitiativesTabContent', () => {
     });
   });
 
+  test('renders disabled adhere action styles when adhere is disabled', () => {
+    const onAdhere = jest.fn();
+
+    const props = buildProps({
+      initiatives: [
+        {
+          id: 0,
+          initiativeId: 'initiative-1',
+          initiativeName: 'Bonus Decoder',
+          organizationName: 'MIMIT',
+          status: '',
+          onboardStatus: 'ONBOARDABLE',
+        },
+      ],
+      onAdhere,
+      isAdhereDisabled: true,
+    });
+
+    renderWithContext(<NewInitiativesTabContent {...props} />);
+
+    const adhereButton = screen.getByRole('button', {
+      name: 'pages.initiativesList.actions.adhere',
+    });
+
+    expect(adhereButton).toBeDisabled();
+    expect(adhereButton).toHaveStyle('cursor: not-allowed');
+    expect(adhereButton).toHaveStyle('opacity: 0.5');
+    fireEvent.click(adhereButton);
+    expect(onAdhere).not.toHaveBeenCalled();
+  });
+
   test('shows and closes not-onboardable modal for NOT_ONBOARDABLE row', async () => {
     const props = buildProps({
       initiatives: [

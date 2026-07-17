@@ -21,6 +21,7 @@ import {
 import { safeFormatDate } from '../../utils/formatUtils';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useAlert } from '../../hooks/useAlert';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import AssociateSelectedPosModal from './AssociateSelectedPosModal';
 import AlreadyAssociatedPosModal, {
   AlreadyAssociatedPointOfSale,
@@ -52,6 +53,7 @@ type PosCatalogDrawerProps = {
   selectedStore: PointOfSaleDTO | null;
   initiativeOptions: Array<InitiativeOption>;
   publishedInitiativeOptions: Array<InitiativeOption>;
+  actionsDisabled?: boolean;
   merchantId: string;
 };
 
@@ -81,10 +83,14 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   selectedStore,
   initiativeOptions,
   publishedInitiativeOptions,
+  actionsDisabled = false,
   merchantId,
 }) => {
   const { t } = useScopedTranslation();
   const { setAlert } = useAlert();
+  const { isActionDisabled } = useUserPermissions();
+  const isAssociateDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_ASSOCIATE);
+  const isExcludeDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_EXCLUDE);
   const getDisplayValue = (value?: string) =>
     value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value;
   const ellipsisSx = {
@@ -339,7 +345,13 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
         showExclusionSuccessAlert(excludedCount, initiativeName);
       }
     },
-    [handleExcludeModalClose, onClose, onOperationCompleted, selectedStore, showExclusionSuccessAlert]
+    [
+      handleExcludeModalClose,
+      onClose,
+      onOperationCompleted,
+      selectedStore,
+      showExclusionSuccessAlert,
+    ]
   );
 
   const handleExcludeConfirm = useCallback(async () => {
@@ -384,12 +396,14 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
             dataTestId: 'exclude-store-button',
             variant: 'outlined',
             color: 'error',
+            disabled: isExcludeDisabled || actionsDisabled,
             onClick: () => setIsExcludeModalOpen(true),
           },
           {
             title: t('pages.posCatalog.actions.associate'),
             dataTestId: 'associate-store-button',
             variant: 'contained',
+            disabled: isAssociateDisabled || actionsDisabled,
             onClick: () => setIsAssociateModalOpen(true),
           },
         ]}
@@ -577,6 +591,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
       />
       <PointOfSaleExclusionResultModal
         stores={notExcludedStores}
+        isPartial={exclusionSuccessData !== null}
         onClose={handleExclusionResultModalClose}
       />
     </>

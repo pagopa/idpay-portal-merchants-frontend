@@ -10,6 +10,22 @@ const mockPush = jest.fn();
 const mockSetAlert = jest.fn();
 const mockEditEmailModal = jest.fn();
 const mockEditIbanModal = jest.fn();
+const mockUseCurrentInitiativeId = jest.fn(() => ({ initiativeId: 'initiative-123' }));
+const mockIsActionDisabled = jest.fn(() => false);
+
+jest.mock('../../../hooks/useUserPermissions', () => {
+  const actual = jest.requireActual('../../../hooks/useUserPermissions');
+  return {
+    __esModule: true,
+    ...actual,
+    useUserPermissions: () => ({
+      role: 'admin',
+      logicalRoleName: 'admin',
+      isSupportUser: false,
+      isActionDisabled: mockIsActionDisabled,
+    }),
+  };
+});
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -28,7 +44,7 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
   default: () => ({ t: (key: string) => key }),
 }));
 jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => ({ initiativeId: 'initiative-123' }),
+  useCurrentInitiativeId: () => mockUseCurrentInitiativeId(),
 }));
 jest.mock('../../../hooks/useAlert', () => ({
   useAlert: () => ({ setAlert: mockSetAlert }),
@@ -96,6 +112,8 @@ const mockMerchantDetailNoEmail = {
 describe('InitiativeOverview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: 'initiative-123' });
+    mockIsActionDisabled.mockReturnValue(false);
     jest.spyOn(helperFunctions, 'formatDate').mockReturnValue('15/01/2023');
     jest.spyOn(helperFunctions, 'formatIban').mockImplementation((value?: string) => `formatted-${value ?? ''}`);
     jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetail as any);
@@ -265,5 +283,58 @@ describe('InitiativeOverview', () => {
         severity: 'error',
       });
     });
+  });
+
+  it('does not load details when initiative id is missing', async () => {
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: undefined as unknown as string });
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(merchantService.getMerchantDetail).not.toHaveBeenCalled();
+    });
+  });
+
+  it('updates merchant data with empty initiative id fallback when initiative id is missing', async () => {
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: undefined as unknown as string });
+
+    renderComponent();
+
+    const onUpdate = mockEditEmailModal.mock.calls.at(-1)[0].onUpdate;
+    await act(async () => {
+      await onUpdate({ operativeEmail: 'updated@test.it' }, 'operativeEmail');
+    });
+
+    expect(merchantService.updateMerchantData).toHaveBeenCalledWith('', {
+      operativeEmail: 'updated@test.it',
+    });
+  });
+
+  it('hides iban banner action when iban editing is disabled', async () => {
+    mockIsActionDisabled.mockImplementation(
+      ((permission: string) => permission === 'overview.editIban') as unknown as () => boolean
+    );
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetailNoIBAN);
+
+    renderComponent();
+
+    expect(
+      await screen.findByText('pages.initiativeOverview.ibanBanner.description')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('pages.initiativeOverview.ibanBanner.action')).not.toBeInTheDocument();
+  });
+
+  it('hides email banner action when email editing is disabled', async () => {
+    mockIsActionDisabled.mockImplementation(
+      ((permission: string) => permission === 'overview.editEmail') as unknown as () => boolean
+    );
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetailNoEmail);
+
+    renderComponent();
+
+    expect(
+      await screen.findByText('pages.initiativeOverview.emailBanner.description')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('pages.initiativeOverview.emailBanner.action')).not.toBeInTheDocument();
   });
 });

@@ -30,6 +30,7 @@ import {
 } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import { useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
 import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
@@ -47,6 +48,7 @@ import { isDisplayableExclusionReason } from './pointOfSaleFeedbackUtils';
 
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
+const CLOSED: StatusEnum = 'CLOSED';
 const ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK = 5000;
 const ALL_INITIATIVES_FILTER = 'ALL_INITIATIVES';
 const NO_INITIATIVE_FILTER = 'NO_INITIATIVE';
@@ -94,6 +96,9 @@ const initialValues: GetPointOfSalesFilters = {
 
 const PosCatalog: React.FC = () => {
   const { setAlert } = useAlert();
+  const { isActionDisabled } = useUserPermissions();
+  const isAssociateDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_ASSOCIATE);
+  const isExcludeDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_EXCLUDE);
   const [selectedStore, setSelectedStore] = useState<PointOfSaleDTO | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedStoreIds, setSelectedStoreIds] = useState<GridSelectionModel>([]);
@@ -158,6 +163,13 @@ const PosCatalog: React.FC = () => {
           value: initiative.initiativeId ?? '',
           label: initiative.initiativeName ?? '',
         })),
+    [initiativesList]
+  );
+
+  const areAllInitiativesClosed = useMemo(
+    () =>
+      Boolean(initiativesList?.length) &&
+      (initiativesList?.every((initiative) => initiative.status === CLOSED) ?? false),
     [initiativesList]
   );
 
@@ -553,6 +565,7 @@ const PosCatalog: React.FC = () => {
             <Button
               variant="outlined"
               color="error"
+              disabled={isExcludeDisabled || areAllInitiativesClosed}
               onClick={() => setIsExcludeModalOpen(true)}
               sx={{ whiteSpace: 'nowrap' }}
             >
@@ -560,6 +573,7 @@ const PosCatalog: React.FC = () => {
             </Button>
             <Button
               variant="contained"
+              disabled={isAssociateDisabled || areAllInitiativesClosed}
               onClick={() => setIsAssociateModalOpen(true)}
               sx={{ whiteSpace: 'nowrap' }}
             >
@@ -614,6 +628,7 @@ const PosCatalog: React.FC = () => {
                 selectedStore={selectedStore}
                 initiativeOptions={initiativeOptions}
                 publishedInitiativeOptions={publishedInitiativeOptions}
+                actionsDisabled={areAllInitiativesClosed}
                 merchantId={parseJwt(storageTokenOps.read())?.merchant_id ?? ''}
               />
             </>
@@ -651,6 +666,7 @@ const PosCatalog: React.FC = () => {
           />
           <PointOfSaleExclusionResultModal
             stores={notExcludedStores}
+            isPartial={exclusionSuccessData !== null}
             onClose={handleExclusionResultModalClose}
           />
         </>

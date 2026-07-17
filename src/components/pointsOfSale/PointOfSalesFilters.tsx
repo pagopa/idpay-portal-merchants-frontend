@@ -56,14 +56,14 @@ const fieldLayout: Record<
   { xs: number; sm: number; md: number; lg: number }
 > = {
   initiative: { xs: 12, sm: 6, md: 4, lg: 2 },
-  type: { xs: 12, sm: 6, md: 4, lg: 2 },
-  city: { xs: 12, sm: 6, md: 4, lg: 2 },
+  type: { xs: 12, sm: 6, md: 4, lg: 2.5 },
+  city: { xs: 12, sm: 6, md: 4, lg: 1.5 },
   address: { xs: 12, sm: 6, md: 4, lg: 2 },
   contactName: { xs: 12, sm: 6, md: 4, lg: 2 },
 };
 
 const selectTextSafeAreaSx = {
-  maxWidth: '75%',
+  maxWidth: '100%',
 };
 
 const selectValueEllipsisSx = {
@@ -72,7 +72,6 @@ const selectValueEllipsisSx = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     display: 'block',
-    paddingRight: '40px !important',
   },
 };
 
@@ -121,7 +120,6 @@ const renderField = (
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
-                  maxWidth: 'calc(100% - 32px)',
                 }}
               >
                 {getInitiativeLabel(selected, initiativeOptions)}

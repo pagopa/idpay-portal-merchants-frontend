@@ -440,6 +440,27 @@ describe('Test suite for initiativeList page', () => {
     expect(screen.getByText('No date initiative')).toBeTruthy();
   });
 
+  test('Render initiative with creationDate formatted in spending period column', () => {
+    store.dispatch(
+      setInitiativesList([
+        {
+          enabled: true,
+          initiativeId: 'with-date-id',
+          initiativeName: 'With date initiative',
+          organizationName: 'With date org',
+          serviceId: 'with-date-service',
+          status: 'PUBLISHED',
+          creationDate: '2024-01-15T00:00:00.000Z',
+        },
+      ] as Array<any>)
+    );
+
+    renderWithContext(<InitiativesList />, store);
+
+    expect(screen.getByText('With date initiative')).toBeTruthy();
+    expect(screen.getByText('15/01/2024')).toBeTruthy();
+  });
+
   test('User navigate to discounts list pege of an initiative', () => {
     const history = createMemoryHistory();
 

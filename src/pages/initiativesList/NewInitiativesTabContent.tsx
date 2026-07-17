@@ -31,6 +31,7 @@ type Props = {
   orderBy: EnhancedTableProps['orderBy'];
   onRequestSort: EnhancedTableProps['onRequestSort'];
   onAdhere: (initiative: { initiativeId: string; initiativeName: string }) => void;
+  isAdhereDisabled?: boolean;
 };
 
 function NewInitiativesTableHead(props: EnhancedTableProps) {
@@ -91,6 +92,7 @@ const NewInitiativesTabContent = ({
   orderBy,
   onRequestSort,
   onAdhere,
+  isAdhereDisabled = false,
 }: Props) => {
   const { t } = useScopedTranslation();
   const [isNotOnboardableModalOpen, setIsNotOnboardableModalOpen] = useState(false);
@@ -209,6 +211,7 @@ const NewInitiativesTabContent = ({
                           <Box
                             component="button"
                             type="button"
+                            disabled={isAdhereDisabled}
                             sx={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -216,10 +219,11 @@ const NewInitiativesTabContent = ({
                               color: 'primary.main',
                               background: 'none',
                               border: 'none',
-                              cursor: 'pointer',
+                              cursor: isAdhereDisabled ? 'not-allowed' : 'pointer',
                               fontWeight: 600,
                               fontSize: '1em',
                               p: 0,
+                              opacity: isAdhereDisabled ? 0.5 : 1,
                             }}
                             onClick={() =>
                               onAdhere({
