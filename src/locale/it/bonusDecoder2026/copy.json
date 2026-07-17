@@ -25,9 +25,14 @@
     "initiativeOverview": {
       "info": {
         "button": "Scopri di più",
-        "description": "Bonus Decoder è il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica ai sensi del Decreto del Ministro delle Imprese e del Made in Italy di concerto con il Ministero dell’Economia e delle Finanze 3 settembre 2025, ammesso alla registrazione dalla Corte dei conti in data 18 settembre 2025, al n. 1146.",
+        "description": "Il Bonus Decoder è un contributo pubblico del Ministero delle Imprese e del Made in Italy che permette ai consumatori di acquistare un decoder DVB-T2 (terrestre) o DVB-S2 (satellitare) con uno sconto diretto applicato dal rivenditore: fino a € 30,00 per il terrestre e fino a € 70,00 per il satellitare, pari al 70% del prezzo di acquisto. Il fondo totale è di € 30.000.000,00.",
         "message": "È il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica.",
         "title": "Cos'è Bonus Decoder?"
+      }
+    },
+    "initiativesList": {
+      "onboardingModal": {
+        "description": "Bonus Decoder è un contributo pubblico del Ministero delle Imprese e del Made in Italy che permette ai consumatori di acquistare un decoder DVB-T2 (terrestre) o DVB-S2 (satellitare) con uno sconto diretto applicato dal rivenditore."
       }
     }
   }

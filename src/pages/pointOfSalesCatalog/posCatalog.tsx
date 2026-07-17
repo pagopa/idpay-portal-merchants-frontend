@@ -48,7 +48,6 @@ import { isDisplayableExclusionReason } from './pointOfSaleFeedbackUtils';
 
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
-const CLOSED: StatusEnum = 'CLOSED';
 const ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK = 5000;
 const ALL_INITIATIVES_FILTER = 'ALL_INITIATIVES';
 const NO_INITIATIVE_FILTER = 'NO_INITIATIVE';
@@ -166,12 +165,7 @@ const PosCatalog: React.FC = () => {
     [initiativesList]
   );
 
-  const areAllInitiativesClosed = useMemo(
-    () =>
-      Boolean(initiativesList?.length) &&
-      (initiativesList?.every((initiative) => initiative.status === CLOSED) ?? false),
-    [initiativesList]
-  );
+  const areInitiativeActionsDisabled = publishedInitiativeOptions.length === 0;
 
   const formik = useFormik<GetPointOfSalesFilters>({
     initialValues,
@@ -565,7 +559,7 @@ const PosCatalog: React.FC = () => {
             <Button
               variant="outlined"
               color="error"
-              disabled={isExcludeDisabled || areAllInitiativesClosed}
+              disabled={isExcludeDisabled || areInitiativeActionsDisabled}
               onClick={() => setIsExcludeModalOpen(true)}
               sx={{ whiteSpace: 'nowrap' }}
             >
@@ -573,7 +567,7 @@ const PosCatalog: React.FC = () => {
             </Button>
             <Button
               variant="contained"
-              disabled={isAssociateDisabled || areAllInitiativesClosed}
+              disabled={isAssociateDisabled || areInitiativeActionsDisabled}
               onClick={() => setIsAssociateModalOpen(true)}
               sx={{ whiteSpace: 'nowrap' }}
             >
@@ -628,7 +622,7 @@ const PosCatalog: React.FC = () => {
                 selectedStore={selectedStore}
                 initiativeOptions={initiativeOptions}
                 publishedInitiativeOptions={publishedInitiativeOptions}
-                actionsDisabled={areAllInitiativesClosed}
+                actionsDisabled={areInitiativeActionsDisabled}
                 merchantId={parseJwt(storageTokenOps.read())?.merchant_id ?? ''}
               />
             </>

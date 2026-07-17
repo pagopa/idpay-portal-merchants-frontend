@@ -29,7 +29,7 @@ describe('InitiativeOnboardingModal', () => {
     );
 
     expect(
-      screen.getByText(bonusDecoder2026Copy.pages.initiativeOverview.info.description)
+      screen.getByText(bonusDecoder2026Copy.pages.initiativesList.onboardingModal.description)
     ).toBeTruthy();
   });
 
