@@ -577,6 +577,7 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
       />
       <PointOfSaleExclusionResultModal
         stores={notExcludedStores}
+        isPartial={exclusionSuccessData !== null}
         onClose={handleExclusionResultModalClose}
       />
     </>

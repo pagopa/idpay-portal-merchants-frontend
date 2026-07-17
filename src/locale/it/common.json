@@ -156,7 +156,7 @@
         "description_one": "Il punto vendita selezionato verrà escluso dall'iniziativa selezionata.",
         "description_other": "I punti vendita selezionati verranno esclusi dall'iniziativa selezionata.",
         "initiativeLabel": "Iniziativa",
-        "infoBanner": "I punti vendita resteranno disponibili nella pagina dedicata e potranno essere riassociati in qualsiasi momento tramite il pulsante \"Associa\"."
+        "infoBanner": "I punti vendita resteranno disponibili nella pagina dedicata e potranno essere riassegnati in qualsiasi momento tramite il pulsante \"Associa\"."
       },
       "alreadyAssociatedModal": {
         "title_one": "Punto vendita già associato",

@@ -651,6 +651,7 @@ const PosCatalog: React.FC = () => {
           />
           <PointOfSaleExclusionResultModal
             stores={notExcludedStores}
+            isPartial={exclusionSuccessData !== null}
             onClose={handleExclusionResultModalClose}
           />
         </>
