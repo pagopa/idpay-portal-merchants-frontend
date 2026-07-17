@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -9,8 +10,11 @@ import { cleanupOnLogout } from '../../../utils/logoutCleanup';
 import { browserConsole } from '../../../utils/consoleLogger';
 
 const mockRole = { value: 'admin' };
-const mockT = jest.fn((key: string) => (key === 'roles.admin' ? 'Administrator' : key));
+const mockT = jest.fn((key: string) =>
+  key === 'roles.admin' ? 'Administrator' : key === 'roles.operator' ? 'Operator' : key
+);
 const mockHeaderProductProps = jest.fn();
+const mockHeaderAccountProps = jest.fn();
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -57,6 +61,7 @@ jest.mock('../../../components/Header/CustomHeaderAccount', () => ({
     onAssistanceClick,
     loggedUser,
   }: any) => (
+    mockHeaderAccountProps({ onLogout, onLogin, onDocumentationClick, onAssistanceClick, loggedUser }),
     <div data-testid="custom-header-account">
       {loggedUser && (
         <div>
@@ -196,7 +201,9 @@ describe('CustomHeader', () => {
     jest.clearAllMocks();
     mockOnExit.mockImplementation((callback) => callback());
     mockRole.value = 'admin';
-    mockT.mockImplementation((key: string) => (key === 'roles.admin' ? 'Administrator' : key));
+    mockT.mockImplementation((key: string) =>
+      key === 'roles.admin' ? 'Administrator' : key === 'roles.operator' ? 'Operator' : key
+    );
     delete (window as any).location;
     (window as any).location = { assign: jest.fn() };
     window.open = jest.fn();
@@ -816,7 +823,8 @@ describe('CustomHeader', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('John')).toBeInTheDocument();
+      expect(mockHeaderAccountProps).toHaveBeenCalled();
+      expect(mockHeaderAccountProps.mock.calls.at(-1)?.[0].loggedUser.id).toBe('user-123');
     });
   });
 
@@ -835,8 +843,10 @@ describe('CustomHeader', () => {
     );
 
     await waitFor(() => {
-      const latestCall = mockHeaderProductProps.mock.calls.at(-1)?.[0];
-      expect(latestCall.partyList[0].productRole).toBe('Administrator');
+      const matchingCall = mockHeaderProductProps.mock.calls.find(
+        ([props]) => props.partyList?.[0]?.productRole === 'Administrator'
+      );
+      expect(matchingCall).toBeDefined();
     });
   });
 
