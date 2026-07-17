@@ -421,6 +421,21 @@ describe('<PosCatalog />', () => {
     expect(drawerProps.publishedInitiativeOptions).toEqual([
       { value: 'initiative-1', label: 'Initiative One' },
     ]);
+    expect(drawerProps.actionsDisabled).toBe(false);
+  });
+
+  it('disables catalog and drawer actions when there are no onboarded initiatives', () => {
+    mockUseAppSelector.mockReturnValue([]);
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('row-action-store-1'));
+    fireEvent.click(screen.getByTestId('selection-button'));
+
+    expect(screen.getByText('pages.posCatalog.actions.exclude (2)')).toBeDisabled();
+    expect(screen.getByText('pages.posCatalog.actions.associate (2)')).toBeDisabled();
+    expect(drawerProps.actionsDisabled).toBe(true);
+    expect(drawerProps.publishedInitiativeOptions).toEqual([]);
   });
 
   it('associates selected stores to the selected initiative on confirm', async () => {
