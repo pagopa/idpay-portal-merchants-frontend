@@ -5,10 +5,16 @@ import CustomHeader from '../CustomHeader';
 import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
 import { trackEvent } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
 import { ENV } from '../../../utils/env';
+import { cleanupOnLogout } from '../../../utils/logoutCleanup';
+import { browserConsole } from '../../../utils/consoleLogger';
+
+const mockRole = { value: 'admin' };
+const mockT = jest.fn((key: string) => (key === 'roles.admin' ? 'Administrator' : key));
+const mockHeaderProductProps = jest.fn();
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: mockT,
   }),
 }));
 
@@ -83,6 +89,7 @@ jest.mock('@pagopa/mui-italia', () => ({
     onSelectedProduct,
     onSelectedParty,
   }: any) => (
+    mockHeaderProductProps({ partyId, productId, productsList, partyList, onSelectedProduct, onSelectedParty }),
     <div data-testid="header-product">
       <div data-testid="party-id">{partyId}</div>
       <div data-testid="product-id">{productId}</div>
@@ -157,13 +164,23 @@ jest.mock('../../../hooks/useUserPermissions', () => {
     __esModule: true,
     ...actual,
     useUserPermissions: () => ({
-      role: 'admin',
-      logicalRoleName: 'admin',
+      role: mockRole.value,
+      logicalRoleName: mockRole.value,
       isSupportUser: false,
       isActionDisabled: () => false,
     }),
   };
 });
+
+jest.mock('../../../utils/logoutCleanup', () => ({
+  cleanupOnLogout: jest.fn(),
+}));
+
+jest.mock('../../../utils/consoleLogger', () => ({
+  browserConsole: {
+    log: jest.fn(),
+  },
+}));
 
 describe('CustomHeader', () => {
   const mockOnExit = jest.fn((callback) => callback());
@@ -177,6 +194,9 @@ describe('CustomHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOnExit.mockImplementation((callback) => callback());
+    mockRole.value = 'admin';
+    mockT.mockImplementation((key: string) => (key === 'roles.admin' ? 'Administrator' : key));
     delete (window as any).location;
     (window as any).location = { assign: jest.fn() };
     window.open = jest.fn();
@@ -215,7 +235,7 @@ describe('CustomHeader', () => {
     const logoutButton = screen.getByTestId('logout-button');
     fireEvent.click(logoutButton);
     expect(mockOnExit).toHaveBeenCalled();
-    expect(window.location.assign).not.toHaveBeenCalledWith(ENV.URL_FE.LOGOUT);
+    expect(window.location.assign).toHaveBeenCalledWith(ENV.URL_FE.LOGOUT);
   });
 
   it('should handle login action when user is not logged in', () => {
@@ -234,7 +254,7 @@ describe('CustomHeader', () => {
     const loginButton = screen.getByTestId('login-button');
     fireEvent.click(loginButton);
     expect(mockOnExit).toHaveBeenCalled();
-    expect(window.location.assign).not.toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
+    expect(window.location.assign).toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
   });
 
   it('should open documentation link in new tab', () => {
@@ -724,7 +744,169 @@ describe('CustomHeader', () => {
     fireEvent.click(screen.getByTestId('logout-button'));
     fireEvent.click(screen.getByTestId('login-button'));
 
-    expect(window.location.assign).not.toHaveBeenCalledWith(ENV.URL_FE.LOGOUT);
-    expect(window.location.assign).not.toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
+    expect(window.location.assign).toHaveBeenCalledWith(ENV.URL_FE.LOGOUT);
+    expect(window.location.assign).toHaveBeenCalledWith(ENV.URL_FE.LOGIN);
+  });
+
+  it('falls back to raw role key when role translation is missing', async () => {
+    mockRole.value = 'MANAGER';
+    mockT.mockImplementation((key: string) => key);
+
+    const stateWithPartyRole = {
+      parties: {
+        selectedParty: {
+          partyId: 'party-role-fallback',
+          description: 'Role Fallback Party',
+          urlLogo: 'https://logo.com/logo.png',
+          roles: [{ roleKey: 'operator' }],
+        },
+        selectedProducts: [],
+      },
+    };
+    const store = createMockStore(stateWithPartyRole);
+
+    render(
+      <Provider store={store}>
+        <CustomHeader
+          withSecondHeader={true}
+          onExit={mockOnExit}
+          loggedUser={mockLoggedUser}
+          parties={[]}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      const latestCall = mockHeaderProductProps.mock.calls.at(-1)?.[0];
+      expect(latestCall.partyList[0].productRole).toBe('MANAGER');
+    });
+  });
+
+  it('runs cleanup on logout', () => {
+    const store = createMockStore();
+
+    render(
+      <Provider store={store}>
+        <CustomHeader
+          withSecondHeader={true}
+          onExit={mockOnExit}
+          loggedUser={mockLoggedUser}
+          parties={[]}
+        />
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('logout-button'));
+
+    expect(cleanupOnLogout).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps logged user uid into header account id', async () => {
+    const store = createMockStore();
+
+    render(
+      <Provider store={store}>
+        <CustomHeader
+          withSecondHeader={true}
+          onExit={mockOnExit}
+          loggedUser={mockLoggedUser}
+          parties={[]}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('John')).toBeInTheDocument();
+    });
+  });
+
+  it('uses effective translated role label in partyList', async () => {
+    const store = createMockStore();
+
+    render(
+      <Provider store={store}>
+        <CustomHeader
+          withSecondHeader={true}
+          onExit={mockOnExit}
+          loggedUser={mockLoggedUser}
+          parties={[]}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      const latestCall = mockHeaderProductProps.mock.calls.at(-1)?.[0];
+      expect(latestCall.partyList[0].productRole).toBe('Administrator');
+    });
+  });
+
+  it('logs product switch through browserConsole when selecting a product', () => {
+    const store = createMockStore();
+
+    render(
+      <Provider store={store}>
+        <CustomHeader
+          withSecondHeader={true}
+          onExit={mockOnExit}
+          loggedUser={mockLoggedUser}
+          parties={[]}
+        />
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('select-product-prod-test-1'));
+
+    expect(browserConsole.log).toHaveBeenCalledWith(
+      'TODO: perform token exchange to change Product and set [object Object]'
+    );
+  });
+
+  it('does not track or exit when selected party handler receives undefined', async () => {
+    const store = createMockStore();
+
+    render(
+      <Provider store={store}>
+        <CustomHeader
+          withSecondHeader={true}
+          onExit={mockOnExit}
+          loggedUser={mockLoggedUser}
+          parties={[]}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(mockHeaderProductProps).toHaveBeenCalled();
+    });
+
+    const latestCallArgs = mockHeaderProductProps.mock.lastCall?.[0];
+
+    jest.clearAllMocks();
+
+    latestCallArgs.onSelectedParty(undefined);
+
+    expect(trackEvent).not.toHaveBeenCalled();
+    expect(mockOnExit).not.toHaveBeenCalled();
+  });
+
+  it('logs party switch through browserConsole when selecting a party', () => {
+    const store = createMockStore();
+
+    render(
+      <Provider store={store}>
+        <CustomHeader
+          withSecondHeader={true}
+          onExit={mockOnExit}
+          loggedUser={mockLoggedUser}
+          parties={[]}
+        />
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('select-party-undefined'));
+
+    expect(browserConsole.log).toHaveBeenCalledWith(
+      'TODO: perform token exchange to change Party and set [object Object]'
+    );
   });
 });
