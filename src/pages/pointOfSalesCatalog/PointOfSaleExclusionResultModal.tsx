@@ -13,6 +13,7 @@ export type NotExcludedPointOfSale = NotExcludedPointOfSaleDTO & PointOfSaleFeed
 
 type Props = {
   stores: Array<NotExcludedPointOfSale>;
+  isPartial: boolean;
   onClose: () => void;
 };
 
@@ -37,6 +38,7 @@ const reasonChipSx = (reason: PosOnboardingExclusionRejectionReason) => {
 
 const PointOfSaleExclusionResultModal: React.FC<Props> = ({
   stores,
+  isPartial,
   onClose,
 }) => {
   const { t } = useScopedTranslation();
@@ -45,7 +47,9 @@ const PointOfSaleExclusionResultModal: React.FC<Props> = ({
     return null;
   }
 
-  const titleKey = 'pages.posCatalog.exclusionResultModal.notCompletedTitle';
+  const titleKey = `pages.posCatalog.exclusionResultModal.${
+    isPartial ? 'partialTitle' : 'notCompletedTitle'
+  }`;
   const descriptionKey = 'pages.posCatalog.exclusionResultModal.notCompletedDescription';
 
   return (
@@ -95,7 +99,7 @@ const PointOfSaleExclusionResultModal: React.FC<Props> = ({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {getPointOfSaleFeedbackLabel(pointOfSale, { includeCity: false })}
+                {getPointOfSaleFeedbackLabel(pointOfSale)}
               </Typography>
               <Chip
                 size="small"
