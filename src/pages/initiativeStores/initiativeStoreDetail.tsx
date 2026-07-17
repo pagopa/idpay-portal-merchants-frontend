@@ -27,6 +27,7 @@ import { browserConsole } from '../../utils/consoleLogger';
 import ROUTES from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
 import { useInitiativeConfig } from '../../hooks/useInitiativeConfig';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
@@ -61,6 +62,8 @@ const InitiativeStoreDetail = () => {
   const { setStoreId } = useStore();
   const { defaultConfig } = useInitiativeConfig();
   const emailRegex = new RegExp(defaultConfig.regex.email);
+  const { isActionDisabled } = useUserPermissions();
+  const isEditReferentDisabled = isActionDisabled(PERMISSION_KEYS.STORE_DETAIL_EDIT_REFERENT);
 
   const areFieldsEqual = useMemo(() => storeDetail?.contactName !== contactNameModal.trim() ||
     storeDetail?.contactSurname !== contactSurnameModal.trim() ||
@@ -438,6 +441,7 @@ const InitiativeStoreDetail = () => {
                 <Grid item xs={3} sx={{ minWidth: 0 }}>
                   <Box display="flex" flexDirection="row" justifyContent="flex-end">
                     <ButtonNaked
+                      disabled={isEditReferentDisabled}
                       onClick={() => {
                         setModalIsOpen(true);
                         // resetModalFieldsAndErrors();

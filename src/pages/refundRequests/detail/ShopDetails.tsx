@@ -40,18 +40,13 @@ import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { useAlert } from '../../../hooks/useAlert';
 import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../../utils/consoleLogger';
-
-type StatusEnum = RewardBatchDTO['status'];
-const ENABLED_DOWNLOAD_STATUSES: Array<StatusEnum> = [
-  'APPROVED',
-  'PENDING_REFUND',
-  'REFUNDED',
-  'NOT_REFUNDED',
-];
-const APPROVING_STATUS: StatusEnum = 'APPROVING';
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/data-contracts';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/data-contracts';
+import { ENABLED_DOWNLOAD_STATUSES } from '../../../utils/constants';
 import { ShopCard } from './ShopCard';
+
+type StatusEnum = RewardBatchDTO['status'];
+const APPROVING_STATUS: StatusEnum = 'APPROVING';
 
 const filterByStatusOptionsList = Object.values(RewardBatchTrxStatus).filter(
   (el) => el !== RewardBatchTrxStatus.TO_CHECK

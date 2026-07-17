@@ -21,6 +21,7 @@ import {
 import { safeFormatDate } from '../../utils/formatUtils';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useAlert } from '../../hooks/useAlert';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import AssociateSelectedPosModal from './AssociateSelectedPosModal';
 import AlreadyAssociatedPosModal, {
   AlreadyAssociatedPointOfSale,
@@ -87,6 +88,9 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
 }) => {
   const { t } = useScopedTranslation();
   const { setAlert } = useAlert();
+  const { isActionDisabled } = useUserPermissions();
+  const isAssociateDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_ASSOCIATE);
+  const isExcludeDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_EXCLUDE);
   const getDisplayValue = (value?: string) =>
     value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value;
   const ellipsisSx = {
@@ -392,14 +396,14 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
             dataTestId: 'exclude-store-button',
             variant: 'outlined',
             color: 'error',
-            disabled: actionsDisabled,
+            disabled: isExcludeDisabled || actionsDisabled,
             onClick: () => setIsExcludeModalOpen(true),
           },
           {
             title: t('pages.posCatalog.actions.associate'),
             dataTestId: 'associate-store-button',
             variant: 'contained',
-            disabled: actionsDisabled,
+            disabled: isAssociateDisabled || actionsDisabled,
             onClick: () => setIsAssociateModalOpen(true),
           },
         ]}

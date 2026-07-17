@@ -12,6 +12,7 @@ const MERCHANT_TRANSACTIONS: ReportTypeEnum = 'MERCHANT_TRANSACTIONS';
 import { MIN_START_DATE } from '../../utils/constants';
 import { ReportDTO } from '../../api/generated/merchants/data-contracts';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 
 type ReportStatusEnum = ReportDTO['reportStatus'];
 const FAILED: ReportStatusEnum = 'FAILED';
@@ -34,6 +35,8 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
   const { t } = useScopedTranslation();
   const { initiative_id } = useParams<RouteParams>();
   const requestIdRef = useRef<number>(0);
+  const { isActionDisabled } = useUserPermissions();
+  const isGenerateReportDisabled = isActionDisabled(PERMISSION_KEYS.REPORT_GENERATE);
 
   const yesterday = useMemo(() => dayjs().subtract(1, 'day').startOf('day'), []);
   const yesterdayStr = useMemo(() => yesterday.format('YYYY-MM-DD'), [yesterday]);
@@ -179,7 +182,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
 
           <Button
             variant="contained"
-            disabled={formik.isSubmitting}
+            disabled={formik.isSubmitting || isGenerateReportDisabled}
             onClick={useCallback(() => formik.handleSubmit(), [formik])}
           >
             {t('pages.reportExport.form.submit')}

@@ -59,7 +59,8 @@
     "assistanceSubject": "Inserisci l’argomento della tua richiesta"
   },
   "roles": {
-    "admin": "Amministratore"
+    "admin": "Amministratore",
+    "support": "Assistenza"
   },
   "enums": {
     "discountStatus": {
