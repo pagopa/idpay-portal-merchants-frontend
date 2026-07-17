@@ -49,6 +49,38 @@ import { isDisplayableExclusionReason } from './pointOfSaleFeedbackUtils';
 type StatusEnum = InitiativeDTO['status'];
 const PUBLISHED: StatusEnum = 'PUBLISHED';
 const ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK = 5000;
+const ALL_INITIATIVES_FILTER = 'ALL_INITIATIVES';
+const NO_INITIATIVE_FILTER = 'NO_INITIATIVE';
+type InitiativeFilter = typeof ALL_INITIATIVES_FILTER | typeof NO_INITIATIVE_FILTER;
+
+const INITIATIVE_FILTER_VALUES: Array<InitiativeFilter> = [
+  ALL_INITIATIVES_FILTER,
+  NO_INITIATIVE_FILTER,
+];
+
+const isInitiativeFilter = (initiative?: string): initiative is InitiativeFilter =>
+  Boolean(initiative) && INITIATIVE_FILTER_VALUES.includes(initiative as InitiativeFilter);
+
+const getInitiativeCatalogQuery = (
+  initiative?: string
+): {
+  initiativeId?: string;
+  initiativeFilter?: InitiativeFilter;
+} => {
+  if (!initiative) {
+    return {};
+  }
+
+  if (isInitiativeFilter(initiative)) {
+    return {
+      initiativeFilter: initiative,
+    };
+  }
+
+  return {
+    initiativeId: initiative,
+  };
+};
 
 const initialValues: GetPointOfSalesFilters = {
   initiative: '',
@@ -165,7 +197,7 @@ const PosCatalog: React.FC = () => {
     }
 
     return getMerchantPointOfSalesCatalog(merchantId, {
-      initiativeId: filters.initiative,
+      ...getInitiativeCatalogQuery(filters.initiative),
       type: filters.type,
       city: filters.city,
       address: filters.address,
