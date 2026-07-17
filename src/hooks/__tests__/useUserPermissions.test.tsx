@@ -70,4 +70,14 @@ describe('useUserPermissions', () => {
     expect(result.current.isActionDisabled(PERMISSION_KEYS.OVERVIEW_EDIT_EMAIL)).toBe(false);
   });
 
+  test('should resolve disabled actions for lowercase support role', () => {
+    mockedUseIDPayUser.mockReturnValue(buildUser('support'));
+
+    const { result } = renderHook(() => useUserPermissions());
+
+    expect(result.current.role).toBe('support');
+    expect(result.current.logicalRoleName).toBe('Utenza di supporto (sola lettura)');
+    expect(result.current.isSupportUser).toBe(true);
+    expect(result.current.isActionDisabled(PERMISSION_KEYS.TRANSACTION_REVERSE)).toBe(true);
+  });
 });
