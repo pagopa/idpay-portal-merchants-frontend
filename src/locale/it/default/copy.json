@@ -2,7 +2,7 @@
   "commons": {
     "title": "Default Bonus"
   },
-  "pages" : {
+  "pages": {
     "tos": {
       "and": "e l’",
       "backHome": "Torna alla home",
@@ -19,6 +19,11 @@
         "description": "Bonus Default è il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica ai sensi del Decreto del Ministro delle Imprese e del Made in Italy di concerto con il Ministero dell’Economia e delle Finanze 3 settembre 2025, ammesso alla registrazione dalla Corte dei conti in data 18 settembre 2025, al n. 1146.",
         "message": "È il contributo, erogato dal Ministero delle Imprese e del Made in Italy, per incentivare la sostituzione di un elettrodomestico con un modello ad alta efficienza energetica e promuovere la sostenibilità e la transizione energetica.",
         "title": "Cos'è Bonus Default?"
+      }
+    },
+    "initiativesList": {
+      "onboardingModal": {
+        "description": "Stai per aderire al bonus selezionato. Clicca su conferma per completare l'adesione."
       }
     }
   }
