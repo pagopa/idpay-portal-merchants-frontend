@@ -1,6 +1,6 @@
 import React from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
-import { Box, Button, Chip, DialogContent, Stack, Typography } from '@mui/material';
+import { Box, Button, Chip, DialogContent, Stack, Tooltip, Typography } from '@mui/material';
 import {
   NotExcludedPointOfSaleDTO,
   PosOnboardingExclusionRejectionReason,
@@ -73,42 +73,48 @@ const PointOfSaleExclusionResultModal: React.FC<Props> = ({
     >
       <DialogContent sx={{ p: 3.5, pb: 0 }}>
         <Box sx={{ maxHeight: 150, overflowY: 'auto', overflowX: 'hidden', pr: 1 }}>
-          {stores.map((pointOfSale) => (
-            <Stack
-              key={`${pointOfSale.pointOfSaleId}-${pointOfSale.reason}`}
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              gap={2}
-              sx={{
-                py: 1.35,
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                '&:last-of-type': {
-                  borderBottom: 'none',
-                },
-              }}
-            >
-              <Typography
-                variant="body2"
-                noWrap
+          {stores.map((pointOfSale) => {
+            const label = getPointOfSaleFeedbackLabel(pointOfSale);
+
+            return (
+              <Stack
+                key={`${pointOfSale.pointOfSaleId}-${pointOfSale.reason}`}
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                gap={2}
                 sx={{
-                  display: 'block',
-                  minWidth: 0,
-                  fontWeight: 700,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  py: 1.35,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  '&:last-of-type': {
+                    borderBottom: 'none',
+                  },
                 }}
               >
-                {getPointOfSaleFeedbackLabel(pointOfSale)}
-              </Typography>
-              <Chip
-                size="small"
-                variant="filled"
-                label={t(`pages.posCatalog.exclusionResultModal.reasons.${pointOfSale.reason}`)}
-                sx={reasonChipSx(pointOfSale.reason)}
-              />
-            </Stack>
-          ))}
+                <Tooltip title={label} placement="bottom">
+                  <Typography
+                    variant="body2"
+                    noWrap
+                    sx={{
+                      display: 'block',
+                      minWidth: 0,
+                      fontWeight: 700,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {label}
+                  </Typography>
+                </Tooltip>
+                <Chip
+                  size="small"
+                  variant="filled"
+                  label={t(`pages.posCatalog.exclusionResultModal.reasons.${pointOfSale.reason}`)}
+                  sx={reasonChipSx(pointOfSale.reason)}
+                />
+              </Stack>
+            );
+          })}
         </Box>
       </DialogContent>
     </DialogComponent>

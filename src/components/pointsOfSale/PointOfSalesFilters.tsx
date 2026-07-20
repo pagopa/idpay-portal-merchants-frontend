@@ -56,11 +56,13 @@ const fieldLayout: Record<
   { xs: number; sm: number; md: number; lg: number }
 > = {
   initiative: { xs: 12, sm: 6, md: 4, lg: 2 },
-  type: { xs: 12, sm: 6, md: 4, lg: 2.5 },
+  type: { xs: 12, sm: 6, md: 4, lg: 2.8 },
   city: { xs: 12, sm: 6, md: 4, lg: 1.5 },
   address: { xs: 12, sm: 6, md: 4, lg: 2 },
-  contactName: { xs: 12, sm: 6, md: 4, lg: 2 },
+  contactName: { xs: 12, sm: 6, md: 4, lg: 1.7 },
 };
+
+const INITIATIVE_STORES_TYPE_LG_WIDTH = 3.5;
 
 const selectTextSafeAreaSx = {
   maxWidth: '100%',
@@ -80,6 +82,11 @@ const selectLabelEllipsisSx = {
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   ...selectTextSafeAreaSx,
+};
+
+const posTypeLabelSx = {
+  ...selectLabelEllipsisSx,
+  maxWidth: { xs: '100%', lg: 'calc(100% - 40px)' },
 };
 
 const menuItemLabelEllipsisSx = {
@@ -141,7 +148,7 @@ const renderField = (
     case 'type':
       return (
         <FormControl fullWidth size="small">
-          <InputLabel id="pos-type-label" sx={selectLabelEllipsisSx}>
+          <InputLabel id="pos-type-label" sx={posTypeLabelSx}>
             {t('pages.initiativeStores.pointOfSaleType')}
           </InputLabel>
           <Select
@@ -210,6 +217,7 @@ const PointOfSalesFilters: React.FC<PointOfSalesFiltersProps> = ({
   initiativeOptions = [],
 }) => {
   const selectInitiativeOptions = getSelectInitiativeOptions(t, initiativeOptions);
+  const hasInitiativeFilter = fields.includes('initiative');
 
   return (
     <FiltersForm
@@ -218,11 +226,22 @@ const PointOfSalesFilters: React.FC<PointOfSalesFiltersProps> = ({
       formik={formik}
       filtersAppliedOnce={filtersAppliedOnce}
     >
-      {fields.map((field) => (
-        <Grid key={field} item {...fieldLayout[field]}>
-          {renderField(field, formik, t, selectInitiativeOptions)}
-        </Grid>
-      ))}
+      {fields.map((field) => {
+        const layout = fieldLayout[field];
+
+        if (!layout) {
+          return null;
+        }
+
+        const lg =
+          field === 'type' && !hasInitiativeFilter ? INITIATIVE_STORES_TYPE_LG_WIDTH : layout.lg;
+
+        return (
+          <Grid key={field} item {...layout} lg={lg}>
+            {renderField(field, formik, t, selectInitiativeOptions)}
+          </Grid>
+        );
+      })}
     </FiltersForm>
   );
 };

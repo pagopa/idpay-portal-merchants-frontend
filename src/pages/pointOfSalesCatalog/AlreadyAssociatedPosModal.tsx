@@ -1,6 +1,6 @@
 import React from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
-import { Box, Button, DialogContent, Typography } from '@mui/material';
+import { Box, Button, DialogContent, Tooltip, Typography } from '@mui/material';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import DialogComponent from '../../components/Dialog/DialogComponent';
 import { getPointOfSaleFeedbackLabel, PointOfSaleFeedbackItem } from './pointOfSaleFeedbackUtils';
@@ -61,31 +61,37 @@ const AlreadyAssociatedPosModal: React.FC<Props> = ({
       {showStores ? (
         <DialogContent sx={{ p: 3.5, pb: 0 }}>
           <Box sx={{ maxHeight: 150, overflowY: 'auto', overflowX: 'hidden', pr: 1 }}>
-            {stores.map((pointOfSale) => (
-              <Box
-                key={pointOfSale.pointOfSaleId}
-                sx={{
-                  py: 1.35,
-                  borderBottom: `1px solid ${theme.palette.divider}`,
-                  '&:last-of-type': {
-                    borderBottom: 'none',
-                  },
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  noWrap
+            {stores.map((pointOfSale) => {
+              const label = getPointOfSaleFeedbackLabel(pointOfSale);
+
+              return (
+                <Box
+                  key={pointOfSale.pointOfSaleId}
                   sx={{
-                    display: 'block',
-                    fontWeight: 700,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
+                    py: 1.35,
+                    borderBottom: `1px solid ${theme.palette.divider}`,
+                    '&:last-of-type': {
+                      borderBottom: 'none',
+                    },
                   }}
                 >
-                  {getPointOfSaleFeedbackLabel(pointOfSale)}
-                </Typography>
-              </Box>
-            ))}
+                  <Tooltip title={label} placement="bottom">
+                    <Typography
+                      variant="body2"
+                      noWrap
+                      sx={{
+                        display: 'block',
+                        fontWeight: 700,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {label}
+                    </Typography>
+                  </Tooltip>
+                </Box>
+              );
+            })}
           </Box>
         </DialogContent>
       ) : undefined}

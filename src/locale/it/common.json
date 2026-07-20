@@ -160,12 +160,12 @@
         "infoBanner": "I punti vendita resteranno disponibili nella pagina dedicata e potranno essere riassegnati in qualsiasi momento tramite il pulsante \"Associa\"."
       },
       "alreadyAssociatedModal": {
-        "title_one": "Punto vendita già associato",
-        "title_other": "Punti vendita già associati",
+        "title_one": "Il punto vendita è già associato",
+        "title_other": "I punti vendita sono già associati",
         "description_one": "Il seguente punto vendita selezionato è già associato all'iniziativa scelta.",
         "description_other": "I seguenti punti vendita selezionati sono già associati all'iniziativa scelta.",
-        "allAlreadyAssociatedTitle_one": "Punto vendita già associato",
-        "allAlreadyAssociatedTitle_other": "Punti vendita già associati",
+        "allAlreadyAssociatedTitle_one": "Il punto vendita è già associato",
+        "allAlreadyAssociatedTitle_other": "Tutti i punti vendita sono già associati",
         "allAlreadyAssociatedDescription_one": "Il punto vendita selezionato è già associato all'iniziativa {{initiativeName}}.",
         "allAlreadyAssociatedDescription_other": "I punti vendita selezionati sono già associati all'iniziativa {{initiativeName}}."
       },
