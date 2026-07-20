@@ -1,4 +1,5 @@
 export interface GetPointOfSalesFilters {
+  associated?: 'YES' | 'NO';
   initiative?: string;
   type?: 'PHYSICAL' | 'ONLINE';
   city?: string;

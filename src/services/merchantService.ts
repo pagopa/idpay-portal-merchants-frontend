@@ -37,19 +37,6 @@ type GetPointOfSalesCatalogFilters = Omit<GetPointOfSalesFilters, 'initiative'> 
   initiativeFilter?: 'ALL_INITIATIVES' | 'NO_INITIATIVE';
 };
 
-const normalizeCatalogInitiativeFilters = (
-  filters: GetPointOfSalesCatalogFilters
-): GetPointOfSalesCatalogFilters => {
-  if (!filters.initiativeId) {
-    return filters;
-  }
-
-  return {
-    ...filters,
-    initiativeFilter: undefined,
-  };
-};
-
 const normalizePointOfSaleError = (
   errorData?: ValidationErrorDTO | PointOfSaleErrorDTO
 ): ValidationErrorDTO | PointOfSaleErrorDTO | undefined => {
@@ -226,11 +213,9 @@ export const getMerchantPointOfSalesCatalog = async (
   pageSize: number;
   totalElements: number;
 }> => {
-  const normalizedFilters = normalizeCatalogInitiativeFilters(filters);
-
   const response = await getMerchantsApi().getMerchantPointOfSalesCatalog(
     merchantId,
-    normalizedFilters as unknown as Record<string, unknown>
+    filters as unknown as Record<string, unknown>
   );
 
   return {

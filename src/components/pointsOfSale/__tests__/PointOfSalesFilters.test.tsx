@@ -1,4 +1,6 @@
+/// <reference types="@testing-library/jest-dom" />
 import React from 'react';
+import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useFormik } from 'formik';
 import PointOfSalesFilters, { PointOfSalesFilterField } from '../PointOfSalesFilters';
@@ -228,5 +230,44 @@ describe('PointOfSalesFilters', () => {
 
     expect(screen.getByLabelText('pages.initiativeStores.city')).toBeInTheDocument();
     expect(screen.getAllByRole('textbox')).toHaveLength(1);
+  });
+
+  test('renders associated filter and disables initiative when requested', () => {
+    const formik = {
+      values: {
+        associated: 'NO',
+        initiative: '',
+        type: undefined,
+        city: '',
+        address: '',
+        contactName: '',
+        sort: 'asc',
+      },
+      handleChange: jest.fn(),
+      handleBlur: jest.fn(),
+    } as any;
+
+    render(
+      <PointOfSalesFilters
+        formik={formik}
+        filtersAppliedOnce={false}
+        onFiltersApplied={jest.fn()}
+        onFiltersReset={jest.fn()}
+        t={(key: string) => key}
+        fields={['associated', 'initiative']}
+        disableInitiativeFilter
+        includeNoInitiativeOption={false}
+      />
+    );
+
+    expect(screen.getByLabelText('pages.posCatalog.filters.associated')).toBeInTheDocument();
+
+    const initiativeSelect = screen.getByLabelText('Iniziativa');
+    expect(initiativeSelect).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.mouseDown(initiativeSelect);
+    expect(
+      screen.queryByRole('option', { name: 'enums.initiativesFilters.noInitiative' })
+    ).not.toBeInTheDocument();
   });
 });
