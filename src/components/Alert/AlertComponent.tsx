@@ -49,11 +49,13 @@ const AlertComponent = ({
     <Slide direction="left" in={isOpen} mountOnEnter unmountOnExit>
       <Box
         sx={{
-          position: 'fixed',
-          right: 24,
-          bottom: 24,
+          display: 'flex',
+          height: '100%',
+          alignItems: 'flex-end',
+          justifyContent: 'flex-end',
+          position: 'sticky',
+          bottom: '128px',
           zIndex: '1150',
-          pointerEvents: 'none',
           ...containerStyle,
         }}
       >
@@ -63,14 +65,15 @@ const AlertComponent = ({
           severity={severity}
           icon={severity && severityMap[severity]}
           sx={{
+            position: 'absolute',
+            bottom: '-108px',
             backgroundColor: 'white',
             width: 'auto',
             maxWidth: '400px',
             minWidth: '300px',
             boxShadow: 3,
             borderRadius: 1,
-            pointerEvents: 'auto',
-            ...contentStyle,
+            ...contentStyle
           }}
         >
           {title ? <AlertTitle>{title}</AlertTitle> : null}
