@@ -36,8 +36,18 @@ const AlreadyAssociatedPosModal: React.FC<Props> = ({
       dataTestId="already-associated-pos-modal"
       onClose={onClose}
       closeLabel={t('actions.close')}
-      title={t('pages.posCatalog.alreadyAssociatedModal.title', { count: stores.length })}
-      description={t('pages.posCatalog.alreadyAssociatedModal.description', { count: stores.length, initiativeName })}
+      title={t(
+        showStores
+          ? 'pages.posCatalog.alreadyAssociatedModal.title'
+          : 'pages.posCatalog.alreadyAssociatedModal.allAlreadyAssociatedTitle',
+        { count: stores.length }
+      )}
+      description={t(
+        showStores
+          ? 'pages.posCatalog.alreadyAssociatedModal.description'
+          : 'pages.posCatalog.alreadyAssociatedModal.allAlreadyAssociatedDescription',
+        { count: stores.length, initiativeName }
+      )}
       paperSx={{
         width: { xs: 'calc(100% - 32px)', sm: '40%' },
       }}
