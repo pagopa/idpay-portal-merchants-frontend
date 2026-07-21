@@ -132,7 +132,7 @@
       }
     },
     "posCatalog": {
-      "title": "Catalogo punti vendita",
+      "title": "Tutti i punti vendita",
       "subtitle": "Qui trovi tutti i punti vendita censiti durante le iniziative.",
       "noData": "Non ci sono punti vendita, aggiungili per iniziare.",
       "filters": {
@@ -144,8 +144,8 @@
         "associate": "Associa",
         "exclude": "Escludi"
       },
-      "associateSuccess_one": "È stato associato {{count}} punto vendita a {{initiativeName}}.",
-      "associateSuccess_other": "Sono stati associati {{count}} punti vendita a {{initiativeName}}.",
+      "associateSuccess_one": "È stato incluso {{count}} punto vendita in {{initiativeName}}.",
+      "associateSuccess_other": "Sono stati inclusi {{count}} punti vendita in {{initiativeName}}.",
       "excludeSuccess_one": "È stato escluso {{count}} punto vendita da {{initiativeName}}.",
       "excludeSuccess_other": "Sono stati esclusi {{count}} punti vendita da {{initiativeName}}.",
       "associateModal": {
@@ -165,14 +165,14 @@
         "infoBanner": "I punti vendita resteranno disponibili nella pagina dedicata e potranno essere riassegnati in qualsiasi momento tramite il pulsante \"Associa\"."
       },
       "alreadyAssociatedModal": {
-        "title_one": "Il punto vendita è già associato",
-        "title_other": "I punti vendita sono già associati",
-        "description_one": "Il seguente punto vendita selezionato è già associato all'iniziativa scelta.",
-        "description_other": "I seguenti punti vendita selezionati sono già associati all'iniziativa scelta.",
-        "allAlreadyAssociatedTitle_one": "Il punto vendita è già associato",
-        "allAlreadyAssociatedTitle_other": "Tutti i punti vendita sono già associati",
-        "allAlreadyAssociatedDescription_one": "Il punto vendita selezionato è già associato all'iniziativa {{initiativeName}}.",
-        "allAlreadyAssociatedDescription_other": "I punti vendita selezionati sono già associati all'iniziativa {{initiativeName}}."
+        "title_one": "Il punto vendita è già incluso",
+        "title_other": "I punti vendita sono già inclusi",
+        "description_one": "Il punto vendita selezionato è già incluso nell'iniziativa {{initiativeName}}.",
+        "description_other": "I punti vendita selezionati sono già inclusi nell'iniziativa {{initiativeName}}.",
+        "allAlreadyAssociatedTitle_one": "Il punto vendita è già incluso",
+        "allAlreadyAssociatedTitle_other": "Tutti i punti vendita sono già inclusi",
+        "allAlreadyAssociatedDescription_one": "Il punto vendita selezionato è già incluso nell'iniziativa {{initiativeName}}.",
+        "allAlreadyAssociatedDescription_other": "I punti vendita selezionati sono già inclusi nell'iniziativa {{initiativeName}}."
       },
       "exclusionResultModal": {
         "partialTitle_one": "Il punto vendita non può essere escluso",
