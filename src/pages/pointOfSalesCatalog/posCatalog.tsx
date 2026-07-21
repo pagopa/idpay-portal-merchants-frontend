@@ -91,8 +91,12 @@ const getInitiativeCatalogQuery = (
     };
   }
 
-  if (!filters.initiative || isAllInitiativesSelection(filters.initiative)) {
+  if (!filters.initiative) {
     return {};
+  }
+
+  if (isAllInitiativesSelection(filters.initiative)) {
+    return { initiativeFilter: ALL_INITIATIVES_FILTER };
   }
 
   if (isInitiativeFilter(filters.initiative)) {

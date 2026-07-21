@@ -1064,7 +1064,7 @@ describe('<PosCatalog />', () => {
     expect(drawerProps.publishedInitiativeOptions).toEqual([{ value: '', label: '' }]);
   });
 
-  it('uses default pagination values when fetch filters omit page and size', async () => {
+  it('uses default pagination values without initiative filter when no initiative is selected', async () => {
     renderComponent();
 
     const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
@@ -1221,7 +1221,7 @@ describe('<PosCatalog />', () => {
     });
   });
 
-  it('omits initiative filters when ALL_INITIATIVES is selected without association', async () => {
+  it('maps ALL_INITIATIVES selection without association to the initiative filter only', async () => {
     renderComponent();
 
     const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
@@ -1237,6 +1237,7 @@ describe('<PosCatalog />', () => {
     });
 
     expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'ALL_INITIATIVES',
       type: 'PHYSICAL',
       city: 'Turin',
       address: 'Corso Francia',
