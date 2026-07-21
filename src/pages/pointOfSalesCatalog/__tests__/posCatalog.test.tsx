@@ -15,6 +15,7 @@ const mockParseJwt = jest.fn();
 const mockStorageRead = jest.fn();
 const mockUseFormik = jest.fn();
 const mockBrowserConsoleLog = jest.fn();
+const mockIsActionDisabled = jest.fn();
 
 let dataTableProps: any = {};
 let filtersProps: any = {};
@@ -38,6 +39,16 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
   __esModule: true,
   default: () => ({
     t: (key: string) => key,
+  }),
+}));
+
+jest.mock('../../../hooks/useUserPermissions', () => ({
+  PERMISSION_KEYS: {
+    POS_CATALOG_ASSOCIATE: 'POS_CATALOG_ASSOCIATE',
+    POS_CATALOG_EXCLUDE: 'POS_CATALOG_EXCLUDE',
+  },
+  useUserPermissions: () => ({
+    isActionDisabled: mockIsActionDisabled,
   }),
 }));
 
@@ -103,24 +114,31 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
   );
 });
 
-jest.mock('../../../components/pointsOfSale/PointOfSalesFilters', () => (props: any) => {
-  filtersProps = props;
-  return (
-    <div data-testid="mock-filters">
-      <button
-        data-testid="apply-filters"
-        onClick={() => props.onFiltersApplied(props.formik.values)}
-      >
-        apply
-      </button>
-      <button data-testid="reset-filters" onClick={() => props.onFiltersReset()}>
-        reset
-      </button>
-      <div data-testid="filters-applied-once">{String(props.filtersAppliedOnce)}</div>
-      <div data-testid="initiative-options-count">{props.initiativeOptions.length}</div>
-    </div>
-  );
-});
+jest.mock('../../../components/pointsOfSale/PointOfSalesFilters', () => ({
+  __esModule: true,
+  ASSOCIATED_FILTER_YES: 'YES',
+  ASSOCIATED_FILTER_NO: 'NO',
+  ALL_INITIATIVES_VALUE: 'ALL_INITIATIVES',
+  NO_INITIATIVE_VALUE: 'NO_INITIATIVE',
+  default: (props: any) => {
+    filtersProps = props;
+    return (
+      <div data-testid="mock-filters">
+        <button
+          data-testid="apply-filters"
+          onClick={() => props.onFiltersApplied(props.formik.values)}
+        >
+          apply
+        </button>
+        <button data-testid="reset-filters" onClick={() => props.onFiltersReset()}>
+          reset
+        </button>
+        <div data-testid="filters-applied-once">{String(props.filtersAppliedOnce)}</div>
+        <div data-testid="initiative-options-count">{props.initiativeOptions.length}</div>
+      </div>
+    );
+  },
+}));
 
 jest.mock('../PosCatalogFiltersDrawer', () => ({
   PosCatalogDrawer: (props: any) => {
@@ -200,7 +218,6 @@ const defaultFormikValues = {
   type: undefined,
   city: '',
   address: '',
-  contactName: '',
   page: 0,
   size: 10,
   sort: 'franchiseName,asc',
@@ -235,6 +252,7 @@ describe('<PosCatalog />', () => {
       { initiativeId: 'initiative-2', initiativeName: 'Initiative Two', status: 'PUBLISHED' },
     ]);
     mockStorageRead.mockReturnValue('mock-token');
+    mockIsActionDisabled.mockReturnValue(false);
     mockParseJwt.mockReturnValue({ merchant_id: 'merchant-123' });
     mockUseFormik.mockImplementation(({ initialValues, onSubmit }: any) => ({
       values: initialValues ?? defaultFormikValues,
@@ -285,7 +303,7 @@ describe('<PosCatalog />', () => {
     expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
     expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
     expect(screen.getByTestId('initiative-options-count')).toBeInTheDocument();
-    expect(filtersProps.fields).toEqual(['initiative', 'type', 'city', 'address', 'contactName']);
+    expect(filtersProps.fields).toEqual(['associated', 'initiative', 'type', 'city', 'address']);
     expect(filtersProps.t('translation.key')).toBe('translation.key');
   });
 
@@ -355,6 +373,32 @@ describe('<PosCatalog />', () => {
     expectEmptyStateMessage();
   });
 
+  it('shows filters and table when only the associated filter is set', () => {
+    mockUsePointOfSalesTable.mockReturnValue({
+      ...defaultHookValue,
+      stores: [],
+      filtersAppliedOnce: false,
+    });
+    mockUseFormik.mockImplementation(({ onSubmit }: any) => ({
+      values: {
+        ...defaultFormikValues,
+        associated: 'YES',
+      },
+      setFieldValue: jest.fn(),
+      submitForm: () =>
+        onSubmit({
+          ...defaultFormikValues,
+          associated: 'YES',
+        }),
+    }));
+
+    renderComponent();
+
+    expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+    expectEmptyStateMessage();
+  });
+
   it('passes hook handlers to filters and table callbacks', () => {
     renderComponent();
 
@@ -369,6 +413,32 @@ describe('<PosCatalog />', () => {
     expect(mockHandleSortModelChange).toHaveBeenCalledWith([{ field: 'referent', sort: 'desc' }]);
     expect(mockHandlePaginationPageChange).toHaveBeenCalledWith(3);
     expect(mockHandleRowsPerPageChange).toHaveBeenCalledWith(25);
+  });
+
+  it('clears the initiative before applying filters when associated is set to NO', () => {
+    mockUseFormik.mockImplementation(({ onSubmit }: any) => ({
+      values: {
+        ...defaultFormikValues,
+        associated: 'NO',
+        initiative: 'initiative-1',
+      },
+      setFieldValue: jest.fn(),
+      submitForm: () =>
+        onSubmit({
+          ...defaultFormikValues,
+          associated: 'NO',
+          initiative: 'initiative-1',
+        }),
+    }));
+
+    renderComponent();
+    fireEvent.click(screen.getByTestId('apply-filters'));
+
+    expect(mockHandleFiltersApplied).toHaveBeenCalledWith({
+      ...defaultFormikValues,
+      associated: 'NO',
+      initiative: '',
+    });
   });
 
   it('shows selection actions and opens the association modal with initiative options', () => {
@@ -707,6 +777,57 @@ describe('<PosCatalog />', () => {
     expect(mockSetAlert).not.toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
   });
 
+  it('clears the initiative field through formik when associated is NO', () => {
+    const setFieldValue = jest.fn();
+
+    mockUseFormik.mockImplementation(({ onSubmit }: any) => ({
+      values: {
+        ...defaultFormikValues,
+        associated: 'NO',
+        initiative: 'initiative-1',
+      },
+      setFieldValue,
+      submitForm: () =>
+        onSubmit({
+          ...defaultFormikValues,
+          associated: 'NO',
+          initiative: 'initiative-1',
+        }),
+    }));
+
+    renderComponent();
+
+    expect(setFieldValue).toHaveBeenCalledWith('initiative', '');
+  });
+
+  it('maps associated YES with a non-filter initiative to ALL_INITIATIVES plus initiativeId', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      associated: 'YES',
+      initiative: 'initiative-2',
+      type: 'ONLINE',
+      city: 'Bologna',
+      address: 'Via Indipendenza',
+      page: 6,
+      size: 18,
+      sort: 'name,asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'ALL_INITIATIVES',
+      initiativeId: 'initiative-2',
+      type: 'ONLINE',
+      city: 'Bologna',
+      address: 'Via Indipendenza',
+      sort: 'name,asc',
+      page: 6,
+      size: 18,
+    });
+  });
+
   it('shows a generic error and does not call associate service when merchant id is missing', async () => {
     mockParseJwt.mockReturnValue({});
 
@@ -849,6 +970,14 @@ describe('<PosCatalog />', () => {
     );
   });
 
+  it('refreshes the catalog through the drawer operation callback', () => {
+    renderComponent();
+
+    drawerProps.onOperationCompleted();
+
+    expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
+  });
+
   it('builds the columns with action callback', () => {
     renderComponent();
 
@@ -871,11 +1000,11 @@ describe('<PosCatalog />', () => {
     mockParseJwt.mockReturnValueOnce({});
 
     const result = await hookArgs.fetchStores({
+      associated: 'YES',
       initiative: 'initiative-1',
       type: 'ONLINE',
       city: 'Rome',
       address: 'Street',
-      contactName: 'Mario',
       page: 1,
       size: 20,
       sort: 'desc',
@@ -896,11 +1025,11 @@ describe('<PosCatalog />', () => {
     const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
 
     await hookArgs.fetchStores({
+      associated: 'YES',
       initiative: 'initiative-1',
       type: 'PHYSICAL',
       city: 'Milan',
       address: 'Via Milano',
-      contactName: 'Luigi',
       page: 2,
       size: 30,
       sort: 'name,asc',
@@ -909,11 +1038,11 @@ describe('<PosCatalog />', () => {
     expect(mockStorageRead).toHaveBeenCalled();
     expect(mockParseJwt).toHaveBeenCalledWith('mock-token');
     expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'ALL_INITIATIVES',
       initiativeId: 'initiative-1',
       type: 'PHYSICAL',
       city: 'Milan',
       address: 'Via Milano',
-      contactName: 'Luigi',
       sort: 'name,asc',
       page: 2,
       size: 30,
@@ -961,7 +1090,7 @@ describe('<PosCatalog />', () => {
     expect(drawerProps.publishedInitiativeOptions).toEqual([{ value: '', label: '' }]);
   });
 
-  it('uses default pagination values when fetch filters omit page and size', async () => {
+  it('uses default pagination values without initiative filter when no initiative is selected', async () => {
     renderComponent();
 
     const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
@@ -971,7 +1100,6 @@ describe('<PosCatalog />', () => {
       type: undefined,
       city: '',
       address: '',
-      contactName: '',
       sort: 'franchiseName,asc',
     });
 
@@ -979,24 +1107,23 @@ describe('<PosCatalog />', () => {
       type: undefined,
       city: '',
       address: '',
-      contactName: '',
       sort: 'franchiseName,asc',
       page: 0,
       size: 10,
     });
   });
 
-  it('maps ALL_INITIATIVES to initiativeFilter when fetching stores', async () => {
+  it('maps associated YES to ALL_INITIATIVES when no single initiative is selected', async () => {
     renderComponent();
 
     const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
 
     await hookArgs.fetchStores({
-      initiative: 'ALL_INITIATIVES',
+      associated: 'YES',
+      initiative: '',
       type: 'PHYSICAL',
       city: 'Milan',
       address: 'Via Milano',
-      contactName: 'Luigi',
       page: 2,
       size: 30,
       sort: 'name,asc',
@@ -1007,24 +1134,50 @@ describe('<PosCatalog />', () => {
       type: 'PHYSICAL',
       city: 'Milan',
       address: 'Via Milano',
-      contactName: 'Luigi',
       sort: 'name,asc',
       page: 2,
       size: 30,
     });
   });
 
-  it('maps NO_INITIATIVE to initiativeFilter when fetching stores', async () => {
+  it('maps associated YES and ALL_INITIATIVES selection to the initiative filter only', async () => {
     renderComponent();
 
     const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
 
     await hookArgs.fetchStores({
+      associated: 'YES',
+      initiative: 'ALL_INITIATIVES',
+      type: 'PHYSICAL',
+      city: 'Milan',
+      address: 'Via Milano',
+      page: 2,
+      size: 30,
+      sort: 'name,asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'ALL_INITIATIVES',
+      type: 'PHYSICAL',
+      city: 'Milan',
+      address: 'Via Milano',
+      sort: 'name,asc',
+      page: 2,
+      size: 30,
+    });
+  });
+
+  it('maps associated YES and NO_INITIATIVE selection to the initiative filter only', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      associated: 'YES',
       initiative: 'NO_INITIATIVE',
       type: 'ONLINE',
       city: 'Rome',
       address: 'Via Roma',
-      contactName: 'Mario',
       page: 1,
       size: 20,
       sort: 'name,desc',
@@ -1035,10 +1188,114 @@ describe('<PosCatalog />', () => {
       type: 'ONLINE',
       city: 'Rome',
       address: 'Via Roma',
-      contactName: 'Mario',
       sort: 'name,desc',
       page: 1,
       size: 20,
+    });
+  });
+
+  it('maps associated NO to NO_INITIATIVE when fetching stores', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      associated: 'NO',
+      initiative: '',
+      type: 'ONLINE',
+      city: 'Rome',
+      address: 'Via Roma',
+      page: 1,
+      size: 20,
+      sort: 'name,desc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'NO_INITIATIVE',
+      type: 'ONLINE',
+      city: 'Rome',
+      address: 'Via Roma',
+      sort: 'name,desc',
+      page: 1,
+      size: 20,
+    });
+  });
+
+  it('maps a selected NO_INITIATIVE filter without association to the initiative filter only', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: 'NO_INITIATIVE',
+      type: 'ONLINE',
+      city: 'Naples',
+      address: 'Via Toledo',
+      page: 4,
+      size: 15,
+      sort: 'name,asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'NO_INITIATIVE',
+      type: 'ONLINE',
+      city: 'Naples',
+      address: 'Via Toledo',
+      sort: 'name,asc',
+      page: 4,
+      size: 15,
+    });
+  });
+
+  it('maps a selected initiative without association to the initiative id only', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: 'initiative-2',
+      type: 'PHYSICAL',
+      city: 'Florence',
+      address: 'Via de Tornabuoni',
+      page: 7,
+      size: 14,
+      sort: 'name,asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeId: 'initiative-2',
+      type: 'PHYSICAL',
+      city: 'Florence',
+      address: 'Via de Tornabuoni',
+      sort: 'name,asc',
+      page: 7,
+      size: 14,
+    });
+  });
+
+  it('maps ALL_INITIATIVES selection without association to the initiative filter only', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: 'ALL_INITIATIVES',
+      type: 'PHYSICAL',
+      city: 'Turin',
+      address: 'Corso Francia',
+      page: 5,
+      size: 12,
+      sort: 'name,desc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'ALL_INITIATIVES',
+      type: 'PHYSICAL',
+      city: 'Turin',
+      address: 'Corso Francia',
+      sort: 'name,desc',
+      page: 5,
+      size: 12,
     });
   });
 
@@ -1050,6 +1307,93 @@ describe('<PosCatalog />', () => {
     fireEvent.click(screen.getByTestId('row-action-store-1'));
 
     expect(screen.getByTestId('drawer-merchant-id')).toHaveTextContent('');
+  });
+
+  it('disables single actions based on user permissions', () => {
+    mockIsActionDisabled.mockImplementation((permissionKey: string) =>
+      permissionKey === 'POS_CATALOG_ASSOCIATE'
+    );
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+
+    expect(screen.getByText('pages.posCatalog.actions.associate (2)')).toBeDisabled();
+    expect(screen.getByText('pages.posCatalog.actions.exclude (2)')).not.toBeDisabled();
+  });
+
+  it('handles exclusion failures by closing the modal and showing the generic error', async () => {
+    mockExcludePos.mockRejectedValueOnce(new Error('exclusion failed'));
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.exclude (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.excludeModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(
+      within(screen.getByTestId('exclude-selected-pos-modal')).getByText(
+        'pages.posCatalog.actions.exclude'
+      )
+    );
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      });
+    });
+    expect(screen.queryByTestId('exclude-selected-pos-modal')).not.toBeInTheDocument();
+  });
+
+  it('shows the partial exclusion title and success alert after closing the result modal', async () => {
+    mockExcludePos.mockResolvedValueOnce({
+      excludedPointOfSales: [{ pointOfSaleId: 'store-1', franchiseName: 'Store One' }],
+      notExcludedPointOfSales: [{ pointOfSaleId: 'store-2', reason: 'ALREADY_EXCLUDED' }],
+    });
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.exclude (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.excludeModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(
+      within(screen.getByTestId('exclude-selected-pos-modal')).getByText(
+        'pages.posCatalog.actions.exclude'
+      )
+    );
+
+    const exclusionResultModal = await screen.findByTestId('point-of-sale-exclusion-result-modal');
+    expect(
+      within(exclusionResultModal).getByText(
+        'pages.posCatalog.exclusionResultModal.partialTitle'
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(within(exclusionResultModal).getByText('actions.okClose'));
+
+    await waitFor(() => {
+      expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
+    });
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: 'pages.posCatalog.excludeSuccess',
+      isOpen: true,
+      severity: 'success',
+      timeout: 6000,
+    });
   });
 
   it('handles an undefined initiatives list by passing no options to children', () => {

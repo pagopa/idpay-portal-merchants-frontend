@@ -78,7 +78,7 @@
       "published": "In corso"
     },
     "initiativesFilters": {
-      "allInitiatives": "Associati a tutte le iniziative",
+      "allInitiatives": "Tutte le iniziative",
       "noInitiative": "Non associati"
     }
   },
@@ -135,6 +135,11 @@
       "title": "Tutti i punti vendita",
       "subtitle": "Qui trovi tutti i punti vendita censiti durante le iniziative.",
       "noData": "Non ci sono punti vendita, aggiungili per iniziare.",
+      "filters": {
+        "associated": "Associati",
+        "associatedYes": "Si",
+        "associatedNo": "No"
+      },
       "actions": {
         "associate": "Associa",
         "exclude": "Escludi"

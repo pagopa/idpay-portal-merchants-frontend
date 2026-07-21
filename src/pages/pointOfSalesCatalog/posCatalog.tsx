@@ -33,7 +33,10 @@ import { browserConsole } from '../../utils/consoleLogger';
 import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import { useAppSelector } from '../../redux/hooks';
 import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
-import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
+import PointOfSalesFilters, {
+  ASSOCIATED_FILTER_NO,
+  ASSOCIATED_FILTER_YES,
+} from '../../components/pointsOfSale/PointOfSalesFilters';
 import buildPointOfSalesColumns from '../../components/pointsOfSale/pointOfSalesColumns';
 import usePointOfSalesTable from '../../components/pointsOfSale/usePointOfSalesTable';
 import { PosCatalogDrawer } from './PosCatalogFiltersDrawer';
@@ -61,25 +64,46 @@ const INITIATIVE_FILTER_VALUES: Array<InitiativeFilter> = [
 const isInitiativeFilter = (initiative?: string): initiative is InitiativeFilter =>
   Boolean(initiative) && INITIATIVE_FILTER_VALUES.includes(initiative as InitiativeFilter);
 
+const isAllInitiativesSelection = (initiative?: string) => initiative === ALL_INITIATIVES_FILTER;
+
 const getInitiativeCatalogQuery = (
-  initiative?: string
+  filters: GetPointOfSalesFilters
 ): {
   initiativeId?: string;
   initiativeFilter?: InitiativeFilter;
 } => {
-  if (!initiative) {
-    return {};
+  if (filters.associated === ASSOCIATED_FILTER_NO) {
+    return { initiativeFilter: NO_INITIATIVE_FILTER };
   }
 
-  if (isInitiativeFilter(initiative)) {
+  if (filters.associated === ASSOCIATED_FILTER_YES) {
+    if (!filters.initiative || isAllInitiativesSelection(filters.initiative)) {
+      return { initiativeFilter: ALL_INITIATIVES_FILTER };
+    }
+
+    if (isInitiativeFilter(filters.initiative)) {
+      return { initiativeFilter: filters.initiative };
+    }
+
     return {
-      initiativeFilter: initiative,
+      initiativeFilter: ALL_INITIATIVES_FILTER,
+      initiativeId: filters.initiative,
     };
   }
 
-  return {
-    initiativeId: initiative,
-  };
+  if (!filters.initiative) {
+    return {};
+  }
+
+  if (isAllInitiativesSelection(filters.initiative)) {
+    return { initiativeFilter: ALL_INITIATIVES_FILTER };
+  }
+
+  if (isInitiativeFilter(filters.initiative)) {
+    return { initiativeFilter: filters.initiative };
+  }
+
+  return { initiativeId: filters.initiative };
 };
 
 const initialValues: GetPointOfSalesFilters = {
@@ -87,7 +111,6 @@ const initialValues: GetPointOfSalesFilters = {
   type: undefined,
   city: '',
   address: '',
-  contactName: '',
   page: 0,
   size: PAGINATION_SIZE,
   sort: 'franchiseName,asc',
@@ -174,6 +197,12 @@ const PosCatalog: React.FC = () => {
     },
   });
 
+  useEffect(() => {
+    if (formik.values.associated === ASSOCIATED_FILTER_NO && formik.values.initiative) {
+      void formik.setFieldValue('initiative', '');
+    }
+  }, [formik.setFieldValue, formik.values.associated, formik.values.initiative]);
+
   const handleFetchError = useCallback(
     () =>
       setAlert({
@@ -199,11 +228,10 @@ const PosCatalog: React.FC = () => {
     }
 
     return getMerchantPointOfSalesCatalog(merchantId, {
-      ...getInitiativeCatalogQuery(filters.initiative),
+      ...getInitiativeCatalogQuery(filters),
       type: filters.type,
       city: filters.city,
       address: filters.address,
-      contactName: filters.contactName,
       sort: filters.sort,
       page: filters.page ?? 0,
       size: filters.size ?? PAGINATION_SIZE,
@@ -231,11 +259,11 @@ const PosCatalog: React.FC = () => {
   });
 
   const filtersSetted = () =>
-    formik.values.initiative !== '' ||
+    formik.values.associated !== undefined ||
+    (formik.values.initiative !== '' && !isAllInitiativesSelection(formik.values.initiative)) ||
     formik.values.type !== undefined ||
     formik.values.city !== '' ||
-    formik.values.address !== '' ||
-    formik.values.contactName !== '';
+    formik.values.address !== '';
 
   const openStoreDrawer = useCallback((store: PointOfSaleDTO) => {
     setSelectedStore(store);
@@ -254,7 +282,9 @@ const PosCatalog: React.FC = () => {
   const handleCatalogFiltersApplied = useCallback(
     (values: GetPointOfSalesFilters) => {
       setSelectedStoreIds([]);
-      handleFiltersApplied(values);
+      handleFiltersApplied(
+        values.associated === ASSOCIATED_FILTER_NO ? { ...values, initiative: '' } : values
+      );
     },
     [handleFiltersApplied]
   );
@@ -594,7 +624,9 @@ const PosCatalog: React.FC = () => {
                 formik={formik}
                 filtersAppliedOnce={filtersAppliedOnce}
                 initiativeOptions={initiativeOptions}
-                fields={['initiative', 'type', 'city', 'address', 'contactName']}
+                fields={['associated', 'initiative', 'type', 'city', 'address']}
+                disableInitiativeFilter={formik.values.associated === ASSOCIATED_FILTER_NO}
+                includeNoInitiativeOption={false}
                 t={t}
               />
 

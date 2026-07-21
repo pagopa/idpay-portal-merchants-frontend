@@ -12,6 +12,8 @@ export type InitiativeOption = {
 
 export const ALL_INITIATIVES_VALUE = 'ALL_INITIATIVES';
 export const NO_INITIATIVE_VALUE = 'NO_INITIATIVE';
+export const ASSOCIATED_FILTER_YES = 'YES';
+export const ASSOCIATED_FILTER_NO = 'NO';
 
 const FIXED_INITIATIVE_OPTIONS = [
   {
@@ -30,16 +32,25 @@ const FIXED_INITIATIVE_VALUES = new Set<string>(
 
 const getSelectInitiativeOptions = (
   t: (key: string) => string,
-  initiativeOptions: Array<InitiativeOption>
+  initiativeOptions: Array<InitiativeOption>,
+  includeNoInitiativeOption: boolean
 ): Array<InitiativeOption> => [
-  ...FIXED_INITIATIVE_OPTIONS.map((option) => ({
+  ...FIXED_INITIATIVE_OPTIONS.filter(
+    (option) => includeNoInitiativeOption || option.value !== NO_INITIATIVE_VALUE
+  ).map((option) => ({
     value: option.value,
     label: t(option.labelKey),
   })),
   ...initiativeOptions.filter((initiative) => !FIXED_INITIATIVE_VALUES.has(initiative.value)),
 ];
 
-export type PointOfSalesFilterField = 'initiative' | 'type' | 'city' | 'address' | 'contactName';
+export type PointOfSalesFilterField =
+  | 'associated'
+  | 'initiative'
+  | 'type'
+  | 'city'
+  | 'address'
+  | 'contactName';
 
 type PointOfSalesFiltersProps = {
   formik: FormikProps<GetPointOfSalesFilters>;
@@ -49,12 +60,15 @@ type PointOfSalesFiltersProps = {
   t: (key: string) => string;
   fields: Array<PointOfSalesFilterField>;
   initiativeOptions?: Array<InitiativeOption>;
+  disableInitiativeFilter?: boolean;
+  includeNoInitiativeOption?: boolean;
 };
 
 const fieldLayout: Record<
   PointOfSalesFilterField,
   { xs: number; sm: number; md: number; lg: number }
 > = {
+  associated: { xs: 12, sm: 6, md: 4, lg: 1.5 },
   initiative: { xs: 12, sm: 6, md: 4, lg: 2 },
   type: { xs: 12, sm: 6, md: 4, lg: 2.8 },
   city: { xs: 12, sm: 6, md: 4, lg: 1.5 },
@@ -102,9 +116,36 @@ const renderField = (
   field: PointOfSalesFilterField,
   formik: FormikProps<GetPointOfSalesFilters>,
   t: (key: string) => string,
-  initiativeOptions: Array<InitiativeOption>
+  initiativeOptions: Array<InitiativeOption>,
+  disableInitiativeFilter: boolean
 ) => {
   switch (field) {
+    case 'associated':
+      return (
+        <FormControl fullWidth size="small">
+          <InputLabel id="associated-label" sx={selectLabelEllipsisSx}>
+            {t('pages.posCatalog.filters.associated')}
+          </InputLabel>
+          <Select
+            labelId="associated-label"
+            id="associated-select"
+            label={t('pages.posCatalog.filters.associated')}
+            name="associated"
+            value={formik.values.associated ?? ''}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            sx={selectValueEllipsisSx}
+          >
+            <MenuItem value="" sx={{ display: 'none' }} />
+            <MenuItem value={ASSOCIATED_FILTER_YES}>
+              {t('pages.posCatalog.filters.associatedYes')}
+            </MenuItem>
+            <MenuItem value={ASSOCIATED_FILTER_NO}>
+              {t('pages.posCatalog.filters.associatedNo')}
+            </MenuItem>
+          </Select>
+        </FormControl>
+      );
     case 'initiative':
       return (
         <FormControl fullWidth size="small">
@@ -119,6 +160,7 @@ const renderField = (
             value={formik.values.initiative ?? ''}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
+            disabled={disableInitiativeFilter}
             sx={selectValueEllipsisSx}
             renderValue={(selected) => (
               <span
@@ -215,8 +257,14 @@ const PointOfSalesFilters: React.FC<PointOfSalesFiltersProps> = ({
   t,
   fields,
   initiativeOptions = [],
+  disableInitiativeFilter = false,
+  includeNoInitiativeOption = true,
 }) => {
-  const selectInitiativeOptions = getSelectInitiativeOptions(t, initiativeOptions);
+  const selectInitiativeOptions = getSelectInitiativeOptions(
+    t,
+    initiativeOptions,
+    includeNoInitiativeOption
+  );
   const hasInitiativeFilter = fields.includes('initiative');
 
   return (
@@ -238,7 +286,7 @@ const PointOfSalesFilters: React.FC<PointOfSalesFiltersProps> = ({
 
         return (
           <Grid key={field} item {...layout} lg={lg}>
-            {renderField(field, formik, t, selectInitiativeOptions)}
+            {renderField(field, formik, t, selectInitiativeOptions, disableInitiativeFilter)}
           </Grid>
         );
       })}
