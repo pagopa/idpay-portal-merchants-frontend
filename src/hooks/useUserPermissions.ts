@@ -1,5 +1,6 @@
 ﻿import { useMemo } from 'react';
 import config from '../locale/it/default/config.json';
+import { useCurrentInitiative } from './useCurrentInitiative';
 import { useIDPayUser } from './useIDPayUser';
 
 export const PERMISSION_KEYS = {
@@ -30,6 +31,22 @@ export const PERMISSION_KEYS = {
 
 export type PermissionKey = (typeof PERMISSION_KEYS)[keyof typeof PERMISSION_KEYS];
 
+const INITIATIVE_SCOPED_PERMISSION_KEYS = new Set<PermissionKey>([
+  PERMISSION_KEYS.OVERVIEW_EDIT_EMAIL,
+  PERMISSION_KEYS.OVERVIEW_EDIT_IBAN,
+  PERMISSION_KEYS.OVERVIEW_UPLOAD_STORES,
+  PERMISSION_KEYS.STORES_ADD,
+  PERMISSION_KEYS.STORE_DETAIL_EDIT_REFERENT,
+  PERMISSION_KEYS.TRANSACTION_REVERSE,
+  PERMISSION_KEYS.TRANSACTION_MODIFY_DOC,
+  PERMISSION_KEYS.TRANSACTION_POSTPONE,
+  PERMISSION_KEYS.REFUND_SEND_BATCH,
+  PERMISSION_KEYS.REPORTED_USER_REPORT,
+  PERMISSION_KEYS.REPORTED_USER_DELETE,
+  PERMISSION_KEYS.POS_CATALOG_ASSOCIATE,
+  PERMISSION_KEYS.POS_CATALOG_EXCLUDE,
+]);
+
 type SubRoleConfig = {
   logicalName?: string;
   permissions?: { disabledActions?: Array<string> };
@@ -52,18 +69,31 @@ const getDisabledActionsForRole = (role: string | undefined | null): Set<string>
   return new Set(actions);
 };
 
+const isInitiativeEnded = (endDate?: string): boolean => {
+  if (!endDate) {
+    return false;
+  }
+
+  return new Date(endDate).getTime() < Date.now();
+};
+
 export const useUserPermissions = () => {
   const user = useIDPayUser();
+  const currentInitiative = useCurrentInitiative();
   const role = user?.org_role;
 
   return useMemo(() => {
     const disabledActions = getDisabledActionsForRole(role);
     const subRole = role ? rolesConfig.subRoles?.[role.toLowerCase()] : undefined;
+    const hasEndedInitiative = isInitiativeEnded(currentInitiative?.endDate);
+
     return {
       role,
       logicalRoleName: subRole?.logicalName,
       isSupportUser: (role ?? '').toLowerCase() === 'support',
-      isActionDisabled: (action: PermissionKey) => disabledActions.has(action),
+      isActionDisabled: (action: PermissionKey) =>
+        disabledActions.has(action) ||
+        (hasEndedInitiative && INITIATIVE_SCOPED_PERMISSION_KEYS.has(action)),
     };
-  }, [role]);
+  }, [currentInitiative?.endDate, role]);
 };
