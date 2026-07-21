@@ -373,6 +373,32 @@ describe('<PosCatalog />', () => {
     expectEmptyStateMessage();
   });
 
+  it('shows filters and table when only the associated filter is set', () => {
+    mockUsePointOfSalesTable.mockReturnValue({
+      ...defaultHookValue,
+      stores: [],
+      filtersAppliedOnce: false,
+    });
+    mockUseFormik.mockImplementation(({ onSubmit }: any) => ({
+      values: {
+        ...defaultFormikValues,
+        associated: 'YES',
+      },
+      setFieldValue: jest.fn(),
+      submitForm: () =>
+        onSubmit({
+          ...defaultFormikValues,
+          associated: 'YES',
+        }),
+    }));
+
+    renderComponent();
+
+    expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+    expectEmptyStateMessage();
+  });
+
   it('passes hook handlers to filters and table callbacks', () => {
     renderComponent();
 
@@ -1218,6 +1244,32 @@ describe('<PosCatalog />', () => {
       sort: 'name,asc',
       page: 4,
       size: 15,
+    });
+  });
+
+  it('maps a selected initiative without association to the initiative id only', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: 'initiative-2',
+      type: 'PHYSICAL',
+      city: 'Florence',
+      address: 'Via de Tornabuoni',
+      page: 7,
+      size: 14,
+      sort: 'name,asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeId: 'initiative-2',
+      type: 'PHYSICAL',
+      city: 'Florence',
+      address: 'Via de Tornabuoni',
+      sort: 'name,asc',
+      page: 7,
+      size: 14,
     });
   });
 
