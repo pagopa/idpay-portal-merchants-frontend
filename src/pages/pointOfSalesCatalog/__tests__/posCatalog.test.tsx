@@ -761,7 +761,7 @@ describe('<PosCatalog />', () => {
 
     expect(
       within(alreadyAssociatedModal).getByText(
-        'pages.posCatalog.alreadyAssociatedModal.allAlreadyAssociatedDescription'
+        'pages.posCatalog.alreadyAssociatedModal.description'
       )
     ).toBeInTheDocument();
     expect(
