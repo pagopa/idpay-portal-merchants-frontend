@@ -179,7 +179,6 @@ describe('PosCatalogFiltersDrawer', () => {
           type: 'ONLINE',
           city: 'Roma',
           address: 'Via Demo',
-          contactName: 'Mario',
           sort: 'asc',
         }}
         onFiltersApplied={onFiltersApplied}
@@ -187,11 +186,12 @@ describe('PosCatalogFiltersDrawer', () => {
       />
     );
 
+    expect(screen.getByLabelText('pages.posCatalog.filters.associated')).toBeInTheDocument();
     expect(screen.getByLabelText('Iniziativa')).toBeInTheDocument();
     expect(screen.getByLabelText('pages.initiativeStores.pointOfSaleType')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Roma')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Via Demo')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Mario')).toBeInTheDocument();
+    expect(screen.queryByDisplayValue('Mario')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByText('apply-filters'));
     fireEvent.click(screen.getByText('reset-filters'));
@@ -202,10 +202,39 @@ describe('PosCatalogFiltersDrawer', () => {
         type: 'ONLINE',
         city: 'Roma',
         address: 'Via Demo',
-        contactName: 'Mario',
       })
     );
     expect(onFiltersReset).toHaveBeenCalledTimes(1);
+  });
+
+  it('resets and disables initiative when associated is set to NO', () => {
+    const onFiltersApplied = jest.fn();
+
+    render(
+      <TestFilters
+        initialValues={{
+          associated: 'NO',
+          initiative: 'Iniziativa 1',
+          type: 'ONLINE',
+          city: '',
+          address: '',
+          sort: 'asc',
+        }}
+        onFiltersApplied={onFiltersApplied}
+        onFiltersReset={jest.fn()}
+      />
+    );
+
+    expect(screen.getByLabelText('Iniziativa')).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(screen.getByText('apply-filters'));
+
+    expect(onFiltersApplied).toHaveBeenCalledWith(
+      expect.objectContaining({
+        associated: 'NO',
+        initiative: '',
+      })
+    );
   });
 
   it('renders the closed drawer as empty', () => {

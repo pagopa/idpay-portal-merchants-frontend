@@ -482,7 +482,7 @@ describe('merchantService', () => {
     expect(mockedApi.getMerchantPointOfSalesCatalog).toHaveBeenCalled();
   });
 
-  test('getMerchantPointOfSalesCatalog prioritizes initiativeId over initiativeFilter', async () => {
+  test('getMerchantPointOfSalesCatalog preserves initiativeId and initiativeFilter together', async () => {
     mockedApi.getMerchantPointOfSalesCatalog.mockResolvedValue({});
 
     await getMerchantPointOfSalesCatalog('merchant', {
@@ -492,7 +492,7 @@ describe('merchantService', () => {
 
     expect(mockedApi.getMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant', {
       initiativeId: 'initiative-1',
-      initiativeFilter: undefined,
+      initiativeFilter: 'ALL_INITIATIVES',
     });
   });
 
