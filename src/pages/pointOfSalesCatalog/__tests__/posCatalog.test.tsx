@@ -15,6 +15,7 @@ const mockParseJwt = jest.fn();
 const mockStorageRead = jest.fn();
 const mockUseFormik = jest.fn();
 const mockBrowserConsoleLog = jest.fn();
+const mockIsActionDisabled = jest.fn();
 
 let dataTableProps: any = {};
 let filtersProps: any = {};
@@ -38,6 +39,16 @@ jest.mock('../../../hooks/useScopedTranslation', () => ({
   __esModule: true,
   default: () => ({
     t: (key: string) => key,
+  }),
+}));
+
+jest.mock('../../../hooks/useUserPermissions', () => ({
+  PERMISSION_KEYS: {
+    POS_CATALOG_ASSOCIATE: 'POS_CATALOG_ASSOCIATE',
+    POS_CATALOG_EXCLUDE: 'POS_CATALOG_EXCLUDE',
+  },
+  useUserPermissions: () => ({
+    isActionDisabled: mockIsActionDisabled,
   }),
 }));
 
@@ -241,6 +252,7 @@ describe('<PosCatalog />', () => {
       { initiativeId: 'initiative-2', initiativeName: 'Initiative Two', status: 'PUBLISHED' },
     ]);
     mockStorageRead.mockReturnValue('mock-token');
+    mockIsActionDisabled.mockReturnValue(false);
     mockParseJwt.mockReturnValue({ merchant_id: 'merchant-123' });
     mockUseFormik.mockImplementation(({ initialValues, onSubmit }: any) => ({
       values: initialValues ?? defaultFormikValues,
@@ -375,6 +387,32 @@ describe('<PosCatalog />', () => {
     expect(mockHandleSortModelChange).toHaveBeenCalledWith([{ field: 'referent', sort: 'desc' }]);
     expect(mockHandlePaginationPageChange).toHaveBeenCalledWith(3);
     expect(mockHandleRowsPerPageChange).toHaveBeenCalledWith(25);
+  });
+
+  it('clears the initiative before applying filters when associated is set to NO', () => {
+    mockUseFormik.mockImplementation(({ onSubmit }: any) => ({
+      values: {
+        ...defaultFormikValues,
+        associated: 'NO',
+        initiative: 'initiative-1',
+      },
+      setFieldValue: jest.fn(),
+      submitForm: () =>
+        onSubmit({
+          ...defaultFormikValues,
+          associated: 'NO',
+          initiative: 'initiative-1',
+        }),
+    }));
+
+    renderComponent();
+    fireEvent.click(screen.getByTestId('apply-filters'));
+
+    expect(mockHandleFiltersApplied).toHaveBeenCalledWith({
+      ...defaultFormikValues,
+      associated: 'NO',
+      initiative: '',
+    });
   });
 
   it('shows selection actions and opens the association modal with initiative options', () => {
@@ -713,6 +751,57 @@ describe('<PosCatalog />', () => {
     expect(mockSetAlert).not.toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
   });
 
+  it('clears the initiative field through formik when associated is NO', () => {
+    const setFieldValue = jest.fn();
+
+    mockUseFormik.mockImplementation(({ onSubmit }: any) => ({
+      values: {
+        ...defaultFormikValues,
+        associated: 'NO',
+        initiative: 'initiative-1',
+      },
+      setFieldValue,
+      submitForm: () =>
+        onSubmit({
+          ...defaultFormikValues,
+          associated: 'NO',
+          initiative: 'initiative-1',
+        }),
+    }));
+
+    renderComponent();
+
+    expect(setFieldValue).toHaveBeenCalledWith('initiative', '');
+  });
+
+  it('maps associated YES with a non-filter initiative to ALL_INITIATIVES plus initiativeId', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      associated: 'YES',
+      initiative: 'initiative-2',
+      type: 'ONLINE',
+      city: 'Bologna',
+      address: 'Via Indipendenza',
+      page: 6,
+      size: 18,
+      sort: 'name,asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'ALL_INITIATIVES',
+      initiativeId: 'initiative-2',
+      type: 'ONLINE',
+      city: 'Bologna',
+      address: 'Via Indipendenza',
+      sort: 'name,asc',
+      page: 6,
+      size: 18,
+    });
+  });
+
   it('shows a generic error and does not call associate service when merchant id is missing', async () => {
     mockParseJwt.mockReturnValue({});
 
@@ -853,6 +942,14 @@ describe('<PosCatalog />', () => {
         state: expect.objectContaining({ showSuccessAlert: false }),
       })
     );
+  });
+
+  it('refreshes the catalog through the drawer operation callback', () => {
+    renderComponent();
+
+    drawerProps.onOperationCompleted();
+
+    expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
   });
 
   it('builds the columns with action callback', () => {
@@ -1017,6 +1114,60 @@ describe('<PosCatalog />', () => {
     });
   });
 
+  it('maps associated YES and ALL_INITIATIVES selection to the initiative filter only', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      associated: 'YES',
+      initiative: 'ALL_INITIATIVES',
+      type: 'PHYSICAL',
+      city: 'Milan',
+      address: 'Via Milano',
+      page: 2,
+      size: 30,
+      sort: 'name,asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'ALL_INITIATIVES',
+      type: 'PHYSICAL',
+      city: 'Milan',
+      address: 'Via Milano',
+      sort: 'name,asc',
+      page: 2,
+      size: 30,
+    });
+  });
+
+  it('maps associated YES and NO_INITIATIVE selection to the initiative filter only', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      associated: 'YES',
+      initiative: 'NO_INITIATIVE',
+      type: 'ONLINE',
+      city: 'Rome',
+      address: 'Via Roma',
+      page: 1,
+      size: 20,
+      sort: 'name,desc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'NO_INITIATIVE',
+      type: 'ONLINE',
+      city: 'Rome',
+      address: 'Via Roma',
+      sort: 'name,desc',
+      page: 1,
+      size: 20,
+    });
+  });
+
   it('maps associated NO to NO_INITIATIVE when fetching stores', async () => {
     renderComponent();
 
@@ -1044,6 +1195,57 @@ describe('<PosCatalog />', () => {
     });
   });
 
+  it('maps a selected NO_INITIATIVE filter without association to the initiative filter only', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: 'NO_INITIATIVE',
+      type: 'ONLINE',
+      city: 'Naples',
+      address: 'Via Toledo',
+      page: 4,
+      size: 15,
+      sort: 'name,asc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      initiativeFilter: 'NO_INITIATIVE',
+      type: 'ONLINE',
+      city: 'Naples',
+      address: 'Via Toledo',
+      sort: 'name,asc',
+      page: 4,
+      size: 15,
+    });
+  });
+
+  it('omits initiative filters when ALL_INITIATIVES is selected without association', async () => {
+    renderComponent();
+
+    const hookArgs = mockUsePointOfSalesTable.mock.calls[0][0];
+
+    await hookArgs.fetchStores({
+      initiative: 'ALL_INITIATIVES',
+      type: 'PHYSICAL',
+      city: 'Turin',
+      address: 'Corso Francia',
+      page: 5,
+      size: 12,
+      sort: 'name,desc',
+    });
+
+    expect(mockGetMerchantPointOfSalesCatalog).toHaveBeenCalledWith('merchant-123', {
+      type: 'PHYSICAL',
+      city: 'Turin',
+      address: 'Corso Francia',
+      sort: 'name,desc',
+      page: 5,
+      size: 12,
+    });
+  });
+
   it('passes an empty merchant id to the drawer when the token has no merchant_id', () => {
     mockParseJwt.mockReturnValue({});
 
@@ -1052,6 +1254,93 @@ describe('<PosCatalog />', () => {
     fireEvent.click(screen.getByTestId('row-action-store-1'));
 
     expect(screen.getByTestId('drawer-merchant-id')).toHaveTextContent('');
+  });
+
+  it('disables single actions based on user permissions', () => {
+    mockIsActionDisabled.mockImplementation((permissionKey: string) =>
+      permissionKey === 'POS_CATALOG_ASSOCIATE'
+    );
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+
+    expect(screen.getByText('pages.posCatalog.actions.associate (2)')).toBeDisabled();
+    expect(screen.getByText('pages.posCatalog.actions.exclude (2)')).not.toBeDisabled();
+  });
+
+  it('handles exclusion failures by closing the modal and showing the generic error', async () => {
+    mockExcludePos.mockRejectedValueOnce(new Error('exclusion failed'));
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.exclude (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.excludeModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(
+      within(screen.getByTestId('exclude-selected-pos-modal')).getByText(
+        'pages.posCatalog.actions.exclude'
+      )
+    );
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      });
+    });
+    expect(screen.queryByTestId('exclude-selected-pos-modal')).not.toBeInTheDocument();
+  });
+
+  it('shows the partial exclusion title and success alert after closing the result modal', async () => {
+    mockExcludePos.mockResolvedValueOnce({
+      excludedPointOfSales: [{ pointOfSaleId: 'store-1', franchiseName: 'Store One' }],
+      notExcludedPointOfSales: [{ pointOfSaleId: 'store-2', reason: 'ALREADY_EXCLUDED' }],
+    });
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('selection-button'));
+    fireEvent.click(screen.getByText('pages.posCatalog.actions.exclude (2)'));
+
+    fireEvent.mouseDown(
+      screen.getByRole('combobox', {
+        name: /pages.posCatalog.excludeModal.initiativeLabel/,
+      })
+    );
+    fireEvent.click(screen.getByText('Initiative One'));
+    fireEvent.click(
+      within(screen.getByTestId('exclude-selected-pos-modal')).getByText(
+        'pages.posCatalog.actions.exclude'
+      )
+    );
+
+    const exclusionResultModal = await screen.findByTestId('point-of-sale-exclusion-result-modal');
+    expect(
+      within(exclusionResultModal).getByText(
+        'pages.posCatalog.exclusionResultModal.partialTitle'
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(within(exclusionResultModal).getByText('actions.okClose'));
+
+    await waitFor(() => {
+      expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
+    });
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: 'pages.posCatalog.excludeSuccess',
+      isOpen: true,
+      severity: 'success',
+      timeout: 6000,
+    });
   });
 
   it('handles an undefined initiatives list by passing no options to children', () => {
