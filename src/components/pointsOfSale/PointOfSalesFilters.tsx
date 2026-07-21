@@ -100,7 +100,7 @@ const selectLabelEllipsisSx = {
 
 const posTypeLabelSx = {
   ...selectLabelEllipsisSx,
-  maxWidth: { xs: '100%', lg: 'calc(100% - 40px)' },
+  maxWidth: 'calc(100% - 40px)',
 };
 
 const menuItemLabelEllipsisSx = {
