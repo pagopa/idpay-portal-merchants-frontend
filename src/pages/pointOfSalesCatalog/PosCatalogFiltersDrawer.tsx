@@ -3,7 +3,9 @@ import { theme } from '@pagopa/mui-italia/theme';
 import { Box, Typography, CircularProgress, Tooltip } from '@mui/material';
 import { FormikProps } from 'formik';
 import DetailDrawer from '../../components/Drawer/DetailDrawer';
-import PointOfSalesFilters from '../../components/pointsOfSale/PointOfSalesFilters';
+import PointOfSalesFilters, {
+  ASSOCIATED_FILTER_NO,
+} from '../../components/pointsOfSale/PointOfSalesFilters';
 import {
   PointOfSaleExclusionResultDTO,
   PointOfSaleDTO,
@@ -64,17 +66,35 @@ export const PosCatalogFilters: React.FC<PosCatalogFiltersProps> = ({
   onFiltersReset,
   initiativeOptions,
   t,
-}) => (
-  <PointOfSalesFilters
-    formik={formik}
-    filtersAppliedOnce={filtersAppliedOnce}
-    onFiltersApplied={onFiltersApplied}
-    onFiltersReset={onFiltersReset}
-    t={t}
-    fields={['initiative', 'type', 'city', 'address', 'contactName']}
-    initiativeOptions={initiativeOptions}
-  />
-);
+}) => {
+  useEffect(() => {
+    if (formik.values.associated === ASSOCIATED_FILTER_NO && formik.values.initiative) {
+      void formik.setFieldValue('initiative', '');
+    }
+  }, [formik.setFieldValue, formik.values.associated, formik.values.initiative]);
+
+  const handleFiltersApplied = useCallback(
+    (values: GetPointOfSalesFilters) =>
+      onFiltersApplied(
+        values.associated === ASSOCIATED_FILTER_NO ? { ...values, initiative: '' } : values
+      ),
+    [onFiltersApplied]
+  );
+
+  return (
+    <PointOfSalesFilters
+      formik={formik}
+      filtersAppliedOnce={filtersAppliedOnce}
+      onFiltersApplied={handleFiltersApplied}
+      onFiltersReset={onFiltersReset}
+      t={t}
+      fields={['associated', 'initiative', 'type', 'city', 'address']}
+      initiativeOptions={initiativeOptions}
+      disableInitiativeFilter={formik.values.associated === ASSOCIATED_FILTER_NO}
+      includeNoInitiativeOption={false}
+    />
+  );
+};
 
 export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   isOpen,
