@@ -11,8 +11,6 @@ import { partiesActions } from '../../redux/slices/partiesSlice';
 import { JWTUser } from '../../model/JwtUser';
 import { ENV } from '../../utils/env';
 
-// --- Mocks ---
-
 jest.mock('../../redux/hooks');
 const mockedUseAppDispatch = useAppDispatch as jest.Mock;
 const mockedUseAppSelector = useAppSelector as jest.Mock;
@@ -62,8 +60,6 @@ const mockParty: Party = {
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <Provider store={store}>{children}</Provider>
 );
-
-// --- Test Suite ---
 
 describe('useSelectedParty', () => {
   beforeEach(() => {
