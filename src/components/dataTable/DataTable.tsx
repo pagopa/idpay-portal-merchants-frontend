@@ -84,7 +84,9 @@ const DataTable = ({
         <DataGrid
           rows={rows}
           columns={columns}
-          rowsPerPageOptions={rowsPerPageOptions ?? (isTransactionsPage ? ELEMENT_PER_PAGE : [rowsPerPage])}
+          rowsPerPageOptions={
+            rowsPerPageOptions ?? (isTransactionsPage ? ELEMENT_PER_PAGE : [rowsPerPage])
+          }
           {...selectionProps}
           onSelectionModelChange={onSelectionModelChange}
           disableSelectionOnClick
@@ -102,6 +104,8 @@ const DataTable = ({
           onPageSizeChange={(newPageSize) => onRowsPerPageChange?.(newPageSize)}
           localeText={{
             noRowsLabel: 'Nessun punto vendita da visualizzare.',
+            columnHeaderSortIconLabel: '',
+            columnMenuLabel: '',
             MuiTablePagination: {
               labelRowsPerPage: 'Righe per pagina',
               labelDisplayedRows(paginationInfo) {
