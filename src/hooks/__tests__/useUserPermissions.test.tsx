@@ -100,7 +100,7 @@ describe('useUserPermissions', () => {
     expect(result.current.isActionDisabled(PERMISSION_KEYS.OVERVIEW_EDIT_EMAIL)).toBe(true);
     expect(result.current.isActionDisabled(PERMISSION_KEYS.POS_CATALOG_ASSOCIATE)).toBe(true);
     expect(result.current.isActionDisabled(PERMISSION_KEYS.INITIATIVE_ADHERE)).toBe(false);
-    expect(result.current.isActionDisabled(PERMISSION_KEYS.REPORT_GENERATE)).toBe(false);
+    expect(result.current.isActionDisabled(PERMISSION_KEYS.REPORT_GENERATE)).toBe(true);
   });
 
   test('should keep initiative scoped actions enabled when current initiative has not ended', () => {
