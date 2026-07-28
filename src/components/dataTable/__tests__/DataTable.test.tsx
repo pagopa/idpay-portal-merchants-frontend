@@ -11,15 +11,9 @@ jest.mock('@mui/x-data-grid', () => ({
     mockDataGrid(props);
     return (
       <div data-testid="mock-data-grid">
-        <div data-testid="rows-per-page-options">
-          {JSON.stringify(props.rowsPerPageOptions)}
-        </div>
-        <div data-testid="selection-model">
-          {JSON.stringify(props.selectionModel ?? null)}
-        </div>
-        <div data-testid="disable-multiple-selection">
-          {String(props.disableMultipleSelection)}
-        </div>
+        <div data-testid="rows-per-page-options">{JSON.stringify(props.rowsPerPageOptions)}</div>
+        <div data-testid="selection-model">{JSON.stringify(props.selectionModel ?? null)}</div>
+        <div data-testid="disable-multiple-selection">{String(props.disableMultipleSelection)}</div>
         <div data-testid="checkbox-selection">{String(props.checkboxSelection)}</div>
         <button onClick={() => props.onSortModelChange?.([{ field: 'name', sort: 'asc' }])}>
           sort
@@ -163,5 +157,18 @@ describe('DataTable', () => {
     render(<DataTable {...baseProps} />);
 
     expect(screen.getByTestId('displayed-rows')).toHaveTextContent('1-2 di 10');
+  });
+
+  it('passes correct localeText for columnHeaderSortIconLabel and columnMenuLabel', () => {
+    render(<DataTable {...baseProps} />);
+
+    expect(mockDataGrid).toHaveBeenCalledWith(
+      expect.objectContaining({
+        localeText: expect.objectContaining({
+          columnHeaderSortIconLabel: '',
+          columnMenuLabel: '',
+        }),
+      })
+    );
   });
 });

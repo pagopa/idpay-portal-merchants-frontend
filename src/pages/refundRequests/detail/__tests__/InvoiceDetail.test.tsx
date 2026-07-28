@@ -53,6 +53,11 @@ jest.mock('../../../../hooks/useCurrentInitiative', () => ({
   useCurrentInitiative: jest.fn(),
 }));
 
+jest.mock('../../../../hooks/useUserPermissions', () => ({
+  ...jest.requireActual('../../../../hooks/useUserPermissions'),
+  useUserPermissions: jest.fn(),
+}));
+
 jest.mock('../../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
@@ -90,6 +95,7 @@ import { isReversableOrEditable } from '../../../../helpers';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../../../utils/constants';
 import { safeFormatDate } from '../../../../utils/formatUtils';
 import { useCurrentInitiative } from '../../../../hooks/useCurrentInitiative';
+import { useUserPermissions } from '../../../../hooks/useUserPermissions';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 
@@ -175,6 +181,9 @@ beforeEach(() => {
   (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
   (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
   (useCurrentInitiative as jest.Mock).mockReturnValue({ initiativeId: 'init-123', endDate: null });
+  (useUserPermissions as jest.Mock).mockReturnValue({
+    isActionDisabled: jest.fn().mockReturnValue(false),
+  });
   (useAppSelector as jest.Mock).mockReset();
   (window as any).open = jest.fn();
   global.fetch = jest.fn();
