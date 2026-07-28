@@ -1,41 +1,18 @@
-import { Paper, Box } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
-import DOMPurify from 'dompurify';
-import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import useScopedTranslation from '../../hooks/useScopedTranslation';
-import privacyHTML from './privacyHTML.json';
+import { useState } from 'react';
+import routes from '../../routes';
+import { useOneTrustNotice } from '../../hooks/useOneTrustNotice';
+import { ENV } from '../../utils/env';
+import OneTrustContentWrapper from '../components/OneTrustContentWrapper';
 
 const PrivacyPolicy = () => {
-  const { t } = useScopedTranslation();
-
-  return (
-    <Box sx={{ width: '100%', padding: '0 20px' }}>
-      <Box>
-        <Box mt={2} sx={{ display: 'grid', gridColumn: 'span 8' }}>
-          <TitleBox
-            title={t('pages.privacyPolicyStatic.title')}
-            mbTitle={2}
-            mtTitle={2}
-            variantTitle="h4"
-          />
-        </Box>
-      </Box>
-
-      <Paper elevation={1} square={true} sx={{ mt: 2 }}>
-        <Box px={4} pt={2} pb={4}>
-          <Grid container>
-            <Grid item xs={12}>
-              <div
-                className="content"
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(privacyHTML.html),
-                }}
-              />
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
-    </Box>
+  const [contentLoaded, setContentLoaded] = useState(false);
+  useOneTrustNotice(
+    ENV.ONE_TRUST.PRIVACY_POLICY_JSON_URL,
+    contentLoaded,
+    setContentLoaded,
+    routes.PRIVACY_POLICY
   );
+
+  return <OneTrustContentWrapper idSelector={ENV.ONE_TRUST.PRIVACY_POLICY_ID} />;
 };
 export default PrivacyPolicy;

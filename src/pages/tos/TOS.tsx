@@ -1,36 +1,14 @@
-import { Box, Paper } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
-import DOMPurify from 'dompurify';
-import TitleBox from '@pagopa/selfcare-common-frontend/lib/components/TitleBox';
-import useScopedTranslation from '../../hooks/useScopedTranslation';
-import tosHTML from './tosHTML.json';
-
-declare const OneTrust: any;
+import { useState } from 'react';
+import routes from '../../routes';
+import { useOneTrustNotice } from '../../hooks/useOneTrustNotice';
+import { ENV } from '../../utils/env';
+import OneTrustContentWrapper from '../components/OneTrustContentWrapper';
 
 const TOS = () => {
-  const { t } = useScopedTranslation();
+  const [contentLoaded, setContentLoaded] = useState(false);
 
-  return (
-    <Box sx={{ width: '100%', padding: '0 20px' }}>
-      <Box>
-        <Box mt={2} sx={{ display: 'grid', gridColumn: 'span 8' }}>
-          <TitleBox title={t('pages.tosStatic.title')} mbTitle={2} mtTitle={2} variantTitle="h4" />
-        </Box>
-      </Box>
+  useOneTrustNotice(ENV.ONE_TRUST.TOS_JSON_URL, contentLoaded, setContentLoaded, routes.TOS);
 
-      <Paper elevation={1} square={true} sx={{ mt: 2 }}>
-        <Box px={4} pt={2} pb={4}>
-          <Grid container>
-            <Grid item xs={12}>
-              <div
-                className="content"
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(tosHTML.html) }}
-              />
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
-    </Box>
-  );
+  return <OneTrustContentWrapper idSelector={ENV.ONE_TRUST.TOS_ID} />;
 };
 export default TOS;
