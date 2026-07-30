@@ -21,11 +21,15 @@ import { useGetInitiativesQuery } from './redux/api/initiativesApi';
 import WithInitiativeGuard from './decorators/withInitiativeGuard';
 import { routesConfig } from './routesConfig';
 import PosCatalog from './pages/pointOfSalesCatalog/posCatalog';
+import TOSWall from './components/TOS/TOSWall';
+import useTCAgreement from './hooks/useTCAgreement';
+import TOSLayout from './components/TOSLayout/TOSLayout';
 
 const SecuredRoutes = withLogin(
   withSelectedPartyProducts(() => {
     const [match, setMatch] = useState<any>(null);
     const location = useLocation();
+    const { isTOSAccepted, acceptTOS, firstAcceptance } = useTCAgreement();
 
     useEffect(() => {
       setMatch(
@@ -40,6 +44,29 @@ const SecuredRoutes = withLogin(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     useGetInitiativesQuery({ enabled: !match });
+
+    if (
+      isTOSAccepted === false &&
+      location.pathname !== routes.PRIVACY_POLICY &&
+      location.pathname !== routes.TOS
+    ) {
+      return (
+        <TOSLayout>
+          <TOSWall
+            acceptTOS={acceptTOS}
+            privacyRoute={routes.PRIVACY_POLICY}
+            tosRoute={routes.TOS}
+            firstAcceptance={firstAcceptance}
+          />
+        </TOSLayout>
+      );
+    } else if (
+      typeof isTOSAccepted === 'undefined' &&
+      location.pathname !== routes.PRIVACY_POLICY &&
+      location.pathname !== routes.TOS
+    ) {
+      return <></>;
+    }
 
     return (
       <AlertProvider>
