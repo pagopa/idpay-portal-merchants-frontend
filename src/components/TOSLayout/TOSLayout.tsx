@@ -1,51 +1,52 @@
-// import React, { useEffect, useState } from 'react';
-// import { Box } from '@mui/material';
-// import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/lib/hooks/useUnloadEventInterceptor';
-// import { useSelector } from 'react-redux';
-// import { userSelectors } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
-// import { useLocation } from 'react-router-dom';
-// import { Footer } from '@pagopa/selfcare-common-frontend/lib';
-// import Header from '../Header/Header';
-// import ROUTES from '../../routes';
+import React, { useEffect, useState } from 'react';
+import { Box } from '@mui/material';
+import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/lib/hooks/useUnloadEventInterceptor';
+import { useSelector } from 'react-redux';
+import { userSelectors } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
+import { useLocation } from 'react-router-dom';
+import ROUTES from '../../routes';
+import CustomHeader from '../Header/CustomHeader';
+import Footer from '../Footer/Footer';
 
-// type Props = {
-//   children?: React.ReactNode;
-// };
+type Props = {
+  children?: React.ReactNode;
+};
 
-// const TOSLayout = ({ children }: Props) => {
-//   const onExit = useUnloadEventOnExit();
-//   const loggedUser = useSelector(userSelectors.selectLoggedUser);
-//   const location = useLocation();
-//   const [showAssistanceInfo, setShowAssistanceInfo] = useState(true);
-//   useEffect(() => {
-//     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
-//   }, [location.pathname]);
-//   return (
-//     <Box
-//       display="grid"
-//       gridTemplateColumns="1fr"
-//       gridTemplateRows="auto 1fr auto"
-//       gridTemplateAreas={`"header"
-//                         "body"
-//                         "footer"`}
-//       minHeight="100vh"
-//     >
-//       <Box gridArea="header">
-//         <Header
-//           withSecondHeader={showAssistanceInfo}
-//           onExit={onExit}
-//           loggedUser={loggedUser}
-//           parties={[]}
-//         />
-//       </Box>
+const TOSLayout = ({ children }: Props) => {
+  const onExit = useUnloadEventOnExit();
+  const loggedUser = useSelector(userSelectors.selectLoggedUser);
+  const location = useLocation();
+  const [showAssistanceInfo, setShowAssistanceInfo] = useState(true);
 
-//       <Box gridArea="body">{children}</Box>
+  useEffect(() => {
+    setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
+  }, [location.pathname]);
+  return (
+    <Box
+      display="grid"
+      gridTemplateColumns="1fr"
+      gridTemplateRows="auto 1fr auto"
+      gridTemplateAreas={`"header"
+                        "body"
+                        "footer"`}
+      minHeight="100vh"
+    >
+      <Box gridArea="header">
+        <CustomHeader
+          withSecondHeader={showAssistanceInfo}
+          onExit={onExit}
+          loggedUser={loggedUser}
+          parties={[]}
+        />
+     </Box>
 
-//       <Box gridArea="footer">
-//         <Footer onExit={onExit} loggedUser={true} />
-//       </Box>
-//     </Box>
-//   );
-// };
+      <Box gridArea="body">{children}</Box>
 
-// export default TOSLayout;
+      <Box gridArea="footer">
+        <Footer onExit={onExit} loggedUser={true} />
+     </Box>
+   </Box>
+  );
+};
+
+export default TOSLayout;
