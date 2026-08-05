@@ -136,7 +136,7 @@ class MerchantsApiClient {
     return res.data;
   }
 
-  public async deleteTransaction(_transactionId: string): Promise<void> {
+  public async deleteTransaction(_initiativeId: string, _transactionId: string): Promise<void> {
     return Promise.resolve();
   }
 
@@ -150,6 +150,7 @@ class MerchantsApiClient {
   }
 
   public async authPaymentBarCode(
+    _initiativeId: string,
     _trxCode: string,
     _body: { amountCents: number; idTrxAcquirer: string }
   ): Promise<unknown> {
@@ -157,19 +158,21 @@ class MerchantsApiClient {
   }
 
   public async reversalTransactionInvoiced(
+    initiativeId: string,
     transactionId: string,
     file: File,
     docNumber?: string
   ): Promise<void> {
-    await this.transaction.reversalTransactionInvoiced({ transactionId }, { file, docNumber });
+    await this.transaction.reversalTransactionInvoiced({ initiativeId, transactionId }, { file, docNumber });
   }
 
   public async updateInvoiceTransaction(
+    initiativeId: string,
     transactionId: string,
     file: File,
     docNumber?: string
   ): Promise<void> {
-    await this.transaction.updateInvoiceTransaction({ transactionId }, { file, docNumber });
+    await this.transaction.updateInvoiceTransaction({ initiativeId, transactionId }, { file, docNumber });
   }
 
   public async downloadInvoiceFile(

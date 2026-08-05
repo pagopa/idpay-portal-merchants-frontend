@@ -2038,13 +2038,19 @@ paths:
               example:
                 code: PAYMENT_GENERIC_ERROR
                 message: Application error
-  /transactions/{transactionId}:
+  /initiatives/{initiativeId}/transactions/{transactionId}:
     delete:
       tags:
         - merchant-transactions
       summary: "ENG: Merchant delete transaction - IT: Cancellazione transazione da parte dell'esercente"
       operationId: deleteTransaction
       parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
         - name: transactionId
           in: path
           description: The transaction ID
@@ -2101,7 +2107,7 @@ paths:
               example:
                 code: PAYMENT_GENERIC_ERROR
                 message: Application error
-  /transactions/{transactionId}/reversal-invoiced:
+  /initiatives/{initiativeId}/transactions/{transactionId}/reversal-invoiced:
     post:
       tags:
         - transaction
@@ -2110,6 +2116,12 @@ paths:
         Allows the merchant to refound a transaction from a batch.
       operationId: reversalTransactionInvoiced
       parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
         - name: transactionId
           in: path
           required: true
@@ -2415,13 +2427,19 @@ paths:
           description: Too many requests
         "500":
           description: Server error
-  /transactions/bar-code/{trxCode}/authorize:
+  /initiatives/{initiativeId}/transactions/bar-code/{trxCode}/authorize:
     put:
       tags:
         - merchant-transactions
       summary: "ENG: Authorize payment - IT: Autorizzazione pagamento"
       operationId: authPaymentBarCode
       parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
         - name: trxCode
           in: path
           description: "ENG: The transaction's code - IT: Codice della transazione"
@@ -3013,7 +3031,7 @@ paths:
               $ref: '#/components/headers/X-RateLimit-Reset'
             Retry-After:
               $ref: '#/components/headers/Retry-After'
-  /transactions/{transactionId}/invoice/update:
+  /initiatives/{initiativeId}/transactions/{transactionId}/invoice/update:
     put:
       tags:
         - transaction
@@ -3021,6 +3039,12 @@ paths:
       description: "ENG: Point of sales invoice transaction update <br> IT: Aggiornamento del file e del numero fattura per una transazione da parte di un Punto Vendita"
       operationId: updateInvoiceTransaction
       parameters:
+        - name: initiativeId
+          in: path
+          description: The initiative ID
+          required: true
+          schema:
+            type: string
         - name: transactionId
           in: path
           description: The transaction ID

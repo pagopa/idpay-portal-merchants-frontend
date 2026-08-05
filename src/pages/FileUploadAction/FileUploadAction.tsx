@@ -8,15 +8,18 @@ import { useParams, useHistory } from 'react-router-dom';
 import BreadcrumbsBoxUpload from '../components/BreadcrumbsBoxUpload';
 import { useAlert } from '../../hooks/useAlert';
 import { useScopedTranslation } from '../../hooks/useScopedTranslation';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 
 interface FileUploadActionProps {
   apiCall:
     | ((
+        initiativeId: string,
         transactionId: string,
         file: File,
         docNumber: string
       ) => Promise<void | { code: string; message: string }>)
     | ((
+        initiativeId: string,
         transactionId: string,
         file: File,
         pointOfSaleId: string,
@@ -39,6 +42,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   styleClass,
   i18nBlockKey,
 }) => {
+  const {initiativeId} = useCurrentInitiativeId();
   const [file, setFile] = useState<File | null>(null);
   const [docNumber, setDocNumber] = useState<string>('');
 
@@ -153,7 +157,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
       try {
         const normalizedDocNumber = docNumber.trim();
-        const response = await (apiCall as any)(trxId, file, normalizedDocNumber);
+        const response = await (apiCall as any)(initiativeId, trxId, file, normalizedDocNumber);
 
         if (response?.code) {
           if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {

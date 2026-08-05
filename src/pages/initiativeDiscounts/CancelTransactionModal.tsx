@@ -6,6 +6,7 @@ import { MerchantTransactionDTO } from '../../api/generated/merchants/data-contr
 type TransactionStatusEnum = MerchantTransactionDTO['status'];
 import { deleteTransaction } from '../../services/merchantService';
 import { useAlert } from '../../hooks/useAlert';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 
 type Props = {
   openCancelTrxModal: boolean;
@@ -21,11 +22,12 @@ const CancelTransactionModal = ({
   trxId,
   status,
 }: Props) => {
+  const {initiativeId} = useCurrentInitiativeId();
   const { setAlert } = useAlert();
   const { t } = useScopedTranslation();
 
   const handleCancelTransaction = (trxId: string) => {
-    deleteTransaction(trxId)
+    deleteTransaction(initiativeId || '', trxId)
       .then((_res) => {
         window.location.reload();
       })
