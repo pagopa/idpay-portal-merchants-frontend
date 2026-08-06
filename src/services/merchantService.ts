@@ -271,10 +271,11 @@ export const getMerchantPointOfSaleTransactionsProcessed = (
   );
 
 export const downloadInvoiceFile = (
+  initiativeId: string,
   transactionId: string,
   pointOfSaleId: string
 ): Promise<DownloadInvoiceResponseDTO> =>
-  getMerchantsApi().downloadInvoiceFile(pointOfSaleId, transactionId);
+  getMerchantsApi().downloadInvoiceFile(initiativeId, pointOfSaleId, transactionId);
 
 export const getReportedUser = (
   initiativeId: string,

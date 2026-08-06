@@ -175,6 +175,7 @@ export default function InvoiceDetail({
     setLoading(true);
     try {
       const response = await getMerchantsApi().downloadInvoiceFile(
+        initiative_id,
         selectedTransaction?.pointOfSaleId,
         selectedTransaction?.trxId
       );

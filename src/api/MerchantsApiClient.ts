@@ -176,10 +176,12 @@ class MerchantsApiClient {
   }
 
   public async downloadInvoiceFile(
+    initiativeId: string,
     pointOfSaleId: string,
     transactionId: string
   ): Promise<DownloadInvoiceResponseDTO> {
     const res = await this.transaction.downloadInvoiceFile({
+      initiativeId,
       pointOfSaleId,
       transactionId,
     });
