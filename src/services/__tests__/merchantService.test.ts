@@ -129,8 +129,8 @@ describe('merchantService', () => {
   });
 
   test('deleteTransaction delegates correctly', async () => {
-    await deleteTransaction('trx');
-    expect(mockedApi.deleteTransaction).toHaveBeenCalledWith('trx');
+    await deleteTransaction('init-1', 'trx');
+    expect(mockedApi.deleteTransaction).toHaveBeenCalledWith('init-1', 'trx');
   });
 
   test('reversalTransactionInvoiced delegates correctly', async () => {
@@ -369,8 +369,8 @@ describe('merchantService', () => {
   });
 
   test('downloadInvoiceFile delegates correctly', async () => {
-    await downloadInvoiceFile('trx', 'pos');
-    expect(mockedApi.downloadInvoiceFile).toHaveBeenCalledWith('pos', 'trx');
+    await downloadInvoiceFile('init-1', 'trx', 'pos');
+    expect(mockedApi.downloadInvoiceFile).toHaveBeenCalledWith('init-1', 'pos', 'trx');
   });
 
   test('getReportedUser delegates correctly', async () => {

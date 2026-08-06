@@ -13,7 +13,6 @@ import { useAlert } from '../../hooks/useAlert';
 import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import DetailDrawer, { DetailDrawerProps } from '../Drawer/DetailDrawer';
 import { isReversableOrEditable } from '../../helpers';
-import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import getStatus from './useStatus';
 
 type Props = DetailDrawerProps & {
@@ -22,7 +21,6 @@ type Props = DetailDrawerProps & {
 };
 
 export default function TransactionDetail({ itemValues, listItem, ...rest }: Props) {
-  const {initiativeId} = useCurrentInitiativeId();
   const { setAlert } = useAlert();
   const { storeId } = useStore();
   const history = useHistory();
@@ -83,7 +81,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
     setIsLoading(true);
     try {
-      const response = await downloadInvoiceFile(initiativeId || '', selectedTransaction?.id, pointOfSaleId);
+      const response = await downloadInvoiceFile(merchantId, selectedTransaction?.id, pointOfSaleId);
       const { invoiceUrl } = response;
       const filename = selectedTransaction?.invoiceFile?.filename || 'fattura.pdf';
 
