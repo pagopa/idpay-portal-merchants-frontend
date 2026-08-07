@@ -9,6 +9,7 @@ import { authPaymentBarCode } from '../../services/merchantService';
 import { BASE_ROUTE } from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import WizardNavigation from './WizardNavigation';
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
 }
 
 const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: Props) => {
+  const {initiativeId} = useCurrentInitiativeId();
   const { setAlert } = useAlert();
   const { t } = useScopedTranslation();
   const history = useHistory();
@@ -118,7 +120,7 @@ const DiscountCode = ({ id, amount, code, setCode, activeStep, setActiveStep }: 
     if (amountCents && typeof discountCode === 'string') {
       const trxDate = new Date();
       const idTrxAcquirer = trxDate.getTime().toString();
-      authPaymentBarCode(discountCode, amountCents, idTrxAcquirer)
+      authPaymentBarCode(initiativeId || '', discountCode, amountCents, idTrxAcquirer)
         .then((response) => {
           type AuthResponse = {
             right?: {

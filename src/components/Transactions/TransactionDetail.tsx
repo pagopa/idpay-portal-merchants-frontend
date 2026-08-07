@@ -81,7 +81,7 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
     setIsLoading(true);
     try {
-      const response = await downloadInvoiceFile(selectedTransaction?.id, pointOfSaleId);
+      const response = await downloadInvoiceFile(merchantId, selectedTransaction?.id, pointOfSaleId);
       const { invoiceUrl } = response;
       const filename = selectedTransaction?.invoiceFile?.filename || 'fattura.pdf';
 

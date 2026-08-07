@@ -103,15 +103,16 @@ export const getMerchantInitiativeStatistics = (
 export const getMerchantDetail = (initiativeId: string): Promise<MerchantDetailDTO> =>
   getMerchantsApi().getMerchantDetail(initiativeId);
 
-export const deleteTransaction = (transactionId: string): Promise<void> =>
-  getMerchantsApi().deleteTransaction(transactionId);
+export const deleteTransaction = (initaitiveId: string, transactionId: string): Promise<void> =>
+  getMerchantsApi().deleteTransaction(initaitiveId, transactionId);
 
 export const reversalTransactionInvoiced = (
+  initiativeId: string,
   transactionId: string,
   file: File,
   docNumber?: string
 ): Promise<void | { code: string; message: string }> =>
-  getMerchantsApi().reversalTransactionInvoiced(transactionId, file, docNumber);
+  getMerchantsApi().reversalTransactionInvoiced(initiativeId, transactionId, file, docNumber);
 
 export const createTransaction = (
   amountCents: number,
@@ -127,11 +128,12 @@ export const createTransaction = (
   });
 
 export const authPaymentBarCode = (
+  initiativeId: string,
   trxCode: string,
   amountCents: number,
   idTrxAcquirer: string
 ): Promise<unknown> =>
-  getMerchantsApi().authPaymentBarCode(trxCode, {
+  getMerchantsApi().authPaymentBarCode(initiativeId, trxCode, {
     amountCents,
     idTrxAcquirer,
   });
@@ -269,10 +271,11 @@ export const getMerchantPointOfSaleTransactionsProcessed = (
   );
 
 export const downloadInvoiceFile = (
+  initiativeId: string,
   transactionId: string,
   pointOfSaleId: string
 ): Promise<DownloadInvoiceResponseDTO> =>
-  getMerchantsApi().downloadInvoiceFile(pointOfSaleId, transactionId);
+  getMerchantsApi().downloadInvoiceFile(initiativeId, pointOfSaleId, transactionId);
 
 export const getReportedUser = (
   initiativeId: string,
@@ -337,11 +340,12 @@ export const downloadMerchantReport = (initiativeId: string, reportId: string) =
   getMerchantsApi().downloadMerchantReport(initiativeId, reportId);
 
 export const updateInvoiceTransaction = (
+  initiativeId: string,
   transactionId: string,
   file: File,
   docNumber?: string
 ): Promise<{ code: string; message: string } | void> =>
-  getMerchantsApi().updateInvoiceTransaction(transactionId, file, docNumber);
+  getMerchantsApi().updateInvoiceTransaction(initiativeId, transactionId, file, docNumber);
 
 export const updateMerchantData = (
   initaitiveId: string,
