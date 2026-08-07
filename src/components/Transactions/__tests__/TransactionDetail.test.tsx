@@ -116,7 +116,7 @@ describe('TransactionDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseParams.mockReturnValue({ id: 'merchant-123' });
+    mockUseParams.mockReturnValue({ initiative_id: 'init-123' });
     mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/here' } });
 
     mockUseStore.mockReturnValue({ storeId: 'store-999' });
@@ -354,7 +354,7 @@ describe('TransactionDetail', () => {
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-8', 'store-999');
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-8', 'store-999');
       expect(linkMock.href).toBe('https://example.com/invoice.pdf');
       expect(linkMock.download).toBe('invoice-8.pdf');
       expect(linkMock.click).toHaveBeenCalled();
@@ -395,7 +395,7 @@ describe('TransactionDetail', () => {
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-9', 'store-999');
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-9', 'store-999');
       expect(linkMock.href).toBe('https://example.com/default.pdf');
       expect(linkMock.download).toBe('fattura.pdf');
       expect(linkMock.click).toHaveBeenCalled();
@@ -428,7 +428,7 @@ describe('TransactionDetail', () => {
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-10', 'store-999');
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-10', 'store-999');
       expect(mockSetAlert).toHaveBeenCalled();
     });
 

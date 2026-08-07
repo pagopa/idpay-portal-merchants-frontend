@@ -283,10 +283,10 @@ describe('MerchantsApiClient', () => {
     mockTransactionInstance.reversalTransactionInvoiced.mockResolvedValue({});
     const file = new File(['content'], 'invoice.pdf');
 
-    await api.reversalTransactionInvoiced('trx1', file, 'DOC001');
+    await api.reversalTransactionInvoiced('init1', 'trx1', file, 'DOC001');
 
     expect(mockTransactionInstance.reversalTransactionInvoiced).toHaveBeenCalledWith(
-      { transactionId: 'trx1' },
+      { initiativeId: 'init1', transactionId: 'trx1' },
       { file, docNumber: 'DOC001' }
     );
   });
@@ -295,10 +295,10 @@ describe('MerchantsApiClient', () => {
     mockTransactionInstance.updateInvoiceTransaction.mockResolvedValue({});
     const file = new File(['content'], 'invoice.pdf');
 
-    await api.updateInvoiceTransaction('trx1', file, 'DOC001');
+    await api.updateInvoiceTransaction('init1', 'trx1', file, 'DOC001');
 
     expect(mockTransactionInstance.updateInvoiceTransaction).toHaveBeenCalledWith(
-      { transactionId: 'trx1' },
+      { initiativeId: 'init1', transactionId: 'trx1' },
       { file, docNumber: 'DOC001' }
     );
   });
@@ -307,10 +307,11 @@ describe('MerchantsApiClient', () => {
     const mockData = { downloadUrl: 'http://example.com/invoice.pdf' };
     mockTransactionInstance.downloadInvoiceFile.mockResolvedValue({ data: mockData });
 
-    const result = await api.downloadInvoiceFile('pos1', 'trx1');
+    const result = await api.downloadInvoiceFile('init1', 'pos1', 'trx1');
 
     expect(result).toEqual(mockData);
     expect(mockTransactionInstance.downloadInvoiceFile).toHaveBeenCalledWith({
+      initiativeId: 'init1',
       pointOfSaleId: 'pos1',
       transactionId: 'trx1',
     });
