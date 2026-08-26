@@ -23,6 +23,8 @@ import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
 import { MerchantTransactionsListDTO } from '../../api/generated/merchants/data-contracts';
+import { getInitiativeProductLabel } from '../../utils/initiativeProductLabel';
+
 import InvoiceDetail from './detail/InvoiceDetail';
 
 interface RouteParams {
@@ -72,8 +74,9 @@ const InvoiceDataTable = ({
   ]);
   const { initiative_id, batch_id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
-  const { t } = useScopedTranslation();
+  const { t, initiativeName } = useScopedTranslation();
   const [isDownloading, setIsDownloading] = useState(false);
+  const productLabel = getInitiativeProductLabel(initiativeName);
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);
@@ -222,7 +225,7 @@ const InvoiceDataTable = ({
     },
     {
       field: 'additionalProperties.productName',
-      headerName: 'Elettrodomestico',
+      headerName: productLabel,
       flex: 2,
       sortable: false,
       disableColumnMenu: true,
@@ -384,7 +387,7 @@ const InvoiceDataTable = ({
               format: (val: any) => safeFormatDate(val),
             },
             {
-              label: 'Elettrodomestico',
+              label: productLabel,
               id: 'additionalProperties.productName',
               type: TYPE_TEXT.Text,
             },
