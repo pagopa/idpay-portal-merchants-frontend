@@ -24,6 +24,7 @@ import CustomChip from '../Chip/CustomChip';
 import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchants/data-contracts';
 import { useAlert } from '../../hooks/useAlert';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
+import { getInitiativeProductLabel } from '../../utils/initiativeProductLabel';
 import TransactionDataTable from './TransactionDataTable';
 import TransactionDetail from './TransactionDetail';
 import getStatus from './useStatus';
@@ -52,7 +53,7 @@ const MerchantTransactions = ({
   dataTableIsLoading,
 }: MerchantTransactionsProps) => {
   const { alert, setAlert } = useAlert();
-  const { t } = useScopedTranslation();
+  const { t, initiativeName } = useScopedTranslation();
   const [rows, setRows] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
@@ -61,8 +62,8 @@ const MerchantTransactions = ({
     gtinError: '',
     trxCodeError: '',
   });
-  // const [gtinValue, setGtinValue] = useState<string>('');
-  const listItemDetail = getDetailFieldList();
+  const productLabel = getInitiativeProductLabel(initiativeName);
+  const listItemDetail = getDetailFieldList(productLabel);
 
   const infoStyles = {
     fontWeight: theme.typography.fontWeightRegular,
@@ -118,7 +119,7 @@ const MerchantTransactions = ({
   const columns: Array<GridColDef> = [
     {
       field: 'productName',
-      headerName: t('commons.transactionsTableHeaders.productName'),
+      headerName: productLabel,
       flex: 2,
       editable: false,
       disableColumnMenu: true,
