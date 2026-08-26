@@ -41,17 +41,24 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
               dataTestId: 'change-file-btn',
               disabled: isModifyDocDisabled,
               onClick: () => {
+                const docNumber = itemValues?.invoiceFile?.docNumber;
                 const path = routes.MODIFY_DOCUMENT.replace(':initiative_id', merchantId)
                   .replace(':pointOfSaleId', storeId)
                   .replace(':trxId', itemValues.id)
-                  .replace(':fileDocNumber', window.btoa(itemValues?.invoiceFile?.docNumber ?? ''));
+                  .replace(':fileDocNumber', docNumber ? window.btoa(docNumber) : '-');
 
                 history.push(path, { fromLocation: history.location });
               },
             },
           ]
         : [],
-    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history, isModifyDocDisabled]
+    [
+      isReversableOrEditable,
+      itemValues?.id,
+      itemValues?.invoiceFile?.docNumber,
+      history,
+      isModifyDocDisabled,
+    ]
   );
 
   const reverseButton: DetailDrawerProps['buttons'] = useMemo(
@@ -71,7 +78,13 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
             },
           ]
         : [],
-    [isReversableOrEditable, itemValues?.id, itemValues?.invoiceFile?.docNumber, history, isReverseDisabled]
+    [
+      isReversableOrEditable,
+      itemValues?.id,
+      itemValues?.invoiceFile?.docNumber,
+      history,
+      isReverseDisabled,
+    ]
   );
 
   const getStatusChip = () => {
@@ -81,7 +94,11 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
   const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
     setIsLoading(true);
     try {
-      const response = await downloadInvoiceFile(merchantId, selectedTransaction?.id, pointOfSaleId);
+      const response = await downloadInvoiceFile(
+        merchantId,
+        selectedTransaction?.id,
+        pointOfSaleId
+      );
       const { invoiceUrl } = response;
       const filename = selectedTransaction?.invoiceFile?.filename || 'fattura.pdf';
 

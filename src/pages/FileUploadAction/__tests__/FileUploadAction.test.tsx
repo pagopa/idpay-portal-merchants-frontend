@@ -4,6 +4,7 @@ import { useAppSelector } from '../../../redux/hooks';
 
 const mockGoBack = jest.fn();
 const mockReplace = jest.fn();
+const mockUseParams = jest.fn();
 
 jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
   useCurrentInitiativeId: () => 'initiative-1',
@@ -20,11 +21,7 @@ jest.mock('../../../redux/hooks', () => ({
 }));
 
 jest.mock('react-router-dom', () => ({
-  useParams: () => ({
-    pointOfSaleId: 'pos1',
-    trxId: 'trx1',
-    fileDocNumber: undefined,
-  }),
+  useParams: () => mockUseParams(),
   useHistory: () => ({
     goBack: mockGoBack,
     replace: mockReplace,
@@ -76,6 +73,11 @@ describe('FileUploadAction', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseParams.mockReturnValue({
+      pointOfSaleId: 'pos1',
+      trxId: 'trx1',
+      fileDocNumber: undefined,
+    });
     window.open = jest.fn();
   });
 
@@ -244,10 +246,18 @@ describe('FileUploadAction', () => {
     expect(replaceButton).toBeInTheDocument();
   });
 
-  it('covers useEffect decoding success branch', () => {
-    // just ensure component renders when fileDocNumber exists
+  it('prefills the document number from fileDocNumber', async () => {
+    mockUseParams.mockReturnValue({
+      pointOfSaleId: 'pos1',
+      trxId: 'trx1',
+      fileDocNumber: window.btoa('DOC-1'),
+    });
+
     render(<FileUploadAction {...baseProps} />);
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByRole('textbox')).toHaveValue('DOC-1');
+    });
   });
 
   it('covers useEffect decoding fallback branch', () => {
