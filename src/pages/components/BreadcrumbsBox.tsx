@@ -19,6 +19,7 @@ const BreadcrumbsBox = ({ backLabel, items }: Props) => {
           minWidth: 0,
           '& .MuiBreadcrumbs-li': {
             minWidth: 0,
+            display: 'flex',
           },
           '& .MuiBreadcrumbs-ol': {
             flexWrap: 'nowrap',
@@ -30,7 +31,11 @@ const BreadcrumbsBox = ({ backLabel, items }: Props) => {
         <Box onClick={() => history.goBack()} sx={{ display: 'inline-flex', cursor: 'pointer' }}>
           <ButtonNaked
             startIcon={<ArrowBackIcon />}
-            sx={{ color: 'primary.main', fontSize: '1rem', marginBottom: '3px' }}
+            sx={{
+              color: 'primary.main',
+              fontSize: '1rem',
+              marginBottom: '0px',
+            }}
             weight="default"
             data-testid="back-btn-test"
           >

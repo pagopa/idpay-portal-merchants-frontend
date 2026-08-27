@@ -25,7 +25,15 @@ const BreadcrumbsBox = ({ backLabel, items, active, onClickBackButton, backButto
   };
   return (
     <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
-      <Breadcrumbs aria-label="breadcrumb">
+      <Breadcrumbs
+        aria-label="breadcrumb"
+        sx={{
+          '& .MuiBreadcrumbs-li button': {
+            marginBottom: '0px',
+            display: 'flex',
+          },
+        }}
+      >
         <ButtonNaked
           onClick={() => active && handleBackButton()}
           startIcon={<ArrowBackIcon />}
