@@ -12,19 +12,19 @@ import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 
 interface FileUploadActionProps {
   apiCall:
-    | ((
-        initiativeId: string,
-        transactionId: string,
-        file: File,
-        docNumber: string
-      ) => Promise<void | { code: string; message: string }>)
-    | ((
-        initiativeId: string,
-        transactionId: string,
-        file: File,
-        pointOfSaleId: string,
-        docNumber: string
-      ) => Promise<void | { code: string; message: string }>);
+  | ((
+    initiativeId: string,
+    transactionId: string,
+    file: File,
+    docNumber: string
+  ) => Promise<void | { code: string; message: string }>)
+  | ((
+    initiativeId: string,
+    transactionId: string,
+    file: File,
+    pointOfSaleId: string,
+    docNumber: string
+  ) => Promise<void | { code: string; message: string }>);
   successStateKey: string;
   breadcrumbsLabel: string;
   manualLink: string;
@@ -147,12 +147,10 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       setRequiredFileError(true);
       setFileSizeError(false);
       setFileTypeError(false);
-      return;
     }
 
     if (!docNumber || docNumber.trim().length < 2) {
       setDocNumberError(true);
-      return;
     }
 
     if (file && trxId && docNumber.trim().length >= 2) {
@@ -175,14 +173,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               isOpen: true,
               severity: 'error',
             });
-          } else {
-            setAlert({
-              text: t('modifyDocument.errors.errorAlert'),
-              isOpen: true,
-              severity: 'error',
-            });
           }
-
           setLoadingFile(false);
           return;
         }
@@ -205,8 +196,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         history.goBack();
       } catch (error: unknown) {
         setAlert({
-          title: t('errors.genericTitle'),
-          text: t('errors.genericDescription'),
+          text: t('modifyDocument.errors.errorAlert'),
           isOpen: true,
           severity: 'error',
         });
@@ -271,8 +261,8 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               docNumberError && docNumber === ''
                 ? t('validation.required')
                 : docNumberError && docNumber.trim().length < 2
-                ? 'Lunghezza minima 2 caratteri'
-                : ''
+                  ? 'Lunghezza minima 2 caratteri'
+                  : ''
             }
             required
           />
