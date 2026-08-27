@@ -87,14 +87,17 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
     }
 
     setFile(null);
-    setDocNumber('');
+
+    if (!fileDocNumber) {
+      setDocNumber('');
+    }
     setRequiredFileError(false);
     setDocNumberError(false);
     setFileSizeError(false);
     setFileTypeError(false);
     setLoadingFile(false);
     setInputKey((prev) => prev + 1);
-  }, [trxId]);
+  }, [trxId, fileDocNumber]);
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile) {

@@ -19,7 +19,7 @@ jest.mock('../../../routes', () => ({
   __esModule: true,
   default: {
     MODIFY_DOCUMENT:
-      '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/modify/:fileDocNumber',
+      '/merchants/:initiative_id/stores/:pointOfSaleId/transactions/:trxId/modify/:fileDocNumber',
     REVERSE: '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/reverse',
   },
 }));
@@ -514,7 +514,43 @@ describe('TransactionDetail', () => {
     const editBtn = screen.getByTestId('change-file-btn');
     fireEvent.click(editBtn);
 
-    expect(pushMock).toHaveBeenCalled();
-    expect(pushMock.mock.calls[0][0]).toContain('modify');
+    expect(pushMock).toHaveBeenCalledWith(
+      `${routes.MODIFY_DOCUMENT.replace(':initiative_id', 'init-123')
+        .replace(':pointOfSaleId', 'store-999')
+        .replace(':trxId', 'TRX-13')
+        .replace(':fileDocNumber', window.btoa('DOC-13'))}`,
+      { fromLocation: { pathname: '/here' } }
+    );
+  });
+
+  it('navigates to modify document with a placeholder when docNumber is null', () => {
+    const helpers = require('../../../helpers');
+    jest.spyOn(helpers, 'isReversableOrEditable').mockReturnValue(true);
+
+    const itemValues = {
+      id: 'TRX-14',
+      status: 'INVOICED',
+      invoiceFile: { filename: 'inv-14.pdf', docNumber: null },
+    };
+
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        setIsOpen={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('change-file-btn'));
+
+    expect(pushMock).toHaveBeenCalledWith(
+      `${routes.MODIFY_DOCUMENT.replace(':initiative_id', 'init-123')
+        .replace(':pointOfSaleId', 'store-999')
+        .replace(':trxId', 'TRX-14')
+        .replace(':fileDocNumber', '-')}`,
+      { fromLocation: { pathname: '/here' } }
+    );
   });
 });
