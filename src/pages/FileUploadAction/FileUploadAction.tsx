@@ -264,6 +264,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
                   ? 'Lunghezza minima 2 caratteri'
                   : ''
             }
+            required
           />
         </Box>
 
