@@ -16,6 +16,7 @@ export default function AutocompleteComponent({
   required,
   label,
   onTextChange,
+  loading
 }: Readonly<{
   options: Array<any>;
   onChangeDebounce?: (value: string) => void;
@@ -25,20 +26,13 @@ export default function AutocompleteComponent({
   required?: boolean;
   label?: string;
   onTextChange?: (value: string) => void;
+  loading?: boolean;
 }>) {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [optionValue, setOptionValue] = useState('');
   const { t } = useScopedTranslation();
 
   useEffect(() => {
-    if (inputValue.length < 5 || inputValue.trim().length === 0 || optionValue === inputValue) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
 
     const timer = setTimeout(() => {
       if (onChangeDebounce) {
@@ -49,10 +43,6 @@ export default function AutocompleteComponent({
       clearTimeout(timer);
     };
   }, [inputValue]);
-
-  useEffect(() => {
-    setLoading(false);
-  }, [options]);
 
   const getHelperText = () => {
     if (!inputError) {
@@ -80,10 +70,7 @@ export default function AutocompleteComponent({
         setOpen(false);
       }}
       isOptionEqualToValue={(option, value) => option?.address === value?.address}
-      getOptionLabel={(option) => {
-        setOptionValue(option?.Address?.Label ?? '');
-        return option?.Address?.Label ?? '';
-      }}
+      getOptionLabel={(option) => option?.Address?.Label ?? ''}
       options={options}
       loading={loading}
       noOptionsText={t('pages.pointOfSales.noOptionsText')}

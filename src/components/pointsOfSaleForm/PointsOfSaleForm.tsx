@@ -732,6 +732,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                           }}
                           inputError={!!getFieldError(index, 'address')}
                           errorText={getFieldError(index, 'address')}
+                          loading={loading}
                         />
                         {loading && (
                           <Typography variant="body2">

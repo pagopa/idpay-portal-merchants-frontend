@@ -11,9 +11,10 @@ import { axiosInstance } from './axiosInstance';
  */
 export const axiosFetchAdapter: typeof fetch = async (
   input: RequestInfo | URL,
-  init?: RequestInit
+  init?: RequestInit & {isExternalService?: boolean}
 ): Promise<Response> => {
   const url = typeof input === 'string' ? input : input.toString();
+  const isExternalService = init?.isExternalService;
 
   const axiosResponse = await axiosInstance.request({
     url,
@@ -21,6 +22,7 @@ export const axiosFetchAdapter: typeof fetch = async (
     headers: init?.headers as any,
     data: init?.body,
     responseType: 'arraybuffer',
+    isExternalService
   });
 
   if (axiosResponse.status === 204) {
