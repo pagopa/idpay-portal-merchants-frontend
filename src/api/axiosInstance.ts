@@ -74,8 +74,9 @@ axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError<unknown>) => {
     const status = error.response?.status;
+    const isExternalService = error?.response?.config?.isExternalService;
 
-    if (status === 401) {
+    if (status === 401 && !isExternalService) {
       store.dispatch(
         appStateActions.addError({
           id: 'tokenNotValid',

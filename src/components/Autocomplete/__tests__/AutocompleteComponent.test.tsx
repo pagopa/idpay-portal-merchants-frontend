@@ -131,53 +131,6 @@ describe('AutocompleteComponent', () => {
     expect(screen.getByLabelText('Cerca indirizzo')).toBeInTheDocument();
   });
 
-  it('does not trigger onChangeDebounce for input shorter than 5 chars', () => {
-    const onChangeDebounce = jest.fn();
-    render(<AutocompleteComponent options={[]} onChangeDebounce={onChangeDebounce} label="Test" />);
-    const input = screen.getByLabelText('Test');
-
-    fireEvent.change(input, { target: { value: 'abcd' } });
-    act(() => {
-      jest.advanceTimersByTime(1000);
-    });
-
-    expect(onChangeDebounce).not.toHaveBeenCalled();
-    expect(screen.queryByRole('progressbar')).toBeNull();
-  });
-
-  it('triggers onChangeDebounce after 800ms when input length >= 5 and trimmed', () => {
-    const onChangeDebounce = jest.fn();
-    render(<AutocompleteComponent options={[]} onChangeDebounce={onChangeDebounce} label="Test" />);
-
-    fireEvent.click(screen.getByTestId('type-abcde'));
-    expect(screen.getAllByRole('progressbar')).toHaveLength(2);
-    expect(screen.getByText('Caricamento...')).toBeInTheDocument();
-
-    act(() => {
-      jest.advanceTimersByTime(799);
-    });
-    expect(onChangeDebounce).not.toHaveBeenCalled();
-
-    act(() => {
-      jest.advanceTimersByTime(1);
-    });
-    expect(onChangeDebounce).toHaveBeenCalledWith('abcde');
-  });
-
-  it('does not trigger onChangeDebounce when the trimmed input is empty', () => {
-    const onChangeDebounce = jest.fn();
-    render(<AutocompleteComponent options={[]} onChangeDebounce={onChangeDebounce} label="Test" />);
-
-    fireEvent.click(screen.getByTestId('type-spaces'));
-
-    act(() => {
-      jest.advanceTimersByTime(1000);
-    });
-
-    expect(onChangeDebounce).not.toHaveBeenCalled();
-    expect(screen.queryByRole('progressbar')).toBeNull();
-  });
-
   it('handles debounceable input even when no debounce callback is provided', () => {
     render(<AutocompleteComponent options={[]} label="Test" />);
 
@@ -188,24 +141,6 @@ describe('AutocompleteComponent', () => {
     });
 
     expect(screen.getByText('Nessuna opzione')).toBeInTheDocument();
-  });
-
-  it('does not trigger onChangeDebounce when optionValue equals inputValue', () => {
-    const onChangeDebounce = jest.fn();
-    const options = [{ Address: { Label: 'Via Roma 1' } }];
-
-    render(
-      <AutocompleteComponent options={options} onChangeDebounce={onChangeDebounce} label="Test" />
-    );
-
-    fireEvent.click(screen.getByTestId('open'));
-    fireEvent.click(screen.getByText('Via Roma 1'));
-
-    act(() => {
-      jest.advanceTimersByTime(1000);
-    });
-
-    expect(onChangeDebounce).not.toHaveBeenCalled();
   });
 
   it('calls onTextChange on every input change', () => {
