@@ -60,7 +60,8 @@
     "validationDescription": "Verifica che i dati inseriti siano corretti",
     "pointOfSaleError": "Errore punto vendita",
     "duplicateEmailError": "Errore email referente",
-    "sendTheBatchForPreviousMonth": "Inviare prima i lotti relativi ai mesi precedenti"
+    "sendTheBatchForPreviousMonth": "Inviare prima i lotti relativi ai mesi precedenti",
+    "sendBatchinvalid": "Il termine per l'invio dei rimborsi è scaduto."
   },
   "pages": {
     "acceptNewDiscount": {
