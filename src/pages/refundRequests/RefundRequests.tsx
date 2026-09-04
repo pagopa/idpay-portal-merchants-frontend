@@ -38,6 +38,11 @@ const posTypeMapper: Record<string, string> = {
   ONLINE: 'Online',
 };
 
+const sendBatchErrorMessageByCode: Record<string, string> = {
+  REWARD_BATCH_PREVIOUS_NOT_SENT: 'errors.sendTheBatchForPreviousMonth',
+  REWARD_BATCH_SENT_NOT_PERMITTED: 'errors.sendBatchinvalid',
+};
+
 const RefundRequests = () => {
   const { setAlert } = useAlert();
   const { initiativeId } = useCurrentInitiativeId();
@@ -331,11 +336,12 @@ const RefundRequests = () => {
 
     try {
       const result: any = await sendRewardBatch(initiativeId, selectedRow);
+      const resultErrorMessageKey = result?.code ? sendBatchErrorMessageByCode[result.code] : undefined;
 
-      if (result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+      if (resultErrorMessageKey) {
         setAlert({
           title: t('errors.genericTitle'),
-          text: t('errors.sendTheBatchForPreviousMonth'),
+          text: t(resultErrorMessageKey),
           isOpen: true,
           severity: 'error',
         });
@@ -350,10 +356,12 @@ const RefundRequests = () => {
 
       await fetchRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
     } catch (error: any) {
-      if (error?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+      const errorMessageKey = error?.code ? sendBatchErrorMessageByCode[error.code] : undefined;
+
+      if (errorMessageKey) {
         setAlert({
           title: t('errors.genericTitle'),
-          text: t('errors.sendTheBatchForPreviousMonth'),
+          text: t(errorMessageKey),
           isOpen: true,
           severity: 'error',
         });
