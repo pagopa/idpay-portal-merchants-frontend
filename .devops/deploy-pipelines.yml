@@ -50,6 +50,10 @@ variables:
     react_app_analytics_enabled: '$(UAT_ANALYTICS_ENABLED)'
     react_app_analytics_mocked: '$(UAT_ANALYTICS_MOCKED)'
     react_app_mixpanel_token: '$(UAT_MIXPANEL_TOKEN)'
+
+    # MIXPANEL TEST
+    react_app_mixpanel_enable: 'true'
+    react_app_mixpanel_debug: 'true'
     react_app_one_trust_domain_id: 019a15b5-bdb4-7d03-8046-deb3bed80d75
 
     react_app_one_trust_otnotice_cdn_url: $(REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL_GLOBAL)
@@ -91,6 +95,10 @@ variables:
     react_app_analytics_enabled: '$(PROD_ANALYTICS_ENABLED)'
     react_app_analytics_mocked: '$(PROD_ANALYTICS_MOCKED)'
     react_app_mixpanel_token: '$(PROD_MIXPANEL_TOKEN)'
+
+    # MIXPANEL TEST
+    react_app_mixpanel_enable: 'false'
+    react_app_mixpanel_debug: 'false'
     react_app_one_trust_domain_id: 019a15d0-8140-7fc9-9550-800aa9b1be13
 
     react_app_one_trust_otnotice_cdn_url: $(REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL_GLOBAL)
@@ -133,6 +141,10 @@ variables:
     react_app_analytics_enabled: '$(DEV_ANALYTICS_ENABLED)'
     react_app_analytics_mocked: '$(DEV_ANALYTICS_MOCKED)'
     react_app_mixpanel_token: '$(DEV_MIXPANEL_TOKEN)'
+
+    # MIXPANEL TEST
+    react_app_mixpanel_enable: 'true'
+    react_app_mixpanel_debug: 'true'
     react_app_one_trust_domain_id: 019a15b5-bdb4-7d03-8046-deb3bed80d75
 
     react_app_one_trust_otnotice_cdn_url: $(REACT_APP_ONE_TRUST_OTNOTICE_CDN_URL_GLOBAL)
@@ -248,6 +260,11 @@ stages:
               REACT_APP_ANALYTICS_ENABLE: '$(react_app_analytics_enabled)'
               REACT_APP_ANALYTICS_MOCK: '$(react_app_analytics_mocked)'
               REACT_APP_MIXPANEL_TOKEN: '$(react_app_mixpanel_token)'
+
+              # MIXPANEL TEST
+              REACT_APP_MIXPANEL_ENABLE: '$(react_app_mixpanel_enable)'
+              REACT_APP_MIXPANEL_DEBUG: '$(react_app_mixpanel_debug)'
+              REACT_APP_MIXPANEL_API_HOST: 'https://api-eu.mixpanel.com'
               REACT_APP_ONE_TRUST_BASE_URL: '$(react_app_one_trust_base_url)'
               REACT_APP_ONE_TRUST_DOMAIN_ID: '$(react_app_one_trust_domain_id)'
 

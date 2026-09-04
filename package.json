@@ -29,6 +29,7 @@
     "formik": "^2.2.9",
     "i18next": "^26.0.1",
     "jest-sonar-reporter": "^2.0.0",
+    "mixpanel-browser": "^2.74.0",
     "node-fetch": "^3.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
