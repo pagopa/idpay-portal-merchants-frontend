@@ -8,7 +8,7 @@ import {
 import useScopedTranslation from './useScopedTranslation';
 
 export function usePlacesAutocomplete() {
-  const {t} = useScopedTranslation();
+  const { t } = useScopedTranslation();
   const [options, setOptions] = useState<Array<AddressAutocompleteResultItemDTO>>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,11 +29,7 @@ export function usePlacesAutocomplete() {
       setOptions([...(res?.ResultItems ?? [])]);
     } catch (err: any) {
       browserConsole.error('Autocomplete error', err);
-      if (err?.status === 401) {
-        setError(t("pages.pointOfSales.addressErrors.notAuthorized"));
-      } else {
-        setError(t("pages.pointOfSales.addressErrors.genericError"));
-      }
+      setError(t("pages.pointOfSales.addressErrors.genericError"));
     } finally {
       setLoading(false);
     }
