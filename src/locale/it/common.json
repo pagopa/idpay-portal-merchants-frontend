@@ -273,6 +273,10 @@
       "signName": "Nome insegna",
       "website": "Indirizzo web",
       "address": "Indirizzo",
+      "addressErrors" : {
+        "notAuthorized": "Si è verificato un errore, riprova più tardi.",
+        "genericError": "Errore nella ricerca."
+      },
       "requiredErrors": {
         "franchiseName": "Inserisci il nome dell'insegna",
         "address": "Inserisci l'indirizzo completo dell'insegna",
