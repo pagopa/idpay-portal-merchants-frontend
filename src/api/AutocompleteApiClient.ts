@@ -12,14 +12,15 @@ class AutocompleteApiClient {
   constructor() {
     this.autocompleteClient = new Autocomplete({
       baseUrl: `${ENV.URL_API.MERCHANTS}/address-search`,
-      customFetch: axiosFetchAdapter,
+      customFetch: axiosFetchAdapter
     });
   }
 
   public async getAddresses(
-    request: AddressAutocompleteRequestDTO
+    request: AddressAutocompleteRequestDTO,
+    options?: {isExternalService?: boolean}
   ): Promise<AddressAutocompleteResponseDTO> {
-    const response = await this.autocompleteClient.autocomplete(request, { format: 'json' });
+    const response = await this.autocompleteClient.autocomplete(request, { format: 'json', ...options });
     return response.data;
   }
 }
@@ -28,5 +29,5 @@ const client = new AutocompleteApiClient();
 
 export const AutocompleteApi = {
   getAddresses: (request: AddressAutocompleteRequestDTO): Promise<AddressAutocompleteResponseDTO> =>
-    client.getAddresses(request),
+    client.getAddresses(request, {isExternalService: true}),
 };
