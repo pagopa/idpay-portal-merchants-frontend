@@ -274,8 +274,8 @@
       "website": "Indirizzo web",
       "address": "Indirizzo",
       "addressErrors" : {
-        "notAuthorized": "Servizio non disponibile",
-        "genericError": "Errore nella ricerca"
+        "notAuthorized": "Si è verificato un errore, riprova più tardi.",
+        "genericError": "Errore nella ricerca."
       },
       "requiredErrors": {
         "franchiseName": "Inserisci il nome dell'insegna",
