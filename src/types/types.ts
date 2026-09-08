@@ -1,3 +1,4 @@
+import 'axios';
 export interface GetPointOfSalesFilters {
   associated?: 'YES' | 'NO';
   initiative?: string;
@@ -65,4 +66,10 @@ export interface SalePointFormDTO {
   website?: string;
 
   zipCode?: string;
+}
+
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    isExternalService?: boolean;
+  }
 }
