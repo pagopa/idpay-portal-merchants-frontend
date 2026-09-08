@@ -30,6 +30,10 @@ import { POS_UPDATE } from '../../utils/constants';
 import { SalePointFormDTO } from '../../types/types';
 import { ENV } from '../../utils/env';
 import { useAlert } from '../../hooks/useAlert';
+import {
+  MIXPANEL_EVENTS,
+  trackAnalyticsEvent,
+} from '../../services/analyticsService';
 
 interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
@@ -203,10 +207,12 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const handleConfirm = async () => {
     if (uploadMethod === POS_UPDATE.Manual) {
-      // Increment submitAttempt to force validation
+      trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_CONVERSION, {
+        store_number: salesPoints.length,
+      });
+
       setSubmitAttempt((prev) => prev + 1);
 
-      // Use timeout to wait for useEffect to run
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       if (
@@ -220,6 +226,9 @@ const InitiativeStoresUpload: React.FC = () => {
       const userJwt = parseJwt(storageTokenOps.read());
       const merchantId = userJwt?.merchant_id;
       if (!merchantId) {
+        trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_ERROR, {
+          reason: 'MISSING_MERCHANT_ID',
+        });
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.genericDescription'),
@@ -253,11 +262,17 @@ const InitiativeStoresUpload: React.FC = () => {
 
         if (responseValidationDetails?.length) {
           const { errors, alertMessages } = buildApiValidationState(responseValidationDetails);
+          trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_ERROR, {
+            reason: responseValidationDetails.map(({ code }) => code).filter(Boolean).join(','),
+          });
           setApiValidationErrors(errors);
           setApiValidationAlertMessages(alertMessages);
           return;
         }
         if (String(response.code) === 'POINT_OF_SALE_ALREADY_REGISTERED') {
+          trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_ERROR, {
+            reason: String(response.code),
+          });
           setAlert({
             title: t('errors.pointOfSaleAlreadyExistsError'),
             text: t('errors.pointOfSaleAlreadyExistsDescription'),
@@ -265,6 +280,9 @@ const InitiativeStoresUpload: React.FC = () => {
             severity: 'error',
           });
         } else {
+          trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_ERROR, {
+            reason: String(response.code || 'GENERIC_ERROR'),
+          });
           setAlert({
             title: t('errors.genericTitle'),
             text: t('errors.genericDescription'),
@@ -276,7 +294,7 @@ const InitiativeStoresUpload: React.FC = () => {
         setPointsOfSaleLoaded(true);
         history.push({
           pathname: generatePath(ROUTES.STORES, { initiative_id }),
-          state: { showSuccessAlert: true },
+          state: { showSuccessAlert: true, storeNumber: salesPoints.length },
         });
       }
     }

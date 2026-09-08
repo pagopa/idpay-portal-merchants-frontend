@@ -29,6 +29,7 @@ import { PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
 import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
+import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -49,9 +50,13 @@ const InitiativeStores: React.FC = () => {
   const { isActionDisabled } = useUserPermissions();
   const isAddStoreDisabled = isActionDisabled(PERMISSION_KEYS.STORES_ADD);
 
-  const location = useLocation<{ showSuccessAlert?: boolean }>();
+  const location = useLocation<{ showSuccessAlert?: boolean; storeNumber?: number }>();
   useEffect(() => {
     if (location.state?.showSuccessAlert) {
+      const storeNumber = location.state.storeNumber ?? 0;
+      const successProperties = { store_number: storeNumber };
+      trackAnalyticsEvent(MIXPANEL_EVENTS.NEW_STORES_SUCCESS, successProperties);
+      trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_SUCCESS, successProperties);
       setAlert({
         text: t('pages.initiativeStores.pointOfSalesUploadSuccess'),
         isOpen: true,

@@ -31,6 +31,7 @@ import { ENABLED_DOWNLOAD_STATUSES, MISSING_DATA_PLACEHOLDER } from '../../utils
 import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../utils/consoleLogger';
 import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
+import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 import { RefundRequestsModal } from './RefundRequestModal';
 
 type StatusEnum = RewardBatchDTO['status'];
@@ -337,6 +338,9 @@ const RefundRequests = () => {
       const result: any = await sendRewardBatch(initiativeId, selectedRow);
 
       if (result?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
+        trackAnalyticsEvent(MIXPANEL_EVENTS.INVOICE_SENT_ERROR, {
+          reason: result.code,
+        });
         setAlert({
           title: t('errors.genericTitle'),
           text: t('errors.sendTheBatchForPreviousMonth'),
@@ -346,6 +350,9 @@ const RefundRequests = () => {
         return;
       }
 
+      trackAnalyticsEvent(MIXPANEL_EVENTS.INVOICE_SENT_SUCCESS, {
+        invoice_number: rewardBatches.find(({ id }) => id === selectedRow)?.numberOfTransactions ?? 0,
+      });
       setAlert({
         text: t('pages.refundRequests.rewardBatchSentSuccess'),
         isOpen: true,
@@ -354,6 +361,9 @@ const RefundRequests = () => {
 
       await fetchRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
     } catch (error: any) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.INVOICE_SENT_ERROR, {
+        reason: error?.code || 'REQUEST_FAILED',
+      });
       if (error?.code === 'REWARD_BATCH_PREVIOUS_NOT_SENT') {
         setAlert({
           title: t('errors.genericTitle'),

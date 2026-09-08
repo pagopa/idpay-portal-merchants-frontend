@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { putMerchantOnboardingRequest } from '../services/merchantService';
+import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../services/analyticsService';
 
 export type InitiativeForOnboarding = {
   initiativeId: string;
@@ -45,6 +46,7 @@ export const useInitiativeOnboarding = (
     useState<OnboardingAlertState>(INITIAL_ALERT_STATE);
 
   const openOnboardingModal = useCallback((initiative: InitiativeForOnboarding) => {
+    trackAnalyticsEvent(MIXPANEL_EVENTS.INITIATIVE_ADHERENCE_START);
     setSelectedInitiative(initiative);
     setModalOpen(true);
   }, []);
@@ -62,6 +64,7 @@ export const useInitiativeOnboarding = (
     setIsOnboardingLoading(true);
     try {
       await putMerchantOnboardingRequest(selectedInitiative.initiativeId);
+      trackAnalyticsEvent(MIXPANEL_EVENTS.INITIATIVE_ADHERENCE_SUCCESS);
       closeOnboardingModal();
       setOnboardingAlertState({
         open: true,
@@ -101,4 +104,3 @@ export const useInitiativeOnboarding = (
 };
 
 export default useInitiativeOnboarding;
-
