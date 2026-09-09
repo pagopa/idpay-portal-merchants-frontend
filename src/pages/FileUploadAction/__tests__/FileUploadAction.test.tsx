@@ -134,6 +134,64 @@ describe('FileUploadAction', () => {
     });
   });
 
+  it('decodes the document number from params and keeps it when transaction id is missing', async () => {
+    mockUseParams.mockReturnValue({
+      trxId: undefined,
+      fileDocNumber: window.btoa('DOC-123'),
+    });
+
+    const { getByRole } = renderComponent();
+
+    await waitFor(() => {
+      expect(getByRole('textbox')).toHaveValue('DOC-123');
+    });
+  });
+
+  it('falls back to the raw document number when params decoding fails', async () => {
+    mockUseParams.mockReturnValue({
+      trxId: undefined,
+      fileDocNumber: '%%%not-base64%%%',
+    });
+
+    const { getByRole } = renderComponent();
+
+    await waitFor(() => {
+      expect(getByRole('textbox')).toHaveValue('%%%not-base64%%%');
+    });
+  });
+
+  it('resets the document number when route params change and the encoded value is removed', async () => {
+    mockUseParams.mockReturnValue({
+      trxId: 'transaction-1',
+      fileDocNumber: window.btoa('DOC-123'),
+    });
+
+    const { getByRole, rerender } = renderComponent();
+
+    await waitFor(() => {
+      expect(getByRole('textbox')).toHaveValue('DOC-123');
+    });
+
+    mockUseParams.mockReturnValue({
+      trxId: 'transaction-2',
+      fileDocNumber: undefined,
+    });
+
+    rerender(
+      <FileUploadAction
+        apiCall={jest.fn().mockResolvedValue(undefined)}
+        successStateKey="success"
+        breadcrumbsLabel="Breadcrumb"
+        manualLink=""
+        i18nBlockKey="modifyDocument"
+      />
+    );
+
+    await waitFor(() => {
+      expect(getByRole('textbox')).toHaveValue('');
+    });
+  });
+
   it('tracks file selection errors and removes the selected file', () => {
     const { getByTestId } = renderComponent();
 
@@ -164,6 +222,110 @@ describe('FileUploadAction', () => {
     });
   });
 
+  it('shows required and validation errors when continue is clicked without valid input', async () => {
+    const { getByRole, getByText } = renderComponent();
+
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+
+    await waitFor(() => {
+      expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
+        reason: 'FILE_REQUIRED',
+      });
+    });
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
+      reason: 'DOCUMENT_NUMBER_INVALID',
+    });
+    expect(getByText('modifyDocument.errors.requiredFileError')).toBeInTheDocument();
+    expect(getByText('validation.required')).toBeInTheDocument();
+  });
+
+  it('shows the minimum length validation message on blur for short document numbers', async () => {
+    const { getByRole, getByText } = renderComponent();
+
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'A' },
+    });
+    fireEvent.blur(getByRole('textbox'));
+
+    await waitFor(() => {
+      expect(getByText('Lunghezza minima 2 caratteri')).toBeInTheDocument();
+    });
+  });
+
+  it('does not update the document number when the input exceeds 100 characters', () => {
+    const { getByRole } = renderComponent();
+    const textbox = getByRole('textbox');
+
+    fireEvent.change(textbox, {
+      target: { value: 'DOC-123' },
+    });
+    fireEvent.change(textbox, {
+      target: { value: 'A'.repeat(101) },
+    });
+
+    expect(textbox).toHaveValue('DOC-123');
+  });
+
+  it('clears the validation message on blur when the document number is valid', async () => {
+    const { getByRole, getByText, queryByText } = renderComponent();
+    const textbox = getByRole('textbox');
+
+    fireEvent.change(textbox, {
+      target: { value: 'A' },
+    });
+    fireEvent.blur(textbox);
+
+    await waitFor(() => {
+      expect(getByText('Lunghezza minima 2 caratteri')).toBeInTheDocument();
+    });
+
+    fireEvent.change(textbox, {
+      target: { value: 'DOC-123' },
+    });
+    fireEvent.blur(textbox);
+
+    await waitFor(() => {
+      expect(queryByText('Lunghezza minima 2 caratteri')).not.toBeInTheDocument();
+    });
+  });
+
+  it('navigates back when the back button is clicked', () => {
+    const { getByRole } = renderComponent();
+
+    fireEvent.click(getByRole('button', { name: 'actions.back' }));
+
+    expect(historyMock.goBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the manual link in a new tab', () => {
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    const { getByText } = render(
+      <FileUploadAction
+        apiCall={jest.fn().mockResolvedValue(undefined)}
+        successStateKey="success"
+        breadcrumbsLabel="Breadcrumb"
+        manualLink="https://example.test/manual"
+        i18nBlockKey="modifyDocument"
+      />
+    );
+
+    fireEvent.click(getByText('modifyDocument.manualLink'));
+
+    expect(openSpy).toHaveBeenCalledWith('https://example.test/manual', '_blank');
+    openSpy.mockRestore();
+  });
+
+  it('opens an empty manual link fallback when no manual url is provided', () => {
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    const { getByText } = renderComponent();
+
+    fireEvent.click(getByText('modifyDocument.manualLink'));
+
+    expect(openSpy).toHaveBeenCalledWith('', '_blank');
+    openSpy.mockRestore();
+  });
+
   it('shows the alert when the API rejects the upload with a known error code', async () => {
     const apiCall = jest.fn().mockResolvedValue({
       code: 'REWARD_BATCH_STATUS_NOT_ALLOWED',
@@ -189,6 +351,70 @@ describe('FileUploadAction', () => {
       severity: 'error',
     });
     expect(historyMock.goBack).not.toHaveBeenCalled();
+  });
+
+  it('shows the already sent alert when the API rejects the upload with the already sent code', async () => {
+    const apiCall = jest.fn().mockResolvedValue({
+      code: 'REWARD_BATCH_ALREADY_SENT',
+    });
+    const { getByTestId, getByRole } = renderComponent(apiCall);
+
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'DOC-123' },
+    });
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+
+    await waitFor(() =>
+      expect(setAlertMock).toHaveBeenCalledWith({
+        text: 'modifyDocument.errors.alreadySentError',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
+  });
+
+  it('does not show a specific alert when the API returns an unknown error code', async () => {
+    const apiCall = jest.fn().mockResolvedValue({
+      code: 'UNKNOWN_CODE',
+    });
+    const { getByTestId, getByRole } = renderComponent(apiCall);
+
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'DOC-123' },
+    });
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+
+    await waitFor(() => {
+      expect(apiCall).toHaveBeenCalled();
+    });
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
+      reason: 'UNKNOWN_CODE',
+    });
+    expect(setAlertMock).not.toHaveBeenCalled();
+    expect(historyMock.goBack).not.toHaveBeenCalled();
+  });
+
+  it('does not call the api when the transaction id is missing even if file and document are provided', async () => {
+    const apiCall = jest.fn().mockResolvedValue(undefined);
+    mockUseParams.mockReturnValue({
+      trxId: undefined,
+      fileDocNumber: undefined,
+    });
+
+    const { getByRole, getByTestId } = renderComponent(apiCall);
+
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'DOC-123' },
+    });
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+
+    await waitFor(() => {
+      expect(apiCall).not.toHaveBeenCalled();
+    });
   });
 
   it('navigates back and shows success after a successful upload', async () => {
@@ -218,6 +444,30 @@ describe('FileUploadAction', () => {
     });
   });
 
+  it('stores the success state even when the current history state is missing', async () => {
+    historyMock.location = {
+      pathname: '/upload',
+    };
+
+    const apiCall = jest.fn().mockResolvedValue(undefined);
+    const { getByTestId, getByRole } = renderComponent(apiCall);
+
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'DOC-123' },
+    });
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+
+    await waitFor(() => {
+      expect(historyMock.replace).toHaveBeenCalledWith({
+        pathname: '/upload',
+        state: {
+          refundUploadSuccess: true,
+        },
+      });
+    });
+  });
+
   it('shows an alert when the upload request fails', async () => {
     const apiCall = jest.fn().mockRejectedValue(new Error('request failed'));
     const { getByTestId, getByRole } = renderComponent(apiCall);
@@ -238,6 +488,62 @@ describe('FileUploadAction', () => {
 
     expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
       reason: 'REQUEST_FAILED',
+    });
+  });
+
+  it('opens the hidden file input from the replace button and handles direct file selection', async () => {
+    const { container, getByRole, getByTestId } = renderComponent();
+
+    fireEvent.click(getByTestId('select-valid-file'));
+
+    const replaceButton = getByRole('button', { name: 'modifyDocument.replaceFile' });
+    const hiddenInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const clickSpy = jest.spyOn(hiddenInput, 'click');
+
+    fireEvent.click(replaceButton);
+
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+
+    const uploadedFile = new File(['xml-content'], 'invoice.xml', { type: 'application/xml' });
+
+    fireEvent.change(hiddenInput, {
+      target: { files: [uploadedFile] },
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('file-value')).toHaveTextContent('invoice.xml');
+    });
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_START');
+    expect(container.querySelector('input[type="file"]')).not.toBe(hiddenInput);
+  });
+
+  it('resets the hidden file input value when the file is removed', () => {
+    const { container, getByTestId } = renderComponent();
+    const hiddenInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+
+    Object.defineProperty(hiddenInput, 'value', {
+      configurable: true,
+      writable: true,
+      value: 'C:\\fakepath\\invoice.pdf',
+    });
+
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.click(getByTestId('remove-file'));
+
+    expect(hiddenInput.value).toBe('');
+  });
+
+  it('recreates the hidden input even when no file is selected from it', async () => {
+    const { container } = renderComponent();
+    const hiddenInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+
+    fireEvent.change(hiddenInput, {
+      target: { files: [] },
+    });
+
+    await waitFor(() => {
+      expect(container.querySelector('input[type="file"]')).not.toBe(hiddenInput);
     });
   });
 });
