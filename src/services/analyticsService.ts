@@ -3,6 +3,7 @@ import mixpanel, {
   type Config,
   type Mixpanel,
 } from 'mixpanel-browser';
+import { browserConsole } from '../utils/consoleLogger';
 
 const AUTOCAPTURE_CONFIG: AutocaptureConfig = {
   pageview: false,
@@ -146,7 +147,7 @@ export const initAnalytics = () => {
 
   const mixpanelToken = process.env.REACT_APP_MIXPANEL_TOKEN;
   if (!mixpanelToken) {
-    console.warn(
+    browserConsole.warn(
       '[Mixpanel] Missing REACT_APP_MIXPANEL_TOKEN: analytics initialization skipped.'
     );
     return;
