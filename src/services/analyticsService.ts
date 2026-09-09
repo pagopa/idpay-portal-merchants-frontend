@@ -18,6 +18,7 @@ const AUTOCAPTURE_CONFIG: AutocaptureConfig = {
 
 const MIXPANEL_CONFIG: Partial<Config> = {
   api_host: process.env.REACT_APP_MIXPANEL_API_HOST || 'https://api-eu.mixpanel.com',
+  debug: process.env.REACT_APP_MIXPANEL_DEBUG === 'true',
   persistence: 'localStorage',
   persistence_name: 'idpay-merchants-analytics',
   opt_out_tracking_cookie_prefix: '__mp_idpay_merchants_analytics_',

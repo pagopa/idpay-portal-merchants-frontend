@@ -38,6 +38,7 @@ describe('analyticsService', () => {
     delete process.env.REACT_APP_MIXPANEL_ENABLE;
     delete process.env.REACT_APP_MIXPANEL_TOKEN;
     delete process.env.REACT_APP_MIXPANEL_API_HOST;
+    delete process.env.REACT_APP_MIXPANEL_DEBUG;
 
     mockMixpanelInstance.has_opted_out_tracking.mockReturnValue(false);
     mockMixpanel.init.mockReturnValue(mockMixpanelInstance);
@@ -84,6 +85,7 @@ describe('analyticsService', () => {
     process.env.REACT_APP_MIXPANEL_ENABLE = 'true';
     process.env.REACT_APP_MIXPANEL_TOKEN = 'mixpanel-token';
     process.env.REACT_APP_MIXPANEL_API_HOST = 'https://custom.mixpanel.test';
+    process.env.REACT_APP_MIXPANEL_DEBUG = 'true';
 
     const {
       clearInitiativeAnalyticsProperties,
@@ -100,6 +102,7 @@ describe('analyticsService', () => {
       'mixpanel-token',
       expect.objectContaining({
         api_host: 'https://custom.mixpanel.test',
+        debug: true,
         persistence: 'localStorage',
         track_pageview: false,
       }),
