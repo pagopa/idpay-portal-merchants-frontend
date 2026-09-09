@@ -224,7 +224,10 @@ describe('InitiativeStoresUpload', () => {
     ]);
     expect(pushMock).toHaveBeenCalledWith({
       pathname: expect.stringContaining('/portale-esercenti/test-initiative/punti-vendita'),
-      state: { showSuccessAlert: true },
+      state: expect.objectContaining({
+        showSuccessAlert: true,
+        storeNumber: 1,
+      }),
     });
     expect(mockLatestFormProps.pointsOfSaleLoaded).toBe(true);
   });

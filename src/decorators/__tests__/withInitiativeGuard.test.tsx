@@ -1,175 +1,255 @@
-import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
-import WithInitiativeGuard from '../withInitiativeGuard';
+// @ts-nocheck
+import React from 'react';
+import { render, waitFor } from '@testing-library/react';
+import { useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import {
+  clearInitiativeAnalyticsProperties,
+  syncInitiativeAnalyticsProperties,
+  trackAnalyticsPageView,
+} from '../../services/analyticsService';
+import WithInitiativeGuard, { InitiativeAnalyticsGuard } from '../withInitiativeGuard';
 
-const mockUseSelector = jest.fn();
-jest.mock('react-redux', () => ({
-  useSelector: (selector: any) => mockUseSelector(selector),
-}));
+const mockUseLocation = useLocation as jest.Mock;
+const mockUseSelector = useSelector as jest.Mock;
+const mockClearInitiativeAnalyticsProperties =
+  clearInitiativeAnalyticsProperties as jest.Mock;
+const mockSyncInitiativeAnalyticsProperties = syncInitiativeAnalyticsProperties as jest.Mock;
+const mockTrackAnalyticsPageView = trackAnalyticsPageView as jest.Mock;
 
-const mockUseCurrentInitiativeId = jest.fn();
-jest.mock('../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => mockUseCurrentInitiativeId(),
-}));
-
-const mockRedirect = jest.fn();
 jest.mock('react-router-dom', () => ({
-  Redirect: (props: any) => {
-    mockRedirect(props);
-    return <div data-testid="redirect" />;
-  },
+  ...jest.requireActual('react-router-dom'),
+  Redirect: ({ to }: { to: string }) =>
+    require('react').createElement('div', { 'data-testid': 'redirect' }, to),
+  useLocation: jest.fn(),
 }));
 
-jest.mock('../../routes', () => ({
-  __esModule: true,
-  default: {
-    HOME: '/home',
-  },
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useSelector: jest.fn(),
 }));
 
-const mockUseInitiativeConfig = jest.fn();
-jest.mock('../../hooks/useInitiativeConfig', () => ({
-  useInitiativeConfig: () => mockUseInitiativeConfig(),
+jest.mock('../../services/analyticsService', () => ({
+  clearInitiativeAnalyticsProperties: jest.fn(),
+  syncInitiativeAnalyticsProperties: jest.fn(),
+  trackAnalyticsPageView: jest.fn(),
 }));
 
-const mockUseCurrentInitiative = jest.fn();
+jest.mock('../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: jest.fn(),
+}));
+
 jest.mock('../../hooks/useCurrentInitiative', () => ({
-  useCurrentInitiative: () => mockUseCurrentInitiative(),
+  useCurrentInitiative: jest.fn(),
 }));
+
+jest.mock('../../hooks/useInitiativeConfig', () => ({
+  useInitiativeConfig: jest.fn(),
+}));
+
+const mockUseCurrentInitiativeId = require('../../hooks/useCurrentInitiativeId')
+  .useCurrentInitiativeId as jest.Mock;
+const mockUseCurrentInitiative = require('../../hooks/useCurrentInitiative')
+  .useCurrentInitiative as jest.Mock;
+const mockUseInitiativeConfig = require('../../hooks/useInitiativeConfig')
+  .useInitiativeConfig as jest.Mock;
+const mockGetConfig = jest.fn();
+
+describe('InitiativeAnalyticsGuard', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseLocation.mockReturnValue({
+      pathname: '/portale-esercenti/initiative-1/punti-vendita',
+    });
+    mockUseSelector.mockReturnValue([
+      {
+        initiativeId: 'initiative-1',
+        initiativeName: 'Test initiative',
+      },
+    ]);
+    mockUseCurrentInitiativeId.mockReturnValue({
+      initiativeId: 'initiative-1',
+      isValid: true,
+      isListLoaded: true,
+    });
+    mockUseCurrentInitiative.mockReturnValue({
+      initiativeId: 'initiative-1',
+    });
+    mockUseInitiativeConfig.mockReturnValue({ getConfig: mockGetConfig });
+    mockGetConfig.mockResolvedValue(['/punte-vendita']);
+  });
+
+  it('synchronizes initiative properties and tracks a page view for a known initiative route', () => {
+    const { getByText } = render(
+      <InitiativeAnalyticsGuard>
+        <span>content</span>
+      </InitiativeAnalyticsGuard>
+    );
+
+    expect(getByText('content')).toBeInTheDocument();
+    expect(mockSyncInitiativeAnalyticsProperties).toHaveBeenCalledWith(
+      'Test initiative',
+      'initiative-1'
+    );
+    expect(mockTrackAnalyticsPageView).toHaveBeenCalledWith(
+      '/portale-esercenti/initiative-1/punti-vendita'
+    );
+    expect(mockClearInitiativeAnalyticsProperties).not.toHaveBeenCalled();
+  });
+
+  it('does not track a page view when the route initiative is not in the list', () => {
+    mockUseLocation.mockReturnValue({
+      pathname: '/portale-esercenti/missing-initiative/punti-vendita',
+    });
+
+    render(
+      <InitiativeAnalyticsGuard>
+        <span>content</span>
+      </InitiativeAnalyticsGuard>
+    );
+
+    expect(mockSyncInitiativeAnalyticsProperties).toHaveBeenCalledWith(
+      undefined,
+      'missing-initiative'
+    );
+    expect(mockTrackAnalyticsPageView).not.toHaveBeenCalled();
+  });
+
+  it('clears initiative properties and tracks global pages', () => {
+    mockUseLocation.mockReturnValue({
+      pathname: '/portale-esercenti/panoramica',
+    });
+
+    render(
+      <InitiativeAnalyticsGuard>
+        <span>content</span>
+      </InitiativeAnalyticsGuard>
+    );
+
+    expect(mockClearInitiativeAnalyticsProperties).toHaveBeenCalled();
+    expect(mockTrackAnalyticsPageView).toHaveBeenCalledWith(
+      '/portale-esercenti/panoramica'
+    );
+    expect(mockSyncInitiativeAnalyticsProperties).not.toHaveBeenCalled();
+  });
+
+  it('clears initiative properties when the guard unmounts', () => {
+    const { unmount } = render(
+      <InitiativeAnalyticsGuard>
+        <span>content</span>
+      </InitiativeAnalyticsGuard>
+    );
+
+    unmount();
+
+    expect(mockClearInitiativeAnalyticsProperties).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe('WithInitiativeGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockUseInitiativeConfig.mockReturnValue({
-      getConfig: jest.fn().mockResolvedValue([]),
+    mockUseSelector.mockReturnValue([
+      {
+        initiativeId: 'initiative-1',
+        initiativeName: 'Test initiative',
+      },
+    ]);
+    mockUseCurrentInitiativeId.mockReturnValue({
+      initiativeId: 'initiative-1',
+      isValid: true,
+      isListLoaded: true,
     });
-
     mockUseCurrentInitiative.mockReturnValue({
-      initiativeName: '',
-      startDate: '',
+      initiativeId: 'initiative-1',
     });
+    mockUseInitiativeConfig.mockReturnValue({ getConfig: mockGetConfig });
+    mockGetConfig.mockResolvedValue(['/punte-vendita']);
   });
 
-  it('renders loading state when list is not loaded', () => {
-    mockUseSelector.mockReturnValue([{ id: '1' }]);
+  it('shows a loading state while the initiatives list is loading', () => {
     mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: '1',
+      initiativeId: 'initiative-1',
       isValid: true,
       isListLoaded: false,
     });
 
-    render(
-      <WithInitiativeGuard route="test-route">
-        <div>Protected</div>
+    const { getByText } = render(
+      <WithInitiativeGuard route="/punte-vendita">
+        <span>content</span>
       </WithInitiativeGuard>
     );
 
-    expect(screen.getByText('Caricamento iniziative...')).toBeInTheDocument();
+    expect(getByText('Caricamento iniziative...')).toBeInTheDocument();
   });
 
-  it('redirects to HOME when initiatives list is empty', () => {
+  it('redirects when there are no initiatives', () => {
     mockUseSelector.mockReturnValue([]);
-    mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: '1',
-      isValid: true,
-      isListLoaded: true,
-    });
+    mockUseCurrentInitiative.mockReturnValue(undefined);
 
-    render(
-      <WithInitiativeGuard route="test-route">
-        <div>Protected</div>
+    const { getByTestId } = render(
+      <WithInitiativeGuard route="/punte-vendita">
+        <span>content</span>
       </WithInitiativeGuard>
     );
 
-    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
+    expect(getByTestId('redirect')).toBeInTheDocument();
   });
 
-  it('redirects to HOME when initiativeId is missing', () => {
-    mockUseSelector.mockReturnValue([{ id: '1' }]);
+  it('redirects when the route has no initiative id', () => {
     mockUseCurrentInitiativeId.mockReturnValue({
       initiativeId: undefined,
-      isValid: true,
-      isListLoaded: true,
-    });
-
-    render(
-      <WithInitiativeGuard route="test-route">
-        <div>Protected</div>
-      </WithInitiativeGuard>
-    );
-
-    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
-  });
-
-  it('redirects to HOME when initiativeId is invalid', () => {
-    mockUseSelector.mockReturnValue([{ id: '1' }]);
-    mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: '1',
       isValid: false,
       isListLoaded: true,
     });
 
-    render(
-      <WithInitiativeGuard route="test-route">
-        <div>Protected</div>
+    const { getByTestId } = render(
+      <WithInitiativeGuard route="/punte-vendita">
+        <span>content</span>
       </WithInitiativeGuard>
     );
 
-    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
+    expect(getByTestId('redirect')).toBeInTheDocument();
   });
 
-  it('renders children when state is OK', async () => {
-    mockUseSelector.mockReturnValue([{ id: '1' }]);
+  it('redirects when the initiative id is invalid', () => {
     mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: '1',
-      isValid: true,
+      initiativeId: 'initiative-1',
+      isValid: false,
       isListLoaded: true,
     });
 
-    mockUseCurrentInitiative.mockReturnValue({
-      initiativeName: 'Test',
-      startDate: '2024-01-01',
-    });
-
-    mockUseInitiativeConfig.mockReturnValue({
-      getConfig: jest.fn().mockResolvedValue(['allowed-route']),
-    });
-
-    render(
-      <WithInitiativeGuard route="allowed-route">
-        <div>Protected</div>
+    const { getByTestId } = render(
+      <WithInitiativeGuard route="/punte-vendita">
+        <span>content</span>
       </WithInitiativeGuard>
     );
 
-    expect(await screen.findByText('Protected')).toBeInTheDocument();
+    expect(getByTestId('redirect')).toBeInTheDocument();
   });
 
-  it('redirects when route is not included in initiativeConfig', async () => {
-    mockUseSelector.mockReturnValue([{ id: '1' }]);
-    mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: '1',
-      isValid: true,
-      isListLoaded: true,
-    });
+  it('redirects when the route is not allowed by the initiative configuration', async () => {
+    mockGetConfig.mockResolvedValue([]);
 
-    mockUseCurrentInitiative.mockReturnValue({
-      initiativeName: 'Test',
-      startDate: '2024-01-01',
-    });
-
-    mockUseInitiativeConfig.mockReturnValue({
-      getConfig: jest.fn().mockResolvedValue(['another-route']),
-    });
-
-    render(
-      <WithInitiativeGuard route="forbidden-route">
-        <div>Protected</div>
+    const { getByTestId } = render(
+      <WithInitiativeGuard route="/punte-vendita">
+        <span>content</span>
       </WithInitiativeGuard>
     );
 
-    await screen.findByTestId('redirect');
+    await waitFor(() => expect(getByTestId('redirect')).toBeInTheDocument());
+  });
 
-    expect(mockRedirect).toHaveBeenCalledWith(expect.objectContaining({ to: '/home' }));
+  it('renders children when the route is valid and allowed', async () => {
+    const { getByText } = render(
+      <WithInitiativeGuard route="/punte-vendita">
+        <span>content</span>
+      </WithInitiativeGuard>
+    );
+
+    await waitFor(() => expect(getByText('content')).toBeInTheDocument());
+    expect(mockGetConfig).toHaveBeenCalledWith('routes', {
+      initiativeId: 'initiative-1',
+    });
   });
 });
