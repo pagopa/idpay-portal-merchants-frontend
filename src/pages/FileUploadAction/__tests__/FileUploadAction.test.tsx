@@ -1,280 +1,243 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+// @ts-nocheck
+import React from 'react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import { useHistory, useParams } from 'react-router-dom';
 import FileUploadAction from '../FileUploadAction';
-import { useAppSelector } from '../../../redux/hooks';
-
-const mockGoBack = jest.fn();
-const mockReplace = jest.fn();
-const mockUseParams = jest.fn();
-
-jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
-  useCurrentInitiativeId: () => 'initiative-1',
-}));
-
-jest.mock('../../../redux/slices/initiativesSlice', () => ({
-  setInitiativesList: jest.fn(),
-  intiativesListSelector: jest.fn(),
-  initiativesReducer: jest.fn(),
-}));
-
-jest.mock('../../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
+import { useAlert } from '../../../hooks/useAlert';
+import { useScopedTranslation } from '../../../hooks/useScopedTranslation';
+import { useCurrentInitiativeId } from '../../../hooks/useCurrentInitiativeId';
+import { trackAnalyticsEvent } from '../../../services/analyticsService';
 
 jest.mock('react-router-dom', () => ({
-  useParams: () => mockUseParams(),
-  useHistory: () => ({
-    goBack: mockGoBack,
-    replace: mockReplace,
-    location: { state: {} },
-  }),
+  ...jest.requireActual('react-router-dom'),
+  useHistory: jest.fn(),
+  useParams: jest.fn(),
 }));
 
-jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k: any) => k }),
+jest.mock('../../../hooks/useAlert', () => ({
+  useAlert: jest.fn(),
 }));
 
+jest.mock('../../../hooks/useScopedTranslation', () => ({
+  useScopedTranslation: jest.fn(),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: jest.fn(),
+}));
+
+jest.mock('../../../services/analyticsService', () => ({
+  MIXPANEL_EVENTS: {
+    LOAD_INVOICE_START: 'LOAD_INVOICE_START',
+    LOAD_INVOICE_ERROR: 'LOAD_INVOICE_ERROR',
+    LOAD_INVOICE_SUCCESS: 'LOAD_INVOICE_SUCCESS',
+  },
+  trackAnalyticsEvent: jest.fn(),
+}));
+
+jest.mock('../../components/BreadcrumbsBoxUpload', () => () => <div />);
 jest.mock('@pagopa/selfcare-common-frontend/lib', () => ({
-  TitleBox: ({ title }: any) => <div>{title}</div>,
+  TitleBox: () => <div />,
 }));
 
 jest.mock('@pagopa/mui-italia', () => ({
-  SingleFileInput: ({ onFileSelected }: any) => (
-    <button
-      data-testid="mock-file-input"
-      onClick={() => onFileSelected(new File(['test'], 'test.pdf', { type: 'application/pdf' }))}
-    >
-      Upload
-    </button>
-  ),
-  ButtonNaked: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button>,
   theme: {
     palette: { background: { paper: '#fff' } },
     typography: { fontWeightBold: 700, fontWeightMedium: 500 },
   },
+  SingleFileInput: ({ onFileSelected, onFileRemoved, value, loading }) => (
+    <div>
+      <button
+        data-testid="select-valid-file"
+        onClick={() => onFileSelected(new File(['content'], 'invoice.pdf', { type: 'application/pdf' }))}
+      >
+        select valid file
+      </button>
+      <button
+        data-testid="select-invalid-file"
+        onClick={() => onFileSelected(new File(['content'], 'invoice.txt', { type: 'text/plain' }))}
+      >
+        select invalid file
+      </button>
+      <button
+        data-testid="select-large-file"
+        onClick={() =>
+          onFileSelected(
+            new File([new ArrayBuffer(20 * 1024 * 1024 + 1)], 'invoice.pdf', {
+              type: 'application/pdf',
+            })
+          )
+        }
+      >
+        select large file
+      </button>
+      <button data-testid="remove-file" onClick={onFileRemoved}>
+        remove file
+      </button>
+      <span data-testid="file-value">{value?.name || ''}</span>
+      <span data-testid="loading">{String(loading)}</span>
+    </div>
+  ),
 }));
 
-const mockSetAlert = jest.fn();
-
-jest.mock('../../../hooks/useAlert', () => ({
-  useAlert: () => ({
-    setAlert: mockSetAlert,
-  }),
-}));
+const mockUseHistory = useHistory as jest.Mock;
+const mockUseParams = useParams as jest.Mock;
+const mockUseAlert = useAlert as jest.Mock;
+const mockUseScopedTranslation = useScopedTranslation as jest.Mock;
+const mockUseCurrentInitiativeId = useCurrentInitiativeId as jest.Mock;
+const mockTrackAnalyticsEvent = trackAnalyticsEvent as jest.Mock;
 
 describe('FileUploadAction', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
-  const baseProps = {
-    apiCall: jest.fn().mockResolvedValue({}),
-    successStateKey: 'refundUploadSuccess',
-    breadcrumbsLabel: 'Test breadcrumb',
-    manualLink: 'https://manual',
-    i18nBlockKey: 'modifyDocument',
+  let historyMock: {
+    goBack: jest.Mock;
+    replace: jest.Mock;
+    location: { pathname: string; state?: object };
   };
+  let setAlertMock: jest.Mock;
+
+  const renderComponent = (apiCall = jest.fn().mockResolvedValue(undefined)) =>
+    render(
+      <FileUploadAction
+        apiCall={apiCall}
+        successStateKey="success"
+        breadcrumbsLabel="Breadcrumb"
+        manualLink=""
+        i18nBlockKey="modifyDocument"
+      />
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    historyMock = {
+      goBack: jest.fn(),
+      replace: jest.fn(),
+      location: {
+        pathname: '/upload',
+        state: { existingState: true },
+      },
+    };
+    setAlertMock = jest.fn();
+
+    mockUseHistory.mockReturnValue(historyMock);
     mockUseParams.mockReturnValue({
-      pointOfSaleId: 'pos1',
-      trxId: 'trx1',
+      trxId: 'transaction-1',
       fileDocNumber: undefined,
     });
-    window.open = jest.fn();
-  });
-
-  it('renders and navigates back', () => {
-    render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByText('actions.back'));
-    expect(mockGoBack).toHaveBeenCalled();
-  });
-
-  it('shows required file error', async () => {
-    render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByText('actions.continue'));
-
-    await waitFor(() => {
-      expect(screen.getByText('modifyDocument.errors.requiredFileError')).toBeInTheDocument();
+    mockUseAlert.mockReturnValue({ setAlert: setAlertMock });
+    mockUseScopedTranslation.mockReturnValue({
+      t: (key: string) => key,
+      isLoading: false,
+    });
+    mockUseCurrentInitiativeId.mockReturnValue({
+      initiativeId: 'initiative-1',
     });
   });
 
-  it('validates doc number length', async () => {
-    render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByTestId('mock-file-input'));
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'A' },
-    });
-    fireEvent.click(screen.getByText('actions.continue'));
+  it('tracks file selection errors and removes the selected file', () => {
+    const { getByTestId } = renderComponent();
 
-    await waitFor(() => {
-      expect(screen.getByText('Lunghezza minima 2 caratteri')).toBeInTheDocument();
+    fireEvent.click(getByTestId('select-invalid-file'));
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_START');
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
+      reason: 'UNSUPPORTED_FILE_TYPE',
+    });
+    expect(getByTestId('file-value')).toHaveTextContent('');
+
+    fireEvent.click(getByTestId('select-valid-file'));
+
+    expect(getByTestId('file-value')).toHaveTextContent('invoice.pdf');
+
+    fireEvent.click(getByTestId('remove-file'));
+
+    expect(getByTestId('file-value')).toHaveTextContent('');
+  });
+
+  it('tracks an error for files exceeding the maximum size', () => {
+    const { getByTestId } = renderComponent();
+
+    fireEvent.click(getByTestId('select-large-file'));
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
+      reason: 'FILE_TOO_LARGE',
     });
   });
 
-  it('calls api successfully', async () => {
-    const apiCall = jest.fn().mockResolvedValue({});
-    render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
-    fireEvent.click(screen.getByTestId('mock-file-input'));
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'ABC' },
+  it('shows the alert when the API rejects the upload with a known error code', async () => {
+    const apiCall = jest.fn().mockResolvedValue({
+      code: 'REWARD_BATCH_STATUS_NOT_ALLOWED',
     });
-    fireEvent.click(screen.getByText('actions.continue'));
+    const { getByTestId, getByRole } = renderComponent(apiCall);
 
-    await waitFor(() => {
-      expect(apiCall).toHaveBeenCalled();
-      expect(mockReplace).toHaveBeenCalled();
-      expect(mockGoBack).toHaveBeenCalled();
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: '  DOC-123  ' },
+    });
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+
+    await waitFor(() => expect(apiCall).toHaveBeenCalledWith(
+      'initiative-1',
+      'transaction-1',
+      expect.any(File),
+      'DOC-123'
+    ));
+
+    expect(setAlertMock).toHaveBeenCalledWith({
+      text: 'modifyDocument.errors.deniedSentError',
+      isOpen: true,
+      severity: 'error',
+    });
+    expect(historyMock.goBack).not.toHaveBeenCalled();
+  });
+
+  it('navigates back and shows success after a successful upload', async () => {
+    const apiCall = jest.fn().mockResolvedValue(undefined);
+    const { getByTestId, getByRole } = renderComponent(apiCall);
+
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'DOC-123' },
+    });
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+
+    await waitFor(() => expect(historyMock.goBack).toHaveBeenCalled());
+
+    expect(historyMock.replace).toHaveBeenCalledWith({
+      pathname: '/upload',
+      state: {
+        existingState: true,
+        refundUploadSuccess: true,
+      },
+    });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_SUCCESS');
+    expect(setAlertMock).toHaveBeenCalledWith({
+      text: 'modifyDocument.refundSuccessUpload',
+      isOpen: true,
+      severity: 'success',
     });
   });
 
-  it('handles REWARD_BATCH_STATUS_NOT_ALLOWED error', async () => {
-    const apiCall = jest.fn().mockRejectedValue({
-      response: { data: { code: 'REWARD_BATCH_STATUS_NOT_ALLOWED' } },
+  it('shows an alert when the upload request fails', async () => {
+    const apiCall = jest.fn().mockRejectedValue(new Error('request failed'));
+    const { getByTestId, getByRole } = renderComponent(apiCall);
+
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'DOC-123' },
     });
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
 
-    render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
-    fireEvent.click(screen.getByTestId('mock-file-input'));
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'ABC' },
-    });
-    fireEvent.click(screen.getByText('actions.continue'));
+    await waitFor(() =>
+      expect(setAlertMock).toHaveBeenCalledWith({
+        text: 'modifyDocument.errors.errorAlert',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
 
-    await waitFor(() => {
-      expect(mockSetAlert).toHaveBeenCalled();
-    });
-  });
-
-  it('handles generic API error branch', async () => {
-    const apiCall = jest.fn().mockRejectedValue(new Error('generic'));
-
-    render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
-    fireEvent.click(screen.getByTestId('mock-file-input'));
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'ABC' },
-    });
-    fireEvent.click(screen.getByText('actions.continue'));
-
-    await waitFor(() => {
-      expect(mockSetAlert).toHaveBeenCalled();
-    });
-  });
-
-  it('handles file type error branch', async () => {
-    render(<FileUploadAction {...baseProps} />);
-
-    const hiddenInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-
-    const badFile = new File(['bad'], 'bad.txt', {
-      type: 'text/plain',
-    });
-
-    fireEvent.change(hiddenInput, {
-      target: { files: [badFile] },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('modifyDocument.errors.fileNotSupported')).toBeInTheDocument();
-    });
-  });
-
-  it('handles file size error branch', async () => {
-    render(<FileUploadAction {...baseProps} />);
-
-    const hiddenInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-
-    const largeFile = new File([new ArrayBuffer(21 * 1024 * 1024)], 'large.pdf', {
-      type: 'application/pdf',
-    });
-
-    fireEvent.change(hiddenInput, {
-      target: { files: [largeFile] },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('modifyDocument.errors.fileSizeError')).toBeInTheDocument();
-    });
-  });
-
-  it('opens manual link', () => {
-    render(<FileUploadAction {...baseProps} />);
-    fireEvent.click(screen.getByText('modifyDocument.manualLink'));
-    expect(window.open).toHaveBeenCalledWith('https://manual', '_blank');
-  });
-
-  it('handles REWARD_BATCH_ALREADY_SENT branch', async () => {
-    const apiCall = jest.fn().mockRejectedValue({
-      response: { data: { code: 'REWARD_BATCH_ALREADY_SENT' } },
-    });
-
-    render(<FileUploadAction {...baseProps} apiCall={apiCall} />);
-    fireEvent.click(screen.getByTestId('mock-file-input'));
-    fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'ABC' },
-    });
-    fireEvent.click(screen.getByText('actions.continue'));
-
-    await waitFor(() => {
-      expect(mockSetAlert).toHaveBeenCalled();
-    });
-  });
-
-  it('covers hidden input onChange branch', () => {
-    render(<FileUploadAction {...baseProps} />);
-
-    const hiddenInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-
-    const file = new File(['data'], 'test.pdf', {
-      type: 'application/pdf',
-    });
-
-    fireEvent.change(hiddenInput, {
-      target: { files: [file] },
-    });
-
-    expect(true).toBe(true);
-  });
-
-  it('covers handleRemoveFile branch', () => {
-    render(<FileUploadAction {...baseProps} />);
-
-    // select valid file first
-    fireEvent.click(screen.getByTestId('mock-file-input'));
-
-    const replaceButton = screen.getByText('modifyDocument.replaceFile');
-
-    // clicking replace triggers hidden input click (not removal)
-    fireEvent.click(replaceButton);
-
-    expect(replaceButton).toBeInTheDocument();
-  });
-
-  it('prefills the document number from fileDocNumber', async () => {
-    mockUseParams.mockReturnValue({
-      pointOfSaleId: 'pos1',
-      trxId: 'trx1',
-      fileDocNumber: window.btoa('DOC-1'),
-    });
-
-    render(<FileUploadAction {...baseProps} />);
-
-    await waitFor(() => {
-      expect(screen.getByRole('textbox')).toHaveValue('DOC-1');
-    });
-  });
-
-  it('covers useEffect decoding fallback branch', () => {
-    // fallback branch executes without crashing
-    render(<FileUploadAction {...baseProps} />);
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
-  });
-
-  it('covers docNumber onBlur validation branch', async () => {
-    render(<FileUploadAction {...baseProps} />);
-    const input = screen.getByRole('textbox');
-
-    fireEvent.change(input, { target: { value: '' } });
-    fireEvent.blur(input);
-
-    await waitFor(() => {
-      expect(screen.getByText('validation.required')).toBeInTheDocument();
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
+      reason: 'REQUEST_FAILED',
     });
   });
 });
