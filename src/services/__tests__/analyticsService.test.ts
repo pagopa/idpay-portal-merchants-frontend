@@ -15,9 +15,17 @@ const mockMixpanel = {
   init: jest.fn(() => mockMixpanelInstance),
 };
 
+const mockBrowserConsole = {
+  warn: jest.fn(),
+};
+
 jest.mock('mixpanel-browser', () => ({
   __esModule: true,
   default: mockMixpanel,
+}));
+
+jest.mock('../../utils/consoleLogger', () => ({
+  browserConsole: mockBrowserConsole,
 }));
 
 const loadAnalyticsService = () => {
@@ -71,12 +79,11 @@ describe('analyticsService', () => {
   it('skips initialization and warns when the Mixpanel token is missing', () => {
     process.env.REACT_APP_MIXPANEL_ENABLE = 'true';
     const { initAnalytics } = loadAnalyticsService();
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 
     initAnalytics();
 
     expect(mockMixpanel.init).not.toHaveBeenCalled();
-    expect(warnSpy).toHaveBeenCalledWith(
+    expect(mockBrowserConsole.warn).toHaveBeenCalledWith(
       '[Mixpanel] Missing REACT_APP_MIXPANEL_TOKEN: analytics initialization skipped.'
     );
   });
