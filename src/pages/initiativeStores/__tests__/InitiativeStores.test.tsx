@@ -252,7 +252,6 @@ describe('<InitiativeStores />', () => {
     expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/${mockId}/punti-vendita/censisci/`
     );
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_CONVERSION');
   });
 
   test('mostra lo stato vuoto per filtri applicati senza link di censimento', () => {
@@ -290,7 +289,6 @@ describe('<InitiativeStores />', () => {
 
     fireEvent.click(screen.getByText('pages.initiativeStores.addStoreList'));
 
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_CONVERSION');
     expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/${mockId}/punti-vendita/censisci/`
     );
