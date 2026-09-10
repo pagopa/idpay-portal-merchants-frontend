@@ -136,6 +136,32 @@ const submitValidForm = async () => {
   await waitFor(() => expect(updateMerchantPointOfSalesMock).toHaveBeenCalled());
 };
 
+const expectStoreSubmissionError = async ({
+  apiResponse,
+  expectedAlert,
+  expectedReason,
+}: {
+  apiResponse: Record<string, unknown>;
+  expectedAlert: {
+    title: string;
+    text: string;
+    isOpen: boolean;
+    severity: 'error';
+  };
+  expectedReason: string;
+}) => {
+  updateMerchantPointOfSalesMock.mockResolvedValue(apiResponse);
+  renderComponent();
+
+  await submitValidForm();
+
+  expect(mockSetAlert).toHaveBeenCalledWith(expectedAlert);
+  expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+    reason: expectedReason,
+  });
+  expect(pushMock).not.toHaveBeenCalled();
+};
+
 describe('InitiativeStoresUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -286,45 +312,35 @@ describe('InitiativeStoresUpload', () => {
   });
 
   it('shows the duplicate point-of-sale error returned by the API', async () => {
-    updateMerchantPointOfSalesMock.mockResolvedValue({
-      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
-      message: 'shop@example.com',
+    await expectStoreSubmissionError({
+      apiResponse: {
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: 'shop@example.com',
+      },
+      expectedAlert: {
+        title: 'errors.pointOfSaleAlreadyExistsError',
+        text: 'errors.pointOfSaleAlreadyExistsDescription',
+        isOpen: true,
+        severity: 'error',
+      },
+      expectedReason: 'POINT_OF_SALE_ALREADY_REGISTERED',
     });
-    renderComponent();
-
-    await submitValidForm();
-
-    expect(mockSetAlert).toHaveBeenCalledWith({
-      title: 'errors.pointOfSaleAlreadyExistsError',
-      text: 'errors.pointOfSaleAlreadyExistsDescription',
-      isOpen: true,
-      severity: 'error',
-    });
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
-      reason: 'POINT_OF_SALE_ALREADY_REGISTERED',
-    });
-    expect(pushMock).not.toHaveBeenCalled();
   });
 
   it('shows a generic error for an unrecognized API response', async () => {
-    updateMerchantPointOfSalesMock.mockResolvedValue({
-      code: 'UNKNOWN_ERROR',
-      message: 'Unexpected error',
+    await expectStoreSubmissionError({
+      apiResponse: {
+        code: 'UNKNOWN_ERROR',
+        message: 'Unexpected error',
+      },
+      expectedAlert: {
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      },
+      expectedReason: 'UNKNOWN_ERROR',
     });
-    renderComponent();
-
-    await submitValidForm();
-
-    expect(mockSetAlert).toHaveBeenCalledWith({
-      title: 'errors.genericTitle',
-      text: 'errors.genericDescription',
-      isOpen: true,
-      severity: 'error',
-    });
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
-      reason: 'UNKNOWN_ERROR',
-    });
-    expect(pushMock).not.toHaveBeenCalled();
   });
 
   it('maps API validation errors to field errors and alert messages', async () => {

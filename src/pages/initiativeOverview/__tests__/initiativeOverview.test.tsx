@@ -102,6 +102,41 @@ const renderComponent = () => {
   );
 };
 
+const expectEmailUpdateFlow = async ({
+  merchantDetail = mockMerchantDetail,
+  expectedAlertKey,
+  expectedEvent,
+}: {
+  merchantDetail?: Record<string, unknown>;
+  expectedAlertKey: string;
+  expectedEvent: string;
+}) => {
+  jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(merchantDetail as any);
+  renderComponent();
+
+  if (merchantDetail.operativeEmail) {
+    await screen.findByText(String(merchantDetail.operativeEmail));
+  }
+
+  const onUpdate = mockEditEmailModal.mock.calls.at(-1)[0].onUpdate;
+  await act(async () => {
+    await onUpdate({ operativeEmail: 'updated@test.it' }, 'operativeEmail');
+  });
+
+  expect(merchantService.updateMerchantData).toHaveBeenCalledWith('initiative-123', {
+    operativeEmail: 'updated@test.it',
+  });
+  await waitFor(() => {
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: expectedAlertKey,
+      isOpen: true,
+      severity: 'success',
+    });
+  });
+  expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith(expectedEvent);
+  expect(merchantService.getMerchantDetail).toHaveBeenCalledTimes(2);
+};
+
 const mockMerchantDetail = {
   iban: 'IT60X0542811101000000123456',
   ibanHolder: 'Mario Rossi',
@@ -232,50 +267,18 @@ describe('InitiativeOverview', () => {
   });
 
   it('updates merchant data successfully through modal callbacks', async () => {
-    renderComponent();
-
-    await screen.findByText('merchant@test.it');
-
-    const onUpdate = mockEditEmailModal.mock.calls.at(-1)[0].onUpdate;
-    await act(async () => {
-      await onUpdate({ operativeEmail: 'updated@test.it' }, 'operativeEmail');
+    await expectEmailUpdateFlow({
+      expectedAlertKey: 'pages.initiativeOverview.successAlert.operativeEmail.edit',
+      expectedEvent: 'IDPAY_EMAIL_UPDATE_UX_SUCCESS',
     });
-
-    expect(merchantService.updateMerchantData).toHaveBeenCalledWith('initiative-123', {
-      operativeEmail: 'updated@test.it',
-    });
-    await waitFor(() => {
-      expect(mockSetAlert).toHaveBeenCalledWith({
-        text: 'pages.initiativeOverview.successAlert.operativeEmail.edit',
-        isOpen: true,
-        severity: 'success',
-      });
-    });
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_EMAIL_UPDATE_UX_SUCCESS');
-    expect(merchantService.getMerchantDetail).toHaveBeenCalledTimes(2);
   });
 
   it('add merchant data successfully through modal callbacks', async () => {
-    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetailNoEmail);
-    renderComponent();
-
-    const onUpdate = mockEditEmailModal.mock.calls.at(-1)[0].onUpdate;
-    await act(async () => {
-      await onUpdate({ operativeEmail: 'updated@test.it' }, 'operativeEmail');
+    await expectEmailUpdateFlow({
+      merchantDetail: mockMerchantDetailNoEmail,
+      expectedAlertKey: 'pages.initiativeOverview.successAlert.operativeEmail.add',
+      expectedEvent: 'IDPAY_EMAIL_UX_SUCCESS',
     });
-
-    expect(merchantService.updateMerchantData).toHaveBeenCalledWith('initiative-123', {
-      operativeEmail: 'updated@test.it',
-    });
-    await waitFor(() => {
-      expect(mockSetAlert).toHaveBeenCalledWith({
-        text: 'pages.initiativeOverview.successAlert.operativeEmail.add',
-        isOpen: true,
-        severity: 'success',
-      });
-    });
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_EMAIL_UX_SUCCESS');
-    expect(merchantService.getMerchantDetail).toHaveBeenCalledTimes(2);
   });
 
   it('tracks IBAN update with the required update event code', async () => {
