@@ -6,6 +6,7 @@ import InitiativeStores from '../InitiativeStores';
 import { browserConsole } from '../../../utils/consoleLogger';
 import { getMerchantPointOfSales } from '../../../services/merchantService';
 import { parseJwt } from '../../../utils/jwt-utils';
+import { trackAnalyticsEvent } from '../../../services/analyticsService';
 
 const mockId = 'initiative-123';
 const mockSetAlert = jest.fn();
@@ -24,6 +25,7 @@ const mockBuildPointOfSalesColumns = jest.fn();
 
 let dataTableProps: any = {};
 let usePointOfSalesTableArgs: any;
+const mockTrackAnalyticsEvent = trackAnalyticsEvent as jest.Mock;
 
 jest.mock('../../../hooks/useUserPermissions', () => {
   const actual = jest.requireActual('../../../hooks/useUserPermissions');
@@ -83,6 +85,13 @@ jest.mock('../../../components/pointsOfSale/pointOfSalesColumns', () => ({
 
 jest.mock('../../../services/merchantService', () => ({
   getMerchantPointOfSales: jest.fn(),
+}));
+
+jest.mock('../../../services/analyticsService', () => ({
+  MIXPANEL_EVENTS: {
+    ADD_STORE_CONVERSION: 'IDPAY_ADD_STORE_UX_CONVERSION',
+  },
+  trackAnalyticsEvent: jest.fn(),
 }));
 
 jest.mock('../../../utils/jwt-utils', () => ({
@@ -243,6 +252,7 @@ describe('<InitiativeStores />', () => {
     expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/${mockId}/punti-vendita/censisci/`
     );
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_CONVERSION');
   });
 
   test('mostra lo stato vuoto per filtri applicati senza link di censimento', () => {
@@ -280,6 +290,7 @@ describe('<InitiativeStores />', () => {
 
     fireEvent.click(screen.getByText('pages.initiativeStores.addStoreList'));
 
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_CONVERSION');
     expect(mockHistory.push).toHaveBeenCalledWith(
       `/portale-esercenti/${mockId}/punti-vendita/censisci/`
     );

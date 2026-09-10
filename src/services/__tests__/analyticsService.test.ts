@@ -64,7 +64,7 @@ describe('analyticsService', () => {
 
     initAnalytics();
     trackAnalyticsPageView('/test');
-    trackAnalyticsEvent('IDPAY_ADD_STORE_UX_SUCCESS');
+    trackAnalyticsEvent('IDPAY_LOAD_INVOICE_UX_SUCCESS');
     clearInitiativeAnalyticsProperties();
     registerInitiativeAnalyticsProperties('Initiative', 'initiative-id');
     syncInitiativeAnalyticsProperties('Initiative', 'initiative-id');
@@ -117,7 +117,7 @@ describe('analyticsService', () => {
     );
 
     trackAnalyticsPageView('/portale-esercenti/test');
-    trackAnalyticsEvent('IDPAY_ADD_STORE_UX_SUCCESS', {
+    trackAnalyticsEvent('IDPAY_LOAD_INVOICE_UX_SUCCESS', {
       count: 1,
       successful: true,
       optional: null,
@@ -130,7 +130,7 @@ describe('analyticsService', () => {
       current_url_path: '/portale-esercenti/test',
     });
     expect(mockMixpanelInstance.track).toHaveBeenCalledWith(
-      'IDPAY_ADD_STORE_UX_SUCCESS',
+      'IDPAY_LOAD_INVOICE_UX_SUCCESS',
       {
         count: 1,
         successful: true,
@@ -234,7 +234,7 @@ describe('analyticsService', () => {
 
     expect(mockMixpanelInstance.opt_out_tracking).toHaveBeenCalledTimes(1);
 
-    trackAnalyticsEvent('IDPAY_ADD_STORE_UX_SUCCESS');
+    trackAnalyticsEvent('IDPAY_LOAD_INVOICE_UX_SUCCESS');
     expect(mockMixpanelInstance.track).not.toHaveBeenCalled();
 
     initAnalytics();
@@ -249,5 +249,29 @@ describe('analyticsService', () => {
     disableAnalytics();
 
     expect(mockMixpanelInstance.opt_out_tracking).not.toHaveBeenCalled();
+  });
+
+  it('exposes the full required Mixpanel event map', () => {
+    const { MIXPANEL_EVENTS } = loadAnalyticsService();
+
+    expect(Object.values(MIXPANEL_EVENTS)).toEqual(
+      expect.arrayContaining([
+        'IDPAY_BONUS_ACCEPTANCE_UX_SUCCESS',
+        'IDPAY_BONUS_ACCEPTANCE_UX_DENIED',
+        'IDPAY_IBAN_UX_SUCCESS',
+        'IDPAY_IBAN_UPDATE_SUCCESS',
+        'IDPAY_EMAIL_UX_SUCCESS',
+        'IDPAY_EMAIL_UPDATE_UX_SUCCESS',
+        'IDPAY_NEW_STORES_UX_SUCCESS',
+        'IDPAY_ADD_STORE_UX_CONVERSION',
+        'IDPAY_ADD_STORE_ERROR',
+        'IDPAY_ADD_STORE_UX_SUCCESS',
+        'IDPAY_LOAD_INVOICE_UX_START_FLOW',
+        'IDPAY_LOAD_INVOICE_UX_SUCCESS',
+        'IDPAY_LOAD_INVOICE_ERROR',
+        'IDPAY_INVOICE_SENT_UX_SUCCESS',
+        'IDPAY_INVOICE_SENT_ERROR',
+      ])
+    );
   });
 });

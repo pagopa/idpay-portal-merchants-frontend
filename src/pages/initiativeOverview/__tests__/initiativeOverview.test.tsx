@@ -5,6 +5,7 @@ import { Router } from 'react-router-dom';
 import InitiativeOverview from '../initiativeOverview';
 import * as merchantService from '../../../services/merchantService';
 import * as helperFunctions from '../../../helpers';
+import { trackAnalyticsEvent } from '../../../services/analyticsService';
 
 const mockPush = jest.fn();
 const mockSetAlert = jest.fn();
@@ -38,6 +39,16 @@ jest.mock('react-i18next', () => ({
 jest.mock('../../../services/merchantService', () => ({
   getMerchantDetail: jest.fn(),
   updateMerchantData: jest.fn(),
+}));
+jest.mock('../../../services/analyticsService', () => ({
+  MIXPANEL_EVENTS: {
+    IBAN_SUCCESS: 'IDPAY_IBAN_UX_SUCCESS',
+    IBAN_UPDATE_SUCCESS: 'IDPAY_IBAN_UPDATE_SUCCESS',
+    OPERATIVE_EMAIL_SUCCESS: 'IDPAY_EMAIL_UX_SUCCESS',
+    OPERATIVE_EMAIL_UPDATE_SUCCESS: 'IDPAY_EMAIL_UPDATE_UX_SUCCESS',
+    ADD_STORE_CONVERSION: 'IDPAY_ADD_STORE_UX_CONVERSION',
+  },
+  trackAnalyticsEvent: jest.fn(),
 }));
 jest.mock('../../../hooks/useScopedTranslation', () => ({
   __esModule: true,
@@ -80,6 +91,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockHistory = createMemoryHistory();
+const mockTrackAnalyticsEvent = trackAnalyticsEvent as jest.Mock;
 
 const renderComponent = () => {
   mockHistory.push('/overview/initiative-123');
@@ -215,6 +227,7 @@ describe('InitiativeOverview', () => {
 
     fireEvent.click(await screen.findByTestId('add-stores-button'));
 
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_CONVERSION');
     expect(mockPush).toHaveBeenCalledWith('/portale-esercenti/initiative-123/punti-vendita/censisci');
   });
 
@@ -238,6 +251,7 @@ describe('InitiativeOverview', () => {
         severity: 'success',
       });
     });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_EMAIL_UPDATE_UX_SUCCESS');
     expect(merchantService.getMerchantDetail).toHaveBeenCalledTimes(2);
   });
 
@@ -260,7 +274,21 @@ describe('InitiativeOverview', () => {
         severity: 'success',
       });
     });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_EMAIL_UX_SUCCESS');
     expect(merchantService.getMerchantDetail).toHaveBeenCalledTimes(2);
+  });
+
+  it('tracks IBAN update with the required update event code', async () => {
+    renderComponent();
+
+    await screen.findByText('merchant@test.it');
+
+    const onUpdate = mockEditIbanModal.mock.calls.at(-1)[0].onUpdate;
+    await act(async () => {
+      await onUpdate({ iban: 'NEWIBAN' }, 'iban');
+    });
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_IBAN_UPDATE_SUCCESS');
   });
 
   it('shows an error alert when merchant data update fails', async () => {

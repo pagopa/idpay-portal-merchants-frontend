@@ -7,6 +7,7 @@ import InitiativeStoresUpload from '../initiativeStoresUpload';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
 import * as formatUtils from '../../../utils/formatUtils';
+import { trackAnalyticsEvent } from '../../../services/analyticsService';
 
 const mockSetAlert = jest.fn();
 const pushMock = jest.fn();
@@ -26,6 +27,15 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
 
 jest.mock('../../../services/merchantService', () => ({
   updateMerchantPointOfSales: jest.fn(),
+}));
+
+jest.mock('../../../services/analyticsService', () => ({
+  MIXPANEL_EVENTS: {
+    NEW_STORES_SUCCESS: 'IDPAY_NEW_STORES_UX_SUCCESS',
+    ADD_STORE_ERROR: 'IDPAY_ADD_STORE_ERROR',
+    ADD_STORE_SUCCESS: 'IDPAY_ADD_STORE_UX_SUCCESS',
+  },
+  trackAnalyticsEvent: jest.fn(),
 }));
 
 jest.mock('../../../utils/jwt-utils');
@@ -116,6 +126,7 @@ const readTokenMock = storageTokenOps.read as jest.Mock;
 const parseJwtMock = jwtUtils.parseJwt as jest.Mock;
 const updateMerchantPointOfSalesMock = merchantService.updateMerchantPointOfSales as jest.Mock;
 const normalizeUrlHttpsMock = formatUtils.normalizeUrlHttps as jest.Mock;
+const mockTrackAnalyticsEvent = trackAnalyticsEvent as jest.Mock;
 
 const renderComponent = () => render(<InitiativeStoresUpload />);
 
@@ -204,6 +215,9 @@ describe('InitiativeStoresUpload', () => {
         severity: 'error',
       })
     );
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'MISSING_MERCHANT_ID',
+    });
     expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();
   });
 
@@ -229,7 +243,36 @@ describe('InitiativeStoresUpload', () => {
         storeNumber: 1,
       }),
     });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_SUCCESS');
     expect(mockLatestFormProps.pointsOfSaleLoaded).toBe(true);
+  });
+
+  it('tracks the multiple-store success event when more than one store is added', async () => {
+    renderComponent();
+
+    mockLatestFormProps.onFormChange([
+      {
+        type: 'PHYSICAL',
+        contactEmail: 'shop1@example.com',
+        confirmContactEmail: 'shop1@example.com',
+        website: 'one.example.com',
+        channelGeolink: 'maps.one.example.com',
+      },
+      {
+        type: 'PHYSICAL',
+        contactEmail: 'shop2@example.com',
+        confirmContactEmail: 'shop2@example.com',
+        website: 'two.example.com',
+        channelGeolink: 'maps.two.example.com',
+      },
+    ]);
+    mockLatestFormProps.onValidationChange(true);
+
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    await waitFor(() => expect(updateMerchantPointOfSalesMock).toHaveBeenCalled());
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_NEW_STORES_UX_SUCCESS');
   });
 
   it('resets the loaded flag when the form changes after a successful update', async () => {
@@ -257,6 +300,9 @@ describe('InitiativeStoresUpload', () => {
       isOpen: true,
       severity: 'error',
     });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'POINT_OF_SALE_ALREADY_REGISTERED',
+    });
     expect(pushMock).not.toHaveBeenCalled();
   });
 
@@ -274,6 +320,9 @@ describe('InitiativeStoresUpload', () => {
       text: 'errors.genericDescription',
       isOpen: true,
       severity: 'error',
+    });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'UNKNOWN_ERROR',
     });
     expect(pushMock).not.toHaveBeenCalled();
   });
@@ -308,6 +357,9 @@ describe('InitiativeStoresUpload', () => {
         },
       })
     );
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'VALIDATION_ERROR',
+    });
     expect(mockLatestFormProps.externalAlertMessages).toEqual({
       0: 'errors.genericDescription',
     });
@@ -337,6 +389,9 @@ describe('InitiativeStoresUpload', () => {
     );
     expect(mockLatestFormProps.externalAlertMessages).toEqual({
       0: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredOtherInitiativeAlert',
+    });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'VALIDATION_ERROR',
     });
   });
 
@@ -368,6 +423,9 @@ describe('InitiativeStoresUpload', () => {
     );
     expect(mockLatestFormProps.externalAlertMessages).toEqual({
       0: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredAlert',
+    });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'VALIDATION_ERROR',
     });
   });
 

@@ -53,10 +53,6 @@ const InitiativeStores: React.FC = () => {
   const location = useLocation<{ showSuccessAlert?: boolean; storeNumber?: number }>();
   useEffect(() => {
     if (location.state?.showSuccessAlert) {
-      const storeNumber = location.state.storeNumber ?? 0;
-      const successProperties = { store_number: storeNumber };
-      trackAnalyticsEvent(MIXPANEL_EVENTS.NEW_STORES_SUCCESS, successProperties);
-      trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_SUCCESS, successProperties);
       setAlert({
         text: t('pages.initiativeStores.pointOfSalesUploadSuccess'),
         isOpen: true,
@@ -142,6 +138,7 @@ const InitiativeStores: React.FC = () => {
   });
 
   const goToAddStorePage = useCallback(() => {
+    trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_CONVERSION);
     history.push(`${BASE_ROUTE}/${initiativeId}/punti-vendita/censisci/`);
   }, [history, initiativeId]);
 
