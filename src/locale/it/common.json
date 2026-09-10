@@ -40,6 +40,7 @@
     "sessionExpiredMessage": "Ti stiamo reindirizzando alla pagina di accesso",
     "validationDescription": "Verifica che i dati inseriti siano corretti",
     "sendTheBatchForPreviousMonth": "Inviare prima i lotti relativi ai mesi precedenti",
+    "sendBatchinvalid": "Il termine per l'invio dei rimborsi è scaduto.",
     "tcDescription": "Non siamo riusciti a recuperare le informazioni sull’accettazione dei termini e condizioni d’uso. Riprova.",
     "tcSave": "Non siamo riusciti a salvare l'accettazione dei Termini e condizioni d’uso. Riprova",
     "pointOfSaleError": "Errore punto vendita",

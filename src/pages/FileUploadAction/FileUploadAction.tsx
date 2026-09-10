@@ -9,6 +9,7 @@ import BreadcrumbsBoxUpload from '../components/BreadcrumbsBoxUpload';
 import { useAlert } from '../../hooks/useAlert';
 import { useScopedTranslation } from '../../hooks/useScopedTranslation';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
+import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 
 interface FileUploadActionProps {
   apiCall:
@@ -101,10 +102,14 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_START);
       setRequiredFileError(false);
     }
 
     if (!VALID_MIME_TYPES.includes(selectedFile.type)) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+        reason: 'UNSUPPORTED_FILE_TYPE',
+      });
       setFileTypeError(true);
       setFile(null);
       return;
@@ -115,6 +120,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       setFileSizeError(false);
       setFileTypeError(false);
     } else {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+        reason: 'FILE_TOO_LARGE',
+      });
       setFileSizeError(true);
       setFileTypeError(false);
     }
@@ -144,12 +152,18 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
   const handleAction = async (): Promise<void> => {
     if (!file) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+        reason: 'FILE_REQUIRED',
+      });
       setRequiredFileError(true);
       setFileSizeError(false);
       setFileTypeError(false);
     }
 
     if (!docNumber || docNumber.trim().length < 2) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+        reason: 'DOCUMENT_NUMBER_INVALID',
+      });
       setDocNumberError(true);
     }
 
@@ -161,6 +175,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         const response = await (apiCall as any)(initiativeId, trxId, file, normalizedDocNumber);
 
         if (response?.code) {
+          trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+            reason: response.code,
+          });
           if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
             setAlert({
               text: t('modifyDocument.errors.deniedSentError'),
@@ -188,6 +205,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           },
         });
 
+        trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_SUCCESS);
         setAlert({
           text: t('modifyDocument.refundSuccessUpload'),
           isOpen: true,
@@ -195,6 +213,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         });
         history.goBack();
       } catch (error: unknown) {
+        trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+          reason: 'REQUEST_FAILED',
+        });
         setAlert({
           text: t('modifyDocument.errors.errorAlert'),
           isOpen: true,

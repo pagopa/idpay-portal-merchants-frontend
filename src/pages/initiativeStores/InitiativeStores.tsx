@@ -29,6 +29,7 @@ import { PAGINATION_SIZE } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { browserConsole } from '../../utils/consoleLogger';
 import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
+import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 
 const initialValues: GetPointOfSalesFilters = {
   type: undefined,
@@ -49,7 +50,7 @@ const InitiativeStores: React.FC = () => {
   const { isActionDisabled } = useUserPermissions();
   const isAddStoreDisabled = isActionDisabled(PERMISSION_KEYS.STORES_ADD);
 
-  const location = useLocation<{ showSuccessAlert?: boolean }>();
+  const location = useLocation<{ showSuccessAlert?: boolean; storeNumber?: number }>();
   useEffect(() => {
     if (location.state?.showSuccessAlert) {
       setAlert({
@@ -137,6 +138,7 @@ const InitiativeStores: React.FC = () => {
   });
 
   const goToAddStorePage = useCallback(() => {
+    trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_CONVERSION);
     history.push(`${BASE_ROUTE}/${initiativeId}/punti-vendita/censisci/`);
   }, [history, initiativeId]);
 

@@ -18,7 +18,10 @@ import Assistance from './pages/assistance/assistance';
 import { AlertProvider } from './contexts/AlertContext';
 import ROUTES from './routes';
 import { useGetInitiativesQuery } from './redux/api/initiativesApi';
-import WithInitiativeGuard from './decorators/withInitiativeGuard';
+import {
+  InitiativeAnalyticsGuard,
+  default as WithInitiativeGuard,
+} from './decorators/withInitiativeGuard';
 import { routesConfig } from './routesConfig';
 import PosCatalog from './pages/pointOfSalesCatalog/posCatalog';
 import TOSWall from './components/TOS/TOSWall';
@@ -69,44 +72,46 @@ const SecuredRoutes = withLogin(
     }
 
     return (
-      <AlertProvider>
-        <Layout>
-          <Switch>
-            <Route path={routes.HOME} exact={true}>
-              <InitiativesList />
-            </Route>
-            <Route path={routes.ASSISTANCE} exact={true}>
-              <Assistance />
-            </Route>
-
-            <Route path={routes.TOS} exact={true}>
-              <TOS />
-            </Route>
-
-            <Route path={routes.PRIVACY_POLICY} exact={true}>
-              <PrivacyPolicy />
-            </Route>
-
-            {/* <Route path={routes.DISCOUNTS} exact={true}>
-            <InitiativeDiscounts />
-          </Route> */}
-
-            {routesConfig.map(({ key, route, render }) => (
-              <Route key={key} path={route} exact={true}>
-                <WithInitiativeGuard route={key}>{render()}</WithInitiativeGuard>
+      <InitiativeAnalyticsGuard>
+        <AlertProvider>
+          <Layout>
+            <Switch>
+              <Route path={routes.HOME} exact={true}>
+                <InitiativesList />
               </Route>
-            ))}
+              <Route path={routes.ASSISTANCE} exact={true}>
+                <Assistance />
+              </Route>
 
-            <Route path={routes.POS_CATALOG}>
-              <PosCatalog />
-            </Route>
+              <Route path={routes.TOS} exact={true}>
+                <TOS />
+              </Route>
 
-            <Route path="*">
-              <Redirect to={routes.HOME} />
-            </Route>
-          </Switch>
-        </Layout>
-      </AlertProvider>
+              <Route path={routes.PRIVACY_POLICY} exact={true}>
+                <PrivacyPolicy />
+              </Route>
+
+              {/* <Route path={routes.DISCOUNTS} exact={true}>
+                <InitiativeDiscounts />
+              </Route> */}
+
+              {routesConfig.map(({ key, route, render }) => (
+                <Route key={key} path={route} exact={true}>
+                  <WithInitiativeGuard route={key}>{render()}</WithInitiativeGuard>
+                </Route>
+              ))}
+
+              <Route path={routes.POS_CATALOG}>
+                <PosCatalog />
+              </Route>
+
+              <Route path="*">
+                <Redirect to={routes.HOME} />
+              </Route>
+            </Switch>
+          </Layout>
+        </AlertProvider>
+      </InitiativeAnalyticsGuard>
     );
   })
 );

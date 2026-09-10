@@ -1,12 +1,14 @@
 import { RewardBatchDTO } from '../api/generated/merchants/data-contracts';
 
 const IS_DEVELOP = process.env.NODE_ENV === 'development';
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 export const testToken = '';
 
 export const DEBUG_CONSOLE = false;
 export const MOCK_USER = IS_DEVELOP;
 export const LOG_REDUX_ACTIONS = IS_DEVELOP;
+export const IS_ACTION_DISABLED = IS_PROD;
 
 export const LOADING_TASK_LOGIN_CHECK = 'LOGIN_CHECK';
 export const LOADING_TASK_SEARCH_PARTIES = 'SEARCH_PARTIES';
