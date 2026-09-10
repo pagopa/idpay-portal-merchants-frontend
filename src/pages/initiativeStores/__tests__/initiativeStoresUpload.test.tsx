@@ -269,7 +269,7 @@ describe('InitiativeStoresUpload', () => {
         storeNumber: 1,
       }),
     });
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_SUCCESS');
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_SUCCESS', { store_number: 1 });
     expect(mockLatestFormProps.pointsOfSaleLoaded).toBe(true);
   });
 
@@ -298,7 +298,7 @@ describe('InitiativeStoresUpload', () => {
 
     await waitFor(() => expect(updateMerchantPointOfSalesMock).toHaveBeenCalled());
 
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_NEW_STORES_UX_SUCCESS');
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_SUCCESS', { store_number: 2 });
   });
 
   it('resets the loaded flag when the form changes after a successful update', async () => {

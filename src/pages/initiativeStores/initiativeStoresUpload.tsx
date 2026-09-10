@@ -66,14 +66,6 @@ const InitiativeStoresUpload: React.FC = () => {
   const history = useHistory();
   const [submitAttempt, setSubmitAttempt] = useState(0);
 
-  const trackAddStoreSuccess = (storesCount: number) => {
-    trackAnalyticsEvent(
-      storesCount > 1
-        ? MIXPANEL_EVENTS.NEW_STORES_SUCCESS
-        : MIXPANEL_EVENTS.ADD_STORE_SUCCESS
-    );
-  };
-
   const trackAddStoreError = (reason: string) => {
     trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_ERROR, { reason });
   };
@@ -215,6 +207,8 @@ const InitiativeStoresUpload: React.FC = () => {
   }, [salesPoints]);
 
   const handleConfirm = async () => {
+    trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_CONVERSION, { store_number: salesPoints?.length } );
+
     if (uploadMethod === POS_UPDATE.Manual) {
       setSubmitAttempt((prev) => prev + 1);
 
@@ -289,7 +283,7 @@ const InitiativeStoresUpload: React.FC = () => {
             });
           }
         } else {
-          trackAddStoreSuccess(salesPoints.length);
+          trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_SUCCESS, { store_number: salesPoints?.length });
           setPointsOfSaleLoaded(true);
           history.push({
             pathname: generatePath(ROUTES.STORES, { initiative_id }),
