@@ -82,12 +82,17 @@ const InitiativeOverview = () => {
   const onUpdate = async (merchantData: MerchantIbanPatchDTO, key: keyof MerchantIbanPatchDTO) => {
     setIsEmailModalOpen(false);
     setIsIbanModalOpen(false);
+    const wasValuePresent = Boolean(data?.[key]);
     try {
       await updateMerchantData(initiativeId || '', merchantData).then(() => loadDetails());
       trackAnalyticsEvent(
         key === 'iban'
-          ? MIXPANEL_EVENTS.IBAN_EDIT_SUCCESS
-          : MIXPANEL_EVENTS.OPERATIVE_EMAIL_EDIT_SUCCESS
+          ? wasValuePresent
+            ? MIXPANEL_EVENTS.IBAN_UPDATE_SUCCESS
+            : MIXPANEL_EVENTS.IBAN_SUCCESS
+          : wasValuePresent
+            ? MIXPANEL_EVENTS.OPERATIVE_EMAIL_UPDATE_SUCCESS
+            : MIXPANEL_EVENTS.OPERATIVE_EMAIL_SUCCESS
       );
       setAlert({
         text: t(`pages.initiativeOverview.successAlert.${key}.${!data?.[key] ? 'add' : 'edit'}`),
@@ -126,7 +131,6 @@ const InitiativeOverview = () => {
                   action={isEditIbanDisabled ? undefined : {
                     label: t('pages.initiativeOverview.ibanBanner.action'),
                     onClick: () => {
-                      trackAnalyticsEvent(MIXPANEL_EVENTS.IBAN_EDIT_START);
                       setIsIbanModalOpen(true);
                     }
                   }}
@@ -137,7 +141,6 @@ const InitiativeOverview = () => {
                   action={isEditEmailDisabled ? undefined : {
                     label: t('pages.initiativeOverview.emailBanner.action'),
                     onClick: () => {
-                      trackAnalyticsEvent(MIXPANEL_EVENTS.OPERATIVE_EMAIL_EDIT_START);
                       setIsEmailModalOpen(true);
                     }
                   }}
@@ -185,7 +188,6 @@ const InitiativeOverview = () => {
                         <IconButton
                           disabled={isEditEmailDisabled}
                           onClick={() => {
-                            trackAnalyticsEvent(MIXPANEL_EVENTS.OPERATIVE_EMAIL_EDIT_START);
                             setIsEmailModalOpen(true);
                           }}
                         >
@@ -201,7 +203,6 @@ const InitiativeOverview = () => {
                           <IconButton
                             disabled={isEditIbanDisabled}
                             onClick={() => {
-                              trackAnalyticsEvent(MIXPANEL_EVENTS.IBAN_EDIT_START);
                               setIsIbanModalOpen(true);
                             }}
                           >
@@ -247,6 +248,7 @@ const InitiativeOverview = () => {
                       startIcon={<StorefrontOutlinedIcon />}
                       disabled={isUploadStoresDisabled}
                       onClick={() => {
+                        trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_CONVERSION);
                         history.push(
                           generatePath(ROUTES.STORES_UPLOAD, { initiative_id: initiativeId })
                         );

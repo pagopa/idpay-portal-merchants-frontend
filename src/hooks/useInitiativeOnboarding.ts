@@ -46,7 +46,6 @@ export const useInitiativeOnboarding = (
     useState<OnboardingAlertState>(INITIAL_ALERT_STATE);
 
   const openOnboardingModal = useCallback((initiative: InitiativeForOnboarding) => {
-    trackAnalyticsEvent(MIXPANEL_EVENTS.INITIATIVE_ADHERENCE_START);
     setSelectedInitiative(initiative);
     setModalOpen(true);
   }, []);
@@ -64,7 +63,7 @@ export const useInitiativeOnboarding = (
     setIsOnboardingLoading(true);
     try {
       await putMerchantOnboardingRequest(selectedInitiative.initiativeId);
-      trackAnalyticsEvent(MIXPANEL_EVENTS.INITIATIVE_ADHERENCE_SUCCESS);
+      trackAnalyticsEvent(MIXPANEL_EVENTS.BONUS_ACCEPTANCE_SUCCESS);
       closeOnboardingModal();
       setOnboardingAlertState({
         open: true,
@@ -75,6 +74,7 @@ export const useInitiativeOnboarding = (
       });
       onSuccess?.(selectedInitiative.initiativeId);
     } catch {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.BONUS_ACCEPTANCE_DENIED);
       closeOnboardingModal();
       setOnboardingAlertState({
         open: true,
