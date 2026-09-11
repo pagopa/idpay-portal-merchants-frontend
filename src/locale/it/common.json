@@ -37,6 +37,7 @@
     "genericDescription": "Riprovare",
     "contactAdmin": "Contatta l'assistenza",
     "sessionExpiredTitle": "La tua sessione è scaduta",
+    "sessionExpiredTitle": "La tua sessione è scaduta",
     "sessionExpiredMessage": "Ti stiamo reindirizzando alla pagina di accesso",
     "validationDescription": "Verifica che i dati inseriti siano corretti",
     "sendTheBatchForPreviousMonth": "Inviare prima i lotti relativi ai mesi precedenti",
@@ -366,7 +367,10 @@
         "suspendedRefund": "Rimborso sospeso",
         "exportCSV": "Esporta csv",
         "detailCardTitleDx": "dati rimborso",
-        "posType": "Tipo"
+        "posType": "Tipo",
+        "csv" : {
+          "alert": "Stiamo elaborando il lotto. Quando sarà pronto, potrai esportare il file .csv"
+        }
       },
       "invoiceDetailConfirmModal": {
         "title": "Conferma spostamento",
