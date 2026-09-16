@@ -270,6 +270,7 @@ const RefundRequests = () => {
       headerName: 'Lotto',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value),
     },
     {
@@ -277,6 +278,7 @@ const RefundRequests = () => {
       headerName: 'Tipologia',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(posTypeMapper[params.value]),
     },
     {
@@ -284,6 +286,7 @@ const RefundRequests = () => {
       headerName: 'Rimborso richiesto',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
     },
     {
@@ -291,6 +294,7 @@ const RefundRequests = () => {
       headerName: 'Rimborso approvato',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
     },
     {
@@ -298,6 +302,7 @@ const RefundRequests = () => {
       headerName: 'Rimborso sospeso',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
     },
     {
@@ -305,6 +310,7 @@ const RefundRequests = () => {
       headerName: 'Stato',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <StatusChip status={params.value} />,
     },
     {
@@ -312,6 +318,7 @@ const RefundRequests = () => {
       headerName: '',
       flex: 0.3,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => (
         <IconButton
           onClick={() =>
