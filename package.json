@@ -139,6 +139,17 @@
       "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",
       "^.+\\.(jpg|jpeg|png|gif|webp|avif|svg)$": "<rootDir>/__mocks__/file-mock.js",
       "react-markdown": "<rootDir>/node_modules/react-markdown/react-markdown.min.js"
-    }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.test.{ts,tsx}",
+      "!src/**/__tests__/**",
+      "!src/**/__mocks__/**",
+      "!src/setupTests.ts",
+      "!src/index.js",
+      "!src/index.css",
+      "!src/react-app-env.d.ts",
+      "!src/reportWebVitals.ts"
+    ]
   }
 }
