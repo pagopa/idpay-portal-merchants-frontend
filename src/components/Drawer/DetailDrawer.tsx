@@ -8,9 +8,10 @@ import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 const ellipsisSx = {
   display: 'block',
   maxWidth: 'calc(100% - 1rem)',
+  minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  maxHeight: '7rem',
+  whiteSpace: 'nowrap',
 };
 
 export type DetailDrawerProps = {

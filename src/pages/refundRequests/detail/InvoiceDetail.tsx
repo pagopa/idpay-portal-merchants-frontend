@@ -1,4 +1,4 @@
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, Button, CircularProgress, Tooltip } from '@mui/material';
 import { useEffect, useState, useMemo } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
 import { ReceiptLong } from '@mui/icons-material';
@@ -22,6 +22,18 @@ import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts'
 type StatusEnum = RewardBatchDTO['status'];
 const CREATED_STATUS: StatusEnum = 'CREATED';
 import { useCurrentInitiative } from '../../../hooks/useCurrentInitiative';
+
+const truncatedTextSx = {
+  display: 'block',
+  maxWidth: '100%',
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const getTooltipTitle = (value?: string) =>
+  value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value;
 
 type Props = DetailDrawerProps & {
   itemValues: Record<string, any>;
@@ -261,29 +273,28 @@ export default function InvoiceDetail({
         setIsOpen={setIsOpen}
         buttons={[...editButton, ...postponeButton, ...reverseButton]}
       >
-        {listItem.map((item, index) => (
-          <Box key={`${item?.id}-${index}`}>
-            <Typography
-              variant="body2"
-              fontWeight={theme.typography.fontWeightRegular}
-              color={theme.palette.text.secondary}
-            >
-              {item?.label}
-            </Typography>
-            <Typography
-              variant="body2"
-              fontWeight="fontWeightMedium"
-              sx={{
-                whiteSpace: 'pre-wrap',
-                overflowWrap: 'anywhere',
-              }}
-            >
-              {item.format
-                ? item.format(getNestedValue(itemValues, item?.id))
-                : getValueText(item?.id, item?.type)}
-            </Typography>
-          </Box>
-        ))}
+        {listItem.map((item, index) => {
+          const displayValue = item.format
+            ? item.format(getNestedValue(itemValues, item?.id))
+            : getValueText(item?.id, item?.type);
+
+          return (
+            <Box key={`${item?.id}-${index}`}>
+              <Typography
+                variant="body2"
+                fontWeight={theme.typography.fontWeightRegular}
+                color={theme.palette.text.secondary}
+              >
+                {item?.label}
+              </Typography>
+              <Tooltip title={getTooltipTitle(displayValue)}>
+                <Typography variant="body2" fontWeight="fontWeightMedium" sx={truncatedTextSx}>
+                  {displayValue}
+                </Typography>
+              </Tooltip>
+            </Box>
+          );
+        })}
         <Box>
           <Typography
             variant="body2"
@@ -292,13 +303,11 @@ export default function InvoiceDetail({
           >
             {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
           </Typography>
-          <Typography
-            variant="body2"
-            fontWeight={theme.typography.fontWeightMedium}
-            sx={{ overflowWrap: 'break-word' }}
-          >
-            {itemValues?.invoiceData?.docNumber ?? MISSING_DATA_PLACEHOLDER}
-          </Typography>
+          <Tooltip title={getTooltipTitle(itemValues?.invoiceData?.docNumber)}>
+            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={truncatedTextSx}>
+              {itemValues?.invoiceData?.docNumber ?? MISSING_DATA_PLACEHOLDER}
+            </Typography>
+          </Tooltip>
         </Box>
         <Box>
           <Typography
@@ -340,19 +349,18 @@ export default function InvoiceDetail({
                 }}
               >
                 <ReceiptLong sx={{ flexShrink: 0, mt: '2px' }} />
-                <Typography
-                  component="span"
-                  variant="inherit"
-                  sx={{
-                    whiteSpace: 'pre-wrap',
-                    overflowWrap: 'anywhere',
-                    wordBreak: 'break-word',
-                    minWidth: 0,
-                    flex: 1,
-                  }}
-                >
-                  {itemValues?.invoiceData?.filename ?? MISSING_DATA_PLACEHOLDER}
-                </Typography>
+                <Tooltip title={getTooltipTitle(itemValues?.invoiceData?.filename)}>
+                  <Typography
+                    component="span"
+                    variant="inherit"
+                    sx={{
+                      ...truncatedTextSx,
+                      flex: 1,
+                    }}
+                  >
+                    {itemValues?.invoiceData?.filename ?? MISSING_DATA_PLACEHOLDER}
+                  </Typography>
+                </Tooltip>
               </Box>
             )}
           </Button>
@@ -399,24 +407,28 @@ export default function InvoiceDetail({
                       >
                         {date ? formatDate(new Date(date)) : MISSING_DATA_PLACEHOLDER}
                       </Typography>
-                      <Typography
-                        variant="body2"
-                        fontWeight={theme.typography.fontWeightMedium}
-                        sx={{ overflowWrap: 'break-word' }}
-                      >
-                        {reason ?? MISSING_DATA_PLACEHOLDER}
-                      </Typography>
+                      <Tooltip title={getTooltipTitle(reason)}>
+                        <Typography
+                          variant="body2"
+                          fontWeight={theme.typography.fontWeightMedium}
+                          sx={truncatedTextSx}
+                        >
+                          {reason ?? MISSING_DATA_PLACEHOLDER}
+                        </Typography>
+                      </Tooltip>
                     </Box>
                   )
                 )
               ) : (
-                <Typography
-                  variant="body2"
-                  fontWeight={theme.typography.fontWeightMedium}
-                  sx={{ overflowWrap: 'break-word' }}
-                >
-                  {MISSING_DATA_PLACEHOLDER}
-                </Typography>
+                <Tooltip title={MISSING_DATA_PLACEHOLDER}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={theme.typography.fontWeightMedium}
+                    sx={truncatedTextSx}
+                  >
+                    {MISSING_DATA_PLACEHOLDER}
+                  </Typography>
+                </Tooltip>
               )}
             </Typography>
           </Box>
