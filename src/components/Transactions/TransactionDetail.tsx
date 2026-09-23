@@ -1,17 +1,19 @@
-import { Box, Typography, Button, CircularProgress, Tooltip } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia/theme';
-import { ReceiptLong } from '@mui/icons-material';
 import routes from '../../routes';
-import { currencyFormatter, formatValues } from '../../utils/formatUtils';
 import CustomChip from '../Chip/CustomChip';
-import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { downloadInvoiceFile } from '../../services/merchantService';
 import { useStore } from '../../pages/initiativeStores/StoreContext';
 import { useAlert } from '../../hooks/useAlert';
 import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import DetailDrawer, { DetailDrawerProps } from '../Drawer/DetailDrawer';
+import {
+  DrawerFileButton,
+  DrawerLabeledValue,
+  getDetailValueText,
+} from '../Drawer/detailDrawerShared';
 import { isReversableOrEditable } from '../../helpers';
 import getStatus from './useStatus';
 
@@ -19,18 +21,6 @@ type Props = DetailDrawerProps & {
   itemValues: any;
   listItem: Array<any>;
 };
-
-const truncatedTextSx = {
-  display: 'block',
-  maxWidth: '100%',
-  minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-};
-
-const getTooltipTitle = (value?: string) =>
-  value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value;
 
 export default function TransactionDetail({ itemValues, listItem, ...rest }: Props) {
   const { setAlert } = useAlert();
@@ -140,21 +130,6 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
     }
   };
 
-  function getValueText(driver: string, type: TYPE_TEXT) {
-    const index = Object.keys(itemValues).indexOf(driver);
-    const val = Object.values(itemValues)[index] as string;
-    if (driver === 'additionalProperties.productName') {
-      return itemValues?.additionalProperties?.productName ?? MISSING_DATA_PLACEHOLDER;
-    }
-    if (type === TYPE_TEXT.Text) {
-      return formatValues(val);
-    } else if (type === TYPE_TEXT.Currency) {
-      return currencyFormatter(Number(val) / 100).toString();
-    } else {
-      return 'error on type';
-    }
-  }
-
   return (
     <DetailDrawer
       {...rest}
@@ -162,28 +137,15 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
       buttons={[...editButton, ...reverseButton]}
     >
       {listItem.map((item, index) => {
-        const displayValue = getValueText(item?.id, item?.type);
+        const displayValue = getDetailValueText(itemValues, item?.id, item?.type);
 
         return (
-          <Box
+          <DrawerLabeledValue
             key={`${item?.id}-${index}`}
-            sx={{
-              minWidth: 0,
-            }}
-          >
-            <Typography
-              variant="body2"
-              fontWeight={theme.typography.fontWeightRegular}
-              color={theme.palette.text.secondary}
-            >
-              {item?.label}
-            </Typography>
-            <Tooltip title={getTooltipTitle(displayValue)}>
-              <Typography variant="body2" fontWeight="fontWeightMedium" sx={truncatedTextSx}>
-                {displayValue}
-              </Typography>
-            </Tooltip>
-          </Box>
+            label={item?.label}
+            value={displayValue}
+            boxSx={{ minWidth: 0 }}
+          />
         );
       })}
       <Box>
@@ -198,81 +160,19 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
       </Box>
       {itemValues.status !== 'CANCELLED' && (
         <>
-          <Box>
-            <Typography
-              variant="body2"
-              fontWeight={theme.typography.fontWeightRegular}
-              color={theme.palette.text.secondary}
-            >
-              {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
-            </Typography>
-            <Tooltip title={getTooltipTitle(itemValues?.invoiceFile?.docNumber)}>
-              <Typography
-                variant="body2"
-                fontWeight={theme.typography.fontWeightMedium}
-                sx={truncatedTextSx}
-              >
-                {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
-              </Typography>
-            </Tooltip>
-          </Box>
-          <Box>
-            <Typography
-              variant="body2"
-              fontWeight={theme.typography.fontWeightRegular}
-              color={theme.palette.text.secondary}
-            >
-              {itemValues.status === 'REFUNDED' ? 'Nota di credito' : 'Fattura'}
-            </Typography>
-            <Button
-              data-testid="btn-test"
-              sx={{
-                padding: 0,
-                width: '100%',
-                display: 'block',
-                textAlign: 'left',
-                minWidth: 0,
-                maxWidth: '100%',
-                minHeight: 'fit-content',
-                height: 'auto',
-                '&:hover': {
-                  backgroundColor: '#fff',
-                  color: '#0055AA',
-                },
-              }}
-              onClick={() => downloadFile(itemValues, storeId)}
-            >
-              {isLoading ? (
-                <CircularProgress color="inherit" size={20} data-testid="item-loader" />
-              ) : (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '6px',
-                    width: '100%',
-                    mt: '2px',
-                    textAlign: 'left',
-                  }}
-                >
-                  <ReceiptLong sx={{ flexShrink: 0, mt: 2 }} />
-                  <Tooltip title={getTooltipTitle(itemValues?.invoiceFile?.filename)}>
-                    <Typography
-                      component="span"
-                      variant="inherit"
-                      sx={{
-                        ...truncatedTextSx,
-                        flex: 1,
-                        marginTop: 2,
-                      }}
-                    >
-                      {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
-                    </Typography>
-                  </Tooltip>
-                </Box>
-              )}
-            </Button>
-          </Box>
+          <DrawerLabeledValue
+            label={itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
+            value={itemValues?.invoiceFile?.docNumber}
+          />
+          <DrawerFileButton
+            label={itemValues.status === 'REFUNDED' ? 'Nota di credito' : 'Fattura'}
+            filename={itemValues?.invoiceFile?.filename}
+            isLoading={isLoading}
+            onClick={() => downloadFile(itemValues, storeId)}
+            contentSx={{ textAlign: 'left' }}
+            iconSx={{ mt: 2 }}
+            fileNameSx={{ marginTop: 2 }}
+          />
         </>
       )}
     </DetailDrawer>
