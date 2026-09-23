@@ -1,14 +1,13 @@
-import { Box, Typography, Button, CircularProgress, Tooltip } from '@mui/material';
+import { Box, Typography, Tooltip, Button } from '@mui/material';
 import { useEffect, useState, useMemo } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
-import { ReceiptLong } from '@mui/icons-material';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import useScopedTranslation from '../../../hooks/useScopedTranslation';
 import routes from '../../../routes';
 import { postponeTransaction } from '../../../services/merchantService';
 import { getMerchantsApi } from '../../../api/MerchantsApiClient';
-import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
-import { formatValues, currencyFormatter, getEndOfNextMonth } from '../../../utils/formatUtils';
+import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
+import { getEndOfNextMonth } from '../../../utils/formatUtils';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-contracts';
 import { useAlert } from '../../../hooks/useAlert';
@@ -17,23 +16,18 @@ import ModalComponent from '../../../components/modal/ModalComponent';
 import { formatDate, isReversableOrEditable } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/data-contracts';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
+import {
+  DrawerFileButton,
+  DrawerLabeledValue,
+  drawerTruncatedTextSx,
+  getDetailValueText,
+  getDrawerTooltipTitle,
+} from '../../../components/Drawer/detailDrawerShared';
 import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts';
 
 type StatusEnum = RewardBatchDTO['status'];
 const CREATED_STATUS: StatusEnum = 'CREATED';
 import { useCurrentInitiative } from '../../../hooks/useCurrentInitiative';
-
-const truncatedTextSx = {
-  display: 'block',
-  maxWidth: '100%',
-  minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-};
-
-const getTooltipTitle = (value?: string) =>
-  value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value;
 
 type Props = DetailDrawerProps & {
   itemValues: Record<string, any>;
@@ -245,21 +239,6 @@ export default function InvoiceDetail({
     }
   };
 
-  function getValueText(driver: string, type: TYPE_TEXT) {
-    const index = Object.keys(itemValues).indexOf(driver);
-    const val = Object.values(itemValues)[index] as string;
-    if (driver === 'additionalProperties.productName') {
-      return itemValues?.additionalProperties?.productName ?? MISSING_DATA_PLACEHOLDER;
-    }
-    if (type === TYPE_TEXT.Text) {
-      return formatValues(val);
-    } else if (type === TYPE_TEXT.Currency) {
-      return currencyFormatter(Number(val) / 100).toString();
-    } else {
-      return 'error on type';
-    }
-  }
-
   function getNestedValue(obj: any, path: string) {
     return path.split('.').reduce((acc, part) => acc && acc[part], obj);
   }
@@ -276,95 +255,23 @@ export default function InvoiceDetail({
         {listItem.map((item, index) => {
           const displayValue = item.format
             ? item.format(getNestedValue(itemValues, item?.id))
-            : getValueText(item?.id, item?.type);
+            : getDetailValueText(itemValues, item?.id, item?.type);
 
           return (
-            <Box key={`${item?.id}-${index}`}>
-              <Typography
-                variant="body2"
-                fontWeight={theme.typography.fontWeightRegular}
-                color={theme.palette.text.secondary}
-              >
-                {item?.label}
-              </Typography>
-              <Tooltip title={getTooltipTitle(displayValue)}>
-                <Typography variant="body2" fontWeight="fontWeightMedium" sx={truncatedTextSx}>
-                  {displayValue}
-                </Typography>
-              </Tooltip>
-            </Box>
+            <DrawerLabeledValue key={`${item?.id}-${index}`} label={item?.label} value={displayValue} />
           );
         })}
-        <Box>
-          <Typography
-            variant="body2"
-            fontWeight={theme.typography.fontWeightRegular}
-            color={theme.palette.text.secondary}
-          >
-            {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
-          </Typography>
-          <Tooltip title={getTooltipTitle(itemValues?.invoiceData?.docNumber)}>
-            <Typography variant="body2" fontWeight={theme.typography.fontWeightMedium} sx={truncatedTextSx}>
-              {itemValues?.invoiceData?.docNumber ?? MISSING_DATA_PLACEHOLDER}
-            </Typography>
-          </Tooltip>
-        </Box>
-        <Box>
-          <Typography
-            variant="body2"
-            fontWeight={theme.typography.fontWeightRegular}
-            color={theme.palette.text.secondary}
-          >
-            {itemValues.status === 'REFUNDED' ? 'Nota di credito' : 'Fattura'}
-          </Typography>
-          <Button
-            data-testid="btn-test"
-            sx={{
-              padding: 0,
-              width: '100%',
-              display: 'block',
-              textAlign: 'left',
-              minWidth: 0,
-              maxWidth: '100%',
-              minHeight: 'fit-content',
-              height: 'auto',
-              '&:hover': {
-                backgroundColor: '#fff',
-                color: '#0055AA',
-              },
-            }}
-            onClick={() => handleDownloadFile(itemValues)}
-          >
-            {isLoading ? (
-              <CircularProgress color="inherit" size={20} data-testid="item-loader" />
-            ) : (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '6px',
-                  width: '100%',
-                  mt: '2px',
-                  minWidth: 0,
-                }}
-              >
-                <ReceiptLong sx={{ flexShrink: 0, mt: '2px' }} />
-                <Tooltip title={getTooltipTitle(itemValues?.invoiceData?.filename)}>
-                  <Typography
-                    component="span"
-                    variant="inherit"
-                    sx={{
-                      ...truncatedTextSx,
-                      flex: 1,
-                    }}
-                  >
-                    {itemValues?.invoiceData?.filename ?? MISSING_DATA_PLACEHOLDER}
-                  </Typography>
-                </Tooltip>
-              </Box>
-            )}
-          </Button>
-        </Box>
+        <DrawerLabeledValue
+          label={itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
+          value={itemValues?.invoiceData?.docNumber}
+        />
+        <DrawerFileButton
+          label={itemValues.status === 'REFUNDED' ? 'Nota di credito' : 'Fattura'}
+          filename={itemValues?.invoiceData?.filename}
+          isLoading={isLoading}
+          onClick={() => handleDownloadFile(itemValues)}
+          iconSx={{ mt: '2px' }}
+        />
         <Box>
           <Typography
             variant="body2"
@@ -407,11 +314,11 @@ export default function InvoiceDetail({
                       >
                         {date ? formatDate(new Date(date)) : MISSING_DATA_PLACEHOLDER}
                       </Typography>
-                      <Tooltip title={getTooltipTitle(reason)}>
+                      <Tooltip title={getDrawerTooltipTitle(reason)}>
                         <Typography
                           variant="body2"
                           fontWeight={theme.typography.fontWeightMedium}
-                          sx={truncatedTextSx}
+                          sx={drawerTruncatedTextSx}
                         >
                           {reason ?? MISSING_DATA_PLACEHOLDER}
                         </Typography>
@@ -424,7 +331,7 @@ export default function InvoiceDetail({
                   <Typography
                     variant="body2"
                     fontWeight={theme.typography.fontWeightMedium}
-                    sx={truncatedTextSx}
+                    sx={drawerTruncatedTextSx}
                   >
                     {MISSING_DATA_PLACEHOLDER}
                   </Typography>

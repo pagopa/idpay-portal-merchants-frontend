@@ -116,8 +116,10 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
   const ellipsisSx = {
     display: 'block',
     maxWidth: '100%',
+    minWidth: 0,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   };
   const selectedStoreAddress = selectedStore ? formatCatalogDrawerAddress(selectedStore) : '';
   const [initiatives, setInitiatives] = useState<Array<PointOfSaleInitiativeDTO>>([]);
@@ -501,7 +503,17 @@ export const PosCatalogDrawer: React.FC<PosCatalogDrawerProps> = ({
               >
                 <Typography
                   variant="body1"
-                  sx={{ ...ellipsisSx, fontWeight: theme.typography.fontWeightMedium }}
+                  sx={{
+                    ...ellipsisSx,
+                    fontWeight: theme.typography.fontWeightMedium,
+                    '& a': {
+                      color: 'inherit',
+                      display: 'block',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    },
+                  }}
                 >
                   {selectedStore.type === 'PHYSICAL' ? (
                     getDisplayValue(selectedStoreAddress)
