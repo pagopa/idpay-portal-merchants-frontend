@@ -1,4 +1,4 @@
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, Button, CircularProgress, Tooltip } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia/theme';
@@ -19,6 +19,18 @@ type Props = DetailDrawerProps & {
   itemValues: any;
   listItem: Array<any>;
 };
+
+const truncatedTextSx = {
+  display: 'block',
+  maxWidth: '100%',
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const getTooltipTitle = (value?: string) =>
+  value?.trim() === '' || !value ? MISSING_DATA_PLACEHOLDER : value;
 
 export default function TransactionDetail({ itemValues, listItem, ...rest }: Props) {
   const { setAlert } = useAlert();
@@ -149,25 +161,31 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
       data-testid="transaction-detail"
       buttons={[...editButton, ...reverseButton]}
     >
-      {listItem.map((item, index) => (
-        <Box
-          key={`${item?.id}-${index}`}
-          sx={{
-            wordBreak: 'break-word',
-          }}
-        >
-          <Typography
-            variant="body2"
-            fontWeight={theme.typography.fontWeightRegular}
-            color={theme.palette.text.secondary}
+      {listItem.map((item, index) => {
+        const displayValue = getValueText(item?.id, item?.type);
+
+        return (
+          <Box
+            key={`${item?.id}-${index}`}
+            sx={{
+              minWidth: 0,
+            }}
           >
-            {item?.label}
-          </Typography>
-          <Typography variant="body2" fontWeight="fontWeightMedium">
-            {getValueText(item?.id, item?.type)}
-          </Typography>
-        </Box>
-      ))}
+            <Typography
+              variant="body2"
+              fontWeight={theme.typography.fontWeightRegular}
+              color={theme.palette.text.secondary}
+            >
+              {item?.label}
+            </Typography>
+            <Tooltip title={getTooltipTitle(displayValue)}>
+              <Typography variant="body2" fontWeight="fontWeightMedium" sx={truncatedTextSx}>
+                {displayValue}
+              </Typography>
+            </Tooltip>
+          </Box>
+        );
+      })}
       <Box>
         <Typography
           variant="body2"
@@ -188,13 +206,15 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
             >
               {itemValues.status === 'REFUNDED' ? 'Numero nota di credito' : 'Numero fattura'}
             </Typography>
-            <Typography
-              variant="body2"
-              fontWeight={theme.typography.fontWeightMedium}
-              sx={{ overflowWrap: 'break-word' }}
-            >
-              {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
-            </Typography>
+            <Tooltip title={getTooltipTitle(itemValues?.invoiceFile?.docNumber)}>
+              <Typography
+                variant="body2"
+                fontWeight={theme.typography.fontWeightMedium}
+                sx={truncatedTextSx}
+              >
+                {itemValues?.invoiceFile?.docNumber ?? MISSING_DATA_PLACEHOLDER}
+              </Typography>
+            </Tooltip>
           </Box>
           <Box>
             <Typography
@@ -236,20 +256,19 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
                   }}
                 >
                   <ReceiptLong sx={{ flexShrink: 0, mt: 2 }} />
-                  <Typography
-                    component="span"
-                    variant="inherit"
-                    sx={{
-                      whiteSpace: 'pre-wrap',
-                      overflowWrap: 'anywhere',
-                      wordBreak: 'break-word',
-                      minWidth: 0,
-                      flex: 1,
-                      marginTop: 2,
-                    }}
-                  >
-                    {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
-                  </Typography>
+                  <Tooltip title={getTooltipTitle(itemValues?.invoiceFile?.filename)}>
+                    <Typography
+                      component="span"
+                      variant="inherit"
+                      sx={{
+                        ...truncatedTextSx,
+                        flex: 1,
+                        marginTop: 2,
+                      }}
+                    >
+                      {itemValues?.invoiceFile?.filename ?? MISSING_DATA_PLACEHOLDER}
+                    </Typography>
+                  </Tooltip>
                 </Box>
               )}
             </Button>
