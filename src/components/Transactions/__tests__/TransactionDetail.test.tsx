@@ -248,6 +248,80 @@ describe('TransactionDetail', () => {
     expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
   });
 
+  it('applies truncation styles and shows tooltips for long drawer values', async () => {
+    const longListValue = 'VALORE-MOLTO-LUNGO-PER-TOOLTIP-TRANSACTION-DETAIL';
+    const longDocNumber = 'DOC-NUMBER-MOLTO-LUNGO-1234567890';
+    const longFilename = 'nome-file-molto-lungo-per-verificare-il-tooltip-transaction-detail.pdf';
+
+    const itemValues = {
+      id: 'TRX-LONG',
+      status: 'COMPLETED',
+      additionalProperties: { productName: longListValue },
+      invoiceFile: { filename: longFilename, docNumber: longDocNumber },
+    };
+
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        setIsOpen={jest.fn()}
+        itemValues={itemValues}
+        listItem={[
+          {
+            id: 'additionalProperties.productName',
+            label: 'Text Field',
+            type: TYPE_TEXT.Text,
+          },
+        ]}
+      />
+    );
+
+    const listValue = screen.getByText(longListValue);
+    const docNumber = screen.getByText(longDocNumber);
+    const fileName = screen.getByText(longFilename);
+
+    expect(listValue).toHaveStyle({
+      display: 'block',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(docNumber).toHaveStyle({
+      display: 'block',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(fileName).toHaveStyle({
+      display: 'block',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+
+    fireEvent.mouseOver(listValue);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(longListValue);
+
+    fireEvent.mouseLeave(listValue);
+    await waitFor(() => {
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+
+    fireEvent.mouseOver(docNumber);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(longDocNumber);
+
+    fireEvent.mouseLeave(docNumber);
+    await waitFor(() => {
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+
+    fireEvent.mouseOver(fileName);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(longFilename);
+  });
+
   it('creates edit button when editable and pushes correct path on click (docNumber present)', () => {
     const itemValues = {
       id: 'TRX-5',

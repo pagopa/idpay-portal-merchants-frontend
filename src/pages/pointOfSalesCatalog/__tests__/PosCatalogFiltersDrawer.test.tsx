@@ -305,6 +305,76 @@ describe('PosCatalogFiltersDrawer', () => {
     expect(screen.getByText('-')).toBeInTheDocument();
   });
 
+  it('applies truncation styles and shows tooltips for long drawer texts', async () => {
+    const longInitiativeLabel =
+      'Iniziativa con descrizione molto lunga per verificare il tooltip nel drawer POS';
+    const longWebsite = 'www.sito-molto-lungo-per-verificare-il-tooltip-del-drawer-pos.it';
+
+    (getPointOfSaleInitiatives as jest.Mock).mockResolvedValue([
+      { initiativeId: 'LONG_ID', updatedAt: '2024-02-02T00:00:00Z' },
+    ]);
+
+    render(
+      <PosCatalogDrawer
+        isOpen
+        onClose={jest.fn()}
+        selectedStore={{
+          ...onlineStore,
+          id: 'LONG-STORE-ID-1234567890',
+          website: longWebsite,
+          contactName: 'Nome molto lungo per verificare il comportamento del tooltip',
+        }}
+        initiativeOptions={[{ value: 'LONG_ID', label: longInitiativeLabel }]}
+        publishedInitiativeOptions={[{ value: 'LONG_ID', label: longInitiativeLabel }]}
+        merchantId="merchant-123"
+      />
+    );
+
+    const initiativeText = await screen.findByText(longInitiativeLabel);
+    const websiteLink = await screen.findByRole('link', { name: longWebsite });
+    const websiteText = websiteLink.closest('p');
+    const storeIdText = screen.getByText('LONG-STORE-ID-1234567890');
+
+    expect(initiativeText).toHaveStyle({
+      display: 'block',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(storeIdText).toHaveStyle({
+      display: 'block',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(websiteText).toHaveStyle({
+      display: 'block',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(websiteLink).toHaveStyle({
+      display: 'block',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+
+    fireEvent.mouseOver(initiativeText);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(longInitiativeLabel);
+
+    fireEvent.mouseLeave(initiativeText);
+    await waitFor(() => {
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+
+    fireEvent.mouseOver(websiteLink);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(longWebsite);
+  });
+
   it('associates the selected store to an initiative from the drawer modal', async () => {
     (associatePos as jest.Mock).mockResolvedValue({
       associated: [{ pointOfSaleId: '2', franchiseName: 'Negozio fisico' }],
