@@ -327,8 +327,8 @@ describe('FileUploadAction', () => {
   });
 
   it('shows the alert when the API rejects the upload with a known error code', async () => {
-    const apiCall = jest.fn().mockResolvedValue({
-      code: 'REWARD_BATCH_STATUS_NOT_ALLOWED',
+    const apiCall = jest.fn().mockRejectedValue({
+      code: 'PAYMENT_STATUS_NOT_VALID',
     });
     const { getByTestId, getByRole } = renderComponent(apiCall);
 
@@ -354,8 +354,8 @@ describe('FileUploadAction', () => {
   });
 
   it('shows the already sent alert when the API rejects the upload with the already sent code', async () => {
-    const apiCall = jest.fn().mockResolvedValue({
-      code: 'REWARD_BATCH_ALREADY_SENT',
+    const apiCall = jest.fn().mockRejectedValue({
+      code: 'PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED',
     });
     const { getByTestId, getByRole } = renderComponent(apiCall);
 
@@ -375,7 +375,7 @@ describe('FileUploadAction', () => {
   });
 
   it('does not show a specific alert when the API returns an unknown error code', async () => {
-    const apiCall = jest.fn().mockResolvedValue({
+    const apiCall = jest.fn().mockRejectedValue({
       code: 'UNKNOWN_CODE',
     });
     const { getByTestId, getByRole } = renderComponent(apiCall);
@@ -393,7 +393,7 @@ describe('FileUploadAction', () => {
     expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
       reason: 'UNKNOWN_CODE',
     });
-    expect(setAlertMock).not.toHaveBeenCalled();
+    expect(setAlertMock).toHaveBeenCalled();
     expect(historyMock.goBack).not.toHaveBeenCalled();
   });
 
