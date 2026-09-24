@@ -280,10 +280,14 @@ describe('MerchantsApiClient', () => {
   });
 
   it('reversalTransactionInvoiced calls transaction method', async () => {
-    mockTransactionInstance.reversalTransactionInvoiced.mockResolvedValue({});
+    mockTransactionInstance.reversalTransactionInvoiced.mockResolvedValue({
+      headers: new Headers({ 'X-Transaction-Revision': '42' }),
+    });
     const file = new File(['content'], 'invoice.pdf');
 
-    await api.reversalTransactionInvoiced('init1', 'trx1', file, 'DOC001');
+    await expect(api.reversalTransactionInvoiced('init1', 'trx1', file, 'DOC001')).resolves.toEqual(
+      { transactionRevision: 42 }
+    );
 
     expect(mockTransactionInstance.reversalTransactionInvoiced).toHaveBeenCalledWith(
       { initiativeId: 'init1', transactionId: 'trx1' },
@@ -292,15 +296,33 @@ describe('MerchantsApiClient', () => {
   });
 
   it('updateInvoiceTransaction calls transaction method', async () => {
-    mockTransactionInstance.updateInvoiceTransaction.mockResolvedValue({});
+    mockTransactionInstance.updateInvoiceTransaction.mockResolvedValue({
+      headers: new Headers({ 'X-Transaction-Revision': '43' }),
+    });
     const file = new File(['content'], 'invoice.pdf');
 
-    await api.updateInvoiceTransaction('init1', 'trx1', file, 'DOC001');
+    await expect(api.updateInvoiceTransaction('init1', 'trx1', file, 'DOC001')).resolves.toEqual({
+      transactionRevision: 43,
+    });
 
     expect(mockTransactionInstance.updateInvoiceTransaction).toHaveBeenCalledWith(
       { initiativeId: 'init1', transactionId: 'trx1' },
       { file, docNumber: 'DOC001' }
     );
+  });
+
+  it('does not expose a revision when the mutation header is missing or malformed', async () => {
+    const file = new File(['content'], 'invoice.pdf');
+
+    mockTransactionInstance.updateInvoiceTransaction.mockResolvedValue({
+      headers: new Headers(),
+    });
+    await expect(api.updateInvoiceTransaction('init1', 'trx1', file)).resolves.toEqual({});
+
+    mockTransactionInstance.reversalTransactionInvoiced.mockResolvedValue({
+      headers: new Headers({ 'X-Transaction-Revision': 'not-a-number' }),
+    });
+    await expect(api.reversalTransactionInvoiced('init1', 'trx1', file)).resolves.toEqual({});
   });
 
   it('downloadInvoiceFile returns data', async () => {
