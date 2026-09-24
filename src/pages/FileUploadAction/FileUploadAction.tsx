@@ -36,6 +36,11 @@ interface FileUploadActionProps {
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
 const VALID_MIME_TYPES = ['application/pdf', 'application/xml', 'text/xml'];
 
+const errorMessageMap = {
+  PAYMENT_STATUS_NOT_VALID: 'modifyDocument.errors.deniedSentError',
+  PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED: 'modifyDocument.errors.alreadySentError'
+};
+
 const FileUploadAction: React.FC<FileUploadActionProps> = ({
   apiCall,
   breadcrumbsLabel,
@@ -172,31 +177,8 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
       try {
         const normalizedDocNumber = docNumber.trim();
-        const response = await (apiCall as any)(initiativeId, trxId, file, normalizedDocNumber);
-
-        if (response?.code) {
-          trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
-            reason: response.code,
-          });
-          if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
-            setAlert({
-              text: t('modifyDocument.errors.deniedSentError'),
-              isOpen: true,
-              severity: 'error',
-            });
-          } else if (response.code === 'REWARD_BATCH_ALREADY_SENT') {
-            setAlert({
-              text: t('modifyDocument.errors.alreadySentError'),
-              isOpen: true,
-              severity: 'error',
-            });
-          }
-          setLoadingFile(false);
-          return;
-        }
-
+        await (apiCall as any)(initiativeId, trxId, file, normalizedDocNumber);
         setLoadingFile(false);
-
         history.replace({
           ...history.location,
           state: {
@@ -204,7 +186,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             refundUploadSuccess: true,
           },
         });
-
         trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_SUCCESS);
         setAlert({
           text: t('modifyDocument.refundSuccessUpload'),
@@ -212,211 +193,215 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           severity: 'success',
         });
         history.goBack();
-      } catch (error: unknown) {
-        trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
-          reason: 'REQUEST_FAILED',
-        });
-        setAlert({
-          text: t('modifyDocument.errors.errorAlert'),
-          isOpen: true,
-          severity: 'error',
-        });
+      } catch (error: any) {
+        const errorResponseCode: keyof typeof errorMessageMap = error?.code;
+        setAlert({ isOpen: true, severity: 'error', text: t(errorMessageMap?.[errorResponseCode] ?? 'modifyDocument.errors.errorAlert') });
+        setLoadingFile(false);
+        if (errorResponseCode) {
+          trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+            reason: errorResponseCode,
+          });
+        } else {
+          trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+            reason: 'REQUEST_FAILED',
+          });
+        }
         setLoadingFile(false);
       }
-    }
+    };
   };
 
-  return (
-    <>
-      <Box p={4} maxWidth="75%" justifySelf="center">
-        <BreadcrumbsBoxUpload
-          backLabel={t('actions.exit')}
-          items={[breadcrumbsLabel, secondBreadcrumbLabel]}
-          active={true}
-          onClickBackButton={handleBackNavigation}
-        />
-
-        <TitleBox
-          title={scopedT(`${i18nBlockKey}.title`)}
-          mtTitle={3}
-          variantTitle="h4"
-          subTitle={scopedT(`${i18nBlockKey}.invoiceSubtitle`)}
-          variantSubTitle="body2"
-        />
-
-        <Box
-          mt={3}
-          py={3}
-          px={4}
-          sx={{ backgroundColor: theme.palette.background.paper }}
-          borderRadius="4px"
-        >
-          <Typography mt={2} variant="h6" fontWeight={theme.typography.fontWeightBold}>
-            {scopedT(`${i18nBlockKey}.invoiceTitle`)}
-          </Typography>
-
-          <Typography mt={2} variant="body2" fontWeight={theme.typography.fontWeightMedium}>
-            {scopedT(`${i18nBlockKey}.insertInvoice`)}
-          </Typography>
-
-          <TextField
-            variant="outlined"
-            fullWidth
-            value={docNumber}
-            onChange={handleDocNumberChange}
-            onBlur={() =>
-              !docNumber || docNumber.trim().length < 2
-                ? setDocNumberError(true)
-                : setDocNumberError(false)
-            }
-            label={scopedT(`${i18nBlockKey}.invoiceLabel`)}
-            size="small"
-            sx={{
-              mt: 2,
-              '& .MuiFormLabel-root.Mui-error': {
-                color: '#5C6E82 !important',
-              },
-            }}
-            error={docNumberError}
-            helperText={
-              docNumberError && docNumber === ''
-                ? t('validation.required')
-                : docNumberError && docNumber.trim().length < 2
-                  ? 'Lunghezza minima 2 caratteri'
-                  : ''
-            }
-            required
+    return (
+      <>
+        <Box p={4} maxWidth="75%" justifySelf="center">
+          <BreadcrumbsBoxUpload
+            backLabel={t('actions.exit')}
+            items={[breadcrumbsLabel, secondBreadcrumbLabel]}
+            active={true}
+            onClickBackButton={handleBackNavigation}
           />
-        </Box>
 
-        <Box
-          mt={4}
-          p={3}
-          className={styleClass}
-          sx={{
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: '4px',
-            minWidth: { lg: '1000px' },
-          }}
-        >
-          <Typography variant="h6" fontWeight={theme.typography.fontWeightBold}>
-            {scopedT(`${i18nBlockKey}.creditNote`)}
-          </Typography>
-
-          <Typography variant="body2" mt={4} mb={1} sx={{ marginTop: '32px !important' }}>
-            {scopedT(`${i18nBlockKey}.creditNoteSubtitle`)}
-          </Typography>
-
-          <Link
-            onClick={() => window.open(manualLink || '', '_blank')}
-            sx={{ cursor: 'pointer', fontWeight: theme.typography.fontWeightMedium, fontSize: 14 }}
-          >
-            {scopedT(`${i18nBlockKey}.manualLink`)}
-          </Link>
-
-          {fileSizeError && (
-            <Box mt={2}>
-              <MuiAlert severity="error">
-                <Typography variant="body2">
-                  {scopedT(`${i18nBlockKey}.errors.fileSizeError`)}
-                </Typography>
-              </MuiAlert>
-            </Box>
-          )}
-
-          {fileTypeError && (
-            <Box mt={2}>
-              <MuiAlert severity="error">
-                <Typography variant="body2">
-                  {scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
-                </Typography>
-              </MuiAlert>
-            </Box>
-          )}
-
-          {requiredFileError && (
-            <Box mt={2}>
-              <MuiAlert severity="error">
-                <Typography variant="body2">
-                  {scopedT(`${i18nBlockKey}.errors.requiredFileError`)}
-                </Typography>
-              </MuiAlert>
-            </Box>
-          )}
+          <TitleBox
+            title={scopedT(`${i18nBlockKey}.title`)}
+            mtTitle={3}
+            variantTitle="h4"
+            subTitle={scopedT(`${i18nBlockKey}.invoiceSubtitle`)}
+            variantSubTitle="body2"
+          />
 
           <Box
-            mt={1}
-            mb={2}
-            sx={{
-              '& .MuiButton-root': {
-                backgroundColor: 'transparent',
-                boxShadow: 'none',
-                padding: 0,
-                minWidth: 'auto',
-                textTransform: 'none',
-                fontWeight: 'bold',
-                color: '#0073E6 !important',
-                '&:hover': {
-                  backgroundColor: 'transparent',
-                },
-              },
-            }}
+            mt={3}
+            py={3}
+            px={4}
+            sx={{ backgroundColor: theme.palette.background.paper }}
+            borderRadius="4px"
           >
-            <SingleFileInput
-              onFileSelected={handleFileSelect}
-              onFileRemoved={handleRemoveFile}
-              value={file}
-              dropzoneLabel={scopedT(`${i18nBlockKey}.uploadFile`)}
-              dropzoneButton={scopedT(`${i18nBlockKey}.uploadFileButton`)}
-              rejectedLabel={scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
-              loading={loadingFile || isLoading}
+            <Typography mt={2} variant="h6" fontWeight={theme.typography.fontWeightBold}>
+              {scopedT(`${i18nBlockKey}.invoiceTitle`)}
+            </Typography>
+
+            <Typography mt={2} variant="body2" fontWeight={theme.typography.fontWeightMedium}>
+              {scopedT(`${i18nBlockKey}.insertInvoice`)}
+            </Typography>
+
+            <TextField
+              variant="outlined"
+              fullWidth
+              value={docNumber}
+              onChange={handleDocNumberChange}
+              onBlur={() =>
+                !docNumber || docNumber.trim().length < 2
+                  ? setDocNumberError(true)
+                  : setDocNumberError(false)
+              }
+              label={scopedT(`${i18nBlockKey}.invoiceLabel`)}
+              size="small"
+              sx={{
+                mt: 2,
+                '& .MuiFormLabel-root.Mui-error': {
+                  color: '#5C6E82 !important',
+                },
+              }}
+              error={docNumberError}
+              helperText={
+                docNumberError && docNumber === ''
+                  ? t('validation.required')
+                  : docNumberError && docNumber.trim().length < 2
+                    ? 'Lunghezza minima 2 caratteri'
+                    : ''
+              }
+              required
             />
           </Box>
 
-          <input
-            key={inputKey}
-            type="file"
-            accept="application/pdf, application/xml"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={(e) => {
-              const selectedFile = e.target.files?.[0];
-              if (selectedFile) {
-                handleFileSelect(selectedFile);
-              }
-              setInputKey((prev) => prev + 1);
+          <Box
+            mt={4}
+            p={3}
+            className={styleClass}
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: '4px',
+              minWidth: { lg: '1000px' },
             }}
-          />
-
-          {file && (
-            <Button
-              variant="naked"
-              startIcon={<FileUploadIcon />}
-              onClick={handleButtonClick}
-              sx={{ fontWeight: 'bold', fontSize: 14 }}
-            >
-              {scopedT(`${i18nBlockKey}.replaceFile`)}
-            </Button>
-          )}
-
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            p={{ xs: 2, sm: 0 }}
-            spacing={2}
-            mt={3}
-            justifyContent="space-between"
           >
-            <Button variant="outlined" onClick={handleBackNavigation}>
-              {t('actions.back')}
-            </Button>
-            <Button variant="contained" onClick={handleAction}>
-              {t('actions.continue')}
-            </Button>
-          </Stack>
-        </Box>
-      </Box>
-    </>
-  );
-};
+            <Typography variant="h6" fontWeight={theme.typography.fontWeightBold}>
+              {scopedT(`${i18nBlockKey}.creditNote`)}
+            </Typography>
 
-export default FileUploadAction;
+            <Typography variant="body2" mt={4} mb={1} sx={{ marginTop: '32px !important' }}>
+              {scopedT(`${i18nBlockKey}.creditNoteSubtitle`)}
+            </Typography>
+
+            <Link
+              onClick={() => window.open(manualLink || '', '_blank')}
+              sx={{ cursor: 'pointer', fontWeight: theme.typography.fontWeightMedium, fontSize: 14 }}
+            >
+              {scopedT(`${i18nBlockKey}.manualLink`)}
+            </Link>
+
+            {fileSizeError && (
+              <Box mt={2}>
+                <MuiAlert severity="error">
+                  <Typography variant="body2">
+                    {scopedT(`${i18nBlockKey}.errors.fileSizeError`)}
+                  </Typography>
+                </MuiAlert>
+              </Box>
+            )}
+
+            {fileTypeError && (
+              <Box mt={2}>
+                <MuiAlert severity="error">
+                  <Typography variant="body2">
+                    {scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
+                  </Typography>
+                </MuiAlert>
+              </Box>
+            )}
+
+            {requiredFileError && (
+              <Box mt={2}>
+                <MuiAlert severity="error">
+                  <Typography variant="body2">
+                    {scopedT(`${i18nBlockKey}.errors.requiredFileError`)}
+                  </Typography>
+                </MuiAlert>
+              </Box>
+            )}
+
+            <Box
+              mt={1}
+              mb={2}
+              sx={{
+                '& .MuiButton-root': {
+                  backgroundColor: 'transparent',
+                  boxShadow: 'none',
+                  padding: 0,
+                  minWidth: 'auto',
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  color: '#0073E6 !important',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                  },
+                },
+              }}
+            >
+              <SingleFileInput
+                onFileSelected={handleFileSelect}
+                onFileRemoved={handleRemoveFile}
+                value={file}
+                dropzoneLabel={scopedT(`${i18nBlockKey}.uploadFile`)}
+                dropzoneButton={scopedT(`${i18nBlockKey}.uploadFileButton`)}
+                rejectedLabel={scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
+                loading={loadingFile || isLoading}
+              />
+            </Box>
+
+            <input
+              key={inputKey}
+              type="file"
+              accept="application/pdf, application/xml"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const selectedFile = e.target.files?.[0];
+                if (selectedFile) {
+                  handleFileSelect(selectedFile);
+                }
+                setInputKey((prev) => prev + 1);
+              }}
+            />
+
+            {file && (
+              <Button
+                variant="naked"
+                startIcon={<FileUploadIcon />}
+                onClick={handleButtonClick}
+                sx={{ fontWeight: 'bold', fontSize: 14 }}
+              >
+                {scopedT(`${i18nBlockKey}.replaceFile`)}
+              </Button>
+            )}
+
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              p={{ xs: 2, sm: 0 }}
+              spacing={2}
+              mt={3}
+              justifyContent="space-between"
+            >
+              <Button variant="outlined" onClick={handleBackNavigation}>
+                {t('actions.back')}
+              </Button>
+              <Button variant="contained" onClick={handleAction}>
+                {t('actions.continue')}
+              </Button>
+            </Stack>
+          </Box>
+        </Box>
+      </>
+    );
+  };
+
+  export default FileUploadAction;

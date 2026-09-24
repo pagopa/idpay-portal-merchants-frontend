@@ -456,7 +456,7 @@
     "errors": {
       "requiredFileError": "Selezionare un file da caricare",
       "deniedSentError": "Non puoi modificare questo documento.",
-      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "alreadySentError": "Non puoi procedere con il caricamento di questo documento perché la transazione è già stata inviata per il rimborso.",
       "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
       "fileSizeError": "Il file supera la dimensione massima di 20MB",
       "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
@@ -482,7 +482,7 @@
     "errors": {
       "requiredFileError": "Selezionare un file da caricare",
       "deniedSentError": "Non puoi modificare questo documento.",
-      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "alreadySentError": "Non puoi procedere con il caricamento di questo documento perché la transazione è già stata inviata per il rimborso.",
       "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
       "fileSizeError": "Il file supera la dimensione massima di 20MB",
       "fileNotSupported": "Tipologia di file non supportata, caricare un file PDF o XML"
