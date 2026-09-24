@@ -2,7 +2,7 @@
 import { disableAnalytics, initAnalytics } from './services/analyticsService';
 
 // const ANALYTICS_COOKIE_GROUP = 'C0002';
-const ANALYTICS_COOKIE_GROUP = 'C0001'; // test
+const ANALYTICS_COOKIE_GROUP = 'C0001';
 
 type AnalyticsWindow = Window & {
   OneTrust?: {

@@ -66,6 +66,8 @@ const getPreviousMonth = () => {
   return `${year}-${month}`;
 };
 
+const mockDataTable = jest.fn();
+
 const mockData = [
   {
     id: 1,
@@ -113,40 +115,35 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
     onPaginationPageChange,
   }: // onSelectionModelChange,
   // isRowSelectable,
-  any) => (
-    <div data-testid="data-table">
-      <table>
-        <thead>
-          <tr>
-            {columns.map((col: any) => (
-              <th key={col.field}>{col.headerName}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row: any, index: number) => (
-            <tr key={row.id ?? index}>
-              {/* <td>
-                <button
-                  data-testid={`select-row-${row.id ?? index}`}
-                  onClick={() => onSelectionModelChange?.([row.id])}
-                  disabled={isRowSelectable ? !isRowSelectable({ row }) : false}
-                >
-                  Select
-                </button>
-              </td> */}
+  any) => {
+    mockDataTable({ columns, rows, onPaginationPageChange });
+
+    return (
+      <div data-testid="data-table">
+        <table>
+          <thead>
+            <tr>
               {columns.map((col: any) => (
-                <td key={col.field}>
-                  {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
-                </td>
+                <th key={col.field}>{col.headerName}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
-    </div>
-  ),
+          </thead>
+          <tbody>
+            {rows.map((row: any, index: number) => (
+              <tr key={row.id ?? index}>
+                {columns.map((col: any) => (
+                  <td key={col.field}>
+                    {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
+      </div>
+    );
+  },
 }));
 
 jest.mock('../RefundRequestModal', () => ({
@@ -213,6 +210,19 @@ describe('RefundRequests', () => {
     expect(screen.getByText('pages.refundRequests.title')).toBeInTheDocument();
     expect(screen.getByText('pages.refundRequests.subtitle')).toBeInTheDocument();
     expect(screen.getByTestId('data-table')).toBeInTheDocument();
+  });
+
+  it('should disable the column menu for all refund request columns', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockDataTable).toHaveBeenCalled();
+    });
+
+    const columns = mockDataTable.mock.calls.at(-1)?.[0].columns ?? [];
+
+    expect(columns.length).toBeGreaterThan(0);
+    expect(columns.every((column: any) => column.disableColumnMenu === true)).toBe(true);
   });
 
   it('should call history.push', async () => {
