@@ -10,7 +10,8 @@ jest.mock('../../../services/merchantService', () => ({
 import { generateMerchantReport } from '../../../services/merchantService';
 import { useAppSelector } from '../../../redux/hooks';
 import { Provider } from 'react-redux';
-import { configureStore, UnknownAction } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
+import { useUserPermissions } from '../../../hooks/useUserPermissions';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -25,6 +26,13 @@ jest.mock('../../../redux/slices/initiativesSlice', () => ({
 
 jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
+}));
+
+jest.mock('../../../hooks/useUserPermissions', () => ({
+  PERMISSION_KEYS: {
+    REPORT_GENERATE: 'report.generate',
+  },
+  useUserPermissions: jest.fn(),
 }));
 
 let lastFormikConfig: any;
@@ -61,6 +69,7 @@ jest.mock('formik', () => ({
 }));
 
 const mockedGenerate = generateMerchantReport as jest.Mock;
+const mockedUseUserPermissions = useUserPermissions as jest.Mock;
 
 const createMockStore = (initialState?: any) => {
   return configureStore({
@@ -83,6 +92,9 @@ describe('ExportFiltersCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
+    mockedUseUserPermissions.mockReturnValue({
+      isActionDisabled: jest.fn().mockReturnValue(false),
+    });
   });
 
   const clickSubmit = () => {
@@ -95,6 +107,18 @@ describe('ExportFiltersCard', () => {
     expect(screen.getByText('pages.reportExport.form.submit')).toBeInTheDocument();
     expect(screen.getByText('pages.reportExport.form.title')).toBeInTheDocument();
     expect(screen.getByText('pages.reportExport.form.subtitle')).toBeInTheDocument();
+  });
+
+  it('disables date inputs and submit when report generation is disabled', () => {
+    mockedUseUserPermissions.mockReturnValue({
+      isActionDisabled: jest.fn().mockReturnValue(true),
+    });
+
+    renderComponent();
+
+    expect(screen.getByLabelText('Dal')).toBeDisabled();
+    expect(screen.getByLabelText('Al')).toBeDisabled();
+    expect(screen.getByText('pages.reportExport.form.submit')).toBeDisabled();
   });
 
   it('handles INSERTED status', async () => {
