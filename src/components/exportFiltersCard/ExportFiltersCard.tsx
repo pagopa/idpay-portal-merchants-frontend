@@ -140,6 +140,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               label="Dal"
               type="date"
               size="medium"
+              disabled={isGenerateReportDisabled}
               value={formik.values.startDate ?? ''}
               onChange={(e) => {
                 void formik.setFieldValue('startDate', e.target.value);
@@ -160,6 +161,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               label="Al"
               type="date"
               size="medium"
+              disabled={isGenerateReportDisabled}
               value={formik.values.endDate ?? ''}
               onChange={(e) => void formik.setFieldValue('endDate', e.target.value)}
               onBlur={formik.handleBlur}
