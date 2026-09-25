@@ -87,6 +87,32 @@ const renderComponent = (updateAlerts = jest.fn()) => {
     </Provider>
   );
 };
+
+const getDateInputs = () => ({
+  inputDal: screen.getByLabelText('Dal'),
+  inputAl: screen.getByLabelText('Al'),
+});
+
+const fillDateInputs = (startDate: any, endDate: any) => {
+  const { inputDal, inputAl } = getDateInputs();
+
+  fireEvent.change(inputDal, startDate);
+  fireEvent.change(inputAl, endDate);
+
+  return { inputDal, inputAl };
+};
+
+const validateAndFillDateInputs = (startDate: any, endDate: any) => {
+  const result = lastFormikConfig.validate({
+    startDate,
+    endDate,
+  });
+
+  fillDateInputs(result.startDate, result.endDate);
+
+  return result;
+};
+
 describe('ExportFiltersCard', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
@@ -222,15 +248,7 @@ describe('ExportFiltersCard', () => {
       </Provider>
     );
 
-    const result = lastFormikConfig.validate({
-      startDate: null,
-      endDate: null,
-    });
-    const inputDal = screen.getByLabelText('Dal');
-    const inputAl = screen.getByLabelText('Al');
-
-    fireEvent.change(inputDal, result.startDate);
-    fireEvent.change(inputAl, result.endDate);
+    const result = validateAndFillDateInputs(null, null);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     expect(result.startDate).toBe('validation.required');
     expect(result.endDate).toBe('validation.required');
@@ -249,15 +267,7 @@ describe('ExportFiltersCard', () => {
     const startDate = dayjs();
     const endDate = dayjs().add(0, 'day');
 
-    const result = lastFormikConfig.validate({
-      startDate: startDate,
-      endDate: endDate,
-    });
-    const inputDal = screen.getByLabelText('Dal');
-    const inputAl = screen.getByLabelText('Al');
-
-    fireEvent.change(inputDal, result.startDate);
-    fireEvent.change(inputAl, result.endDate);
+    const result = validateAndFillDateInputs(startDate, endDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
     await waitFor(() => expect(result.endDate).toBe('validation.invalidRange'));
@@ -276,16 +286,7 @@ describe('ExportFiltersCard', () => {
     const startDate = dayjs();
     const endDate = dayjs().add(100, 'day');
 
-    const result = lastFormikConfig.validate({
-      startDate: startDate,
-      endDate: endDate,
-    });
-
-    const inputDal = screen.getByLabelText('Dal');
-    const inputAl = screen.getByLabelText('Al');
-
-    fireEvent.change(inputDal, result.startDate);
-    fireEvent.change(inputAl, result.endDate);
+    const result = validateAndFillDateInputs(startDate, endDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
     await waitFor(() => expect(result.endDate).toBe('validation.maxRange'));
@@ -304,16 +305,7 @@ describe('ExportFiltersCard', () => {
       diff: () => 10,
     };
 
-    const result = lastFormikConfig.validate({
-      startDate: mockDay,
-      endDate: mockDay,
-    });
-
-    const inputDal = screen.getByLabelText('Dal');
-    const inputAl = screen.getByLabelText('Al');
-
-    fireEvent.change(inputDal, result.startDate);
-    fireEvent.change(inputAl, result.endDate);
+    const result = validateAndFillDateInputs(mockDay, mockDay);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
 
     clickSubmit();
@@ -335,16 +327,7 @@ describe('ExportFiltersCard', () => {
     const futureDate = dayjs().add(2, 'day');
     const validEndDate = dayjs();
 
-    const result = lastFormikConfig.validate({
-      startDate: futureDate,
-      endDate: validEndDate,
-    });
-
-    const inputDal = screen.getByLabelText('Dal');
-    const inputAl = screen.getByLabelText('Al');
-
-    fireEvent.change(inputDal, result.startDate);
-    fireEvent.change(inputAl, result.endDate);
+    const result = validateAndFillDateInputs(futureDate, validEndDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
     await waitFor(() => expect(result.startDate).toBe('validation.invalidRange'));
@@ -363,16 +346,7 @@ describe('ExportFiltersCard', () => {
     const futureDate = dayjs().add(2, 'day');
     const validStartDate = dayjs();
 
-    const result = lastFormikConfig.validate({
-      startDate: validStartDate,
-      endDate: futureDate,
-    });
-
-    const inputDal = screen.getByLabelText('Dal');
-    const inputAl = screen.getByLabelText('Al');
-
-    fireEvent.change(inputDal, result.startDate);
-    fireEvent.change(inputAl, result.endDate);
+    const result = validateAndFillDateInputs(validStartDate, futureDate);
     expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
     clickSubmit();
     await waitFor(() => expect(result.endDate).toBe('validation.invalidRange'));
