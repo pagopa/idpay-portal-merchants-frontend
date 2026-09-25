@@ -147,56 +147,27 @@ describe('ExportFiltersCard', () => {
     expect(screen.getByText('pages.reportExport.form.submit')).toBeDisabled();
   });
 
-  it('handles INSERTED status', async () => {
-    mockedGenerate.mockResolvedValue({ reportStatus: 'INSERTED' });
+  it.each([
+    ['INSERTED status', 'INSERTED', false],
+    ['GENERATED status', 'GENERATED', false],
+    ['FAILED status', 'FAILED', false],
+    ['API error', 'FAILED', true],
+  ])('handles %s', async (_, expectedStatus, shouldReject) => {
+    if (shouldReject) {
+      mockedGenerate.mockRejectedValue(new Error('error'));
+    } else {
+      mockedGenerate.mockResolvedValue({ reportStatus: expectedStatus });
+    }
+
     const updateAlerts = jest.fn();
 
     renderComponent(updateAlerts);
     clickSubmit();
 
-    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true));
+    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith(expectedStatus, true));
 
     jest.runAllTimers();
-    expect(updateAlerts).toHaveBeenCalledWith('INSERTED', false);
-  });
-
-  it('handles GENERATED status', async () => {
-    mockedGenerate.mockResolvedValue({ reportStatus: 'GENERATED' });
-    const updateAlerts = jest.fn();
-
-    renderComponent(updateAlerts);
-    clickSubmit();
-
-    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('GENERATED', true));
-
-    jest.runAllTimers();
-    expect(updateAlerts).toHaveBeenCalledWith('GENERATED', false);
-  });
-
-  it('handles FAILED status', async () => {
-    mockedGenerate.mockResolvedValue({ reportStatus: 'FAILED' });
-    const updateAlerts = jest.fn();
-
-    renderComponent(updateAlerts);
-    clickSubmit();
-
-    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('FAILED', true));
-
-    jest.runAllTimers();
-    expect(updateAlerts).toHaveBeenCalledWith('FAILED', false);
-  });
-
-  it('handles API error', async () => {
-    mockedGenerate.mockRejectedValue(new Error('error'));
-    const updateAlerts = jest.fn();
-
-    renderComponent(updateAlerts);
-    clickSubmit();
-
-    await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('FAILED', true));
-
-    jest.runAllTimers();
-    expect(updateAlerts).toHaveBeenCalledWith('FAILED', false);
+    expect(updateAlerts).toHaveBeenCalledWith(expectedStatus, false);
   });
 
   it('does nothing if id is missing', async () => {
