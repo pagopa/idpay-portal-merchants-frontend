@@ -310,8 +310,8 @@ describe('ExportFiltersCard', () => {
 
     clickSubmit();
     await waitFor(() => expect(result).toEqual({}));
-    await waitFor(() => expect(inputDal).not.toHaveAttribute('helperText'));
-    await waitFor(() => expect(inputAl).not.toHaveAttribute('helperText'));
+    await waitFor(() => expect(getDateInputs().inputDal).not.toHaveAttribute('helperText'));
+    await waitFor(() => expect(getDateInputs().inputAl).not.toHaveAttribute('helperText'));
   });
 
   it('covers validate future startDate invalidRange branch', async () => {
