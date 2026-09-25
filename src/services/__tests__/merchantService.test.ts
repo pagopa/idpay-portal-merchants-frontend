@@ -37,6 +37,7 @@ import {
   putMerchantOnboardingRequest,
   excludePos,
 } from '../merchantService';
+import { getPendingTransactionState } from '../transactionStateBridge';
 
 jest.mock('../../api/MerchantsApiClient', () => ({
   getMerchantsApi: jest.fn(),
@@ -95,6 +96,7 @@ const expectUpdateMerchantPointOfSalesError = async (
 describe('merchantService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
     (getMerchantsApi as jest.Mock).mockReturnValue(mockedApi);
   });
 
@@ -442,6 +444,30 @@ describe('merchantService', () => {
   test('updateInvoiceTransaction delegates correctly', async () => {
     await updateInvoiceTransaction('trx', {} as any);
     expect(mockedApi.updateInvoiceTransaction).toHaveBeenCalled();
+  });
+
+  test('records a successful invoice update revision without storing the file', async () => {
+    mockedApi.updateInvoiceTransaction.mockResolvedValue({ transactionRevision: 10 });
+    const file = new File(['content'], 'invoice.pdf');
+
+    await updateInvoiceTransaction('initiative-1', 'transaction-1', file, 'DOC-10');
+
+    expect(getPendingTransactionState('initiative-1', 'transaction-1')).toEqual(
+      expect.objectContaining({
+        operation: 'invoice-update',
+        effect: 'invoice',
+        expectedTransactionRevision: 10,
+        invoice: { docNumber: 'DOC-10', filename: 'invoice.pdf' },
+      })
+    );
+  });
+
+  test('does not record a mutation when the revision header is missing', async () => {
+    mockedApi.reversalTransactionInvoiced.mockResolvedValue({});
+
+    await reversalTransactionInvoiced('initiative-1', 'transaction-1', {} as File);
+
+    expect(getPendingTransactionState('initiative-1', 'transaction-1')).toBeUndefined();
   });
 
   test('updateMerchantData delegates correctly', async () => {
