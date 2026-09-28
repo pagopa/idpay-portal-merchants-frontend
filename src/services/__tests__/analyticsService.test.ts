@@ -112,6 +112,22 @@ describe('analyticsService', () => {
         debug: true,
         persistence: 'localStorage',
         track_pageview: false,
+        property_blacklist: expect.arrayContaining(['$current_url']),
+        hooks: expect.objectContaining({
+          before_send_events: expect.any(Function),
+        }),
+        autocapture: expect.objectContaining({
+          capture_text_content: true,
+          capture_extra_attrs: ['name'],
+          allow_element_callback: expect.any(Function),
+          block_attrs: [
+            'aria-label',
+            'aria-labelledby',
+            'aria-describedby',
+            'title',
+            'role',
+          ],
+        }),
       }),
       'analytics'
     );
@@ -148,6 +164,56 @@ describe('analyticsService', () => {
     });
     expect(mockMixpanelInstance.register).toHaveBeenCalledWith({
       initiative_name: 'Synced initiative',
+    });
+
+    const [, initConfig] = mockMixpanel.init.mock.calls[0];
+    expect(initConfig.property_blacklist).not.toContain('$pathname');
+    const allowElementCallback = initConfig.autocapture.allow_element_callback;
+    const button = document.createElement('button');
+    const link = document.createElement('a');
+    const imageInsideLink = document.createElement('img');
+    link.appendChild(imageInsideLink);
+    const clickableImage = document.createElement('img');
+    clickableImage.onclick = jest.fn();
+    const submitInput = document.createElement('input');
+    submitInput.setAttribute('type', 'submit');
+    const genericDiv = document.createElement('div');
+
+    expect(allowElementCallback(button, new MouseEvent('click'))).toBe(true);
+    expect(allowElementCallback(link, new MouseEvent('click'))).toBe(true);
+    expect(allowElementCallback(imageInsideLink, new MouseEvent('click'))).toBe(true);
+    expect(allowElementCallback(clickableImage, new MouseEvent('click'))).toBe(true);
+    expect(allowElementCallback(submitInput, new MouseEvent('click'))).toBe(true);
+    expect(allowElementCallback(genericDiv, new MouseEvent('click'))).toBe(false);
+    expect(allowElementCallback(genericDiv, new Event('change'))).toBe(true);
+
+    expect(initConfig.hooks.before_send_events({
+      event: '$mp_web_page_view',
+      properties: {
+        $pathname: '/portale-esercenti/initiative-1/punti-vendita/store-42',
+        current_url_path: '/portale-esercenti/initiative-1/punti-vendita/store-42',
+      },
+    })).toEqual({
+      event: '$mp_web_page_view',
+      properties: {
+        $pathname: '/portale-esercenti/initiative-1/punti-vendita',
+        current_url_path: '/portale-esercenti/initiative-1/punti-vendita',
+      },
+    });
+    expect(initConfig.hooks.before_send_events({
+      event: '$mp_input_change',
+      properties: {
+        $pathname: '/portale-esercenti/punti-vendita',
+        $el_attr__name: 'associated',
+      },
+    })).toEqual({
+      event: '$mp_input_change',
+      properties: {
+        $pathname: '/portale-esercenti/punti-vendita',
+        $el_attr__name: 'associated',
+        current_url_path: undefined,
+        field_name: 'associated',
+      },
     });
   });
 
@@ -218,6 +284,16 @@ describe('analyticsService', () => {
         click: true,
         input: true,
         submit: true,
+        capture_text_content: true,
+        capture_extra_attrs: ['name'],
+        allow_element_callback: expect.any(Function),
+        block_attrs: [
+          'aria-label',
+          'aria-labelledby',
+          'aria-describedby',
+          'title',
+          'role',
+        ],
       }),
     });
   });
