@@ -94,6 +94,20 @@ const MIXPANEL_CONFIG: Partial<Config> = {
 let analyticsInstance: Mixpanel | undefined;
 let analyticsActive = false;
 
+export const trackAnalyticsInputChange = (
+  fieldName: string,
+  value?: string | number,
+  inputType: string = 'select'
+) => {
+  if (!analyticsInstance || !analyticsActive) {
+    return;
+  }
+  analyticsInstance.track('$mp_input_change', {
+    $el_attr__name: fieldName,
+    input_value: value,
+    input_type: inputType
+  });
+};
 export const MIXPANEL_EVENTS = {
   BONUS_ACCEPTANCE_SUCCESS: 'IDPAY_BONUS_ACCEPTANCE_UX_SUCCESS',
   BONUS_ACCEPTANCE_DENIED: 'IDPAY_BONUS_ACCEPTANCE_UX_DENIED',

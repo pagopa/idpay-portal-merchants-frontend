@@ -11,6 +11,7 @@ import {
   Select,
 } from '@mui/material';
 import { MIAlert } from '@pagopa/mui-italia';
+import { trackAnalyticsInputChange } from '../../services/analyticsService';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import DialogComponent from '../../components/Dialog/DialogComponent';
 
@@ -120,7 +121,10 @@ const AssociateSelectedPosModal: React.FC<Props> = ({
             labelId={selectLabelId}
             value={selectedInitiativeId}
             label={initiativeLabel}
-            onChange={(event) => onInitiativeChange(event.target.value)}
+            onChange={(event) => {
+              onInitiativeChange(event.target.value);
+              trackAnalyticsInputChange('selectedInitiativeId', event.target.value);
+            }}
             sx={{
               '& .MuiSelect-select': {
                 py: 1.25,
