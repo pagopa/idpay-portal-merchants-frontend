@@ -11,17 +11,29 @@ const mockResetForm = jest.fn();
 const mockHandleChange = jest.fn();
 const mockReplace = jest.fn();
 const mockGoBack = jest.fn();
+let mockFormikOnSubmit: (() => void) | undefined;
+let mockFormikValues = {
+  status: '',
+  pointOfSaleId: '',
+  trxCode: '',
+  page: 0,
+};
+let mockHistoryLocation: any = {
+  key: 'history-key',
+  state: { store: { id: 'batch-1' }, refundUploadSuccess: true },
+};
+let mockRouteParams = { initiative_id: 'initiative-123', batch_id: 'batch-1' };
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({
     goBack: mockGoBack,
     replace: mockReplace,
-    location: { state: { store: { id: 'batch-1' }, refundUploadSuccess: true } },
+    location: mockHistoryLocation,
   }),
   useLocation: () => ({
-    state: { store: { id: 'batch-1' }, batchId: 'batch-1' },
+    state: mockHistoryLocation.state,
   }),
-  useParams: () => ({ initiative_id: 'initiative-123', batch_id: 'batch-1' }),
+  useParams: () => mockRouteParams,
 }));
 
 jest.mock('../../../../utils/constants', () => {
@@ -34,18 +46,16 @@ jest.mock('../../../../utils/constants', () => {
 
 jest.mock('formik', () => ({
   ...jest.requireActual('formik'),
-  useFormik: () => ({
-    values: {
-      status: '',
-      pointOfSaleId: '',
-      trxCode: '',
-      page: 0,
-    },
-    handleSubmit: mockHandleSubmit,
-    resetForm: mockResetForm,
-    handleChange: mockHandleChange,
-    dirty: true,
-  }),
+  useFormik: (config: { onSubmit: () => void }) => {
+    mockFormikOnSubmit = config.onSubmit;
+    return {
+      values: mockFormikValues,
+      handleSubmit: mockHandleSubmit,
+      resetForm: mockResetForm,
+      handleChange: mockHandleChange,
+      dirty: true,
+    };
+  },
 }));
 
 jest.mock('react-i18next', () => ({
@@ -70,6 +80,33 @@ jest.mock('../../../../hooks/useAlert', () => ({
   }),
 }));
 
+jest.mock('../../../../services/analyticsService', () => ({
+  trackAnalyticsInputChange: jest.fn(),
+}));
+
+jest.mock('../../../initiativeDiscounts/FiltersForm', () => (props: any) => (
+  <div>
+    {props.children}
+    <button onClick={props.onFiltersApplied}>actions.filterBtn</button>
+    <button onClick={props.onFiltersReset}>actions.removeFiltersBtn</button>
+  </div>
+));
+
+jest.mock('../../invoiceDataTable', () => (props: any) => (
+  <div>
+    <button data-testid="drawer-close-button" onClick={props.onDrawerClosed}>
+      Close drawer
+    </button>
+    <span data-testid="invoice-filters">
+      {`${props.rewardBatchTrxStatus}|${props.pointOfSaleId}|${props.trxCode}`}
+    </span>
+  </div>
+));
+
+jest.mock('../ShopCard', () => ({
+  ShopCard: ({ store }: any) => <div data-testid="shop-card">{store.dateRange}</div>,
+}));
+
 let mockJWT: string | undefined = 'merchant-1';
 jest.mock('../../../../utils/jwt-utils', () => ({
   parseJwt: () => ({ merchant_id: mockJWT }),
@@ -82,6 +119,10 @@ const {
   getMerchantTransactionsProcessed,
   downloadBatchCsv,
 } = jest.requireMock('../../../../services/merchantService');
+
+const { trackAnalyticsInputChange: mockTrackAnalyticsInputChange } = jest.requireMock(
+  '../../../../services/analyticsService'
+);
 
 jest.mock('../../../../redux/slices/initiativesSlice', () => ({
   setInitiativesList: jest.fn(),
@@ -129,6 +170,19 @@ describe('ShopDetails', () => {
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.clearAllMocks();
+    mockJWT = 'merchant-1';
+    mockFormikValues = {
+      status: '',
+      pointOfSaleId: '',
+      trxCode: '',
+      page: 0,
+    };
+    mockHistoryLocation = {
+      key: 'history-key',
+      state: { store: { id: 'batch-1' }, refundUploadSuccess: true },
+    };
+    mockRouteParams = { initiative_id: 'initiative-123', batch_id: 'batch-1' };
+    setupSuccessfulBaseMocks();
   });
 
   act(() => {
@@ -366,5 +420,167 @@ describe('ShopDetails', () => {
     await waitFor(() => expect(mockHandleSubmit).toHaveBeenCalled());
     fireEvent.click(removeFiltersBtn);
     await waitFor(() => expect(mockResetForm).toHaveBeenCalled());
+  });
+
+  it('should clear refundUploadSuccess from history state', async () => {
+    renderComponent();
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        ...mockHistoryLocation,
+        state: {
+          ...mockHistoryLocation.state,
+          refundUploadSuccess: undefined,
+        },
+      })
+    );
+  });
+
+  it('should not clear refundUploadSuccess when state flag is absent', async () => {
+    mockHistoryLocation = {
+      key: 'history-key',
+      state: { store: { id: 'batch-1' } },
+    };
+
+    renderComponent();
+
+    await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith({
+      ...mockHistoryLocation,
+      state: {
+        store: expect.objectContaining({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' }),
+      },
+    });
+  });
+
+  it('should map store dates and render fallback tooltip label', async () => {
+    getRewardBatchById.mockResolvedValue({
+      id: 'batch-1',
+      name: 'Batch 1',
+      status: 'APPROVED',
+      startDate: '2024-01-10T00:00:00.000Z',
+      endDate: '2024-01-20T00:00:00.000Z',
+    });
+    getMerchantPointOfSalesWithTransactions.mockResolvedValue([{ pointOfSaleId: 'shop-1' }]);
+
+    renderComponent();
+
+    expect(await screen.findByTestId('shop-card')).toHaveTextContent('10/01/2024 - 20/01/2024');
+    expect(screen.getByText('pages.initiativeStores.pointOfSale')).toBeInTheDocument();
+  });
+
+  it('should keep empty date range when store dates are missing', async () => {
+    renderComponent();
+
+    expect(await screen.findByTestId('shop-card')).toHaveTextContent('-');
+  });
+
+  it('should apply submitted filters to invoice table props', async () => {
+    mockFormikValues = {
+      status: 'AUTHORIZED',
+      pointOfSaleId: 'shop-1',
+      trxCode: 'ABC123',
+      page: 0,
+    };
+
+    renderComponent();
+
+    await waitFor(() => expect(mockFormikOnSubmit).toBeDefined());
+
+    act(() => {
+      mockFormikOnSubmit?.();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('invoice-filters')).toHaveTextContent('AUTHORIZED|shop-1|ABC123')
+    );
+  });
+
+  it('should reset filters passed to invoice table', async () => {
+    mockFormikValues = {
+      status: 'AUTHORIZED',
+      pointOfSaleId: 'shop-1',
+      trxCode: 'ABC123',
+      page: 0,
+    };
+
+    renderComponent();
+
+    await waitFor(() => expect(mockFormikOnSubmit).toBeDefined());
+
+    act(() => {
+      mockFormikOnSubmit?.();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('invoice-filters')).toHaveTextContent('AUTHORIZED|shop-1|ABC123')
+    );
+
+    fireEvent.click(screen.getByText('actions.removeFiltersBtn'));
+
+    await waitFor(() => expect(screen.getByTestId('invoice-filters')).toHaveTextContent('||'));
+  });
+
+  it('should set stores to an empty array when merchant POS response is undefined', async () => {
+    getMerchantPointOfSalesWithTransactions.mockResolvedValue(undefined);
+
+    renderComponent();
+
+    await waitFor(() => expect(getMerchantPointOfSalesWithTransactions).toHaveBeenCalled());
+    expect(screen.getByRole('combobox', { name: /Punto vendita/i })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+    // The second combobox is status select, which has empty label when disabled
+    const comboboxes = screen.getAllByRole('combobox');
+    expect(comboboxes[1]).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it.skip('should track analytics for point of sale and status filters', async () => {
+    renderComponent();
+
+    const nativeInputs = document.querySelectorAll('input.MuiSelect-nativeInput');
+    fireEvent.change(nativeInputs[0], { target: { name: 'pointOfSaleId', value: 'shop-1' } });
+    fireEvent.change(nativeInputs[1], { target: { name: 'status', value: 'AUTHORIZED' } });
+
+    expect(mockHandleChange).toHaveBeenCalledTimes(2);
+    expect(mockTrackAnalyticsInputChange).toHaveBeenNthCalledWith(1, 'pointOfSaleId', 'shop-1');
+    expect(mockTrackAnalyticsInputChange).toHaveBeenNthCalledWith(2, 'status', 'AUTHORIZED');
+  });
+
+  it('should render selected status chip in status select', async () => {
+    mockFormikValues = {
+      status: 'AUTHORIZED',
+      pointOfSaleId: '',
+      trxCode: '',
+      page: 0,
+    };
+
+    renderComponent();
+
+    expect(await screen.findByTestId('status-test')).toHaveTextContent('AUTHORIZED');
+  });
+
+  it('should refresh batch data when invoice drawer is closed', async () => {
+    renderComponent();
+
+    await waitFor(() => expect(getRewardBatchById).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByTestId('drawer-close-button'));
+
+    await waitFor(() => expect(getRewardBatchById).toHaveBeenCalledTimes(2));
+  });
+
+  it('should skip download when route params are missing', async () => {
+    mockRouteParams = { initiative_id: '', batch_id: '' };
+
+    renderComponent();
+
+    const btn = await screen.findByTestId('download-csv-button-test');
+    fireEvent.click(btn);
+
+    await waitFor(() => expect(getRewardBatchById).toHaveBeenCalled());
+    expect(downloadBatchCsv).not.toHaveBeenCalled();
   });
 });
