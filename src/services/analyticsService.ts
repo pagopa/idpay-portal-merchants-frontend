@@ -108,6 +108,7 @@ export const trackAnalyticsInputChange = (
     input_type: inputType
   });
 };
+
 export const MIXPANEL_EVENTS = {
   BONUS_ACCEPTANCE_SUCCESS: 'IDPAY_BONUS_ACCEPTANCE_UX_SUCCESS',
   BONUS_ACCEPTANCE_DENIED: 'IDPAY_BONUS_ACCEPTANCE_UX_DENIED',

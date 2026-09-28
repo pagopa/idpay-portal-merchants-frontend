@@ -532,21 +532,115 @@ describe('ShopDetails', () => {
       'aria-disabled',
       'true'
     );
-    // The second combobox is status select, which has empty label when disabled
     const comboboxes = screen.getAllByRole('combobox');
     expect(comboboxes[1]).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it.skip('should track analytics for point of sale and status filters', async () => {
+  it('should track analytics when point of sale filter changes', async () => {
     renderComponent();
 
-    const nativeInputs = document.querySelectorAll('input.MuiSelect-nativeInput');
-    fireEvent.change(nativeInputs[0], { target: { name: 'pointOfSaleId', value: 'shop-1' } });
-    fireEvent.change(nativeInputs[1], { target: { name: 'status', value: 'AUTHORIZED' } });
+    await waitFor(() =>
+      expect(getMerchantPointOfSalesWithTransactions).toHaveBeenCalled()
+    );
 
-    expect(mockHandleChange).toHaveBeenCalledTimes(2);
-    expect(mockTrackAnalyticsInputChange).toHaveBeenNthCalledWith(1, 'pointOfSaleId', 'shop-1');
-    expect(mockTrackAnalyticsInputChange).toHaveBeenNthCalledWith(2, 'status', 'AUTHORIZED');
+    const pointOfSaleSelect = screen.getByRole('combobox', {
+      name: /Punto vendita/i,
+    });
+
+    fireEvent.mouseDown(pointOfSaleSelect);
+
+    const option = await screen.findByRole('option', {
+      name: 'Shop 1',
+    });
+
+    fireEvent.click(option);
+
+    expect(mockHandleChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: expect.objectContaining({
+          value: 'shop-1',
+        }),
+      })
+    );
+
+    expect(mockTrackAnalyticsInputChange).toHaveBeenCalledWith(
+      'pointOfSaleId',
+      'shop-1'
+    );
+  });
+
+  it('should track analytics when status filter changes', async () => {
+    renderComponent();
+
+    await waitFor(() =>
+      expect(getMerchantPointOfSalesWithTransactions).toHaveBeenCalled()
+    );
+
+    const statusSelect = screen.getByTestId('status-test');
+    const combobox = statusSelect.querySelector('[role="combobox"]');
+
+    expect(combobox).toBeInTheDocument();
+
+    fireEvent.mouseDown(combobox!);
+
+    const options = await screen.findAllByRole('option');
+    const option = options.find((item) => item.getAttribute('data-value') === 'CONSULTABLE');
+
+    expect(option).toBeDefined();
+    fireEvent.click(option!);
+
+    expect(mockHandleChange).toHaveBeenCalled();
+    expect(mockTrackAnalyticsInputChange).toHaveBeenCalledWith(
+      'status',
+      'CONSULTABLE'
+    );
+  });
+
+  it('should render empty status value when no status is selected', async () => {
+    mockFormikValues = {
+      status: '',
+      pointOfSaleId: '',
+      trxCode: '',
+      page: 0,
+    };
+
+    renderComponent();
+
+    const statusSelect = await screen.findByTestId('status-test');
+    const combobox = statusSelect.querySelector('[role="combobox"]');
+
+    expect(combobox).toBeInTheDocument();
+    expect(statusSelect).not.toHaveTextContent('AUTHORIZED');
+  });
+
+  it('should handle undefined history state', async () => {
+    mockHistoryLocation = {
+      key: 'history-key',
+      state: undefined,
+    };
+
+    renderComponent();
+
+    await waitFor(() =>
+      expect(getRewardBatchById).toHaveBeenCalled()
+    );
+
+    expect(getRewardBatchById).toHaveBeenCalledWith(
+      'initiative-123',
+      'batch-1'
+    );
+
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+
+    expect(mockReplace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: {
+          store: expect.objectContaining({
+            id: 'batch-1',
+          }),
+        },
+      })
+    );
   });
 
   it('should render selected status chip in status select', async () => {
