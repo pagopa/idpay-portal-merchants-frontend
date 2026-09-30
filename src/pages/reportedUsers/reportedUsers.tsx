@@ -14,12 +14,12 @@ import { getReportedUser, deleteReportedUser } from '../../services/merchantServ
 import { parseJwt } from '../../utils/jwt-utils';
 import AlertListComponent, { AlertProps } from '../../components/Alert/AlertListComponent';
 import { useAlert } from '../../hooks/useAlert';
+import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
 import { isValidCF, normalizeValue } from './helpersReportedUsers';
 import SearchTaxCode from './SearchTaxCode';
 import NoResultPaper from './NoResultPaper';
 import { getReportedUsersColumns } from './columnsReportedUser';
 import ModalReportedUser from './modalReportedUser';
-import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
 
 const initialValues: GetReportedUsersFilters = {
   cf: '',

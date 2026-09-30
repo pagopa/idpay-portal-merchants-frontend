@@ -26,11 +26,11 @@ import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
 import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { useAlert } from '../../hooks/useAlert';
 import { BASE_ROUTE } from '../../routes';
-import { ENABLED_DOWNLOAD_STATUSES, IS_ACTION_DISABLED, MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { ENABLED_DOWNLOAD_STATUSES, MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../utils/consoleLogger';
-import { RefundRequestsModal } from './RefundRequestModal';
 import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
+import { RefundRequestsModal } from './RefundRequestModal';
 
 type StatusEnum = RewardBatchDTO['status'];
 
