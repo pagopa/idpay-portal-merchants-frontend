@@ -19,6 +19,7 @@ import SearchTaxCode from './SearchTaxCode';
 import NoResultPaper from './NoResultPaper';
 import { getReportedUsersColumns } from './columnsReportedUser';
 import ModalReportedUser from './modalReportedUser';
+import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
 
 const initialValues: GetReportedUsersFilters = {
   cf: '',
@@ -34,6 +35,9 @@ const ReportedUsers: React.FC = () => {
   const { setAlert } = useAlert();
   const history = useHistory();
   const { initiativeId } = useCurrentInitiativeId();
+  const { isActionDisabled } = useUserPermissions();
+  const isReportUserDisabled = isActionDisabled(PERMISSION_KEYS.REPORTED_USER_REPORT);
+  const isDeleteReportDisabled = isActionDisabled(PERMISSION_KEYS.REPORTED_USER_DELETE);
 
   const requestIdRef = useRef<number>(0);
 
@@ -180,8 +184,8 @@ const ReportedUsers: React.FC = () => {
   );
 
   const reportedUsersColumns = React.useMemo(
-    () => getReportedUsersColumns(handleOpenDeleteModal),
-    [handleOpenDeleteModal]
+    () => getReportedUsersColumns(handleOpenDeleteModal, isDeleteReportDisabled),
+    [handleOpenDeleteModal, isDeleteReportDisabled]
   );
 
   useEffect(() => {
@@ -218,6 +222,7 @@ const ReportedUsers: React.FC = () => {
           <Button
             variant="contained"
             size="small"
+            disabled={isReportUserDisabled}
             onClick={() => {
               history.push(routes.REPORTED_USERS_INSERT.replace(':initiative_id', initiativeId), {
                 merchantId,

@@ -30,6 +30,7 @@ import { ENABLED_DOWNLOAD_STATUSES, IS_ACTION_DISABLED, MISSING_DATA_PLACEHOLDER
 import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../utils/consoleLogger';
 import { RefundRequestsModal } from './RefundRequestModal';
+import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
 
 type StatusEnum = RewardBatchDTO['status'];
 
@@ -48,6 +49,8 @@ const RefundRequests = () => {
   const { initiativeId } = useCurrentInitiativeId();
   const history = useHistory();
   const { t } = useTranslation();
+  const { isActionDisabled } = useUserPermissions();
+  const isSendBatchDisabled = isActionDisabled(PERMISSION_KEYS.REFUND_SEND_BATCH);
 
   const requestIdRef = useRef<number>(0);
 
@@ -405,7 +408,7 @@ const RefundRequests = () => {
 
         {selectedRow && (
           <Button
-            disabled={IS_ACTION_DISABLED}
+            disabled={isSendBatchDisabled}
             variant="contained"
             size="small"
             onClick={() =>

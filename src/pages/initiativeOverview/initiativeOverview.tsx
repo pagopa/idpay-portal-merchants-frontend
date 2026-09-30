@@ -13,6 +13,7 @@ import { formatDate, formatIban } from '../../helpers';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { useAlert } from '../../hooks/useAlert';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
+import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
 import { InitiativeOverviewInfo } from './initiativeOverviewInfo';
 
 const InitiativeOverview = () => {
@@ -20,6 +21,8 @@ const InitiativeOverview = () => {
   const { t } = useTranslation();
   const { initiativeId } = useCurrentInitiativeId();
   const { setAlert } = useAlert();
+  const { isActionDisabled } = useUserPermissions();
+  const isUploadStoresDisabled = isActionDisabled(PERMISSION_KEYS.OVERVIEW_UPLOAD_STORES);
   // const [amount, setAmount] = useState<number | undefined>(undefined);
   // const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
@@ -197,6 +200,7 @@ const InitiativeOverview = () => {
                 <Button
                   variant="contained"
                   startIcon={<StoreIcon />}
+                  disabled={isUploadStoresDisabled}
                   onClick={() => {
                     history.push(
                       generatePath(ROUTES.STORES_UPLOAD, { initiative_id: initiativeId })
