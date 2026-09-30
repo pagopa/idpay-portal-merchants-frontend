@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import InitiativeStoreDetail from '../initiativeStoreDetail';
-import { useParams, MemoryRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   getMerchantPointOfSalesById,
   getMerchantPointOfSaleTransactionsProcessed,
@@ -15,6 +15,7 @@ import { isValidEmail } from '../../../helpers';
 import { POS_TYPE } from '../../../utils/constants';
 import { StoreProvider } from '../StoreContext';
 import { handlePromptMessage } from '../../../helpers';
+import { renderWithContext } from '../../../utils/__tests__/test-utils';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -58,6 +59,7 @@ const mockIsValidEmail = isValidEmail as jest.Mock;
 const mockGetById = getMerchantPointOfSalesById as jest.Mock;
 const mockGetTransactions = getMerchantPointOfSaleTransactionsProcessed as jest.Mock;
 const mockUpdate = updateMerchantPointOfSales as jest.Mock;
+const originalConsoleError = console.error;
 
 const mockStore = {
   id: 'store1',
@@ -80,6 +82,19 @@ describe('InitiativeStoreDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
+    jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+      const [message] = args;
+
+      if (
+        typeof message === 'string' &&
+        (message.includes('ReactDOM.render is no longer supported in React 18') ||
+          message.includes('not wrapped in act(...'))
+      ) {
+        return;
+      }
+
+      originalConsoleError(...args);
+    });
     mockUseParams.mockReturnValue({ id: 'initiative1', store_id: 'store1' });
     mockParseJwt.mockReturnValue({ merchant_id: 'm1' });
     mockStorage.read.mockReturnValue('jwt');
@@ -93,15 +108,14 @@ describe('InitiativeStoreDetail', () => {
   afterEach(() => {
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
+    (console.error as jest.Mock).mockRestore();
   });
 
   test('renders store detail and calls APIs', async () => {
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
     expect(await screen.findByText('Mock Store')).toBeInTheDocument();
     expect(mockGetById).toHaveBeenCalled();
@@ -110,12 +124,10 @@ describe('InitiativeStoreDetail', () => {
 
   test('opens and closes modal', async () => {
     const user = userEvent.setup({ delay: null });
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
     await screen.findByText('Mock Store');
     const editButton = screen.getByRole('button', { name: /Modifica/i });
@@ -179,12 +191,10 @@ describe('InitiativeStoreDetail', () => {
 
   test('validates email fields on blur', async () => {
     const user = userEvent.setup({ delay: null });
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
@@ -211,12 +221,10 @@ describe('InitiativeStoreDetail', () => {
 
   test('handles mismatched emails', async () => {
     const user = userEvent.setup({ delay: null });
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
@@ -242,12 +250,10 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     mockUpdate.mockResolvedValue(undefined);
 
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
@@ -276,12 +282,10 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     mockUpdate.mockResolvedValue({ code: 'POINT_OF_SALE_ALREADY_REGISTERED', message: 'mail' });
 
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
@@ -308,12 +312,10 @@ describe('InitiativeStoreDetail', () => {
     const user = userEvent.setup({ delay: null });
     mockUpdate.mockResolvedValue({ code: 'OTHER' });
 
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
 
     await user.click(await screen.findByRole('button', { name: /Modifica/i }));
@@ -339,36 +341,30 @@ describe('InitiativeStoreDetail', () => {
   test('handles fetchStoreDetail failure', async () => {
     mockGetById.mockRejectedValueOnce(new Error('fail'));
 
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
   });
 
   test('handles fetchStoreTransactions failure', async () => {
     mockGetTransactions.mockRejectedValueOnce(new Error('fail'));
 
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
   });
 
   test('calls handleFiltersApplied, handleFiltersReset, sort and pagination', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(
-      <MemoryRouter>
-        <StoreProvider>
-          <InitiativeStoreDetail />
-        </StoreProvider>
-      </MemoryRouter>
+    renderWithContext(
+      <StoreProvider>
+        <InitiativeStoreDetail />
+      </StoreProvider>
     );
 
     await screen.findByTestId('transactions');
