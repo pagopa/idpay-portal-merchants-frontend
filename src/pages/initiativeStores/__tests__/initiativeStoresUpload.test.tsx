@@ -31,6 +31,7 @@ jest.mock('../../../services/merchantService', () => ({
 
 jest.mock('../../../services/analyticsService', () => ({
   MIXPANEL_EVENTS: {
+    ADD_STORE_CONVERSION: 'IDPAY_ADD_STORE_UX_CONVERSION',
     NEW_STORES_SUCCESS: 'IDPAY_NEW_STORES_UX_SUCCESS',
     ADD_STORE_ERROR: 'IDPAY_ADD_STORE_ERROR',
     ADD_STORE_SUCCESS: 'IDPAY_ADD_STORE_UX_SUCCESS',
@@ -205,6 +206,11 @@ describe('InitiativeStoresUpload', () => {
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
 
     await waitFor(() => expect(mockLatestFormProps.submitAttempt).toBe(1));
+    await waitFor(() =>
+      expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+        reason: 'FORM_VALIDATION_ERROR',
+      })
+    );
     expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();
   });
 
@@ -223,6 +229,11 @@ describe('InitiativeStoresUpload', () => {
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
 
     await waitFor(() => expect(mockLatestFormProps.submitAttempt).toBe(1));
+    await waitFor(() =>
+      expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+        reason: 'DUPLICATE_EMAIL',
+      })
+    );
     expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();
   });
 
@@ -374,7 +385,7 @@ describe('InitiativeStoresUpload', () => {
       })
     );
     expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
-      reason: 'VALIDATION_ERROR',
+      reason: 'EMAIL_ALREADY_REGISTERED',
     });
     expect(mockLatestFormProps.externalAlertMessages).toEqual({
       0: 'errors.genericDescription',
@@ -407,7 +418,7 @@ describe('InitiativeStoresUpload', () => {
       0: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredOtherInitiativeAlert',
     });
     expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
-      reason: 'VALIDATION_ERROR',
+      reason: 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
     });
   });
 
@@ -441,7 +452,7 @@ describe('InitiativeStoresUpload', () => {
       0: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredAlert',
     });
     expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
-      reason: 'VALIDATION_ERROR',
+      reason: 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
     });
   });
 

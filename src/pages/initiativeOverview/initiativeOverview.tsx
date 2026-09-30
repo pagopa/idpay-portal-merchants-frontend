@@ -248,7 +248,6 @@ const InitiativeOverview = () => {
                       startIcon={<StorefrontOutlinedIcon />}
                       disabled={isUploadStoresDisabled}
                       onClick={() => {
-                        trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_CONVERSION);
                         history.push(
                           generatePath(ROUTES.STORES_UPLOAD, { initiative_id: initiativeId })
                         );
