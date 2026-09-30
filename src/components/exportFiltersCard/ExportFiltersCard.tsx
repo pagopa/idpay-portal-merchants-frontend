@@ -148,6 +148,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               onBlur={formik.handleBlur}
               inputProps={{ min: MIN_START_DATE, max: yesterdayStr, placeholder: '' }}
               InputLabelProps={{ shrink: true }}
+              disabled={isGenerateReportDisabled}
               error={Boolean(formik.touched.startDate && formik.errors.startDate)}
               helperText={
                 formik.touched.startDate && formik.errors.startDate
@@ -170,6 +171,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               }}
               InputLabelProps={{ shrink: true }}
               error={Boolean(formik.touched.endDate && formik.errors.endDate)}
+              disabled={isGenerateReportDisabled}
               helperText={
                 formik.touched.endDate && formik.errors.endDate
                   ? String(formik.errors.endDate)
