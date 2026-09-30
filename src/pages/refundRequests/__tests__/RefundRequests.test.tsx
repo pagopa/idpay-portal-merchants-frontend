@@ -10,6 +10,20 @@ import RefundRequests from '../RefundRequests';
 
 let consoleErrorSpy: jest.SpyInstance;
 
+jest.mock('../../../hooks/useUserPermissions', () => {
+  const actual = jest.requireActual('../../../hooks/useUserPermissions');
+  return {
+    __esModule: true,
+    ...actual,
+    useUserPermissions: () => ({
+      role: 'admin',
+      logicalRoleName: 'admin',
+      isSupportUser: false,
+      isActionDisabled: () => false,
+    }),
+  };
+});
+
 beforeAll(() => {
   consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 });

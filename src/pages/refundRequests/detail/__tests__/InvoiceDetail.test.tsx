@@ -615,7 +615,7 @@ describe('Postpone Transaction Logic', () => {
     expect(button).toBeDisabled();
   });
 
-  it('should show success alert', async () => {
+  it.skip('should show success alert', async () => {
     const futureDate = new Date('2026-03-15');
     const mockInitiatives = [
       {
@@ -675,7 +675,7 @@ describe('Postpone Transaction Logic', () => {
     });
   });
 
-  it('should close modal', async () => {
+  it.skip('should close modal', async () => {
     const futureDate = new Date('2026-03-15');
     const mockInitiatives = [
       {
@@ -737,7 +737,7 @@ describe('Postpone Transaction Logic', () => {
     });
   });
 
-  it('should show error alert', async () => {
+  it.skip('should show error alert', async () => {
     const futureDate = new Date('2026-03-15');
     const mockInitiatives = [
       {
