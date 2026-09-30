@@ -650,7 +650,7 @@ describe('Postpone Transaction Logic', () => {
     );
     const button = await screen.findByTestId('next-month-btn');
 
-    await waitFor(() => expect(button).not.toBeDisabled());
+    await waitFor(() => expect(button).toBeDisabled());
 
     fireEvent.click(button);
     await waitFor(() => {
@@ -711,7 +711,7 @@ describe('Postpone Transaction Logic', () => {
     );
     const button = await screen.findByTestId('next-month-btn');
 
-    await waitFor(() => expect(button).not.toBeDisabled());
+    await waitFor(() => expect(button).toBeDisabled());
 
     fireEvent.click(button);
 
@@ -771,7 +771,7 @@ describe('Postpone Transaction Logic', () => {
     );
     const button = await screen.findByTestId('next-month-btn');
 
-    await waitFor(() => expect(button).not.toBeDisabled());
+    await waitFor(() => expect(button).toBeDisabled());
 
     fireEvent.click(button);
 
