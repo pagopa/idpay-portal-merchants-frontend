@@ -122,6 +122,7 @@ export default function InvoiceDetail({
             {
               title: 'Storna',
               dataTestId: 'reverse-btn',
+              disabled: isReverseDisabled,
               onClick: () => {
                 const path = routes.REVERSE.replace(':initiative_id', initiative_id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
