@@ -50,6 +50,9 @@ coverage
 
 yarn-error.log
 
+playwright-report
+test-results
+
 *.zip
 
 !jest.config.js
