@@ -2,6 +2,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ExportFiltersCard from '../ExportFiltersCard';
 import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { createStore } from '../../../redux/store';
 
 jest.mock('../../../services/merchantService', () => ({
   generateMerchantReport: jest.fn(),
@@ -51,9 +53,11 @@ const mockedGenerate = generateMerchantReport as jest.Mock;
 
 const renderComponent = (updateAlerts = jest.fn()) =>
   render(
-    <BrowserRouter>
-      <ExportFiltersCard updateAlerts={updateAlerts} />
-    </BrowserRouter>
+    <Provider store={createStore()}>
+      <BrowserRouter>
+        <ExportFiltersCard updateAlerts={updateAlerts} />
+      </BrowserRouter>
+    </Provider>
   );
 
 describe('ExportFiltersCard', () => {
@@ -133,9 +137,11 @@ describe('ExportFiltersCard', () => {
     const updateAlerts = jest.fn();
 
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={createStore()}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
 
     clickSubmit();
@@ -150,9 +156,11 @@ describe('ExportFiltersCard', () => {
     const onReportGenerated = jest.fn();
 
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} onReportGenerated={onReportGenerated} />
-      </BrowserRouter>
+      <Provider store={createStore()}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} onReportGenerated={onReportGenerated} />
+        </BrowserRouter>
+      </Provider>
     );
 
     clickSubmit();
@@ -165,9 +173,11 @@ describe('ExportFiltersCard', () => {
   it('covers validate required branch', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={createStore()}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
 
     const result = lastFormikConfig.validate({
@@ -187,9 +197,11 @@ describe('ExportFiltersCard', () => {
   it('covers validate invalidRange branch (<1 day)', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={createStore()}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const dayjs = require('dayjs');
     const startDate = dayjs();
@@ -214,9 +226,11 @@ describe('ExportFiltersCard', () => {
   it('covers validate maxRange branch (>90 days)', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={createStore()}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const dayjs = require('dayjs');
     const startDate = dayjs();
@@ -240,9 +254,11 @@ describe('ExportFiltersCard', () => {
   it('covers validate success branch (no errors)', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={createStore()}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const mockDay = {
       diff: () => 10,
@@ -269,9 +285,11 @@ describe('ExportFiltersCard', () => {
   it('covers validate future startDate invalidRange branch', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={createStore()}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const dayjs = require('dayjs');
     const futureDate = dayjs().add(2, 'day');
@@ -297,9 +315,11 @@ describe('ExportFiltersCard', () => {
   it('covers validate future endDate invalidRange branch', async () => {
     const updateAlerts = jest.fn();
     render(
-      <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
-      </BrowserRouter>
+      <Provider store={createStore()}>
+        <BrowserRouter>
+          <ExportFiltersCard updateAlerts={updateAlerts} />
+        </BrowserRouter>
+      </Provider>
     );
     const dayjs = require('dayjs');
     const futureDate = dayjs().add(2, 'day');

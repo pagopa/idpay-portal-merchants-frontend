@@ -12,6 +12,7 @@ type ReportTypeEnum = ReportRequest['reportType'];
 const MERCHANT_TRANSACTIONS: ReportTypeEnum = 'MERCHANT_TRANSACTIONS';
 import { MIN_START_DATE } from '../../utils/constants';
 import { ReportDTO } from '../../api/generated/merchants/data-contracts';
+import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
 
 type ReportStatusEnum = ReportDTO['reportStatus'];
 const FAILED: ReportStatusEnum = 'FAILED';
@@ -34,6 +35,8 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
   const { t } = useTranslation();
   const { initiative_id } = useParams<RouteParams>();
   const requestIdRef = useRef<number>(0);
+  const { isActionDisabled } = useUserPermissions();
+  const isGenerateReportDisabled = isActionDisabled(PERMISSION_KEYS.REPORT_GENERATE);
 
   const yesterday = useMemo(() => dayjs().subtract(1, 'day').startOf('day'), []);
   const yesterdayStr = useMemo(() => yesterday.format('YYYY-MM-DD'), [yesterday]);
@@ -145,6 +148,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               onBlur={formik.handleBlur}
               inputProps={{ min: MIN_START_DATE, max: yesterdayStr, placeholder: '' }}
               InputLabelProps={{ shrink: true }}
+              disabled={isGenerateReportDisabled}
               error={Boolean(formik.touched.startDate && formik.errors.startDate)}
               helperText={
                 formik.touched.startDate && formik.errors.startDate
@@ -167,6 +171,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               }}
               InputLabelProps={{ shrink: true }}
               error={Boolean(formik.touched.endDate && formik.errors.endDate)}
+              disabled={isGenerateReportDisabled}
               helperText={
                 formik.touched.endDate && formik.errors.endDate
                   ? String(formik.errors.endDate)
@@ -179,7 +184,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
 
           <Button
             variant="contained"
-            disabled={formik.isSubmitting}
+            disabled={formik.isSubmitting || isGenerateReportDisabled}
             onClick={useCallback(() => formik.handleSubmit(), [formik])}
           >
             {t('pages.reportExport.form.submit')}

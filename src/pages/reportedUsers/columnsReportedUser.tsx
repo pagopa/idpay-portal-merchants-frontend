@@ -6,7 +6,7 @@ import React from 'react';
 import { MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 
-export function getReportedUsersColumns(handleDelete: (cf: string) => void) {
+export function getReportedUsersColumns(handleDelete: (cf: string) => void, isDeleteDisabled = false) {
   return [
     {
       field: 'cf',
@@ -102,9 +102,13 @@ export function getReportedUsersColumns(handleDelete: (cf: string) => void) {
       renderCell: (params: any) => (
         <Box sx={{ ml: 1.25 }}>
           <DeleteOutlineIcon
-            color="error"
-            style={{ cursor: 'pointer' }}
-            onClick={() => handleDelete(params.row.cf)}
+            color={isDeleteDisabled ? 'disabled' : 'error'}
+            style={{
+              cursor: isDeleteDisabled ? 'not-allowed' : 'pointer',
+              pointerEvents: isDeleteDisabled ? 'none' : 'auto',
+              opacity: isDeleteDisabled ? 0.5 : 1,
+            }}
+            onClick={isDeleteDisabled ? undefined : () => handleDelete(params.row.cf)}
             titleAccess="Elimina"
           />
         </Box>

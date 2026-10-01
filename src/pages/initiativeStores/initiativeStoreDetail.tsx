@@ -26,6 +26,7 @@ import { POS_TYPE } from '../../utils/constants';
 import { browserConsole } from '../../utils/consoleLogger';
 import ROUTES from '../../routes';
 import { useAlert } from '../../hooks/useAlert';
+import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
 
@@ -58,7 +59,9 @@ const InitiativeStoreDetail = () => {
   const { initiative_id, store_id } = useParams<RouteParams>();
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const { setStoreId } = useStore();
-
+  const { isActionDisabled } = useUserPermissions();
+  const isEditReferentDisabled = isActionDisabled(PERMISSION_KEYS.STORE_DETAIL_EDIT_REFERENT);
+  
   useEffect(() => {
     void fetchStoreDetail();
     void fetchStoreTransactions();
@@ -415,6 +418,7 @@ const InitiativeStoreDetail = () => {
               <Grid item xs={3}>
                 <Box display="flex" flexDirection="row" justifyContent="flex-end">
                   <ButtonNaked
+                    disabled={isEditReferentDisabled}
                     onClick={() => {
                       setModalIsOpen(true);
                       // resetModalFieldsAndErrors();

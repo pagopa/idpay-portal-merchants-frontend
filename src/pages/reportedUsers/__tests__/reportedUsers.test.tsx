@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
+import { Provider } from 'react-redux';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import ReportedUsers from '../reportedUsers';
@@ -8,6 +9,7 @@ import { getReportedUser, deleteReportedUser } from '../../../services/merchantS
 import { parseJwt } from '../../../utils/jwt-utils';
 import { ApiError } from '../../../api/ApiError';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import { createStore } from '../../../redux/store';
 
 jest.mock('../../../decorators/withLogin', () => ({
   __esModule: true,
@@ -76,7 +78,7 @@ jest.mock('react-i18next', () => ({
       return translations[key] || key;
     },
   }),
-  Trans: ({ children, values }: any) => <span>{children}</span>,
+  Trans: ({ children }: any) => <span>{children}</span>,
   initReactI18next: {},
   withTranslation: () => (Component: any) => {
     Component.defaultProps = { ...(Component.defaultProps || {}), t: (k: string) => k };
@@ -203,12 +205,15 @@ describe('ReportedUsers Component', () => {
     if (locationState) {
       history.push('/initiative/123/reported-users', locationState);
     }
+    const store = createStore();
     return render(
-      <Router history={history}>
-        <Route path="/initiative/:initiative_id/reported-users">
-          <ReportedUsers />
-        </Route>
-      </Router>
+      <Provider store={store}>
+        <Router history={history}>
+          <Route path="/initiative/:initiative_id/reported-users">
+            <ReportedUsers />
+          </Route>
+        </Router>
+      </Provider>
     );
   };
 
