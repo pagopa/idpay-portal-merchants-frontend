@@ -11,6 +11,8 @@ import {
 } from '../../../services/merchantService';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import InitiativesList from '../initiativesList';
+import * as scopedTranslation from '../../../hooks/useScopedTranslation';
+import italianTranslations from '../../../locale/it/common.json';
 
 jest.mock('../../../services/merchantService', () => {
   const actualMerchantService = jest.requireActual('../../../services/merchantService');
@@ -317,6 +319,40 @@ describe('Test suite for initiativeList page', () => {
     renderWithContext(<InitiativesList />, store);
     const sortByName = screen.getByText('pages.initiativesList.initiativeName');
     fireEvent.click(sortByName);
+  });
+
+  test('Status sorting follows Italian labels in both directions', () => {
+    const translationSpy = jest.spyOn(scopedTranslation, 'default').mockReturnValue({
+      t: ((key: string) => {
+        if (key === 'enums.initiativeStatus.published') {
+          return italianTranslations.enums.initiativeStatus.published;
+        }
+        if (key === 'enums.initiativeStatus.closed') {
+          return italianTranslations.enums.initiativeStatus.closed;
+        }
+        return key;
+      }) as any,
+      isLoading: false,
+    });
+
+    try {
+      store.dispatch(setInitiativesList([
+        { initiativeId: 'closed', initiativeName: 'Closed initiative', status: 'CLOSED' },
+        { initiativeId: 'published', initiativeName: 'Published initiative', status: 'PUBLISHED' },
+      ] as any));
+      renderWithContext(<InitiativesList />, store);
+
+      const statusHeading = screen.getByText('pages.initiativesList.initiativeStatus');
+      fireEvent.click(statusHeading);
+      expect(screen.getAllByTestId('initiative-btn-test').map((button) => button.textContent))
+        .toEqual(['Published initiative', 'Closed initiative']);
+
+      fireEvent.click(screen.getByText('pages.initiativesList.initiativeStatus'));
+      expect(screen.getAllByTestId('initiative-btn-test').map((button) => button.textContent))
+        .toEqual(['Closed initiative', 'Published initiative']);
+    } finally {
+      translationSpy.mockRestore();
+    }
   });
 
   test('Switching to new initiatives tab resets sort when current column is not supported', async () => {
