@@ -173,19 +173,25 @@ describe('ReportDataTable', () => {
     const localStore = createMockStore({});
     const { rerender } = render(
       <Provider store={localStore}>
-        <ReportDataTable refreshKey={1} />
+        <ReportDataTable refreshKey={0} />
       </Provider>
     );
 
     await waitFor(() => expect(screen.getByTestId('row-r1')).toBeInTheDocument());
 
+    getMerchantReports.mockResolvedValue(
+      makeReportResponse([makeReport('r2', 'INSERTED'), makeReport('r1', 'INSERTED')])
+    );
+
     rerender(
       <Provider store={localStore}>
-        <ReportDataTable refreshKey={2} />
+        <ReportDataTable refreshKey={1} />
       </Provider>
     );
 
-    await waitFor(() => expect(getMerchantReports).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId('row-r2')).toBeInTheDocument());
+    expect(getMerchantReports).toHaveBeenCalledTimes(2);
+    expect(getMerchantReports).toHaveBeenLastCalledWith('merchant-1', 0, 10);
   });
 
   it('covers nullish coalescing in pagination mapping', async () => {

@@ -189,7 +189,7 @@ describe('ExportFiltersCard', () => {
     expect(mockedGenerate).not.toHaveBeenCalled();
   });
 
-  it('calls onReportGenerated in finally block', async () => {
+  it('calls onReportGenerated once after a successful response', async () => {
     mockedGenerate.mockResolvedValue({ reportStatus: 'INSERTED' });
 
     const updateAlerts = jest.fn();
@@ -206,7 +206,7 @@ describe('ExportFiltersCard', () => {
 
     await waitFor(() => expect(updateAlerts).toHaveBeenCalledWith('INSERTED', true));
 
-    expect(onReportGenerated).toHaveBeenCalled();
+    expect(onReportGenerated).toHaveBeenCalledTimes(1);
   });
 
   it('covers validate required branch', async () => {

@@ -95,6 +95,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
         const status: ReportStatusEnum = response?.reportStatus ?? FAILED;
         updateAlerts(status as string, true);
         setTimeout(() => updateAlerts(status as string, false), 3000);
+        onReportGenerated?.();
       } catch (error) {
         if (currentRequestId !== requestIdRef.current) {
           return;
@@ -105,11 +106,6 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
       } finally {
         if (currentRequestId === requestIdRef.current) {
           formik.resetForm();
-          onReportGenerated?.();
-        }
-        if (currentRequestId === requestIdRef.current) {
-          formik.resetForm();
-          onReportGenerated?.();
         }
       }
     },
