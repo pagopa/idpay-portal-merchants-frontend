@@ -298,6 +298,56 @@ describe('analyticsService', () => {
     });
   });
 
+  it('tracks input changes only when analytics is active', () => {
+    process.env.REACT_APP_MIXPANEL_ENABLE = 'true';
+    process.env.REACT_APP_MIXPANEL_TOKEN = 'mixpanel-token';
+
+    const { disableAnalytics, initAnalytics, trackAnalyticsInputChange } = loadAnalyticsService();
+
+    trackAnalyticsInputChange('initiative', 'value');
+    expect(mockMixpanelInstance.track).not.toHaveBeenCalled();
+
+    initAnalytics();
+    mockMixpanelInstance.track.mockClear();
+
+    trackAnalyticsInputChange('initiative', 'value', 'select');
+
+    expect(mockMixpanelInstance.track).toHaveBeenCalledWith('$mp_input_change', {
+      $el_attr__name: 'initiative',
+      input_value: 'value',
+      input_type: 'select',
+    });
+
+    mockMixpanelInstance.track.mockClear();
+    disableAnalytics();
+    trackAnalyticsInputChange('initiative', 'value', 'select');
+
+    expect(mockMixpanelInstance.track).not.toHaveBeenCalled();
+  });
+
+  it('allows clickable images via onclick attribute and blocks non-clickable input types', () => {
+    process.env.REACT_APP_MIXPANEL_ENABLE = 'true';
+    process.env.REACT_APP_MIXPANEL_TOKEN = 'mixpanel-token';
+
+    const { initAnalytics } = loadAnalyticsService();
+
+    initAnalytics();
+
+    const [, initConfig] = mockMixpanel.init.mock.calls[0];
+    const allowElementCallback = initConfig.autocapture.allow_element_callback;
+    const imageWithOnclickAttribute = document.createElement('img');
+    imageWithOnclickAttribute.setAttribute('onclick', 'handleClick()');
+    const plainImage = document.createElement('img');
+    const textInput = document.createElement('input');
+    textInput.setAttribute('type', 'text');
+    const inputWithoutType = document.createElement('input');
+
+    expect(allowElementCallback(imageWithOnclickAttribute, new MouseEvent('click'))).toBe(true);
+    expect(allowElementCallback(plainImage, new MouseEvent('click'))).toBe(false);
+    expect(allowElementCallback(textInput, new MouseEvent('click'))).toBe(false);
+    expect(allowElementCallback(inputWithoutType, new MouseEvent('click'))).toBe(false);
+  });
+
   it('opts out of tracking and resumes a previously initialized instance', () => {
     process.env.REACT_APP_MIXPANEL_ENABLE = 'true';
     process.env.REACT_APP_MIXPANEL_TOKEN = 'mixpanel-token';

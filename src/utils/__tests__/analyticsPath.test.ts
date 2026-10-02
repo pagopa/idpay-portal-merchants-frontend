@@ -26,4 +26,41 @@ describe('sanitizeAnalyticsPath', () => {
       '/portale-esercenti/custom-route/not-managed'
     );
   });
+
+  it('normalizes PUBLIC_URL set to root to an empty analytics base route', () => {
+    const originalPublicUrl = process.env.PUBLIC_URL;
+    process.env.PUBLIC_URL = '/';
+    jest.resetModules();
+
+    jest.isolateModules(() => {
+      const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
+
+      expect(isolatedSanitizeAnalyticsPath('/auth')).toBe('/auth');
+    });
+
+    process.env.PUBLIC_URL = originalPublicUrl;
+  });
+
+  it('falls back to the preserved dynamic placeholder when the matched params are missing', () => {
+    jest.resetModules();
+    jest.doMock('react-router-dom', () => ({
+      matchPath: jest.fn((_pathname, config) => {
+        if (config?.path === '/portale-esercenti/:initiative_id/panoramica') {
+          return { params: {} };
+        }
+
+        return false;
+      }),
+    }));
+
+    jest.isolateModules(() => {
+      const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
+
+      expect(isolatedSanitizeAnalyticsPath('/portale-esercenti/initiative-1/panoramica')).toBe(
+        '/portale-esercenti/:initiative_id/panoramica'
+      );
+    });
+
+    jest.dontMock('react-router-dom');
+  });
 });

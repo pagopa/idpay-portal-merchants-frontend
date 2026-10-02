@@ -8,6 +8,7 @@ import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
 import * as formatUtils from '../../../utils/formatUtils';
 import { trackAnalyticsEvent } from '../../../services/analyticsService';
+import { POS_UPDATE } from '../../../utils/constants';
 
 const mockSetAlert = jest.fn();
 const pushMock = jest.fn();
@@ -131,6 +132,29 @@ const mockTrackAnalyticsEvent = trackAnalyticsEvent as jest.Mock;
 
 const renderComponent = () => render(<InitiativeStoresUpload />);
 
+const renderCsvComponent = (setUploadMethod: jest.Mock = jest.fn()) => {
+  const actualReact = jest.requireActual('react');
+  let CsvInitiativeStoresUpload: React.FC;
+
+  jest.isolateModules(() => {
+    jest.doMock('react', () => ({
+      __esModule: true,
+      ...actualReact,
+      default: actualReact,
+      useState: jest
+        .fn()
+        .mockImplementationOnce(() => [POS_UPDATE.Csv, setUploadMethod])
+        .mockImplementation(actualReact.useState),
+    }));
+
+    CsvInitiativeStoresUpload = require('../initiativeStoresUpload').default;
+  });
+
+  jest.dontMock('react');
+
+  return render(<CsvInitiativeStoresUpload />);
+};
+
 const submitValidForm = async () => {
   fireEvent.click(screen.getByTestId('set-valid-form'));
   fireEvent.click(screen.getByTestId('confirm-stores-button'));
@@ -179,6 +203,7 @@ describe('InitiativeStoresUpload', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
+
 
   it('renders the manual form and opens the operation manual', () => {
     renderComponent();
@@ -235,6 +260,39 @@ describe('InitiativeStoresUpload', () => {
       })
     );
     expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();
+  });
+
+  it('computes duplicate email errors for multiple indexes', async () => {
+    renderComponent();
+
+    mockLatestFormProps.onFormChange([
+      {
+        contactEmail: 'duplicate@example.com',
+        confirmContactEmail: 'duplicate@example.com',
+      },
+      {
+        contactEmail: ' duplicate@example.com ',
+        confirmContactEmail: 'duplicate@example.com',
+      },
+      {
+        contactEmail: 'DUPLICATE@example.com',
+        confirmContactEmail: 'duplicate@example.com',
+      },
+    ]);
+    mockLatestFormProps.onValidationChange(true);
+
+    await waitFor(() =>
+      expect(mockLatestFormProps.externalErrors).toEqual({
+        1: {
+          contactEmail: expect.any(String),
+          confirmContactEmail: expect.any(String),
+        },
+        2: {
+          contactEmail: expect.any(String),
+          confirmContactEmail: expect.any(String),
+        },
+      })
+    );
   });
 
   it('shows a generic error when the merchant ID is missing', async () => {
@@ -454,6 +512,138 @@ describe('InitiativeStoresUpload', () => {
     expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
       reason: 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
     });
+  });
+
+  it('tracks the existing API validation reason on a second confirm attempt', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      errors: [
+        {
+          index: 0,
+          field: 'contactEmail',
+          code: 'EMAIL_ALREADY_REGISTERED',
+        },
+      ],
+    });
+    renderComponent();
+
+    await submitValidForm();
+    mockTrackAnalyticsEvent.mockClear();
+
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    await waitFor(() =>
+      expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+        reason: 'EMAIL_ALREADY_REGISTERED',
+      })
+    );
+    expect(updateMerchantPointOfSalesMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('tracks VALIDATION_ERROR when API validation details do not include a code', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      errors: [
+        {
+          index: 0,
+          field: 'vatNumber',
+        },
+      ],
+    });
+    renderComponent();
+
+    await submitValidForm();
+
+    await waitFor(() =>
+      expect(mockLatestFormProps.externalErrors).toEqual({
+        0: {
+          vatNumber: 'errors.genericDescription',
+        },
+      })
+    );
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({
+      0: 'errors.genericDescription',
+    });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'VALIDATION_ERROR',
+    });
+  });
+
+  it('ignores validation details without field and code', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      errors: [
+        {
+          index: 0,
+        },
+      ],
+    });
+    renderComponent();
+
+    await submitValidForm();
+
+    await waitFor(() => expect(mockTrackAnalyticsEvent).toHaveBeenCalled());
+    expect(mockLatestFormProps.externalErrors).toEqual({});
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({});
+    expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it('tracks UNKNOWN_ERROR when the API response code is missing', async () => {
+    await expectStoreSubmissionError({
+      apiResponse: {
+        message: 'Unexpected error',
+      },
+      expectedAlert: {
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      },
+      expectedReason: 'UNKNOWN_ERROR',
+    });
+  });
+
+  it('shows a generic error when the update request throws', async () => {
+    updateMerchantPointOfSalesMock.mockRejectedValue(new Error('network'));
+    renderComponent();
+    fireEvent.click(screen.getByTestId('set-valid-form'));
+
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    await waitFor(() =>
+      expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+        reason: 'REQUEST_FAILED',
+      })
+    );
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      title: 'errors.genericTitle',
+      text: 'errors.genericDescription',
+      isOpen: true,
+      severity: 'error',
+    });
+  });
+
+  it('renders the CSV flow and navigates to stores on confirm', () => {
+    renderCsvComponent();
+
+    expect(screen.getByText('pages.initiativeStores.uploadCSV')).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativeStores.dragCSV')).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativeStores.prepareList')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    expect(pushMock).toHaveBeenCalledWith(
+      expect.stringContaining('/portale-esercenti/test-initiative/punti-vendita')
+    );
+  });
+
+  it('changes the upload method from the CSV radio group', () => {
+    const setUploadMethod = jest.fn();
+    renderCsvComponent(setUploadMethod);
+
+    fireEvent.click(screen.getByLabelText('pages.initiativeStores.enterManually'));
+
+    expect(setUploadMethod).toHaveBeenCalledWith(POS_UPDATE.Manual);
   });
 
   it('clears API validation errors after the form changes', async () => {
