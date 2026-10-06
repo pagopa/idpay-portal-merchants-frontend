@@ -7,6 +7,7 @@ import { useAlert } from '../../../hooks/useAlert';
 import { useScopedTranslation } from '../../../hooks/useScopedTranslation';
 import { useCurrentInitiativeId } from '../../../hooks/useCurrentInitiativeId';
 import { trackAnalyticsEvent } from '../../../services/analyticsService';
+import { ApiError } from '../../../api/ApiError';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -157,6 +158,19 @@ describe('FileUploadAction', () => {
 
     await waitFor(() => {
       expect(getByRole('textbox')).toHaveValue('%%%not-base64%%%');
+    });
+  });
+
+  it('treats the missing document placeholder as an empty document number', async () => {
+    mockUseParams.mockReturnValue({
+      trxId: undefined,
+      fileDocNumber: '-',
+    });
+
+    const { getByRole } = renderComponent();
+
+    await waitFor(() => {
+      expect(getByRole('textbox')).toHaveValue('');
     });
   });
 
@@ -433,7 +447,7 @@ describe('FileUploadAction', () => {
       pathname: '/upload',
       state: {
         existingState: true,
-        refundUploadSuccess: true,
+        success: true,
       },
     });
     expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_SUCCESS');
@@ -462,9 +476,32 @@ describe('FileUploadAction', () => {
       expect(historyMock.replace).toHaveBeenCalledWith({
         pathname: '/upload',
         state: {
-          refundUploadSuccess: true,
+          success: true,
         },
       });
+    });
+  });
+
+  it('shows a dedicated retry-later alert when the upload fails with 404', async () => {
+    const apiCall = jest.fn().mockRejectedValue(new ApiError(404, 'Not found'));
+    const { getByTestId, getByRole } = renderComponent(apiCall);
+
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'DOC-123' },
+    });
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+
+    await waitFor(() =>
+      expect(setAlertMock).toHaveBeenCalledWith({
+        text: 'modifyDocument.errors.notFoundError',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
+      reason: 'RESOURCE_NOT_FOUND',
     });
   });
 
