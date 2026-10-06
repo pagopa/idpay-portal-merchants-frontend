@@ -10,20 +10,6 @@ import RefundRequests from '../RefundRequests';
 
 let consoleErrorSpy: jest.SpyInstance;
 
-jest.mock('../../../hooks/useUserPermissions', () => {
-  const actual = jest.requireActual('../../../hooks/useUserPermissions');
-  return {
-    __esModule: true,
-    ...actual,
-    useUserPermissions: () => ({
-      role: 'admin',
-      logicalRoleName: 'admin',
-      isSupportUser: false,
-      isActionDisabled: () => false,
-    }),
-  };
-});
-
 beforeAll(() => {
   consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -524,7 +510,7 @@ describe('RefundRequests', () => {
     });
   });
 
-  it('should map approved/suspended amounts only for enabled download statuses', async () => {
+  it('should map approved/suspended amounts only for APPROVED batches (others become undefined)', async () => {
     const currentYear = new Date().getFullYear();
     const monthAlwaysSelectable = `${currentYear}-00`;
 
@@ -542,39 +528,6 @@ describe('RefundRequests', () => {
       },
       {
         id: 22,
-        name: 'pending-refund-batch',
-        posType: 'ONLINE',
-        initialAmountCents: 7000,
-        approvedAmountCents: 45678,
-        suspendedAmountCents: 300,
-        status: 'PENDING_REFUND',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-      },
-      {
-        id: 23,
-        name: 'refunded-batch',
-        posType: 'ONLINE',
-        initialAmountCents: 9000,
-        approvedAmountCents: 78901,
-        suspendedAmountCents: 400,
-        status: 'REFUNDED',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-      },
-      {
-        id: 24,
-        name: 'not-refunded-batch',
-        posType: 'ONLINE',
-        initialAmountCents: 11000,
-        approvedAmountCents: 22222,
-        suspendedAmountCents: 500,
-        status: 'NOT_REFUNDED',
-        month: monthAlwaysSelectable,
-        numberOfTransactions: 1,
-      },
-      {
-        id: 25,
         name: 'created-but-has-amounts-in-response',
         posType: 'ONLINE',
         initialAmountCents: 7000,
@@ -601,13 +554,7 @@ describe('RefundRequests', () => {
     expect(screen.getByText('Rimborso sospeso')).toBeInTheDocument();
 
     expect(screen.getByText(/123.45\s€/)).toBeInTheDocument();
-    expect(screen.getByText(/456.78\s€/)).toBeInTheDocument();
-    expect(screen.getByText(/789.01\s€/)).toBeInTheDocument();
-    expect(screen.getByText(/222.22\s€/)).toBeInTheDocument();
     expect(screen.getByText(/2.00\s€/)).toBeInTheDocument();
-    expect(screen.getByText(/3.00\s€/)).toBeInTheDocument();
-    expect(screen.getByText(/4.00\s€/)).toBeInTheDocument();
-    expect(screen.getByText(/5.00\s€/)).toBeInTheDocument();
 
     expect(screen.queryByText(/99.99\s€/)).not.toBeInTheDocument();
     expect(screen.queryByText(/88.88\s€/)).not.toBeInTheDocument();

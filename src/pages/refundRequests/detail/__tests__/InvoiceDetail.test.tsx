@@ -662,7 +662,7 @@ describe('Postpone Transaction Logic', () => {
     expect(button).toBeDisabled();
   });
 
-  it.skip('should show success alert', async () => {
+  it('should show success alert', async () => {
     const futureDate = new Date('2026-03-15');
     const mockInitiatives = [
       {
@@ -699,7 +699,7 @@ describe('Postpone Transaction Logic', () => {
     );
     const button = await screen.findByTestId('next-month-btn');
 
-    await waitFor(() => expect(button).toBeDisabled());
+    await waitFor(() => expect(button).not.toBeDisabled());
 
     fireEvent.click(button);
     await waitFor(() => {
@@ -724,7 +724,7 @@ describe('Postpone Transaction Logic', () => {
     });
   });
 
-  it.skip('should close modal', async () => {
+  it('should close modal', async () => {
     const futureDate = new Date('2026-03-15');
     const mockInitiatives = [
       {
@@ -762,7 +762,7 @@ describe('Postpone Transaction Logic', () => {
     );
     const button = await screen.findByTestId('next-month-btn');
 
-    await waitFor(() => expect(button).toBeDisabled());
+    await waitFor(() => expect(button).not.toBeDisabled());
 
     fireEvent.click(button);
 
@@ -788,7 +788,7 @@ describe('Postpone Transaction Logic', () => {
     });
   });
 
-  it.skip('should show error alert', async () => {
+  it('should show error alert', async () => {
     const futureDate = new Date('2026-03-15');
     const mockInitiatives = [
       {
@@ -824,7 +824,7 @@ describe('Postpone Transaction Logic', () => {
     );
     const button = await screen.findByTestId('next-month-btn');
 
-    await waitFor(() => expect(button).toBeDisabled());
+    await waitFor(() => expect(button).not.toBeDisabled());
 
     fireEvent.click(button);
 
