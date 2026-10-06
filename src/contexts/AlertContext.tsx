@@ -28,9 +28,13 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (error?.isOpen) {
-      setTimeout(onClose, 3000);
+      const closeTimeout = setTimeout(onClose, error.timeout ?? 3000);
+
+      return () => clearTimeout(closeTimeout);
     }
-  }, [error]);
+
+    return undefined;
+  }, [error, onClose]);
 
   const value = useMemo(() => ({ alert: { ...error, onClose }, setAlert }), [error]);
 

@@ -53,6 +53,11 @@ jest.mock('../../../../hooks/useCurrentInitiative', () => ({
   useCurrentInitiative: jest.fn(),
 }));
 
+jest.mock('../../../../hooks/useUserPermissions', () => ({
+  ...jest.requireActual('../../../../hooks/useUserPermissions'),
+  useUserPermissions: jest.fn(),
+}));
+
 jest.mock('../../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
@@ -90,6 +95,9 @@ import { isReversableOrEditable } from '../../../../helpers';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../../../utils/constants';
 import { safeFormatDate } from '../../../../utils/formatUtils';
 import { useCurrentInitiative } from '../../../../hooks/useCurrentInitiative';
+import { useUserPermissions } from '../../../../hooks/useUserPermissions';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
 
 let mockSetAlert: jest.Mock;
 
@@ -154,6 +162,14 @@ const baseListItem = [
   },
 ];
 
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState,
+  });
+};
+
+const store = createMockStore();
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockSetAlert = jest.fn();
@@ -165,6 +181,9 @@ beforeEach(() => {
   (useAlert as jest.Mock).mockReturnValue({ setAlert: mockSetAlert });
   (useLocation as jest.Mock).mockReturnValue(mockUseLocation);
   (useCurrentInitiative as jest.Mock).mockReturnValue({ initiativeId: 'init-123', endDate: null });
+  (useUserPermissions as jest.Mock).mockReturnValue({
+    isActionDisabled: jest.fn().mockReturnValue(false),
+  });
   (useAppSelector as jest.Mock).mockReset();
   (window as any).open = jest.fn();
   global.fetch = jest.fn();
@@ -175,13 +194,15 @@ describe('Render component', () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={baseItemValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={baseItemValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
@@ -196,17 +217,19 @@ describe('Render component', () => {
   it('should render rejection note for suspended status', () => {
     (useAppSelector as jest.Mock).mockReturnValue([]);
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={{
-          ...baseItemValues,
-          rewardBatchTrxStatus: 'SUSPENDED',
-          additionalProperties: { productName: undefined },
-        }}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={{
+            ...baseItemValues,
+            rewardBatchTrxStatus: 'SUSPENDED',
+            additionalProperties: { productName: undefined },
+          }}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
@@ -221,13 +244,15 @@ describe('Render component', () => {
     (useAppSelector as jest.Mock).mockReturnValue(undefined);
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={baseItemValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={baseItemValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     expect(screen.getByText('Dettaglio transazione')).toBeInTheDocument();
@@ -240,13 +265,15 @@ describe('Render component', () => {
     };
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={values}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={values}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     expect(screen.getAllByText('-').length).toBeGreaterThan(0);
@@ -279,13 +306,15 @@ describe('Download File', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={baseItemValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={baseItemValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     const button = screen.getByTestId('btn-test');
@@ -317,13 +346,15 @@ describe('Download File', () => {
     });
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={baseItemValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={baseItemValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     const button = screen.getByTestId('btn-test');
@@ -366,13 +397,15 @@ describe('Download File', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={unsupportedValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={unsupportedValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     const button = screen.getByTestId('btn-test');
@@ -411,13 +444,15 @@ describe('Download File', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={noFilenameValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={noFilenameValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     const button = screen.getByTestId('btn-test');
@@ -440,13 +475,15 @@ describe('Download File', () => {
     downloadInvoiceFileMock.mockRejectedValueOnce(new Error('download error'));
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={baseItemValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={baseItemValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     const button = screen.getByTestId('btn-test');
@@ -472,13 +509,15 @@ describe('Download File', () => {
     downloadInvoiceFileMock.mockReturnValueOnce(mockPromise);
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={baseItemValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={baseItemValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     const button = screen.getByTestId('btn-test');
@@ -497,13 +536,15 @@ describe('Download File', () => {
     };
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={values}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={values}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     const modifyBtn = screen.getByTestId('change-file-btn');
@@ -532,13 +573,15 @@ describe('Download File', () => {
     });
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={xmlValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={xmlValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     fireEvent.click(screen.getByTestId('btn-test'));
@@ -565,13 +608,15 @@ describe('Download File', () => {
     (window as any).open = jest.fn().mockReturnValue(null);
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={baseItemValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={baseItemValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     fireEvent.click(screen.getByTestId('btn-test'));
@@ -602,13 +647,15 @@ describe('Postpone Transaction Logic', () => {
       rewardBatchTrxStatus: 'CONSULTABLE',
     };
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={consultableValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={consultableValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
     const button = await screen.findByTestId('next-month-btn');
 
@@ -640,13 +687,15 @@ describe('Postpone Transaction Logic', () => {
       rewardBatchTrxStatus: 'CONSULTABLE',
     };
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={consultableValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={consultableValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
     const button = await screen.findByTestId('next-month-btn');
 
@@ -701,13 +750,15 @@ describe('Postpone Transaction Logic', () => {
     };
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={consultableValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={consultableValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
     const button = await screen.findByTestId('next-month-btn');
 
@@ -761,13 +812,15 @@ describe('Postpone Transaction Logic', () => {
     };
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={consultableValues}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={consultableValues}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
     const button = await screen.findByTestId('next-month-btn');
 
@@ -824,13 +877,15 @@ describe('Reverse button', () => {
     };
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={trxItem}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={trxItem}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     const reverseButton = screen.getByTestId('reverse-btn');
@@ -842,18 +897,20 @@ describe('Reverse button', () => {
 
   it('Should navigate', () => {
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={{
-          ...baseItemValues,
-          rewardBatchTrxStatus: 'REJECTED',
-          status: 'REWARDED',
-          pointOfSaleId: 'pos-1',
-        }}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={{
+            ...baseItemValues,
+            rewardBatchTrxStatus: 'REJECTED',
+            status: 'REWARDED',
+            pointOfSaleId: 'pos-1',
+          }}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
     const button = screen.getByTestId('btn-test');
     fireEvent.click(button);
@@ -874,13 +931,15 @@ describe('Reverse button', () => {
     };
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={trxItem}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={trxItem}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     const modifyBtn = screen.getByTestId('change-file-btn');
@@ -894,13 +953,15 @@ describe('Reverse button', () => {
     (isReversableOrEditable as jest.Mock).mockReturnValue(false);
 
     render(
-      <InvoiceDetail
-        title="Dettaglio transazione"
-        itemValues={{ ...baseItemValues, pointOfSaleId: 'pos-1' }}
-        listItem={baseListItem}
-        isOpen={true}
-        setIsOpen={() => {}}
-      />
+      <Provider store={store}>
+        <InvoiceDetail
+          title="Dettaglio transazione"
+          itemValues={{ ...baseItemValues, pointOfSaleId: 'pos-1' }}
+          listItem={baseListItem}
+          isOpen={true}
+          setIsOpen={() => {}}
+        />
+      </Provider>
     );
 
     expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();

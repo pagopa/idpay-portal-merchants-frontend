@@ -25,6 +25,10 @@ jest.mock('../../services/rolePermissionService', () => ({
   getUserPermission: jest.fn(),
 }));
 
+jest.mock('../useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
 const mockedUseDispatch = useDispatch as jest.Mock;
 const mockedStorageTokenOps = storageTokenOps as jest.Mocked<typeof storageTokenOps>;
 const mockedStorageUserOps = storageUserOps as jest.Mocked<typeof storageUserOps>;

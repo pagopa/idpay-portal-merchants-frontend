@@ -1,8 +1,8 @@
 import { Box, Table, TableBody, TableCell, TableRow } from '@mui/material';
 import useLoading from '@pagopa/selfcare-common-frontend/lib/hooks/useLoading';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { formatDate, formattedCurrency } from '../../helpers';
 import { getMerchantTransactionsProcessed } from '../../services/merchantService';
 import { pagesTableContainerStyle } from '../../styles';
@@ -23,7 +23,7 @@ import { useMemoInitTableData } from './useMemoInitTableData';
 
 const MerchantTransactionsProcessed = ({ id }: TransactionsComponentProps) => {
   const { setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [page, setPage] = useState<number>(0);
   const [rows, setRows] = useState<Array<MerchantTransactionDTO>>([]);
   const [rowsPerPage, setRowsPerPage] = useState<number>(0);

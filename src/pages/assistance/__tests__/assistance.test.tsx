@@ -19,6 +19,10 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
   useLoading: jest.fn(),
 }));
 
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
 jest.mock('../../../services/emailNotificationService');
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises

@@ -57,7 +57,10 @@ export const ENV = {
   ANALYTCS: {
     ENABLE: env.get('REACT_APP_ANALYTICS_ENABLE').default('false').asBool(),
     MOCK: env.get('REACT_APP_ANALYTICS_MOCK').default('false').asBool(),
-    DEBUG: env.get('REACT_APP_ANALYTICS_DEBUG').default('false').asBool(),
+    DEBUG: env
+      .get('REACT_APP_MIXPANEL_DEBUG')
+      .default(env.get('REACT_APP_ANALYTICS_DEBUG').default('false').asString())
+      .asBool(),
     TOKEN: env.get('REACT_APP_MIXPANEL_TOKEN').required().asString(),
     API_HOST: env
       .get('REACT_APP_MIXPANEL_API_HOST')
@@ -70,15 +73,15 @@ export const ENV = {
       .get('REACT_APP_ONE_TRUST_OTNOTICE_CDN_SETTINGS')
       .required()
       .asString(),
-    // PRIVACY_POLICY_ID: env
-    //   .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID_MERCHANTS')
-    //   .required()
-    //   .asString(),
-    // PRIVACY_POLICY_JSON_URL: env
-    //   .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL_MERCHANTS')
-    //   .required()
-    //   .asString(),
-    // TOS_ID: env.get('REACT_APP_ONE_TRUST_TOS_ID_MERCHANTS').required().asString(),
-    // TOS_JSON_URL: env.get('REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS').required().asString(),
+    PRIVACY_POLICY_ID: env
+      .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_ID_MERCHANTS')
+      .required()
+      .asString(),
+    PRIVACY_POLICY_JSON_URL: env
+      .get('REACT_APP_ONE_TRUST_PRIVACY_POLICY_JSON_URL_MERCHANTS')
+      .required()
+      .asString(),
+    TOS_ID: env.get('REACT_APP_ONE_TRUST_TOS_ID_MERCHANTS').required().asString(),
+    TOS_JSON_URL: env.get('REACT_APP_ONE_TRUST_TOS_JSON_URL_MERCHANTS').required().asString(),
   },
 };

@@ -1,6 +1,5 @@
 import App from '../App';
 import '../locale';
-import React from 'react';
 import { renderWithContext } from '../utils/__tests__/test-utils';
 import useTCAgreement from '../hooks/useTCAgreement';
 import { createMemoryHistory } from 'history';
@@ -25,10 +24,6 @@ jest.mock('../decorators/withSelectedPartyProducts');
 jest.mock('../hooks/useTCAgreement');
 const mockUseTCAgreement = useTCAgreement as jest.Mock;
 
-beforeEach(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-});
 
 describe('Test suite for App component', () => {
   test('Render App with TOS accepted', () => {

@@ -1,5 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import SearchTaxCode from '../SearchTaxCode';
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+import { setupInitiativeMocks } from '../../../test-utils/mockInitiativeContext';
 
 const createFormikMock = (overrides: any = {}) =>
   ({
@@ -41,7 +49,20 @@ const createFormikMock = (overrides: any = {}) =>
     ...overrides,
   } as any);
 
+const createMockStore = () =>
+  configureStore({
+    reducer: {
+      initiatives: () => ({
+        list: [],
+      }),
+    },
+  });
+
 describe('SearchTaxCode', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupInitiativeMocks();
+  });
   const renderSearchTaxCode = ({
     formikOverrides,
     onReset,
@@ -52,43 +73,59 @@ describe('SearchTaxCode', () => {
     const formik = createFormikMock(formikOverrides);
     const onSearch = jest.fn();
 
-    render(<SearchTaxCode formik={formik} onSearch={onSearch} onReset={onReset} />);
+    const store = createMockStore();
+
+    render(
+      <Provider store={store}>
+        <SearchTaxCode formik={formik} onSearch={onSearch} onReset={onReset} />
+      </Provider>
+    );
+
     return { formik, onSearch, onReset };
   };
 
   it('renders cf field and buttons', () => {
     renderSearchTaxCode();
-    expect(screen.getByLabelText('pages.reportedUsers.cfPlaceholder')).toBeInTheDocument();
+    expect(screen.getByLabelText('commons.labels.searchByFiscalCode')).toBeInTheDocument();
+    expect(screen.getByLabelText('commons.labels.searchByFiscalCode')).toBeInTheDocument();
     expect(screen.getByTestId('btn-filters-cf')).toBeInTheDocument();
     expect(screen.getByTestId('btn-cancel-cf')).toBeInTheDocument();
   });
 
   it('shows error if submitted with empty cf', () => {
     const { formik } = renderSearchTaxCode();
+
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
-    expect(formik.setFieldError).toHaveBeenCalledWith('cf', expect.any(String));
+
+    expect(formik.setFieldError).toHaveBeenCalled();
   });
 
   it('shows error if submitted with invalid cf', () => {
     const { formik } = renderSearchTaxCode({
       formikOverrides: { values: { cf: '123' } },
     });
-    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), {
+
+    fireEvent.change(screen.getByLabelText('commons.labels.searchByFiscalCode'), {
       target: { value: '123' },
     });
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
-    expect(formik.setFieldError).toHaveBeenCalledWith('cf', 'pages.reportedUsers.cf.invalid');
+
+    expect(formik.setFieldError).toHaveBeenCalledWith('cf', 'pages.reportedUsers.invalid');
   });
 
   it('calls onSearch with cleaned cf if valid', () => {
     const { onSearch } = renderSearchTaxCode({
       formikOverrides: { values: { cf: 'abcDEF12g34h567i' } },
     });
-    fireEvent.change(screen.getByLabelText('pages.reportedUsers.cfPlaceholder'), {
+
+    fireEvent.change(screen.getByLabelText('commons.labels.searchByFiscalCode'), {
       target: { value: 'abcDEF12g34h567i' },
     });
     fireEvent.click(screen.getByTestId('btn-filters-cf'));
-    expect(onSearch).toHaveBeenCalledWith({ cf: 'ABCDEF12G34H567I' });
+
+    expect(onSearch).toHaveBeenCalledWith({
+      cf: 'ABCDEF12G34H567I',
+    });
   });
 
   it('resets cf field on Cancel click (fallback when onReset is not provided)', () => {

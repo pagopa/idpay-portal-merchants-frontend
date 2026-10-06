@@ -9,13 +9,32 @@ interface Props {
 
 export default function InitiativeDetailCard({ titleBox, children }: Props) {
   return (
-    <Box py={3} px={4} sx={{ backgroundColor: theme.palette.background.paper }}>
+    <Box
+      py={3}
+      px={4}
+      sx={{
+        backgroundColor: theme.palette.background.paper,
+        boxSizing: 'border-box',
+        maxWidth: '100%',
+        minWidth: 0,
+        overflow: 'hidden',
+        width: '100%',
+      }}
+    >
       <Box mb={2}>
-        <Typography variant="body1" fontWeight={theme.typography.fontWeightBold}>
+        <Typography
+          variant="body1"
+          fontWeight={theme.typography.fontWeightBold}
+          sx={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {titleBox}
         </Typography>
       </Box>
-      <Box>{children}</Box>
+      <Box sx={{ minWidth: 0 }}>{children}</Box>
     </Box>
   );
 }

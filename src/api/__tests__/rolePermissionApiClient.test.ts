@@ -1,85 +1,71 @@
-import { BaseApiClient } from '../BaseApiClient';
+var mockPermissionsInstance: any;
+var mockConsentInstance: any;
 
-jest.mock('../BaseApiClient');
+jest.mock('../generated/role-permission/Permissions', () => ({
+  Permissions: jest.fn().mockImplementation(function (this: any) {
+    this.userPermission = jest.fn();
+    mockPermissionsInstance = this;
+  }),
+}));
 
-describe('RolePermissionApi (modern implementation)', () => {
-  let mockSafeRequest: jest.Mock;
+jest.mock('../generated/role-permission/Consent', () => ({
+  Consent: jest.fn().mockImplementation(function (this: any) {
+    this.getPortalConsent = jest.fn();
+    this.savePortalConsent = jest.fn();
+    mockConsentInstance = this;
+  }),
+}));
 
-  const loadApi = () => {
-    let RolePermissionApi: any;
-    jest.isolateModules(() => {
-      RolePermissionApi = require('../rolePermissionApiClient').RolePermissionApi;
-    });
-    return RolePermissionApi;
-  };
+import { RolePermissionApi } from '../rolePermissionApiClient';
 
+describe('RolePermissionApiClient', () => {
   beforeEach(() => {
-    mockSafeRequest = jest.fn();
-
-    (BaseApiClient as jest.Mock).mockImplementation(() => ({
-      safeRequest: mockSafeRequest,
-    }));
+    jest.clearAllMocks();
   });
 
-  it('userPermission calls safeRequest correctly and returns data', async () => {
-    mockSafeRequest.mockResolvedValue({ data: { right: 'data' } });
+  it('userPermission returns data', async () => {
+    const mockResponse = { right: 'data' };
 
-    const RolePermissionApi = loadApi();
+    mockPermissionsInstance.userPermission.mockResolvedValue({
+      data: mockResponse,
+    });
+
     const result = await RolePermissionApi.userPermission();
 
-    expect(mockSafeRequest).toHaveBeenCalledWith({
-      path: '/permissions',
-      method: 'GET',
-      secure: true,
-      format: 'json',
-    });
-
-    expect(result).toEqual({ right: 'data' });
+    expect(result).toEqual(mockResponse);
+    expect(mockPermissionsInstance.userPermission).toHaveBeenCalled();
   });
 
-  it('getPortalConsent calls safeRequest correctly and returns data', async () => {
-    mockSafeRequest.mockResolvedValue({ data: { right: 'consent-data' } });
+  it('getPortalConsent returns data', async () => {
+    const mockResponse = { right: 'consent-data' };
 
-    const RolePermissionApi = loadApi();
+    mockConsentInstance.getPortalConsent.mockResolvedValue({
+      data: mockResponse,
+    });
+
     const result = await RolePermissionApi.getPortalConsent();
 
-    expect(mockSafeRequest).toHaveBeenCalledWith({
-      path: '/consent',
-      method: 'GET',
-      secure: true,
-      format: 'json',
-    });
-
-    expect(result).toEqual({ right: 'consent-data' });
+    expect(result).toEqual(mockResponse);
+    expect(mockConsentInstance.getPortalConsent).toHaveBeenCalled();
   });
 
-  it('savePortalConsent calls safeRequest with versionId', async () => {
-    mockSafeRequest.mockResolvedValue({ data: undefined });
+  it('savePortalConsent resolves', async () => {
+    mockConsentInstance.savePortalConsent.mockResolvedValue({
+      data: undefined,
+    });
 
-    const RolePermissionApi = loadApi();
     await RolePermissionApi.savePortalConsent('v1');
 
-    expect(mockSafeRequest).toHaveBeenCalledWith({
-      path: '/consent',
-      method: 'POST',
-      secure: true,
-      format: 'json',
-      body: { versionId: 'v1' },
+    expect(mockConsentInstance.savePortalConsent).toHaveBeenCalledWith({
+      versionId: 'v1',
     });
   });
 
-  it('savePortalConsent supports undefined versionId', async () => {
-    mockSafeRequest.mockResolvedValue({ data: undefined });
+  it('propagates client error', async () => {
+    const error = new Error('Network error');
 
-    const RolePermissionApi = loadApi();
-    await RolePermissionApi.savePortalConsent(undefined);
+    mockPermissionsInstance.userPermission.mockRejectedValue(error);
 
-    expect(mockSafeRequest).toHaveBeenCalledWith({
-      path: '/consent',
-      method: 'POST',
-      secure: true,
-      format: 'json',
-      body: { versionId: undefined },
-    });
+    await expect(RolePermissionApi.userPermission()).rejects.toThrow('Network error');
   });
 });

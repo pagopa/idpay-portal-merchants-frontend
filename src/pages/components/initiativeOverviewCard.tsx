@@ -21,18 +21,13 @@ const InitiativeOverviewCard = ({
     sx={{
       borderRadius: 0,
       width: '100%',
-      display: 'grid',
-      gridColumn: 'span 12',
     }}
     data-testid="card"
   >
     <CardContent
       sx={{
-        display: 'grid',
         width: '100%',
-        gridTemplateColumns: 'repeat(12, 1fr)',
         alignItems: 'baseline',
-        rowGap: 1,
       }}
       data-testid="card-content"
     >

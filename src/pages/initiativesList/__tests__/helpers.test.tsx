@@ -1,23 +1,42 @@
-import { descendingComparator, getComparator, stableSort } from '../helpers';
+import { Data, descendingComparator, getComparator, stableSort } from '../helpers';
 
 describe('Test suite for helpers.ts of InitiativesList', () => {
   const orderByInitiativeName = 'initiativeName';
   const orderByOrganizationName = 'organizationName';
+  const orderBySpendingPeriod = 'spendingPeriod';
 
-  const mockedCompA = {
+  const mockedCompA: Pick<Data, 'initiativeName' | 'organizationName'> = {
     initiativeName: 'qwerty',
     organizationName: 'org1234',
   };
 
-  const mockedCompB = {
+  const mockedCompB: Pick<Data, 'initiativeName' | 'organizationName'> = {
     initiativeName: 'asdfgh',
     organizationName: 'org5678',
   };
 
-  const mockedCompC = {
+  const mockedCompC: Pick<Data, 'initiativeName' | 'organizationName'> = {
     initiativeName: 'zxcvb',
     organizationName: 'org9012',
   };
+
+  const mockedSpendingPeriodA: Pick<Data, 'spendingPeriod'> = {
+    spendingPeriod: '10/01/2024',
+  };
+
+  const mockedSpendingPeriodB: Pick<Data, 'spendingPeriod'> = {
+    spendingPeriod: '09/01/2024',
+  };
+
+  const mockedSpendingPeriodC: Pick<Data, 'spendingPeriod'> = {
+    spendingPeriod: '11/01/2024',
+  };
+
+  const mockedInvalidSpendingPeriod: Pick<Data, 'spendingPeriod'> = {
+    spendingPeriod: 'invalid-date',
+  };
+
+  const mockedMissingSpendingPeriod: Pick<Data, 'spendingPeriod'> = {};
 
   const arr: any = ['1', '2'];
   const comp: any = {
@@ -40,8 +59,41 @@ describe('Test suite for helpers.ts of InitiativesList', () => {
     expect(descendingComparator(mockedCompA, mockedCompC, orderByOrganizationName)).toBe(1);
   });
 
+  test('descendingComparator handles spendingPeriod sorting and invalid values', () => {
+    expect(
+      descendingComparator(mockedSpendingPeriodA, mockedSpendingPeriodA, orderBySpendingPeriod)
+    ).toBe(0);
+    expect(
+      descendingComparator(mockedSpendingPeriodA, mockedSpendingPeriodB, orderBySpendingPeriod)
+    ).toBe(-1);
+    expect(
+      descendingComparator(mockedSpendingPeriodA, mockedSpendingPeriodC, orderBySpendingPeriod)
+    ).toBe(1);
+    expect(
+      descendingComparator(
+        mockedInvalidSpendingPeriod,
+        mockedMissingSpendingPeriod,
+        orderBySpendingPeriod
+      )
+    ).toBe(0);
+    expect(
+      descendingComparator(
+        mockedMissingSpendingPeriod,
+        mockedSpendingPeriodA,
+        orderBySpendingPeriod
+      )
+    ).toBe(1);
+  });
+
+  test('getComparator supports ascending order', () => {
+    const ascendingComparator = getComparator('asc', orderByInitiativeName);
+
+    expect(ascendingComparator(mockedCompA, mockedCompB)).toBe(1);
+    expect(ascendingComparator(mockedCompB, mockedCompA)).toBe(-1);
+  });
+
   test('stableSort', () => {
-    expect(stableSort(arr, getComparator(comp.a, comp.b))).toEqual(['1', '2']);
-    expect(stableSort(arr2, getComparator('desc', comp2.b))).toEqual(['1', '1']);
+    expect(stableSort(arr, getComparator<any, any>(comp.a, comp.b))).toEqual(['1', '2']);
+    expect(stableSort(arr2, getComparator<any, any>('desc', comp2.b))).toEqual(['1', '1']);
   });
 });

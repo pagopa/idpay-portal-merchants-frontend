@@ -1,5 +1,7 @@
 import { getMerchantsApi } from '../api/MerchantsApiClient';
+import { ApiError } from '../api/ApiError';
 import {
+  GetMerchantInitiativesAvailableParams,
   InitiativeDTO,
   MerchantStatisticsDTO,
   MerchantDetailDTO,
@@ -15,8 +17,46 @@ import {
   ReportRequest,
   RewardBatchDTO,
   TransactionResponse,
+  ReportDTO,
+  MerchantIbanPatchDTO,
+  PointOfSaleDTO,
+  PointOfSaleReferentPatchDTO,
+  ValidationErrorDTO,
+  PointOfSaleErrorDTO,
+  ValidationErrorDetail,
+  PointOfSaleInitiativeDTO,
+  PointOfSaleOnboardingResultDTO,
+  OnboardingResponse,
+  PageResponseInitiativeResponse,
+  PointOfSaleExclusionResultDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
+
+type GetPointOfSalesCatalogFilters = Omit<GetPointOfSalesFilters, 'initiative'> & {
+  initiativeId?: string;
+  initiativeFilter?: 'ALL_INITIATIVES' | 'NO_INITIATIVE';
+};
+
+const normalizePointOfSaleError = (
+  errorData?: ValidationErrorDTO | PointOfSaleErrorDTO
+): ValidationErrorDTO | PointOfSaleErrorDTO | undefined => {
+  if (!errorData) {
+    return undefined;
+  }
+
+  if (String(errorData.code) === 'VALIDATION_ERROR') {
+    const validationErrorData = errorData as ValidationErrorDTO & {
+      details?: Array<ValidationErrorDetail>;
+    };
+
+    return {
+      ...validationErrorData,
+      errors: validationErrorData.errors ?? validationErrorData.details ?? [],
+    };
+  }
+
+  return errorData;
+};
 
 export type GetMerchantTransactionsProcessedParams = {
   initiativeId: string;
@@ -33,6 +73,11 @@ export type GetMerchantTransactionsProcessedParams = {
 
 export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> =>
   getMerchantsApi().getMerchantInitiativeList();
+
+export const getMerchantInitiativesAvailable = (
+  query?: GetMerchantInitiativesAvailableParams
+): Promise<Array<PageResponseInitiativeResponse>> =>
+  getMerchantsApi().getMerchantInitiativesAvailable(query);
 
 export const getMerchantTransactions = (
   initiativeId: string,
@@ -58,15 +103,16 @@ export const getMerchantInitiativeStatistics = (
 export const getMerchantDetail = (initiativeId: string): Promise<MerchantDetailDTO> =>
   getMerchantsApi().getMerchantDetail(initiativeId);
 
-export const deleteTransaction = (transactionId: string): Promise<void> =>
-  getMerchantsApi().deleteTransaction(transactionId);
+export const deleteTransaction = (initaitiveId: string, transactionId: string): Promise<void> =>
+  getMerchantsApi().deleteTransaction(initaitiveId, transactionId);
 
 export const reversalTransactionInvoiced = (
+  initiativeId: string,
   transactionId: string,
   file: File,
   docNumber?: string
 ): Promise<void | { code: string; message: string }> =>
-  getMerchantsApi().reversalTransactionInvoiced(transactionId, file, docNumber);
+  getMerchantsApi().reversalTransactionInvoiced(initiativeId, transactionId, file, docNumber);
 
 export const createTransaction = (
   amountCents: number,
@@ -82,43 +128,103 @@ export const createTransaction = (
   });
 
 export const authPaymentBarCode = (
+  initiativeId: string,
   trxCode: string,
   amountCents: number,
   idTrxAcquirer: string
 ): Promise<unknown> =>
-  getMerchantsApi().authPaymentBarCode(trxCode, {
+  getMerchantsApi().authPaymentBarCode(initiativeId, trxCode, {
     amountCents,
     idTrxAcquirer,
   });
 
 export const updateMerchantPointOfSales = async (
+  initiativeId: string,
   merchantId: string,
-  pointOfSales: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>
-): Promise<void | { code?: string; message?: string }> => {
-  const result = await getMerchantsApi().updateMerchantPointOfSales(merchantId, pointOfSales);
+  pointOfSales: Array<PointOfSaleDTO>
+): Promise<void | ValidationErrorDTO | PointOfSaleErrorDTO> => {
+  try {
+    const result = await getMerchantsApi().updateMerchantPointOfSales(
+      initiativeId,
+      merchantId,
+      pointOfSales
+    );
 
-  return result as void | { code?: string; message?: string };
+    return result as void | ValidationErrorDTO | PointOfSaleErrorDTO;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      const errorDetails = error.details as ValidationErrorDTO | PointOfSaleErrorDTO | undefined;
+
+      if (errorDetails?.code) {
+        return normalizePointOfSaleError({
+          ...errorDetails,
+          message: errorDetails.message ?? error.message ?? '',
+        } as ValidationErrorDTO | PointOfSaleErrorDTO);
+      }
+
+      return {
+        code: (error.code ?? 'POINT_OF_SALE_GENERIC_ERROR') as PointOfSaleErrorDTO['code'],
+        message: error.message ?? '',
+      };
+    }
+
+    const apiErrorData = (
+      error as {
+        response?: { data?: ValidationErrorDTO | PointOfSaleErrorDTO };
+      }
+    )?.response?.data;
+
+    if (apiErrorData) {
+      return normalizePointOfSaleError(apiErrorData);
+    }
+
+    return { code: 'POINT_OF_SALE_GENERIC_ERROR', message: '' };
+  }
 };
 
 export const getMerchantPointOfSales = async (
+  initiativeId: string,
   merchantId: string,
   filters: GetPointOfSalesFilters
 ): Promise<{
-  content: Array<import('../api/generated/merchants/data-contracts').PointOfSaleDTO>;
+  content: Array<PointOfSaleDTO>;
   pageNo: number;
   pageSize: number;
   totalElements: number;
 }> => {
   const response = await getMerchantsApi().getMerchantPointOfSales(
+    initiativeId,
     merchantId,
     filters as unknown as Record<string, unknown>
   );
 
   return {
-    content: response?.content ?? [],
-    pageNo: response?.pageNumber ?? 0,
-    pageSize: response?.pageSize ?? 0,
-    totalElements: response?.totalElements ?? 0,
+    content: (response as any)?.content ?? [],
+    pageNo: (response as any)?.pageNumber ?? 0,
+    pageSize: (response as any)?.pageSize ?? 0,
+    totalElements: (response as any)?.totalElements ?? 0,
+  };
+};
+
+export const getMerchantPointOfSalesCatalog = async (
+  merchantId: string,
+  filters: GetPointOfSalesCatalogFilters
+): Promise<{
+  content: Array<PointOfSaleDTO>;
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+}> => {
+  const response = await getMerchantsApi().getMerchantPointOfSalesCatalog(
+    merchantId,
+    filters as unknown as Record<string, unknown>
+  );
+
+  return {
+    content: (response as any)?.content ?? [],
+    pageNo: (response as any)?.pageNumber ?? 0,
+    pageSize: (response as any)?.pageSize ?? 0,
+    totalElements: (response as any)?.totalElements ?? 0,
   };
 };
 
@@ -127,8 +233,31 @@ export const getMerchantPointOfSalesWithTransactions = (
 ): Promise<Array<FranchisePointOfSaleDTO>> =>
   getMerchantsApi().getMerchantPointOfSalesWithTransactions(rewardBatchId);
 
-export const getMerchantPointOfSalesById = (merchantId: string, pointOfSaleId: string) =>
-  getMerchantsApi().getMerchantPointOfSalesById(merchantId, pointOfSaleId);
+export const getMerchantPointOfSalesById = (
+  initiativeId: string,
+  merchantId: string,
+  pointOfSaleId: string
+) => getMerchantsApi().getMerchantPointOfSalesById(initiativeId, merchantId, pointOfSaleId);
+
+export const getPointOfSaleInitiatives = (
+  merchantId: string,
+  pointOfSaleId: string
+): Promise<Array<PointOfSaleInitiativeDTO>> =>
+  getMerchantsApi().getPointOfSaleInitiatives(merchantId, pointOfSaleId);
+
+export const associatePos = (
+  initiativeId: string,
+  merchantId: string,
+  pointOfSaleIds: Array<string>
+): Promise<PointOfSaleOnboardingResultDTO> =>
+  getMerchantsApi().associatePos(initiativeId, merchantId, pointOfSaleIds);
+
+export const excludePos = (
+  initiativeId: string,
+  merchantId: string,
+  pointOfSaleIds: Array<string>
+): Promise<PointOfSaleExclusionResultDTO> =>
+  getMerchantsApi().excludePos(initiativeId, merchantId, pointOfSaleIds);
 
 export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,
@@ -142,10 +271,11 @@ export const getMerchantPointOfSaleTransactionsProcessed = (
   );
 
 export const downloadInvoiceFile = (
+  initiativeId: string,
   transactionId: string,
   pointOfSaleId: string
 ): Promise<DownloadInvoiceResponseDTO> =>
-  getMerchantsApi().downloadInvoiceFile(pointOfSaleId, transactionId);
+  getMerchantsApi().downloadInvoiceFile(initiativeId, pointOfSaleId, transactionId);
 
 export const getReportedUser = (
   initiativeId: string,
@@ -191,13 +321,9 @@ export const downloadBatchCsv = (
 export const postponeTransaction = (
   initiativeId: string,
   rewardBatchId: string,
-  transactionId: string,
+  transactionId: string
 ): Promise<void> =>
-  getMerchantsApi().postponeTransaction(
-    initiativeId,
-    rewardBatchId,
-    transactionId,
-  );
+  getMerchantsApi().postponeTransaction(initiativeId, rewardBatchId, transactionId);
 
 export const getMerchantReports = (
   initiativeId: string,
@@ -205,15 +331,33 @@ export const getMerchantReports = (
   size?: number
 ): Promise<ReportListDTO> => getMerchantsApi().getMerchantReports(initiativeId, page, size);
 
-export const generateMerchantReport = (initiativeId: string, body: ReportRequest): Promise<void> =>
-  getMerchantsApi().generateMerchantReport(initiativeId, body);
+export const generateMerchantReport = (
+  initiativeId: string,
+  body: ReportRequest
+): Promise<ReportDTO> => getMerchantsApi().generateMerchantReport(initiativeId, body);
 
 export const downloadMerchantReport = (initiativeId: string, reportId: string) =>
   getMerchantsApi().downloadMerchantReport(initiativeId, reportId);
 
 export const updateInvoiceTransaction = (
+  initiativeId: string,
   transactionId: string,
   file: File,
   docNumber?: string
-): Promise<{ code: string; message: string }> =>
-  getMerchantsApi().updateInvoiceTransaction(transactionId, file, docNumber);
+): Promise<{ code: string; message: string } | void> =>
+  getMerchantsApi().updateInvoiceTransaction(initiativeId, transactionId, file, docNumber);
+
+export const updateMerchantData = (
+  initaitiveId: string,
+  merchantData: MerchantIbanPatchDTO
+): Promise<void> => getMerchantsApi().updateMerchantData(initaitiveId, merchantData);
+
+export const patchPointOfSaleReferent = (
+  merchantId: string,
+  pointOfSaleId: string,
+  body: PointOfSaleReferentPatchDTO
+): Promise<PointOfSaleDTO> =>
+  getMerchantsApi().patchPointOfSaleReferent(merchantId, pointOfSaleId, body);
+
+export const putMerchantOnboardingRequest = (initiativeId: string): Promise<OnboardingResponse> =>
+  getMerchantsApi().putMerchantOnboardingRequest(initiativeId);

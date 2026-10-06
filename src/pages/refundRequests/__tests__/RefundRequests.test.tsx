@@ -43,6 +43,20 @@ jest.mock('react-router-dom', () => ({
   useHistory: jest.fn(),
 }));
 
+jest.mock('../../../hooks/useUserPermissions', () => {
+  const actual = jest.requireActual('../../../hooks/useUserPermissions');
+  return {
+    __esModule: true,
+    ...actual,
+    useUserPermissions: () => ({
+      role: 'admin',
+      logicalRoleName: 'admin',
+      isSupportUser: false,
+      isActionDisabled: () => false,
+    }),
+  };
+});
+
 const mockGetRewardBatches = jest.fn();
 const mockSendRewardBatch = jest.fn();
 
@@ -65,6 +79,8 @@ const getPreviousMonth = () => {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   return `${year}-${month}`;
 };
+
+const mockDataTable = jest.fn();
 
 const mockData = [
   {
@@ -113,40 +129,35 @@ jest.mock('../../../components/dataTable/DataTable', () => ({
     onPaginationPageChange,
   }: // onSelectionModelChange,
   // isRowSelectable,
-  any) => (
-    <div data-testid="data-table">
-      <table>
-        <thead>
-          <tr>
-            {columns.map((col: any) => (
-              <th key={col.field}>{col.headerName}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row: any, index: number) => (
-            <tr key={row.id ?? index}>
-              {/* <td>
-                <button
-                  data-testid={`select-row-${row.id ?? index}`}
-                  onClick={() => onSelectionModelChange?.([row.id])}
-                  disabled={isRowSelectable ? !isRowSelectable({ row }) : false}
-                >
-                  Select
-                </button>
-              </td> */}
+  any) => {
+    mockDataTable({ columns, rows, onPaginationPageChange });
+
+    return (
+      <div data-testid="data-table">
+        <table>
+          <thead>
+            <tr>
               {columns.map((col: any) => (
-                <td key={col.field}>
-                  {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
-                </td>
+                <th key={col.field}>{col.headerName}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
-    </div>
-  ),
+          </thead>
+          <tbody>
+            {rows.map((row: any, index: number) => (
+              <tr key={row.id ?? index}>
+                {columns.map((col: any) => (
+                  <td key={col.field}>
+                    {col.renderCell ? col.renderCell({ value: row[col.field], row }) : row[col.field]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button onClick={() => onPaginationPageChange(2)}>Next Page</button>
+      </div>
+    );
+  },
 }));
 
 jest.mock('../RefundRequestModal', () => ({
@@ -215,6 +226,19 @@ describe('RefundRequests', () => {
     expect(screen.getByTestId('data-table')).toBeInTheDocument();
   });
 
+  it('should disable the column menu for all refund request columns', async () => {
+    renderWithStore(<RefundRequests />);
+
+    await waitFor(() => {
+      expect(mockDataTable).toHaveBeenCalled();
+    });
+
+    const columns = mockDataTable.mock.calls.at(-1)?.[0].columns ?? [];
+
+    expect(columns.length).toBeGreaterThan(0);
+    expect(columns.every((column: any) => column.disableColumnMenu === true)).toBe(true);
+  });
+
   it('should call history.push', async () => {
     const pushMock = jest.fn();
 
@@ -274,8 +298,8 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should handle fetch error gracefully', async () => {
@@ -294,7 +318,7 @@ describe('RefundRequests', () => {
       })
     );
 
-    expect(await screen.findByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(await screen.findByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should not show send button when no rows are selected', async () => {
@@ -304,9 +328,7 @@ describe('RefundRequests', () => {
       expect(screen.getByTestId('data-table')).toBeInTheDocument();
     });
 
-    expect(
-      screen.queryByRole('button', { name: /pages.refundRequests.sendRequests/i })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /actions.send/i })).not.toBeInTheDocument();
   });
 
   it('should render table columns correctly', async () => {
@@ -373,10 +395,8 @@ describe('RefundRequests', () => {
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
 
-    await waitFor(() =>
-      expect(screen.getByText('pages.refundRequests.sendRequests')).toBeInTheDocument()
-    );
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    await waitFor(() => expect(screen.getByText('actions.send')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('actions.send'));
 
     await waitFor(() => expect(screen.getByTestId('refund-modal')).toBeInTheDocument());
 
@@ -442,7 +462,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should handle response without content property', async () => {
@@ -459,7 +479,7 @@ describe('RefundRequests', () => {
       expect(mockGetRewardBatches).toHaveBeenCalled();
     });
 
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should render spacer column', async () => {
@@ -487,10 +507,8 @@ describe('RefundRequests', () => {
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
 
-    await waitFor(() =>
-      expect(screen.getByText('pages.refundRequests.sendRequests')).toBeInTheDocument()
-    );
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    await waitFor(() => expect(screen.getByText('actions.send')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('actions.send'));
 
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
@@ -615,7 +633,7 @@ describe('RefundRequests', () => {
         severity: 'error',
       })
     );
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   // Removed dynamic module reloading test because it caused duplicate React instance
@@ -631,7 +649,7 @@ describe('RefundRequests', () => {
 
     await waitFor(() => expect(mockGetRewardBatches).toHaveBeenCalled());
 
-    expect(screen.getByText('pages.refundRequests.noData')).toBeInTheDocument();
+    expect(screen.getByText('commons.labels.noData')).toBeInTheDocument();
   });
 
   it('should not select row when month is current month (isRowSelectable false branch)', async () => {
@@ -675,7 +693,7 @@ describe('RefundRequests', () => {
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
 
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByText('actions.send'));
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
     await waitFor(() => {
@@ -813,7 +831,7 @@ describe('RefundRequests', () => {
 
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByText('actions.send'));
     fireEvent.click(screen.getByRole('button', { name: /Invia/i }));
 
     await waitFor(() => {
@@ -833,7 +851,7 @@ describe('RefundRequests', () => {
 
     const radios = screen.getAllByRole('radio');
     fireEvent.click(radios[0]);
-    fireEvent.click(screen.getByText('pages.refundRequests.sendRequests'));
+    fireEvent.click(screen.getByText('actions.send'));
 
     await waitFor(() => expect(screen.getByTestId('refund-modal')).toBeInTheDocument());
 

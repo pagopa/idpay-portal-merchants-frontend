@@ -1,17 +1,31 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material';
+import { theme } from '@pagopa/mui-italia/theme';
 import InitiativeStores from '../InitiativeStores';
-import * as merchantService from '../../../services/merchantService';
-import * as jwtUtils from '../../../utils/jwt-utils';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
-import { renderWithContext } from '../../../utils/__tests__/test-utils';
-import { useLocation } from 'react-router-dom';
+import { browserConsole } from '../../../utils/consoleLogger';
+import { getMerchantPointOfSales } from '../../../services/merchantService';
+import { parseJwt } from '../../../utils/jwt-utils';
+import { trackAnalyticsEvent } from '../../../services/analyticsService';
 
 const mockId = 'initiative-123';
+const mockSetAlert = jest.fn();
 const mockHistory = {
   replace: jest.fn(),
   push: jest.fn(),
 };
+
+const mockHandleFiltersApplied = jest.fn();
+const mockHandleFiltersReset = jest.fn();
+const mockHandleSortModelChange = jest.fn();
+const mockHandlePaginationPageChange = jest.fn();
+const mockHandleRowsPerPageChange = jest.fn();
+const mockUsePointOfSalesTable = jest.fn();
+const mockBuildPointOfSalesColumns = jest.fn();
+
+let dataTableProps: any = {};
+let usePointOfSalesTableArgs: any;
+const mockTrackAnalyticsEvent = trackAnalyticsEvent as jest.Mock;
 
 jest.mock('../../../hooks/useUserPermissions', () => {
   const actual = jest.requireActual('../../../hooks/useUserPermissions');
@@ -36,11 +50,68 @@ jest.mock('react-i18next', () => ({
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({ ...mockHistory }),
-  useParams: () => ({ initiative_id: mockId }),
-  useLocation: jest.fn(),
+  useLocation: jest.fn(() => ({ state: {}, pathname: '/' })),
 }));
 
-let dataTableProps: any = {};
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => ({ initiativeId: mockId }),
+}));
+
+jest.mock('../../../hooks/useAlert', () => ({
+  useAlert: () => ({ setAlert: mockSetAlert }),
+}));
+
+jest.mock('../../../hooks/useScopedTranslation', () => ({
+  __esModule: true,
+  default: () => ({
+    t: (key: string) => key,
+    isLoading: false,
+    initiativeName: undefined,
+  }),
+}));
+
+jest.mock('../../../components/pointsOfSale/usePointOfSalesTable', () => ({
+  __esModule: true,
+  default: (...args: Array<unknown>) => {
+    [usePointOfSalesTableArgs] = args;
+    return mockUsePointOfSalesTable(...args);
+  },
+}));
+
+jest.mock('../../../components/pointsOfSale/pointOfSalesColumns', () => ({
+  __esModule: true,
+  default: (...args: Array<unknown>) => mockBuildPointOfSalesColumns(...args),
+}));
+
+jest.mock('../../../services/merchantService', () => ({
+  getMerchantPointOfSales: jest.fn(),
+}));
+
+jest.mock('../../../services/analyticsService', () => ({
+  MIXPANEL_EVENTS: {
+    ADD_STORE_CONVERSION: 'IDPAY_ADD_STORE_UX_CONVERSION',
+  },
+  trackAnalyticsEvent: jest.fn(),
+}));
+
+jest.mock('../../../utils/jwt-utils', () => ({
+  parseJwt: jest.fn(),
+}));
+
+jest.mock('../../../components/pointsOfSale/PointOfSalesFilters', () => (props: any) => (
+  <div data-testid="mock-filters">
+    <button
+      data-testid="apply-filters-test"
+      onClick={() => props.onFiltersApplied(props.formik.values)}
+    >
+      Apply
+    </button>
+    <button data-testid="reset-filters-test" onClick={() => props.onFiltersReset()}>
+      Reset
+    </button>
+  </div>
+));
+
 jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
   dataTableProps = props;
   return (
@@ -51,36 +122,20 @@ jest.mock('../../../components/dataTable/DataTable', () => (props: any) => {
       >
         Sort
       </button>
-      <button
-        data-testid="sort-button-non-referent"
-        onClick={() => props.onSortModelChange([{ field: 'city', sort: 'asc' }])}
-      >
-        Sort city
-      </button>
-      <button data-testid="sort-button-remove" onClick={() => props.onSortModelChange([])}>
-        Remove Sort
-      </button>
       <button data-testid="paginate-button" onClick={() => props.onPaginationPageChange(2)}>
         Paginate
       </button>
+      <button data-testid="page-size-button" onClick={() => props.onRowsPerPageChange(25)}>
+        Change page size
+      </button>
       {props.rows.map((row: any) => (
-        <div key={row.id} onClick={() => props.handleRowAction(row)}>
+        <div key={row.id} onClick={() => props.columns[0]?.renderCell?.({ row })}>
           {row.franchiseName}
         </div>
       ))}
     </div>
   );
 });
-
-jest.mock('../../../services/merchantService', () => ({
-  getMerchantPointOfSales: jest.fn(),
-}));
-
-jest.mock('../../../utils/jwt-utils');
-jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage');
-
-const mockParseJwt = jwtUtils.parseJwt as jest.Mock;
-const mockStorageRead = storageTokenOps.read as jest.Mock;
 
 const mockStores = [
   {
@@ -94,676 +149,280 @@ const mockStores = [
     contactEmail: 'mario@test.com',
     website: 'www.storea.com',
   },
-  {
-    id: '2',
-    franchiseName: 'Store B',
-    type: 'ONLINE',
-    website: 'www.storeb.com',
-    city: 'Milano',
-    contactName: 'Luisa',
-    contactSurname: 'Verdi',
-    contactEmail: 'luisa@test.com',
-  },
-  { id: '3', franchiseName: 'Store C', type: 'UNDEFINED', city: 'Napoli' },
 ];
-const mockPagination = { pageNo: 0, pageSize: 5, totalElements: 3, totalPages: 1 };
 
-const setupDefaultMocks = () => {
-  jest.clearAllMocks();
-  mockParseJwt.mockReturnValue({ merchant_id: 'merchant-id-01' });
-  mockStorageRead.mockReturnValue('DUMMY_TOKEN');
-  (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
-    content: mockStores,
-    ...mockPagination,
-  });
-  (useLocation as jest.Mock).mockReturnValue({ state: {} });
+const defaultHookValue = {
+  stores: mockStores,
+  storesPagination: { pageNo: 0, pageSize: 10, totalElements: 1 },
+  storesLoading: false,
+  rowsPerPage: 10,
+  sortModel: [],
+  filtersAppliedOnce: false,
+  handleFiltersApplied: mockHandleFiltersApplied,
+  handleFiltersReset: mockHandleFiltersReset,
+  handleSortModelChange: mockHandleSortModelChange,
+  handlePaginationPageChange: mockHandlePaginationPageChange,
+  handleRowsPerPageChange: mockHandleRowsPerPageChange,
 };
 
-const renderInitiativeStores = () => renderWithContext(<InitiativeStores />);
+const renderComponent = () =>
+  render(
+    <ThemeProvider theme={theme}>
+      <InitiativeStores />
+    </ThemeProvider>
+  );
 
-const waitForTable = () =>
-  waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-const waitForStoreA = () => waitFor(() => expect(screen.getByText('Store A')).toBeInTheDocument());
-
-const renderAndWaitTable = async () => {
-  renderInitiativeStores();
-  await waitForTable();
-};
-
-const renderAndWaitStoreA = async () => {
-  renderInitiativeStores();
-  await waitForStoreA();
-};
-
-const setStoredPagination = (overrides: Record<string, unknown>) => {
-  const storedPagination = {
-    pageNo: 2,
-    pageSize: 10,
-    totalElements: 30,
-    totalPages: 3,
-    sort: 'city,desc',
-    initiativeId: mockId,
-    ...overrides,
-  };
-  sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
-  return storedPagination;
+const expectEmptyStateMessage = () => {
+  expect(
+    screen.getByText((_, element) =>
+      element?.tagName.toLowerCase() === 'p' &&
+      element?.textContent ===
+      'pages.initiativeStores.noStorespages.initiativeStores.addStoreNoResults.'
+    )
+  ).toBeInTheDocument();
 };
 
 describe('<InitiativeStores />', () => {
   beforeEach(() => {
-    setupDefaultMocks();
+    jest.clearAllMocks();
+    dataTableProps = {};
+    usePointOfSalesTableArgs = undefined;
+    const { useLocation } = jest.requireMock('react-router-dom');
+    useLocation.mockReturnValue({ state: {}, pathname: '/' });
+    mockUsePointOfSalesTable.mockReturnValue(defaultHookValue);
+    (parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-123' });
+    (getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+      content: mockStores,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 1,
+    });
+    mockBuildPointOfSalesColumns.mockReturnValue([
+      {
+        field: 'franchiseName',
+        renderCell: ({ row }: any) => row.franchiseName,
+      },
+      {
+        field: 'actions',
+        renderCell: ({ row }: any) => (
+          <button onClick={() => mockHistory.push(`/portale-esercenti/${mockId}/punti-vendita/${row.id}/`)}>
+            action
+          </button>
+        ),
+      },
+    ]);
   });
 
-  test('renderizza correttamente, mostra il loader e poi i dati della tabella', async () => {
-    renderInitiativeStores();
+  test('renderizza titolo, filtri, tabella e bottone aggiungi quando ci sono store', () => {
+    renderComponent();
+
+    expect(screen.getByText('pages.initiativeStores.title')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-filters')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativeStores.addStoreList')).toBeInTheDocument();
+    expect(screen.getByText('Store A')).toBeInTheDocument();
+  });
+
+  test('mostra il loader quando storesLoading è true', () => {
+    mockUsePointOfSalesTable.mockReturnValue({
+      ...defaultHookValue,
+      stores: [],
+      storesLoading: true,
+    });
+
+    renderComponent();
+
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
-      expect(screen.getByText('Store A')).toBeInTheDocument();
-    });
-    expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-      'merchant-id-01',
-      expect.objectContaining({ page: 0, sort: 'asc' })
-    );
+    expect(screen.queryByTestId('mock-datatable')).not.toBeInTheDocument();
   });
 
-  test.skip('mostra lo stato vuoto se non ci sono punti vendita', async () => {
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
-      content: [],
-      ...mockPagination,
-      totalElements: 0,
+  test('mostra lo stato vuoto e naviga alla pagina di censimento se non ci sono store', () => {
+    mockUsePointOfSalesTable.mockReturnValue({
+      ...defaultHookValue,
+      stores: [],
+      storesLoading: false,
+      filtersAppliedOnce: false,
     });
-    renderInitiativeStores();
-    await waitFor(() => {
-      expect(screen.getByText('pages.initiativeStores.noStores')).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByText('pages.initiativeStores.addStoreNoResults'));
+
+    renderComponent();
+
+    expectEmptyStateMessage();
+    fireEvent.click(screen.getAllByText('pages.initiativeStores.addStoreList')[1]);
+
     expect(mockHistory.push).toHaveBeenCalledWith(
-      `/portale-esercenti/initiative-123/punti-vendita/censisci/`
+      `/portale-esercenti/${mockId}/punti-vendita/censisci/`
     );
   });
 
-  test('gestisce il fallimento della chiamata API iniziale', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const error = new Error('API Failure');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
-    renderInitiativeStores();
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalled();
+  test('mostra lo stato vuoto per filtri applicati senza link di censimento', () => {
+    mockUsePointOfSalesTable.mockReturnValue({
+      ...defaultHookValue,
+      stores: [],
+      storesLoading: false,
+      filtersAppliedOnce: true,
     });
-    consoleErrorSpy.mockRestore();
+
+    renderComponent();
+
+    expectEmptyStateMessage();
+    expect(screen.getAllByText('pages.initiativeStores.addStoreList')).toHaveLength(2);
   });
 
-  test('gestisce un errore API durante il reset dei filtri', async () => {
-    await renderAndWaitTable();
+  test('invoca gli handler del hook tramite filtri e tabella', () => {
+    renderComponent();
 
-    const error = new Error('Reset failure');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
-
-    const resetButton = screen.getByTestId('reset-filters-test');
-    fireEvent.click(resetButton);
-
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalled();
-    });
-  });
-
-  test('handles sort removal', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    fireEvent.click(screen.getByTestId('sort-button-remove'));
-
-    fireEvent.click(screen.getByTestId('paginate-button'));
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({ sort: 'asc' })
-      );
-    });
-  });
-
-  test('gestisce un errore nel .catch di handleFiltersReset', async () => {
-    await renderAndWaitTable();
-
-    const error = new Error('External catch failure');
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockRejectedValue(error);
-
-    const resetButton = screen.getByTestId('reset-filters-test');
-    fireEvent.click(resetButton);
-
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({
-          address: '',
-          city: '',
-          contactName: '',
-          page: 0,
-          size: 10,
-          sort: 'asc',
-          type: undefined,
-        })
-      );
-    });
-  });
-
-  test('non effettua la chiamata API se manca il merchant_id nel token', async () => {
-    mockParseJwt.mockReturnValue({ not_merchant_id: 'some-value' });
-    renderInitiativeStores();
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-    expect(merchantService.getMerchantPointOfSales).not.toHaveBeenCalled();
-  });
-
-  test('applica i filtri e ricarica i dati', async () => {
-    await renderAndWaitStoreA();
-
-    const cityInput = screen.getByLabelText('pages.initiativeStores.city');
-    fireEvent.change(cityInput, { target: { value: 'Napoli' } });
-
-    const applyButton = screen.getByTestId('apply-filters-test');
-    fireEvent.click(applyButton);
-
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({ city: 'Napoli', page: 0 })
-      );
-    });
-  });
-
-  test('resetta i filtri e ricarica i dati iniziali', async () => {
-    await renderAndWaitStoreA();
-    const resetButton = screen.getByTestId('reset-filters-test');
-    fireEvent.click(resetButton);
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenLastCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({
-          address: '',
-          city: '',
-          contactName: '',
-          page: 0,
-          size: 10,
-          sort: 'asc',
-          type: undefined,
-        })
-      );
-    });
-  });
-
-  test('mostra la tabella vuota se i filtri non producono risultati', async () => {
-    await renderAndWaitStoreA();
-
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
-      content: [],
-      ...mockPagination,
-      totalElements: 0,
-    });
-    const cityInput = screen.getByLabelText('pages.initiativeStores.city');
-    fireEvent.change(cityInput, { target: { value: 'Città Inesistente' } });
     fireEvent.click(screen.getByTestId('apply-filters-test'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
-    });
-  });
-
-  test('naviga alla pagina di aggiunta punto vendita al click sul pulsante', async () => {
-    await renderAndWaitStoreA();
-    const addButton = screen.getByText('pages.initiativeStores.addStoreList');
-    fireEvent.click(addButton);
-    expect(mockHistory.push).toHaveBeenCalledWith(
-      `/portale-esercenti/initiative-123/punti-vendita/censisci/`
-    );
-  });
-
-  test("gestisce l'ordinamento della tabella", async () => {
-    await renderAndWaitTable();
+    fireEvent.click(screen.getByTestId('reset-filters-test'));
     fireEvent.click(screen.getByTestId('sort-button'));
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({ sort: 'contactName,desc' })
-      );
-    });
-  });
-
-  test('gestisce ordinamento su campo diverso da referent', async () => {
-    await renderAndWaitTable();
-
-    fireEvent.click(screen.getByTestId('sort-button-non-referent'));
-
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({ sort: 'city,asc' })
-      );
-    });
-  });
-
-  test('gestisce la paginazione della tabella', async () => {
-    await renderAndWaitTable();
     fireEvent.click(screen.getByTestId('paginate-button'));
-    await waitFor(() => {
-      expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-        'merchant-id-01',
-        expect.objectContaining({ page: 2 })
-      );
-    });
+    fireEvent.click(screen.getByTestId('page-size-button'));
+
+    expect(mockHandleFiltersApplied).toHaveBeenCalled();
+    expect(mockHandleFiltersReset).toHaveBeenCalled();
+    expect(mockHandleSortModelChange).toHaveBeenCalledWith([{ field: 'referent', sort: 'desc' }]);
+    expect(mockHandlePaginationPageChange).toHaveBeenCalledWith(2);
+    expect(mockHandleRowsPerPageChange).toHaveBeenCalledWith(25);
   });
 
-  test.skip('naviga al dettaglio del punto vendita al click su una riga', async () => {
-    await renderAndWaitStoreA();
-    fireEvent.click(screen.getByText('Store A'));
+  test('naviga alla pagina di aggiunta punto vendita dal bottone principale', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByText('pages.initiativeStores.addStoreList'));
+
     expect(mockHistory.push).toHaveBeenCalledWith(
-      `/portale-esercenti/initiative-123/punti-vendita/1/`
+      `/portale-esercenti/${mockId}/punti-vendita/censisci/`
     );
   });
 
-  test("mostra l'alert di successo quando showSuccessAlert è true", async () => {
-    (useLocation as jest.Mock).mockReturnValue({
+  test('mostra alert di successo e resetta lo state di location', () => {
+    const { useLocation } = jest.requireMock('react-router-dom');
+    useLocation.mockReturnValue({
       state: { showSuccessAlert: true },
       pathname: '/',
     });
-    renderInitiativeStores();
-    await waitFor(() => {
-      expect(mockHistory.replace).toHaveBeenCalledWith(
-        expect.objectContaining({
-          state: expect.objectContaining({ showSuccessAlert: false }),
-        })
-      );
-    });
+
+    renderComponent();
+
+    expect(mockSetAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'pages.initiativeStores.pointOfSalesUploadSuccess',
+        severity: 'success',
+      })
+    );
+    expect(mockHistory.replace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: expect.objectContaining({ showSuccessAlert: false }),
+      })
+    );
   });
 
-  test.skip('naviga a censisci quando non ci sono store al click su link', async () => {
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockResolvedValue({
+  test('mantiene il componente renderizzabile anche con spy sul logger', () => {
+    const consoleLogSpy = jest.spyOn(browserConsole, 'log').mockImplementation(() => undefined);
+
+    renderComponent();
+
+    expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
+    consoleLogSpy.mockRestore();
+  });
+
+  test('configura usePointOfSalesTable con fetchStores e resetStorageOnUnmount corretti', () => {
+    renderComponent();
+
+    expect(usePointOfSalesTableArgs).toEqual(
+      expect.objectContaining({
+        storageKey: 'storesPagination',
+        storageContextField: 'initiativeId',
+        storageContextValue: mockId,
+        resetStorageOnUnmount: true,
+        suppressLoadingOnSort: true,
+        enabled: true,
+        resetDependencies: [mockId],
+        onFetchError: expect.any(Function),
+        fetchStores: expect.any(Function),
+      })
+    );
+  });
+
+  test('fetchStores returns empty pagination when merchant id is missing', async () => {
+    (parseJwt as jest.Mock).mockReturnValue({});
+    renderComponent();
+
+    await expect(
+      usePointOfSalesTableArgs.fetchStores({
+        type: undefined,
+        city: '',
+        address: '',
+        contactName: '',
+        page: 3,
+        size: 50,
+        sort: 'asc',
+      })
+    ).resolves.toEqual({
       content: [],
-      ...mockPagination,
+      pageNo: 0,
+      pageSize: 50,
       totalElements: 0,
     });
-    renderInitiativeStores();
-    await waitFor(() => {
-      expect(screen.getByText('pages.initiativeStores.noStores')).toBeInTheDocument();
+
+    expect(getMerchantPointOfSales).not.toHaveBeenCalled();
+  });
+
+  test('fetchStores delegates to getMerchantPointOfSales with normalized filters', async () => {
+    renderComponent();
+
+    await usePointOfSalesTableArgs.fetchStores({
+      type: 'PHYSICAL',
+      city: 'Rome',
+      address: 'Via Roma',
+      contactName: 'Mario',
+      page: undefined,
+      size: undefined,
+      sort: 'desc',
     });
-    const link = screen.getByText('pages.initiativeStores.addStoreNoResults');
-    fireEvent.click(link);
+
+    expect(getMerchantPointOfSales).toHaveBeenCalledWith(mockId, 'merchant-123', {
+      type: 'PHYSICAL',
+      city: 'Rome',
+      address: 'Via Roma',
+      contactName: 'Mario',
+      sort: 'desc',
+      page: 0,
+      size: 10,
+    });
+  });
+
+  test('onFetchError shows generic error alert', () => {
+    renderComponent();
+
+    usePointOfSalesTableArgs.onFetchError();
+
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      title: 'errors.genericTitle',
+      text: 'errors.genericDescription',
+      isOpen: true,
+      severity: 'error',
+    });
+  });
+
+  test('passes goToStoreDetail action to built columns', () => {
+    renderComponent();
+
+    const onActionClick = mockBuildPointOfSalesColumns.mock.calls[0][0].onActionClick;
+    onActionClick({ id: 'store-42' });
+
     expect(mockHistory.push).toHaveBeenCalledWith(
-      `/portale-esercenti/initiative-123/punti-vendita/censisci/`
+      `/portale-esercenti/${mockId}/punti-vendita/store-42/`
     );
   });
 
-  test.each([
-    ['PHYSICAL', 'pages.initiativeStores.physical'],
-    ['ONLINE', 'pages.initiativeStores.online'],
-  ])('seleziona tipo %s nel dropdown', async (_type, i18nOptionKey) => {
-    await renderAndWaitStoreA();
+  test('passa le colonne costruite al DataTable', () => {
+    renderComponent();
 
-    const typeSelect = screen.getByLabelText('pages.initiativeStores.pointOfSaleType');
-    fireEvent.mouseDown(typeSelect);
-    const option = screen.getByText(i18nOptionKey);
-    fireEvent.click(option);
-  });
-
-  test('inserisce valore nel campo address', async () => {
-    await renderAndWaitStoreA();
-
-    const addressInput = screen.getByLabelText('pages.initiativeStores.address');
-    fireEvent.change(addressInput, { target: { value: 'Via Milano 10' } });
-    expect((addressInput as HTMLInputElement).value).toBe('Via Milano 10');
-  });
-
-  test('inserisce valore nel campo contactName', async () => {
-    await renderAndWaitStoreA();
-
-    const contactInput = screen.getByLabelText('pages.initiativeStores.referent');
-    fireEvent.change(contactInput, { target: { value: 'Giovanni' } });
-    expect((contactInput as HTMLInputElement).value).toBe('Giovanni');
-  });
-
-  test('mostra bottone add store solo quando ci sono store', async () => {
-    renderInitiativeStores();
-    await waitFor(() => {
-      const addButton = screen.queryByText('pages.initiativeStores.addStoreList');
-      expect(addButton).toBeInTheDocument();
-    });
-  });
-
-  test('non mostra bottone add store quando loading', async () => {
-    (merchantService.getMerchantPointOfSales as jest.Mock).mockImplementation(
-      () => new Promise(() => {})
-    );
-    renderInitiativeStores();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  test('gestisce ordinamento con campo referent mappato a contactName', async () => {
-    await renderAndWaitTable();
-
-    fireEvent.click(screen.getByTestId('sort-button'));
-
-    await waitFor(() => {
-      const stored = sessionStorage.getItem('storesPagination');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        expect(parsed.sort).toBe('contactName,desc');
-      }
-    });
-  });
-});
-
-describe('Column rendering logic', () => {
-  beforeEach(() => {
-    setupDefaultMocks();
-  });
-
-  test('il renderCell della colonna "type" formatta correttamente i valori', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const typeColumn = dataTableProps.columns.find((c: any) => c.field === 'type');
-    const physicalCell = render(typeColumn.renderCell({ value: 'PHYSICAL' }));
-    expect(physicalCell.container.textContent).toContain('Fisico');
-
-    const onlineCell = render(typeColumn.renderCell({ value: 'ONLINE' }));
-    expect(onlineCell.container.textContent).toContain('Online');
-
-    const unknownCell = render(typeColumn.renderCell({ value: 'UNKNOWN' }));
-    expect(unknownCell.container.textContent).toContain('-');
-  });
-
-  test('il renderCell della colonna franchiseName gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const franchiseColumn = dataTableProps.columns.find((c: any) => c.field === 'franchiseName');
-    const cell = render(franchiseColumn.renderCell({ value: 'Store A' }));
-    expect(cell.container.textContent).toContain('Store A');
-  });
-
-  test('il renderCell della colonna address gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const addressColumn = dataTableProps.columns.find((c: any) => c.field === 'address');
-    const cell = render(addressColumn.renderCell({ value: 'Via Roma 1' }));
-    expect(cell.container.textContent).toContain('Via Roma 1');
-  });
-
-  test('il renderCell della colonna website gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const websiteColumn = dataTableProps.columns.find((c: any) => c.field === 'website');
-    const cell = render(websiteColumn.renderCell({ value: 'www.example.com' }));
-    expect(cell.container.textContent).toContain('www.example.com');
-  });
-
-  test('il renderCell della colonna city gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const cityColumn = dataTableProps.columns.find((c: any) => c.field === 'city');
-    const cell = render(cityColumn.renderCell({ value: 'Roma' }));
-    expect(cell.container.textContent).toContain('Roma');
-  });
-
-  test('il renderCell della colonna contactEmail gestisce i valori correttamente', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const emailColumn = dataTableProps.columns.find((c: any) => c.field === 'contactEmail');
-    const cell = render(emailColumn.renderCell({ value: 'test@example.com' }));
-    expect(cell.container.textContent).toContain('test@example.com');
-  });
-
-  test('il renderCell della colonna referent combina nome e cognome', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(
-      referentColumn.renderCell({
-        row: { contactName: 'Mario', contactSurname: 'Rossi' },
+    expect(mockBuildPointOfSalesColumns).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onActionClick: expect.any(Function),
       })
     );
-    expect(cell.container.textContent).toContain('Mario Rossi');
-  });
-
-  test('il renderCell della colonna referent gestisce nome mancante', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(
-      referentColumn.renderCell({
-        row: { contactSurname: 'Rossi' },
-      })
-    );
-    expect(cell.container.textContent).toContain('Rossi');
-  });
-
-  test('il renderCell della colonna referent gestisce cognome mancante', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(
-      referentColumn.renderCell({
-        row: { contactName: 'Mario' },
-      })
-    );
-    expect(cell.container.textContent).toContain('Mario');
-  });
-
-  test('il renderCell della colonna referent gestisce entrambi i dati mancanti', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const referentColumn = dataTableProps.columns.find((c: any) => c.field === 'contactName');
-    const cell = render(referentColumn.renderCell({ row: {} }));
-    expect(cell.container.textContent).toContain('-');
-  });
-
-  test('il renderCell della colonna type gestisce valore vuoto', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const typeColumn = dataTableProps.columns.find((c: any) => c.field === 'type');
-    const cell = render(typeColumn.renderCell({ value: '' }));
-    expect(cell.container.textContent).toContain('-');
-  });
-
-  test('il renderCell della colonna actions renderizza il bottone', async () => {
-    renderWithContext(<InitiativeStores />);
-    await waitFor(() => expect(screen.getByTestId('mock-datatable')).toBeInTheDocument());
-
-    const actionsColumn = dataTableProps.columns.find((c: any) => c.field === 'actions');
-    const cell = render(actionsColumn.renderCell({ row: { id: '1' } }));
-    const button = cell.container.querySelector('button');
-    expect(button).toBeInTheDocument();
-  });
-
-  describe('sessionStorage behavior', () => {
-    beforeEach(() => {
-      setupDefaultMocks();
-      sessionStorage.clear();
-    });
-
-    test('loads pagination and sorting from sessionStorage when initiativeId matches', async () => {
-      const storedPagination = {
-        pageNo: 2,
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        sort: 'city,desc',
-        initiativeId: mockId,
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
-
-      renderWithContext(<InitiativeStores />);
-
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
-    });
-
-    test('ignora sessionStorage se initiativeId non corrisponde', async () => {
-      setStoredPagination({ initiativeId: 'different-initiative-id' });
-
-      renderWithContext(<InitiativeStores />);
-
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
-    });
-
-    test('ignora sessionStorage se pageNo è undefined', async () => {
-      setStoredPagination({ pageNo: undefined });
-
-      renderWithContext(<InitiativeStores />);
-
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
-    });
-
-    test('handles sessionStorage without sort field', async () => {
-      const storedPagination = {
-        pageNo: 1,
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        initiativeId: mockId,
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
-
-      renderWithContext(<InitiativeStores />);
-
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
-    });
-
-    test('does not set sortModel from sessionStorage sort string', async () => {
-      const storedPagination = {
-        pageNo: 0,
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        sort: 'franchiseName,asc',
-        initiativeId: mockId,
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
-
-      renderWithContext(<InitiativeStores />);
-
-      await waitFor(() => {
-        expect(dataTableProps.sortModel).toEqual([]);
-      });
-    });
-
-    test('ignores invalid sort string format in sessionStorage', async () => {
-      const storedPagination = {
-        pageNo: 0,
-        pageSize: 10,
-        totalElements: 30,
-        totalPages: 3,
-        sort: 'invalidformat',
-        initiativeId: mockId,
-      };
-      sessionStorage.setItem('storesPagination', JSON.stringify(storedPagination));
-
-      renderWithContext(<InitiativeStores />);
-
-      await waitFor(() => {
-        expect(merchantService.getMerchantPointOfSales).toHaveBeenCalledWith(
-          'merchant-id-01',
-          expect.objectContaining({
-            page: 0,
-            sort: 'asc',
-          })
-        );
-      });
-    });
-
-    test('rimuove sessionStorage quando il componente viene smontato (non andando al dettaglio)', async () => {
-      renderWithContext(<InitiativeStores />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
-      });
-
-      sessionStorage.setItem('storesPagination', JSON.stringify(mockPagination));
-
-      // simulate unmount
-      const { cleanup } = require('@testing-library/react');
-      cleanup();
-
-      expect(sessionStorage.getItem('storesPagination')).toBeNull();
-    });
-
-    test('aggiorna sessionStorage quando cambia la paginazione', async () => {
-      renderWithContext(<InitiativeStores />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('paginate-button'));
-
-      await waitFor(() => {
-        const stored = sessionStorage.getItem('storesPagination');
-        expect(stored).not.toBeNull();
-        const parsed = JSON.parse(stored!);
-        expect(parsed.pageNo).toBe(2);
-        expect(parsed.initiativeId).toBe(mockId);
-      });
-    });
-
-    test("aggiorna sessionStorage quando cambia l'ordinamento", async () => {
-      renderWithContext(<InitiativeStores />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('mock-datatable')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('sort-button'));
-
-      await waitFor(() => {
-        const stored = sessionStorage.getItem('storesPagination');
-        expect(stored).not.toBeNull();
-        const parsed = JSON.parse(stored!);
-        expect(parsed.sort).toBe('contactName,desc');
-        expect(parsed.initiativeId).toBe(mockId);
-      });
-    });
+    expect(dataTableProps.columns).toHaveLength(2);
   });
 });

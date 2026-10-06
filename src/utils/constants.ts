@@ -1,7 +1,8 @@
-import type { RewardBatchDTO } from '../api/generated/merchants/data-contracts';
+import { RewardBatchDTO } from '../api/generated/merchants/data-contracts';
+import { ENV } from './env';
 
 const IS_DEVELOP = process.env.NODE_ENV === 'development';
-const IS_PROD = process.env.NODE_ENV === 'production';
+const IS_PROD = ENV.ENV === 'PROD';
 
 export const testToken = '';
 
@@ -19,6 +20,8 @@ export const MISSING_DATA_PLACEHOLDER = '-';
 export const MISSING_EURO_PLACEHOLDER = '0,00 €';
 
 export const ELEMENT_PER_PAGE = [10, 25, 50, 100];
+
+export const ASSOCIATION_SUCCESS_ALERT_TIMEOUT = 6000;
 
 export const enum POS_UPDATE {
   Csv = 'csv',

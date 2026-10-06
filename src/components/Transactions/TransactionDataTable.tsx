@@ -94,6 +94,8 @@ const TransactionDataTable = ({
           rowCount={paginationModel?.totalElements}
           localeText={{
             noRowsLabel: 'Nessun punto vendita da visualizzare.',
+            columnHeaderSortIconLabel: '',
+            columnMenuLabel: '',
             MuiTablePagination: {
               labelDisplayedRows(paginationInfo) {
                 return `${paginationInfo.from}-${paginationInfo.to} di ${paginationInfo.count}`;

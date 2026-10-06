@@ -6,7 +6,6 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { Alert, Box, Button, FormControl, Paper, TextField, Typography } from '@mui/material';
 import { Toast } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 
 import { TransactionResponse } from '../../api/generated/merchants/data-contracts';
@@ -16,13 +15,14 @@ import {
   mapDataForDiscoutTimeRecap,
 } from '../../helpers';
 import { BASE_ROUTE } from '../../routes';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 interface Props {
   data: TransactionResponse | undefined;
 }
 
 const DiscountCreatedRecap = ({ data }: Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const history = useHistory();
   const [expirationDays, setExpirationDays] = useState<number>();
   const [expirationDate, setExpirationDate] = useState<string>();

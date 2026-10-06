@@ -1,13 +1,13 @@
 import { Box } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useTranslation } from 'react-i18next';
 import { useCallback, useState } from 'react';
 import AlertListComponent, { AlertProps } from '../../components/Alert/AlertListComponent';
 import ExportFiltersCard from '../../components/exportFiltersCard/ExportFiltersCard';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import ReportDataTable from './ReportDataTable';
 
 const InitiativeExportReportPage = () => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
     INSERTED: {
       text: t('pages.reportExport.alert.info'),

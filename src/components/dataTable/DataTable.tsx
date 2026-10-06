@@ -37,7 +37,9 @@ export interface DataTableProps {
   isTransactionsPage?: boolean;
   onRowsPerPageChange?: (pageSize: number) => void;
   onSelectionModelChange?: (selectionModel: GridSelectionModel) => void;
+  selectionModel?: GridSelectionModel;
   singleSelectionModel?: GridInputSelectionModel;
+  rowsPerPageOptions?: Array<number>;
 }
 
 const DataTable = ({
@@ -54,7 +56,9 @@ const DataTable = ({
   isRowSelectable,
   isTransactionsPage = false,
   onRowsPerPageChange,
+  selectionModel,
   singleSelectionModel,
+  rowsPerPageOptions,
 }: DataTableProps) => {
   const handlePageChange = (page: number) => {
     onPaginationPageChange?.(page);
@@ -70,7 +74,7 @@ const DataTable = ({
   const selectionProps = {
     checkboxSelection: checkable,
     isRowSelectable,
-    selectionModel: singleSelect ? singleSelectionModel : undefined,
+    selectionModel: singleSelect ? singleSelectionModel : selectionModel,
     disableMultipleSelection: singleSelect,
   };
 
@@ -80,7 +84,9 @@ const DataTable = ({
         <DataGrid
           rows={rows}
           columns={columns}
-          rowsPerPageOptions={isTransactionsPage ? ELEMENT_PER_PAGE : [rowsPerPage]}
+          rowsPerPageOptions={
+            rowsPerPageOptions ?? (isTransactionsPage ? ELEMENT_PER_PAGE : [rowsPerPage])
+          }
           {...selectionProps}
           onSelectionModelChange={onSelectionModelChange}
           disableSelectionOnClick
@@ -98,8 +104,10 @@ const DataTable = ({
           onPageSizeChange={(newPageSize) => onRowsPerPageChange?.(newPageSize)}
           localeText={{
             noRowsLabel: 'Nessun punto vendita da visualizzare.',
+            columnHeaderSortIconLabel: '',
+            columnMenuLabel: '',
             MuiTablePagination: {
-              labelRowsPerPage: 'Elementi per pagina',
+              labelRowsPerPage: 'Righe per pagina',
               labelDisplayedRows(paginationInfo) {
                 return `${paginationInfo.from}-${paginationInfo.to} di ${paginationInfo.count}`;
               },
@@ -130,11 +138,6 @@ const DataTable = ({
             },
             '& .MuiDataGrid-cell:focus-within': {
               outline: 'none',
-            },
-            '& .MuiDataGrid-columnHeaderCheckbox': {
-              '& span ': {
-                display: 'none',
-              },
             },
           }}
         />

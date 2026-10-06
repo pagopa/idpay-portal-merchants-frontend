@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { Provider } from 'react-redux';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import ReportedUsers from '../reportedUsers';
@@ -9,32 +8,19 @@ import { getReportedUser, deleteReportedUser } from '../../../services/merchantS
 import { parseJwt } from '../../../utils/jwt-utils';
 import { ApiError } from '../../../api/ApiError';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
-import { createStore } from '../../../redux/store';
 
-jest.mock('../../../decorators/withLogin', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
-
-jest.mock('../../../decorators/withInitiativeGuard', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
-
-jest.mock('../../../decorators/withParties', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
-
-jest.mock('../../../decorators/withSelectedParty', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
-
-jest.mock('../../../decorators/withSelectedPartyProducts', () => ({
-  __esModule: true,
-  default: (Component: any) => Component,
-}));
+[
+  '../../../decorators/withLogin',
+  '../../../decorators/withInitiativeGuard',
+  '../../../decorators/withParties',
+  '../../../decorators/withSelectedParty',
+  '../../../decorators/withSelectedPartyProducts',
+].forEach((path) => {
+  jest.mock(path, () => ({
+    __esModule: true,
+    default: (Component: any) => Component,
+  }));
+});
 
 jest.mock('../../../services/merchantService', () => ({
   __esModule: true,
@@ -64,10 +50,10 @@ jest.mock('react-i18next', () => ({
         'pages.reportedUsers.subtitle': 'Sottotitolo',
         'pages.reportedUsers.reportUser': 'Segnala Utente',
         'pages.reportedUsers.loading': 'Caricamento...',
-        'pages.reportedUsers.cf.noResultUser': 'Nessun utente trovato',
+        'pages.reportedUsers.noResultUser': 'Nessun utente trovato',
         'pages.reportedUsers.noUsers': 'Nessun utente presente',
-        'pages.reportedUsers.cf.validCf': 'La segnalazione è stata registrata',
-        'pages.reportedUsers.cf.removedCf': 'Utente rimosso con successo',
+        'pages.reportedUsers.validCf': 'La segnalazione è stata registrata',
+        'pages.reportedUsers.removedCf': 'Utente rimosso con successo',
         'pages.reportedUsers.ModalReportedUser.title': 'Conferma eliminazione',
         'pages.reportedUsers.ModalReportedUser.description': `Vuoi eliminare ${params?.cf}?`,
         'pages.reportedUsers.ModalReportedUser.descriptionTwo': 'Operazione irreversibile',
@@ -78,7 +64,7 @@ jest.mock('react-i18next', () => ({
       return translations[key] || key;
     },
   }),
-  Trans: ({ children }: any) => <span>{children}</span>,
+  Trans: ({ children, values }: any) => <span>{children}</span>,
   initReactI18next: {},
   withTranslation: () => (Component: any) => {
     Component.defaultProps = { ...(Component.defaultProps || {}), t: (k: string) => k };
@@ -176,13 +162,40 @@ jest.mock('../columnsReportedUser', () => ({
 }));
 
 import type { MockedFunction, Mocked } from 'jest-mock';
+import { configureStore } from '@reduxjs/toolkit';
+import { useAppSelector } from '../../../redux/hooks';
+import { Provider } from 'react-redux';
+import {
+  searchByCF,
+  searchAndWaitForTable,
+  openDeleteModal as openDeleteModalUtil,
+} from '../../../test-utils/reportedUsersTestUtils';
 
 const mockGetReportedUser = getReportedUser as MockedFunction<typeof getReportedUser>;
 const mockDeleteReportedUser = deleteReportedUser as MockedFunction<typeof deleteReportedUser>;
 const mockParseJwt = parseJwt as MockedFunction<typeof parseJwt>;
 const mockStorageTokenOps = storageTokenOps as Mocked<typeof storageTokenOps>;
 
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+const createMockStore = (initialState?: any) => {
+  return configureStore({
+    reducer: () => initialState,
+  });
+};
+
+const store = createMockStore();
+
 describe('ReportedUsers Component', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   let history: any;
 
   beforeEach(() => {
@@ -205,7 +218,11 @@ describe('ReportedUsers Component', () => {
     if (locationState) {
       history.push('/initiative/123/reported-users', locationState);
     }
-    const store = createStore();
+
+    const localStore = configureStore({
+      reducer: () => ({}),
+    });
+
     return render(
       <Provider store={store}>
         <Router history={history}>
@@ -215,6 +232,10 @@ describe('ReportedUsers Component', () => {
         </Router>
       </Provider>
     );
+  };
+
+  const confirmDelete = async () => {
+    fireEvent.click(screen.getByTestId('modal-confirm'));
   };
 
   describe('Rendering iniziale', () => {
@@ -248,11 +269,7 @@ describe('ReportedUsers Component', () => {
 
       renderComponent();
 
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
+      await searchByCF('RSSMRA80A01H501U');
 
       await waitFor(() => {
         expect(mockGetReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
@@ -264,80 +281,20 @@ describe('ReportedUsers Component', () => {
       });
     });
 
-    it('deve gestire risposta vuota come array', async () => {
-      mockGetReportedUser.mockResolvedValueOnce([] as any);
+    it.each([
+      { response: [] },
+      { response: null },
+      { response: new ApiError(404, 'Not Found'), isError: true },
+      { response: new Error('API Error'), isError: true },
+    ])('handles empty or error responses', async ({ response, isError }) => {
+      if (isError) {
+        mockGetReportedUser.mockRejectedValueOnce(response as any);
+      } else {
+        mockGetReportedUser.mockResolvedValueOnce(response as any);
+      }
 
       renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByText('Nessun utente trovato')).toBeInTheDocument();
-      });
-    });
-
-    it('deve gestire risposta non array', async () => {
-      mockGetReportedUser.mockResolvedValueOnce(null as any);
-
-      renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByText('Nessun utente trovato')).toBeInTheDocument();
-      });
-    });
-
-    it('deve gestire errore 404 senza mostrare alert', async () => {
-      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
-
-      renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
-      });
-    });
-
-    it('deve gestire errore 404 con response.status', async () => {
-      mockGetReportedUser.mockRejectedValueOnce(new ApiError(404, 'Not Found'));
-
-      renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
-      });
-    });
-
-    it('deve gestire errori generici durante la ricerca', async () => {
-      mockGetReportedUser.mockRejectedValueOnce(new Error('API Error'));
-
-      renderComponent();
-
-      const input = screen.getByTestId('cf-input');
-      const searchButton = screen.getByTestId('search-button');
-
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(searchButton);
+      await searchByCF('RSSMRA80A01H501U');
 
       await waitFor(() => {
         expect(screen.getByTestId('no-result-paper')).toBeInTheDocument();
@@ -385,20 +342,7 @@ describe('ReportedUsers Component', () => {
 
       renderComponent();
 
-      const input = screen.getByTestId('cf-input');
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(screen.getByTestId('search-button'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('data-table')).toBeInTheDocument();
-      });
-
-      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
-      fireEvent.click(deleteButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
-      });
+      await openDeleteModalUtil('RSSMRA80A01H501U');
     });
 
     it('deve eliminare utente dopo conferma', async () => {
@@ -416,23 +360,9 @@ describe('ReportedUsers Component', () => {
 
       renderComponent();
 
-      const input = screen.getByTestId('cf-input');
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(screen.getByTestId('search-button'));
+      await openDeleteModalUtil('RSSMRA80A01H501U');
 
-      await waitFor(() => {
-        expect(screen.getByTestId('data-table')).toBeInTheDocument();
-      });
-
-      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
-      fireEvent.click(deleteButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
-      });
-
-      const confirmButton = screen.getByTestId('modal-confirm');
-      fireEvent.click(confirmButton);
+      await confirmDelete();
 
       await waitFor(() => {
         expect(mockDeleteReportedUser).toHaveBeenCalledWith('123', 'RSSMRA80A01H501U');
@@ -457,20 +387,7 @@ describe('ReportedUsers Component', () => {
 
       renderComponent();
 
-      const input = screen.getByTestId('cf-input');
-      fireEvent.change(input, { target: { value: 'RSSMRA80A01H501U' } });
-      fireEvent.click(screen.getByTestId('search-button'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('data-table')).toBeInTheDocument();
-      });
-
-      const deleteButton = screen.getByTestId('delete-RSSMRA80A01H501U');
-      fireEvent.click(deleteButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('modal-reported-user')).toBeInTheDocument();
-      });
+      await openDeleteModalUtil('RSSMRA80A01H501U');
 
       const cancelButton = screen.getByTestId('modal-cancel');
       fireEvent.click(cancelButton);
@@ -624,17 +541,14 @@ describe('ReportedUsers Component', () => {
     it('deve mostrare e poi nascondere alert di successo dopo 3 secondi', async () => {
       renderComponent({ newCf: 'RSSMRA80A01H501U' });
 
-      // Deve comparire subito
       await waitFor(() => {
         expect(screen.getByText('La segnalazione è stata registrata')).toBeInTheDocument();
       });
 
-      // Avanziamo il timer
       act(() => {
         jest.advanceTimersByTime(3000);
       });
 
-      // Deve sparire
       await waitFor(() => {
         expect(screen.queryByText('La segnalazione è stata registrata')).not.toBeInTheDocument();
       });

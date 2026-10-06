@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
+import config from '../locale/it/default/config.json';
 import { useCurrentInitiative } from './useCurrentInitiative';
 import { useIDPayUser } from './useIDPayUser';
 
@@ -47,6 +48,28 @@ const INITIATIVE_SCOPED_PERMISSION_KEYS = new Set<PermissionKey>([
   PERMISSION_KEYS.REPORT_GENERATE,
 ]);
 
+type SubRoleConfig = {
+  logicalName?: string;
+  permissions?: { disabledActions?: Array<string> };
+};
+
+type RolesConfig = {
+  name?: string;
+  logicalName?: string;
+  subRoles?: Record<string, SubRoleConfig>;
+};
+
+const rolesConfig: RolesConfig = (config as { roles?: RolesConfig }).roles ?? {};
+
+const getDisabledActionsForRole = (role: string | undefined | null): Set<string> => {
+  if (!role) {
+    return new Set();
+  }
+  const normalized = role.toLowerCase();
+  const actions = rolesConfig.subRoles?.[normalized]?.permissions?.disabledActions ?? [];
+  return new Set(actions);
+};
+
 const isInitiativeEnded = (endDate?: string): boolean => {
   if (!endDate) {
     return false;
@@ -61,11 +84,16 @@ export const useUserPermissions = () => {
   const role = user?.org_role;
 
   return useMemo(() => {
+    const disabledActions = getDisabledActionsForRole(role);
+    const subRole = role ? rolesConfig.subRoles?.[role.toLowerCase()] : undefined;
     const hasEndedInitiative = isInitiativeEnded(currentInitiative?.endDate);
 
     return {
       role,
+      logicalRoleName: subRole?.logicalName,
+      isSupportUser: (role ?? '').toLowerCase() === 'support',
       isActionDisabled: (action: PermissionKey) =>
+        disabledActions.has(action) ||
         (hasEndedInitiative && INITIATIVE_SCOPED_PERMISSION_KEYS.has(action)),
     };
   }, [currentInitiative?.endDate, role]);

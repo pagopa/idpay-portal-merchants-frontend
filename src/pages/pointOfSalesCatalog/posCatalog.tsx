@@ -1,0 +1,725 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { theme } from '@pagopa/mui-italia/theme';
+import { Box, Button, Paper, Stack, Typography } from '@mui/material';
+import { GridSelectionModel, GridSortModel } from '@mui/x-data-grid';
+import CircularProgress from '@mui/material/CircularProgress';
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
+import { useFormik } from 'formik';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import { useHistory, useLocation } from 'react-router-dom';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
+import DataTable from '../../components/dataTable/DataTable';
+import { GetPointOfSalesFilters } from '../../types/types';
+import {
+  InitiativeDTO,
+  PointOfSaleExclusionResultDTO,
+  PointOfSaleDTO,
+  PointOfSaleOnboardingResultDTO,
+} from '../../api/generated/merchants/data-contracts';
+import { parseJwt } from '../../utils/jwt-utils';
+import {
+  associatePos,
+  excludePos,
+  getMerchantPointOfSalesCatalog,
+} from '../../services/merchantService';
+import {
+  ASSOCIATION_SUCCESS_ALERT_TIMEOUT,
+  ELEMENT_PER_PAGE,
+  PAGINATION_SIZE,
+} from '../../utils/constants';
+import { useAlert } from '../../hooks/useAlert';
+import { browserConsole } from '../../utils/consoleLogger';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
+import { useAppSelector } from '../../redux/hooks';
+import { intiativesListSelector } from '../../redux/slices/initiativesSlice';
+import PointOfSalesFilters, {
+  ASSOCIATED_FILTER_NO,
+  ASSOCIATED_FILTER_YES,
+} from '../../components/pointsOfSale/PointOfSalesFilters';
+import buildPointOfSalesColumns from '../../components/pointsOfSale/pointOfSalesColumns';
+import usePointOfSalesTable from '../../components/pointsOfSale/usePointOfSalesTable';
+import { PosCatalogDrawer } from './PosCatalogFiltersDrawer';
+import AssociateSelectedPosModal from './AssociateSelectedPosModal';
+import AlreadyAssociatedPosModal, {
+  AlreadyAssociatedPointOfSale,
+} from './AlreadyAssociatedPosModal';
+import PointOfSaleExclusionResultModal, {
+  NotExcludedPointOfSale,
+} from './PointOfSaleExclusionResultModal';
+import { isDisplayableExclusionReason } from './pointOfSaleFeedbackUtils';
+
+type StatusEnum = InitiativeDTO['status'];
+const PUBLISHED: StatusEnum = 'PUBLISHED';
+const ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK = 5000;
+const ALL_INITIATIVES_FILTER = 'ALL_INITIATIVES';
+const NO_INITIATIVE_FILTER = 'NO_INITIATIVE';
+type InitiativeFilter = typeof ALL_INITIATIVES_FILTER | typeof NO_INITIATIVE_FILTER;
+
+const INITIATIVE_FILTER_VALUES: Array<InitiativeFilter> = [
+  ALL_INITIATIVES_FILTER,
+  NO_INITIATIVE_FILTER,
+];
+
+const isInitiativeFilter = (initiative?: string): initiative is InitiativeFilter =>
+  Boolean(initiative) && INITIATIVE_FILTER_VALUES.includes(initiative as InitiativeFilter);
+
+const isAllInitiativesSelection = (initiative?: string) => initiative === ALL_INITIATIVES_FILTER;
+
+const getInitiativeCatalogQuery = (
+  filters: GetPointOfSalesFilters
+): {
+  initiativeId?: string;
+  initiativeFilter?: InitiativeFilter;
+} => {
+  if (filters.associated === ASSOCIATED_FILTER_NO) {
+    return { initiativeFilter: NO_INITIATIVE_FILTER };
+  }
+
+  if (filters.associated === ASSOCIATED_FILTER_YES) {
+    if (!filters.initiative || isAllInitiativesSelection(filters.initiative)) {
+      return { initiativeFilter: ALL_INITIATIVES_FILTER };
+    }
+
+    if (isInitiativeFilter(filters.initiative)) {
+      return { initiativeFilter: filters.initiative };
+    }
+
+    return {
+      initiativeFilter: ALL_INITIATIVES_FILTER,
+      initiativeId: filters.initiative,
+    };
+  }
+
+  if (!filters.initiative) {
+    return {};
+  }
+
+  if (isAllInitiativesSelection(filters.initiative)) {
+    return { initiativeFilter: ALL_INITIATIVES_FILTER };
+  }
+
+  if (isInitiativeFilter(filters.initiative)) {
+    return { initiativeFilter: filters.initiative };
+  }
+
+  return { initiativeId: filters.initiative };
+};
+
+const initialValues: GetPointOfSalesFilters = {
+  initiative: '',
+  type: undefined,
+  city: '',
+  address: '',
+  page: 0,
+  size: PAGINATION_SIZE,
+  sort: 'franchiseName,asc',
+};
+
+const PosCatalog: React.FC = () => {
+  const { setAlert } = useAlert();
+  const { isActionDisabled } = useUserPermissions();
+  const isAssociateDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_ASSOCIATE);
+  const isExcludeDisabled = isActionDisabled(PERMISSION_KEYS.POS_CATALOG_EXCLUDE);
+  const [selectedStore, setSelectedStore] = useState<PointOfSaleDTO | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedStoreIds, setSelectedStoreIds] = useState<GridSelectionModel>([]);
+  const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
+  const [isExcludeModalOpen, setIsExcludeModalOpen] = useState(false);
+  const [selectedInitiativeId, setSelectedInitiativeId] = useState('');
+  const [isAssociatingPos, setIsAssociatingPos] = useState(false);
+  const [isExcludingPos, setIsExcludingPos] = useState(false);
+  const [alreadyAssociatedStores, setAlreadyAssociatedStores] = useState<
+    Array<AlreadyAssociatedPointOfSale>
+  >([]);
+  const [associationSuccessData, setAssociationSuccessData] = useState<{
+    associatedCount: number;
+    initiativeName: string;
+  } | null>(null);
+  const [alreadyAssociatedInitiativeName, setAlreadyAssociatedInitiativeName] = useState('');
+  const [shouldShowAlreadyAssociatedStores, setShouldShowAlreadyAssociatedStores] = useState(true);
+  const [pendingAssociationRefreshFilters, setPendingAssociationRefreshFilters] =
+    useState<GetPointOfSalesFilters | null>(null);
+  const [notExcludedStores, setNotExcludedStores] = useState<Array<NotExcludedPointOfSale>>([]);
+  const [exclusionSuccessData, setExclusionSuccessData] = useState<{
+    excludedCount: number;
+    initiativeName: string;
+  } | null>(null);
+  const [pendingExclusionRefreshFilters, setPendingExclusionRefreshFilters] =
+    useState<GetPointOfSalesFilters | null>(null);
+
+  const { t } = useScopedTranslation();
+  const history = useHistory();
+  const initiativesList = useAppSelector(intiativesListSelector);
+
+  const location = useLocation<{ showSuccessAlert?: boolean }>();
+  useEffect(() => {
+    if (location.state?.showSuccessAlert) {
+      setAlert({
+        text: t('pages.initiativeStores.pointOfSalesUploadSuccess'),
+        isOpen: true,
+        severity: 'success',
+      });
+
+      history.replace({
+        ...location,
+        state: { ...location.state, showSuccessAlert: false },
+      });
+    }
+  }, [location, history, setAlert, t]);
+
+  const initiativeOptions = useMemo(
+    () =>
+      (initiativesList ?? []).map((initiative) => ({
+        value: initiative.initiativeId ?? '',
+        label: initiative.initiativeName ?? '',
+      })),
+    [initiativesList]
+  );
+
+  const publishedInitiativeOptions = useMemo(
+    () =>
+      (initiativesList ?? [])
+        .filter((initiative) => initiative.status === PUBLISHED)
+        .map((initiative) => ({
+          value: initiative.initiativeId ?? '',
+          label: initiative.initiativeName ?? '',
+        })),
+    [initiativesList]
+  );
+
+  const areInitiativeActionsDisabled = publishedInitiativeOptions.length === 0;
+
+  const formik = useFormik<GetPointOfSalesFilters>({
+    initialValues,
+    onSubmit: (values) => {
+      browserConsole.log('Eseguo ricerca con filtri:', values);
+    },
+  });
+
+  useEffect(() => {
+    if (formik.values.associated === ASSOCIATED_FILTER_NO && formik.values.initiative) {
+      void formik.setFieldValue('initiative', '');
+    }
+  }, [formik.setFieldValue, formik.values.associated, formik.values.initiative]);
+
+  const handleFetchError = useCallback(
+    () =>
+      setAlert({
+        title: t('errors.genericTitle'),
+        text: t('errors.genericDescription'),
+        isOpen: true,
+        severity: 'error',
+      }),
+    [setAlert, t]
+  );
+
+  const fetchCatalogStores = useCallback(async (filters: GetPointOfSalesFilters) => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
+
+    if (!merchantId) {
+      return {
+        content: [],
+        pageNo: 0,
+        pageSize: filters.size ?? PAGINATION_SIZE,
+        totalElements: 0,
+      };
+    }
+
+    return getMerchantPointOfSalesCatalog(merchantId, {
+      ...getInitiativeCatalogQuery(filters),
+      type: filters.type,
+      city: filters.city,
+      address: filters.address,
+      sort: filters.sort,
+      page: filters.page ?? 0,
+      size: filters.size ?? PAGINATION_SIZE,
+    });
+  }, []);
+
+  const {
+    stores,
+    storesPagination,
+    storesLoading,
+    rowsPerPage,
+    sortModel,
+    filtersAppliedOnce,
+    handleFiltersApplied,
+    handleFiltersReset,
+    handleSortModelChange,
+    handlePaginationPageChange,
+    handleRowsPerPageChange,
+  } = usePointOfSalesTable({
+    initialValues,
+    initialPageSize: PAGINATION_SIZE,
+    storageKey: 'storesPagination',
+    onFetchError: handleFetchError,
+    fetchStores: fetchCatalogStores,
+  });
+
+  const filtersSetted = () =>
+    formik.values.associated !== undefined ||
+    (formik.values.initiative !== '' && !isAllInitiativesSelection(formik.values.initiative)) ||
+    formik.values.type !== undefined ||
+    formik.values.city !== '' ||
+    formik.values.address !== '';
+
+  const openStoreDrawer = useCallback((store: PointOfSaleDTO) => {
+    setSelectedStore(store);
+    setIsDrawerOpen(true);
+  }, []);
+
+  const handleToggleDrawer = useCallback(() => {
+    setIsDrawerOpen(false);
+    setSelectedStore(null);
+  }, []);
+
+  const handleSelectionModelChange = useCallback((selectionModel: GridSelectionModel) => {
+    setSelectedStoreIds(selectionModel);
+  }, []);
+
+  const handleCatalogFiltersApplied = useCallback(
+    (values: GetPointOfSalesFilters) => {
+      setSelectedStoreIds([]);
+      handleFiltersApplied(
+        values.associated === ASSOCIATED_FILTER_NO ? { ...values, initiative: '' } : values
+      );
+    },
+    [handleFiltersApplied]
+  );
+
+  const handleCatalogFiltersReset = useCallback(() => {
+    setSelectedStoreIds([]);
+    handleFiltersReset();
+  }, [handleFiltersReset]);
+
+  const handleCatalogPaginationPageChange = useCallback(
+    (page: number) => {
+      setSelectedStoreIds([]);
+      handlePaginationPageChange(page);
+    },
+    [handlePaginationPageChange]
+  );
+
+  const handleCatalogRowsPerPageChange = useCallback(
+    (pageSize: number) => {
+      setSelectedStoreIds([]);
+      handleRowsPerPageChange(pageSize);
+    },
+    [handleRowsPerPageChange]
+  );
+
+  const handleCatalogSortModelChange = useCallback(
+    (model: GridSortModel) => {
+      setSelectedStoreIds([]);
+      handleSortModelChange(model);
+    },
+    [handleSortModelChange]
+  );
+
+  const handleCatalogOperationCompleted = useCallback(
+    () => handleFiltersApplied(formik.values),
+    [formik.values, handleFiltersApplied]
+  );
+
+  const handleAssociateModalClose = useCallback(() => {
+    setIsAssociateModalOpen(false);
+    setSelectedInitiativeId('');
+  }, []);
+
+  const handleExcludeModalClose = useCallback(() => {
+    setIsExcludeModalOpen(false);
+    setSelectedInitiativeId('');
+  }, []);
+
+  const handleInitiativeChange = useCallback((initiativeId: string) => {
+    setSelectedInitiativeId(initiativeId);
+  }, []);
+
+  const showAssociationSuccessAlert = useCallback(
+    (associatedCount: number, initiativeName: string) =>
+      setAlert({
+        text: t('pages.posCatalog.associateSuccess', {
+          count: associatedCount,
+          initiativeName,
+        }),
+        isOpen: true,
+        severity: 'success',
+        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT ?? ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK,
+      }),
+    [setAlert, t]
+  );
+
+  const showExclusionSuccessAlert = useCallback(
+    (excludedCount: number, initiativeName: string) =>
+      setAlert({
+        text: t('pages.posCatalog.excludeSuccess', {
+          count: excludedCount,
+          initiativeName,
+        }),
+        isOpen: true,
+        severity: 'success',
+        timeout: ASSOCIATION_SUCCESS_ALERT_TIMEOUT ?? ASSOCIATION_SUCCESS_ALERT_TIMEOUT_FALLBACK,
+      }),
+    [setAlert, t]
+  );
+
+  const getNotExcludedStores = useCallback(
+    (result: PointOfSaleExclusionResultDTO): Array<NotExcludedPointOfSale> =>
+      (result.notExcludedPointOfSales ?? []).filter((pointOfSale) =>
+        isDisplayableExclusionReason(pointOfSale.reason)
+      ) as Array<NotExcludedPointOfSale>,
+    []
+  );
+
+  const handleAlreadyAssociatedModalClose = useCallback(() => {
+    setAlreadyAssociatedStores([]);
+    setAlreadyAssociatedInitiativeName('');
+    setShouldShowAlreadyAssociatedStores(true);
+
+    if (associationSuccessData) {
+      showAssociationSuccessAlert(
+        associationSuccessData.associatedCount,
+        associationSuccessData.initiativeName
+      );
+      setAssociationSuccessData(null);
+    }
+
+    if (pendingAssociationRefreshFilters) {
+      handleFiltersApplied(pendingAssociationRefreshFilters);
+      setPendingAssociationRefreshFilters(null);
+    }
+  }, [
+    associationSuccessData,
+    handleFiltersApplied,
+    pendingAssociationRefreshFilters,
+    showAssociationSuccessAlert,
+  ]);
+
+  const handleExclusionResultModalClose = useCallback(() => {
+    setNotExcludedStores([]);
+
+    if (exclusionSuccessData) {
+      showExclusionSuccessAlert(
+        exclusionSuccessData.excludedCount,
+        exclusionSuccessData.initiativeName
+      );
+      setExclusionSuccessData(null);
+    }
+
+    if (pendingExclusionRefreshFilters) {
+      handleFiltersApplied(pendingExclusionRefreshFilters);
+      setPendingExclusionRefreshFilters(null);
+    }
+  }, [
+    exclusionSuccessData,
+    handleFiltersApplied,
+    pendingExclusionRefreshFilters,
+    showExclusionSuccessAlert,
+  ]);
+
+  const handleAssociationResult = useCallback(
+    (result: PointOfSaleOnboardingResultDTO, initiativeName: string) => {
+      const alreadyAssociated = (result.notAssociated ?? []).filter(
+        (pointOfSale) => pointOfSale.reason === 'ALREADY_ASSOCIATED'
+      );
+      const associatedCount = result.associated?.length ?? 0;
+
+      setSelectedStoreIds([]);
+      handleAssociateModalClose();
+      handleToggleDrawer();
+
+      if (alreadyAssociated.length > 0) {
+        setAssociationSuccessData(associatedCount > 0 ? { associatedCount, initiativeName } : null);
+        setAlreadyAssociatedInitiativeName(initiativeName);
+        setShouldShowAlreadyAssociatedStores(associatedCount > 0);
+        setPendingAssociationRefreshFilters(formik.values);
+        setAlreadyAssociatedStores(alreadyAssociated);
+        return;
+      }
+
+      handleFiltersApplied(formik.values);
+      if (associatedCount > 0) {
+        showAssociationSuccessAlert(associatedCount, initiativeName);
+      }
+    },
+    [
+      formik.values,
+      handleAssociateModalClose,
+      handleFiltersApplied,
+      handleToggleDrawer,
+      showAssociationSuccessAlert,
+    ]
+  );
+
+  const handleAssociateConfirm = useCallback(async () => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
+    const initiativeName =
+      publishedInitiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)
+        ?.label ?? '';
+
+    if (!merchantId || !selectedInitiativeId || selectedStoreIds.length === 0) {
+      handleAssociateModalClose();
+      handleFetchError();
+      return;
+    }
+
+    setIsAssociatingPos(true);
+
+    try {
+      const result = await associatePos(
+        selectedInitiativeId,
+        merchantId,
+        selectedStoreIds.map((id) => String(id))
+      );
+      handleAssociationResult(result, initiativeName);
+    } catch (_error) {
+      handleAssociateModalClose();
+      handleFetchError();
+    } finally {
+      setIsAssociatingPos(false);
+    }
+  }, [
+    handleAssociationResult,
+    handleAssociateModalClose,
+    handleFetchError,
+    publishedInitiativeOptions,
+    selectedInitiativeId,
+    selectedStoreIds,
+  ]);
+
+  const handleExclusionResult = useCallback(
+    (result: PointOfSaleExclusionResultDTO, initiativeName: string) => {
+      const excludedCount = result.excludedPointOfSales?.length ?? 0;
+      const notExcludedResultStores = getNotExcludedStores(result);
+
+      setSelectedStoreIds([]);
+      handleExcludeModalClose();
+      handleToggleDrawer();
+
+      if (notExcludedResultStores.length > 0) {
+        setExclusionSuccessData(excludedCount > 0 ? { excludedCount, initiativeName } : null);
+        setPendingExclusionRefreshFilters(formik.values);
+        setNotExcludedStores(notExcludedResultStores);
+        return;
+      }
+
+      handleFiltersApplied(formik.values);
+      if (excludedCount > 0) {
+        showExclusionSuccessAlert(excludedCount, initiativeName);
+      }
+    },
+    [
+      formik.values,
+      getNotExcludedStores,
+      handleExcludeModalClose,
+      handleFiltersApplied,
+      handleToggleDrawer,
+      showExclusionSuccessAlert,
+    ]
+  );
+
+  const handleExcludeConfirm = useCallback(async () => {
+    const userJwt = parseJwt(storageTokenOps.read());
+    const merchantId = userJwt?.merchant_id;
+    const initiativeName =
+      publishedInitiativeOptions.find((initiative) => initiative.value === selectedInitiativeId)
+        ?.label ?? '';
+
+    if (!merchantId || !selectedInitiativeId || selectedStoreIds.length === 0) {
+      handleExcludeModalClose();
+      handleFetchError();
+      return;
+    }
+
+    setIsExcludingPos(true);
+
+    try {
+      const result = await excludePos(
+        selectedInitiativeId,
+        merchantId,
+        selectedStoreIds.map((id) => String(id))
+      );
+      handleExclusionResult(result, initiativeName);
+    } catch (_error) {
+      handleExcludeModalClose();
+      handleFetchError();
+    } finally {
+      setIsExcludingPos(false);
+    }
+  }, [
+    handleExcludeModalClose,
+    handleExclusionResult,
+    handleFetchError,
+    publishedInitiativeOptions,
+    selectedInitiativeId,
+    selectedStoreIds,
+  ]);
+
+  const selectedStoresCountLabel = ` (${selectedStoreIds.length})`;
+
+  const columns = useMemo(
+    () =>
+      buildPointOfSalesColumns({
+        t,
+        onActionClick: openStoreDrawer,
+      }),
+    [openStoreDrawer, t]
+  );
+
+  return (
+    <Box sx={{ my: 2 }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={{ xs: 2, md: 3 }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', md: 'center' }}
+      >
+        <TitleBox
+          title={t('pages.posCatalog.title')}
+          subTitle={t('pages.posCatalog.subtitle')}
+          mbTitle={2}
+          variantTitle="h4"
+          variantSubTitle="body1"
+        />
+        {selectedStoreIds.length > 0 && (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Button
+              variant="outlined"
+              color="error"
+              disabled={isExcludeDisabled || areInitiativeActionsDisabled}
+              onClick={() => setIsExcludeModalOpen(true)}
+              sx={{ whiteSpace: 'nowrap' }}
+            >
+              {`${t('pages.posCatalog.actions.exclude')}${selectedStoresCountLabel}`}
+            </Button>
+            <Button
+              variant="contained"
+              disabled={isAssociateDisabled || areInitiativeActionsDisabled}
+              onClick={() => setIsAssociateModalOpen(true)}
+              sx={{ whiteSpace: 'nowrap' }}
+            >
+              {`${t('pages.posCatalog.actions.associate')}${selectedStoresCountLabel}`}
+            </Button>
+          </Stack>
+        )}
+      </Stack>
+      {storesLoading ? (
+        <Box
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          {(stores.length > 0 ||
+            (stores.length === 0 && filtersSetted()) ||
+            filtersAppliedOnce) && (
+            <>
+              <PointOfSalesFilters
+                onFiltersApplied={handleCatalogFiltersApplied}
+                onFiltersReset={handleCatalogFiltersReset}
+                formik={formik}
+                filtersAppliedOnce={filtersAppliedOnce}
+                initiativeOptions={initiativeOptions}
+                fields={['associated', 'initiative', 'type', 'city', 'address']}
+                disableInitiativeFilter={formik.values.associated === ASSOCIATED_FILTER_NO}
+                includeNoInitiativeOption={false}
+                t={t}
+              />
+
+              <Box sx={{ height: 'auto', width: '100%' }}>
+                <DataTable
+                  rows={stores}
+                  columns={columns}
+                  checkable
+                  rowsPerPage={rowsPerPage}
+                  rowsPerPageOptions={ELEMENT_PER_PAGE}
+                  onRowsPerPageChange={handleCatalogRowsPerPageChange}
+                  onSelectionModelChange={handleSelectionModelChange}
+                  selectionModel={selectedStoreIds}
+                  onSortModelChange={handleCatalogSortModelChange}
+                  paginationModel={storesPagination}
+                  onPaginationPageChange={handleCatalogPaginationPageChange}
+                  sortModel={sortModel}
+                />
+              </Box>
+
+              <PosCatalogDrawer
+                isOpen={isDrawerOpen}
+                onClose={handleToggleDrawer}
+                onOperationCompleted={handleCatalogOperationCompleted}
+                selectedStore={selectedStore}
+                initiativeOptions={initiativeOptions}
+                publishedInitiativeOptions={publishedInitiativeOptions}
+                actionsDisabled={areInitiativeActionsDisabled}
+                merchantId={parseJwt(storageTokenOps.read())?.merchant_id ?? ''}
+              />
+            </>
+          )}
+          <AssociateSelectedPosModal
+            open={isAssociateModalOpen}
+            initiativeOptions={publishedInitiativeOptions}
+            selectedInitiativeId={selectedInitiativeId}
+            selectedStoresCount={selectedStoreIds.length}
+            isLoading={isAssociatingPos}
+            onClose={handleAssociateModalClose}
+            onInitiativeChange={handleInitiativeChange}
+            onConfirm={handleAssociateConfirm}
+          />
+          <AssociateSelectedPosModal
+            open={isExcludeModalOpen}
+            initiativeOptions={publishedInitiativeOptions}
+            selectedInitiativeId={selectedInitiativeId}
+            selectedStoresCount={selectedStoreIds.length}
+            isLoading={isExcludingPos}
+            onClose={handleExcludeModalClose}
+            onInitiativeChange={handleInitiativeChange}
+            onConfirm={handleExcludeConfirm}
+            copyKey="excludeModal"
+            confirmLabelKey="pages.posCatalog.actions.exclude"
+            confirmColor="error"
+            dataTestId="exclude-selected-pos-modal"
+            titleId="exclude-selected-pos-modal-title"
+          />
+          <AlreadyAssociatedPosModal
+            stores={alreadyAssociatedStores}
+            initiativeName={alreadyAssociatedInitiativeName}
+            showStores={shouldShowAlreadyAssociatedStores}
+            onClose={handleAlreadyAssociatedModalClose}
+          />
+          <PointOfSaleExclusionResultModal
+            stores={notExcludedStores}
+            isPartial={exclusionSuccessData !== null}
+            onClose={handleExclusionResultModalClose}
+          />
+        </>
+      )}
+      {!storesLoading && stores?.length === 0 && (
+        <Paper
+          sx={{
+            my: 4,
+            p: 4,
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Stack spacing={1} alignItems="center">
+            <ErrorOutlineOutlinedIcon fontVariant="h5" color="disabled" />
+            <Typography variant="body2">
+              {t('pages.initiativeStores.noStores')}
+              {t('pages.initiativeStores.addStoreNoResults')}.
+            </Typography>
+          </Stack>
+        </Paper>
+      )}
+    </Box>
+  );
+};
+
+export default PosCatalog;

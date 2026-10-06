@@ -1,15 +1,32 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { store } from '../../../redux/store';
 import InitiativeOverview from '../initiativeOverview';
 import * as merchantService from '../../../services/merchantService';
 import * as helperFunctions from '../../../helpers';
-import type {
-  MerchantDetailDTO,
-  MerchantStatisticsDTO,
-} from '../../../api/generated/merchants/data-contracts';
+import { trackAnalyticsEvent } from '../../../services/analyticsService';
+
+const mockPush = jest.fn();
+const mockSetAlert = jest.fn();
+const mockEditEmailModal = jest.fn();
+const mockEditIbanModal = jest.fn();
+const mockUseCurrentInitiativeId = jest.fn(() => ({ initiativeId: 'initiative-123' }));
+const mockIsActionDisabled = jest.fn(() => false);
+
+jest.mock('../../../hooks/useUserPermissions', () => {
+  const actual = jest.requireActual('../../../hooks/useUserPermissions');
+  return {
+    __esModule: true,
+    ...actual,
+    useUserPermissions: () => ({
+      role: 'admin',
+      logicalRoleName: 'admin',
+      isSupportUser: false,
+      isActionDisabled: mockIsActionDisabled,
+    }),
+  };
+});
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -19,94 +36,336 @@ jest.mock('react-i18next', () => ({
   },
 }));
 
-jest.mock('../../../services/merchantService');
-
+jest.mock('../../../services/merchantService', () => ({
+  getMerchantDetail: jest.fn(),
+  updateMerchantData: jest.fn(),
+}));
+jest.mock('../../../services/analyticsService', () => ({
+  MIXPANEL_EVENTS: {
+    IBAN_SUCCESS: 'IDPAY_IBAN_UX_SUCCESS',
+    IBAN_UPDATE_SUCCESS: 'IDPAY_IBAN_UPDATE_SUCCESS',
+    OPERATIVE_EMAIL_SUCCESS: 'IDPAY_EMAIL_UX_SUCCESS',
+    OPERATIVE_EMAIL_UPDATE_SUCCESS: 'IDPAY_EMAIL_UPDATE_UX_SUCCESS',
+    ADD_STORE_CONVERSION: 'IDPAY_ADD_STORE_UX_CONVERSION',
+  },
+  trackAnalyticsEvent: jest.fn(),
+}));
+jest.mock('../../../hooks/useScopedTranslation', () => ({
+  __esModule: true,
+  default: () => ({ t: (key: string) => key }),
+}));
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => mockUseCurrentInitiativeId(),
+}));
+jest.mock('../../../hooks/useAlert', () => ({
+  useAlert: () => ({ setAlert: mockSetAlert }),
+}));
+jest.mock('../../components/initiativeOverviewCard', () => ({
+  __esModule: true,
+  default: ({ title, subtitle, children }: any) => (
+    <div>
+      <div>{title}</div>
+      {subtitle ? <div>{subtitle}</div> : null}
+      <div>{children}</div>
+    </div>
+  ),
+}));
+jest.mock('../initiativeOverviewInfo', () => ({
+  InitiativeOverviewInfo: () => <div>initiative-overview-info</div>,
+}));
+jest.mock('../EditEmailModal', () => ({
+  EditEmailModal: (props: any) => {
+    mockEditEmailModal(props);
+    return props.isOpen ? <div data-testid="edit-email-modal-open" /> : null;
+  },
+}));
+jest.mock('../EditIbanModal', () => ({
+  EditIbanModal: (props: any) => {
+    mockEditIbanModal(props);
+    return props.isOpen ? <div data-testid="edit-iban-modal-open" /> : null;
+  },
+}));
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ initiative_id: 'initiative-123' }),
+  useHistory: () => ({ push: mockPush }),
 }));
 
 const mockHistory = createMemoryHistory();
+const mockTrackAnalyticsEvent = trackAnalyticsEvent as jest.Mock;
 
 const renderComponent = () => {
   mockHistory.push('/overview/initiative-123');
   return render(
-    <Provider store={store}>
-      <Router history={mockHistory}>
-        <InitiativeOverview />
-      </Router>
-    </Provider>
+    <Router history={mockHistory}>
+      <InitiativeOverview />
+    </Router>
   );
 };
 
-const mockMerchantDetail: MerchantDetailDTO = {
+const expectEmailUpdateFlow = async ({
+  merchantDetail = mockMerchantDetail,
+  expectedAlertKey,
+  expectedEvent,
+}: {
+  merchantDetail?: Record<string, unknown>;
+  expectedAlertKey: string;
+  expectedEvent: string;
+}) => {
+  jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(merchantDetail as any);
+  renderComponent();
+
+  if (merchantDetail.operativeEmail) {
+    await screen.findByText(String(merchantDetail.operativeEmail));
+  }
+
+  const onUpdate = mockEditEmailModal.mock.calls.at(-1)[0].onUpdate;
+  await act(async () => {
+    await onUpdate({ operativeEmail: 'updated@test.it' }, 'operativeEmail');
+  });
+
+  expect(merchantService.updateMerchantData).toHaveBeenCalledWith('initiative-123', {
+    operativeEmail: 'updated@test.it',
+  });
+  await waitFor(() => {
+    expect(mockSetAlert).toHaveBeenCalledWith({
+      text: expectedAlertKey,
+      isOpen: true,
+      severity: 'success',
+    });
+  });
+  expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith(expectedEvent);
+  expect(merchantService.getMerchantDetail).toHaveBeenCalledTimes(2);
+};
+
+const mockMerchantDetail = {
+  iban: 'IT60X0542811101000000123456',
+  ibanHolder: 'Mario Rossi',
+  activationDate: '2023-01-15T10:00:00Z',
+  operativeEmail: 'merchant@test.it',
+};
+
+const mockMerchantDetailNoIBAN = {
+  ibanHolder: 'Mario Rossi',
+  activationDate: '2023-01-15T10:00:00Z',
+  operativeEmail: 'merchant@test.it',
+};
+
+const mockMerchantDetailNoEmail = {
   iban: 'IT60X0542811101000000123456',
   ibanHolder: 'Mario Rossi',
   activationDate: '2023-01-15T10:00:00Z',
 };
 
-const mockMerchantStatistics: MerchantStatisticsDTO = {
-  amountCents: 50000,
-  refundedCents: 15000,
-  accruedCents: 0,
-};
-
 describe('InitiativeOverview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(helperFunctions, 'formatDate');
-    jest.spyOn(helperFunctions, 'formatIban');
-    jest.spyOn(helperFunctions, 'formattedCurrency');
-    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetail);
-    jest
-      .spyOn(merchantService, 'getMerchantInitiativeStatistics')
-      .mockResolvedValue(mockMerchantStatistics);
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: 'initiative-123' });
+    mockIsActionDisabled.mockReturnValue(false);
+    jest.spyOn(helperFunctions, 'formatDate').mockReturnValue('15/01/2023');
+    jest.spyOn(helperFunctions, 'formatIban').mockImplementation((value?: string) => `formatted-${value ?? ''}`);
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetail as any);
+    jest.spyOn(merchantService, 'updateMerchantData').mockResolvedValue(undefined);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('should render the main titles and cards', async () => {
+  it('renders main content and merchant details', async () => {
     renderComponent();
 
     expect(screen.getByText('pages.initiativeOverview.title')).toBeInTheDocument();
     expect(screen.getByText('pages.initiativeOverview.subtitle')).toBeInTheDocument();
 
+    expect(await screen.findByText('15/01/2023')).toBeInTheDocument();
+    expect(screen.getByText('merchant@test.it')).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativeOverview.stores')).toBeInTheDocument();
+    expect(screen.getByText('initiative-overview-info')).toBeInTheDocument();
+    expect(merchantService.getMerchantDetail).toHaveBeenCalledWith('initiative-123');
+  });
+
+  it('shows placeholder values when merchant details are missing', async () => {
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue({} as any);
+
+    renderComponent();
+
+    expect(await screen.findAllByText('-')).not.toHaveLength(0);
+  });
+
+  it('shows an error alert when loading details fails', async () => {
+    jest.spyOn(merchantService, 'getMerchantDetail').mockRejectedValue(new Error('API Error Detail'));
+
+    renderComponent();
+
     await waitFor(() => {
-      expect(screen.getByText('pages.initiativeOverview.information')).toBeInTheDocument();
-      expect(screen.getByText('pages.initiativeOverview.stores')).toBeInTheDocument();
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      });
     });
   });
 
-  it('should handle API error for getMerchantDetail', async () => {
-    const error = new Error('API Error Detail');
-    jest.spyOn(merchantService, 'getMerchantDetail').mockRejectedValue(error);
-
+  it('should show InfoBanner if IBAN is missing', async () => {
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetailNoIBAN);
     renderComponent();
+
+    const bannerBtn = await screen.findByText('pages.initiativeOverview.ibanBanner.action')
+    expect(screen.getByText('pages.initiativeOverview.ibanBanner.description')).toBeInTheDocument();
+
+    fireEvent.click(bannerBtn);
+    expect(mockEditIbanModal.mock.calls.at(-1)[0].isOpen).toBe(true);
+  })
+
+  it('should show InfoBanner if email is missing', async () => {
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetailNoEmail);
+    renderComponent();
+
+    const bannerBtn = await screen.findByText('pages.initiativeOverview.emailBanner.action')
+    expect(screen.getByText('pages.initiativeOverview.emailBanner.description')).toBeInTheDocument();
+
+    fireEvent.click(bannerBtn);
+    expect(mockEditEmailModal.mock.calls.at(-1)[0].isOpen).toBe(true);
+  })
+
+  it('toggles visibility of iban data and opens edit modals', async () => {
+    renderComponent();
+
+    await screen.findByText('merchant@test.it');
+
+    expect(screen.getByText('•••••••••••')).toBeInTheDocument();
+    expect(screen.getByText('•••••••••••••••••••••••••••')).toBeInTheDocument();
+
+    const buttons = screen.getAllByRole('button');
+
+    await act(async () => {
+      fireEvent.click(buttons[0]);
+    });
+    expect(mockEditEmailModal.mock.calls.at(-1)[0].isOpen).toBe(true);
+
+    await act(async () => {
+      fireEvent.click(buttons[1]);
+    });
+    expect(screen.getByText('Mario Rossi')).toBeInTheDocument();
+    expect(screen.getByText('formatted-IT60X0542811101000000123456')).toBeInTheDocument();
+    expect(helperFunctions.formatIban).toHaveBeenCalledWith('IT60X0542811101000000123456');
+
+    await act(async () => {
+      fireEvent.click(buttons[2]);
+    });
+    expect(mockEditIbanModal.mock.calls.at(-1)[0].isOpen).toBe(true);
   });
 
-  // it('should handle API error for getMerchantInitiativeStatistics', async () => {
-  //   const error = new Error('API Error Stats');
-  //   jest.spyOn(merchantService, 'getMerchantInitiativeStatistics').mockRejectedValue(error);
+  it('navigates to stores upload page when clicking add stores button', async () => {
+    renderComponent();
 
-  //   renderComponent();
+    fireEvent.click(await screen.findByTestId('add-stores-button'));
 
-  //   await waitFor(() => {
-  //     expect(addErrorMock).toHaveBeenCalledWith(
-  //       expect.objectContaining({
-  //         id: 'GET_MERCHANT_STATISTICS',
-  //         error,
-  //       })
-  //     );
-  //   });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_CONVERSION');
+    expect(mockPush).toHaveBeenCalledWith('/portale-esercenti/initiative-123/punti-vendita/censisci');
+  });
 
-  //   await waitFor(() => {
-  //     expect(helperFunctions.formattedCurrency).toHaveBeenCalledWith(
-  //       undefined,
-  //       expect.any(String),
-  //       true
-  //     );
-  //   });
-  // });
+  it('updates merchant data successfully through modal callbacks', async () => {
+    await expectEmailUpdateFlow({
+      expectedAlertKey: 'pages.initiativeOverview.successAlert.operativeEmail.edit',
+      expectedEvent: 'IDPAY_EMAIL_UPDATE_UX_SUCCESS',
+    });
+  });
+
+  it('add merchant data successfully through modal callbacks', async () => {
+    await expectEmailUpdateFlow({
+      merchantDetail: mockMerchantDetailNoEmail,
+      expectedAlertKey: 'pages.initiativeOverview.successAlert.operativeEmail.add',
+      expectedEvent: 'IDPAY_EMAIL_UX_SUCCESS',
+    });
+  });
+
+  it('tracks IBAN update with the required update event code', async () => {
+    renderComponent();
+
+    await screen.findByText('merchant@test.it');
+
+    const onUpdate = mockEditIbanModal.mock.calls.at(-1)[0].onUpdate;
+    await act(async () => {
+      await onUpdate({ iban: 'NEWIBAN' }, 'iban');
+    });
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_IBAN_UPDATE_SUCCESS');
+  });
+
+  it('shows an error alert when merchant data update fails', async () => {
+    jest.spyOn(merchantService, 'updateMerchantData').mockRejectedValue(new Error('update failed'));
+
+    renderComponent();
+
+    await screen.findByText('merchant@test.it');
+
+    const onUpdate = mockEditIbanModal.mock.calls.at(-1)[0].onUpdate;
+    await act(async () => {
+      await onUpdate({ iban: 'NEWIBAN' });
+    });
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      });
+    });
+  });
+
+  it('does not load details when initiative id is missing', async () => {
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: undefined as unknown as string });
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(merchantService.getMerchantDetail).not.toHaveBeenCalled();
+    });
+  });
+
+  it('updates merchant data with empty initiative id fallback when initiative id is missing', async () => {
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: undefined as unknown as string });
+
+    renderComponent();
+
+    const onUpdate = mockEditEmailModal.mock.calls.at(-1)[0].onUpdate;
+    await act(async () => {
+      await onUpdate({ operativeEmail: 'updated@test.it' }, 'operativeEmail');
+    });
+
+    expect(merchantService.updateMerchantData).toHaveBeenCalledWith('', {
+      operativeEmail: 'updated@test.it',
+    });
+  });
+
+  it('hides iban banner action when iban editing is disabled', async () => {
+    mockIsActionDisabled.mockImplementation(
+      ((permission: string) => permission === 'overview.editIban') as unknown as () => boolean
+    );
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetailNoIBAN);
+
+    renderComponent();
+
+    expect(
+      await screen.findByText('pages.initiativeOverview.ibanBanner.description')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('pages.initiativeOverview.ibanBanner.action')).not.toBeInTheDocument();
+  });
+
+  it('hides email banner action when email editing is disabled', async () => {
+    mockIsActionDisabled.mockImplementation(
+      ((permission: string) => permission === 'overview.editEmail') as unknown as () => boolean
+    );
+    jest.spyOn(merchantService, 'getMerchantDetail').mockResolvedValue(mockMerchantDetailNoEmail);
+
+    renderComponent();
+
+    expect(
+      await screen.findByText('pages.initiativeOverview.emailBanner.description')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('pages.initiativeOverview.emailBanner.action')).not.toBeInTheDocument();
+  });
 });

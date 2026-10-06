@@ -1,16 +1,16 @@
 import { Box, Step, StepLabel, Stepper } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useState, useEffect } from 'react';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import BreadcrumbsBox from '../components/BreadcrumbsBox';
 import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 import { genericContainerStyle } from '../../styles';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import TotalAmount from './TotalAmount';
 import DiscountCode from './DiscountCode';
 
 const AcceptNewDiscount = () => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { initiativeId } = useCurrentInitiativeId();
   const currentInitiative = useCurrentInitiative();
   const [activeStep, setActiveStep] = useState(0);
@@ -77,7 +77,7 @@ const AcceptNewDiscount = () => {
       }}
     >
       <BreadcrumbsBox
-        backLabel={t('commons.backBtn')}
+        backLabel={t('actions.back')}
         items={[
           t('pages.initiativesList.title'),
           currentInitiative?.initiativeName,

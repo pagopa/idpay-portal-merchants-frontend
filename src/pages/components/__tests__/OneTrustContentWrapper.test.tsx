@@ -1,13 +1,11 @@
-import React from 'react';
 import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import OneTrustContentWrapper from '../OneTrustContentWrapper';
 
-beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-});
+describe('OneTrustContentWrapper', () => {
+  it('renders the notice container and back link', () => {
+    renderWithContext(<OneTrustContentWrapper idSelector="otnotice-test-id" />);
 
-describe('test suite for OneTrustContentWrapper', () => {
-  test('render OneTrustContentWrapper', () => {
-    renderWithContext(<OneTrustContentWrapper idSelector={''} />);
+    expect(document.querySelector('#otnotice-test-id')).toHaveClass('otnotice');
+    expect(document.querySelector('a')).toHaveAttribute('href', '/portale-esercenti');
   });
 });

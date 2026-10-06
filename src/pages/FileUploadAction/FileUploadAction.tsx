@@ -3,26 +3,29 @@ import { Alert as MuiAlert } from '@mui/material';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { SingleFileInput, theme } from '@pagopa/mui-italia';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
-import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import BreadcrumbsBoxUpload from '../components/BreadcrumbsBoxUpload';
 import { useAlert } from '../../hooks/useAlert';
 import { useScopedTranslation } from '../../hooks/useScopedTranslation';
+import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
+import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 
 interface FileUploadActionProps {
   apiCall:
-    | ((
-        transactionId: string,
-        file: File,
-        docNumber: string
-      ) => Promise<void | { code: string; message: string }>)
-    | ((
-        transactionId: string,
-        file: File,
-        pointOfSaleId: string,
-        docNumber: string
-      ) => Promise<void | { code: string; message: string }>);
+  | ((
+    initiativeId: string,
+    transactionId: string,
+    file: File,
+    docNumber: string
+  ) => Promise<void | { code: string; message: string }>)
+  | ((
+    initiativeId: string,
+    transactionId: string,
+    file: File,
+    pointOfSaleId: string,
+    docNumber: string
+  ) => Promise<void | { code: string; message: string }>);
   successStateKey: string;
   breadcrumbsLabel: string;
   manualLink: string;
@@ -40,6 +43,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   styleClass,
   i18nBlockKey,
 }) => {
+  const { initiativeId } = useCurrentInitiativeId();
   const [file, setFile] = useState<File | null>(null);
   const [docNumber, setDocNumber] = useState<string>('');
 
@@ -54,12 +58,12 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
   const [inputKey, setInputKey] = useState<number>(0);
 
-  const { t } = useTranslation();
-  const scopedT = useScopedTranslation(i18nBlockKey);
+  const { t } = useScopedTranslation();
+  const { t: scopedT, isLoading } = useScopedTranslation();
   const history = useHistory();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const secondBreadcrumbLabel = scopedT('breadcrumbLabel');
+  const secondBreadcrumbLabel = scopedT(`${i18nBlockKey}.breadcrumbLabel`);
 
   const { trxId, fileDocNumber } = useParams<{
     id: string;
@@ -84,21 +88,28 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
     }
 
     setFile(null);
-    setDocNumber('');
+
+    if (!fileDocNumber) {
+      setDocNumber('');
+    }
     setRequiredFileError(false);
     setDocNumberError(false);
     setFileSizeError(false);
     setFileTypeError(false);
     setLoadingFile(false);
     setInputKey((prev) => prev + 1);
-  }, [trxId]);
+  }, [trxId, fileDocNumber]);
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_START);
       setRequiredFileError(false);
     }
 
     if (!VALID_MIME_TYPES.includes(selectedFile.type)) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+        reason: 'UNSUPPORTED_FILE_TYPE',
+      });
       setFileTypeError(true);
       setFile(null);
       return;
@@ -109,6 +120,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
       setFileSizeError(false);
       setFileTypeError(false);
     } else {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+        reason: 'FILE_TOO_LARGE',
+      });
       setFileSizeError(true);
       setFileTypeError(false);
     }
@@ -138,15 +152,19 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
   const handleAction = async (): Promise<void> => {
     if (!file) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+        reason: 'FILE_REQUIRED',
+      });
       setRequiredFileError(true);
       setFileSizeError(false);
       setFileTypeError(false);
-      return;
     }
 
     if (!docNumber || docNumber.trim().length < 2) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+        reason: 'DOCUMENT_NUMBER_INVALID',
+      });
       setDocNumberError(true);
-      return;
     }
 
     if (file && trxId && docNumber.trim().length >= 2) {
@@ -154,9 +172,12 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
       try {
         const normalizedDocNumber = docNumber.trim();
-        const response = await (apiCall as any)(trxId, file, normalizedDocNumber);
+        const response = await (apiCall as any)(initiativeId, trxId, file, normalizedDocNumber);
 
         if (response?.code) {
+          trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+            reason: response.code,
+          });
           if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
             setAlert({
               text: t('modifyDocument.errors.deniedSentError'),
@@ -169,14 +190,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               isOpen: true,
               severity: 'error',
             });
-          } else {
-            setAlert({
-              text: t('modifyDocument.errors.errorAlert'),
-              isOpen: true,
-              severity: 'error',
-            });
           }
-
           setLoadingFile(false);
           return;
         }
@@ -191,6 +205,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           },
         });
 
+        trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_SUCCESS);
         setAlert({
           text: t('modifyDocument.refundSuccessUpload'),
           isOpen: true,
@@ -198,9 +213,11 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         });
         history.goBack();
       } catch (error: unknown) {
+        trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
+          reason: 'REQUEST_FAILED',
+        });
         setAlert({
-          title: t('errors.genericTitle'),
-          text: t('errors.genericDescription'),
+          text: t('modifyDocument.errors.errorAlert'),
           isOpen: true,
           severity: 'error',
         });
@@ -213,17 +230,17 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
     <>
       <Box p={4} maxWidth="75%" justifySelf="center">
         <BreadcrumbsBoxUpload
-          backLabel={t('commons.exitBtn')}
+          backLabel={t('actions.exit')}
           items={[breadcrumbsLabel, secondBreadcrumbLabel]}
           active={true}
           onClickBackButton={handleBackNavigation}
         />
 
         <TitleBox
-          title={scopedT('title')}
+          title={scopedT(`${i18nBlockKey}.title`)}
           mtTitle={3}
           variantTitle="h4"
-          subTitle={scopedT('invoiceSubtitle')}
+          subTitle={scopedT(`${i18nBlockKey}.invoiceSubtitle`)}
           variantSubTitle="body2"
         />
 
@@ -235,11 +252,11 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           borderRadius="4px"
         >
           <Typography mt={2} variant="h6" fontWeight={theme.typography.fontWeightBold}>
-            {scopedT('invoiceTitle')}
+            {scopedT(`${i18nBlockKey}.invoiceTitle`)}
           </Typography>
 
           <Typography mt={2} variant="body2" fontWeight={theme.typography.fontWeightMedium}>
-            {scopedT('insertInvoice')}
+            {scopedT(`${i18nBlockKey}.insertInvoice`)}
           </Typography>
 
           <TextField
@@ -252,7 +269,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
                 ? setDocNumberError(true)
                 : setDocNumberError(false)
             }
-            label={scopedT('invoiceLabel')}
+            label={scopedT(`${i18nBlockKey}.invoiceLabel`)}
             size="small"
             sx={{
               mt: 2,
@@ -263,11 +280,12 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             error={docNumberError}
             helperText={
               docNumberError && docNumber === ''
-                ? t('validation.requiredField')
+                ? t('validation.required')
                 : docNumberError && docNumber.trim().length < 2
-                ? 'Lunghezza minima 2 caratteri'
-                : ''
+                  ? 'Lunghezza minima 2 caratteri'
+                  : ''
             }
+            required
           />
         </Box>
 
@@ -282,24 +300,26 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           }}
         >
           <Typography variant="h6" fontWeight={theme.typography.fontWeightBold}>
-            {scopedT('creditNote')}
+            {scopedT(`${i18nBlockKey}.creditNote`)}
           </Typography>
 
           <Typography variant="body2" mt={4} mb={1} sx={{ marginTop: '32px !important' }}>
-            {scopedT('creditNoteSubtitle')}
+            {scopedT(`${i18nBlockKey}.creditNoteSubtitle`)}
           </Typography>
 
           <Link
             onClick={() => window.open(manualLink || '', '_blank')}
             sx={{ cursor: 'pointer', fontWeight: theme.typography.fontWeightMedium, fontSize: 14 }}
           >
-            {scopedT('manualLink')}
+            {scopedT(`${i18nBlockKey}.manualLink`)}
           </Link>
 
           {fileSizeError && (
             <Box mt={2}>
               <MuiAlert severity="error">
-                <Typography variant="body2">{scopedT('errors.fileSizeError')}</Typography>
+                <Typography variant="body2">
+                  {scopedT(`${i18nBlockKey}.errors.fileSizeError`)}
+                </Typography>
               </MuiAlert>
             </Box>
           )}
@@ -307,7 +327,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           {fileTypeError && (
             <Box mt={2}>
               <MuiAlert severity="error">
-                <Typography variant="body2">{scopedT('errors.fileNotSupported')}</Typography>
+                <Typography variant="body2">
+                  {scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
+                </Typography>
               </MuiAlert>
             </Box>
           )}
@@ -315,7 +337,9 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           {requiredFileError && (
             <Box mt={2}>
               <MuiAlert severity="error">
-                <Typography variant="body2">{scopedT('errors.requiredFileError')}</Typography>
+                <Typography variant="body2">
+                  {scopedT(`${i18nBlockKey}.errors.requiredFileError`)}
+                </Typography>
               </MuiAlert>
             </Box>
           )}
@@ -342,10 +366,10 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               onFileSelected={handleFileSelect}
               onFileRemoved={handleRemoveFile}
               value={file}
-              dropzoneLabel={scopedT('uploadFile')}
-              dropzoneButton={scopedT('uploadFileButton')}
-              rejectedLabel={scopedT('errors.fileNotSupported')}
-              loading={loadingFile}
+              dropzoneLabel={scopedT(`${i18nBlockKey}.uploadFile`)}
+              dropzoneButton={scopedT(`${i18nBlockKey}.uploadFileButton`)}
+              rejectedLabel={scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
+              loading={loadingFile || isLoading}
             />
           </Box>
 
@@ -371,7 +395,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
               onClick={handleButtonClick}
               sx={{ fontWeight: 'bold', fontSize: 14 }}
             >
-              {scopedT('replaceFile')}
+              {scopedT(`${i18nBlockKey}.replaceFile`)}
             </Button>
           )}
 
@@ -383,10 +407,10 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             justifyContent="space-between"
           >
             <Button variant="outlined" onClick={handleBackNavigation}>
-              {t('commons.backBtn')}
+              {t('actions.back')}
             </Button>
             <Button variant="contained" onClick={handleAction}>
-              {t('commons.continueBtn')}
+              {t('actions.continue')}
             </Button>
           </Stack>
         </Box>

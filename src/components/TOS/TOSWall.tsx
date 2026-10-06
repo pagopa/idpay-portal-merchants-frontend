@@ -1,6 +1,6 @@
-import { useTranslation } from 'react-i18next';
 import { Box, Typography, Link } from '@mui/material';
 import { TOSAgreement } from '@pagopa/mui-italia';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 interface TOSWallProps {
   acceptTOS: () => void;
@@ -10,27 +10,27 @@ interface TOSWallProps {
 }
 
 const TOSWall = ({ acceptTOS, tosRoute, privacyRoute, firstAcceptance }: TOSWallProps) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   const description = firstAcceptance ? (
     <Typography color="text.secondary">
       {t('pages.tos.termsDescription')}{' '}
-      <Link underline="hover" href={tosRoute}>
+      <Link underline="hover" href={tosRoute} target="_blank">
         {t('pages.tos.linkTos')}
       </Link>{' '}
       {t('pages.tos.termsDescription2')}
-      <Link underline="hover" href={privacyRoute}>
+      <Link underline="hover" href={privacyRoute} target="_blank">
         {t('pages.tos.linkPrivacy')}
       </Link>
     </Typography>
   ) : (
     <Typography color="text.secondary">
       {t('pages.tos.termsDescriptionChanged')}{' '}
-      <Link underline="hover" href={tosRoute}>
+      <Link underline="hover" href={tosRoute} target="_blank">
         {t('pages.tos.linkTos')}
       </Link>{' '}
       {t('pages.tos.and')}{' '}
-      <Link underline="hover" href={privacyRoute}>
+      <Link underline="hover" href={privacyRoute} target="_blank">
         {t('pages.tos.linkPrivacy')}
       </Link>
     </Typography>

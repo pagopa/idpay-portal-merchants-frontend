@@ -6,7 +6,6 @@ import * as formatUtils from '../../../utils/formatUtils';
 
 jest.mock('../../../utils/formatUtils');
 
-// Wrapper component to properly render the cell content with hooks
 const CellWrapper = ({ renderCell, params }: any) => {
   return <>{renderCell(params)}</>;
 };
@@ -457,6 +456,33 @@ describe('getReportedUsersColumns', () => {
       const box = container.querySelector('[class*="MuiBox"]');
 
       expect(box).toBeInTheDocument();
+    });
+
+    it('should render disabled delete icon styles when deletion is disabled', () => {
+      const columns = getReportedUsersColumns(mockHandleDelete, true);
+      const actionsColumn = columns[4];
+      const params = { row: testRow };
+
+      render(<CellWrapper renderCell={actionsColumn.renderCell} params={params} />);
+      const deleteIcon = screen.getByTestId('DeleteOutlineIcon');
+
+      expect(deleteIcon).toHaveClass('MuiSvgIcon-colorDisabled');
+      expect(deleteIcon).toHaveStyle('cursor: not-allowed');
+      expect(deleteIcon).toHaveStyle('pointer-events: none');
+      expect(deleteIcon).toHaveStyle('opacity: 0.5');
+    });
+
+    it('should not call handleDelete when deletion is disabled', () => {
+      const columns = getReportedUsersColumns(mockHandleDelete, true);
+      const actionsColumn = columns[4];
+      const params = { row: testRow };
+
+      render(<CellWrapper renderCell={actionsColumn.renderCell} params={params} />);
+      const deleteIcon = screen.getByTestId('DeleteOutlineIcon');
+
+      fireEvent.click(deleteIcon);
+
+      expect(mockHandleDelete).not.toHaveBeenCalled();
     });
   });
 

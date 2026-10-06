@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { getMerchantDetail, getMerchantInitiativeStatistics } from '../../services/merchantService';
 import { formatIban, formattedCurrency } from '../../helpers';
 import { useAlert } from '../../hooks/useAlert';
@@ -11,7 +11,7 @@ type Props = {
 
 const InitiativeDiscountsSummary = ({ id }: Props) => {
   const { setAlert } = useAlert();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [amount, setAmount] = useState<number | undefined>(undefined);
   const [refunded, setRefunded] = useState<number | undefined>(undefined);
   const [iban, setIban] = useState<string | undefined>();
@@ -93,7 +93,7 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
             variant="body2"
             color="text.primary"
           >
-            {t('pages.initiativeDiscounts.totalAmount')}
+            {t('shared.refund.totalAmount')}
           </Typography>
           <Typography
             sx={{ fontWeight: 700, display: 'grid', gridArea: 'value1', justifyContent: 'end' }}
@@ -107,7 +107,7 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
             variant="body2"
             color="text.primary"
           >
-            {t('pages.initiativeDiscounts.totalRefunded')}
+            {t('shared.refund.totalRefunded')}
           </Typography>
           <Typography
             sx={{ fontWeight: 700, display: 'grid', gridArea: 'value2', justifyContent: 'end' }}
@@ -123,7 +123,7 @@ const InitiativeDiscountsSummary = ({ id }: Props) => {
             variant="overline"
             color="text.primary"
           >
-            {t('pages.initiativeDiscounts.refundsDataTitle')}
+            {t('shared.refund.refundsDataTitle')}
           </Typography>
           <Typography
             sx={{ fontWeight: 400, display: 'grid', gridColumn: 'span 2' }}

@@ -116,10 +116,7 @@ export const formatDate = (date: Date | undefined) => {
   return '';
 };
 
-export const isValidEmail = (email: string) => {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return emailRegex.test(email);
-};
+export const isValidRegex = (value: string, regex: RegExp) => regex.test(value);
 
 export const isValidUrl = (urlToCheck: string) => {
   const allowedDomain = ['it', 'com', 'info', 'io', 'net', 'eu', 'google'];
@@ -135,8 +132,11 @@ export const isValidUrl = (urlToCheck: string) => {
   return true;
 };
 
-export const generateUniqueId = () =>
-  Date.now().toString() + Math.random().toString(36).substring(2, 9);
+export const generateUniqueId = () => {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return Date.now().toString() + array[0].toString(36).substring(0, 8);
+};
 
 export const handlePromptMessage = (location: { pathname: string }, targetPage: string) => {
   const match = matchPath(location.pathname, {
@@ -202,3 +202,5 @@ const impossibleStatusCombination = (itemValues: any, batchStatus: any): boolean
       itemValues?.rewardBatchTrxStatus
     )
   );
+
+  export const spaceRemover = (value: string) => value.trim().replace(/\s+/g, '');

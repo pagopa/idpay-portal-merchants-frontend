@@ -4,9 +4,9 @@ import { useUnloadEventOnExit } from '@pagopa/selfcare-common-frontend/lib/hooks
 import { useSelector } from 'react-redux';
 import { userSelectors } from '@pagopa/selfcare-common-frontend/lib/redux/slices/userSlice';
 import { useLocation } from 'react-router-dom';
-import { Footer } from '@pagopa/selfcare-common-frontend/lib';
-import Header from '../Header/Header';
 import ROUTES from '../../routes';
+import CustomHeader from '../Header/CustomHeader';
+import Footer from '../Footer/Footer';
 
 type Props = {
   children?: React.ReactNode;
@@ -17,6 +17,7 @@ const TOSLayout = ({ children }: Props) => {
   const loggedUser = useSelector(userSelectors.selectLoggedUser);
   const location = useLocation();
   const [showAssistanceInfo, setShowAssistanceInfo] = useState(true);
+
   useEffect(() => {
     setShowAssistanceInfo(location.pathname !== ROUTES.ASSISTANCE);
   }, [location.pathname]);
@@ -31,20 +32,20 @@ const TOSLayout = ({ children }: Props) => {
       minHeight="100vh"
     >
       <Box gridArea="header">
-        <Header
+        <CustomHeader
           withSecondHeader={showAssistanceInfo}
           onExit={onExit}
           loggedUser={loggedUser}
           parties={[]}
         />
-      </Box>
+     </Box>
 
       <Box gridArea="body">{children}</Box>
 
       <Box gridArea="footer">
         <Footer onExit={onExit} loggedUser={true} />
-      </Box>
-    </Box>
+     </Box>
+   </Box>
   );
 };
 

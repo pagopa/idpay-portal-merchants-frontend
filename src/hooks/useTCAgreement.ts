@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import useErrorDispatcher from '@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher';
 import { getPortalConsent, savePortalConsent } from '../services/rolePermissionService';
+import useScopedTranslation from './useScopedTranslation';
 
 const useTCAgreement = () => {
   const addError = useErrorDispatcher();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const [acceptedTOS, setAcceptedTOS] = useState<boolean | undefined>(undefined);
   const [acceptedTOSVersion, setAcceptedTOSVersion] = useState<string | undefined>();
   const [firstAcceptance, setFirstAcceptance] = useState<boolean | undefined>(false);

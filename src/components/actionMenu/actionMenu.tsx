@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { IconButton, Menu, MenuItem, TableCell } from '@mui/material';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import CancelTransactionModal from '../../pages/initiativeDiscounts/CancelTransactionModal';
@@ -7,6 +6,7 @@ import { MerchantTransactionDTO } from '../../api/generated/merchants/data-contr
 
 type TransactionStatusEnum = MerchantTransactionDTO['status'];
 import AuthorizeTransactionModal from '../../pages/initiativeDiscounts/AuthorizeTransactionModal';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 type ActionsMenuProps = {
   initiativeId: string;
@@ -20,7 +20,7 @@ const ActionMenu = ({ initiativeId, status, trxId, data }: ActionsMenuProps) => 
   const [openCancelTrxModal, setOpenCancelTrxModal] = useState<boolean>(false);
   const [openAuthorizeTrxModal, setOpenAuthorizeTrxModal] = useState<boolean>(false);
   const open = Boolean(anchorEl);
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   const handleClickActionsMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);

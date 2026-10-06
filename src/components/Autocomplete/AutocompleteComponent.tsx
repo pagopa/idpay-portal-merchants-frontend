@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useTranslation } from 'react-i18next';
+import InputAdornment from '@mui/material/InputAdornment';
+import ReportIcon from '@mui/icons-material/Report';
 import { MANDATORY_FIELD } from '../../utils/constants';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 export default function AutocompleteComponent({
   options,
@@ -14,6 +16,7 @@ export default function AutocompleteComponent({
   required,
   label,
   onTextChange,
+  loading
 }: Readonly<{
   options: Array<any>;
   onChangeDebounce?: (value: string) => void;
@@ -23,20 +26,13 @@ export default function AutocompleteComponent({
   required?: boolean;
   label?: string;
   onTextChange?: (value: string) => void;
+  loading?: boolean;
 }>) {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [optionValue, setOptionValue] = useState('');
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
 
   useEffect(() => {
-    if (inputValue.length < 5 || inputValue.trim().length === 0 || optionValue === inputValue) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
 
     const timer = setTimeout(() => {
       if (onChangeDebounce) {
@@ -47,10 +43,6 @@ export default function AutocompleteComponent({
       clearTimeout(timer);
     };
   }, [inputValue]);
-
-  useEffect(() => {
-    setLoading(false);
-  }, [options]);
 
   const getHelperText = () => {
     if (!inputError) {
@@ -78,10 +70,7 @@ export default function AutocompleteComponent({
         setOpen(false);
       }}
       isOptionEqualToValue={(option, value) => option?.address === value?.address}
-      getOptionLabel={(option) => {
-        setOptionValue(option?.Address?.Label ?? '');
-        return option?.Address?.Label ?? '';
-      }}
+      getOptionLabel={(option) => option?.Address?.Label ?? ''}
       options={options}
       loading={loading}
       noOptionsText={t('pages.pointOfSales.noOptionsText')}
@@ -105,11 +94,41 @@ export default function AutocompleteComponent({
           size="small"
           error={inputError}
           helperText={getHelperText()}
-          required={required}
-          sx={{ marginTop: 2 }}
+          sx={{
+            marginTop: 2,
+            ...(required
+              ? {
+                  '& .MuiInputLabel-root::after': {
+                    content: '" *"',
+                    color: 'error.main',
+                  },
+                }
+              : {}),
+          }}
           InputProps={{
             ...params.InputProps,
-            endAdornment: <>{loading ? <CircularProgress color="inherit" size={20} /> : null}</>,
+            sx: { position: 'relative' },
+            endAdornment: (
+              <>
+                {loading ? (
+                  <CircularProgress color="inherit" size={20} sx={{ ml: 'auto' }} />
+                ) : null}
+                {inputError ? (
+                  <InputAdornment
+                    position="end"
+                    sx={{
+                      m: 0,
+                      position: 'absolute',
+                      right: 1.5,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                    }}
+                  >
+                    <ReportIcon color="error" data-testid="input-error-icon" fontSize="small" />
+                  </InputAdornment>
+                ) : null}
+              </>
+            ),
           }}
         />
       )}

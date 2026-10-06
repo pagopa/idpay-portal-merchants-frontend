@@ -1,429 +1,468 @@
-/// <reference types="jest" />
-/// <reference types="@testing-library/jest-dom" />
+// @ts-nocheck
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import { useHistory, useParams } from 'react-router-dom';
 import InitiativeStoresUpload from '../initiativeStoresUpload';
 import * as merchantService from '../../../services/merchantService';
 import * as jwtUtils from '../../../utils/jwt-utils';
-import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
-import { useHistory, useParams } from 'react-router-dom';
-import userEvent from '@testing-library/user-event';
-import { usePlacesAutocomplete } from '../../../hooks/useAutocomplete';
+import * as formatUtils from '../../../utils/formatUtils';
+import { trackAnalyticsEvent } from '../../../services/analyticsService';
 
-jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-  withTranslation: () => (Component: React.ComponentType<any>) => (props: any) =>
-    <Component {...props} />,
+const mockSetAlert = jest.fn();
+const pushMock = jest.fn();
+let mockLatestFormProps: any;
+
+jest.mock('../../../hooks/useScopedTranslation', () => () => ({
+  t: (key: string) => key,
 }));
-jest.mock('@pagopa/selfcare-common-frontend/lib/hooks/useErrorDispatcher');
+
+jest.mock('../../../hooks/useAlert', () => ({
+  useAlert: () => ({ setAlert: mockSetAlert }),
+}));
+
 jest.mock('@pagopa/selfcare-common-frontend/lib/utils/storage', () => ({
   storageTokenOps: { read: jest.fn() },
-}));
-jest.mock('../../../services/merchantService', () => ({
-  getMerchantPointOfSales: jest.fn(),
 }));
 
 jest.mock('../../../services/merchantService', () => ({
   updateMerchantPointOfSales: jest.fn(),
 }));
-jest.mock('../../../utils/jwt-utils');
-jest.mock('../../../utils/formatUtils', () => ({
-  normalizeUrlHttp: jest.fn((x) => x),
-  normalizeUrlHttps: jest.fn((x) => x),
+
+jest.mock('../../../services/analyticsService', () => ({
+  MIXPANEL_EVENTS: {
+    NEW_STORES_SUCCESS: 'IDPAY_NEW_STORES_UX_SUCCESS',
+    ADD_STORE_ERROR: 'IDPAY_ADD_STORE_ERROR',
+    ADD_STORE_SUCCESS: 'IDPAY_ADD_STORE_UX_SUCCESS',
+  },
+  trackAnalyticsEvent: jest.fn(),
 }));
+
+jest.mock('../../../utils/jwt-utils');
+
+jest.mock('../../../utils/formatUtils', () => ({
+  normalizeUrlHttp: jest.fn((value) => `http:${value}`),
+  normalizeUrlHttps: jest.fn((value) => `https:${value}`),
+}));
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: jest.fn(),
   useParams: jest.fn(),
 }));
 
-jest.mock('../../../hooks/useAutocomplete');
-const mockUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
+jest.mock('../../../components/pointsOfSaleForm/PointsOfSaleForm', () => (props: any) => {
+  mockLatestFormProps = props;
 
-const pushMock = jest.fn();
+  return (
+    <div data-testid="points-of-sale-form">
+      <button
+        data-testid="set-valid-form"
+        onClick={() => {
+          props.onFormChange([
+            {
+              id: 'local-id',
+              type: 'PHYSICAL',
+              contactEmail: 'shop@example.com',
+              confirmContactEmail: 'shop@example.com',
+              website: 'example.com',
+              channelGeolink: 'maps.example.com',
+            },
+          ]);
+          props.onValidationChange(true);
+        }}
+      >
+        valid
+      </button>
+      <button
+        data-testid="set-invalid-form"
+        onClick={() => {
+          props.onFormChange([]);
+          props.onValidationChange(false);
+        }}
+      >
+        invalid
+      </button>
+      <button
+        data-testid="set-duplicate-emails"
+        onClick={() => {
+          props.onFormChange([
+            {
+              contactEmail: ' DUPLICATE@example.com ',
+              confirmContactEmail: 'duplicate@example.com',
+            },
+            {
+              contactEmail: 'duplicate@example.com',
+              confirmContactEmail: 'duplicate@example.com',
+            },
+          ]);
+          props.onValidationChange(true);
+        }}
+      >
+        duplicates
+      </button>
+      <button
+        data-testid="set-online-form"
+        onClick={() => {
+          props.onFormChange([
+            {
+              type: 'ONLINE',
+              contactEmail: 'online@example.com',
+              confirmContactEmail: 'online@example.com',
+              website: 'online.example.com',
+              channelGeolink: '',
+            },
+          ]);
+          props.onValidationChange(true);
+        }}
+      >
+        online
+      </button>
+    </div>
+  );
+});
+
 const readTokenMock = storageTokenOps.read as jest.Mock;
+const parseJwtMock = jwtUtils.parseJwt as jest.Mock;
 const updateMerchantPointOfSalesMock = merchantService.updateMerchantPointOfSales as jest.Mock;
+const normalizeUrlHttpsMock = formatUtils.normalizeUrlHttps as jest.Mock;
+const mockTrackAnalyticsEvent = trackAnalyticsEvent as jest.Mock;
 
-const optionsAutocomplete = [
-  {
-    PlaceId:
-      'AQAAAEIAo-GdOMG0YuWiCl1bLeH7pnLeGU-DJ1DARfn03wWK1Ibzikvro9XAM6Hv4sDPGpdIfvw6oDSL_x6wyMU6LSAZno_TU8Um_hTeBU-YKbWrPDwG2O8ZhQj-WT_GFbqxVehn5DA',
-    PlaceType: 'Street',
-    Title: 'Italia, 10073, Ciriè, Via Roma',
-    Address: {
-      Label: 'Via Roma, 10073 Ciriè TO, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Piemonte' },
-      SubRegion: { Code: 'TO', Name: 'Torino' },
-      Locality: 'Ciriè',
-      PostalCode: '10073',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 8, EndIndex: 11, Value: '100' },
-        { StartIndex: 22, EndIndex: 30, Value: ' Via Rom' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        PostalCode: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGEArii9_R-e4p-pnON6GGp6cAJbd8-_zRriejOfxrlDW_B870Lz52oI4nsxVlDzeLDBmqRNd2I2NPEVGcrww28DVTKENY0-VYoLJz9vLP7Reg2i6DG7X3oz40JBQJTV_mVhAT_l0ifPvO-tgbtvvAI-LTw-ccaUedojG-bRkDSwngmx',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 39100, Bolzano, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 39100 Bolzano BZ, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Trentino-Alto Adige' },
-      SubRegion: { Code: 'BZ', Name: 'Bolzano' },
-      Locality: 'Bolzano',
-      PostalCode: '39100',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 24, EndIndex: 32, Value: 'Via Roma' },
-        { StartIndex: 33, EndIndex: 36, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGAA9Xws_AzxKpyI4UWarvaljnUGFydR3IszQ73fttFEV9Z9quYdYtSxgmvDXJ0BhmgoDgRNVo85kDrmY8Kq1IYoi4MaxsdhkB_1s_MZsqZPjjs6ce9Uu3il6y5cfjgHjsKlH_hs8IsbtmM65q3HMq3VOkl8UMPHg7-fSym-rj44WN8',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 52017, Pratovecchio Stia, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 52017 Pratovecchio Stia AR, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Toscana' },
-      SubRegion: { Code: 'AR', Name: 'Arezzo' },
-      Locality: 'Pratovecchio Stia',
-      District: 'Stia',
-      PostalCode: '52017',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 34, EndIndex: 42, Value: 'Via Roma' },
-        { StartIndex: 43, EndIndex: 46, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGAA_-f12qM_vUnpxK3dXvRN-bf638wAOLJ7f1QPKgB_SyfnIroh0TEvNwfV_sBGSOkGeBLrPNVrqfcxsNiNCrS4tAHN1gebTUHV-LCXq4CHImG9GDqIBF5m5CNZKQ-uOoWTTjGcCz5Ejw5OVIMWqV05JAPCl-dWOJag0pp0gr_Mkdo',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 17014, Cairo Montenotte, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 17014 Cairo Montenotte SV, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Liguria' },
-      SubRegion: { Code: 'SV', Name: 'Savona' },
-      Locality: 'Cairo Montenotte',
-      PostalCode: '17014',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 33, EndIndex: 41, Value: 'Via Roma' },
-        { StartIndex: 42, EndIndex: 45, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-  {
-    PlaceId:
-      'AQAAAGEAiZmfC8mQdUA2Vk3C9f5T0ZRHSn_e1dTZM1HolAGFAppnd2a1Czq_WdoN_3qcuJcdIsV1JXelZ9VRnAirvew4r9xsOuLxc-EzeSrGpRoJTvmU5s5tb0_xd-CLBNuNXsOAlvnZUhTWeewujbIqkHXPF5vBheEjVKJ0MMdHwopwK9tH',
-    PlaceType: 'PointAddress',
-    Title: 'Italia, 32013, Longarone, Via Roma 100',
-    Address: {
-      Label: 'Via Roma, 100, 32013 Longarone BL, Italia',
-      Country: { Code2: 'IT', Code3: 'ITA', Name: 'Italia' },
-      Region: { Name: 'Veneto' },
-      SubRegion: { Code: 'BL', Name: 'Belluno' },
-      Locality: 'Longarone',
-      PostalCode: '32013',
-      Street: 'Via Roma',
-      StreetComponents: [
-        {
-          BaseName: 'Roma',
-          Type: 'Via',
-          TypePlacement: 'BeforeBaseName',
-          TypeSeparator: ' ',
-          Language: 'it',
-        },
-      ],
-      AddressNumber: '100',
-    },
-    Language: 'it',
-    Highlights: {
-      Title: [
-        { StartIndex: 26, EndIndex: 34, Value: 'Via Roma' },
-        { StartIndex: 35, EndIndex: 38, Value: '100' },
-      ],
-      Address: {
-        Label: [
-          { StartIndex: 0, EndIndex: 8, Value: 'Via Roma' },
-          { StartIndex: 10, EndIndex: 13, Value: '100' },
-        ],
-        Street: [{ StartIndex: 0, EndIndex: 8, Value: 'Via Roma' }],
-        AddressNumber: [{ StartIndex: 0, EndIndex: 3, Value: '100' }],
-      },
-    },
-  },
-];
+const renderComponent = () => render(<InitiativeStoresUpload />);
+
+const submitValidForm = async () => {
+  fireEvent.click(screen.getByTestId('set-valid-form'));
+  fireEvent.click(screen.getByTestId('confirm-stores-button'));
+  await waitFor(() => expect(updateMerchantPointOfSalesMock).toHaveBeenCalled());
+};
+
+const expectStoreSubmissionError = async ({
+  apiResponse,
+  expectedAlert,
+  expectedReason,
+}: {
+  apiResponse: Record<string, unknown>;
+  expectedAlert: {
+    title: string;
+    text: string;
+    isOpen: boolean;
+    severity: 'error';
+  };
+  expectedReason: string;
+}) => {
+  updateMerchantPointOfSalesMock.mockResolvedValue(apiResponse);
+  renderComponent();
+
+  await submitValidForm();
+
+  expect(mockSetAlert).toHaveBeenCalledWith(expectedAlert);
+  expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+    reason: expectedReason,
+  });
+  expect(pushMock).not.toHaveBeenCalled();
+};
 
 describe('InitiativeStoresUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    jest.spyOn(window, 'open').mockImplementation(() => null as any);
-
+    mockLatestFormProps = undefined;
     (useParams as jest.Mock).mockReturnValue({ initiative_id: 'test-initiative' });
     (useHistory as jest.Mock).mockReturnValue({ push: pushMock });
-    mockUsePlacesAutocomplete.mockReturnValue({
-      options: optionsAutocomplete,
-      loading: false,
-      error: false,
-      search: jest.fn(),
-    });
-    jest.spyOn(window, 'open').mockImplementation(jest.fn() as any);
+    readTokenMock.mockReturnValue('fake-token');
+    parseJwtMock.mockReturnValue({ merchant_id: 'merchant-1' });
+    updateMerchantPointOfSalesMock.mockResolvedValue(undefined);
+    normalizeUrlHttpsMock.mockImplementation((value) => `https:${value}`);
+    jest.spyOn(window, 'open').mockImplementation(() => null);
   });
 
   afterEach(() => {
-    (window.open as any).mockRestore?.();
+    jest.restoreAllMocks();
   });
 
-  afterEach(() => {
-    (window.open as jest.Mock | undefined)?.mockRestore?.();
+  it('renders the manual form and opens the operation manual', () => {
+    renderComponent();
+
+    expect(screen.getByTestId('points-of-sale-form')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('pages.initiativeStores.manualLink'));
+
+    expect(window.open).toHaveBeenCalledWith(expect.any(String), '_blank');
   });
 
-  it('renders correctly with Manual upload by default', () => {
-    render(<InitiativeStoresUpload />);
-    expect(screen.getByTestId('confirm-stores-button')).toBeInTheDocument();
-  });
+  it('navigates back to the initiative overview', () => {
+    renderComponent();
 
-  it('calls handleBack when back button is clicked', () => {
-    render(<InitiativeStoresUpload />);
     fireEvent.click(screen.getByTestId('back-stores-button'));
+
     expect(pushMock).toHaveBeenCalledWith(
       expect.stringContaining('/portale-esercenti/test-initiative/panoramica')
     );
   });
 
-  it('Click to open manual link', () => {
-    render(<InitiativeStoresUpload />);
-    fireEvent.click(screen.getByText('pages.initiativeStores.manualLink'));
-    expect(window.open).toHaveBeenCalled();
+  it('does not submit an invalid form and increments the submit attempt', async () => {
+    renderComponent();
+    fireEvent.click(screen.getByTestId('set-invalid-form'));
+
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    await waitFor(() => expect(mockLatestFormProps.submitAttempt).toBe(1));
+    expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();
   });
 
-  it('sets salesPoints when form changes', () => {
-    render(<InitiativeStoresUpload />);
-    const instance = screen.getByTestId('confirm-stores-button');
-    expect(instance).toBeInTheDocument();
+  it('does not submit when duplicate emails are present', async () => {
+    renderComponent();
+    fireEvent.click(screen.getByTestId('set-duplicate-emails'));
+
+    await waitFor(() =>
+      expect(mockLatestFormProps.externalErrors).toEqual({
+        1: {
+          contactEmail: expect.any(String),
+          confirmContactEmail: expect.any(String),
+        },
+      })
+    );
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    await waitFor(() => expect(mockLatestFormProps.submitAttempt).toBe(1));
+    expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();
   });
 
-  it('shows POINT_OF_SALE_ALREADY_REGISTERED error', async () => {
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+  it('shows a generic error when the merchant ID is missing', async () => {
+    parseJwtMock.mockReturnValue(undefined);
+    renderComponent();
+    fireEvent.click(screen.getByTestId('set-valid-form'));
 
-    render(<InitiativeStoresUpload />);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    await waitFor(() =>
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'MISSING_MERCHANT_ID',
+    });
+    expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();
   });
 
-  it('navigates to STORES when response is null', async () => {
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(null);
+  it('normalizes the payload and navigates to stores after a successful update', async () => {
+    renderComponent();
 
-    render(<InitiativeStoresUpload />);
-    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+    await submitValidForm();
+
+    expect(normalizeUrlHttpsMock).toHaveBeenCalledWith('example.com');
+    expect(normalizeUrlHttpsMock).toHaveBeenCalledWith('maps.example.com');
+    expect(updateMerchantPointOfSalesMock).toHaveBeenCalledWith('test-initiative', 'merchant-1', [
+      {
+        type: 'PHYSICAL',
+        contactEmail: 'shop@example.com',
+        website: 'https:example.com',
+        channelGeolink: 'https:maps.example.com',
+      },
+    ]);
+    expect(pushMock).toHaveBeenCalledWith({
+      pathname: expect.stringContaining('/portale-esercenti/test-initiative/punti-vendita'),
+      state: expect.objectContaining({
+        showSuccessAlert: true,
+        storeNumber: 1,
+      }),
+    });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_SUCCESS', { store_number: 1 });
+    expect(mockLatestFormProps.pointsOfSaleLoaded).toBe(true);
   });
 
-  it('normalizes URLs when uploading manually', async () => {
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+  it('tracks the multiple-store success event when more than one store is added', async () => {
+    renderComponent();
 
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue({
-      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
-      message: 'Email duplicata',
-    });
+    mockLatestFormProps.onFormChange([
+      {
+        type: 'PHYSICAL',
+        contactEmail: 'shop1@example.com',
+        confirmContactEmail: 'shop1@example.com',
+        website: 'one.example.com',
+        channelGeolink: 'maps.one.example.com',
+      },
+      {
+        type: 'PHYSICAL',
+        contactEmail: 'shop2@example.com',
+        confirmContactEmail: 'shop2@example.com',
+        website: 'two.example.com',
+        channelGeolink: 'maps.two.example.com',
+      },
+    ]);
+    mockLatestFormProps.onValidationChange(true);
 
-    render(<InitiativeStoresUpload />);
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
 
-    /*await waitFor(() => {
-      expect(formatUtils.normalizeUrlHttps).toHaveBeenCalled();
-      expect(formatUtils.normalizeUrlHttp).toHaveBeenCalled();
-    });*/
+    await waitFor(() => expect(updateMerchantPointOfSalesMock).toHaveBeenCalled());
+
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_SUCCESS', { store_number: 2 });
   });
 
-  it.skip('test complete flow - physical store - error Merchant ID not found', async () => {
-    mockUsePlacesAutocomplete.mockReturnValue({
-      options: optionsAutocomplete,
-      loading: false,
-      error: false,
-      search: jest.fn(),
-    });
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue(undefined);
+  it('resets the loaded flag when the form changes after a successful update', async () => {
+    renderComponent();
+    await submitValidForm();
+    expect(mockLatestFormProps.pointsOfSaleLoaded).toBe(true);
 
-    render(<InitiativeStoresUpload />);
-    await fillFormForSuccess(screen);
+    fireEvent.click(screen.getByTestId('set-invalid-form'));
+
+    await waitFor(() => expect(mockLatestFormProps.pointsOfSaleLoaded).toBe(false));
+  });
+
+  it('shows the duplicate point-of-sale error returned by the API', async () => {
+    await expectStoreSubmissionError({
+      apiResponse: {
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: 'shop@example.com',
+      },
+      expectedAlert: {
+        title: 'errors.pointOfSaleAlreadyExistsError',
+        text: 'errors.pointOfSaleAlreadyExistsDescription',
+        isOpen: true,
+        severity: 'error',
+      },
+      expectedReason: 'POINT_OF_SALE_ALREADY_REGISTERED',
+    });
+  });
+
+  it('shows a generic error for an unrecognized API response', async () => {
+    await expectStoreSubmissionError({
+      apiResponse: {
+        code: 'UNKNOWN_ERROR',
+        message: 'Unexpected error',
+      },
+      expectedAlert: {
+        title: 'errors.genericTitle',
+        text: 'errors.genericDescription',
+        isOpen: true,
+        severity: 'error',
+      },
+      expectedReason: 'UNKNOWN_ERROR',
+    });
+  });
+
+  it('maps API validation errors to field errors and alert messages', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      errors: [
+        {
+          index: 0,
+          field: 'contactEmail',
+          code: 'EMAIL_ALREADY_REGISTERED',
+        },
+        {
+          index: 0,
+          code: 'PHYSICAL_POS_ALREADY_REGISTERED',
+        },
+        {
+          index: 0,
+          code: 'UNKNOWN_CODE',
+        },
+      ],
+    });
+    renderComponent();
+
+    await submitValidForm();
+
+    await waitFor(() =>
+      expect(mockLatestFormProps.externalErrors).toEqual({
+        0: {
+          contactEmail: 'pages.pointOfSales.saveErrors.emailAlreadyRegisteredField',
+        },
+      })
+    );
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'VALIDATION_ERROR',
+    });
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({
+      0: 'errors.genericDescription',
+    });
+    expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it('maps already-registered validation errors to the physical address field', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      details: [
+        {
+          index: 0,
+          code: 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
+        },
+      ],
+    });
+    renderComponent();
+
+    await submitValidForm();
+
+    await waitFor(() =>
+      expect(mockLatestFormProps.externalErrors).toEqual({
+        0: {
+          address: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredOtherInitiativeField',
+        },
+      })
+    );
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({
+      0: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredOtherInitiativeAlert',
+    });
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'VALIDATION_ERROR',
+    });
+  });
+
+  it('maps already-registered validation errors to website for online stores', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      errors: [
+        {
+          index: 0,
+          code: 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
+        },
+        {
+          index: 0,
+          code: 'ONLINE_POS_ALREADY_REGISTERED',
+        },
+      ],
+    });
+    renderComponent();
+    fireEvent.click(screen.getByTestId('set-online-form'));
+
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  }, 10000);
 
-  it.skip('test complete flow - physical store - error duplicated entry', async () => {
-    mockUsePlacesAutocomplete.mockReturnValue({
-      options: optionsAutocomplete,
-      loading: false,
-      error: false,
-      search: jest.fn(),
+    await waitFor(() =>
+      expect(mockLatestFormProps.externalErrors).toEqual({
+        0: {
+          website: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredField',
+        },
+      })
+    );
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({
+      0: 'pages.pointOfSales.saveErrors.posAlreadyRegisteredAlert',
     });
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
-
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue({
-      code: 'POINT_OF_SALE_ALREADY_REGISTERED',
-      message: 'Email duplicata',
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+      reason: 'VALIDATION_ERROR',
     });
+  });
 
-    render(<InitiativeStoresUpload />);
-    await fillFormForSuccess(screen);
-    fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  }, 10000);
-
-  it.skip('test complete flow - physical store - other error', async () => {
-    mockUsePlacesAutocomplete.mockReturnValue({
-      options: optionsAutocomplete,
-      loading: false,
-      error: false,
-      search: jest.fn(),
+  it('clears API validation errors after the form changes', async () => {
+    updateMerchantPointOfSalesMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      errors: [
+        {
+          index: 0,
+          field: 'contactEmail',
+          code: 'EMAIL_ALREADY_REGISTERED',
+        },
+      ],
     });
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
+    renderComponent();
+    await submitValidForm();
+    await waitFor(() => expect(mockLatestFormProps.externalErrors[0]).toBeDefined());
 
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue({
-      code: 'GENERIC ERROR',
-      message: 'Error with SailPoint',
-    });
+    fireEvent.click(screen.getByTestId('set-valid-form'));
 
-    render(<InitiativeStoresUpload />);
-    await fillFormForSuccess(screen);
-    fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  }, 10000);
-
-  it.skip('test complete flow - physical store - success', async () => {
-    mockUsePlacesAutocomplete.mockReturnValue({
-      options: optionsAutocomplete,
-      loading: false,
-      error: false,
-      search: jest.fn(),
-    });
-    readTokenMock.mockReturnValue('fakeToken');
-    (jwtUtils.parseJwt as jest.Mock).mockReturnValue({ merchant_id: 'merchant-1' });
-
-    (updateMerchantPointOfSalesMock as jest.Mock).mockResolvedValue(undefined);
-
-    render(<InitiativeStoresUpload />);
-    await fillFormForSuccess(screen);
-    fireEvent.click(screen.getByTestId('confirm-stores-button'));
-  }, 10000);
+    await waitFor(() => expect(mockLatestFormProps.externalErrors).toEqual({}));
+    expect(mockLatestFormProps.externalAlertMessages).toEqual({});
+  });
 });
-
-const fillFormForSuccess = async (screen: any) => {
-  const emailField = screen.getByLabelText('E-mail');
-  await userEvent.type(emailField, 'a@b.it');
-
-  const emailConfirmField = screen.getByLabelText('Conferma e-mail');
-  await userEvent.type(emailConfirmField, 'a@b.it');
-
-  const franchiseNameField = screen.getByLabelText('Nome insegna');
-  await userEvent.type(franchiseNameField, 'TechStore');
-
-  const contactNameField = screen.getByLabelText('Nome');
-  await userEvent.type(contactNameField, 'TechStore');
-
-  const contactSurnameField = screen.getByLabelText('Cognome');
-  await userEvent.type(contactSurnameField, 'TechStore');
-
-  const addressField = screen.getAllByRole('combobox')[0];
-  fireEvent.change(addressField, { target: { value: 'Via roma 100' } });
-
-  const addressAutocompleteItem = await screen.findAllByRole('option');
-  fireEvent.click(addressAutocompleteItem[3]);
-};

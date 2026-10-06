@@ -1,5 +1,4 @@
 import { Box, Button, Card, CardContent, Typography, Stack, TextField } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import { useRef, useMemo, useCallback } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
@@ -12,7 +11,8 @@ type ReportTypeEnum = ReportRequest['reportType'];
 const MERCHANT_TRANSACTIONS: ReportTypeEnum = 'MERCHANT_TRANSACTIONS';
 import { MIN_START_DATE } from '../../utils/constants';
 import { ReportDTO } from '../../api/generated/merchants/data-contracts';
-import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 
 type ReportStatusEnum = ReportDTO['reportStatus'];
 const FAILED: ReportStatusEnum = 'FAILED';
@@ -32,7 +32,7 @@ type Props = {
 };
 
 const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { initiative_id } = useParams<RouteParams>();
   const requestIdRef = useRef<number>(0);
   const { isActionDisabled } = useUserPermissions();
@@ -48,28 +48,28 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
     },
     validate: (values) => ({
       ...(!values.startDate && {
-        startDate: t('pages.reportExport.form.validation.required'),
+        startDate: t('validation.required'),
       }),
       ...(!values.endDate && {
-        endDate: t('pages.reportExport.form.validation.required'),
+        endDate: t('validation.required'),
       }),
       ...(values.startDate &&
         dayjs(values.startDate).isAfter(yesterday, 'day') && {
-          startDate: t('pages.reportExport.form.validation.invalidRange'),
+          startDate: t('validation.invalidRange'),
         }),
       ...(values.endDate &&
         dayjs(values.endDate).isAfter(yesterday, 'day') && {
-          endDate: t('pages.reportExport.form.validation.invalidRange'),
+          endDate: t('validation.invalidRange'),
         }),
       ...(values.startDate &&
         values.endDate &&
         dayjs(values.endDate).diff(dayjs(values.startDate), 'day') < 0 && {
-          endDate: t('pages.reportExport.form.validation.invalidRange'),
+          endDate: t('validation.invalidRange'),
         }),
       ...(values.startDate &&
         values.endDate &&
         dayjs(values.endDate).diff(dayjs(values.startDate), 'day') > 90 && {
-          endDate: t('pages.reportExport.form.validation.maxRange'),
+          endDate: t('validation.maxRange'),
         }),
     }),
     onSubmit: async (values) => {
@@ -95,6 +95,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
         const status: ReportStatusEnum = response?.reportStatus ?? FAILED;
         updateAlerts(status as string, true);
         setTimeout(() => updateAlerts(status as string, false), 3000);
+        onReportGenerated?.();
       } catch (error) {
         if (currentRequestId !== requestIdRef.current) {
           return;
@@ -105,11 +106,6 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
       } finally {
         if (currentRequestId === requestIdRef.current) {
           formik.resetForm();
-          onReportGenerated?.();
-        }
-        if (currentRequestId === requestIdRef.current) {
-          formik.resetForm();
-          onReportGenerated?.();
         }
       }
     },
@@ -140,6 +136,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               label="Dal"
               type="date"
               size="medium"
+              disabled={isGenerateReportDisabled}
               value={formik.values.startDate ?? ''}
               onChange={(e) => {
                 void formik.setFieldValue('startDate', e.target.value);
@@ -148,7 +145,6 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               onBlur={formik.handleBlur}
               inputProps={{ min: MIN_START_DATE, max: yesterdayStr, placeholder: '' }}
               InputLabelProps={{ shrink: true }}
-              disabled={isGenerateReportDisabled}
               error={Boolean(formik.touched.startDate && formik.errors.startDate)}
               helperText={
                 formik.touched.startDate && formik.errors.startDate
@@ -161,6 +157,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               label="Al"
               type="date"
               size="medium"
+              disabled={isGenerateReportDisabled}
               value={formik.values.endDate ?? ''}
               onChange={(e) => void formik.setFieldValue('endDate', e.target.value)}
               onBlur={formik.handleBlur}
@@ -171,7 +168,6 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
               }}
               InputLabelProps={{ shrink: true }}
               error={Boolean(formik.touched.endDate && formik.errors.endDate)}
-              disabled={isGenerateReportDisabled}
               helperText={
                 formik.touched.endDate && formik.errors.endDate
                   ? String(formik.errors.endDate)

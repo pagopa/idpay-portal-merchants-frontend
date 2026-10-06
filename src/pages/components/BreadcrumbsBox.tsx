@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Tooltip, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { ButtonNaked } from '@pagopa/mui-italia';
 import { useHistory } from 'react-router-dom';
@@ -11,34 +11,67 @@ interface Props {
 const BreadcrumbsBox = ({ backLabel, items }: Props) => {
   const history = useHistory();
   return (
-    <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
-      <Breadcrumbs aria-label="breadcrumb">
+    <Box sx={{ display: 'grid', gridColumn: 'span 12', maxWidth: '100%', minWidth: 0 }}>
+      <Breadcrumbs
+        aria-label="breadcrumb"
+        sx={{
+          maxWidth: '100%',
+          minWidth: 0,
+          '& .MuiBreadcrumbs-li': {
+            minWidth: 0,
+            display: 'flex',
+          },
+          '& .MuiBreadcrumbs-ol': {
+            flexWrap: 'nowrap',
+            maxWidth: '100%',
+            minWidth: 0,
+          },
+        }}
+      >
         <Box onClick={() => history.goBack()} sx={{ display: 'inline-flex', cursor: 'pointer' }}>
           <ButtonNaked
             startIcon={<ArrowBackIcon />}
-            sx={{ color: 'primary.main', fontSize: '1rem', marginBottom: '3px' }}
+            sx={{
+              color: 'primary.main',
+              fontSize: '1rem',
+              marginBottom: '0px',
+            }}
             weight="default"
             data-testid="back-btn-test"
           >
             {backLabel}
           </ButtonNaked>
         </Box>
-        {items.map((label, index) => (
-          <Typography
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              maxWidth: 'calc(95vw - 300px)',
-              minWidth: '0',
-              whiteSpace: 'nowrap',
-            }}
-            color="text.primary"
-            variant="body2"
-            key={index}
-          >
-            {label}
-          </Typography>
-        ))}
+        {items.map((label, index) => {
+          const isLastItem = index === items.length - 1;
+          const breadcrumbLabel = (
+            <Typography
+              sx={{
+                display: 'inline-block',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: isLastItem ? 'min(55vw, calc(95vw - 300px))' : '25vw',
+                minWidth: '0',
+                verticalAlign: 'bottom',
+                whiteSpace: 'nowrap',
+              }}
+              color="text.primary"
+              variant="body2"
+            >
+              {label}
+            </Typography>
+          );
+
+          return isLastItem ? (
+            <Tooltip key={index} title={label ?? ''} placement="bottom">
+              {breadcrumbLabel}
+            </Tooltip>
+          ) : (
+            <Box key={index} sx={{ minWidth: 0 }}>
+              {breadcrumbLabel}
+            </Box>
+          );
+        })}
       </Breadcrumbs>
     </Box>
   );

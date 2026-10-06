@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupInitiativeMocks } from '../../../test-utils/mockInitiativeContext';
 import Table from '@mui/material/Table';
 import TableHeader from '../TableHeader';
 
@@ -10,6 +11,18 @@ jest.mock('react-i18next', () => ({
 }));
 
 describe('TableHeader', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupInitiativeMocks();
+  });
+
+  const renderHeader = (data: { width: string; label: string }[]) =>
+    render(
+      <Table>
+        <TableHeader data={data} />
+      </Table>
+    );
+
   it('renderizza tutte le celle di intestazione passate nei props', () => {
     const data = [
       { width: '20%', label: 'header.first' },
@@ -17,54 +30,40 @@ describe('TableHeader', () => {
       { width: '50%', label: 'header.third' },
     ];
 
-    render(
-      <Table>
-        <TableHeader data={data} />
-      </Table>
-    );
+    renderHeader(data);
 
-    data.forEach((d) => {
-      const cell = screen.getByText(`translated_${d.label}`);
-      expect(cell).toBeInTheDocument();
+    data.forEach(({ label }) => {
+      expect(screen.getByText(`translated_${label}`)).toBeInTheDocument();
     });
   });
 
-  it('usa la traduzione solo per le label non vuote', () => {
+  it('translates only non-empty labels', () => {
     const data = [
       { width: '20%', label: 'header.first' },
       { width: '30%', label: '' },
     ];
 
-    render(
-      <Table>
-        <TableHeader data={data} />
-      </Table>
-    );
+    renderHeader(data);
 
     expect(screen.getByText('translated_header.first')).toBeInTheDocument();
 
-    const headerRow = screen.getByRole('row');
-    const cells = within(headerRow).getAllByRole('columnheader');
+    const cells = within(screen.getByRole('row')).getAllByRole('columnheader');
 
     expect(cells[1]).toBeEmptyDOMElement();
   });
 
-  it('applica la width corretta alle celle', () => {
+  it('applies correct width to each cell', () => {
     const data = [
       { width: '10%', label: 'header.first' },
       { width: '40%', label: 'header.second' },
     ];
 
-    render(
-      <Table>
-        <TableHeader data={data} />
-      </Table>
-    );
+    renderHeader(data);
 
-    const headerRow = screen.getByRole('row');
-    const cells = within(headerRow).getAllByRole('columnheader');
+    const cells = within(screen.getByRole('row')).getAllByRole('columnheader');
 
-    expect(cells[0]).toHaveAttribute('width', '10%');
-    expect(cells[1]).toHaveAttribute('width', '40%');
+    data.forEach(({ width }, index) => {
+      expect(cells[index]).toHaveAttribute('width', width);
+    });
   });
 });

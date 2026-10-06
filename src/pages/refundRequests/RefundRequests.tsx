@@ -11,12 +11,13 @@ import {
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { GridColDef } from '@mui/x-data-grid';
 import { theme } from '@pagopa/mui-italia/theme';
 import { useHistory } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import DataTable from '../../components/dataTable/DataTable';
 import CustomChip from '../../components/Chip/CustomChip';
@@ -26,10 +27,11 @@ import CurrencyColumn from '../../components/Transactions/CurrencyColumn';
 import NoResultPaper from '../reportedUsers/NoResultPaper';
 import { useAlert } from '../../hooks/useAlert';
 import { BASE_ROUTE } from '../../routes';
-import { ENABLED_DOWNLOAD_STATUSES, MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
+import { ENABLED_DOWNLOAD_STATUSES, IS_ACTION_DISABLED, MISSING_DATA_PLACEHOLDER } from '../../utils/constants';
 import { RewardBatchDTO } from '../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../utils/consoleLogger';
-import { PERMISSION_KEYS, useUserPermissions } from '../../hooks/useUserPermissions';
+import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
+import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 import { RefundRequestsModal } from './RefundRequestModal';
 
 type StatusEnum = RewardBatchDTO['status'];
@@ -48,7 +50,7 @@ const RefundRequests = () => {
   const { setAlert } = useAlert();
   const { initiativeId } = useCurrentInitiativeId();
   const history = useHistory();
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const { isActionDisabled } = useUserPermissions();
   const isSendBatchDisabled = isActionDisabled(PERMISSION_KEYS.REFUND_SEND_BATCH);
 
@@ -268,6 +270,7 @@ const RefundRequests = () => {
       headerName: 'Lotto',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(params.value),
     },
     {
@@ -275,6 +278,7 @@ const RefundRequests = () => {
       headerName: 'Tipologia',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => renderCellWithTooltip(posTypeMapper[params.value]),
     },
     {
@@ -282,6 +286,7 @@ const RefundRequests = () => {
       headerName: 'Rimborso richiesto',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <CurrencyColumn value={params.value / 100} />,
     },
     {
@@ -289,6 +294,7 @@ const RefundRequests = () => {
       headerName: 'Rimborso approvato',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
     },
     {
@@ -296,6 +302,7 @@ const RefundRequests = () => {
       headerName: 'Rimborso sospeso',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <CurrencyColumn value={params.value / 100} isValueVisible />,
     },
     {
@@ -303,6 +310,7 @@ const RefundRequests = () => {
       headerName: 'Stato',
       flex: 2,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => <StatusChip status={params.value} />,
     },
     {
@@ -310,6 +318,7 @@ const RefundRequests = () => {
       headerName: '',
       flex: 0.3,
       sortable: false,
+      disableColumnMenu: true,
       renderCell: (params: any) => (
         <IconButton
           onClick={() =>
@@ -342,6 +351,9 @@ const RefundRequests = () => {
       const resultErrorMessageKey = result?.code ? sendBatchErrorMessageByCode[result.code] : undefined;
 
       if (resultErrorMessageKey) {
+        trackAnalyticsEvent(MIXPANEL_EVENTS.INVOICE_SENT_ERROR, {
+          reason: result.code,
+        });
         setAlert({
           title: t('errors.genericTitle'),
           text: t(resultErrorMessageKey),
@@ -351,6 +363,9 @@ const RefundRequests = () => {
         return;
       }
 
+      trackAnalyticsEvent(MIXPANEL_EVENTS.INVOICE_SENT_SUCCESS, {
+        invoice_number: rewardBatches.find(({ id }) => id === selectedRow)?.numberOfTransactions ?? 0,
+      });
       setAlert({
         text: t('pages.refundRequests.rewardBatchSentSuccess'),
         isOpen: true,
@@ -359,6 +374,9 @@ const RefundRequests = () => {
 
       await fetchRewardBatches(initiativeId, currentPagination.pageNo, currentPagination.pageSize);
     } catch (error: any) {
+      trackAnalyticsEvent(MIXPANEL_EVENTS.INVOICE_SENT_ERROR, {
+        reason: error?.code || 'REQUEST_FAILED',
+      });
       const errorMessageKey = error?.code ? sendBatchErrorMessageByCode[error.code] : undefined;
 
       if (errorMessageKey) {
@@ -408,9 +426,9 @@ const RefundRequests = () => {
 
         {selectedRow && (
           <Button
-            disabled={isSendBatchDisabled}
             variant="contained"
             size="small"
+            disabled={isSendBatchDisabled || IS_ACTION_DISABLED}
             onClick={() =>
               setModal({
                 isOpen: true,
@@ -423,7 +441,7 @@ const RefundRequests = () => {
             }
             startIcon={<SendIcon />}
           >
-            {t('pages.refundRequests.sendRequests')}
+            {t('actions.send')}
           </Button>
         )}
       </Stack>
@@ -448,7 +466,7 @@ const RefundRequests = () => {
         )}
 
         {!rewardBatchesLoading && rewardBatches.length === 0 && (
-          <NoResultPaper translationKey="pages.refundRequests.noData" />
+          <NoResultPaper translationKey="commons.labels.noData" />
         )}
       </Box>
     </Box>

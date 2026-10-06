@@ -2,15 +2,21 @@ import { act, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { usePlacesAutocomplete } from '../useAutocomplete';
 import { autocompleteService } from '../../services/autocompleteService';
-import { AddressDTO } from '../../api/generated/autocomplete/AddressDTO';
+import useScopedTranslation from '../useScopedTranslation';
+import { AddressDTO } from '../../api/generated/autocomplete/data-contracts';
 
 jest.mock('../../services/autocompleteService');
+jest.mock('../useScopedTranslation', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 const mockedAutocompleteService = autocompleteService as jest.Mocked<typeof autocompleteService>;
 
 describe('usePlacesAutocomplete', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useScopedTranslation as jest.Mock).mockReturnValue({ t: (key: string) => key } as any);
   });
 
   test('should return the initial state correctly', () => {
@@ -75,7 +81,7 @@ describe('usePlacesAutocomplete', () => {
       //   QueryText: 'query che causa errore',
       //   AdditionalFeatures: ['Core'],
       // });
-      expect(result.current.error).toBe('Errore nella ricerca');
+      expect(result.current.error).toBe('pages.pointOfSales.addressErrors.genericError');
       expect(result.current.loading).toBe(false);
       expect(result.current.options).toEqual([]);
     });

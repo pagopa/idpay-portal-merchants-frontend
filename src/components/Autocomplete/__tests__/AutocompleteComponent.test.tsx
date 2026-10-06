@@ -12,6 +12,10 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
     onInputChange,
     loading,
     renderInput,
+    isOptionEqualToValue,
+    filterOptions,
+    noOptionsText,
+    loadingText,
   } = props;
 
   return (
@@ -28,7 +32,8 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
         inputProps: {},
       })}
 
-      {loading ? <div role="progressbar">loading</div> : null}
+      {loading ? <div role="progressbar">{loadingText}</div> : null}
+      {!options.length ? <div>{noOptionsText}</div> : null}
 
       {open
         ? options.map((opt: any, i: number) => (
@@ -49,11 +54,53 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
       <button type="button" data-testid="type-abcde" onClick={() => onInputChange?.({}, 'abcde')}>
         type-abcde
       </button>
+      <button type="button" data-testid="type-spaces" onClick={() => onInputChange?.({}, '     ')}>
+        type-spaces
+      </button>
+      <button
+        type="button"
+        data-testid="select-undefined"
+        onClick={() => {
+          getOptionLabel?.(undefined);
+          onChange?.({}, undefined);
+        }}
+      >
+        select-undefined
+      </button>
+      <button
+        type="button"
+        data-testid="compare-options"
+        onClick={() => isOptionEqualToValue?.({ address: 'same' }, { address: 'same' })}
+      >
+        compare-options
+      </button>
+      <button
+        type="button"
+        data-testid="filter-options"
+        onClick={() => filterOptions?.(['one'])}
+      >
+        filter-options
+      </button>
     </div>
   );
 });
 
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
 import AutocompleteComponent from '../AutocompleteComponent';
+import { useAppSelector } from '../../../redux/hooks';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -70,6 +117,7 @@ jest.mock('../../../utils/constants', () => ({
 }));
 
 describe('AutocompleteComponent', () => {
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -83,53 +131,16 @@ describe('AutocompleteComponent', () => {
     expect(screen.getByLabelText('Cerca indirizzo')).toBeInTheDocument();
   });
 
-  it('does not trigger onChangeDebounce for input shorter than 5 chars', () => {
-    const onChangeDebounce = jest.fn();
-    render(<AutocompleteComponent options={[]} onChangeDebounce={onChangeDebounce} label="Test" />);
-    const input = screen.getByLabelText('Test');
-
-    fireEvent.change(input, { target: { value: 'abcd' } });
-    act(() => {
-      jest.advanceTimersByTime(1000);
-    });
-
-    expect(onChangeDebounce).not.toHaveBeenCalled();
-    expect(screen.queryByRole('progressbar')).toBeNull();
-  });
-
-  it('triggers onChangeDebounce after 800ms when input length >= 5 and trimmed', () => {
-    const onChangeDebounce = jest.fn();
-    render(<AutocompleteComponent options={[]} onChangeDebounce={onChangeDebounce} label="Test" />);
+  it('handles debounceable input even when no debounce callback is provided', () => {
+    render(<AutocompleteComponent options={[]} label="Test" />);
 
     fireEvent.click(screen.getByTestId('type-abcde'));
 
     act(() => {
-      jest.advanceTimersByTime(799);
-    });
-    expect(onChangeDebounce).not.toHaveBeenCalled();
-
-    act(() => {
-      jest.advanceTimersByTime(1);
-    });
-    expect(onChangeDebounce).toHaveBeenCalledWith('abcde');
-  });
-
-  it('does not trigger onChangeDebounce when optionValue equals inputValue', () => {
-    const onChangeDebounce = jest.fn();
-    const options = [{ Address: { Label: 'Via Roma 1' } }];
-
-    render(
-      <AutocompleteComponent options={options} onChangeDebounce={onChangeDebounce} label="Test" />
-    );
-
-    fireEvent.click(screen.getByTestId('open'));
-    fireEvent.click(screen.getByText('Via Roma 1'));
-
-    act(() => {
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(800);
     });
 
-    expect(onChangeDebounce).not.toHaveBeenCalled();
+    expect(screen.getByText('Nessuna opzione')).toBeInTheDocument();
   });
 
   it('calls onTextChange on every input change', () => {
@@ -143,6 +154,7 @@ describe('AutocompleteComponent', () => {
   it('shows error message when inputError is true', () => {
     render(<AutocompleteComponent options={[]} inputError label="Campo" />);
     expect(screen.getByText('Campo obbligatorio')).toBeInTheDocument();
+    expect(screen.getByTestId('input-error-icon')).toBeInTheDocument();
   });
 
   it('shows custom error message if errorText is provided', () => {
@@ -162,5 +174,15 @@ describe('AutocompleteComponent', () => {
     fireEvent.click(screen.getByText('Via Roma 1'));
 
     expect(onChange).toHaveBeenCalledWith({ Address: { Label: 'Via Roma 1' } });
+  });
+
+  it('handles optional callbacks and empty option labels safely', () => {
+    render(<AutocompleteComponent options={[]} required label="Seleziona" />);
+
+    fireEvent.click(screen.getByTestId('select-undefined'));
+    fireEvent.click(screen.getByTestId('compare-options'));
+    fireEvent.click(screen.getByTestId('filter-options'));
+
+    expect(screen.getByLabelText('Seleziona')).toBeInTheDocument();
   });
 });

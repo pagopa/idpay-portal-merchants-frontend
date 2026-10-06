@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { theme } from '@pagopa/mui-italia/theme';
 import { Box, Paper, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
+import useScopedTranslation from '../../../hooks/useScopedTranslation';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import CustomChip from '../../../components/Chip/CustomChip';
 import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-contracts';
@@ -42,7 +42,7 @@ const StatusChip = ({ status }: any) => {
 };
 
 export const ShopCard = ({ store, iban, ibanHolder }: Props) => {
-  const { t } = useTranslation();
+  const { t } = useScopedTranslation();
   const boldStyle = { fontWeight: theme.typography.fontWeightBold };
 
   const {
@@ -127,7 +127,7 @@ export const ShopCard = ({ store, iban, ibanHolder }: Props) => {
           marginBottom: 6,
         },
         {
-          label: t('pages.refundRequests.batchTransactionsDetails.state'),
+          label: t('commons.status'),
           value: <StatusChip status={status as RewardBatchTrxStatus} />,
           minWidth: '180px',
           isStatus: true,

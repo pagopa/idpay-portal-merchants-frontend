@@ -2,15 +2,18 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import NewDiscount from '../newDiscount';
+import { useAppSelector } from '../../../redux/hooks';
+
+jest.mock('../../../hooks/useScopedTranslation', () => ({
+  __esModule: true,
+  default: () => ({
+    t: (key: string) => key,
+  }),
+}));
 
 const mockUseCurrentInitiativeId = jest.fn();
 jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
   useCurrentInitiativeId: () => mockUseCurrentInitiativeId(),
-}));
-
-const mockUseCurrentInitiative = jest.fn();
-jest.mock('../../../hooks/useCurrentInitiative', () => ({
-  useCurrentInitiative: () => mockUseCurrentInitiative(),
 }));
 
 jest.mock('@pagopa/selfcare-common-frontend/lib', () => ({
@@ -36,31 +39,61 @@ jest.mock('../DiscountCreatedRecap', () => (props: any) => {
   return <div data-testid="discount-recap" />;
 });
 
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
+}));
+
 describe('NewDiscount', () => {
+  const renderComponent = () => render(<NewDiscount />);
+
+  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCurrentInitiative.mockReturnValue({ initiativeName: 'Init name' });
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeName: 'Init name' });
   });
 
-  it('returns null when initiativeId is missing', () => {
+  const mockInitiative = (initiativeId?: string) =>
     mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: undefined,
+      initiativeId,
       isValid: true,
       isListLoaded: true,
     });
 
-    const { container } = render(<NewDiscount />);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
+    mockUseCurrentInitiativeId.mockReturnValue({
+      initiativeName: 'Init name',
+    });
+  });
+
+  it('returns null when initiativeId is missing', () => {
+    mockInitiative(undefined);
+
+    const { container } = renderComponent();
     expect(container.firstChild).toBeNull();
   });
 
   it('renders CreateForm when discount is not created', () => {
-    mockUseCurrentInitiativeId.mockReturnValue({
-      initiativeId: 'init-1',
-      isValid: true,
-      isListLoaded: true,
-    });
+    mockInitiative('init-1');
 
-    render(<NewDiscount />);
+    renderComponent();
 
     expect(screen.getByTestId('breadcrumbs')).toBeInTheDocument();
     expect(screen.getByTestId('create-form')).toBeInTheDocument();
@@ -83,12 +116,12 @@ describe('NewDiscount', () => {
       isListLoaded: true,
     });
 
-    jest.spyOn(React, 'useState').mockImplementationOnce(() => [true, jest.fn()] as any);
-    jest
-      .spyOn(React, 'useState')
+    const useStateSpy = jest.spyOn(React, 'useState');
+    useStateSpy
+      .mockImplementationOnce(() => [true, jest.fn()] as any)
       .mockImplementationOnce(() => [{ id: 'trx' } as any, jest.fn()] as any);
 
-    render(<NewDiscount />);
+    renderComponent();
 
     expect(screen.getByTestId('discount-recap')).toBeInTheDocument();
     expect(screen.getByTestId('title')).toHaveTextContent('pages.newDiscount.createdTitle');

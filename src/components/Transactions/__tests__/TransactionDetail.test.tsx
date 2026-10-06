@@ -19,7 +19,7 @@ jest.mock('../../../routes', () => ({
   __esModule: true,
   default: {
     MODIFY_DOCUMENT:
-      '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/modify/:fileDocNumber',
+      '/merchants/:initiative_id/stores/:pointOfSaleId/transactions/:trxId/modify/:fileDocNumber',
     REVERSE: '/merchants/:id/stores/:pointOfSaleId/transactions/:trxId/reverse',
   },
 }));
@@ -116,7 +116,7 @@ describe('TransactionDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseParams.mockReturnValue({ id: 'merchant-123' });
+    mockUseParams.mockReturnValue({ initiative_id: 'init-123' });
     mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/here' } });
 
     mockUseStore.mockReturnValue({ storeId: 'store-999' });
@@ -248,6 +248,80 @@ describe('TransactionDetail', () => {
     expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
   });
 
+  it('applies truncation styles and shows tooltips for long drawer values', async () => {
+    const longListValue = 'VALORE-MOLTO-LUNGO-PER-TOOLTIP-TRANSACTION-DETAIL';
+    const longDocNumber = 'DOC-NUMBER-MOLTO-LUNGO-1234567890';
+    const longFilename = 'nome-file-molto-lungo-per-verificare-il-tooltip-transaction-detail.pdf';
+
+    const itemValues = {
+      id: 'TRX-LONG',
+      status: 'COMPLETED',
+      additionalProperties: { productName: longListValue },
+      invoiceFile: { filename: longFilename, docNumber: longDocNumber },
+    };
+
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        setIsOpen={jest.fn()}
+        itemValues={itemValues}
+        listItem={[
+          {
+            id: 'additionalProperties.productName',
+            label: 'Text Field',
+            type: TYPE_TEXT.Text,
+          },
+        ]}
+      />
+    );
+
+    const listValue = screen.getByText(longListValue);
+    const docNumber = screen.getByText(longDocNumber);
+    const fileName = screen.getByText(longFilename);
+
+    expect(listValue).toHaveStyle({
+      display: 'block',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(docNumber).toHaveStyle({
+      display: 'block',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(fileName).toHaveStyle({
+      display: 'block',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+
+    fireEvent.mouseOver(listValue);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(longListValue);
+
+    fireEvent.mouseLeave(listValue);
+    await waitFor(() => {
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+
+    fireEvent.mouseOver(docNumber);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(longDocNumber);
+
+    fireEvent.mouseLeave(docNumber);
+    await waitFor(() => {
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+
+    fireEvent.mouseOver(fileName);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(longFilename);
+  });
+
   it('creates edit button when editable and pushes correct path on click (docNumber present)', () => {
     const itemValues = {
       id: 'TRX-5',
@@ -354,7 +428,7 @@ describe('TransactionDetail', () => {
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-8', 'store-999');
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-8', 'store-999');
       expect(linkMock.href).toBe('https://example.com/invoice.pdf');
       expect(linkMock.download).toBe('invoice-8.pdf');
       expect(linkMock.click).toHaveBeenCalled();
@@ -395,7 +469,7 @@ describe('TransactionDetail', () => {
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-9', 'store-999');
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-9', 'store-999');
       expect(linkMock.href).toBe('https://example.com/default.pdf');
       expect(linkMock.download).toBe('fattura.pdf');
       expect(linkMock.click).toHaveBeenCalled();
@@ -428,7 +502,7 @@ describe('TransactionDetail', () => {
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('TRX-10', 'store-999');
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-10', 'store-999');
       expect(mockSetAlert).toHaveBeenCalled();
     });
 
@@ -514,7 +588,43 @@ describe('TransactionDetail', () => {
     const editBtn = screen.getByTestId('change-file-btn');
     fireEvent.click(editBtn);
 
-    expect(pushMock).toHaveBeenCalled();
-    expect(pushMock.mock.calls[0][0]).toContain('modify');
+    expect(pushMock).toHaveBeenCalledWith(
+      `${routes.MODIFY_DOCUMENT.replace(':initiative_id', 'init-123')
+        .replace(':pointOfSaleId', 'store-999')
+        .replace(':trxId', 'TRX-13')
+        .replace(':fileDocNumber', window.btoa('DOC-13'))}`,
+      { fromLocation: { pathname: '/here' } }
+    );
+  });
+
+  it('navigates to modify document with a placeholder when docNumber is null', () => {
+    const helpers = require('../../../helpers');
+    jest.spyOn(helpers, 'isReversableOrEditable').mockReturnValue(true);
+
+    const itemValues = {
+      id: 'TRX-14',
+      status: 'INVOICED',
+      invoiceFile: { filename: 'inv-14.pdf', docNumber: null },
+    };
+
+    render(
+      <TransactionDetail
+        title="Dettaglio"
+        isOpen
+        setIsOpen={jest.fn()}
+        itemValues={itemValues}
+        listItem={[]}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('change-file-btn'));
+
+    expect(pushMock).toHaveBeenCalledWith(
+      `${routes.MODIFY_DOCUMENT.replace(':initiative_id', 'init-123')
+        .replace(':pointOfSaleId', 'store-999')
+        .replace(':trxId', 'TRX-14')
+        .replace(':fileDocNumber', '-')}`,
+      { fromLocation: { pathname: '/here' } }
+    );
   });
 });

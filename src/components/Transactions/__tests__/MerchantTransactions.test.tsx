@@ -5,12 +5,26 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Tooltip } from '@mui/material';
 import MerchantTransactions from '../MerchantTransactions';
-import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/PointOfSaleTransactionProcessedDTO';
 import getStatus from '../useStatus';
 import CustomChip from '../../Chip/CustomChip';
+import { PointOfSaleTransactionProcessedDTO } from '../../../api/generated/merchants/data-contracts';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+}));
+
+jest.mock('../../../hooks/useCurrentInitiativeId', () => ({
+  useCurrentInitiativeId: () => 'initiative-1',
+}));
+
+jest.mock('../../../redux/slices/initiativesSlice', () => ({
+  setInitiativesList: jest.fn(),
+  intiativesListSelector: jest.fn(),
+  initiativesReducer: jest.fn(),
+}));
+
+jest.mock('../../../redux/hooks', () => ({
+  useAppSelector: jest.fn(),
 }));
 
 const mockSetAlert = jest.fn();
@@ -43,24 +57,27 @@ jest.mock('../../../pages/components/EmptyList', () => (props: any) => (
   <div data-testid="empty-list">{props.message}</div>
 ));
 
-jest.mock('../TransactionDataTable', () => (props: any) => (
-  <div data-testid="transaction-data-table">
-    <button onClick={() => props.onSortModelChange([{ field: 'updateDate', sort: 'desc' }])}>
-      Sort Action
-    </button>
-    <button onClick={() => props.onPaginationPageChange(2)}>Pagination Action</button>
-    <button onClick={() => props.handleRowAction(props.rows[0])}>Row Action</button>
-    {props.columns.map((col: any) => {
-      return (
-        <div key={col.field} data-testid={`col-${col.field}`}>
-          {col.valueGetter
-            ? props?.rows[0]?.additionalProperties?.productName
-            : props?.rows[0]?.[col.field]}
-        </div>
-      );
-    })}
-  </div>
-));
+jest.mock('../TransactionDataTable', () => (props: any) => {
+  mockTransactionDataTableProps = props;
+  return (
+    <div data-testid="transaction-data-table">
+      <button onClick={() => props.onSortModelChange([{ field: 'updateDate', sort: 'desc' }])}>
+        Sort Action
+      </button>
+      <button onClick={() => props.onPaginationPageChange(2)}>Pagination Action</button>
+      <button onClick={() => props.handleRowAction(props.rows[0])}>Row Action</button>
+      {props.columns.map((col: any) => {
+        return (
+          <div key={col.field} data-testid={`col-${col.field}`}>
+            {col.valueGetter
+              ? props?.rows[0]?.additionalProperties?.productName
+              : props?.rows[0]?.[col.field]}
+          </div>
+        );
+      })}
+    </div>
+  );
+});
 
 jest.mock(
   '../TransactionDetail',
@@ -79,6 +96,7 @@ jest.mock(
 const MockedCustomChip = CustomChip as jest.Mock;
 const mockedGetStatus = getStatus as jest.Mock;
 const MockedTooltip = Tooltip as jest.Mock;
+let mockTransactionDataTableProps: any;
 
 describe('MerchantTransactions', () => {
   const handleFiltersApplied = jest.fn();
@@ -100,6 +118,7 @@ describe('MerchantTransactions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockTransactionDataTableProps = undefined;
     mockedGetStatus.mockImplementation((status) => ({
       label: status,
       color: 'green',
@@ -132,10 +151,8 @@ describe('MerchantTransactions', () => {
   it('handles filter application', async () => {
     renderComponent();
 
-    const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
-    const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
-    );
+    const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
+    const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
 
     await act(async () => {
       await userEvent.type(fiscalCodeInput, 'test');
@@ -151,16 +168,14 @@ describe('MerchantTransactions', () => {
     renderComponent();
 
     await act(async () => {
-      const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
-      const fiscalCodeInput = screen.getByLabelText(
-        'pages.pointOfSaleTransactions.searchByFiscalCode'
-      );
+      const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
+      const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
 
     await waitFor(() => {
-      const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+      const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });
       expect(resetButton).toBeInTheDocument();
     });
   });
@@ -248,9 +263,7 @@ describe('MerchantTransactions', () => {
   it('updates fiscal code input on user input', async () => {
     renderComponent();
 
-    const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
-    );
+    const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
     await userEvent.type(fiscalCodeInput, 'TESTCF');
 
     expect(fiscalCodeInput).toHaveValue('TESTCF');
@@ -259,8 +272,8 @@ describe('MerchantTransactions', () => {
   it('accepts valid alphanumeric GTIN and trxCode input', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     await userEvent.type(gtinInput, 'ABC123xyz');
     await userEvent.type(trxCodeInput, 'ABC123xy');
 
@@ -277,10 +290,8 @@ describe('MerchantTransactions', () => {
   it('prevents GTIN and trxCodeInput input with spaces', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByGtin'
-    ) as HTMLInputElement;
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin') as HTMLInputElement;
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '123 456' } });
     fireEvent.change(trxCodeInput, { target: { value: '123 456' } });
 
@@ -291,11 +302,9 @@ describe('MerchantTransactions', () => {
   it('prevents GTIN and trxCodeInput input longer than 14/8 characters', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByGtin'
-    ) as HTMLInputElement;
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin') as HTMLInputElement;
     const trxCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByTrxCode'
+      'commons.labels.searchByTrxCode'
     ) as HTMLInputElement;
     fireEvent.change(gtinInput, { target: { value: '123456789012345' } });
     fireEvent.change(trxCodeInput, { target: { value: '123456789012345' } });
@@ -307,8 +316,8 @@ describe('MerchantTransactions', () => {
   it('shows error message for special characters in GTIN and trxCode', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '123@#$' } });
     fireEvent.change(trxCodeInput, { target: { value: '123@#$' } });
 
@@ -323,8 +332,8 @@ describe('MerchantTransactions', () => {
   it('accepts exactly 14 characters in GTIN and trxCode', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     await userEvent.type(gtinInput, '12345678901234');
     await userEvent.type(trxCodeInput, '12345678');
 
@@ -335,8 +344,8 @@ describe('MerchantTransactions', () => {
   it('clears error message when valid input is entered after invalid', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
 
     fireEvent.change(gtinInput, { target: { value: '123@' } });
     fireEvent.change(trxCodeInput, { target: { value: '123@' } });
@@ -360,8 +369,8 @@ describe('MerchantTransactions', () => {
   it('clears error message on blur', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
 
     fireEvent.change(gtinInput, { target: { value: '123@' } });
     fireEvent.blur(gtinInput);
@@ -379,8 +388,8 @@ describe('MerchantTransactions', () => {
   it('accepts empty GTIN and trxCode input', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
-    const trxCodeInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
+    const trxCodeInput = screen.getByLabelText('commons.labels.searchByTrxCode');
     fireEvent.change(gtinInput, { target: { value: '' } });
     fireEvent.change(trxCodeInput, { target: { value: '' } });
 
@@ -414,13 +423,9 @@ describe('MerchantTransactions', () => {
 
   it('renders form with all filter fields', () => {
     renderComponent();
-    expect(
-      screen.getByLabelText('pages.pointOfSaleTransactions.searchByFiscalCode')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText('pages.pointOfSaleTransactions.searchByTrxCode')
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin')).toBeInTheDocument();
+    expect(screen.getByLabelText('commons.labels.searchByFiscalCode')).toBeInTheDocument();
+    expect(screen.getByLabelText('commons.labels.searchByTrxCode')).toBeInTheDocument();
+    expect(screen.getByLabelText('commons.labels.searchByGtin')).toBeInTheDocument();
   });
 
   describe('renders transactions with variant values', () => {
@@ -514,6 +519,40 @@ describe('MerchantTransactions', () => {
     expect(screen.getByTestId('transaction-data-table')).toBeInTheDocument();
   });
 
+  it('covers column renderers for tooltip, currency, status and action cells', async () => {
+    renderComponent();
+
+    const row = mockTransactions[0];
+    const getColumn = (field: string) =>
+      mockTransactionDataTableProps.columns.find((col: any) => col.field === field);
+    const renderColumn = (field: string, value: any = row[field]) =>
+      getColumn(field).renderCell({ value, row });
+
+    expect(getColumn('productName').valueGetter({ row })).toBe('Frigorifero');
+
+    MockedTooltip.mockClear();
+    render(renderColumn('productName', 'Long product name'));
+    render(renderColumn('trxChargeDate', 'Long charge date'));
+    render(renderColumn('fiscalCode', 'AAAAAA00A00A000A'));
+    expect(MockedTooltip).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Long product name' }),
+      expect.anything()
+    );
+
+    render(renderColumn('effectiveAmountCents', 12345));
+    expect(screen.getByText('123.45')).toBeInTheDocument();
+
+    render(renderColumn('status', 'REFUNDED'));
+    expect(MockedCustomChip).toHaveBeenCalledWith(
+      expect.objectContaining({ label: 'REFUNDED' }),
+      expect.anything()
+    );
+
+    const actionCell = render(renderColumn('actions'));
+    await userEvent.click(actionCell.container.querySelector('button') as HTMLButtonElement);
+    await waitFor(() => expect(screen.getByTestId('detail-drawer')).toBeInTheDocument());
+  });
+
   it('updates transactions when props change', () => {
     const { rerender } = renderComponent();
 
@@ -567,10 +606,8 @@ describe('MerchantTransactions', () => {
       />
     );
 
-    const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
-    const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
-    );
+    const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
+    const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
 
     await act(async () => {
       await userEvent.type(fiscalCodeInput, 'test');
@@ -589,21 +626,19 @@ describe('MerchantTransactions', () => {
     );
 
     await act(async () => {
-      const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
-      const fiscalCodeInput = screen.getByLabelText(
-        'pages.pointOfSaleTransactions.searchByFiscalCode'
-      );
+      const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
+      const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
       await userEvent.type(fiscalCodeInput, 'test');
       await userEvent.click(applyButton);
     });
 
     await waitFor(() => {
-      const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+      const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });
       expect(resetButton).toBeInTheDocument();
     });
 
     await act(async () => {
-      const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+      const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });
       await userEvent.click(resetButton);
     });
   });
@@ -629,7 +664,7 @@ describe('MerchantTransactions', () => {
   it('validates GTIN with only numbers', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
     await userEvent.type(gtinInput, '1234567890123');
 
     expect(gtinInput).toHaveValue('1234567890123');
@@ -740,11 +775,11 @@ describe('MerchantTransactions', () => {
       />
     );
 
-    const applyButton = screen.getByRole('button', { name: 'commons.filterBtn' });
+    const applyButton = screen.getByRole('button', { name: 'actions.filterBtn' });
     fireEvent.click(applyButton);
 
     await waitFor(() => expect(handleFiltersApplied).not.toHaveBeenCalled());
-    expect(screen.getByRole('button', { name: 'commons.removeFiltersBtn' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'actions.removeFiltersBtn' })).toBeInTheDocument();
   });
 
   it('calls setAlert when drawer is toggled', async () => {
@@ -761,7 +796,7 @@ describe('MerchantTransactions', () => {
   it('rejects GTIN input with spaces or long values without updating formik', () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
     fireEvent.change(gtinInput, { target: { value: '123 456' } });
     expect(gtinInput).toHaveValue('');
 
@@ -808,7 +843,7 @@ describe('MerchantTransactions', () => {
   it('accepts GTIN input of exactly 14 characters', async () => {
     renderComponent();
 
-    const gtinInput = screen.getByLabelText('pages.pointOfSaleTransactions.searchByGtin');
+    const gtinInput = screen.getByLabelText('commons.labels.searchByGtin');
     await userEvent.type(gtinInput, '12345678901234');
 
     expect(gtinInput).toHaveValue('12345678901234');
@@ -826,11 +861,9 @@ describe('MerchantTransactions', () => {
   it('clears input fields on filter reset', async () => {
     renderComponent();
 
-    const fiscalCodeInput = screen.getByLabelText(
-      'pages.pointOfSaleTransactions.searchByFiscalCode'
-    );
+    const fiscalCodeInput = screen.getByLabelText('commons.labels.searchByFiscalCode');
     await userEvent.type(fiscalCodeInput, 'TEST');
-    const resetButton = screen.getByRole('button', { name: 'commons.removeFiltersBtn' });
+    const resetButton = screen.getByRole('button', { name: 'actions.removeFiltersBtn' });
     await userEvent.click(resetButton);
 
     expect(fiscalCodeInput).toHaveValue('');
