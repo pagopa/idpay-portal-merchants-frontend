@@ -107,6 +107,18 @@ describe('FileUploadAction', () => {
       />
     );
 
+  const submitUpload = async (apiCall: jest.Mock) => {
+    const { getByTestId, getByRole } = renderComponent(apiCall);
+
+    fireEvent.click(getByTestId('select-valid-file'));
+    fireEvent.change(getByRole('textbox'), {
+      target: { value: 'DOC-123' },
+    });
+    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+
+    return { getByTestId, getByRole };
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -135,42 +147,32 @@ describe('FileUploadAction', () => {
     });
   });
 
-  it('decodes the document number from params and keeps it when transaction id is missing', async () => {
-    mockUseParams.mockReturnValue({
-      trxId: undefined,
+  it.each([
+    {
+      title: 'decodes the document number from params and keeps it when transaction id is missing',
       fileDocNumber: window.btoa('DOC-123'),
-    });
-
-    const { getByRole } = renderComponent();
-
-    await waitFor(() => {
-      expect(getByRole('textbox')).toHaveValue('DOC-123');
-    });
-  });
-
-  it('falls back to the raw document number when params decoding fails', async () => {
-    mockUseParams.mockReturnValue({
-      trxId: undefined,
+      expectedValue: 'DOC-123',
+    },
+    {
+      title: 'falls back to the raw document number when params decoding fails',
       fileDocNumber: '%%%not-base64%%%',
-    });
-
-    const { getByRole } = renderComponent();
-
-    await waitFor(() => {
-      expect(getByRole('textbox')).toHaveValue('%%%not-base64%%%');
-    });
-  });
-
-  it('treats the missing document placeholder as an empty document number', async () => {
+      expectedValue: '%%%not-base64%%%',
+    },
+    {
+      title: 'treats the missing document placeholder as an empty document number',
+      fileDocNumber: '-',
+      expectedValue: '',
+    },
+  ])('$title', async ({ fileDocNumber, expectedValue }) => {
     mockUseParams.mockReturnValue({
       trxId: undefined,
-      fileDocNumber: '-',
+      fileDocNumber,
     });
 
     const { getByRole } = renderComponent();
 
     await waitFor(() => {
-      expect(getByRole('textbox')).toHaveValue('');
+      expect(getByRole('textbox')).toHaveValue(expectedValue);
     });
   });
 
@@ -482,49 +484,34 @@ describe('FileUploadAction', () => {
     });
   });
 
-  it('shows a dedicated retry-later alert when the upload fails with 404', async () => {
-    const apiCall = jest.fn().mockRejectedValue(new ApiError(404, 'Not found'));
-    const { getByTestId, getByRole } = renderComponent(apiCall);
+  it.each([
+    {
+      title: 'shows a dedicated retry-later alert when the upload fails with 404',
+      createApiCall: () => jest.fn().mockRejectedValue(new ApiError(404, 'Not found')),
+      expectedAlertText: 'modifyDocument.errors.notFoundError',
+      expectedReason: 'RESOURCE_NOT_FOUND',
+    },
+    {
+      title: 'shows an alert when the upload request fails',
+      createApiCall: () => jest.fn().mockRejectedValue(new Error('request failed')),
+      expectedAlertText: 'modifyDocument.errors.errorAlert',
+      expectedReason: 'REQUEST_FAILED',
+    },
+  ])('$title', async ({ createApiCall, expectedAlertText, expectedReason }) => {
+    const apiCall = createApiCall();
 
-    fireEvent.click(getByTestId('select-valid-file'));
-    fireEvent.change(getByRole('textbox'), {
-      target: { value: 'DOC-123' },
-    });
-    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
+    await submitUpload(apiCall);
 
     await waitFor(() =>
       expect(setAlertMock).toHaveBeenCalledWith({
-        text: 'modifyDocument.errors.notFoundError',
+        text: expectedAlertText,
         isOpen: true,
         severity: 'error',
       })
     );
 
     expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
-      reason: 'RESOURCE_NOT_FOUND',
-    });
-  });
-
-  it('shows an alert when the upload request fails', async () => {
-    const apiCall = jest.fn().mockRejectedValue(new Error('request failed'));
-    const { getByTestId, getByRole } = renderComponent(apiCall);
-
-    fireEvent.click(getByTestId('select-valid-file'));
-    fireEvent.change(getByRole('textbox'), {
-      target: { value: 'DOC-123' },
-    });
-    fireEvent.click(getByRole('button', { name: 'actions.continue' }));
-
-    await waitFor(() =>
-      expect(setAlertMock).toHaveBeenCalledWith({
-        text: 'modifyDocument.errors.errorAlert',
-        isOpen: true,
-        severity: 'error',
-      })
-    );
-
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
-      reason: 'REQUEST_FAILED',
+      reason: expectedReason,
     });
   });
 
