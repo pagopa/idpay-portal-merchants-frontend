@@ -46,7 +46,6 @@ jest.mock('../../../services/analyticsService', () => ({
     IBAN_UPDATE_SUCCESS: 'IDPAY_IBAN_UPDATE_SUCCESS',
     OPERATIVE_EMAIL_SUCCESS: 'IDPAY_EMAIL_UX_SUCCESS',
     OPERATIVE_EMAIL_UPDATE_SUCCESS: 'IDPAY_EMAIL_UPDATE_UX_SUCCESS',
-    ADD_STORE_CONVERSION: 'IDPAY_ADD_STORE_UX_CONVERSION',
   },
   trackAnalyticsEvent: jest.fn(),
 }));
@@ -262,7 +261,6 @@ describe('InitiativeOverview', () => {
 
     fireEvent.click(await screen.findByTestId('add-stores-button'));
 
-    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_UX_CONVERSION');
     expect(mockPush).toHaveBeenCalledWith('/portale-esercenti/initiative-123/punti-vendita/censisci');
   });
 

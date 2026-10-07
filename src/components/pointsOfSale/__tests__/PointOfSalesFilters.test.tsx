@@ -5,30 +5,29 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { useFormik } from 'formik';
 import PointOfSalesFilters, { PointOfSalesFilterField } from '../PointOfSalesFilters';
 import { GetPointOfSalesFilters } from '../../../types/types';
+import { trackAnalyticsInputChange } from '../../../services/analyticsService';
+
+const createMockFormik = (overrides?: Partial<GetPointOfSalesFilters>) => ({
+  values: {
+    initiative: '',
+    type: undefined,
+    city: '',
+    address: '',
+    contactName: '',
+    sort: 'asc',
+    ...overrides,
+  },
+  handleChange: jest.fn(),
+  handleBlur: jest.fn(),
+} as any);
 
 jest.mock('../../../pages/initiativeDiscounts/FiltersForm', () => ({
   __esModule: true,
-  default: ({
-    children,
-    onFiltersApplied,
-    onFiltersReset,
-    formik,
-  }: {
-    children: React.ReactNode;
-    onFiltersApplied: (values: GetPointOfSalesFilters) => void;
-    onFiltersReset: () => void;
-    formik: { values: GetPointOfSalesFilters };
-  }) => (
-    <div>
-      <button type="button" onClick={() => onFiltersApplied(formik.values)}>
-        apply-filters
-      </button>
-      <button type="button" onClick={onFiltersReset}>
-        reset-filters
-      </button>
-      {children}
-    </div>
-  ),
+  default: require('../../../test-utils/filtersFormMock').FiltersFormMock,
+}));
+
+jest.mock('../../../services/analyticsService', () => ({
+  trackAnalyticsInputChange: jest.fn(),
 }));
 
 const TestComponent = ({
@@ -116,18 +115,7 @@ describe('PointOfSalesFilters', () => {
   });
 
   test('falls back to the raw initiative value when no matching option exists', () => {
-    const formik = {
-      values: {
-        initiative: 'initiative-missing',
-        type: undefined,
-        city: '',
-        address: '',
-        contactName: '',
-        sort: 'asc',
-      },
-      handleChange: jest.fn(),
-      handleBlur: jest.fn(),
-    } as any;
+    const formik = createMockFormik({ initiative: 'initiative-missing' });
 
     render(
       <PointOfSalesFilters
@@ -147,18 +135,7 @@ describe('PointOfSalesFilters', () => {
   });
 
   test('renders empty initiative select when no initiative options are provided', () => {
-    const formik = {
-      values: {
-        initiative: '',
-        type: undefined,
-        city: '',
-        address: '',
-        contactName: '',
-        sort: 'asc',
-      },
-      handleChange: jest.fn(),
-      handleBlur: jest.fn(),
-    } as any;
+    const formik = createMockFormik();
 
     render(
       <PointOfSalesFilters
@@ -186,18 +163,7 @@ describe('PointOfSalesFilters', () => {
   });
 
   test('renders fixed initiative options first and removes duplicated fixed values', () => {
-    const formik = {
-      values: {
-        initiative: '',
-        type: undefined,
-        city: '',
-        address: '',
-        contactName: '',
-        sort: 'asc',
-      },
-      handleChange: jest.fn(),
-      handleBlur: jest.fn(),
-    } as any;
+    const formik = createMockFormik();
 
     render(
       <PointOfSalesFilters
@@ -233,19 +199,7 @@ describe('PointOfSalesFilters', () => {
   });
 
   test('renders associated filter and disables initiative when requested', () => {
-    const formik = {
-      values: {
-        associated: 'NO',
-        initiative: '',
-        type: undefined,
-        city: '',
-        address: '',
-        contactName: '',
-        sort: 'asc',
-      },
-      handleChange: jest.fn(),
-      handleBlur: jest.fn(),
-    } as any;
+    const formik = createMockFormik({ associated: 'NO' });
 
     render(
       <PointOfSalesFilters
@@ -269,5 +223,76 @@ describe('PointOfSalesFilters', () => {
     expect(
       screen.queryByRole('option', { name: 'enums.initiativesFilters.noInitiative' })
     ).not.toBeInTheDocument();
+  });
+
+  test('handles associated select changes and tracks analytics input changes', () => {
+    const handleChange = jest.fn();
+    const formik = {
+      values: {
+        associated: '',
+        initiative: '',
+        type: undefined,
+        city: '',
+        address: '',
+        contactName: '',
+        sort: 'asc',
+      },
+      handleChange,
+      handleBlur: jest.fn(),
+    } as any;
+
+    render(
+      <PointOfSalesFilters
+        formik={formik}
+        filtersAppliedOnce={false}
+        onFiltersApplied={jest.fn()}
+        onFiltersReset={jest.fn()}
+        t={(key: string) => key}
+        fields={['associated']}
+      />
+    );
+
+    fireEvent.mouseDown(screen.getByLabelText('pages.posCatalog.filters.associated'));
+    fireEvent.click(screen.getByRole('option', { name: 'pages.posCatalog.filters.associatedYes' }));
+
+    expect(handleChange).toHaveBeenCalled();
+    expect(trackAnalyticsInputChange).toHaveBeenCalledWith('associated', 'YES');
+  });
+
+  test('renders initiative select when the current value is undefined', () => {
+    const formik = createMockFormik({ initiative: undefined });
+
+    render(
+      <PointOfSalesFilters
+        formik={formik}
+        filtersAppliedOnce={false}
+        onFiltersApplied={jest.fn()}
+        onFiltersReset={jest.fn()}
+        t={(key: string) => key}
+        fields={['initiative']}
+        initiativeOptions={[{ value: 'initiative-1', label: 'Initiative 1' }]}
+      />
+    );
+
+    expect(screen.getByLabelText('Iniziativa')).toBeInTheDocument();
+  });
+
+  test('renders the type filter without the initiative filter', () => {
+    render(
+      <TestComponent
+        fields={['type']}
+        initialValues={{
+          initiative: '',
+          type: 'PHYSICAL',
+          city: '',
+          address: '',
+          contactName: '',
+          sort: 'asc',
+        }}
+      />
+    );
+
+    expect(screen.getByLabelText('pages.initiativeStores.pointOfSaleType')).toBeInTheDocument();
+    expect(screen.getByText('pages.initiativeStores.physical')).toBeInTheDocument();
   });
 });

@@ -40,6 +40,7 @@ import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
 import { useAlert } from '../../../hooks/useAlert';
 import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts';
 import { browserConsole } from '../../../utils/consoleLogger';
+import { trackAnalyticsInputChange } from '../../../services/analyticsService';
 import { FranchisePointOfSaleDTO } from '../../../api/generated/merchants/data-contracts';
 import { MerchantDetailDTO } from '../../../api/generated/merchants/data-contracts';
 import { ENABLED_DOWNLOAD_STATUSES } from '../../../utils/constants';
@@ -359,7 +360,10 @@ const ShopDetails: React.FC = () => {
                 name="pointOfSaleId"
                 label={t('pages.initiativeStores.pointOfSale')}
                 value={formik.values.pointOfSaleId}
-                onChange={formik.handleChange}
+                onChange={(event) => {
+                  formik.handleChange(event);
+                  trackAnalyticsInputChange('pointOfSaleId', event.target.value);
+                }}
                 size="small"
                 disabled={stores?.length === 0}
               >
@@ -405,7 +409,10 @@ const ShopDetails: React.FC = () => {
                 }}
                 name="status"
                 label={t('commons.status')}
-                onChange={formik.handleChange}
+                onChange={(event) => {
+                  formik.handleChange(event);
+                  trackAnalyticsInputChange('status', event.target.value);
+                }}
                 value={formik.values.status}
                 sx={{
                   width: 165,

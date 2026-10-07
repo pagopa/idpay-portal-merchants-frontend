@@ -25,6 +25,7 @@ import { PointOfSaleTransactionProcessedDTO } from '../../api/generated/merchant
 import { useAlert } from '../../hooks/useAlert';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { getInitiativeProductLabel } from '../../utils/initiativeProductLabel';
+import { trackAnalyticsInputChange } from '../../services/analyticsService';
 import TransactionDataTable from './TransactionDataTable';
 import TransactionDetail from './TransactionDetail';
 import getStatus from './useStatus';
@@ -240,6 +241,11 @@ const MerchantTransactions = ({
     formik.handleChange(event);
   }, []);
 
+  const handleSelectChange = useCallback((event: any) => {
+    formik.handleChange(event);
+    trackAnalyticsInputChange(event.target.name, event.target.value);
+  }, []);
+
   const renderCellWithTooltip = (value: string, tooltipThreshold: number) => (
     <Tooltip title={value && value.length >= tooltipThreshold ? value : ''}>
       <Typography sx={{ ...infoStyles, maxWidth: '100% !important' }} className="ShowDots">
@@ -320,7 +326,7 @@ const MerchantTransactions = ({
               }}
               name="status"
               label={t('commons.status')}
-              onChange={formik.handleChange}
+              onChange={handleSelectChange}
               value={formik.values.status}
               sx={{
                 height: 44,
