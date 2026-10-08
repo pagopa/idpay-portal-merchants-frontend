@@ -119,6 +119,7 @@ const AssociateSelectedPosModal: React.FC<Props> = ({
           </InputLabel>
           <Select
             labelId={selectLabelId}
+            name="selectedInitiativeId"
             value={selectedInitiativeId}
             label={initiativeLabel}
             onChange={(event) => {

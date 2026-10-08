@@ -389,6 +389,7 @@ const InitiativesList = () => {
         <Box sx={{ display: 'grid', gridColumn: 'span 12' }}>
           <TextField
             id="search-initiative"
+            name="searchInitiative"
             placeholder={t('pages.initiativesList.searchByInitiativeName')}
             variant="outlined"
             size="small"
