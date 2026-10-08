@@ -720,6 +720,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         <AutocompleteComponent
                           options={options}
                           label="Indirizzo completo"
+                          name="address"
                           required
                           onChangeDebounce={(value) => search(value)}
                           onChange={(addressObj) => {

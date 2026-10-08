@@ -50,6 +50,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
   >
     <Box display="flex" flexDirection="column" rowGap="1.5rem">
       <TextField
+        name='ibanHolder'
         value={merchantData?.ibanHolder}
         defaultValue={data?.ibanHolder}
         label={t('pages.initiativeOverview.ibanModal.fieldHolder.placeholder')}
@@ -74,6 +75,7 @@ export const EditIbanModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => {
         helperText={error?.ibanHolder && t(error?.ibanHolder)}
       />
       <TextField
+        name='iban'
         value={merchantData?.iban}
         defaultValue={data?.iban}
         label={t('pages.initiativeOverview.ibanModal.fieldIban.placeholder')}
