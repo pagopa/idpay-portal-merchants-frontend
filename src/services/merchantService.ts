@@ -31,6 +31,10 @@ import {
   PointOfSaleExclusionResultDTO,
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
+import {
+  reconcileProcessedTransactions,
+  recordPendingTransactionState,
+} from './transactionStateBridge';
 
 type GetPointOfSalesCatalogFilters = Omit<GetPointOfSalesFilters, 'initiative'> & {
   initiativeId?: string;
@@ -87,12 +91,14 @@ export const getMerchantTransactions = (
 ): Promise<MerchantTransactionsListDTO> =>
   getMerchantsApi().getMerchantTransactions(initiativeId, page, fiscalCode, status);
 
-export const getMerchantTransactionsProcessed = (
+export const getMerchantTransactionsProcessed = async (
   params: GetMerchantTransactionsProcessedParams
 ): Promise<MerchantTransactionsListDTO> => {
   const { initiativeId, ...query } = params;
 
-  return getMerchantsApi().getMerchantTransactionsProcessed(initiativeId, query);
+  const response = await getMerchantsApi().getMerchantTransactionsProcessed(initiativeId, query);
+
+  return reconcileProcessedTransactions(initiativeId, response);
 };
 
 export const getMerchantInitiativeStatistics = (
@@ -106,13 +112,29 @@ export const getMerchantDetail = (initiativeId: string): Promise<MerchantDetailD
 export const deleteTransaction = (initaitiveId: string, transactionId: string): Promise<void> =>
   getMerchantsApi().deleteTransaction(initaitiveId, transactionId);
 
-export const reversalTransactionInvoiced = (
+export const reversalTransactionInvoiced = async (
   initiativeId: string,
   transactionId: string,
   file: File,
   docNumber?: string
-): Promise<void | { code: string; message: string }> =>
-  getMerchantsApi().reversalTransactionInvoiced(initiativeId, transactionId, file, docNumber);
+): Promise<void | { code: string; message: string }> => {
+  const response = await getMerchantsApi().reversalTransactionInvoiced(
+    initiativeId,
+    transactionId,
+    file,
+    docNumber
+  );
+
+  if (response?.transactionRevision !== undefined) {
+    recordPendingTransactionState({
+      initiativeId,
+      transactionId,
+      operation: 'reversal',
+      effect: 'reversal',
+      expectedTransactionRevision: response.transactionRevision,
+    });
+  }
+};
 
 export const createTransaction = (
   amountCents: number,
@@ -339,13 +361,33 @@ export const generateMerchantReport = (
 export const downloadMerchantReport = (initiativeId: string, reportId: string) =>
   getMerchantsApi().downloadMerchantReport(initiativeId, reportId);
 
-export const updateInvoiceTransaction = (
+export const updateInvoiceTransaction = async (
   initiativeId: string,
   transactionId: string,
   file: File,
   docNumber?: string
-): Promise<{ code: string; message: string } | void> =>
-  getMerchantsApi().updateInvoiceTransaction(initiativeId, transactionId, file, docNumber);
+): Promise<{ code: string; message: string } | void> => {
+  const response = await getMerchantsApi().updateInvoiceTransaction(
+    initiativeId,
+    transactionId,
+    file,
+    docNumber
+  );
+
+  if (response?.transactionRevision !== undefined) {
+    recordPendingTransactionState({
+      initiativeId,
+      transactionId,
+      operation: 'invoice-update',
+      effect: 'invoice',
+      expectedTransactionRevision: response.transactionRevision,
+      invoice: {
+        ...(docNumber !== undefined ? { docNumber } : {}),
+        ...(file?.name ? { filename: file.name } : {}),
+      },
+    });
+  }
+};
 
 export const updateMerchantData = (
   initaitiveId: string,

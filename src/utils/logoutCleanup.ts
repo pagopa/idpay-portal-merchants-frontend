@@ -2,6 +2,7 @@ import {
   storageTokenOps,
   storageUserOps,
 } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
+import { clearPendingTransactionStates } from '../services/transactionStateBridge';
 
 /**
  * Performs local cleanup before redirecting to external logout.
@@ -30,4 +31,6 @@ export const cleanupOnLogout = () => {
   } catch (_) {
     // ignore
   }
+
+  clearPendingTransactionStates();
 };
