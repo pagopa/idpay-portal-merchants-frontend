@@ -95,6 +95,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
         const status: ReportStatusEnum = response?.reportStatus ?? FAILED;
         updateAlerts(status as string, true);
         setTimeout(() => updateAlerts(status as string, false), 3000);
+        onReportGenerated?.();
       } catch (error) {
         if (currentRequestId !== requestIdRef.current) {
           return;
@@ -105,11 +106,6 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
       } finally {
         if (currentRequestId === requestIdRef.current) {
           formik.resetForm();
-          onReportGenerated?.();
-        }
-        if (currentRequestId === requestIdRef.current) {
-          formik.resetForm();
-          onReportGenerated?.();
         }
       }
     },
@@ -137,9 +133,11 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
             <TextField
+              name="startDate"
               label="Dal"
               type="date"
               size="medium"
+              disabled={isGenerateReportDisabled}
               value={formik.values.startDate ?? ''}
               onChange={(e) => {
                 void formik.setFieldValue('startDate', e.target.value);
@@ -157,9 +155,11 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
             />
 
             <TextField
+              name="endDate"
               label="Al"
               type="date"
               size="medium"
+              disabled={isGenerateReportDisabled}
               value={formik.values.endDate ?? ''}
               onChange={(e) => void formik.setFieldValue('endDate', e.target.value)}
               onBlur={formik.handleBlur}

@@ -77,27 +77,7 @@ jest.mock('../../../components/Drawer/DetailDrawer', () => ({
 
 jest.mock('../../initiativeDiscounts/FiltersForm', () => ({
   __esModule: true,
-  default: ({
-    children,
-    onFiltersApplied,
-    onFiltersReset,
-    formik,
-  }: {
-    children: React.ReactNode;
-    onFiltersApplied: (values: GetPointOfSalesFilters) => void;
-    onFiltersReset: () => void;
-    formik: { values: GetPointOfSalesFilters };
-  }) => (
-    <div>
-      <button type="button" onClick={() => onFiltersApplied(formik.values)}>
-        apply-filters
-      </button>
-      <button type="button" onClick={onFiltersReset}>
-        reset-filters
-      </button>
-      {children}
-    </div>
-  ),
+  default: require('../../../test-utils/filtersFormMock').FiltersFormMock,
 }));
 
 const TestFilters = ({
