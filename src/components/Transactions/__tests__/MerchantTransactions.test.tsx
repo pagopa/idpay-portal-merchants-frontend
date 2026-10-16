@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 jest.setTimeout(20000);
@@ -867,5 +868,112 @@ describe('MerchantTransactions', () => {
     await userEvent.click(resetButton);
 
     expect(fiscalCodeInput).toHaveValue('');
+  });
+
+  it('covers onSubmit logging, status analytics and tooltip fallback rendering', () => {
+    jest.isolateModules(() => {
+      const mockLog = jest.fn();
+      const mockTrackAnalyticsInputChange = jest.fn();
+      const mockUseFormik = jest.fn().mockReturnValue({
+        values: {
+          fiscalCode: '',
+          productGtin: '',
+          trxCode: '',
+          status: '',
+          page: 0,
+        },
+        dirty: false,
+        handleChange: jest.fn(),
+        handleBlur: jest.fn(),
+        resetForm: jest.fn(),
+      });
+
+      jest.doMock('formik', () => ({
+        useFormik: mockUseFormik,
+      }));
+
+      jest.doMock('react', () => React);
+
+      jest.doMock('../../../utils/consoleLogger', () => ({
+        browserConsole: {
+          log: mockLog,
+          warn: jest.fn(),
+        },
+      }));
+
+      jest.doMock('../../../services/analyticsService', () => ({
+        trackAnalyticsInputChange: mockTrackAnalyticsInputChange,
+      }));
+
+      jest.doMock('@mui/material', () => {
+        const actual = jest.requireActual('@mui/material');
+
+        return {
+          ...actual,
+          Select: ({ children, inputProps, name, onChange, value }: any) => (
+            <select
+              data-testid={inputProps?.['data-testid']}
+              name={name}
+              value={value ?? ''}
+              onChange={(event) =>
+                onChange?.({
+                  target: {
+                    name: name ?? event.target.name,
+                    value: event.target.value,
+                  },
+                })
+              }
+            >
+              {children}
+            </select>
+          ),
+          MenuItem: ({ children, value }: any) => <option value={value}>{children ?? value}</option>,
+          Tooltip: ({ title, children }: any) => (
+            <div data-testid="mock-tooltip" data-title={title}>
+              {children}
+            </div>
+          ),
+        };
+      });
+
+      const { default: MerchantTransactionsIsolated } = require('../MerchantTransactions');
+
+      render(
+        <MerchantTransactionsIsolated
+          transactions={mockTransactions}
+          handleFiltersApplied={handleFiltersApplied}
+          handleFiltersReset={handleFiltersReset}
+          sortModel={[]}
+        />
+      );
+
+      const formikConfig = mockUseFormik.mock.calls[0][0];
+      const submittedValues = {
+        fiscalCode: 'AAAAAA00A00A000A',
+        productGtin: '12345678901234',
+        trxCode: 'TRXCODE1',
+        status: 'REWARDED',
+        page: 0,
+      };
+
+      formikConfig.onSubmit(submittedValues);
+      expect(mockLog).toHaveBeenCalledWith(submittedValues);
+
+      fireEvent.change(screen.getByTestId('filterStatus-select'), {
+        target: {
+          name: 'status',
+          value: 'REFUNDED',
+        },
+      });
+
+      expect(mockTrackAnalyticsInputChange).toHaveBeenCalledWith('status', 'REFUNDED');
+
+      const productNameColumn = mockTransactionDataTableProps.columns.find(
+        (column: any) => column.field === 'productName'
+      );
+
+      expect(productNameColumn.renderCell({ value: 'Nome prodotto molto lungo' })).toBeTruthy();
+      expect(productNameColumn.renderCell({ value: '' })).toBeTruthy();
+    });
   });
 });

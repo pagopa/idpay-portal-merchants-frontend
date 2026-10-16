@@ -97,6 +97,29 @@ describe('InitiativeAnalyticsGuard', () => {
     expect(mockClearInitiativeAnalyticsProperties).not.toHaveBeenCalled();
   });
 
+  it('tracks initiative detail pages without exposing dynamic alphanumeric route parameters', () => {
+    mockUseLocation.mockReturnValue({
+      pathname:
+        '/portale-esercenti/69e0fa95e21efa516c7b8dec/richieste-di-rimborso/7b198efa-3071-48b7-acb0-d166afb1b522',
+    });
+    mockUseSelector.mockReturnValue([
+      {
+        initiativeId: '69e0fa95e21efa516c7b8dec',
+        initiativeName: 'Test initiative',
+      },
+    ]);
+
+    render(
+      <InitiativeAnalyticsGuard>
+        <span>content</span>
+      </InitiativeAnalyticsGuard>
+    );
+
+    expect(mockTrackAnalyticsPageView).toHaveBeenCalledWith(
+      '/portale-esercenti/69e0fa95e21efa516c7b8dec/richieste-di-rimborso'
+    );
+  });
+
   it('does not track a page view when the route initiative is not in the list', () => {
     mockUseLocation.mockReturnValue({
       pathname: '/portale-esercenti/missing-initiative/punti-vendita',

@@ -54,6 +54,7 @@ export const EditEmailModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => 
         {t('pages.initiativeOverview.emailModal.fieldInsert.label')}
       </Typography>
       <TextField
+        name='operativeEmail'
         value={draftEmail}
         defaultValue={data?.operativeEmail}
         label={t('pages.initiativeOverview.emailModal.fieldInsert.placeholder')}
@@ -81,6 +82,7 @@ export const EditEmailModal = ({ isOpen, setIsOpen, onUpdate, data }: Props) => 
         {t('pages.initiativeOverview.emailModal.fieldConfirm.label')}
       </Typography>
       <TextField
+        name='confirmOperativeEmail'
         value={merchantData?.operativeEmail}
         label={t('pages.initiativeOverview.emailModal.fieldConfirm.placeholder')}
         variant='outlined'

@@ -59,6 +59,7 @@ const InitiativeStoresUpload: React.FC = () => {
   const [apiValidationAlertMessages, setApiValidationAlertMessages] = useState<FormAlertMessages>(
     {}
   );
+  const [apiValidationReason, setApiValidationReason] = useState<string | undefined>();
   const [pointsOfSaleLoaded, setPointsOfSaleLoaded] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const { t } = useScopedTranslation();
@@ -68,6 +69,22 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const trackAddStoreError = (reason: string) => {
     trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_ERROR, { reason });
+  };
+
+  const getValidationErrorReason = () => {
+    if (Object.keys(apiValidationErrors).length > 0 || Object.keys(apiValidationAlertMessages).length > 0) {
+      return apiValidationReason ?? 'VALIDATION_ERROR';
+    }
+
+    if (Object.keys(duplicateEmailErrors).length > 0) {
+      return 'DUPLICATE_EMAIL';
+    }
+
+    if (!isFormValid) {
+      return 'FORM_VALIDATION_ERROR';
+    }
+
+    return 'VALIDATION_ERROR';
   };
 
   const mergeFormErrors = (first: FormErrors, second: FormErrors): FormErrors => {
@@ -92,6 +109,7 @@ const InitiativeStoresUpload: React.FC = () => {
       }
       setApiValidationErrors({});
       setApiValidationAlertMessages({});
+      setApiValidationReason(undefined);
       setSalesPoints(newSalesPoints);
     },
     [pointsOfSaleLoaded]
@@ -220,6 +238,7 @@ const InitiativeStoresUpload: React.FC = () => {
         Object.keys(apiValidationErrors).length > 0 ||
         Object.keys(apiValidationAlertMessages).length > 0
       ) {
+        trackAddStoreError(getValidationErrorReason());
         return;
       }
       const userJwt = parseJwt(storageTokenOps.read());
@@ -259,7 +278,9 @@ const InitiativeStoresUpload: React.FC = () => {
               : undefined;
 
           if (responseValidationDetails?.length) {
-            trackAddStoreError('VALIDATION_ERROR');
+            const validationReason = responseValidationDetails.find((detail) => detail.code)?.code;
+            setApiValidationReason(validationReason ?? 'VALIDATION_ERROR');
+            trackAddStoreError(validationReason ?? 'VALIDATION_ERROR');
             const { errors, alertMessages } = buildApiValidationState(responseValidationDetails);
             setApiValidationErrors(errors);
             setApiValidationAlertMessages(alertMessages);

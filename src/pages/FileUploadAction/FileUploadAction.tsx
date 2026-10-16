@@ -10,6 +10,7 @@ import { useAlert } from '../../hooks/useAlert';
 import { useScopedTranslation } from '../../hooks/useScopedTranslation';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
+import { resolveApiErrorStatus } from '../../utils/resolveApiErrorStatus';
 
 interface FileUploadActionProps {
   apiCall:
@@ -35,9 +36,11 @@ interface FileUploadActionProps {
 
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
 const VALID_MIME_TYPES = ['application/pdf', 'application/xml', 'text/xml'];
+const MISSING_FILE_DOC_NUMBER_PLACEHOLDER = '-';
 
 const FileUploadAction: React.FC<FileUploadActionProps> = ({
   apiCall,
+  successStateKey,
   breadcrumbsLabel,
   manualLink,
   styleClass,
@@ -73,6 +76,11 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
   useEffect(() => {
     if (fileDocNumber) {
+      if (fileDocNumber === MISSING_FILE_DOC_NUMBER_PLACEHOLDER) {
+        setDocNumber('');
+        return;
+      }
+
       try {
         const decoded = decodeURIComponent(escape(window.atob(fileDocNumber)));
         setDocNumber(decoded);
@@ -180,13 +188,13 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           });
           if (response.code === 'REWARD_BATCH_STATUS_NOT_ALLOWED') {
             setAlert({
-              text: t('modifyDocument.errors.deniedSentError'),
+              text: scopedT(`${i18nBlockKey}.errors.deniedSentError`),
               isOpen: true,
               severity: 'error',
             });
           } else if (response.code === 'REWARD_BATCH_ALREADY_SENT') {
             setAlert({
-              text: t('modifyDocument.errors.alreadySentError'),
+              text: scopedT(`${i18nBlockKey}.errors.alreadySentError`),
               isOpen: true,
               severity: 'error',
             });
@@ -201,23 +209,28 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           ...history.location,
           state: {
             ...(history.location.state || {}),
-            refundUploadSuccess: true,
+            [successStateKey]: true,
           },
         });
 
         trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_SUCCESS);
         setAlert({
-          text: t('modifyDocument.refundSuccessUpload'),
+          text: scopedT(`${i18nBlockKey}.refundSuccessUpload`),
           isOpen: true,
           severity: 'success',
         });
         history.goBack();
       } catch (error: unknown) {
+        const status = resolveApiErrorStatus(error);
+        const isNotFoundError = status === 404;
+
         trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
-          reason: 'REQUEST_FAILED',
+          reason: isNotFoundError ? 'RESOURCE_NOT_FOUND' : 'REQUEST_FAILED',
         });
         setAlert({
-          text: t('modifyDocument.errors.errorAlert'),
+          text: isNotFoundError
+            ? scopedT(`${i18nBlockKey}.errors.notFoundError`)
+            : scopedT(`${i18nBlockKey}.errors.errorAlert`),
           isOpen: true,
           severity: 'error',
         });

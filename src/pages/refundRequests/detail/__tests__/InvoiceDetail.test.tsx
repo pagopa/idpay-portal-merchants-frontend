@@ -92,7 +92,7 @@ import { postponeTransaction } from '../../../../services/merchantService';
 import { useAlert } from '../../../../hooks/useAlert';
 import { useAppSelector } from '../../../../redux/hooks';
 import { isReversableOrEditable } from '../../../../helpers';
-import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../../../utils/constants';
+import { TYPE_TEXT } from '../../../../utils/constants';
 import { safeFormatDate } from '../../../../utils/formatUtils';
 import { useCurrentInitiative } from '../../../../hooks/useCurrentInitiative';
 import { useUserPermissions } from '../../../../hooks/useUserPermissions';
@@ -526,7 +526,7 @@ describe('Download File', () => {
     expect(screen.getByTestId('item-loader')).toBeInTheDocument();
   });
 
-  it('should use empty string when docNumber is undefined', () => {
+  it('should use the placeholder route segment when docNumber is undefined', () => {
     (isReversableOrEditable as jest.Mock).mockReturnValue(true);
 
     const values = {
@@ -550,7 +550,10 @@ describe('Download File', () => {
     const modifyBtn = screen.getByTestId('change-file-btn');
     fireEvent.click(modifyBtn);
 
-    expect(pushMock).toHaveBeenCalled();
+    expect(pushMock).toHaveBeenCalledWith(
+      expect.stringContaining('/modifica-documento/trx-1/-'),
+      { fromPath: '/merchants/init-1/refunds/batch-1' }
+    );
   });
 
   it('should handle xml extension branch', async () => {

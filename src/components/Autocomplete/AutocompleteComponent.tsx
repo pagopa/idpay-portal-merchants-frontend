@@ -16,7 +16,8 @@ export default function AutocompleteComponent({
   required,
   label,
   onTextChange,
-  loading
+  loading,
+  name,
 }: Readonly<{
   options: Array<any>;
   onChangeDebounce?: (value: string) => void;
@@ -27,6 +28,7 @@ export default function AutocompleteComponent({
   label?: string;
   onTextChange?: (value: string) => void;
   loading?: boolean;
+  name?: string;
 }>) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -90,6 +92,7 @@ export default function AutocompleteComponent({
       renderInput={(params) => (
         <TextField
           {...params}
+          name={name}
           label={label}
           size="small"
           error={inputError}

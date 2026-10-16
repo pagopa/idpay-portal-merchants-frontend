@@ -109,6 +109,10 @@ const ReportDataTable: React.FC<ReportDataTableProps> = ({ updateAlerts, refresh
     }
 
     if (refreshKey) {
+      if (pagination.pageNo === 0) {
+        void loadReports(0, pagination.pageSize);
+        return;
+      }
       setPagination((prev) => ({
         ...prev,
         pageNo: 0,
