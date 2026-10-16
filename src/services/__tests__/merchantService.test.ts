@@ -462,6 +462,39 @@ describe('merchantService', () => {
     );
   });
 
+  test('records a successful reversal revision including revision zero', async () => {
+    mockedApi.reversalTransactionInvoiced.mockResolvedValue({ transactionRevision: 0 });
+
+    await reversalTransactionInvoiced(
+      'initiative-1',
+      'transaction-2',
+      new File(['content'], 'invoice.pdf')
+    );
+
+    expect(getPendingTransactionState('initiative-1', 'transaction-2')).toEqual(
+      expect.objectContaining({
+        operation: 'reversal',
+        effect: 'reversal',
+        expectedTransactionRevision: 0,
+      })
+    );
+  });
+
+  test('records invoice updates when optional invoice metadata is absent', async () => {
+    mockedApi.updateInvoiceTransaction.mockResolvedValue({ transactionRevision: 11 });
+
+    await updateInvoiceTransaction('initiative-1', 'transaction-2', { name: '' } as File);
+
+    expect(getPendingTransactionState('initiative-1', 'transaction-2')).toEqual(
+      expect.objectContaining({
+        operation: 'invoice-update',
+        effect: 'invoice',
+        expectedTransactionRevision: 11,
+        invoice: {},
+      })
+    );
+  });
+
   test('does not record a mutation when the revision header is missing', async () => {
     mockedApi.reversalTransactionInvoiced.mockResolvedValue({});
 

@@ -325,6 +325,16 @@ describe('MerchantsApiClient', () => {
     await expect(api.reversalTransactionInvoiced('init1', 'trx1', file)).resolves.toEqual({});
   });
 
+  it('does not expose a transaction revision outside the safe integer range', async () => {
+    mockTransactionInstance.updateInvoiceTransaction.mockResolvedValue({
+      headers: new Headers({ 'X-Transaction-Revision': '9007199254740992' }),
+    });
+
+    await expect(
+      api.updateInvoiceTransaction('init1', 'trx1', new File(['content'], 'invoice.pdf'))
+    ).resolves.toEqual({});
+  });
+
   it('downloadInvoiceFile returns data', async () => {
     const mockData = { downloadUrl: 'http://example.com/invoice.pdf' };
     mockTransactionInstance.downloadInvoiceFile.mockResolvedValue({ data: mockData });
