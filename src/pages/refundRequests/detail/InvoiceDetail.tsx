@@ -309,9 +309,9 @@ export default function InvoiceDetail({
                 overflowWrap: 'anywhere',
               }}
             >
-              {itemValues?.rewardBatchRejectionReason &&
-              itemValues?.rewardBatchRejectionReason.length ? (
-                itemValues?.rewardBatchRejectionReason.map(
+              {itemValues?.rewardBatchOfficialNotes &&
+              itemValues?.rewardBatchOfficialNotes.length ? (
+                itemValues?.rewardBatchOfficialNotes.map(
                   ({ date, reason }: ReasonDTO, index: number) => (
                     <Box key={`${date}-${index}`}>
                       <Typography
