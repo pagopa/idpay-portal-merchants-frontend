@@ -6,6 +6,9 @@ describe('usePointOfSalesTable', () => {
     merchantName: 'merchant',
   } as any;
 
+  const defaultSort = 'franchiseName,asc';
+  const defaultSortModel = [{ field: 'franchiseName', sort: 'asc' }];
+
   const fetchResponse = {
     content: [{ id: '1', businessName: 'Store 1' }] as any,
     pageNo: 0,
@@ -17,6 +20,26 @@ describe('usePointOfSalesTable', () => {
     sessionStorage.clear();
     jest.clearAllMocks();
   });
+
+  const expectDefaultSortState = (result: any) => {
+    expect(result.current.currentSort).toBe(defaultSort);
+    expect(result.current.sortModel).toEqual(defaultSortModel);
+  };
+
+  const expectInitialFetchStoresCall = (fetchStores: jest.Mock) => {
+    expect(fetchStores).toHaveBeenCalledWith({
+      ...initialValues,
+      sort: defaultSort,
+      page: 0,
+      size: 10,
+    });
+  };
+
+  const expectFreshStoresState = (result: any, onFetchError: jest.Mock) => {
+    expect(result.current.stores).toEqual([{ id: 'fresh', businessName: 'Fresh store' }]);
+    expect(result.current.storesPagination.pageNo).toBe(1);
+    expect(onFetchError).not.toHaveBeenCalled();
+  };
 
   test('loads data on mount with default pagination', async () => {
     const fetchStores = jest.fn().mockResolvedValue(fetchResponse);
@@ -33,12 +56,7 @@ describe('usePointOfSalesTable', () => {
 
     await waitForNextUpdate();
 
-    expect(fetchStores).toHaveBeenCalledWith({
-      ...initialValues,
-      sort: 'franchiseName,asc',
-      page: 0,
-      size: 10,
-    });
+    expectInitialFetchStoresCall(fetchStores);
     expect(result.current.stores).toEqual(fetchResponse.content);
     expect(result.current.storesPagination).toEqual({
       pageNo: 0,
@@ -99,14 +117,8 @@ describe('usePointOfSalesTable', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current.currentSort).toBe('franchiseName,asc');
-    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
-    expect(fetchStores).toHaveBeenCalledWith({
-      ...initialValues,
-      sort: 'franchiseName,asc',
-      page: 0,
-      size: 10,
-    });
+    expectDefaultSortState(result);
+    expectInitialFetchStoresCall(fetchStores);
   });
 
   test('ignores stored pagination when storage context does not match', async () => {
@@ -139,14 +151,8 @@ describe('usePointOfSalesTable', () => {
     await waitForNextUpdate();
 
     expect(result.current.rowsPerPage).toBe(10);
-    expect(result.current.currentSort).toBe('franchiseName,asc');
-    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
-    expect(fetchStores).toHaveBeenCalledWith({
-      ...initialValues,
-      sort: 'franchiseName,asc',
-      page: 0,
-      size: 10,
-    });
+    expectDefaultSortState(result);
+    expectInitialFetchStoresCall(fetchStores);
   });
 
   test('restores stored pagination without sort and keeps default sort state', async () => {
@@ -179,8 +185,7 @@ describe('usePointOfSalesTable', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current.currentSort).toBe('franchiseName,asc');
-    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
+    expectDefaultSortState(result);
     expect(fetchStores).toHaveBeenCalledWith({
       ...initialValues,
       sort: 'franchiseName,asc',
@@ -220,8 +225,7 @@ describe('usePointOfSalesTable', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current.currentSort).toBe('franchiseName,asc');
-    expect(result.current.sortModel).toEqual([{ field: 'franchiseName', sort: 'asc' }]);
+    expectDefaultSortState(result);
   });
 
   test('handles filters applied and resets pagination page', async () => {
@@ -565,9 +569,7 @@ describe('usePointOfSalesTable', () => {
       await waitForNextUpdate();
     });
 
-    expect(result.current.stores).toEqual([{ id: 'fresh', businessName: 'Fresh store' }]);
-    expect(result.current.storesPagination.pageNo).toBe(1);
-    expect(onFetchError).not.toHaveBeenCalled();
+    expectFreshStoresState(result, onFetchError);
   });
 
   test('ignores stale rejected responses from previous requests', async () => {
@@ -620,9 +622,7 @@ describe('usePointOfSalesTable', () => {
       await waitForNextUpdate();
     });
 
-    expect(result.current.stores).toEqual([{ id: 'fresh', businessName: 'Fresh store' }]);
-    expect(result.current.storesPagination.pageNo).toBe(1);
-    expect(onFetchError).not.toHaveBeenCalled();
+    expectFreshStoresState(result, onFetchError);
   });
 
   test('removes storage on unmount by default and preserves it when configured not to', async () => {

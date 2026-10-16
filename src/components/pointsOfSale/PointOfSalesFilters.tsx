@@ -4,7 +4,7 @@ import Grid from '@mui/material/GridLegacy';
 import { FormikProps } from 'formik';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import { GetPointOfSalesFilters } from '../../types/types';
-
+import { trackAnalyticsInputChange } from '../../services/analyticsService';
 export type InitiativeOption = {
   value: string;
   label: string;
@@ -112,6 +112,13 @@ const menuItemLabelEllipsisSx = {
 const getInitiativeLabel = (value: string, initiativeOptions: Array<InitiativeOption>) =>
   initiativeOptions.find((initiative) => initiative.value === value)?.label ?? value;
 
+const handleSelectChange = (
+  formik: FormikProps<GetPointOfSalesFilters>
+) => (event: any) => {
+  formik.handleChange(event);
+  trackAnalyticsInputChange(event.target.name, event.target.value);
+};
+
 const renderField = (
   field: PointOfSalesFilterField,
   formik: FormikProps<GetPointOfSalesFilters>,
@@ -132,7 +139,7 @@ const renderField = (
             label={t('pages.posCatalog.filters.associated')}
             name="associated"
             value={formik.values.associated ?? ''}
-            onChange={formik.handleChange}
+            onChange={handleSelectChange(formik)}
             onBlur={formik.handleBlur}
             sx={selectValueEllipsisSx}
           >
@@ -158,7 +165,7 @@ const renderField = (
             label="Iniziativa"
             name="initiative"
             value={formik.values.initiative ?? ''}
-            onChange={formik.handleChange}
+            onChange={handleSelectChange(formik)}
             onBlur={formik.handleBlur}
             disabled={disableInitiativeFilter}
             sx={selectValueEllipsisSx}
@@ -199,7 +206,7 @@ const renderField = (
             label={t('pages.initiativeStores.pointOfSaleType')}
             name="type"
             value={formik.values.type}
-            onChange={formik.handleChange}
+            onChange={handleSelectChange(formik)}
             onBlur={formik.handleBlur}
             sx={selectValueEllipsisSx}
           >

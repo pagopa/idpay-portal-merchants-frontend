@@ -13,6 +13,7 @@ import {
   syncInitiativeAnalyticsProperties,
   trackAnalyticsPageView,
 } from '../services/analyticsService';
+import { sanitizeAnalyticsPath } from '../utils/analyticsPath';
 
 type Props = {
   children: React.ReactNode;
@@ -119,7 +120,7 @@ export const InitiativeAnalyticsGuard: React.FC<{ children: React.ReactNode }> =
 
     if (lastPageViewContext !== pageViewContext) {
       setLastPageViewContext(pageViewContext);
-      trackAnalyticsPageView(location.pathname);
+      trackAnalyticsPageView(sanitizeAnalyticsPath(location.pathname));
     }
   }, [location.pathname, initiatives, lastPageViewContext]);
 

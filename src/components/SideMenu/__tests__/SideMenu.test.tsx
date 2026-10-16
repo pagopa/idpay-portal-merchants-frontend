@@ -8,6 +8,19 @@ import ROUTES, { BASE_ROUTE } from '../../../routes';
 
 const originalWindowLocation = window.location;
 
+const setMockedWindowLocation = (pathname: string) => {
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: {
+      assign: jest.fn(),
+      pathname,
+      origin: 'MOCKED_ORIGIN',
+      search: '',
+      hash: '',
+    },
+  });
+};
+
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -140,14 +153,7 @@ describe('Test suite for SideMenu component', () => {
 
   test('Appropriate item expanded based on parameter id value (overview route)', () => {
     const initiativeId = mockedInitiativesList[0].initiativeId;
-    const mockedLocation = {
-      assign: jest.fn(),
-      pathname: `${BASE_ROUTE}/${initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`,
-      origin: 'MOCKED_ORIGIN',
-      search: '',
-      hash: '',
-    };
-    Object.defineProperty(window, 'location', { value: mockedLocation });
+    setMockedWindowLocation(`${BASE_ROUTE}/${initiativeId}/${ROUTES.SIDE_MENU_OVERVIEW}`);
 
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
@@ -157,14 +163,7 @@ describe('Test suite for SideMenu component', () => {
 
   test('Appropriate item expanded based on parameter id value (stores route)', () => {
     const initiativeId = mockedInitiativesList[0].initiativeId;
-    const mockedLocation = {
-      assign: jest.fn(),
-      pathname: `${BASE_ROUTE}/${initiativeId}/${ROUTES.SIDE_MENU_STORES}`,
-      origin: 'MOCKED_ORIGIN',
-      search: '',
-      hash: '',
-    };
-    Object.defineProperty(window, 'location', { value: mockedLocation });
+    setMockedWindowLocation(`${BASE_ROUTE}/${initiativeId}/${ROUTES.SIDE_MENU_STORES}`);
 
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
@@ -174,14 +173,7 @@ describe('Test suite for SideMenu component', () => {
 
   test('Appropriate item expanded based on parameter id value (discounts route)', () => {
     const initiativeId = mockedInitiativesList[0].initiativeId;
-    const mockedLocation = {
-      assign: jest.fn(),
-      pathname: `${BASE_ROUTE}/sconti-iniziativa/${initiativeId}`,
-      origin: 'MOCKED_ORIGIN',
-      search: '',
-      hash: '',
-    };
-    Object.defineProperty(window, 'location', { value: mockedLocation });
+    setMockedWindowLocation(`${BASE_ROUTE}/sconti-iniziativa/${initiativeId}`);
 
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
@@ -190,14 +182,7 @@ describe('Test suite for SideMenu component', () => {
   });
 
   test('First initiative expanded when no match found', () => {
-    const mockedLocation = {
-      assign: jest.fn(),
-      pathname: `${BASE_ROUTE}/some-other-route`,
-      origin: 'MOCKED_ORIGIN',
-      search: '',
-      hash: '',
-    };
-    Object.defineProperty(window, 'location', { value: mockedLocation });
+    setMockedWindowLocation(`${BASE_ROUTE}/some-other-route`);
 
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
@@ -206,14 +191,7 @@ describe('Test suite for SideMenu component', () => {
   });
 
   test('No expansion when initiatives list is empty and no match', () => {
-    const mockedLocation = {
-      assign: jest.fn(),
-      pathname: `${BASE_ROUTE}/some-other-route`,
-      origin: 'MOCKED_ORIGIN',
-      search: '',
-      hash: '',
-    };
-    Object.defineProperty(window, 'location', { value: mockedLocation });
+    setMockedWindowLocation(`${BASE_ROUTE}/some-other-route`);
 
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList([]));
@@ -473,14 +451,7 @@ describe('Test suite for SideMenu component', () => {
   });
 
   test('No expansion when match is null and initiativesList undefined', () => {
-    const mockedLocation = {
-      assign: jest.fn(),
-      pathname: `${BASE_ROUTE}/random`,
-      origin: 'MOCKED_ORIGIN',
-      search: '',
-      hash: '',
-    };
-    Object.defineProperty(window, 'location', { value: mockedLocation });
+    setMockedWindowLocation(`${BASE_ROUTE}/random`);
 
     renderWithContext(<SideMenu />);
 
@@ -532,14 +503,7 @@ describe('Test suite for SideMenu component', () => {
   });
 
   test('useEffect branch: match not null but without id param', () => {
-    const mockedLocation = {
-      assign: jest.fn(),
-      pathname: ROUTES.HOME, // matches routing config but no id param
-      origin: 'MOCKED_ORIGIN',
-      search: '',
-      hash: '',
-    };
-    Object.defineProperty(window, 'location', { value: mockedLocation });
+    setMockedWindowLocation(ROUTES.HOME); // matches routing config but no id param
 
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
@@ -548,14 +512,7 @@ describe('Test suite for SideMenu component', () => {
   });
 
   test('useEffect branch: initiativesList undefined and match null', () => {
-    const mockedLocation = {
-      assign: jest.fn(),
-      pathname: '/completely-random-route',
-      origin: 'MOCKED_ORIGIN',
-      search: '',
-      hash: '',
-    };
-    Object.defineProperty(window, 'location', { value: mockedLocation });
+    setMockedWindowLocation('/completely-random-route');
 
     renderWithContext(<SideMenu />); // do NOT dispatch initiatives list
 
@@ -563,14 +520,7 @@ describe('Test suite for SideMenu component', () => {
   });
 
   test('useEffect branch: initiativesList present and match null triggers firstItemExpanded true path', () => {
-    const mockedLocation = {
-      assign: jest.fn(),
-      pathname: '/another-random-route',
-      origin: 'MOCKED_ORIGIN',
-      search: '',
-      hash: '',
-    };
-    Object.defineProperty(window, 'location', { value: mockedLocation });
+    setMockedWindowLocation('/another-random-route');
 
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
