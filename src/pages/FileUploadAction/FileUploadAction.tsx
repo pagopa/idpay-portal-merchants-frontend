@@ -11,6 +11,7 @@ import { useScopedTranslation } from '../../hooks/useScopedTranslation';
 import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 import { resolveApiErrorStatus } from '../../utils/resolveApiErrorStatus';
+import { removePendingTransactionState } from '../../services/transactionStateBridge';
 
 interface FileUploadActionProps {
   apiCall:
@@ -221,6 +222,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         });
         history.goBack();
       } catch (error: unknown) {
+        removePendingTransactionState(initiativeId || '', trxId);
         const status = resolveApiErrorStatus(error);
         const isNotFoundError = status === 404;
 

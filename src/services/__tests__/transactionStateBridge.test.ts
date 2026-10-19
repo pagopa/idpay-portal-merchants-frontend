@@ -375,7 +375,7 @@ describe('transactionStateBridge', () => {
       100
     );
 
-    expect(response.content).toEqual([row]);
+    expect(response.content).toEqual([]);
     expect(getPendingTransactionState('initiative-1', 'transaction-1', 100)).toBeDefined();
     expect(
       getPendingTransactionState(
@@ -580,4 +580,32 @@ describe('transactionStateBridge', () => {
   afterEach(() => {
     removePendingTransactionState('initiative-1', 'transaction-1');
   });
+
+  it('should keep the transaction hidden during a reversal even if transactionRevision is undefined', () => {
+    const initiativeId = 'init-1';
+    const transactionId = 'trx-123';
+
+    recordPendingTransactionState({
+      initiativeId,
+      transactionId,
+      operation: 'reversal',
+      effect: 'reversal',
+      expectedTransactionRevision: 2,
+    });
+
+    const mockApiResponse = {
+      content: [
+        {
+          trxId: transactionId,
+          transactionRevision: undefined,
+          status: 'AUTHORIZED'
+        }
+      ]
+    };
+
+    const result = reconcileProcessedTransactions(initiativeId, mockApiResponse);
+
+    expect(result.content).toHaveLength(0);
+  });
+
 });
