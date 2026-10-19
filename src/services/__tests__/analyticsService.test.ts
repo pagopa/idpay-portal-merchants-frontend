@@ -196,8 +196,8 @@ describe('analyticsService', () => {
     })).toEqual({
       event: '$mp_web_page_view',
       properties: {
-        $pathname: '/portale-esercenti/initiative-1/punti-vendita',
-        current_url_path: '/portale-esercenti/initiative-1/punti-vendita',
+        $pathname: '/portale-esercenti/punti-vendita',
+        current_url_path: '/portale-esercenti/punti-vendita',
       },
     });
     expect(initConfig.hooks.before_send_events({

@@ -13,6 +13,7 @@ import { POS_UPDATE } from '../../../utils/constants';
 const mockSetAlert = jest.fn();
 const pushMock = jest.fn();
 let mockLatestFormProps: any;
+let mockSubmitValidationResult = false;
 
 jest.mock('../../../hooks/useScopedTranslation', () => () => ({
   t: (key: string) => key,
@@ -53,75 +54,112 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
-jest.mock('../../../components/pointsOfSaleForm/PointsOfSaleForm', () => (props: any) => {
-  mockLatestFormProps = props;
+jest.mock('../../../components/pointsOfSaleForm/PointsOfSaleForm', () => {
+  const React = jest.requireActual('react');
 
-  return (
-    <div data-testid="points-of-sale-form">
-      <button
-        data-testid="set-valid-form"
-        onClick={() => {
-          props.onFormChange([
-            {
-              id: 'local-id',
-              type: 'PHYSICAL',
-              contactEmail: 'shop@example.com',
-              confirmContactEmail: 'shop@example.com',
-              website: 'example.com',
-              channelGeolink: 'maps.example.com',
-            },
-          ]);
-          props.onValidationChange(true);
-        }}
-      >
-        valid
-      </button>
-      <button
-        data-testid="set-invalid-form"
-        onClick={() => {
-          props.onFormChange([]);
-          props.onValidationChange(false);
-        }}
-      >
-        invalid
-      </button>
-      <button
-        data-testid="set-duplicate-emails"
-        onClick={() => {
-          props.onFormChange([
-            {
-              contactEmail: ' DUPLICATE@example.com ',
-              confirmContactEmail: 'duplicate@example.com',
-            },
-            {
-              contactEmail: 'duplicate@example.com',
-              confirmContactEmail: 'duplicate@example.com',
-            },
-          ]);
-          props.onValidationChange(true);
-        }}
-      >
-        duplicates
-      </button>
-      <button
-        data-testid="set-online-form"
-        onClick={() => {
-          props.onFormChange([
-            {
-              type: 'ONLINE',
-              contactEmail: 'online@example.com',
-              confirmContactEmail: 'online@example.com',
-              website: 'online.example.com',
-              channelGeolink: '',
-            },
-          ]);
-          props.onValidationChange(true);
-        }}
-      >
-        online
-      </button>
-    </div>
-  );
+  return (props: any) => {
+    const wrappedProps = {
+      ...props,
+      onValidationChange: (isValid: boolean) => {
+        mockSubmitValidationResult = isValid;
+        props.onValidationChange(isValid);
+      },
+    };
+
+    mockLatestFormProps = wrappedProps;
+
+    React.useEffect(() => {
+      if (wrappedProps.submitAttempt > 0) {
+        wrappedProps.onSubmitValidation?.(mockSubmitValidationResult);
+      }
+    }, [wrappedProps.onSubmitValidation, wrappedProps.submitAttempt]);
+
+    return (
+      <div data-testid="points-of-sale-form">
+        <button
+          data-testid="set-valid-form"
+          onClick={() => {
+            wrappedProps.onFormChange([
+              {
+                id: 'local-id',
+                type: 'PHYSICAL',
+                contactEmail: 'shop@example.com',
+                confirmContactEmail: 'shop@example.com',
+                website: 'example.com',
+                channelGeolink: 'maps.example.com',
+              },
+            ]);
+            wrappedProps.onValidationChange(true);
+          }}
+        >
+          valid
+        </button>
+        <button
+          data-testid="set-invalid-form"
+          onClick={() => {
+            wrappedProps.onFormChange([]);
+            wrappedProps.onValidationChange(false);
+          }}
+        >
+          invalid
+        </button>
+        <button
+          data-testid="set-stale-valid-form"
+          onClick={() => {
+            wrappedProps.onFormChange([
+              {
+                id: 'local-id',
+                type: 'PHYSICAL',
+                contactEmail: 'shop@example.com',
+                confirmContactEmail: 'shop@example.com',
+                website: 'example.com',
+                channelGeolink: 'maps.example.com',
+              },
+            ]);
+            wrappedProps.onValidationChange(true);
+            mockSubmitValidationResult = false;
+          }}
+        >
+          stale-valid
+        </button>
+        <button
+          data-testid="set-duplicate-emails"
+          onClick={() => {
+            wrappedProps.onFormChange([
+              {
+                contactEmail: ' DUPLICATE@example.com ',
+                confirmContactEmail: 'duplicate@example.com',
+              },
+              {
+                contactEmail: 'duplicate@example.com',
+                confirmContactEmail: 'duplicate@example.com',
+              },
+            ]);
+            wrappedProps.onValidationChange(true);
+          }}
+        >
+          duplicates
+        </button>
+        <button
+          data-testid="set-online-form"
+          onClick={() => {
+            wrappedProps.onFormChange([
+              {
+                type: 'ONLINE',
+                contactEmail: 'online@example.com',
+                confirmContactEmail: 'online@example.com',
+                website: 'online.example.com',
+                channelGeolink: '',
+              },
+            ]);
+            wrappedProps.onValidationChange(true);
+          }}
+        >
+          online
+        </button>
+      </div>
+    );
+  };
 });
 
 const readTokenMock = storageTokenOps.read as jest.Mock;
@@ -191,6 +229,7 @@ describe('InitiativeStoresUpload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLatestFormProps = undefined;
+    mockSubmitValidationResult = false;
     (useParams as jest.Mock).mockReturnValue({ initiative_id: 'test-initiative' });
     (useHistory as jest.Mock).mockReturnValue({ push: pushMock });
     readTokenMock.mockReturnValue('fake-token');
@@ -227,6 +266,21 @@ describe('InitiativeStoresUpload', () => {
   it('does not submit an invalid form and increments the submit attempt', async () => {
     renderComponent();
     fireEvent.click(screen.getByTestId('set-invalid-form'));
+
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    await waitFor(() => expect(mockLatestFormProps.submitAttempt).toBe(1));
+    await waitFor(() =>
+      expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+        reason: 'FORM_VALIDATION_ERROR',
+      })
+    );
+    expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();
+  });
+
+  it('does not submit when the validation computed on confirm is invalid', async () => {
+    renderComponent();
+    fireEvent.click(screen.getByTestId('set-stale-valid-form'));
 
     fireEvent.click(screen.getByTestId('confirm-stores-button'));
 

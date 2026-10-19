@@ -1,17 +1,17 @@
 import { sanitizeAnalyticsPath } from '../analyticsPath';
 
 describe('sanitizeAnalyticsPath', () => {
-  it('removes dynamic detail route parameters but keeps the initiative id from known analytics routes', () => {
+  it('removes dynamic detail route parameters and initiative ids from known analytics routes', () => {
     expect(
       sanitizeAnalyticsPath(
         '/portale-esercenti/69e0fa95e21efa516c7b8dec/richieste-di-rimborso/7b198efa-3071-48b7-acb0-d166afb1b522'
       )
-    ).toBe('/portale-esercenti/69e0fa95e21efa516c7b8dec/richieste-di-rimborso');
+    ).toBe('/portale-esercenti/richieste-di-rimborso');
   });
 
-  it('keeps the initiative id for routes composed only of the initiative id', () => {
+  it('removes the initiative id from initiative-scoped routes', () => {
     expect(sanitizeAnalyticsPath('/portale-esercenti/69e0fa95e21efa516c7b8dec/panoramica')).toBe(
-      '/portale-esercenti/69e0fa95e21efa516c7b8dec/panoramica'
+      '/portale-esercenti/panoramica'
     );
   });
 
@@ -41,7 +41,7 @@ describe('sanitizeAnalyticsPath', () => {
     process.env.PUBLIC_URL = originalPublicUrl;
   });
 
-  it('falls back to the preserved dynamic placeholder when the matched params are missing', () => {
+  it('still sanitizes known routes when dynamic params are missing from match results', () => {
     jest.resetModules();
     jest.doMock('react-router-dom', () => ({
       matchPath: jest.fn((_pathname, config) => {
@@ -57,7 +57,7 @@ describe('sanitizeAnalyticsPath', () => {
       const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
 
       expect(isolatedSanitizeAnalyticsPath('/portale-esercenti/initiative-1/panoramica')).toBe(
-        '/portale-esercenti/:initiative_id/panoramica'
+        '/portale-esercenti/panoramica'
       );
     });
 

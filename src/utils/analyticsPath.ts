@@ -35,7 +35,7 @@ const analyticsRoutes = [
   `${ANALYTICS_BASE_ROUTE}`,
 ] as const;
 
-const PRESERVED_DYNAMIC_SEGMENTS = [':initiative_id'] as const;
+const PRESERVED_DYNAMIC_SEGMENTS: Array<string> = [];
 
 export const sanitizeAnalyticsPath = (pathname: string) => {
   const matchedRoute = analyticsRoutes.find((routePath) =>
@@ -69,7 +69,7 @@ export const sanitizeAnalyticsPath = (pathname: string) => {
         return true;
       }
 
-      return (PRESERVED_DYNAMIC_SEGMENTS as ReadonlyArray<string>).includes(segment);
+      return PRESERVED_DYNAMIC_SEGMENTS.length > 0 && PRESERVED_DYNAMIC_SEGMENTS.includes(segment);
     })
     .map((segment) => {
       if (!segment.startsWith(':')) {
