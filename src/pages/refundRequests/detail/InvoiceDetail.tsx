@@ -27,6 +27,7 @@ import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts'
 
 type StatusEnum = RewardBatchDTO['status'];
 const CREATED_STATUS: StatusEnum = 'CREATED';
+const MISSING_FILE_DOC_NUMBER_PLACEHOLDER = '-';
 import { useCurrentInitiative } from '../../../hooks/useCurrentInitiative';
 
 type Props = DetailDrawerProps & {
@@ -108,10 +109,16 @@ export default function InvoiceDetail({
               dataTestId: 'change-file-btn',
               disabled: isModifyDocDisabled,
               onClick: () => {
+                const docNumber = itemValues?.invoiceData?.docNumber;
                 const path = routes.MODIFY_DOCUMENT.replace(':initiative_id', initiative_id)
                   .replace(':pointOfSaleId', itemValues?.pointOfSaleId)
                   .replace(':trxId', itemValues.id)
-                  .replace(':fileDocNumber', window.btoa(itemValues?.invoiceData?.docNumber ?? ''));
+                  .replace(
+                    ':fileDocNumber',
+                    docNumber
+                      ? window.btoa(docNumber)
+                      : MISSING_FILE_DOC_NUMBER_PLACEHOLDER
+                  );
 
                 history.push(path, { fromPath: history.location.pathname });
               },

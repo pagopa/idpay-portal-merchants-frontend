@@ -133,6 +133,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
             <TextField
+              name="startDate"
               label="Dal"
               type="date"
               size="medium"
@@ -154,6 +155,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
             />
 
             <TextField
+              name="endDate"
               label="Al"
               type="date"
               size="medium"

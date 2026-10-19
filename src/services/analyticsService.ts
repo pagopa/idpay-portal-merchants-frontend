@@ -1,9 +1,36 @@
 import mixpanel, {
+  type BeforeSendHookPayload,
   type AutocaptureConfig,
   type Config,
   type Mixpanel,
 } from 'mixpanel-browser';
 import { browserConsole } from '../utils/consoleLogger';
+import { sanitizeAnalyticsPath } from '../utils/analyticsPath';
+
+const CLICKABLE_AUTOCAPTURE_SELECTOR = 'a, button, [role="button"], [role="link"]';
+
+const isAllowedAutocaptureClickTarget = (element: Element) => {
+  const tagName = element.tagName.toLowerCase();
+
+  if (element.closest(CLICKABLE_AUTOCAPTURE_SELECTOR)) {
+    return true;
+  }
+
+  if (tagName === 'input') {
+    return ['button', 'submit', 'reset', 'image'].includes(
+      (element.getAttribute('type') || '').toLowerCase()
+    );
+  }
+
+  if (tagName === 'img') {
+    return typeof (element as HTMLImageElement).onclick === 'function' || element.hasAttribute('onclick');
+  }
+
+  return false;
+};
+
+const allowAutocaptureElement = (element: Element, event: Event) =>
+  event.type !== 'click' || isAllowedAutocaptureClickTarget(element);
 
 const AUTOCAPTURE_CONFIG: AutocaptureConfig = {
   pageview: false,
@@ -13,8 +40,32 @@ const AUTOCAPTURE_CONFIG: AutocaptureConfig = {
   dead_click: true,
   rage_click: true,
   scroll: false,
-  capture_text_content: false,
+  capture_text_content: true,
+  capture_extra_attrs: ['name'],
+  block_attrs: ['aria-label', 'aria-labelledby', 'aria-describedby', 'title', 'role'],
   block_selectors: ['.mp-no-track'],
+  allow_element_callback: allowAutocaptureElement,
+};
+
+const sanitizeTrackedPath = (path: unknown) =>
+  typeof path === 'string' ? sanitizeAnalyticsPath(path) : path;
+
+const sanitizeEventPayload = (event: BeforeSendHookPayload): BeforeSendHookPayload => ({
+  ...event,
+  properties: {
+    ...event.properties,
+    $pathname: sanitizeTrackedPath(event.properties.$pathname),
+    current_url_path: sanitizeTrackedPath(event.properties.current_url_path),
+    ...(event.event === '$mp_input_change' && typeof event.properties.$el_attr__name === 'string'
+      ? {
+          field_name: event.properties.$el_attr__name,
+        }
+      : {}),
+  },
+});
+
+const MIXPANEL_HOOKS: Config['hooks'] = {
+  before_send_events: sanitizeEventPayload,
 };
 
 const MIXPANEL_CONFIG: Partial<Config> = {
@@ -30,14 +81,33 @@ const MIXPANEL_CONFIG: Partial<Config> = {
     '$current_url',
     '$initial_referrer',
     '$referrer',
-    'current_url_search',
+    '$el_classes',
+    '$target',
+    '$elements',
+    'current_url_search'
   ],
+  hooks: MIXPANEL_HOOKS,
   record_sessions_percent: 0,
   record_heatmap_data: false,
 };
 
 let analyticsInstance: Mixpanel | undefined;
 let analyticsActive = false;
+
+export const trackAnalyticsInputChange = (
+  fieldName: string,
+  value?: string | number,
+  inputType: string = 'select'
+) => {
+  if (!analyticsInstance || !analyticsActive) {
+    return;
+  }
+  analyticsInstance.track('$mp_input_change', {
+    $el_attr__name: fieldName,
+    input_value: value,
+    input_type: inputType
+  });
+};
 
 export const MIXPANEL_EVENTS = {
   BONUS_ACCEPTANCE_SUCCESS: 'IDPAY_BONUS_ACCEPTANCE_UX_SUCCESS',
