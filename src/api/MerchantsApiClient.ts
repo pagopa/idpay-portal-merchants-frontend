@@ -1,4 +1,5 @@
 import { ENV } from '../utils/env';
+import { browserConsole } from '../utils/consoleLogger';
 import {
   InitiativeDTO,
   MerchantStatisticsDTO,
@@ -39,6 +40,41 @@ import { PointOfSaleTransactions } from './generated/merchants/PointOfSaleTransa
 import { MerchantReport } from './generated/merchants/MerchantReport';
 import { ReportedUser } from './generated/merchants/ReportedUser';
 import { axiosFetchAdapter } from './axiosFetchAdapter';
+
+const TRANSACTION_REVISION_HEADER = 'X-Transaction-Revision';
+
+export interface TransactionMutationResponse {
+  transactionRevision?: number;
+}
+
+const extractTransactionRevision = (response: {
+  headers?: { get?: (name: string) => string | null };
+}): number | undefined => {
+  const rawRevision = response.headers?.get?.(TRANSACTION_REVISION_HEADER);
+
+  if (rawRevision === null || rawRevision === undefined) {
+    browserConsole.warn(
+      '[MerchantsApiClient] successful transaction mutation did not return a revision'
+    );
+    return undefined;
+  }
+
+  const normalizedRevision = rawRevision.trim();
+
+  if (!/^\d+$/.test(normalizedRevision)) {
+    browserConsole.warn('[MerchantsApiClient] transaction revision header is malformed');
+    return undefined;
+  }
+
+  const transactionRevision = Number(normalizedRevision);
+
+  if (!Number.isSafeInteger(transactionRevision)) {
+    browserConsole.warn('[MerchantsApiClient] transaction revision header is unsafe');
+    return undefined;
+  }
+
+  return transactionRevision;
+};
 
 class MerchantsApiClient {
   private merchantInitiatives: MerchantInitiatives;
@@ -162,8 +198,15 @@ class MerchantsApiClient {
     transactionId: string,
     file: File,
     docNumber?: string
-  ): Promise<void> {
-    await this.transaction.reversalTransactionInvoiced({ initiativeId, transactionId }, { file, docNumber });
+  ): Promise<TransactionMutationResponse> {
+    const response = await this.transaction.reversalTransactionInvoiced(
+      { initiativeId, transactionId },
+      { file, docNumber }
+    );
+
+    const transactionRevision = extractTransactionRevision(response);
+
+    return transactionRevision === undefined ? {} : { transactionRevision };
   }
 
   public async updateInvoiceTransaction(
@@ -171,8 +214,15 @@ class MerchantsApiClient {
     transactionId: string,
     file: File,
     docNumber?: string
-  ): Promise<void> {
-    await this.transaction.updateInvoiceTransaction({ initiativeId, transactionId }, { file, docNumber });
+  ): Promise<TransactionMutationResponse> {
+    const response = await this.transaction.updateInvoiceTransaction(
+      { initiativeId, transactionId },
+      { file, docNumber }
+    );
+
+    const transactionRevision = extractTransactionRevision(response);
+
+    return transactionRevision === undefined ? {} : { transactionRevision };
   }
 
   public async downloadInvoiceFile(
