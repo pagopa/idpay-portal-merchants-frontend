@@ -307,11 +307,11 @@ export const reconcileProcessedTransactions = (
   const content = response.content.flatMap((row) => {
     const pendingState = getPendingTransactionState(initiativeId, row.trxId, now);
 
-    if (!pendingState || !isSafeRevision(row.transactionRevision)) {
+    if (!pendingState) {
       return [row];
     }
 
-    if (row.transactionRevision >= pendingState.expectedTransactionRevision) {
+    if (isSafeRevision(row.transactionRevision) && row.transactionRevision >= pendingState.expectedTransactionRevision) {
       removePendingTransactionState(initiativeId, row.trxId);
       return [row];
     }
