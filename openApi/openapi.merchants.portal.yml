@@ -2998,9 +2998,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TransactionErrorDTO"
-              example:
-                code: "PAYMENT_NOT_FOUND_OR_EXPIRED"
-                message: "Cannot find transaction with transactionId [%s]"
+              examples:
+                transactionNotFoundOrExpired:
+                  summary: Transaction not found or expired
+                  value:
+                    code: "PAYMENT_NOT_FOUND_OR_EXPIRED"
+                    message: "Cannot find transaction with transactionId [%s]"
+                invoiceNotFound:
+                  summary: Invoice document not found in storage
+                  value:
+                    code: "PAYMENT_INVOICE_NOT_FOUND"
+                    message: "Invoice document not found in storage"
         "429":
           description: Too many requests
           headers:
@@ -4128,11 +4136,11 @@ components:
           description: Identifier of the reward batch the transaction belongs to
         rewardBatchTrxStatus:
           $ref: "#/components/schemas/RewardBatchTrxStatus"
-        rewardBatchRejectionReason:
+        rewardBatchOfficialNotes:
           type: array
           items:
             $ref: "#/components/schemas/ReasonDTO"
-          description: "ENG: Reason associated with TRX status - IT: Motivo associato allo stato della trx"
+          description: "ENG: Official notes history - IT: Storico delle note ufficiali"
         rewardBatchInclusionDate:
           type: string
           format: date-time
