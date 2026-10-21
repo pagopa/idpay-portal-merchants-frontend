@@ -110,7 +110,7 @@ const baseItemValues = {
     docNumber: 'DOC-123',
     filename: 'fattura.pdf',
   },
-  rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+  rewardBatchOfficialNotes: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
   additionalProperties: {
     productName: 'Prodotto di test',
   },
@@ -873,7 +873,7 @@ describe('Reverse button', () => {
         docNumber: 'DOC-123',
         filename: 'fattura.pdf',
       },
-      rewardBatchRejectionReason: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
+      rewardBatchOfficialNotes: [{ date: new Date('2026-02-03'), reason: 'Motivo di rifiuto' }],
       additionalProperties: {
         productName: 'Prodotto di test',
       },
