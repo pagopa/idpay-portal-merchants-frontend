@@ -33,7 +33,6 @@ const ONLINE: TypeEnum = 'ONLINE';
 interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
   onValidationChange: (isValid: boolean) => void;
-  onSubmitValidation?: (isValid: boolean) => void;
   pointsOfSaleLoaded: boolean;
   externalErrors?: FormErrors;
   externalAlertMessages?: FormAlertMessages;
@@ -57,7 +56,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   externalErrors,
   externalAlertMessages,
   onFormChange,
-  onSubmitValidation,
   onValidationChange,
   pointsOfSaleLoaded,
 }) => {
@@ -135,7 +133,6 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
     if (submitAttempt > 0) {
       const isValid = validateForm(true);
       onValidationChange(isValid);
-      onSubmitValidation?.(isValid);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitAttempt]);

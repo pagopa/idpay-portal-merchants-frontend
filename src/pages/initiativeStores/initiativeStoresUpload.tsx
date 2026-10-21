@@ -48,10 +48,6 @@ interface RouteParams {
   initiative_id: string;
 }
 
-interface SubmitValidationRequest {
-  resolve: (isValid: boolean) => void;
-}
-
 const InitiativeStoresUpload: React.FC = () => {
   const { setAlert } = useAlert();
   const [uploadMethod, setUploadMethod] = useState<POS_UPDATE.Csv | POS_UPDATE.Manual>(
@@ -70,37 +66,21 @@ const InitiativeStoresUpload: React.FC = () => {
   const { initiative_id } = useParams<RouteParams>();
   const history = useHistory();
   const [submitAttempt, setSubmitAttempt] = useState(0);
-  const [submitValidationRequest, setSubmitValidationRequest] = useState<SubmitValidationRequest | null>(null);
 
   const trackAddStoreError = (reason: string) => {
     trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_ERROR, { reason });
   };
 
-  const getValidationErrorReason = ({
-    currentApiValidationErrors = apiValidationErrors,
-    currentApiValidationAlertMessages = apiValidationAlertMessages,
-    currentApiValidationReason = apiValidationReason,
-    currentDuplicateEmailErrors = duplicateEmailErrors,
-    currentFormValid = isFormValid,
-  }: {
-    currentApiValidationErrors?: FormErrors;
-    currentApiValidationAlertMessages?: FormAlertMessages;
-    currentApiValidationReason?: string;
-    currentDuplicateEmailErrors?: FormErrors;
-    currentFormValid?: boolean;
-  } = {}) => {
-    if (
-      Object.keys(currentApiValidationErrors).length > 0 ||
-      Object.keys(currentApiValidationAlertMessages).length > 0
-    ) {
-      return currentApiValidationReason ?? 'VALIDATION_ERROR';
+  const getValidationErrorReason = () => {
+    if (Object.keys(apiValidationErrors).length > 0 || Object.keys(apiValidationAlertMessages).length > 0) {
+      return apiValidationReason ?? 'VALIDATION_ERROR';
     }
 
-    if (Object.keys(currentDuplicateEmailErrors).length > 0) {
+    if (Object.keys(duplicateEmailErrors).length > 0) {
       return 'DUPLICATE_EMAIL';
     }
 
-    if (!currentFormValid) {
+    if (!isFormValid) {
       return 'FORM_VALIDATION_ERROR';
     }
 
@@ -122,27 +102,6 @@ const InitiativeStoresUpload: React.FC = () => {
     );
   };
 
-  const buildDuplicateEmailErrors = useCallback((currentSalesPoints: Array<SalePointFormDTO>) => {
-    const emails = currentSalesPoints
-      .map((sp) => sp.contactEmail?.trim().toLowerCase())
-      .filter(Boolean);
-
-    const duplicates = emails
-      .map((email, idx) => (emails.indexOf(email) !== idx ? idx : -1))
-      .filter((idx) => idx !== -1);
-
-    return duplicates.reduce<FormErrors>(
-      (acc, dupIndex) => ({
-        ...acc,
-        [dupIndex]: {
-          contactEmail: 'Email già presente in un altro punto vendita',
-          confirmContactEmail: 'Email già presente in un altro punto vendita',
-        },
-      }),
-      {}
-    );
-  }, []);
-
   const onFormChange = useCallback(
     (newSalesPoints: Array<SalePointFormDTO>) => {
       if (pointsOfSaleLoaded) {
@@ -158,13 +117,6 @@ const InitiativeStoresUpload: React.FC = () => {
 
   const onValidationChange = useCallback((isValid: boolean) => {
     setIsFormValid(isValid);
-  }, []);
-
-  const onSubmitValidation = useCallback((isValid: boolean) => {
-    setSubmitValidationRequest((currentRequest) => {
-      currentRequest?.resolve(isValid);
-      return null;
-    });
   }, []);
 
   const getValidationErrorField = (
@@ -246,7 +198,22 @@ const InitiativeStoresUpload: React.FC = () => {
 
   // Calculate duplicate email errors
   useEffect(() => {
-    const newDuplicateErrors = buildDuplicateEmailErrors(salesPoints);
+    const emails = salesPoints.map((sp) => sp.contactEmail?.trim().toLowerCase()).filter(Boolean);
+
+    const duplicates = emails
+      .map((email, idx) => (emails.indexOf(email) !== idx ? idx : -1))
+      .filter((idx) => idx !== -1);
+
+    const newDuplicateErrors: FormErrors = duplicates.reduce<FormErrors>(
+      (acc, dupIndex) => ({
+        ...acc,
+        [dupIndex]: {
+          contactEmail: 'Email già presente in un altro punto vendita',
+          confirmContactEmail: 'Email già presente in un altro punto vendita',
+        },
+      }),
+      {}
+    );
 
     setDuplicateEmailErrors((prev) => {
       const prevKeys = [...Object.keys(prev)].sort((a, b) => a.localeCompare(b)).join(',');
@@ -255,34 +222,23 @@ const InitiativeStoresUpload: React.FC = () => {
         .join(',');
       return prevKeys === newKeys ? prev : newDuplicateErrors;
     });
-  }, [buildDuplicateEmailErrors, salesPoints]);
+  }, [salesPoints]);
 
   const handleConfirm = async () => {
     trackAnalyticsEvent(MIXPANEL_EVENTS.ADD_STORE_CONVERSION, { store_number: salesPoints?.length } );
 
     if (uploadMethod === POS_UPDATE.Manual) {
-      const formIsValid = await new Promise<boolean>((resolve) => {
-        setSubmitValidationRequest({ resolve });
-        setSubmitAttempt((prev) => prev + 1);
-      });
-      const currentDuplicateEmailErrors = buildDuplicateEmailErrors(salesPoints);
+      setSubmitAttempt((prev) => prev + 1);
 
-      if (Object.keys(currentDuplicateEmailErrors).length > 0) {
-        setDuplicateEmailErrors(currentDuplicateEmailErrors);
-      }
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       if (
-        !formIsValid ||
-        Object.keys(currentDuplicateEmailErrors).length > 0 ||
+        !isFormValid ||
+        Object.keys(duplicateEmailErrors).length > 0 ||
         Object.keys(apiValidationErrors).length > 0 ||
         Object.keys(apiValidationAlertMessages).length > 0
       ) {
-        trackAddStoreError(
-          getValidationErrorReason({
-            currentDuplicateEmailErrors,
-            currentFormValid: formIsValid,
-          })
-        );
+        trackAddStoreError(getValidationErrorReason());
         return;
       }
       const userJwt = parseJwt(storageTokenOps.read());
@@ -475,7 +431,6 @@ const InitiativeStoresUpload: React.FC = () => {
                   externalErrors={mergeFormErrors(duplicateEmailErrors, apiValidationErrors)}
                   externalAlertMessages={apiValidationAlertMessages}
                   onFormChange={onFormChange}
-                  onSubmitValidation={onSubmitValidation}
                   onValidationChange={onValidationChange}
                   pointsOfSaleLoaded={pointsOfSaleLoaded}
                   submitAttempt={submitAttempt}
