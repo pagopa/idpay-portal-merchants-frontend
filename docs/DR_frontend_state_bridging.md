@@ -215,6 +215,19 @@ At minimum, tests must prove that:
 - suppressing a reversal may shorten the visible page without changing server totals;
 - logout removes pending records and a later login cannot inherit them.
 
+## Diagnostics
+
+`src/utils/transactionBridgeLogger.ts` records bridge events (mutation, revision header,
+pending record/remove/expire, list request/response ordering, reconcile decisions) in an
+in-memory buffer of the last 500 events. `warn`/`error` events are always printed with the
+`[trxStateBridge]` prefix; from the browser console:
+
+- `idpayTrxBridgeDebug.enable()` / `.disable()`: print `debug`/`info` events too (localStorage);
+- `idpayTrxBridgeDebug.dump()`: JSON of the buffered events to attach to a bug report;
+- `idpayTrxBridgeDebug.clear()`: clear the buffer.
+
+Events never contain fiscal codes, file names or document numbers.
+
 ## Final decision
 
 Implement one small, typed, transaction-scoped overlay for invoice update and reversal.

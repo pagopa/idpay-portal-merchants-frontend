@@ -1,5 +1,6 @@
 import { ENV } from '../utils/env';
 import { browserConsole } from '../utils/consoleLogger';
+import { logTrxBridge } from '../utils/transactionBridgeLogger';
 import {
   InitiativeDTO,
   MerchantStatisticsDTO,
@@ -47,15 +48,36 @@ export interface TransactionMutationResponse {
   transactionRevision?: number;
 }
 
-const extractTransactionRevision = (response: {
-  headers?: { get?: (name: string) => string | null };
-}): number | undefined => {
+const getVisibleHeaderNames = (headers: unknown): Array<string> | undefined => {
+  try {
+    const keys = (headers as { keys?: () => Iterable<string> } | undefined)?.keys?.();
+    return keys ? Array.from(keys) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const extractTransactionRevision = (
+  response: {
+    status?: number;
+    headers?: { get?: (name: string) => string | null };
+  },
+  context: { operation: string; initiativeId: string; transactionId: string }
+): number | undefined => {
   const rawRevision = response.headers?.get?.(TRANSACTION_REVISION_HEADER);
+  const logContext = {
+    ...context,
+    httpStatus: response.status,
+    rawRevision,
+    // If X-Transaction-Revision is missing here, check Access-Control-Expose-Headers (CORS).
+    visibleHeaders: getVisibleHeaderNames(response.headers),
+  };
 
   if (rawRevision === null || rawRevision === undefined) {
     browserConsole.warn(
       '[MerchantsApiClient] successful transaction mutation did not return a revision'
     );
+    logTrxBridge('warn', 'api.revision-header-missing', logContext);
     return undefined;
   }
 
@@ -63,6 +85,7 @@ const extractTransactionRevision = (response: {
 
   if (!/^\d+$/.test(normalizedRevision)) {
     browserConsole.warn('[MerchantsApiClient] transaction revision header is malformed');
+    logTrxBridge('warn', 'api.revision-header-malformed', logContext);
     return undefined;
   }
 
@@ -70,8 +93,11 @@ const extractTransactionRevision = (response: {
 
   if (!Number.isSafeInteger(transactionRevision)) {
     browserConsole.warn('[MerchantsApiClient] transaction revision header is unsafe');
+    logTrxBridge('warn', 'api.revision-header-unsafe', logContext);
     return undefined;
   }
+
+  logTrxBridge('info', 'api.revision-header-ok', { ...logContext, transactionRevision });
 
   return transactionRevision;
 };
@@ -204,7 +230,11 @@ class MerchantsApiClient {
       { file, docNumber }
     );
 
-    const transactionRevision = extractTransactionRevision(response);
+    const transactionRevision = extractTransactionRevision(response, {
+      operation: 'reversal',
+      initiativeId,
+      transactionId,
+    });
 
     return transactionRevision === undefined ? {} : { transactionRevision };
   }
@@ -220,7 +250,11 @@ class MerchantsApiClient {
       { file, docNumber }
     );
 
-    const transactionRevision = extractTransactionRevision(response);
+    const transactionRevision = extractTransactionRevision(response, {
+      operation: 'invoice-update',
+      initiativeId,
+      transactionId,
+    });
 
     return transactionRevision === undefined ? {} : { transactionRevision };
   }
