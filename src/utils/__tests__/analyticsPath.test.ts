@@ -27,45 +27,41 @@ describe('sanitizeAnalyticsPath', () => {
     );
   });
 
-  it('normalizes PUBLIC_URL set to root to an empty analytics base route', () => {
+  describe('PUBLIC_URL normalization', () => {
     const originalPublicUrl = process.env.PUBLIC_URL;
-    process.env.PUBLIC_URL = '/';
-    jest.resetModules();
 
-    jest.isolateModules(() => {
-      const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
-
-      expect(isolatedSanitizeAnalyticsPath('/auth')).toBe('/auth');
+    afterEach(() => {
+      process.env.PUBLIC_URL = originalPublicUrl;
     });
 
-    process.env.PUBLIC_URL = originalPublicUrl;
-  });
+    it.each([
+      {
+        description: 'set to root',
+        publicUrl: '/',
+        inputPath: '/auth',
+        expectedPath: '/auth',
+      },
+      {
+        description: 'with multiple slashes and whitespace',
+        publicUrl: '  ///custom-base///  ',
+        inputPath: '/custom-base/privacy-policy',
+        expectedPath: '/custom-base/privacy-policy',
+      },
+      {
+        description: 'empty or blank',
+        publicUrl: '   ',
+        inputPath: '/portale-esercenti/privacy-policy',
+        expectedPath: '/portale-esercenti/privacy-policy',
+      },
+    ])('normalizes PUBLIC_URL when $description', ({ publicUrl, inputPath, expectedPath }) => {
+      process.env.PUBLIC_URL = publicUrl;
+      jest.resetModules();
 
-  it('normalizes PUBLIC_URL with multiple slashes and whitespace', () => {
-    const originalPublicUrl = process.env.PUBLIC_URL;
-    process.env.PUBLIC_URL = '  ///custom-base///  ';
-    jest.resetModules();
+      jest.isolateModules(() => {
+        const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
 
-    jest.isolateModules(() => {
-      const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
-
-      expect(isolatedSanitizeAnalyticsPath('/custom-base/privacy-policy')).toBe('/custom-base/privacy-policy');
+        expect(isolatedSanitizeAnalyticsPath(inputPath)).toBe(expectedPath);
+      });
     });
-
-    process.env.PUBLIC_URL = originalPublicUrl;
-  });
-
-  it('normalizes empty or blank PUBLIC_URL to default base route', () => {
-    const originalPublicUrl = process.env.PUBLIC_URL;
-    process.env.PUBLIC_URL = '   ';
-    jest.resetModules();
-
-    jest.isolateModules(() => {
-      const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
-
-      expect(isolatedSanitizeAnalyticsPath('/portale-esercenti/privacy-policy')).toBe('/portale-esercenti/privacy-policy');
-    });
-
-    process.env.PUBLIC_URL = originalPublicUrl;
   });
 });
