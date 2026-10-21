@@ -41,26 +41,31 @@ describe('sanitizeAnalyticsPath', () => {
     process.env.PUBLIC_URL = originalPublicUrl;
   });
 
-  it('still sanitizes known routes when dynamic params are missing from match results', () => {
+  it('normalizes PUBLIC_URL with multiple slashes and whitespace', () => {
+    const originalPublicUrl = process.env.PUBLIC_URL;
+    process.env.PUBLIC_URL = '  ///custom-base///  ';
     jest.resetModules();
-    jest.doMock('react-router-dom', () => ({
-      matchPath: jest.fn((_pathname, config) => {
-        if (config?.path === '/portale-esercenti/:initiative_id/panoramica') {
-          return { params: {} };
-        }
-
-        return false;
-      }),
-    }));
 
     jest.isolateModules(() => {
       const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
 
-      expect(isolatedSanitizeAnalyticsPath('/portale-esercenti/initiative-1/panoramica')).toBe(
-        '/portale-esercenti/panoramica'
-      );
+      expect(isolatedSanitizeAnalyticsPath('/custom-base/privacy-policy')).toBe('/custom-base/privacy-policy');
     });
 
-    jest.dontMock('react-router-dom');
+    process.env.PUBLIC_URL = originalPublicUrl;
+  });
+
+  it('normalizes empty or blank PUBLIC_URL to default base route', () => {
+    const originalPublicUrl = process.env.PUBLIC_URL;
+    process.env.PUBLIC_URL = '   ';
+    jest.resetModules();
+
+    jest.isolateModules(() => {
+      const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
+
+      expect(isolatedSanitizeAnalyticsPath('/portale-esercenti/privacy-policy')).toBe('/portale-esercenti/privacy-policy');
+    });
+
+    process.env.PUBLIC_URL = originalPublicUrl;
   });
 });

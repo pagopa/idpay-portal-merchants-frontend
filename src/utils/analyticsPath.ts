@@ -35,8 +35,6 @@ const analyticsRoutes = [
   `${ANALYTICS_BASE_ROUTE}`,
 ] as const;
 
-const PRESERVED_DYNAMIC_SEGMENTS: Array<string> = [];
-
 export const sanitizeAnalyticsPath = (pathname: string) => {
   const matchedRoute = analyticsRoutes.find((routePath) =>
     Boolean(
@@ -52,33 +50,9 @@ export const sanitizeAnalyticsPath = (pathname: string) => {
     return pathname;
   }
 
-  const match = matchPath<Record<string, string>>(pathname, {
-    path: matchedRoute,
-    exact: true,
-    strict: false,
-  });
-
   const sanitizedSegments = matchedRoute
     .split('/')
-    .filter((segment) => {
-      if (!segment) {
-        return false;
-      }
-
-      if (!segment.startsWith(':')) {
-        return true;
-      }
-
-      return PRESERVED_DYNAMIC_SEGMENTS.length > 0 && PRESERVED_DYNAMIC_SEGMENTS.includes(segment);
-    })
-    .map((segment) => {
-      if (!segment.startsWith(':')) {
-        return segment;
-      }
-
-      const paramName = segment.slice(1);
-      return match?.params?.[paramName] ?? segment;
-    });
+    .filter((segment) => segment && !segment.startsWith(':'));
 
   return `/${sanitizedSegments.join('/')}`;
 };

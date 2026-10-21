@@ -88,6 +88,22 @@ describe('analyticsService', () => {
     );
   });
 
+  it('initializes analytics with default api_host when not specified', () => {
+    process.env.REACT_APP_MIXPANEL_ENABLE = 'true';
+    process.env.REACT_APP_MIXPANEL_TOKEN = 'mixpanel-token';
+
+    const { initAnalytics } = loadAnalyticsService();
+    initAnalytics();
+
+    expect(mockMixpanel.init).toHaveBeenCalledWith(
+      'mixpanel-token',
+      expect.objectContaining({
+        api_host: 'https://api-eu.mixpanel.com',
+      }),
+      'analytics'
+    );
+  });
+
   it('initializes analytics and tracks pages, events and initiative properties', () => {
     process.env.REACT_APP_MIXPANEL_ENABLE = 'true';
     process.env.REACT_APP_MIXPANEL_TOKEN = 'mixpanel-token';
@@ -200,6 +216,7 @@ describe('analyticsService', () => {
         current_url_path: '/portale-esercenti/punti-vendita',
       },
     });
+
     expect(initConfig.hooks.before_send_events({
       event: '$mp_input_change',
       properties: {
@@ -213,6 +230,45 @@ describe('analyticsService', () => {
         $el_attr__name: 'associated',
         current_url_path: undefined,
         field_name: 'associated',
+      },
+    });
+
+    expect(initConfig.hooks.before_send_events({
+      event: '$mp_input_change',
+      properties: {
+        $el_attr__name: 123,
+      },
+    })).toEqual({
+      event: '$mp_input_change',
+      properties: {
+        $el_attr__name: 123,
+        current_url_path: undefined,
+      },
+    });
+
+    expect(initConfig.hooks.before_send_events({
+      event: 'click',
+      properties: {
+        $el_text: 'document.pdf',
+      },
+    })).toEqual({
+      event: 'click',
+      properties: {
+        $el_text: 'download-file',
+        current_url_path: undefined,
+      },
+    });
+
+    expect(initConfig.hooks.before_send_events({
+      event: 'click',
+      properties: {
+        $el_text: 'report.xml',
+      },
+    })).toEqual({
+      event: 'click',
+      properties: {
+        $el_text: 'download-file',
+        current_url_path: undefined,
       },
     });
   });
@@ -310,12 +366,21 @@ describe('analyticsService', () => {
     initAnalytics();
     mockMixpanelInstance.track.mockClear();
 
-    trackAnalyticsInputChange('initiative', 'value', 'select');
+    trackAnalyticsInputChange('initiative', 'value');
 
     expect(mockMixpanelInstance.track).toHaveBeenCalledWith('$mp_input_change', {
       $el_attr__name: 'initiative',
       input_value: 'value',
       input_type: 'select',
+    });
+
+    mockMixpanelInstance.track.mockClear();
+    trackAnalyticsInputChange('initiative', 'value', 'input');
+
+    expect(mockMixpanelInstance.track).toHaveBeenCalledWith('$mp_input_change', {
+      $el_attr__name: 'initiative',
+      input_value: 'value',
+      input_type: 'input',
     });
 
     mockMixpanelInstance.track.mockClear();
