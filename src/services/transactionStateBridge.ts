@@ -205,19 +205,23 @@ export const getPendingTransactionState = (
 };
 
 /**
- * Read-only access for diagnostics: never removes expired or invalid entries.
+ * Read-only, privacy-safe description for diagnostics: never removes expired or invalid
+ * entries and never exposes invoice values.
  */
 export const peekPendingTransactionState = (
   initiativeId: string,
-  transactionId: string
-): PendingTransactionState | undefined => {
+  transactionId: string,
+  now = Date.now()
+): ReturnType<typeof describePendingState> | undefined => {
   try {
     if (typeof sessionStorage === 'undefined') {
       return undefined;
     }
     const rawValue = sessionStorage.getItem(getStorageKey(initiativeId, transactionId));
     const parsedValue: unknown = rawValue ? JSON.parse(rawValue) : undefined;
-    return isPendingTransactionState(parsedValue) ? parsedValue : undefined;
+    return isPendingTransactionState(parsedValue)
+      ? describePendingState(parsedValue, now)
+      : undefined;
   } catch {
     return undefined;
   }
@@ -362,7 +366,7 @@ export const removePendingTransactionState = (
     initiativeId,
     trxId: transactionId,
     existed: Boolean(existing),
-    ...(existing ? { previous: describePendingState(existing) } : {}),
+    ...(existing ? { previous: existing } : {}),
   });
 
   removeStorageItem(storage, getStorageKey(initiativeId, transactionId));
@@ -429,14 +433,16 @@ const mergeInvoiceData = (
 
 const BATCH_MONTH_PATTERN = /^(\d{4})-(\d{2})/;
 
+export type BatchMonthPosition = 'past' | 'current' | 'future';
+
 /**
- * Returns whether a reward-batch month ("YYYY-MM" or an ISO date) is the current local month,
- * or undefined when the month is missing or cannot be parsed.
+ * Positions a reward-batch month ("YYYY-MM" or an ISO date) relative to the current local
+ * month. Returns undefined when the month is missing or cannot be parsed.
  */
-export const isCurrentBatchMonth = (
+export const getBatchMonthPosition = (
   batchMonth: string | undefined,
   now = Date.now()
-): boolean | undefined => {
+): BatchMonthPosition | undefined => {
   const match = typeof batchMonth === 'string' ? BATCH_MONTH_PATTERN.exec(batchMonth) : null;
   if (!match) {
     return undefined;
@@ -449,7 +455,13 @@ export const isCurrentBatchMonth = (
   }
 
   const current = new Date(now);
-  return year === current.getFullYear() && month === current.getMonth() + 1;
+  const batchIndex = year * 12 + (month - 1);
+  const currentIndex = current.getFullYear() * 12 + current.getMonth();
+
+  if (batchIndex < currentIndex) {
+    return 'past';
+  }
+  return batchIndex === currentIndex ? 'current' : 'future';
 };
 
 export type ReconcileProcessedTransactionsContext = {
@@ -464,13 +476,13 @@ export const reconcileProcessedTransactions = (
   correlationId?: string,
   context: ReconcileProcessedTransactionsContext = {}
 ): MerchantTransactionsListDTO => {
-  const batchIsCurrentMonth = isCurrentBatchMonth(context.batchMonth, now);
+  const batchMonthPosition = getBatchMonthPosition(context.batchMonth, now);
 
   logTrxBridge('debug', 'reconcile.start', {
     correlationId,
     initiativeId,
     batchMonth: context.batchMonth,
-    batchIsCurrentMonth,
+    batchMonthPosition,
     pageNo: response.pageNo,
     pageSize: response.pageSize,
     totalElements: response.totalElements,
@@ -544,11 +556,13 @@ export const reconcileProcessedTransactions = (
       return [];
     }
 
-    // An invoice update outside the current month moves the transaction out of this batch.
-    if (batchIsCurrentMonth === false) {
-      logTrxBridge('info', 'reconcile.stale-invoice-row-suppressed-not-current-month', {
+    // An invoice update in a past-month batch moves the transaction out of that batch;
+    // in a current- or future-month batch the transaction stays with the new invoice.
+    if (batchMonthPosition === 'past') {
+      logTrxBridge('info', 'reconcile.stale-invoice-row-suppressed-past-month', {
         ...decisionContext,
         batchMonth: context.batchMonth,
+        batchMonthPosition,
       });
       return [];
     }
@@ -556,7 +570,7 @@ export const reconcileProcessedTransactions = (
     logTrxBridge('info', 'reconcile.stale-invoice-row-merged', {
       ...decisionContext,
       batchMonth: context.batchMonth,
-      batchIsCurrentMonth,
+      batchMonthPosition,
     });
     return [mergeInvoiceData(row, pendingState.invoice)];
   });

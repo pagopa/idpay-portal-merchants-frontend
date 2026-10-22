@@ -196,7 +196,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         initiativeId,
         trxId,
         concurrentSubmissions,
-        pathname: history.location.pathname,
       });
 
       try {

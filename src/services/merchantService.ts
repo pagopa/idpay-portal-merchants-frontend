@@ -424,8 +424,8 @@ export const getMerchantPointOfSaleTransactionsProcessed = async (
             trxId: row.id,
             rowStatus: row.status,
             operation: pending.operation,
-            expectedRevision: pending.expectedTransactionRevision,
-            ageMs: Date.now() - pending.createdAt,
+            expectedRevision: pending.expectedRevision,
+            ageMs: pending.ageMs,
           },
         ]
       : [];
