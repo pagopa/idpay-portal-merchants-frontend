@@ -12,11 +12,6 @@ import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 import { resolveApiErrorStatus } from '../../utils/resolveApiErrorStatus';
 import { removePendingTransactionState } from '../../services/transactionStateBridge';
-import {
-  describeError,
-  logTrxBridge,
-  nextTrxBridgeCorrelationId,
-} from '../../utils/transactionBridgeLogger';
 
 interface FileUploadActionProps {
   apiCall:
@@ -71,7 +66,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   const { t: scopedT, isLoading } = useScopedTranslation();
   const history = useHistory();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const submissionsInFlightRef = useRef<number>(0);
 
   const secondBreadcrumbLabel = scopedT(`${i18nBlockKey}.breadcrumbLabel`);
 
@@ -185,30 +179,11 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
     if (file && trxId && docNumber.trim().length >= 2) {
       setLoadingFile(true);
 
-      const submissionId = nextTrxBridgeCorrelationId('upload-submit');
-      const concurrentSubmissions = submissionsInFlightRef.current;
-      // eslint-disable-next-line functional/immutable-data
-      submissionsInFlightRef.current = concurrentSubmissions + 1;
-      // A concurrent submission can fail after a successful one and remove its pending state.
-      logTrxBridge(concurrentSubmissions > 0 ? 'warn' : 'info', 'upload.submit', {
-        submissionId,
-        flow: i18nBlockKey,
-        initiativeId,
-        trxId,
-        concurrentSubmissions,
-      });
-
       try {
         const normalizedDocNumber = docNumber.trim();
         const response = await (apiCall as any)(initiativeId, trxId, file, normalizedDocNumber);
 
         if (response?.code) {
-          logTrxBridge('warn', 'upload.response-with-error-code', {
-            submissionId,
-            flow: i18nBlockKey,
-            trxId,
-            code: response.code,
-          });
           trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
             reason: response.code,
           });
@@ -231,13 +206,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
 
         setLoadingFile(false);
 
-        logTrxBridge('info', 'upload.succeeded-navigating-back', {
-          submissionId,
-          flow: i18nBlockKey,
-          trxId,
-          stillInFlight: submissionsInFlightRef.current - 1,
-        });
-
         history.replace({
           ...history.location,
           state: {
@@ -254,18 +222,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         });
         history.goBack();
       } catch (error: unknown) {
-        logTrxBridge('error', 'upload.failed-removing-pending', {
-          submissionId,
-          flow: i18nBlockKey,
-          trxId,
-          stillInFlight: submissionsInFlightRef.current - 1,
-          ...describeError(error),
-        });
-        removePendingTransactionState(
-          initiativeId || '',
-          trxId,
-          `file-upload-catch:${submissionId}`
-        );
+        removePendingTransactionState(initiativeId || '', trxId);
         const status = resolveApiErrorStatus(error);
         const isNotFoundError = status === 404;
 
@@ -280,9 +237,6 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
           severity: 'error',
         });
         setLoadingFile(false);
-      } finally {
-        // eslint-disable-next-line functional/immutable-data
-        submissionsInFlightRef.current = Math.max(0, submissionsInFlightRef.current - 1);
       }
     }
   };

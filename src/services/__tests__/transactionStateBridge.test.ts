@@ -599,20 +599,18 @@ describe('transactionStateBridge', () => {
         {
           trxId: transactionId,
           transactionRevision: undefined,
-          status: 'AUTHORIZED'
-        }
-      ]
+          status: 'AUTHORIZED',
+        },
+      ],
     };
 
-    const result = reconcileProcessedTransactions(initiativeId, mockApiResponse);
+    const result = reconcileProcessedTransactions(initiativeId, mockApiResponse as any);
 
     expect(result.content).toHaveLength(0);
   });
-
 });
 
 describe('transactionStateBridge batch month handling', () => {
-  // 15 March 2026, local time
   const NOW = new Date(2026, 2, 15, 12).getTime();
   const staleRow = { trxId: 'transaction-1', transactionRevision: 9, status: 'REWARDED' };
   const otherRow = { trxId: 'transaction-2', transactionRevision: 3 };
@@ -665,7 +663,6 @@ describe('transactionStateBridge batch month handling', () => {
         'initiative-1',
         listResponse([staleRow, otherRow]),
         NOW,
-        'list-test',
         { batchMonth }
       );
 
@@ -688,7 +685,6 @@ describe('transactionStateBridge batch month handling', () => {
       'initiative-1',
       listResponse([staleRow, otherRow]),
       NOW,
-      'list-test',
       { batchMonth: '2026-02' }
     );
 
@@ -720,7 +716,6 @@ describe('transactionStateBridge batch month handling', () => {
       'initiative-1',
       listResponse([caughtUpRow]),
       NOW,
-      'list-test',
       { batchMonth: '2026-02' }
     );
 
@@ -742,7 +737,6 @@ describe('transactionStateBridge batch month handling', () => {
       'initiative-1',
       listResponse([staleRow, otherRow]),
       NOW,
-      'list-test',
       { batchMonth: '2026-03' }
     );
 

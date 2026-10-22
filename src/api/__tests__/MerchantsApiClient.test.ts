@@ -127,54 +127,54 @@ describe('MerchantsApiClient', () => {
     expect(api1).toBe(api2);
   });
 
-   it('getMerchantInitiativeList returns data', async () => {
-     const mockData = [{ initiativeId: 'init1' }];
-     mockMerchantInitiativesInstance.getMerchantInitiativeList.mockResolvedValue({
-       data: mockData,
-     });
+  it('getMerchantInitiativeList returns data', async () => {
+    const mockData = [{ initiativeId: 'init1' }];
+    mockMerchantInitiativesInstance.getMerchantInitiativeList.mockResolvedValue({
+      data: mockData,
+    });
 
-     const result = await api.getMerchantInitiativeList();
+    const result = await api.getMerchantInitiativeList();
 
-     expect(result).toEqual(mockData);
-     expect(mockMerchantInitiativesInstance.getMerchantInitiativeList).toHaveBeenCalled();
-   });
+    expect(result).toEqual(mockData);
+    expect(mockMerchantInitiativesInstance.getMerchantInitiativeList).toHaveBeenCalled();
+  });
 
-   it('getMerchantInitiativesAvailable returns data with query params', async () => {
-     const mockData = [{ initiativeId: 'init1', name: 'Initiative 1' }];
-     mockMerchantInitiativesInstance.getMerchantInitiativesAvailable.mockResolvedValue({
-       data: mockData,
-     });
+  it('getMerchantInitiativesAvailable returns data with query params', async () => {
+    const mockData = [{ initiativeId: 'init1', name: 'Initiative 1' }];
+    mockMerchantInitiativesInstance.getMerchantInitiativesAvailable.mockResolvedValue({
+      data: mockData,
+    });
 
-     const result = await api.getMerchantInitiativesAvailable({ page: 0, size: 10 });
+    const result = await api.getMerchantInitiativesAvailable({ page: 0, size: 10 });
 
-     expect(result).toEqual(mockData);
-     expect(mockMerchantInitiativesInstance.getMerchantInitiativesAvailable).toHaveBeenCalledWith(
-       {
-         page: 0,
-         size: 10,
-       },
-       {
-         format: 'json',
-       }
-     );
-   });
+    expect(result).toEqual(mockData);
+    expect(mockMerchantInitiativesInstance.getMerchantInitiativesAvailable).toHaveBeenCalledWith(
+      {
+        page: 0,
+        size: 10,
+      },
+      {
+        format: 'json',
+      }
+    );
+  });
 
-   it('getMerchantInitiativesAvailable works without query params', async () => {
-     const mockData = [{ initiativeId: 'init1', name: 'Initiative 1' }];
-     mockMerchantInitiativesInstance.getMerchantInitiativesAvailable.mockResolvedValue({
-       data: mockData,
-     });
+  it('getMerchantInitiativesAvailable works without query params', async () => {
+    const mockData = [{ initiativeId: 'init1', name: 'Initiative 1' }];
+    mockMerchantInitiativesInstance.getMerchantInitiativesAvailable.mockResolvedValue({
+      data: mockData,
+    });
 
-     const result = await api.getMerchantInitiativesAvailable();
+    const result = await api.getMerchantInitiativesAvailable();
 
-     expect(result).toEqual(mockData);
-     expect(mockMerchantInitiativesInstance.getMerchantInitiativesAvailable).toHaveBeenCalledWith(
-       {},
-       {
-         format: 'json',
-       }
-     );
-   });
+    expect(result).toEqual(mockData);
+    expect(mockMerchantInitiativesInstance.getMerchantInitiativesAvailable).toHaveBeenCalledWith(
+      {},
+      {
+        format: 'json',
+      }
+    );
+  });
 
   it('getMerchantInitiativeStatistics returns data', async () => {
     const mockData = { totalAmount: 100 };
@@ -259,7 +259,7 @@ describe('MerchantsApiClient', () => {
   });
 
   it('deleteTransaction resolves without error', async () => {
-    await expect(api.deleteTransaction('trx1')).resolves.toBeUndefined();
+    await expect(api.deleteTransaction('init1', 'trx1')).resolves.toBeUndefined();
   });
 
   it('createTransaction returns empty response', async () => {
@@ -272,7 +272,7 @@ describe('MerchantsApiClient', () => {
   });
 
   it('authPaymentBarCode returns empty object', async () => {
-    const result = await api.authPaymentBarCode('trxCode', {
+    const result = await api.authPaymentBarCode('init1', 'trxCode', {
       amountCents: 100,
       idTrxAcquirer: 'trx1',
     });
@@ -714,37 +714,37 @@ describe('MerchantsApiClient', () => {
     );
   });
 
-   it('patchPointOfSaleReferent calls pointOfSales method', async () => {
-     const mockData = { pointOfSaleId: 'pos1' };
-     const body = {
-       contactName: 'Mario',
-       contactSurname: 'Rossi',
-       contactEmail: 'new@test.it',
-     };
-     mockPointOfSalesInstance.patchPointOfSaleReferent.mockResolvedValue({ data: mockData });
+  it('patchPointOfSaleReferent calls pointOfSales method', async () => {
+    const mockData = { pointOfSaleId: 'pos1' };
+    const body = {
+      contactName: 'John',
+      contactSurname: 'Doe',
+      contactEmail: 'new@test.it',
+    };
+    mockPointOfSalesInstance.patchPointOfSaleReferent.mockResolvedValue({ data: mockData });
 
-     const result = await api.patchPointOfSaleReferent('merch1', 'pos1', body as any);
+    const result = await api.patchPointOfSaleReferent('merch1', 'pos1', body as any);
 
-     expect(result).toEqual(mockData);
-     expect(mockPointOfSalesInstance.patchPointOfSaleReferent).toHaveBeenCalledWith(
-       { merchantId: 'merch1', pointOfSaleId: 'pos1' },
-       body
-     );
-   });
+    expect(result).toEqual(mockData);
+    expect(mockPointOfSalesInstance.patchPointOfSaleReferent).toHaveBeenCalledWith(
+      { merchantId: 'merch1', pointOfSaleId: 'pos1' },
+      body
+    );
+  });
 
-   it('putMerchantOnboardingRequest returns data', async () => {
-     const mockData = { onboardingRequestId: 'onboard123', status: 'PENDING' };
-     mockMerchantInitiativesOnboardingInstance.putMerchantOnboardingRequest.mockResolvedValue({
-       data: mockData,
-     });
+  it('putMerchantOnboardingRequest returns data', async () => {
+    const mockData = { onboardingRequestId: 'onboard123', status: 'PENDING' };
+    mockMerchantInitiativesOnboardingInstance.putMerchantOnboardingRequest.mockResolvedValue({
+      data: mockData,
+    });
 
-     const result = await api.putMerchantOnboardingRequest('init1');
+    const result = await api.putMerchantOnboardingRequest('init1');
 
-     expect(result).toEqual(mockData);
-     expect(
-       mockMerchantInitiativesOnboardingInstance.putMerchantOnboardingRequest
-     ).toHaveBeenCalledWith({
-       initiativeId: 'init1',
-     });
-   });
- });
+    expect(result).toEqual(mockData);
+    expect(
+      mockMerchantInitiativesOnboardingInstance.putMerchantOnboardingRequest
+    ).toHaveBeenCalledWith({
+      initiativeId: 'init1',
+    });
+  });
+});

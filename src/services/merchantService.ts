@@ -1,4 +1,4 @@
-import { getMerchantsApi, TransactionMutationResponse } from '../api/MerchantsApiClient';
+import { getMerchantsApi } from '../api/MerchantsApiClient';
 import { ApiError } from '../api/ApiError';
 import {
   GetMerchantInitiativesAvailableParams,
@@ -32,13 +32,6 @@ import {
 } from '../api/generated/merchants/data-contracts';
 import { GetPointOfSalesFilters, GetPointOfSaleTransactionsFilters } from '../types/types';
 import {
-  describeError,
-  logTrxBridge,
-  nextTrxBridgeCorrelationId,
-} from '../utils/transactionBridgeLogger';
-import {
-  getPendingTransactionStatesSnapshot,
-  peekPendingTransactionState,
   reconcileProcessedTransactions,
   recordPendingTransactionState,
 } from './transactionStateBridge';
@@ -80,7 +73,6 @@ export type GetMerchantTransactionsProcessedParams = {
   rewardBatchTrxStatus?: string;
   pointOfSaleId?: string;
   trxCode?: string;
-  /** Client-only: month ("YYYY-MM") of the reward batch filter, used by the state bridge. */
   batchMonth?: string;
 };
 
@@ -100,63 +92,14 @@ export const getMerchantTransactions = (
 ): Promise<MerchantTransactionsListDTO> =>
   getMerchantsApi().getMerchantTransactions(initiativeId, page, fiscalCode, status);
 
-// Diagnostics: detects overlapping/out-of-order processed-list responses.
-let latestProcessedListRequestSeq = 0;
-let processedListRequestsInFlight = 0;
-
 export const getMerchantTransactionsProcessed = async (
   params: GetMerchantTransactionsProcessedParams
 ): Promise<MerchantTransactionsListDTO> => {
   const { initiativeId, batchMonth, ...query } = params;
 
-  latestProcessedListRequestSeq += 1;
-  const requestSeq = latestProcessedListRequestSeq;
-  const correlationId = nextTrxBridgeCorrelationId('list');
-  const startedAt = Date.now();
-  processedListRequestsInFlight += 1;
-
-  const { fiscalCode, ...loggableQuery } = query;
-  logTrxBridge('debug', 'list.request-start', {
-    correlationId,
-    requestSeq,
-    initiativeId,
-    query: { ...loggableQuery, hasFiscalCode: Boolean(fiscalCode) },
-    batchMonth,
-    inFlight: processedListRequestsInFlight,
-    pending: getPendingTransactionStatesSnapshot(initiativeId, startedAt),
-  });
-
-  try {
-    const response = await getMerchantsApi().getMerchantTransactionsProcessed(initiativeId, query);
-    const receivedAt = Date.now();
-
-    logTrxBridge(
-      requestSeq === latestProcessedListRequestSeq ? 'debug' : 'warn',
-      'list.response-received',
-      {
-        correlationId,
-        requestSeq,
-        latestRequestSeq: latestProcessedListRequestSeq,
-        supersededByNewerRequest: requestSeq !== latestProcessedListRequestSeq,
-        durationMs: receivedAt - startedAt,
-        inFlight: processedListRequestsInFlight,
-      }
-    );
-
-    return reconcileProcessedTransactions(initiativeId, response, receivedAt, correlationId, {
-      batchMonth,
-    });
-  } catch (error) {
-    logTrxBridge('error', 'list.request-failed', {
-      correlationId,
-      requestSeq,
-      durationMs: Date.now() - startedAt,
-      ...describeError(error),
-    });
-    throw error;
-  } finally {
-    processedListRequestsInFlight -= 1;
-  }
+  const response = await getMerchantsApi().getMerchantTransactionsProcessed(initiativeId, query);
+  const receivedAt = Date.now();
+  return reconcileProcessedTransactions(initiativeId, response, receivedAt, {batchMonth});
 };
 
 export const getMerchantInitiativeStatistics = (
@@ -170,81 +113,17 @@ export const getMerchantDetail = (initiativeId: string): Promise<MerchantDetailD
 export const deleteTransaction = (initaitiveId: string, transactionId: string): Promise<void> =>
   getMerchantsApi().deleteTransaction(initaitiveId, transactionId);
 
-// Diagnostics: tracks concurrent mutations on the same transaction (e.g. double submit).
-const mutationsInFlightByTrx: Record<string, number> = {};
-
-const runLoggedTransactionMutation = async (
-  operation: 'reversal' | 'invoice-update',
-  initiativeId: string,
-  transactionId: string,
-  file: File,
-  docNumber: string | undefined,
-  call: () => Promise<TransactionMutationResponse>
-): Promise<{ response: TransactionMutationResponse; correlationId: string }> => {
-  const correlationId = nextTrxBridgeCorrelationId(operation);
-  const trxKey = `${initiativeId}:${transactionId}`;
-  const startedAt = Date.now();
-  const concurrent = mutationsInFlightByTrx[trxKey] ?? 0;
-  // eslint-disable-next-line functional/immutable-data
-  mutationsInFlightByTrx[trxKey] = concurrent + 1;
-
-  logTrxBridge(concurrent > 0 ? 'warn' : 'info', 'mutation.start', {
-    correlationId,
-    operation,
-    initiativeId,
-    trxId: transactionId,
-    concurrentMutationsOnSameTrx: concurrent,
-    hasDocNumber: Boolean(docNumber),
-    fileSize: file?.size,
-    fileType: file?.type,
-    pendingBefore: peekPendingTransactionState(initiativeId, transactionId) ?? null,
-  });
-
-  try {
-    const response = await call();
-    logTrxBridge(
-      response?.transactionRevision === undefined ? 'warn' : 'info',
-      'mutation.succeeded',
-      {
-        correlationId,
-        operation,
-        trxId: transactionId,
-        durationMs: Date.now() - startedAt,
-        transactionRevision: response?.transactionRevision,
-        willRecordPending: response?.transactionRevision !== undefined,
-      }
-    );
-    return { response, correlationId };
-  } catch (error) {
-    logTrxBridge('error', 'mutation.failed', {
-      correlationId,
-      operation,
-      trxId: transactionId,
-      durationMs: Date.now() - startedAt,
-      pendingAtFailure: peekPendingTransactionState(initiativeId, transactionId) ?? null,
-      ...describeError(error),
-    });
-    throw error;
-  } finally {
-    // eslint-disable-next-line functional/immutable-data
-    mutationsInFlightByTrx[trxKey] = Math.max(0, (mutationsInFlightByTrx[trxKey] ?? 1) - 1);
-  }
-};
-
 export const reversalTransactionInvoiced = async (
   initiativeId: string,
   transactionId: string,
   file: File,
   docNumber?: string
 ): Promise<void | { code: string; message: string }> => {
-  const { response, correlationId } = await runLoggedTransactionMutation(
-    'reversal',
+  const response = await getMerchantsApi().reversalTransactionInvoiced(
     initiativeId,
     transactionId,
     file,
-    docNumber,
-    () =>
-      getMerchantsApi().reversalTransactionInvoiced(initiativeId, transactionId, file, docNumber)
+    docNumber
   );
 
   if (response?.transactionRevision !== undefined) {
@@ -254,7 +133,6 @@ export const reversalTransactionInvoiced = async (
       operation: 'reversal',
       effect: 'reversal',
       expectedTransactionRevision: response.transactionRevision,
-      correlationId,
     });
   }
 };
@@ -404,43 +282,16 @@ export const excludePos = (
 ): Promise<PointOfSaleExclusionResultDTO> =>
   getMerchantsApi().excludePos(initiativeId, merchantId, pointOfSaleIds);
 
-export const getMerchantPointOfSaleTransactionsProcessed = async (
+export const getMerchantPointOfSaleTransactionsProcessed = (
   initiativeId: string,
   pointOfSaleId: string,
   filters?: GetPointOfSaleTransactionsFilters
-): Promise<PointOfSaleTransactionsProcessedListDTO> => {
-  const response = await getMerchantsApi().getMerchantPointOfSaleTransactionsProcessed(
+): Promise<PointOfSaleTransactionsProcessedListDTO> =>
+  getMerchantsApi().getMerchantPointOfSaleTransactionsProcessed(
     initiativeId,
     pointOfSaleId,
     filters as unknown as Record<string, unknown> | undefined
   );
-
-  // Diagnostics only: this list is NOT reconciled by the state bridge.
-  const unbridgedRows = (response?.content ?? []).flatMap((row) => {
-    const pending = row?.id ? peekPendingTransactionState(initiativeId, row.id) : undefined;
-    return pending
-      ? [
-          {
-            trxId: row.id,
-            rowStatus: row.status,
-            operation: pending.operation,
-            expectedRevision: pending.expectedRevision,
-            ageMs: pending.ageMs,
-          },
-        ]
-      : [];
-  });
-
-  if (unbridgedRows.length > 0) {
-    logTrxBridge('warn', 'pos-list.pending-rows-shown-unmasked', {
-      initiativeId,
-      pointOfSaleId,
-      rows: unbridgedRows,
-    });
-  }
-
-  return response;
-};
 
 export const downloadInvoiceFile = (
   initiativeId: string,
@@ -517,13 +368,11 @@ export const updateInvoiceTransaction = async (
   file: File,
   docNumber?: string
 ): Promise<{ code: string; message: string } | void> => {
-  const { response, correlationId } = await runLoggedTransactionMutation(
-    'invoice-update',
+  const response = await getMerchantsApi().updateInvoiceTransaction(
     initiativeId,
     transactionId,
     file,
-    docNumber,
-    () => getMerchantsApi().updateInvoiceTransaction(initiativeId, transactionId, file, docNumber)
+    docNumber
   );
 
   if (response?.transactionRevision !== undefined) {
@@ -537,7 +386,6 @@ export const updateInvoiceTransaction = async (
         ...(docNumber !== undefined ? { docNumber } : {}),
         ...(file?.name ? { filename: file.name } : {}),
       },
-      correlationId,
     });
   }
 };
