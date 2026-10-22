@@ -228,6 +228,18 @@ describe('InvoiceDataTable', () => {
     );
   });
 
+  it('passes the batch month to the service for state bridging', async () => {
+    render(
+      <Provider store={store}>
+        <InvoiceDataTable batchMonth="2026-02" />
+      </Provider>
+    );
+    await screen.findByTestId('data-table');
+    expect(mockedGetTransactions).toHaveBeenCalledWith(
+      expect.objectContaining({ rewardBatchId: 'batch-1', batchMonth: '2026-02' })
+    );
+  });
+
   it('shows empty state when there are no transactions', async () => {
     mockedGetTransactions.mockResolvedValueOnce({
       content: [],

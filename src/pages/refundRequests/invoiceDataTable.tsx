@@ -37,6 +37,7 @@ interface InvoiceDataTableProps {
   pointOfSaleId?: string;
   trxCode?: string;
   fiscalCode?: string;
+  batchMonth?: string;
   onDrawerClosed?: () => void;
 }
 
@@ -58,6 +59,7 @@ const InvoiceDataTable = ({
   pointOfSaleId,
   trxCode,
   fiscalCode,
+  batchMonth,
   onDrawerClosed,
 }: InvoiceDataTableProps) => {
   const [transactions, setTransactions] = useState<MerchantTransactionsListDTO['content']>([]);
@@ -165,6 +167,7 @@ const InvoiceDataTable = ({
         initiativeId: initiative_id,
         size: pagination.pageSize,
         rewardBatchId: batch_id,
+        ...(batchMonth ? { batchMonth } : {}),
         ...filters,
         ...params,
       });

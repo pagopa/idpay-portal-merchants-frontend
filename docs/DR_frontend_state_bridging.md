@@ -117,33 +117,44 @@ pending state. Do not build a client-side mutation queue.
 **Invoice update**
 
 - If the processed-list row revision is lower than the expected revision, the API row is
-  stale: keep the sessionStorage entry and merge only the expected `status: INVOICED` and
-  invoice `docNumber`/`filename`.
+  stale: keep the sessionStorage entry and apply the effect that depends on the month of
+  the reward batch the list is filtered by (`RewardBatchDTO.month`, compared with the
+  current local month):
+
+  | Batch month | Stale row |
+  |---|---|
+  | current | merge only the expected `status: INVOICED` and invoice `docNumber`/`filename` |
+  | future | merge, as for the current month: the transaction stays in the batch |
+  | past | suppress the row, as for a reversal: the update moves the transaction out of the batch |
+  | unknown (list not filtered by a batch, or month not yet loaded) | merge |
+
 - When the row revision is equal to or greater than expected, remove the sessionStorage
   entry and show the API row unchanged.
-- If the row has no `transactionRevision`, show the API row without an overlay and keep the
-  pending entry only until its TTL expires.
+- If the row has no valid `transactionRevision`, treat it as stale (apply the effect
+  above) and keep the pending entry only until its TTL expires.
 - Do not overwrite fields unrelated to the upload.
 
 **Reversal**
 
 - If the processed-list row revision is lower than the expected revision, the API row is
   stale: keep the sessionStorage entry and suppress the matching row from the
-  processed-list content.
+  processed-list content, whatever the batch month.
 - Do not fabricate a row, change `totalElements`, reorder the page, or merge reversal
   document fields.
 - When the row revision is equal to or greater than expected, remove the sessionStorage
   entry and show the API response. If the row is still returned, do not suppress current
   server data indefinitely; treat the reversal postcondition as a backend/projection
   contract failure or show an explicit pending state.
-- If a returned row has no `transactionRevision`, show the API response without an overlay
-  and keep the pending entry only until its TTL expires.
+- If a returned row has no valid `transactionRevision`, treat it as stale and suppress it
+  until the pending entry expires (TTL).
 - If the row is absent, keep the sessionStorage entry until its TTL expires. There is no
   reliable frontend signal that distinguishes propagation from filtering, pagination, or
   another list transition.
 
-Do not make structural matching the normal fallback. Without a valid revision, use the
-normal API response without an overlay.
+Do not make structural matching the normal fallback. A missing or invalid revision in the
+mutation header creates no pending record, so the API response is shown without an
+overlay. A missing or invalid revision in a list row, while a pending record exists, is
+treated as stale until the TTL expires.
 
 ### 4. Make expiration and isolation explicit
 
@@ -181,9 +192,12 @@ logout. Cross-tab convergence is not provided and must not be implied.
 - `src/api/MerchantsApiClient.ts`: extract and validate `X-Transaction-Revision` from the
   successful mutation response.
 - `src/services/merchantService.ts`: record successful mutations and transform the
-  processed-list response.
+  processed-list response. The client-only `batchMonth` list parameter is passed to the
+  reconcile step and never sent to the API.
+- `src/pages/refundRequests/detail/ShopDetails.tsx` and `invoiceDataTable.tsx`: provide the
+  batch month (`RewardBatchDTO.month`) of the batch being displayed.
 - `src/pages/FileUploadAction/FileUploadAction.tsx`: remain a generic upload/navigation
-  component.
+  component; on a failed submission it removes the pending record of that transaction.
 - `src/utils/logoutCleanup.ts`: remove the bridge namespace during logout.
 - `src/api/generated/`: regenerate after any contract change.
 
@@ -205,9 +219,10 @@ At minimum, tests must prove that:
 - an equal or higher revision replaces the pending record, while a lower out-of-order
   revision is ignored;
 - a list row with a lower revision keeps the pending entry and applies only the expected
-  invoice fields;
+  invoice fields in current-, future- and unknown-month batches;
+- a stale invoice-updated row in a past-month batch is suppressed;
 - a list row with an equal or higher revision removes the entry and is shown unchanged;
-- a row without a revision is shown from the API without an overlay;
+- a row without a revision is treated as stale while the pending entry is valid;
 - stale reversal rows are suppressed without changing counts, ordering, or creating rows;
 - an absent reversal row remains pending for 30 seconds, then falls back to API data;
 - missing, malformed, unavailable, and expired storage safely fall back to server data;
@@ -215,10 +230,28 @@ At minimum, tests must prove that:
 - suppressing a reversal may shorten the visible page without changing server totals;
 - logout removes pending records and a later login cannot inherit them.
 
+## Diagnostics
+
+`src/utils/transactionBridgeLogger.ts` records bridge events (mutation, revision header,
+pending record/remove/expire, list request/response ordering, reconcile decisions) in an
+in-memory buffer of the last 500 events. `warn`/`error` events are always printed with the
+`[trxStateBridge]` prefix; from the browser console:
+
+- `idpayTrxBridgeDebug.enable()` / `.disable()`: print `debug`/`info` events too (localStorage);
+- `idpayTrxBridgeDebug.dump()`: JSON of the buffered events to attach to a bug report;
+- `idpayTrxBridgeDebug.clear()`: clear the buffer.
+
+Events never contain fiscal codes, file names or document numbers. Reconcile decisions
+include `batchMonth` and `batchMonthPosition` (`past`/`current`/`future`); a stale invoice row
+hidden because of a past-month batch is logged as
+`reconcile.stale-invoice-row-suppressed-past-month`.
+
 ## Final decision
 
 Implement one small, typed, transaction-scoped overlay for invoice update and reversal.
 Record the authoritative revision from the successful-operation header; while the list row
 is behind, keep the session entry and show the expected state. Once the row reaches that
-revision, remove the session entry and show the API data. Keep the expiry policy explicit
+revision, remove the session entry and show the API data. For invoice updates, the
+expected state depends on the batch month: the updated invoice in current- and future-month
+batches, removal from past-month batches. Keep the expiry policy explicit
 and treat any unresolved state as uncertainty, not as consistency.

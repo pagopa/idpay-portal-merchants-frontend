@@ -2,6 +2,7 @@ import {
   clearPendingTransactionStates,
   cleanupExpiredTransactionStates,
   getPendingTransactionState,
+  getBatchMonthPosition,
   reconcileProcessedTransactions,
   recordPendingTransactionState,
   removePendingTransactionState,
@@ -352,7 +353,7 @@ describe('transactionStateBridge', () => {
     ]);
   });
 
-  it('shows rows without a revision unchanged and keeps the pending state until expiry', () => {
+  it('hides stale reversal rows without a revision and keeps the pending state until expiry', () => {
     recordPendingTransactionState({
       initiativeId: 'initiative-1',
       transactionId: 'transaction-1',
@@ -598,14 +599,147 @@ describe('transactionStateBridge', () => {
         {
           trxId: transactionId,
           transactionRevision: undefined,
-          status: 'AUTHORIZED'
-        }
-      ]
+          status: 'AUTHORIZED',
+        },
+      ],
     };
 
-    const result = reconcileProcessedTransactions(initiativeId, mockApiResponse);
+    const result = reconcileProcessedTransactions(initiativeId, mockApiResponse as any);
 
     expect(result.content).toHaveLength(0);
   });
+});
 
+describe('transactionStateBridge batch month handling', () => {
+  const NOW = new Date(2026, 2, 15, 12).getTime();
+  const staleRow = { trxId: 'transaction-1', transactionRevision: 9, status: 'REWARDED' };
+  const otherRow = { trxId: 'transaction-2', transactionRevision: 3 };
+  const listResponse = (content: Array<Record<string, unknown>>) =>
+    ({
+      content,
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: content.length,
+      totalPages: 1,
+    } as unknown as MerchantTransactionsListDTO);
+
+  const recordInvoiceUpdate = () =>
+    recordPendingTransactionState({
+      initiativeId: 'initiative-1',
+      transactionId: 'transaction-1',
+      operation: 'invoice-update',
+      effect: 'invoice',
+      expectedTransactionRevision: 10,
+      invoice: { docNumber: 'DOC-10', filename: 'invoice.pdf' },
+      now: NOW,
+    });
+
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
+  it.each([
+    ['2026-03', 'current'],
+    ['2026-03-01', 'current'],
+    ['2026-02', 'past'],
+    ['2025-12', 'past'],
+    ['2025-03', 'past'],
+    ['2026-04', 'future'],
+    ['2027-01', 'future'],
+    [undefined, undefined],
+    ['', undefined],
+    ['2026-13', undefined],
+    ['invalid', undefined],
+  ])('getBatchMonthPosition(%p) returns %p', (batchMonth, expected) => {
+    expect(getBatchMonthPosition(batchMonth as string | undefined, NOW)).toBe(expected);
+  });
+
+  it.each(['2026-03', '2026-04'])(
+    'merges the invoice into a stale row of a current- or future-month batch (%s)',
+    (batchMonth) => {
+      recordInvoiceUpdate();
+
+      const response = reconcileProcessedTransactions(
+        'initiative-1',
+        listResponse([staleRow, otherRow]),
+        NOW,
+        { batchMonth }
+      );
+
+      expect(response.content).toEqual([
+        {
+          ...staleRow,
+          status: 'INVOICED',
+          invoiceData: { docNumber: 'DOC-10', filename: 'invoice.pdf' },
+        },
+        otherRow,
+      ]);
+      expect(getPendingTransactionState('initiative-1', 'transaction-1', NOW)).toBeDefined();
+    }
+  );
+
+  it('suppresses a stale invoice-updated row of a past-month batch', () => {
+    recordInvoiceUpdate();
+
+    const response = reconcileProcessedTransactions(
+      'initiative-1',
+      listResponse([staleRow, otherRow]),
+      NOW,
+      { batchMonth: '2026-02' }
+    );
+
+    expect(response.content).toEqual([otherRow]);
+    expect(response.totalElements).toBe(2);
+    expect(getPendingTransactionState('initiative-1', 'transaction-1', NOW)).toBeDefined();
+  });
+
+  it('falls back to merging the invoice when the batch month is unknown', () => {
+    recordInvoiceUpdate();
+
+    const response = reconcileProcessedTransactions(
+      'initiative-1',
+      listResponse([staleRow]),
+      NOW
+    );
+
+    expect(response.content?.[0]).toMatchObject({
+      status: 'INVOICED',
+      invoiceData: { docNumber: 'DOC-10', filename: 'invoice.pdf' },
+    });
+  });
+
+  it('shows the caught-up API row in a past-month batch', () => {
+    recordInvoiceUpdate();
+    const caughtUpRow = { ...staleRow, transactionRevision: 10 };
+
+    const response = reconcileProcessedTransactions(
+      'initiative-1',
+      listResponse([caughtUpRow]),
+      NOW,
+      { batchMonth: '2026-02' }
+    );
+
+    expect(response.content).toEqual([caughtUpRow]);
+    expect(getPendingTransactionState('initiative-1', 'transaction-1', NOW)).toBeUndefined();
+  });
+
+  it('suppresses a stale reversal row regardless of the batch month', () => {
+    recordPendingTransactionState({
+      initiativeId: 'initiative-1',
+      transactionId: 'transaction-1',
+      operation: 'reversal',
+      effect: 'reversal',
+      expectedTransactionRevision: 10,
+      now: NOW,
+    });
+
+    const response = reconcileProcessedTransactions(
+      'initiative-1',
+      listResponse([staleRow, otherRow]),
+      NOW,
+      { batchMonth: '2026-03' }
+    );
+
+    expect(response.content).toEqual([otherRow]);
+  });
 });

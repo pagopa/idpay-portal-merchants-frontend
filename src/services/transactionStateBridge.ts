@@ -293,11 +293,46 @@ const mergeInvoiceData = (
   };
 };
 
+const BATCH_MONTH_PATTERN = /^(\d{4})-(\d{2})/;
+
+export type BatchMonthPosition = 'past' | 'current' | 'future';
+
+export const getBatchMonthPosition = (
+  batchMonth: string | undefined,
+  now = Date.now()
+): BatchMonthPosition | undefined => {
+  const match = typeof batchMonth === 'string' ? BATCH_MONTH_PATTERN.exec(batchMonth) : null;
+  if (!match) {
+    return undefined;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (month < 1 || month > 12) {
+    return undefined;
+  }
+
+  const current = new Date(now);
+  const batchIndex = year * 12 + (month - 1);
+  const currentIndex = current.getFullYear() * 12 + current.getMonth();
+
+  if (batchIndex < currentIndex) {
+    return 'past';
+  }
+  return batchIndex === currentIndex ? 'current' : 'future';
+};
+
+export type ReconcileProcessedTransactionsContext = {
+  batchMonth?: string;
+};
+
 export const reconcileProcessedTransactions = (
   initiativeId: string,
   response: MerchantTransactionsListDTO,
-  now = Date.now()
+  now = Date.now(),
+  context: ReconcileProcessedTransactionsContext = {}
 ): MerchantTransactionsListDTO => {
+  const batchMonthPosition = getBatchMonthPosition(context.batchMonth, now);
   cleanupExpiredTransactionStates(now);
 
   if (!Array.isArray(response.content)) {
@@ -311,15 +346,19 @@ export const reconcileProcessedTransactions = (
       return [row];
     }
 
-    if (isSafeRevision(row.transactionRevision) && row.transactionRevision >= pendingState.expectedTransactionRevision) {
-      removePendingTransactionState(initiativeId, row.trxId);
+    if (
+      isSafeRevision(row.transactionRevision) &&
+      row.transactionRevision >= pendingState.expectedTransactionRevision
+    ) {
+      removePendingTransactionState(
+        initiativeId,
+        row.trxId
+      );
       return [row];
     }
-
-    if (pendingState.operation === 'reversal') {
+    if (pendingState.operation === 'reversal' || batchMonthPosition === 'past') {
       return [];
     }
-
     return [mergeInvoiceData(row, pendingState.invoice)];
   });
 
