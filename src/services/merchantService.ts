@@ -80,6 +80,8 @@ export type GetMerchantTransactionsProcessedParams = {
   rewardBatchTrxStatus?: string;
   pointOfSaleId?: string;
   trxCode?: string;
+  /** Client-only: month ("YYYY-MM") of the reward batch filter, used by the state bridge. */
+  batchMonth?: string;
 };
 
 export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> =>
@@ -105,7 +107,7 @@ let processedListRequestsInFlight = 0;
 export const getMerchantTransactionsProcessed = async (
   params: GetMerchantTransactionsProcessedParams
 ): Promise<MerchantTransactionsListDTO> => {
-  const { initiativeId, ...query } = params;
+  const { initiativeId, batchMonth, ...query } = params;
 
   latestProcessedListRequestSeq += 1;
   const requestSeq = latestProcessedListRequestSeq;
@@ -119,6 +121,7 @@ export const getMerchantTransactionsProcessed = async (
     requestSeq,
     initiativeId,
     query: { ...loggableQuery, hasFiscalCode: Boolean(fiscalCode) },
+    batchMonth,
     inFlight: processedListRequestsInFlight,
     pending: getPendingTransactionStatesSnapshot(initiativeId, startedAt),
   });
@@ -140,7 +143,9 @@ export const getMerchantTransactionsProcessed = async (
       }
     );
 
-    return reconcileProcessedTransactions(initiativeId, response, receivedAt, correlationId);
+    return reconcileProcessedTransactions(initiativeId, response, receivedAt, correlationId, {
+      batchMonth,
+    });
   } catch (error) {
     logTrxBridge('error', 'list.request-failed', {
       correlationId,

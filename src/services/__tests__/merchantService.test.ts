@@ -118,6 +118,20 @@ describe('merchantService', () => {
     expect(mockedApi.getMerchantTransactionsProcessed).toHaveBeenCalled();
   });
 
+  test('getMerchantTransactionsProcessed does not send the client-only batchMonth', async () => {
+    mockedApi.getMerchantTransactionsProcessed.mockResolvedValue({});
+    await getMerchantTransactionsProcessed({
+      initiativeId: '1',
+      page: 0,
+      rewardBatchId: 'batch-1',
+      batchMonth: '2026-03',
+    });
+    expect(mockedApi.getMerchantTransactionsProcessed).toHaveBeenLastCalledWith('1', {
+      page: 0,
+      rewardBatchId: 'batch-1',
+    });
+  });
+
   test('getMerchantInitiativeStatistics delegates correctly', async () => {
     mockedApi.getMerchantInitiativeStatistics.mockResolvedValue({});
     await getMerchantInitiativeStatistics('1');

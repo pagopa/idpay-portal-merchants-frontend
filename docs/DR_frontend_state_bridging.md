@@ -119,6 +119,11 @@ pending state. Do not build a client-side mutation queue.
 - If the processed-list row revision is lower than the expected revision, the API row is
   stale: keep the sessionStorage entry and merge only the expected `status: INVOICED` and
   invoice `docNumber`/`filename`.
+- Exception: an invoice update in a reward batch that is not in the current month moves the
+  transaction out of that batch. When the list is filtered by a batch whose month
+  (`RewardBatchDTO.month`) is known and differs from the current local month, suppress
+  the stale row exactly like a reversal. When the batch month is unknown (for example, lists
+  that are not filtered by batch), fall back to the merge.
 - When the row revision is equal to or greater than expected, remove the sessionStorage
   entry and show the API row unchanged.
 - If the row has no `transactionRevision`, show the API row without an overlay and keep the

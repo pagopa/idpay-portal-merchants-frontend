@@ -427,15 +427,50 @@ const mergeInvoiceData = (
   };
 };
 
+const BATCH_MONTH_PATTERN = /^(\d{4})-(\d{2})/;
+
+/**
+ * Returns whether a reward-batch month ("YYYY-MM" or an ISO date) is the current local month,
+ * or undefined when the month is missing or cannot be parsed.
+ */
+export const isCurrentBatchMonth = (
+  batchMonth: string | undefined,
+  now = Date.now()
+): boolean | undefined => {
+  const match = typeof batchMonth === 'string' ? BATCH_MONTH_PATTERN.exec(batchMonth) : null;
+  if (!match) {
+    return undefined;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (month < 1 || month > 12) {
+    return undefined;
+  }
+
+  const current = new Date(now);
+  return year === current.getFullYear() && month === current.getMonth() + 1;
+};
+
+export type ReconcileProcessedTransactionsContext = {
+  /** Month of the reward batch the list is filtered by ("YYYY-MM"), when known. */
+  batchMonth?: string;
+};
+
 export const reconcileProcessedTransactions = (
   initiativeId: string,
   response: MerchantTransactionsListDTO,
   now = Date.now(),
-  correlationId?: string
+  correlationId?: string,
+  context: ReconcileProcessedTransactionsContext = {}
 ): MerchantTransactionsListDTO => {
+  const batchIsCurrentMonth = isCurrentBatchMonth(context.batchMonth, now);
+
   logTrxBridge('debug', 'reconcile.start', {
     correlationId,
     initiativeId,
+    batchMonth: context.batchMonth,
+    batchIsCurrentMonth,
     pageNo: response.pageNo,
     pageSize: response.pageSize,
     totalElements: response.totalElements,
@@ -509,7 +544,20 @@ export const reconcileProcessedTransactions = (
       return [];
     }
 
-    logTrxBridge('info', 'reconcile.stale-invoice-row-merged', decisionContext);
+    // An invoice update outside the current month moves the transaction out of this batch.
+    if (batchIsCurrentMonth === false) {
+      logTrxBridge('info', 'reconcile.stale-invoice-row-suppressed-not-current-month', {
+        ...decisionContext,
+        batchMonth: context.batchMonth,
+      });
+      return [];
+    }
+
+    logTrxBridge('info', 'reconcile.stale-invoice-row-merged', {
+      ...decisionContext,
+      batchMonth: context.batchMonth,
+      batchIsCurrentMonth,
+    });
     return [mergeInvoiceData(row, pendingState.invoice)];
   });
 
