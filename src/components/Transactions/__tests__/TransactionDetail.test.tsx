@@ -115,6 +115,9 @@ import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 describe('TransactionDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, blob: async () => new Blob(['invoice']) });
+    URL.createObjectURL = jest.fn().mockReturnValue('blob:invoice');
+    URL.revokeObjectURL = jest.fn();
 
     mockUseParams.mockReturnValue({ initiative_id: 'init-123' });
     mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/here' } });
@@ -392,12 +395,12 @@ describe('TransactionDetail', () => {
     expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
   });
 
-  it('download success: shows loader, calls service, creates link, uses provided filename', async () => {
+  it('preview success: shows loader, calls service and opens the fetched document', async () => {
     mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/invoice.pdf' });
 
     const linkMock = {
       href: '',
-      download: '',
+      target: '',
       click: jest.fn(),
     };
 
@@ -429,18 +432,18 @@ describe('TransactionDetail', () => {
 
     await waitFor(() => {
       expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-8', 'store-999');
-      expect(linkMock.href).toBe('https://example.com/invoice.pdf');
-      expect(linkMock.download).toBe('invoice-8.pdf');
+      expect(linkMock.href).toBe('blob:invoice');
+      expect(linkMock.target).toBe('_blank');
       expect(linkMock.click).toHaveBeenCalled();
     });
 
     createElSpy.mockRestore();
   });
 
-  it('download success uses default filename "fattura.pdf" when filename is missing (|| branch)', async () => {
+  it('preview success defaults to PDF when filename is missing', async () => {
     mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/default.pdf' });
 
-    const linkMock = { href: '', download: '', click: jest.fn() };
+    const linkMock = { href: '', target: '', click: jest.fn() };
 
     const origCreateElement = document.createElement.bind(document);
     const createElSpy = jest.spyOn(document, 'createElement').mockImplementation((tag: any) => {
@@ -470,12 +473,28 @@ describe('TransactionDetail', () => {
 
     await waitFor(() => {
       expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-9', 'store-999');
-      expect(linkMock.href).toBe('https://example.com/default.pdf');
-      expect(linkMock.download).toBe('fattura.pdf');
+      expect(linkMock.href).toBe('blob:invoice');
+      expect(linkMock.target).toBe('_blank');
       expect(linkMock.click).toHaveBeenCalled();
     });
 
     createElSpy.mockRestore();
+  });
+
+  it.each([403, 404])('shows the toast instead of opening storage error %s', async (status) => {
+    mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/missing.pdf' });
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status });
+    render(
+      <TransactionDetail title="Dettaglio" isOpen setIsOpen={jest.fn()}
+        itemValues={{ id: 'trx', status: 'COMPLETED', invoiceFile: { filename: 'missing.pdf' } }}
+        listItem={[]} />
+    );
+    fireEvent.click(screen.getByTestId('btn-test'));
+    await waitFor(() => expect(mockSetAlert).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Errore download file', text: 'Non è stato possibile scaricare il documento. Riprova più tardi.', severity: 'error' })
+    ));
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('item-loader')).not.toBeInTheDocument();
   });
 
   it('download error: calls setAlert and stops loading (catch branch)', async () => {

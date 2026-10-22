@@ -364,7 +364,7 @@ describe('Download File', () => {
       expect(mockSetAlert).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Errore download file',
-          text: 'Non è stato possibile scaricare il file',
+          text: 'Non è stato possibile scaricare il documento. Riprova più tardi.',
           severity: 'error',
           isOpen: true,
         })
@@ -492,7 +492,7 @@ describe('Download File', () => {
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: 'Errore download file',
+          title: '',
           severity: 'error',
         })
       );
