@@ -73,6 +73,7 @@ export type GetMerchantTransactionsProcessedParams = {
   rewardBatchTrxStatus?: string;
   pointOfSaleId?: string;
   trxCode?: string;
+  batchMonth?: string;
 };
 
 export const getMerchantInitiativeList = (): Promise<Array<InitiativeDTO>> =>
@@ -94,11 +95,11 @@ export const getMerchantTransactions = (
 export const getMerchantTransactionsProcessed = async (
   params: GetMerchantTransactionsProcessedParams
 ): Promise<MerchantTransactionsListDTO> => {
-  const { initiativeId, ...query } = params;
+  const { initiativeId, batchMonth, ...query } = params;
 
   const response = await getMerchantsApi().getMerchantTransactionsProcessed(initiativeId, query);
-
-  return reconcileProcessedTransactions(initiativeId, response);
+  const receivedAt = Date.now();
+  return reconcileProcessedTransactions(initiativeId, response, receivedAt, {batchMonth});
 };
 
 export const getMerchantInitiativeStatistics = (

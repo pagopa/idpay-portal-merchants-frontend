@@ -437,6 +437,9 @@ const ShopDetails: React.FC = () => {
           rewardBatchTrxStatus={filters.status}
           pointOfSaleId={filters.pointOfSale}
           trxCode={filters.trxCode}
+          batchMonth={
+            store?.month ?? (history.location.state as { store?: RewardBatchDTO })?.store?.month
+          }
         />
       </Box>
     </Box>
