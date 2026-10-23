@@ -115,6 +115,9 @@ import { TYPE_TEXT, MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 describe('TransactionDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, blob: async () => new Blob(['invoice']) });
+    URL.createObjectURL = jest.fn().mockReturnValue('blob:invoice');
+    URL.revokeObjectURL = jest.fn();
 
     mockUseParams.mockReturnValue({ initiative_id: 'init-123' });
     mockUseHistory.mockReturnValue({ push: pushMock, location: { pathname: '/here' } });
@@ -392,12 +395,15 @@ describe('TransactionDetail', () => {
     expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
   });
 
-  it('download success: shows loader, calls service, creates link, uses provided filename', async () => {
+  it.each([
+    ['TRX-8', { filename: 'invoice-8.pdf', docNumber: 'D8' }],
+    ['TRX-9', null],
+  ])('previews the fetched PDF for %s, including a missing filename', async (id, invoiceFile) => {
     mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/invoice.pdf' });
 
     const linkMock = {
       href: '',
-      download: '',
+      target: '',
       click: jest.fn(),
     };
 
@@ -408,9 +414,9 @@ describe('TransactionDetail', () => {
     });
 
     const itemValues = {
-      id: 'TRX-8',
+      id,
       status: 'COMPLETED',
-      invoiceFile: { filename: 'invoice-8.pdf', docNumber: 'D8' },
+      invoiceFile,
     };
 
     render(
@@ -428,54 +434,29 @@ describe('TransactionDetail', () => {
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-8', 'store-999');
-      expect(linkMock.href).toBe('https://example.com/invoice.pdf');
-      expect(linkMock.download).toBe('invoice-8.pdf');
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', id, 'store-999');
+      expect(linkMock.href).toBe('blob:invoice');
+      expect(linkMock.target).toBe('_blank');
       expect(linkMock.click).toHaveBeenCalled();
     });
 
     createElSpy.mockRestore();
   });
 
-  it('download success uses default filename "fattura.pdf" when filename is missing (|| branch)', async () => {
-    mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/default.pdf' });
-
-    const linkMock = { href: '', download: '', click: jest.fn() };
-
-    const origCreateElement = document.createElement.bind(document);
-    const createElSpy = jest.spyOn(document, 'createElement').mockImplementation((tag: any) => {
-      if (tag === 'a') return linkMock as any;
-      return origCreateElement(tag);
-    });
-
-    const itemValues = {
-      id: 'TRX-9',
-      status: 'COMPLETED',
-      invoiceFile: null,
-    };
-
+  it.each([403, 404])('shows the toast instead of opening storage error %s', async (status) => {
+    mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/missing.pdf' });
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status });
     render(
-      <TransactionDetail
-        title="Dettaglio"
-        isOpen
-        setIsOpen={jest.fn()}
-        itemValues={itemValues}
-        listItem={[]}
-      />
+      <TransactionDetail title="Dettaglio" isOpen setIsOpen={jest.fn()}
+        itemValues={{ id: 'trx', status: 'COMPLETED', invoiceFile: { filename: 'missing.pdf' } }}
+        listItem={[]} />
     );
-
     fireEvent.click(screen.getByTestId('btn-test'));
-
-    expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-9', 'store-999');
-      expect(linkMock.href).toBe('https://example.com/default.pdf');
-      expect(linkMock.download).toBe('fattura.pdf');
-      expect(linkMock.click).toHaveBeenCalled();
-    });
-
-    createElSpy.mockRestore();
+    await waitFor(() => expect(mockSetAlert).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Errore download file', text: 'Non è stato possibile scaricare il documento. Riprova più tardi.', severity: 'error' })
+    ));
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('item-loader')).not.toBeInTheDocument();
   });
 
   it('download error: calls setAlert and stops loading (catch branch)', async () => {

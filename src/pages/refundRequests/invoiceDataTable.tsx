@@ -143,7 +143,7 @@ const InvoiceDataTable = ({
     } catch (error) {
       setAlert({
         title: 'Errore download file',
-        text: 'Non è stato possibile scaricare il file',
+        text: 'Non è stato possibile scaricare il documento. Riprova più tardi.',
         isOpen: true,
         severity: 'error',
       });
