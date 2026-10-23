@@ -367,6 +367,17 @@ describe('InvoiceDataTable', () => {
     openSpy.mockRestore();
   });
 
+  const expectDownloadError = async () => {
+    await waitFor(() =>
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'Errore download file',
+        text: 'Non è stato possibile scaricare il documento. Riprova più tardi.',
+        isOpen: true,
+        severity: 'error',
+      })
+    );
+  };
+
   it('handles download error with fetch failure', async () => {
     (global as any).fetch = jest.fn().mockResolvedValue({
       ok: false,
@@ -383,14 +394,7 @@ describe('InvoiceDataTable', () => {
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
     fireEvent.click(invoiceLink);
-    await waitFor(() =>
-      expect(mockSetAlert).toHaveBeenCalledWith({
-        title: 'Errore download file',
-        text: 'Non è stato possibile scaricare il documento. Riprova più tardi.',
-        isOpen: true,
-        severity: 'error',
-      })
-    );
+    await expectDownloadError();
   });
 
   it('handles download error with invalid file extension', async () => {
@@ -418,14 +422,7 @@ describe('InvoiceDataTable', () => {
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-003.txt');
     fireEvent.click(invoiceLink);
-    await waitFor(() =>
-      expect(mockSetAlert).toHaveBeenCalledWith({
-        title: 'Errore download file',
-        text: 'Non è stato possibile scaricare il documento. Riprova più tardi.',
-        isOpen: true,
-        severity: 'error',
-      })
-    );
+    await expectDownloadError();
   });
 
   it('handles download error when downloadInvoiceFile throws', async () => {
@@ -439,14 +436,7 @@ describe('InvoiceDataTable', () => {
     const invoiceCell = screen.getByTestId('col-invoiceFilename');
     const invoiceLink = within(invoiceCell).getByText('INV-001.pdf');
     fireEvent.click(invoiceLink);
-    await waitFor(() =>
-      expect(mockSetAlert).toHaveBeenCalledWith({
-        title: 'Errore download file',
-        text: 'Non è stato possibile scaricare il documento. Riprova più tardi.',
-        isOpen: true,
-        severity: 'error',
-      })
-    );
+    await expectDownloadError();
   });
 
   it('handles download with window.open returning null', async () => {

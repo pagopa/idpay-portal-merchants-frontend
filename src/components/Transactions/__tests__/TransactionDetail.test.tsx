@@ -395,7 +395,10 @@ describe('TransactionDetail', () => {
     expect(screen.queryByTestId('change-file-btn')).not.toBeInTheDocument();
   });
 
-  it('preview success: shows loader, calls service and opens the fetched document', async () => {
+  it.each([
+    ['TRX-8', { filename: 'invoice-8.pdf', docNumber: 'D8' }],
+    ['TRX-9', null],
+  ])('previews the fetched PDF for %s, including a missing filename', async (id, invoiceFile) => {
     mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/invoice.pdf' });
 
     const linkMock = {
@@ -411,9 +414,9 @@ describe('TransactionDetail', () => {
     });
 
     const itemValues = {
-      id: 'TRX-8',
+      id,
       status: 'COMPLETED',
-      invoiceFile: { filename: 'invoice-8.pdf', docNumber: 'D8' },
+      invoiceFile,
     };
 
     render(
@@ -431,48 +434,7 @@ describe('TransactionDetail', () => {
     expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-8', 'store-999');
-      expect(linkMock.href).toBe('blob:invoice');
-      expect(linkMock.target).toBe('_blank');
-      expect(linkMock.click).toHaveBeenCalled();
-    });
-
-    createElSpy.mockRestore();
-  });
-
-  it('preview success defaults to PDF when filename is missing', async () => {
-    mockDownloadInvoiceFile.mockResolvedValue({ invoiceUrl: 'https://example.com/default.pdf' });
-
-    const linkMock = { href: '', target: '', click: jest.fn() };
-
-    const origCreateElement = document.createElement.bind(document);
-    const createElSpy = jest.spyOn(document, 'createElement').mockImplementation((tag: any) => {
-      if (tag === 'a') return linkMock as any;
-      return origCreateElement(tag);
-    });
-
-    const itemValues = {
-      id: 'TRX-9',
-      status: 'COMPLETED',
-      invoiceFile: null,
-    };
-
-    render(
-      <TransactionDetail
-        title="Dettaglio"
-        isOpen
-        setIsOpen={jest.fn()}
-        itemValues={itemValues}
-        listItem={[]}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('btn-test'));
-
-    expect(await screen.findByTestId('item-loader')).not.toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', 'TRX-9', 'store-999');
+      expect(mockDownloadInvoiceFile).toHaveBeenCalledWith('init-123', id, 'store-999');
       expect(linkMock.href).toBe('blob:invoice');
       expect(linkMock.target).toBe('_blank');
       expect(linkMock.click).toHaveBeenCalled();
