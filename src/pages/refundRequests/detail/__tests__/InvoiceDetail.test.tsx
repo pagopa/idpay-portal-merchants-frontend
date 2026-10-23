@@ -492,7 +492,7 @@ describe('Download File', () => {
     await waitFor(() => {
       expect(mockSetAlert).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: '',
+          title: 'Errore download file',
           severity: 'error',
         })
       );
