@@ -9,10 +9,10 @@ import { ReportRequest } from '../../api/generated/merchants/data-contracts';
 
 type ReportTypeEnum = ReportRequest['reportType'];
 const MERCHANT_TRANSACTIONS: ReportTypeEnum = 'MERCHANT_TRANSACTIONS';
-import { MIN_START_DATE } from '../../utils/constants';
 import { ReportDTO } from '../../api/generated/merchants/data-contracts';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
+import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 
 type ReportStatusEnum = ReportDTO['reportStatus'];
 const FAILED: ReportStatusEnum = 'FAILED';
@@ -35,8 +35,18 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
   const { t } = useScopedTranslation();
   const { initiative_id } = useParams<RouteParams>();
   const requestIdRef = useRef<number>(0);
+  const currentInitiative = useCurrentInitiative();
   const { isActionDisabled } = useUserPermissions();
   const isGenerateReportDisabled = isActionDisabled(PERMISSION_KEYS.REPORT_GENERATE);
+
+  const initiativeStartDate = useMemo(() => {
+    if (!currentInitiative?.startDate) {
+      return undefined;
+    }
+
+    const startDate = dayjs(currentInitiative.startDate);
+    return startDate.isValid() ? startDate.format('YYYY-MM-DD') : undefined;
+  }, [currentInitiative?.startDate]);
 
   const yesterday = useMemo(() => dayjs().subtract(1, 'day').startOf('day'), []);
   const yesterdayStr = useMemo(() => yesterday.format('YYYY-MM-DD'), [yesterday]);
@@ -115,8 +125,8 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
     () =>
       formik.values.startDate
         ? dayjs(formik.values.startDate).add(0, 'day').format('YYYY-MM-DD')
-        : MIN_START_DATE,
-    [formik.values.startDate]
+        : initiativeStartDate,
+    [formik.values.startDate, initiativeStartDate]
   );
 
   return (
@@ -144,7 +154,7 @@ const ExportFiltersCard = ({ updateAlerts, onReportGenerated }: Props) => {
                 void formik.setFieldValue('endDate', '');
               }}
               onBlur={formik.handleBlur}
-              inputProps={{ min: MIN_START_DATE, max: yesterdayStr, placeholder: '' }}
+              inputProps={{ min: initiativeStartDate, max: yesterdayStr, placeholder: '' }}
               InputLabelProps={{ shrink: true }}
               error={Boolean(formik.touched.startDate && formik.errors.startDate)}
               helperText={
