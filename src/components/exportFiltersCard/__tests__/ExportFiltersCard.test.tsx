@@ -35,6 +35,12 @@ jest.mock('../../../hooks/useUserPermissions', () => ({
   useUserPermissions: jest.fn(),
 }));
 
+jest.mock('../../../hooks/useCurrentInitiative', () => ({
+  useCurrentInitiative: jest.fn(),
+}));
+
+import { useCurrentInitiative } from '../../../hooks/useCurrentInitiative';
+
 let lastFormikConfig: any;
 const mockSetFormFieldValue = jest.fn();
 
@@ -70,6 +76,7 @@ jest.mock('formik', () => ({
 
 const mockedGenerate = generateMerchantReport as jest.Mock;
 const mockedUseUserPermissions = useUserPermissions as jest.Mock;
+const mockedUseCurrentInitiative = useCurrentInitiative as jest.Mock;
 
 const createMockStore = (initialState?: any) => {
   return configureStore({
@@ -121,6 +128,7 @@ describe('ExportFiltersCard', () => {
     mockedUseUserPermissions.mockReturnValue({
       isActionDisabled: jest.fn().mockReturnValue(false),
     });
+    mockedUseCurrentInitiative.mockReturnValue({ startDate: '2024-01-10T00:00:00.000Z' });
   });
 
   const clickSubmit = () => {
@@ -133,6 +141,14 @@ describe('ExportFiltersCard', () => {
     expect(screen.getByText('pages.reportExport.form.submit')).toBeInTheDocument();
     expect(screen.getByText('pages.reportExport.form.title')).toBeInTheDocument();
     expect(screen.getByText('pages.reportExport.form.subtitle')).toBeInTheDocument();
+  });
+
+  it('uses the current initiative start date as the start date minimum', () => {
+    mockedUseCurrentInitiative.mockReturnValue({ startDate: '2024-01-10T00:00:00.000Z' });
+
+    renderComponent();
+
+    expect(screen.getByLabelText('Dal')).toHaveAttribute('min', '2024-01-10');
   });
 
   it('disables date inputs and submit when report generation is disabled', () => {
