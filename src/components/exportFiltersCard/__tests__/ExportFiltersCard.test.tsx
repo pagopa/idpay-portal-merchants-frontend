@@ -151,6 +151,17 @@ describe('ExportFiltersCard', () => {
     expect(screen.getByLabelText('Dal')).toHaveAttribute('min', '2024-01-10');
   });
 
+  it.each([
+    ['missing', undefined],
+    ['invalid', 'not-a-date'],
+  ])('does not set a start date minimum when the initiative start date is %s', (_, startDate) => {
+    mockedUseCurrentInitiative.mockReturnValue({ startDate });
+
+    renderComponent();
+
+    expect(screen.getByLabelText('Dal')).not.toHaveAttribute('min');
+  });
+
   it('disables date inputs and submit when report generation is disabled', () => {
     mockedUseUserPermissions.mockReturnValue({
       isActionDisabled: jest.fn().mockReturnValue(true),
