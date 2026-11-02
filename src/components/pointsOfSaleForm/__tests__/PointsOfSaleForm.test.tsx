@@ -558,6 +558,23 @@ describe('PointsOfSaleForm validation tests', () => {
     fireEvent.change(confirmEmailInput, { target: { value: 'valid@example.com' } });
   });
 
+  it('keeps email mismatch validation visible after submit attempt', async () => {
+    const props = createDefaultProps();
+    const { rerender } = render(<PointsOfSaleForm {...props} />);
+
+    const emailInput = screen.getByLabelText('E-mail');
+    const confirmEmailInput = screen.getByLabelText('Conferma e-mail');
+
+    fireEvent.change(emailInput, { target: { value: 'shop@example.com' } });
+    fireEvent.change(confirmEmailInput, { target: { value: 'different@example.com' } });
+
+    expect(await screen.findByText('Le email non coincidono')).toBeInTheDocument();
+
+    rerender(<PointsOfSaleForm {...props} submitAttempt={1} />);
+
+    expect(await screen.findByText('Le email non coincidono')).toBeInTheDocument();
+  });
+
   it('handles channel inputs and Verifica URL click', () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const urlInput = screen.getByLabelText('Scheda Google MYBusiness');

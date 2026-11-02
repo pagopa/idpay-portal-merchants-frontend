@@ -200,8 +200,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       let fieldErrors: FieldErrors = {};
 
       if (!editMode) {
+        const contactEmailValue = sp.contactEmail?.trim() ?? '';
+        const confirmContactEmailValue = contactEmailConfirm[index]?.trim() ?? '';
+
         if (!sp.contactEmail?.trim()) {
           fieldErrors = { ...fieldErrors, contactEmail: requiredFieldErrors.contactEmail };
+          isValid = false;
+        } else if (!isValidRegex(contactEmailValue, emailRegex)) {
+          fieldErrors = { ...fieldErrors, contactEmail: 'Devi inserire una email valida' };
           isValid = false;
         }
 
@@ -210,6 +216,12 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
             ...fieldErrors,
             confirmContactEmail: requiredFieldErrors.confirmContactEmail,
           };
+          isValid = false;
+        } else if (!isValidRegex(confirmContactEmailValue, emailRegex)) {
+          fieldErrors = { ...fieldErrors, confirmContactEmail: 'Devi inserire una email valida' };
+          isValid = false;
+        } else if (contactEmailValue !== confirmContactEmailValue) {
+          fieldErrors = { ...fieldErrors, confirmContactEmail: 'Le email non coincidono' };
           isValid = false;
         }
 
