@@ -1,6 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import InitiativeExportReportPage from '../ExportReport';
 import { useAppSelector } from '../../../redux/hooks';
+import { useCurrentInitiative } from '../../../hooks/useCurrentInitiative';
+
+jest.mock('../../../hooks/useCurrentInitiative', () => ({
+  useCurrentInitiative: jest.fn(() => ({ startDate: '2026-01-01' })),
+}));
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -34,9 +39,9 @@ jest.mock('@pagopa/selfcare-common-frontend/lib/', () => ({
 jest.mock(
   '../../../components/exportFiltersCard/ExportFiltersCard',
   () =>
-    ({ updateAlerts }: any) =>
+    ({ updateAlerts, startDate }: any) =>
       (
-        <button data-testid="trigger-alert" onClick={() => updateAlerts('inserted', true)}>
+        <button data-testid="trigger-alert" data-start-date={startDate} onClick={() => updateAlerts('inserted', true)}>
           trigger
         </button>
       )
@@ -60,6 +65,9 @@ jest.mock('../../../components/Alert/AlertListComponent', () => ({ alertList }: 
 ));
 
 describe('InitiativeExportReportPage', () => {
+  beforeEach(() => {
+    (useCurrentInitiative as jest.Mock).mockReturnValue({ startDate: '2026-01-01' });
+  });
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   it('renders title, subtitle, filters and table', () => {
     render(<InitiativeExportReportPage />);
@@ -68,6 +76,18 @@ describe('InitiativeExportReportPage', () => {
     expect(screen.getByText('pages.reportExport.subtitle')).toBeInTheDocument();
     expect(screen.getByTestId('trigger-alert')).toBeInTheDocument();
     expect(screen.getByTestId('report-table')).toBeInTheDocument();
+  });
+
+  it('uses the current initiative start date', () => {
+    (useCurrentInitiative as jest.Mock).mockReturnValue({ startDate: '2026-05-10' });
+    render(<InitiativeExportReportPage />);
+    expect(screen.getByTestId('trigger-alert')).toHaveAttribute('data-start-date', '2026-05-10');
+  });
+
+  it('waits for the initiative start date before showing filters', () => {
+    (useCurrentInitiative as jest.Mock).mockReturnValue(undefined);
+    render(<InitiativeExportReportPage />);
+    expect(screen.queryByTestId('trigger-alert')).not.toBeInTheDocument();
   });
 
   it('opens and closes alert via updateAlerts', () => {

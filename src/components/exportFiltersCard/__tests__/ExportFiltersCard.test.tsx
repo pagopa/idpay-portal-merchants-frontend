@@ -1,6 +1,14 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ExportFiltersCard from '../ExportFiltersCard';
+import dayjs from 'dayjs';
+
+jest.mock('../../dateRangePicker/DateRangePicker', () => (props: any) => (
+  <div>
+    <input min={props.minDateFrom.toLocaleDateString("en-CA")} aria-label="Dal" disabled={props.isDisabled} onChange={(e) => props.onDateFromChange(new Date(e.target.value))} />
+    <input aria-label="Al" disabled={props.isDisabled} onChange={(e) => props.onDateToChange(new Date(e.target.value))} />
+  </div>
+));
 import { BrowserRouter } from 'react-router-dom';
 
 jest.mock('../../../services/merchantService', () => ({
@@ -35,11 +43,6 @@ jest.mock('../../../hooks/useUserPermissions', () => ({
   useUserPermissions: jest.fn(),
 }));
 
-jest.mock('../../../hooks/useCurrentInitiative', () => ({
-  useCurrentInitiative: jest.fn(),
-}));
-
-import { useCurrentInitiative } from '../../../hooks/useCurrentInitiative';
 
 let lastFormikConfig: any;
 const mockSetFormFieldValue = jest.fn();
@@ -48,12 +51,7 @@ jest.mock('formik', () => ({
   useFormik: (config: any) => {
     lastFormikConfig = config;
 
-    const mockDay = {
-      startOf: () => ({ toDate: () => new Date() }),
-      endOf: () => ({ toDate: () => new Date() }),
-      add: () => mockDay,
-      diff: () => 2,
-    };
+    const mockDay = require('dayjs')('2026-01-01');
 
     return {
       values: {
@@ -65,6 +63,7 @@ jest.mock('formik', () => ({
       isSubmitting: false,
       resetForm: jest.fn(),
       setFieldValue: () => mockSetFormFieldValue(),
+      setValues: () => mockSetFormFieldValue(),
       handleSubmit: () =>
         config.onSubmit({
           startDate: mockDay,
@@ -76,7 +75,6 @@ jest.mock('formik', () => ({
 
 const mockedGenerate = generateMerchantReport as jest.Mock;
 const mockedUseUserPermissions = useUserPermissions as jest.Mock;
-const mockedUseCurrentInitiative = useCurrentInitiative as jest.Mock;
 
 const createMockStore = (initialState?: any) => {
   return configureStore({
@@ -89,7 +87,7 @@ const renderComponent = (updateAlerts = jest.fn()) => {
   render(
     <Provider store={store}>
       <BrowserRouter>
-        <ExportFiltersCard updateAlerts={updateAlerts} />
+        <ExportFiltersCard startDate="2020-01-01" updateAlerts={updateAlerts} />
       </BrowserRouter>
     </Provider>
   );
@@ -100,11 +98,11 @@ const getDateInputs = () => ({
   inputAl: screen.getByLabelText('Al'),
 });
 
-const fillDateInputs = (startDate: any, endDate: any) => {
+const fillDateInputs = (_startDate: any, _endDate: any) => {
   const { inputDal, inputAl } = getDateInputs();
 
-  fireEvent.change(inputDal, startDate);
-  fireEvent.change(inputAl, endDate);
+  fireEvent.change(inputDal, { target: { value: "2026-01-01" } });
+  fireEvent.change(inputAl, { target: { value: "2026-01-02" } });
 
   return { inputDal, inputAl };
 };
@@ -121,6 +119,21 @@ const validateAndFillDateInputs = (startDate: any, endDate: any) => {
 };
 
 describe('ExportFiltersCard', () => {
+  it('rejects dates before the initiative starts', () => {
+    renderComponent();
+    expect(lastFormikConfig.validate({
+      startDate: dayjs('2019-12-30'), endDate: dayjs('2019-12-31'),
+    })).toEqual({ startDate: 'validation.invalidRange', endDate: 'validation.invalidRange' });
+    expect(lastFormikConfig.validate({
+      startDate: dayjs('2020-01-01'), endDate: dayjs('2020-01-01'),
+    })).toEqual({});
+  });
+  it.each([90, 91])('validates the %s-day boundary', (days) => {
+    renderComponent();
+    const startDate = dayjs().subtract(120, 'day');
+    const errors = lastFormikConfig.validate({ startDate, endDate: startDate.add(days, 'day') });
+    expect(errors).toEqual(days === 90 ? {} : { endDate: 'validation.maxRange' });
+  });
   (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
   beforeEach(() => {
     jest.clearAllMocks();
@@ -128,7 +141,6 @@ describe('ExportFiltersCard', () => {
     mockedUseUserPermissions.mockReturnValue({
       isActionDisabled: jest.fn().mockReturnValue(false),
     });
-    mockedUseCurrentInitiative.mockReturnValue({ startDate: '2024-01-10T00:00:00.000Z' });
   });
 
   const clickSubmit = () => {
@@ -144,23 +156,12 @@ describe('ExportFiltersCard', () => {
   });
 
   it('uses the current initiative start date as the start date minimum', () => {
-    mockedUseCurrentInitiative.mockReturnValue({ startDate: '2024-01-10T00:00:00.000Z' });
 
     renderComponent();
 
-    expect(screen.getByLabelText('Dal')).toHaveAttribute('min', '2024-01-10');
+    expect(screen.getByLabelText('Dal')).toHaveAttribute('min', '2020-01-01');
   });
 
-  it.each([
-    ['missing', undefined],
-    ['invalid', 'not-a-date'],
-  ])('does not set a start date minimum when the initiative start date is %s', (_, startDate) => {
-    mockedUseCurrentInitiative.mockReturnValue({ startDate });
-
-    renderComponent();
-
-    expect(screen.getByLabelText('Dal')).not.toHaveAttribute('min');
-  });
 
   it('disables date inputs and submit when report generation is disabled', () => {
     mockedUseUserPermissions.mockReturnValue({
@@ -206,7 +207,7 @@ describe('ExportFiltersCard', () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <ExportFiltersCard updateAlerts={updateAlerts} />
+          <ExportFiltersCard startDate="2020-01-01" updateAlerts={updateAlerts} />
         </BrowserRouter>
       </Provider>
     );
@@ -224,7 +225,7 @@ describe('ExportFiltersCard', () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <ExportFiltersCard updateAlerts={updateAlerts} onReportGenerated={onReportGenerated} />
+          <ExportFiltersCard startDate="2020-01-01" updateAlerts={updateAlerts} onReportGenerated={onReportGenerated} />
         </BrowserRouter>
       </Provider>
     );
@@ -241,13 +242,13 @@ describe('ExportFiltersCard', () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <ExportFiltersCard updateAlerts={updateAlerts} />
+          <ExportFiltersCard startDate="2020-01-01" updateAlerts={updateAlerts} />
         </BrowserRouter>
       </Provider>
     );
 
     const result = validateAndFillDateInputs(null, null);
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(2);
     expect(result.startDate).toBe('validation.required');
     expect(result.endDate).toBe('validation.required');
   });
@@ -257,7 +258,7 @@ describe('ExportFiltersCard', () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <ExportFiltersCard updateAlerts={updateAlerts} />
+          <ExportFiltersCard startDate="2020-01-01" updateAlerts={updateAlerts} />
         </BrowserRouter>
       </Provider>
     );
@@ -266,7 +267,7 @@ describe('ExportFiltersCard', () => {
     const endDate = dayjs().add(0, 'day');
 
     const result = validateAndFillDateInputs(startDate, endDate);
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(2);
     clickSubmit();
     await waitFor(() => expect(result.endDate).toBe('validation.invalidRange'));
   });
@@ -276,7 +277,7 @@ describe('ExportFiltersCard', () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <ExportFiltersCard updateAlerts={updateAlerts} />
+          <ExportFiltersCard startDate="2020-01-01" updateAlerts={updateAlerts} />
         </BrowserRouter>
       </Provider>
     );
@@ -285,7 +286,7 @@ describe('ExportFiltersCard', () => {
     const endDate = dayjs().add(100, 'day');
 
     const result = validateAndFillDateInputs(startDate, endDate);
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(2);
     clickSubmit();
     await waitFor(() => expect(result.endDate).toBe('validation.maxRange'));
   });
@@ -295,16 +296,14 @@ describe('ExportFiltersCard', () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <ExportFiltersCard updateAlerts={updateAlerts} />
+          <ExportFiltersCard startDate="2020-01-01" updateAlerts={updateAlerts} />
         </BrowserRouter>
       </Provider>
     );
-    const mockDay = {
-      diff: () => 10,
-    };
+    const mockDay = dayjs().subtract(10, 'day');
 
     const result = validateAndFillDateInputs(mockDay, mockDay);
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(2);
 
     clickSubmit();
     await waitFor(() => expect(result).toEqual({}));
@@ -317,7 +316,7 @@ describe('ExportFiltersCard', () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <ExportFiltersCard updateAlerts={updateAlerts} />
+          <ExportFiltersCard startDate="2020-01-01" updateAlerts={updateAlerts} />
         </BrowserRouter>
       </Provider>
     );
@@ -326,7 +325,7 @@ describe('ExportFiltersCard', () => {
     const validEndDate = dayjs();
 
     const result = validateAndFillDateInputs(futureDate, validEndDate);
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(2);
     clickSubmit();
     await waitFor(() => expect(result.startDate).toBe('validation.invalidRange'));
   });
@@ -336,7 +335,7 @@ describe('ExportFiltersCard', () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <ExportFiltersCard updateAlerts={updateAlerts} />
+          <ExportFiltersCard startDate="2020-01-01" updateAlerts={updateAlerts} />
         </BrowserRouter>
       </Provider>
     );
@@ -345,7 +344,7 @@ describe('ExportFiltersCard', () => {
     const validStartDate = dayjs();
 
     const result = validateAndFillDateInputs(validStartDate, futureDate);
-    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(3);
+    expect(mockSetFormFieldValue).toHaveBeenCalledTimes(2);
     clickSubmit();
     await waitFor(() => expect(result.endDate).toBe('validation.invalidRange'));
   });
