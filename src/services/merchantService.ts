@@ -20,6 +20,7 @@ import {
   ReportDTO,
   MerchantIbanPatchDTO,
   PointOfSaleDTO,
+  PointOfSaleUpdateDTO,
   PointOfSaleReferentPatchDTO,
   ValidationErrorDTO,
   PointOfSaleErrorDTO,
@@ -199,6 +200,44 @@ export const updateMerchantPointOfSales = async (
 
     if (apiErrorData) {
       return normalizePointOfSaleError(apiErrorData);
+    }
+
+    return { code: 'POINT_OF_SALE_GENERIC_ERROR', message: '' };
+  }
+};
+
+export const updatePointOfSale = async (
+  merchantId: string,
+  pointOfSaleId: string,
+  pointOfSale: PointOfSaleUpdateDTO
+): Promise<PointOfSaleDTO | ValidationErrorDTO | PointOfSaleErrorDTO> => {
+  try {
+    return await getMerchantsApi().updatePointOfSale(merchantId, pointOfSaleId, pointOfSale);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      const errorDetails = error.details as ValidationErrorDTO | PointOfSaleErrorDTO | undefined;
+
+      if (errorDetails?.code) {
+        return normalizePointOfSaleError({
+          ...errorDetails,
+          message: errorDetails.message ?? error.message ?? '',
+        } as ValidationErrorDTO | PointOfSaleErrorDTO) as ValidationErrorDTO | PointOfSaleErrorDTO;
+      }
+
+      return {
+        code: (error.code ?? 'POINT_OF_SALE_GENERIC_ERROR') as PointOfSaleErrorDTO['code'],
+        message: error.message ?? '',
+      };
+    }
+
+    const apiErrorData = (
+      error as {
+        response?: { data?: ValidationErrorDTO | PointOfSaleErrorDTO };
+      }
+    )?.response?.data;
+
+    if (apiErrorData) {
+      return normalizePointOfSaleError(apiErrorData) as ValidationErrorDTO | PointOfSaleErrorDTO;
     }
 
     return { code: 'POINT_OF_SALE_GENERIC_ERROR', message: '' };

@@ -13,7 +13,7 @@ import {
   InputAdornment,
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
-import { ArrowOutward, Report as ReportIcon } from '@mui/icons-material';
+import { Report as ReportIcon, OpenInNew as OpenInNewIcon } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import { ButtonNaked } from '@pagopa/mui-italia/components';
 import { theme } from '@pagopa/mui-italia/theme';
@@ -34,12 +34,14 @@ interface PointsOfSaleFormProps {
   onFormChange: (salesPoints: Array<PointOfSaleDTO>) => void;
   onValidationChange: (isValid: boolean) => void;
   pointsOfSaleLoaded: boolean;
+  initialSalesPoints?: Array<PointOfSaleDTO>;
+  editMode?: boolean;
   externalErrors?: FormErrors;
   externalAlertMessages?: FormAlertMessages;
   submitAttempt: number;
 }
 
-interface FormErrors {
+export interface FormErrors {
   [salesPointIndex: number]: FieldErrors;
 }
 
@@ -47,7 +49,7 @@ interface FieldErrors {
   [fieldName: string]: string;
 }
 
-interface FormAlertMessages {
+export interface FormAlertMessages {
   [salesPointIndex: number]: string;
 }
 
@@ -58,6 +60,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   onFormChange,
   onValidationChange,
   pointsOfSaleLoaded,
+  initialSalesPoints,
+  editMode = false,
 }) => {
   const { t } = useScopedTranslation();
   const { options, loading, error, search } = usePlacesAutocomplete();
@@ -106,6 +110,25 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       color: theme.palette.error.main,
     },
   };
+
+  const defaultSalesPoint = (): PointOfSaleDTO => ({
+    type: PHYSICAL,
+    franchiseName: '',
+    id: generateUniqueId(),
+    address: '',
+    streetNumber: '',
+    city: '',
+    zipCode: '',
+    region: '',
+    province: '',
+    website: '',
+    contactEmail: '',
+    contactName: '',
+    contactSurname: '',
+    channelEmail: '',
+    channelPhone: '',
+    channelGeolink: '',
+  });
 
   const mergedErrors = useMemo(() => ({ ...errors, ...externalErrors }), [errors, externalErrors]);
 
@@ -176,30 +199,28 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
     const newErrors = salesPoints.reduce<FormErrors>((acc, sp, index) => {
       let fieldErrors: FieldErrors = {};
 
-      if (!sp.contactEmail?.trim()) {
-        fieldErrors = { ...fieldErrors, contactEmail: requiredFieldErrors.contactEmail };
-        isValid = false;
-      }
+      if (!editMode) {
+        if (!sp.contactEmail?.trim()) {
+          fieldErrors = { ...fieldErrors, contactEmail: requiredFieldErrors.contactEmail };
+          isValid = false;
+        }
 
-      if (!contactEmailConfirm[index]?.trim()) {
-        fieldErrors = {
-          ...fieldErrors,
-          confirmContactEmail: requiredFieldErrors.confirmContactEmail,
-        };
-        isValid = false;
-      }
+        if (!contactEmailConfirm[index]?.trim()) {
+          fieldErrors = {
+            ...fieldErrors,
+            confirmContactEmail: requiredFieldErrors.confirmContactEmail,
+          };
+          isValid = false;
+        }
 
-      if (!sp.contactName?.trim()) {
-        fieldErrors = { ...fieldErrors, contactName: requiredFieldErrors.contactName };
-        isValid = false;
-      }
-      if (!sp.contactSurname?.trim()) {
-        fieldErrors = { ...fieldErrors, contactSurname: requiredFieldErrors.contactSurname };
-        isValid = false;
-      }
-      if (!sp.franchiseName?.trim()) {
-        fieldErrors = { ...fieldErrors, franchiseName: requiredFieldErrors.franchiseName };
-        isValid = false;
+        if (!sp.contactName?.trim()) {
+          fieldErrors = { ...fieldErrors, contactName: requiredFieldErrors.contactName };
+          isValid = false;
+        }
+        if (!sp.contactSurname?.trim()) {
+          fieldErrors = { ...fieldErrors, contactSurname: requiredFieldErrors.contactSurname };
+          isValid = false;
+        }
       }
       if (sp.type === PHYSICAL) {
         if (!sp.city?.trim()) {
@@ -271,27 +292,16 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 
   useEffect(() => {
     if (pointsOfSaleLoaded) {
-      setSalesPoints([
-        {
-          type: PHYSICAL,
-          franchiseName: '',
-          address: '',
-          streetNumber: '',
-          city: '',
-          zipCode: '',
-          region: '',
-          province: '',
-          website: '',
-          contactEmail: '',
-          contactName: '',
-          contactSurname: '',
-          channelEmail: '',
-          channelPhone: '',
-          channelGeolink: '',
-        },
-      ]);
+      const values = initialSalesPoints?.length ? initialSalesPoints : [defaultSalesPoint()];
+      setSalesPoints(values);
+      setContactEmailConfirm(
+        values.reduce<{ [index: number]: string }>(
+          (acc, salesPoint, index) => ({ ...acc, [index]: salesPoint.contactEmail ?? '' }),
+          {}
+        )
+      );
     }
-  }, [pointsOfSaleLoaded]);
+  }, [pointsOfSaleLoaded, initialSalesPoints]);
 
   const clearFormOnTypeChanging = (index: number, type: string) => {
     setErrors({});
@@ -590,36 +600,46 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   };
 
   return (
-    <Box bgcolor={'background.paper'} boxShadow={3}>
+    <Box bgcolor={'background.paper'} boxShadow={editMode ? 0 : 3}>
       {salesPoints.map((salesPoint, index) => (
-        <Box p={2} key={`${salesPoint.id}`} mb={2} borderColor={'divider'} borderRadius={2}>
+        <Box
+          p={editMode ? 0 : 2}
+          key={`${salesPoint.id}`}
+          mb={editMode ? 0 : 2}
+          borderColor={'divider'}
+          borderRadius={2}
+        >
           <Grid container>
-            <Grid item xs={10}>
-              <Typography variant="h5" gutterBottom fontWeight={theme.typography.fontWeightBold}>
-                {t('pages.pointOfSales.title')} {index + 1}
-              </Typography>
-            </Grid>
-            <Grid item xs={2}>
-              <Grid container alignItems="center" justifyContent="flex-end" spacing={2}>
-                <Grid item>
-                  <Typography>
-                    {index + 1}/{salesPoints.length}
+            {!editMode && (
+              <>
+                <Grid item xs={10}>
+                  <Typography variant="h5" gutterBottom fontWeight={theme.typography.fontWeightBold}>
+                    {t('pages.pointOfSales.title')} {index + 1}
                   </Typography>
                 </Grid>
-                {index > 0 && (
-                  <Grid item mt={'5px'}>
-                    <DeleteOutlineIcon
-                      cursor={'pointer'}
-                      onClick={() => deleteSalesPoint(index)}
-                      fontSize="small"
-                      htmlColor={theme.palette.error.dark}
-                    />
+                <Grid item xs={2}>
+                  <Grid container alignItems="center" justifyContent="flex-end" spacing={1}>
+                    <Grid item>
+                      <Typography>
+                        {index + 1}/{salesPoints.length}
+                      </Typography>
+                    </Grid>
+                    {index > 0 && (
+                      <Grid item mt={'5px'}>
+                        <DeleteOutlineIcon
+                          cursor={'pointer'}
+                          onClick={() => deleteSalesPoint(index)}
+                          fontSize="small"
+                          htmlColor={theme.palette.error.dark}
+                        />
+                      </Grid>
+                    )}
                   </Grid>
-                )}
-              </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl component="fieldset" sx={{ mb: 3, mt: 2 }}>
+                </Grid>
+              </>
+            )}
+            {!editMode && <Grid item xs={12}>
+              <FormControl component="fieldset">
                 <Typography variant="h6">{t('pages.pointOfSales.type')}</Typography>
 
                 <Typography variant="body1" mb={2} mt={2}>
@@ -641,7 +661,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                   </RadioGroup>
                 </Box>
               </FormControl>
-            </Grid>
+            </Grid>}
             {showErrorAlert[index] && (
               <Grid item xs={12} pb={3}>
                 <Slide direction="left" in={showErrorAlert[index]} mountOnEnter unmountOnExit>
@@ -653,17 +673,22 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
               </Grid>
             )}
             <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                {t('pages.pointOfSales.signName')}
+              <Typography
+                variant={editMode ? 'subtitle2' : 'h6'}
+                gutterBottom
+                sx={editMode ? { textTransform: 'uppercase' } : undefined}
+              >
+                {editMode ? 'INFORMAZIONI PUNTO VENDITA' : t('pages.pointOfSales.signName')}
               </Typography>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={editMode ? 12 : 5}>
               <TextField
                 size="small"
                 fullWidth
                 label="Nome insegna"
                 name="franchiseName"
                 value={salesPoint.franchiseName}
+                disabled={editMode}
                 onChange={(e) => handleFieldChange(index, e as React.ChangeEvent<HTMLInputElement>)}
                 margin="normal"
                 sx={{
@@ -678,7 +703,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                 InputProps={getErrorInputProps(!!getFieldError(index, 'franchiseName'))}
               />
             </Grid>
-            <Grid item xs={7} />
+            {!editMode && <Grid item xs={7} />}
             {salesPoint.type === 'ONLINE' && (
               <>
                 <Typography variant="h6" gutterBottom>
@@ -710,12 +735,14 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 
             {salesPoint.type === 'PHYSICAL' && (
               <Grid item xs={12}>
-                <Box mb={3} mt={2}>
-                  <Grid container spacing={1}>
-                    <Grid item xs={12} sm={10} md={10} lg={10}>
-                      <Typography variant="h6" gutterBottom>
-                        {t('pages.pointOfSales.address')}
-                      </Typography>
+                <Box mb={1} mt={0.5}>
+                  <Grid container spacing={0.5}>
+                    <Grid item xs={12} sm={12} md={12} lg={12}>
+                      {!editMode && (
+                        <Typography variant="h6" gutterBottom>
+                          {t('pages.pointOfSales.address')}
+                        </Typography>
+                      )}
                       <Box mt={2}>
                         <AutocompleteComponent
                           options={options}
@@ -723,6 +750,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                           name="address"
                           required
                           onChangeDebounce={(value) => search(value)}
+                          initialValue={[salesPoint.address, salesPoint.streetNumber]
+                            .filter(Boolean)
+                            .join(', ')}
                           onChange={(addressObj) => {
                             handleChangeAddress(index, addressObj);
                           }}
@@ -747,7 +777,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         )}
                       </Box>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <TextField
                         size="small"
                         aria-readonly={true}
@@ -771,7 +801,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <TextField
                         size="small"
                         aria-readonly={true}
@@ -795,7 +825,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <TextField
                         size="small"
                         aria-readonly={true}
@@ -819,7 +849,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <TextField
                         size="small"
                         aria-readonly={true}
@@ -848,15 +878,15 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
               </Grid>
             )}
 
-            <Grid item xs={12}>
-              <Box mb={3} mt={2}>
+            {!editMode && <Grid item xs={12}>
+              <Box mb={1} mt={0.5}>
                 <Typography variant="h6" gutterBottom>
                   {t('pages.pointOfSales.referentContactTitle')}
                 </Typography>
-                <Typography variant="body1" mb={2}>
+                <Typography variant="body1" mb={0.5}>
                   {t('pages.pointOfSales.referentContactDescription')}
                 </Typography>
-                <Grid container spacing={1}>
+                <Grid container spacing={0.5}>
                   <Grid item xs={12} sm={6}>
                     <Box pr={1}>
                       <TextField
@@ -958,18 +988,18 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                   </Grid>
                 </Grid>
               </Box>
-            </Grid>
+            </Grid>}
             {salesPoint.type === 'PHYSICAL' && (
               <Grid item xs={12}>
-                <Box mt={2}>
-                  <Grid container spacing={1}>
+                <Box mt={0.5}>
+                  <Grid container spacing={0.5}>
                     <Grid item xs={12}>
-                      <Typography variant="h6" gutterBottom>
-                        {'Contatti punto vendita'}
+                      <Typography variant={editMode ? 'subtitle2' : 'h6'} gutterBottom>
+                        {editMode ? 'CONTATTI PUNTO VENDITA' : 'Contatti punto vendita'}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={10}>
-                      <Box mr={2} mt={2}>
+                      <Box mr={2}>
                         <TextField
                           fullWidth
                           size="small"
@@ -991,11 +1021,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                       </Box>
                     </Grid>
                     <Grid item xs={12} sm={2}>
-                      <Box mx={4} mt={2.5}>
+                      <Box ml={0} mr={1} mt={2.5}>
                         <ButtonNaked
                           sx={{ whiteSpace: 'nowrap' }}
                           color="primary"
-                          endIcon={<ArrowOutward fontSize="small" />}
+                          endIcon={<OpenInNewIcon fontSize="small" />}
                           onClick={() => {
                             const url = addHttpsIfMissing(salesPoint.channelGeolink);
                             if (url && isValidConfiguredUrl(salesPoint.channelGeolink)) {
@@ -1121,7 +1151,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         </Box>
       ))}
 
-      {salesPoints.length < 5 && (
+      {!editMode && salesPoints.length < 5 && (
         <Button startIcon={<AddIcon />} onClick={addAnotherSalesPoint} sx={{ p: 1 }}>
           {'Aggiungi un altro punto vendita'}
         </Button>
