@@ -23,6 +23,13 @@ interface Props {
   onSuccess: () => void;
 }
 
+const FIELD_VALIDATION_CODES = new Set([
+  'VALIDATION_ERROR',
+  'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
+  'PHYSICAL_POS_ALREADY_REGISTERED',
+  'ONLINE_POS_ALREADY_REGISTERED',
+]);
+
 const getValidationMessage = (code?: string, fallback?: string) => {
   switch (code) {
     case 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE':
@@ -148,6 +155,20 @@ const EditPointOfSaleModal = ({
         message?: string;
       };
       const details = validationResult.errors ?? validationResult.details ?? [];
+      const isFieldValidationError =
+        details.length > 0 ||
+        (validationResult.code !== undefined && FIELD_VALIDATION_CODES.has(validationResult.code));
+
+      if (!isFieldValidationError) {
+        setAlert({
+          title: t('errors.genericTitle'),
+          text: t('errors.genericDescription'),
+          isOpen: true,
+          severity: 'error',
+        });
+        return;
+      }
+
       const nextErrors = details.reduce<FormErrors>((acc, detail) => {
         const field = detail.field ?? (salesPoints[0].type === 'ONLINE' ? 'website' : 'address');
         return {
@@ -164,7 +185,7 @@ const EditPointOfSaleModal = ({
 
     handleClose();
     setAlert({
-      text: 'pages.initiativeStores.pointOfSaleChangeSuccess',
+      text: t('pages.initiativeStores.pointOfSaleChangeSuccess'),
       isOpen: true,
       severity: 'success',
     });

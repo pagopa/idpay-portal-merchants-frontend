@@ -334,7 +334,7 @@
       "contactEmailModal": "Indirizzo e-mail",
       "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati",
       "referentChangeSuccess": "Dati modificati con successo",
-      "pointOfSaleChangeSuccess": "Dati del punto vendita modificati con successo"
+      "pointOfSaleChangeSuccess": "I dati del punto vendita sono stati modificati."
     },
     "initiativeStoreDetail": {
       "transactionHistory": "Storico transazioni",
