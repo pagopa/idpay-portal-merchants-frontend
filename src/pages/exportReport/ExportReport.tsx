@@ -4,10 +4,12 @@ import { useCallback, useState } from 'react';
 import AlertListComponent, { AlertProps } from '../../components/Alert/AlertListComponent';
 import ExportFiltersCard from '../../components/exportFiltersCard/ExportFiltersCard';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
+import { useCurrentInitiative } from '../../hooks/useCurrentInitiative';
 import ReportDataTable from './ReportDataTable';
 
 const InitiativeExportReportPage = () => {
   const { t } = useScopedTranslation();
+  const initiative = useCurrentInitiative();
   const [alerts, setAlerts] = useState<Record<string, AlertProps>>({
     INSERTED: {
       text: t('pages.reportExport.alert.info'),
@@ -64,10 +66,13 @@ const InitiativeExportReportPage = () => {
         </Box>
 
         <Box sx={{ display: 'flex', gap: 3, mt: 1, mb: 3, alignItems: 'center' }}>
-          <ExportFiltersCard
-            updateAlerts={updateAlerts}
-            onReportGenerated={() => setRefreshKey((prev) => prev + 1)}
-          />
+          {initiative?.startDate && (
+            <ExportFiltersCard
+              startDate={initiative.startDate}
+              updateAlerts={updateAlerts}
+              onReportGenerated={() => setRefreshKey((prev) => prev + 1)}
+            />
+          )}
         </Box>
         <ReportDataTable updateAlerts={updateAlerts} refreshKey={refreshKey} />
       </Box>
