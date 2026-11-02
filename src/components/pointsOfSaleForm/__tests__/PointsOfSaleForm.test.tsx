@@ -575,6 +575,28 @@ describe('PointsOfSaleForm validation tests', () => {
     expect(await screen.findByText('Le email non coincidono')).toBeInTheDocument();
   });
 
+  it('validates email formats and mismatch during submit validation', async () => {
+    const props = createDefaultProps();
+    const { rerender } = render(<PointsOfSaleForm {...props} />);
+
+    const emailInput = screen.getByLabelText('E-mail');
+    const confirmEmailInput = screen.getByLabelText('Conferma e-mail');
+
+    (isValidRegex as jest.Mock).mockReturnValue(false);
+    fireEvent.change(emailInput, { target: { value: 'invalid' } });
+    fireEvent.change(confirmEmailInput, { target: { value: 'invalid-confirm' } });
+
+    rerender(<PointsOfSaleForm {...props} submitAttempt={1} />);
+    expect(await screen.findAllByText('Devi inserire una email valida')).toHaveLength(2);
+
+    (isValidRegex as jest.Mock).mockReturnValue(true);
+    fireEvent.change(emailInput, { target: { value: 'a@test.it' } });
+    fireEvent.change(confirmEmailInput, { target: { value: 'b@test.it' } });
+
+    rerender(<PointsOfSaleForm {...props} submitAttempt={2} />);
+    expect(await screen.findByText('Le email non coincidono')).toBeInTheDocument();
+  });
+
   it('handles channel inputs and Verifica URL click', () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const urlInput = screen.getByLabelText('Scheda Google MYBusiness');
