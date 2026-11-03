@@ -54,6 +54,13 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
       <button type="button" data-testid="type-abcde" onClick={() => onInputChange?.({}, 'abcde')}>
         type-abcde
       </button>
+      <button
+        type="button"
+        data-testid="type-reset-empty"
+        onClick={() => onInputChange?.({}, '', 'reset')}
+      >
+        type-reset-empty
+      </button>
       <button type="button" data-testid="type-spaces" onClick={() => onInputChange?.({}, '     ')}>
         type-spaces
       </button>
@@ -149,6 +156,42 @@ describe('AutocompleteComponent', () => {
 
     fireEvent.click(screen.getByTestId('type-abcde'));
     expect(onTextChange).toHaveBeenCalledWith('abcde');
+  });
+
+  it('calls onChangeDebounce after 800ms with latest input value', () => {
+    const onChangeDebounce = jest.fn();
+    render(
+      <AutocompleteComponent options={[]} onChangeDebounce={onChangeDebounce} label="Debounce test" />
+    );
+
+    fireEvent.click(screen.getByTestId('type-abcde'));
+
+    act(() => {
+      jest.advanceTimersByTime(799);
+    });
+    expect(onChangeDebounce).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(onChangeDebounce).toHaveBeenCalledWith('abcde');
+  });
+
+  it('ignores reset input event when initialValue exists and new value is empty', () => {
+    const onTextChange = jest.fn();
+    render(
+      <AutocompleteComponent
+        options={[]}
+        initialValue="Via Roma"
+        onTextChange={onTextChange}
+        label="Reset test"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('type-reset-empty'));
+
+    expect(onTextChange).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Reset test')).toBeInTheDocument();
   });
 
   it('shows error message when inputError is true', () => {

@@ -30,6 +30,7 @@ import { useInitiativeConfig } from '../../hooks/useInitiativeConfig';
 import { useUserPermissions, PERMISSION_KEYS } from '../../hooks/useUserPermissions';
 import InitiativeDetailCard from './InitiativeDetailCard';
 import { useStore } from './StoreContext';
+import EditPointOfSaleModal from './EditPointOfSaleModal';
 
 interface RouteParams {
   initiative_id: string;
@@ -44,6 +45,7 @@ const InitiativeStoreDetail = () => {
     Array<PointOfSaleTransactionProcessedDTO>
   >([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [pointOfSaleModalIsOpen, setPointOfSaleModalIsOpen] = useState(false);
   const [paginationModel, setPaginationModel] = useState<any>({});
   const [contactNameModal, setContactNameModal] = useState<string>('');
   const [contactSurnameModal, setContactSurnameModal] = useState<string>('');
@@ -391,7 +393,11 @@ const InitiativeStoreDetail = () => {
             width: '100%',
           }}
         >
-          <InitiativeDetailCard titleBox={'DATI PUNTO VENDITA'}>
+          <InitiativeDetailCard
+            titleBox={'DATI PUNTO VENDITA'}
+            onEdit={() => setPointOfSaleModalIsOpen(true)}
+            editDisabled={isEditReferentDisabled}
+          >
             <Box sx={{ minWidth: 0, width: '100%' }}>
               <Grid container spacing={1} sx={{ minWidth: 0 }}>
                 {storeDetail &&
@@ -452,7 +458,6 @@ const InitiativeStoreDetail = () => {
                         setContactSurnameModal(storeDetail.contactSurname);
                       }}
                       size="medium"
-                      // sx={{ display: 'flex', justifyContent: 'end', alignItems: 'start' }}
                       startIcon={<Edit />}
                       color="primary"
                     >
@@ -603,6 +608,16 @@ const InitiativeStoreDetail = () => {
           </Button>
         </Box>
       </ModalComponent>
+      {storeDetail && (
+        <EditPointOfSaleModal
+          open={pointOfSaleModalIsOpen}
+          initiativeId={initiative_id}
+          merchantId={parseJwt(storageTokenOps.read())?.merchant_id}
+          pointOfSale={storeDetail}
+          onClose={() => setPointOfSaleModalIsOpen(false)}
+          onSuccess={() => void fetchStoreDetail()}
+        />
+      )}
     </Box>
   );
 };
