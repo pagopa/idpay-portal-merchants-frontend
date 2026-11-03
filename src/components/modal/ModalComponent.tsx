@@ -18,18 +18,18 @@ const ModalComponent: FC<ModalComponentProps> = ({ open, onClose, children, styl
   return (
     <Modal open={open} onClose={handleClose} className={className}>
       <Box
-        sx={
-          style ?? {
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 600,
-            bgcolor: 'background.paper',
-            boxShadow: 24,
-            p: 4,
-          }
-        }
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 600,
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 4,
+          ...style,
+        }}
         data-testid="iban-modal-content"
       >
         {children}
