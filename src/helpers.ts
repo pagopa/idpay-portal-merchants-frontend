@@ -116,6 +116,18 @@ export const formatDate = (date: Date | undefined) => {
   return '';
 };
 
+export const formatDateTime = (date: Date | undefined) => {
+  if (date) {
+    const time = date.toLocaleTimeString('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Rome',
+    });
+    return `${formatDate(date)} ${time}`;
+  }
+  return '';
+};
+
 export const isValidRegex = (value: string, regex: RegExp) => regex.test(value);
 
 export const isValidUrl = (urlToCheck: string) => {
