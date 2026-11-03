@@ -203,4 +203,11 @@ const impossibleStatusCombination = (itemValues: any, batchStatus: any): boolean
     )
   );
 
-  export const spaceRemover = (value: string) => value.trim().replace(/\s+/g, '');
+export const spaceRemover = (value: string) => value.trim().replace(/\s+/g, '');
+
+export const trimFilename = (filename: string, length: number = 10) => {
+  const regex = /^(.+)(\.[^.]+)$/;
+  const match = filename.match(regex) || [];
+  const [, name, extension] = match;
+  return name.length > length ? `${name.substring(0, length)}... ${extension}` : filename;
+};
