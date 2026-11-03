@@ -12,6 +12,7 @@ import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 import { resolveApiErrorStatus } from '../../utils/resolveApiErrorStatus';
 import { removePendingTransactionState } from '../../services/transactionStateBridge';
+import { trimFilename } from '../../helpers';
 
 interface FileUploadActionProps {
   apiCall:
@@ -380,7 +381,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             <SingleFileInput
               onFileSelected={handleFileSelect}
               onFileRemoved={handleRemoveFile}
-              value={file}
+              value={file && new File([file], trimFilename(file.name, 20))}
               dropzoneLabel={scopedT(`${i18nBlockKey}.uploadFile`)}
               dropzoneButton={scopedT(`${i18nBlockKey}.uploadFileButton`)}
               rejectedLabel={scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
