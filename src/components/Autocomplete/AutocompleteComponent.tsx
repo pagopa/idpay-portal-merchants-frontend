@@ -18,6 +18,7 @@ export default function AutocompleteComponent({
   onTextChange,
   loading,
   name,
+  initialValue,
 }: Readonly<{
   options: Array<any>;
   onChangeDebounce?: (value: string) => void;
@@ -29,10 +30,15 @@ export default function AutocompleteComponent({
   onTextChange?: (value: string) => void;
   loading?: boolean;
   name?: string;
+  initialValue?: string;
 }>) {
   const [open, setOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(initialValue ?? '');
   const { t } = useScopedTranslation();
+
+  useEffect(() => {
+    setInputValue(initialValue ?? '');
+  }, [initialValue]);
 
   useEffect(() => {
 
@@ -82,12 +88,16 @@ export default function AutocompleteComponent({
           onChange(optionValue);
         }
       }}
-      onInputChange={(_, newInputValue) => {
+      onInputChange={(_, newInputValue, reason) => {
+        if (reason === 'reset' && !newInputValue && initialValue) {
+          return;
+        }
         setInputValue(newInputValue);
         if (onTextChange) {
           onTextChange(newInputValue);
         }
       }}
+      inputValue={inputValue}
       filterOptions={(x) => x}
       renderInput={(params) => (
         <TextField
@@ -98,7 +108,6 @@ export default function AutocompleteComponent({
           error={inputError}
           helperText={getHelperText()}
           sx={{
-            marginTop: 2,
             ...(required
               ? {
                   '& .MuiInputLabel-root::after': {
