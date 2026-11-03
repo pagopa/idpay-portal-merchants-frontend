@@ -116,6 +116,18 @@ export const formatDate = (date: Date | undefined) => {
   return '';
 };
 
+export const formatDateTime = (date: Date | undefined) => {
+  if (date) {
+    const time = date.toLocaleTimeString('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Rome',
+    });
+    return `${formatDate(date)} ${time}`;
+  }
+  return '';
+};
+
 export const isValidRegex = (value: string, regex: RegExp) => regex.test(value);
 
 export const isValidUrl = (urlToCheck: string) => {
@@ -203,4 +215,11 @@ const impossibleStatusCombination = (itemValues: any, batchStatus: any): boolean
     )
   );
 
-  export const spaceRemover = (value: string) => value.trim().replace(/\s+/g, '');
+export const spaceRemover = (value: string) => value.trim().replace(/\s+/g, '');
+
+export const trimFilename = (filename: string, length: number = 10) => {
+  const regex = /^(.+)(\.[^.]+)$/;
+  const match = filename.match(regex) || [];
+  const [, name, extension] = match;
+  return name.length > length ? `${name.substring(0, length)}... ${extension}` : filename;
+};

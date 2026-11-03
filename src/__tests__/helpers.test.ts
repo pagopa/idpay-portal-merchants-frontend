@@ -16,6 +16,7 @@ import {
   isReversableOrEditable,
   isValidRegex,
   spaceRemover,
+  trimFilename,
 } from '../helpers';
 import { MISSING_DATA_PLACEHOLDER, MISSING_EURO_PLACEHOLDER } from '../utils/constants';
 import config from "../locale/it/default/config.json";
@@ -380,4 +381,35 @@ describe('isReversableOrEditable', () => {
     const text = '     TEST SPACE    '
     expect(spaceRemover(text)).toBe('TESTSPACE')
   })
+});
+
+
+describe('trimFilename', () => {
+  test('should truncate the filename if it exceeds the specified length', () => {
+    const filename = 'longFilenameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.pdf';
+    const result = trimFilename(filename, 10);
+
+    expect(result).toBe('longFilena... .pdf');
+  });
+
+  test('should return the original filename if the length is less than or equal to the limit', () => {
+    const filename = 'short.pdf';
+    const result = trimFilename(filename, 10);
+
+    expect(result).toBe('short.pdf');
+  });
+
+  test('should use the default length value (10) if none is provided', () => {
+    const filename = 'longFilenameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png';
+    const result = trimFilename(filename);
+
+    expect(result).toBe('longFilena... .png');
+  });
+
+  test('should not trim mid dots', () => {
+    const filename = 'unusualExtensionFile.tar.gz';
+    const result = trimFilename(filename, 10);
+
+    expect(result).toBe('unusualExt... .gz');
+  });
 });
