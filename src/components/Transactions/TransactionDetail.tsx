@@ -93,6 +93,23 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
     const chipItem = getStatus(itemValues.status);
     return <CustomChip label={chipItem?.label} colorChip={chipItem?.color} sizeChip="small" />;
   };
+  const showDownloadError = () => {
+    setAlert({
+      title: 'Errore download file',
+      text: 'Non è stato possibile scaricare il documento. Riprova più tardi.',
+      isOpen: true,
+      severity: 'error',
+      containerStyle: {
+        height: 'fit-content',
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        zIndex: '1300',
+      },
+      contentStyle: { position: 'unset', bottom: '0', right: '0' },
+    });
+  };
+
   const downloadFile = async (selectedTransaction: any, pointOfSaleId: string) => {
     setIsLoading(true);
     try {
@@ -104,28 +121,30 @@ export default function TransactionDetail({ itemValues, listItem, ...rest }: Pro
       const { invoiceUrl } = response;
       const filename = selectedTransaction?.invoiceFile?.filename || 'fattura.pdf';
 
+      if (!invoiceUrl) {
+        showDownloadError();
+        return;
+      }
+      const documentResponse = await fetch(invoiceUrl);
+      if (!documentResponse.ok) {
+        showDownloadError();
+        return;
+      }
+      const blob = await documentResponse.blob();
+      const extension = filename.split('.').pop()?.toLowerCase();
+      const mimeType = extension === 'pdf' ? 'application/pdf'
+        : extension === 'xml' ? 'application/xml' : blob.type;
+      const blobUrl = URL.createObjectURL(new Blob([blob], { type: mimeType }));
       const link = document.createElement('a');
       // eslint-disable-next-line functional/immutable-data
-      link.href = invoiceUrl;
+      link.href = blobUrl;
       // eslint-disable-next-line functional/immutable-data
-      link.download = filename;
+      link.target = '_blank';
       link.click();
-      setIsLoading(false);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
     } catch (error) {
-      setAlert({
-        title: 'Errore download file',
-        text: 'Non è stato possibile scaricare il file',
-        isOpen: true,
-        severity: 'error',
-        containerStyle: {
-          height: 'fit-content',
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          zIndex: '1300',
-        },
-        contentStyle: { position: 'unset', bottom: '0', right: '0' },
-      });
+      showDownloadError();
+    } finally {
       setIsLoading(false);
     }
   };

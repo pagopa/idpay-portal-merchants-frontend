@@ -2155,6 +2155,8 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-Transaction-Revision:
+              $ref: "#/components/headers/X-Transaction-Revision"
             X-RateLimit-Limit:
               $ref: "#/components/headers/X-RateLimit-Limit"
             X-RateLimit-Remaining:
@@ -2996,9 +2998,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TransactionErrorDTO"
-              example:
-                code: "PAYMENT_NOT_FOUND_OR_EXPIRED"
-                message: "Cannot find transaction with transactionId [%s]"
+              examples:
+                transactionNotFoundOrExpired:
+                  summary: Transaction not found or expired
+                  value:
+                    code: "PAYMENT_NOT_FOUND_OR_EXPIRED"
+                    message: "Cannot find transaction with transactionId [%s]"
+                invoiceNotFound:
+                  summary: Invoice document not found in storage
+                  value:
+                    code: "PAYMENT_INVOICE_NOT_FOUND"
+                    message: "Invoice document not found in storage"
         "429":
           description: Too many requests
           headers:
@@ -3071,6 +3081,8 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               $ref: "#/components/headers/Access-Control-Allow-Origin"
+            X-Transaction-Revision:
+              $ref: "#/components/headers/X-Transaction-Revision"
             X-RateLimit-Limit:
               $ref: "#/components/headers/X-RateLimit-Limit"
             X-RateLimit-Remaining:
@@ -3855,6 +3867,14 @@ components:
         Access-Control-Allow-Origin:
           $ref: '#/components/headers/Access-Control-Allow-Origin'
   headers:
+    X-Transaction-Revision:
+      description: The transaction revision after the operation
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 9223372036854775807
     X-RateLimit-Limit:
       description: The maximum number of requests allowed in the current period
       schema:
@@ -4091,6 +4111,13 @@ components:
         trxId:
           type: string
           description: "ENG: Transaction ID - IT: L'ID della transazione"
+        transactionRevision:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9223372036854775807
+          description: "ENG: Current transaction revision - IT: Revisione corrente della transazione"
+          example: 10
         fiscalCode:
           type: string
           description: "ENG: Citizen fiscal code - IT: Codice fiscale del cittadino"
@@ -4109,11 +4136,11 @@ components:
           description: Identifier of the reward batch the transaction belongs to
         rewardBatchTrxStatus:
           $ref: "#/components/schemas/RewardBatchTrxStatus"
-        rewardBatchRejectionReason:
+        rewardBatchOfficialNotes:
           type: array
           items:
             $ref: "#/components/schemas/ReasonDTO"
-          description: "ENG: Reason associated with TRX status - IT: Motivo associato allo stato della trx"
+          description: "ENG: Official notes history - IT: Storico delle note ufficiali"
         rewardBatchInclusionDate:
           type: string
           format: date-time

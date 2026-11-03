@@ -92,7 +92,7 @@ describe('InitiativeAnalyticsGuard', () => {
       'initiative-1'
     );
     expect(mockTrackAnalyticsPageView).toHaveBeenCalledWith(
-      '/portale-esercenti/initiative-1/punti-vendita'
+      '/portale-esercenti/punti-vendita'
     );
     expect(mockClearInitiativeAnalyticsProperties).not.toHaveBeenCalled();
   });
@@ -116,7 +116,7 @@ describe('InitiativeAnalyticsGuard', () => {
     );
 
     expect(mockTrackAnalyticsPageView).toHaveBeenCalledWith(
-      '/portale-esercenti/69e0fa95e21efa516c7b8dec/richieste-di-rimborso'
+      '/portale-esercenti/richieste-di-rimborso'
     );
   });
 

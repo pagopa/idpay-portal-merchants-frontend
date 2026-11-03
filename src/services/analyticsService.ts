@@ -54,6 +54,7 @@ const sanitizeEventPayload = (event: BeforeSendHookPayload): BeforeSendHookPaylo
   ...event,
   properties: {
     ...event.properties,
+    $el_text: (/\.(pdf|xml)$/i).test(event.properties.$el_text) ? 'download-file' : event.properties.$el_text,
     $pathname: sanitizeTrackedPath(event.properties.$pathname),
     current_url_path: sanitizeTrackedPath(event.properties.current_url_path),
     ...(event.event === '$mp_input_change' && typeof event.properties.$el_attr__name === 'string'

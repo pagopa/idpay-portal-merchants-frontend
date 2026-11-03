@@ -21,6 +21,10 @@ describe('cleanupOnLogout', () => {
 
   it('cleans storages and session keys', () => {
     sessionStorage.setItem('storesPagination', '{"a":1}');
+    sessionStorage.setItem(
+      'idpay:merchant-transaction-state-bridge:initiative-1:transaction-1',
+      '{"schemaVersion":1}'
+    );
 
     cleanupOnLogout();
 
@@ -28,6 +32,11 @@ describe('cleanupOnLogout', () => {
     expect(storageUserOps.delete).toHaveBeenCalledTimes(1);
 
     expect(sessionStorage.getItem('storesPagination')).toBeNull();
+    expect(
+      sessionStorage.getItem(
+        'idpay:merchant-transaction-state-bridge:initiative-1:transaction-1'
+      )
+    ).toBeNull();
   });
 
   it('does not throw if sessionStorage is not available', () => {

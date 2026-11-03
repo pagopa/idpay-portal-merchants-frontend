@@ -230,7 +230,7 @@ export default function InvoiceDetail({
     } catch (error) {
       setAlert({
         title: 'Errore download file',
-        text: 'Non è stato possibile scaricare il file',
+        text: 'Non è stato possibile scaricare il documento. Riprova più tardi.',
         isOpen: true,
         severity: 'error',
         containerStyle: {
@@ -309,9 +309,9 @@ export default function InvoiceDetail({
                 overflowWrap: 'anywhere',
               }}
             >
-              {itemValues?.rewardBatchRejectionReason &&
-              itemValues?.rewardBatchRejectionReason.length ? (
-                itemValues?.rewardBatchRejectionReason.map(
+              {itemValues?.rewardBatchOfficialNotes &&
+              itemValues?.rewardBatchOfficialNotes.length ? (
+                itemValues?.rewardBatchOfficialNotes.map(
                   ({ date, reason }: ReasonDTO, index: number) => (
                     <Box key={`${date}-${index}`}>
                       <Typography
