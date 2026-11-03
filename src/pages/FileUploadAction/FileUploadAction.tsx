@@ -381,7 +381,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             <SingleFileInput
               onFileSelected={handleFileSelect}
               onFileRemoved={handleRemoveFile}
-              value={file && new File([file], trimFilename(file.name))}
+              value={file && new File([file], trimFilename(file.name, 20))}
               dropzoneLabel={scopedT(`${i18nBlockKey}.uploadFile`)}
               dropzoneButton={scopedT(`${i18nBlockKey}.uploadFileButton`)}
               rejectedLabel={scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}
