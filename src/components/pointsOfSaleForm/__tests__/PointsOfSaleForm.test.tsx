@@ -1165,17 +1165,7 @@ describe('PointsOfSaleForm missing new-code coverage', () => {
   let defaultProps: ReturnType<typeof createDefaultProps>;
   let searchMock: jest.Mock;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    defaultProps = createDefaultProps();
-    searchMock = mockAutocompleteHook(mockedUsePlacesAutocomplete);
-    mockSequentialUniqueIds('id-1', 'id-2', 'id-3', 'id-4');
-    setBooleanValidationMocks(true, true);
-  });
-
-  it('covers editMode PHYSICAL branches, address callbacks, phone guards and URL normalize', async () => {
-    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-
+  const renderEditModeWithSalesPoint = (overrides: Record<string, unknown>) =>
     render(
       <PointsOfSaleForm
         {...defaultProps}
@@ -1199,10 +1189,24 @@ describe('PointsOfSaleForm missing new-code coverage', () => {
             channelEmail: '',
             channelPhone: '',
             channelGeolink: '',
+            ...overrides,
           },
         ]}
       />
     );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    defaultProps = createDefaultProps();
+    searchMock = mockAutocompleteHook(mockedUsePlacesAutocomplete);
+    mockSequentialUniqueIds('id-1', 'id-2', 'id-3', 'id-4');
+    setBooleanValidationMocks(true, true);
+  });
+
+  it('covers editMode PHYSICAL branches, address callbacks, phone guards and URL normalize', async () => {
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+
+    renderEditModeWithSalesPoint({});
 
     expect(screen.getByText('INFORMAZIONI PUNTO VENDITA')).toBeInTheDocument();
     expect(screen.getByText('CONTATTI PUNTO VENDITA')).toBeInTheDocument();
@@ -1283,33 +1287,13 @@ describe('PointsOfSaleForm missing new-code coverage', () => {
   });
 
   it('covers pointsOfSaleLoaded reduce init in ONLINE editMode', () => {
-    render(
-      <PointsOfSaleForm
-        {...defaultProps}
-        editMode
-        pointsOfSaleLoaded={true}
-        initialSalesPoints={[
-          {
-            id: 'pos-online',
-            type: 'ONLINE',
-            franchiseName: 'Shop Online',
-            address: '',
-            streetNumber: '',
-            city: '',
-            zipCode: '',
-            region: '',
-            province: '',
-            website: 'shop.example.it',
-            contactEmail: 'online@test.it',
-            contactName: 'Mario',
-            contactSurname: 'Rossi',
-            channelEmail: '',
-            channelPhone: '',
-            channelGeolink: '',
-          },
-        ]}
-      />
-    );
+    renderEditModeWithSalesPoint({
+      id: 'pos-online',
+      type: 'ONLINE',
+      franchiseName: 'Shop Online',
+      website: 'shop.example.it',
+      contactEmail: 'online@test.it',
+    });
 
     expect(screen.getByText('INDIRIZZO WEB')).toBeInTheDocument();
     expect(screen.getByLabelText('Indirizzo completo')).toHaveValue('shop.example.it');
