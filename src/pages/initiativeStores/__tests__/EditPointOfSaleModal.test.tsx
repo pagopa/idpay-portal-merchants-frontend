@@ -48,6 +48,11 @@ const basePointOfSale = {
   contactEmail: 'mario.rossi@example.it',
 };
 
+const changedPhysicalPointOfSale = {
+  ...basePointOfSale,
+  channelPhone: '061234568',
+};
+
 const renderComponent = (overrides: Record<string, unknown> = {}) => {
   const props = {
     open: true,
@@ -78,12 +83,23 @@ describe('EditPointOfSaleModal', () => {
 
   it('does not call update when form is invalid', async () => {
     renderComponent();
-    await setFormState(basePointOfSale, false);
+    await setFormState(changedPhysicalPointOfSale, false);
 
     fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
 
     await waitFor(() => expect(latestFormProps.submitAttempt).toBe(1));
     expect(updatePointOfSaleMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps confirm button disabled until at least one field changes', async () => {
+    renderComponent();
+
+    const submitButton = screen.getByTestId('update-point-of-sale-button');
+    expect(submitButton).toBeDisabled();
+
+    await setFormState(changedPhysicalPointOfSale);
+
+    expect(submitButton).toBeEnabled();
   });
 
   it('submits ONLINE payload with website only and shows success alert', async () => {
@@ -112,7 +128,7 @@ describe('EditPointOfSaleModal', () => {
     renderComponent();
     updatePointOfSaleMock.mockResolvedValue({ ...basePointOfSale });
 
-    await setFormState({ ...basePointOfSale, address: '', streetNumber: '' });
+    await setFormState({ ...changedPhysicalPointOfSale, address: '', streetNumber: '' });
 
     fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
 
@@ -126,7 +142,7 @@ describe('EditPointOfSaleModal', () => {
         streetNumber: '10',
         website: 'shop.example.it',
         channelEmail: 'store@example.it',
-        channelPhone: '061234567',
+        channelPhone: '061234568',
         channelGeolink: 'https://maps.example.it',
       })
     );
@@ -135,7 +151,7 @@ describe('EditPointOfSaleModal', () => {
   it('shows generic error alert when selected point-of-sale has no id', async () => {
     renderComponent();
 
-    await setFormState({ ...basePointOfSale, id: undefined });
+    await setFormState({ ...changedPhysicalPointOfSale, id: undefined });
 
     fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
 
@@ -178,7 +194,7 @@ describe('EditPointOfSaleModal', () => {
       message: 'method not allowed',
     });
 
-    await setFormState(basePointOfSale);
+    await setFormState(changedPhysicalPointOfSale);
 
     fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
 
@@ -199,7 +215,7 @@ describe('EditPointOfSaleModal', () => {
       message: 'already used',
     });
 
-    await setFormState(basePointOfSale);
+    await setFormState(changedPhysicalPointOfSale);
 
     fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
 
