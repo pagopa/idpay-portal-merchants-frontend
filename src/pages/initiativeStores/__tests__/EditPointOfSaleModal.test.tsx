@@ -152,6 +152,25 @@ describe('EditPointOfSaleModal', () => {
     expect(screen.getByTestId('update-point-of-sale-button')).toBeDisabled();
   });
 
+  it('enables and disables confirm button based on effective editable changes', async () => {
+    renderComponent({
+      pointOfSale: {
+        ...basePointOfSale,
+        website: undefined,
+        channelPhone: undefined,
+      },
+    });
+
+    const submitButton = screen.getByTestId('update-point-of-sale-button');
+    expect(submitButton).toBeDisabled();
+
+    await setRawFormState([{ ...latestFormProps.initialSalesPoints[0], website: 'new-shop.it' }]);
+    expect(submitButton).toBeEnabled();
+
+    await setRawFormState([{ ...latestFormProps.initialSalesPoints[0] }]);
+    expect(submitButton).toBeDisabled();
+  });
+
   it('submits ONLINE payload with website only and shows success alert', async () => {
     const props = renderComponent({ pointOfSale: { ...basePointOfSale, type: 'ONLINE' } });
     updatePointOfSaleMock.mockResolvedValue({ ...basePointOfSale, type: 'ONLINE' });
@@ -222,6 +241,45 @@ describe('EditPointOfSaleModal', () => {
         channelEmail: '',
         channelPhone: '061234568',
         channelGeolink: '',
+      })
+    );
+  });
+
+  it('submits PHYSICAL payload with empty fallbacks when source address/streetNumber/channelPhone are undefined', async () => {
+    renderComponent({
+      pointOfSale: {
+        ...basePointOfSale,
+        address: undefined,
+        streetNumber: undefined,
+        channelPhone: undefined,
+        website: undefined,
+      },
+    });
+    updatePointOfSaleMock.mockResolvedValue({ ...basePointOfSale });
+
+    await setFormState({
+      ...basePointOfSale,
+      id: 'pos-1',
+      address: undefined,
+      streetNumber: undefined,
+      channelPhone: undefined,
+      website: 'shop-updated.it',
+    });
+
+    fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
+
+    await waitFor(() =>
+      expect(updatePointOfSaleMock).toHaveBeenCalledWith('merchant-1', 'pos-1', {
+        region: 'Lazio',
+        province: 'RM',
+        city: 'Roma',
+        zipCode: '00100',
+        address: '',
+        streetNumber: '',
+        website: 'shop-updated.it',
+        channelEmail: 'store@example.it',
+        channelPhone: '',
+        channelGeolink: 'https://maps.example.it',
       })
     );
   });
