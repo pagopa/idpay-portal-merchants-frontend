@@ -718,8 +718,10 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
             {!editMode && <Grid item xs={7} />}
             {salesPoint.type === 'ONLINE' && (
               <>
-                <Typography variant="h6" gutterBottom>
-                  {t('pages.pointOfSales.website')}
+                <Typography
+                  variant={editMode ? 'subtitle2' : 'h6'}
+                  gutterBottom>
+                  {editMode ? 'INDIRIZZO WEB' : t('pages.pointOfSales.website')}
                 </Typography>
                 <TextField
                   size="small"
@@ -755,7 +757,7 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                           {t('pages.pointOfSales.address')}
                         </Typography>
                       )}
-                      <Box mt={2}>
+                      <Box mt={!editMode ? 2 : 0}>
                         <AutocompleteComponent
                           options={options}
                           label="Indirizzo completo"
@@ -1032,8 +1034,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
                         />
                       </Box>
                     </Grid>
-                    <Grid item xs={12} sm={2}>
-                      <Box ml={0} mr={1} mt={2.5}>
+                    <Grid item xs={12} sm={2} sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Box ml={0} mr={1}>
                         <ButtonNaked
                           sx={{ whiteSpace: 'nowrap' }}
                           color="primary"

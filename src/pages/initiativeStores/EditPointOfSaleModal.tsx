@@ -23,6 +23,20 @@ interface Props {
   onSuccess: () => void;
 }
 
+const EDITABLE_POS_FIELDS: Array<keyof PointOfSaleDTO> = [
+  'type',
+  'address',
+  'streetNumber',
+  'city',
+  'zipCode',
+  'region',
+  'province',
+  'website',
+  'channelEmail',
+  'channelPhone',
+  'channelGeolink',
+];
+
 const FIELD_VALIDATION_CODES = new Set([
   'VALIDATION_ERROR',
   'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
@@ -74,13 +88,23 @@ const EditPointOfSaleModal = ({
   const initialSalesPoints = useMemo(() => [editablePointOfSale], [editablePointOfSale]);
   const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>(initialSalesPoints);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isFormDirty, setIsFormDirty] = useState(false);
   const [submitAttempt, setSubmitAttempt] = useState(0);
   const [errors, setErrors] = useState<FormErrors>({});
   const [alertMessages, setAlertMessages] = useState<FormAlertMessages>({});
 
+  const hasFormChanges = (updatedPoint?: PointOfSaleDTO) => {
+    if (!updatedPoint) {
+      return false;
+    }
+
+    return EDITABLE_POS_FIELDS.some((field) => (updatedPoint[field] ?? '') !== (editablePointOfSale[field] ?? ''));
+  };
+
   useEffect(() => {
     if (open) {
       setSalesPoints(initialSalesPoints);
+      setIsFormDirty(false);
       setSubmitAttempt(0);
       setErrors({});
       setAlertMessages({});
@@ -95,14 +119,15 @@ const EditPointOfSaleModal = ({
 
   const handleFormChange = (values: Array<PointOfSaleDTO>) => {
     const changedPoint = values[0];
-    setSalesPoints([
-      {
-        ...editablePointOfSale,
-        ...changedPoint,
-        address: changedPoint?.address || editablePointOfSale.address,
-        streetNumber: changedPoint?.streetNumber || editablePointOfSale.streetNumber,
-      },
-    ]);
+    const nextPoint = {
+      ...editablePointOfSale,
+      ...changedPoint,
+      address: changedPoint?.address || editablePointOfSale.address,
+      streetNumber: changedPoint?.streetNumber || editablePointOfSale.streetNumber,
+    };
+
+    setSalesPoints([nextPoint]);
+    setIsFormDirty(hasFormChanges(nextPoint));
     setErrors({});
     setAlertMessages({});
   };
@@ -199,8 +224,7 @@ const EditPointOfSaleModal = ({
       className="point-of-sale-modal"
       style={{
         width: 'min(60vw, calc(100vw - 48px))',
-        height: 'min(60vh, calc(100vh - 48px))',
-        minHeight: 0,
+        height: 'auto',
         maxHeight: 'calc(100vh - 48px)',
         overflow: 'hidden',
         overflowX: 'hidden',
@@ -247,7 +271,12 @@ const EditPointOfSaleModal = ({
         <Button variant="outlined" onClick={handleClose}>
           {t('actions.cancel')}
         </Button>
-        <Button variant="contained" onClick={handleSubmit} data-testid="update-point-of-sale-button">
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          data-testid="update-point-of-sale-button"
+          disabled={!isFormDirty}
+        >
           {t('actions.modify')}
         </Button>
       </Box>
