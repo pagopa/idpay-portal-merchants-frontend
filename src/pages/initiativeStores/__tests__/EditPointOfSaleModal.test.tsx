@@ -75,6 +75,13 @@ const setFormState = async (pointOfSale: Record<string, unknown>, isValid = true
   });
 };
 
+const setRawFormState = async (values: Array<Record<string, unknown>>, isValid = true) => {
+  await act(async () => {
+    latestFormProps.onValidationChange(isValid);
+    latestFormProps.onFormChange(values);
+  });
+};
+
 describe('EditPointOfSaleModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -102,6 +109,49 @@ describe('EditPointOfSaleModal', () => {
     expect(submitButton).toBeEnabled();
   });
 
+  it('normalizes nullable point-of-sale fields to empty strings and keeps button disabled when unchanged', async () => {
+    renderComponent({
+      pointOfSale: {
+        ...basePointOfSale,
+        franchiseName: undefined,
+        address: undefined,
+        streetNumber: undefined,
+        city: undefined,
+        zipCode: undefined,
+        region: undefined,
+        province: undefined,
+        website: undefined,
+        channelGeolink: undefined,
+        channelPhone: undefined,
+        channelEmail: undefined,
+        contactName: undefined,
+        contactSurname: undefined,
+        contactEmail: undefined,
+      },
+    });
+
+    expect(latestFormProps.initialSalesPoints[0]).toMatchObject({
+      franchiseName: '',
+      address: '',
+      streetNumber: '',
+      city: '',
+      zipCode: '',
+      region: '',
+      province: '',
+      website: '',
+      channelGeolink: '',
+      channelPhone: '',
+      channelEmail: '',
+      contactName: '',
+      contactSurname: '',
+      contactEmail: '',
+    });
+
+    await setRawFormState([{ ...latestFormProps.initialSalesPoints[0] }]);
+
+    expect(screen.getByTestId('update-point-of-sale-button')).toBeDisabled();
+  });
+
   it('submits ONLINE payload with website only and shows success alert', async () => {
     const props = renderComponent({ pointOfSale: { ...basePointOfSale, type: 'ONLINE' } });
     updatePointOfSaleMock.mockResolvedValue({ ...basePointOfSale, type: 'ONLINE' });
@@ -122,6 +172,58 @@ describe('EditPointOfSaleModal', () => {
       isOpen: true,
       severity: 'success',
     });
+  });
+
+  it('submits ONLINE payload with empty website when website is undefined', async () => {
+    renderComponent({ pointOfSale: { ...basePointOfSale, type: 'ONLINE' } });
+    updatePointOfSaleMock.mockResolvedValue({ ...basePointOfSale, type: 'ONLINE' });
+
+    await setFormState({ ...basePointOfSale, id: 'online-pos', type: 'ONLINE', website: undefined });
+
+    fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
+
+    await waitFor(() =>
+      expect(updatePointOfSaleMock).toHaveBeenCalledWith('merchant-1', 'online-pos', {
+        website: '',
+      })
+    );
+  });
+
+  it('submits PHYSICAL payload with expected fallbacks for undefined fields', async () => {
+    renderComponent();
+    updatePointOfSaleMock.mockResolvedValue({ ...basePointOfSale });
+
+    await setFormState({
+      ...basePointOfSale,
+      id: 'pos-1',
+      channelPhone: '061234568',
+      region: undefined,
+      province: undefined,
+      city: undefined,
+      zipCode: undefined,
+      address: undefined,
+      streetNumber: undefined,
+      website: undefined,
+      channelEmail: undefined,
+      channelGeolink: undefined,
+    });
+
+    fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
+
+    await waitFor(() =>
+      expect(updatePointOfSaleMock).toHaveBeenCalledWith('merchant-1', 'pos-1', {
+        region: '',
+        province: '',
+        city: '',
+        zipCode: '',
+        address: 'Via Roma',
+        streetNumber: '10',
+        website: '',
+        channelEmail: '',
+        channelPhone: '061234568',
+        channelGeolink: '',
+      })
+    );
   });
 
   it('uses existing physical address fields when form sends empty values', async () => {
@@ -185,6 +287,24 @@ describe('EditPointOfSaleModal', () => {
     expect(latestFormProps.externalAlertMessages).toEqual({
       0: 'Verifica i dati inseriti',
     });
+  });
+
+  it('defaults validation field to address for PHYSICAL and maps physical duplicate message', async () => {
+    renderComponent();
+    updatePointOfSaleMock.mockResolvedValue({
+      code: 'VALIDATION_ERROR',
+      details: [{ code: 'PHYSICAL_POS_ALREADY_REGISTERED' }],
+    });
+
+    await setFormState(changedPhysicalPointOfSale);
+
+    fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
+
+    await waitFor(() =>
+      expect(latestFormProps.externalErrors).toEqual({
+        0: { address: 'Questo punto vendita risulta già associato' },
+      })
+    );
   });
 
   it('shows generic alert for non-validation API errors', async () => {
