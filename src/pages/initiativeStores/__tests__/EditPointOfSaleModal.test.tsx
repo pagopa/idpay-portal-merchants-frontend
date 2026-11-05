@@ -242,7 +242,7 @@ describe('EditPointOfSaleModal', () => {
 
     await waitFor(() =>
       expect(updatePointOfSaleMock).toHaveBeenCalledWith('merchant-1', 'online-pos', {
-        website: 'online.it',
+        website: 'https://online.it',
       })
     );
     expect(props.onClose).toHaveBeenCalled();
@@ -337,7 +337,7 @@ describe('EditPointOfSaleModal', () => {
         zipCode: '00100',
         address: '',
         streetNumber: '',
-        website: 'shop-updated.it',
+        website: 'https://shop-updated.it',
         channelEmail: 'store@example.it',
         channelPhone: '',
         channelGeolink: 'https://maps.example.it',
@@ -361,12 +361,49 @@ describe('EditPointOfSaleModal', () => {
         zipCode: '00100',
         address: 'Via Roma',
         streetNumber: '10',
-        website: 'shop.example.it',
+        website: 'https://shop.example.it',
         channelEmail: 'store@example.it',
         channelPhone: '061234568',
         channelGeolink: 'https://maps.example.it',
       })
     );
+  });
+
+  describe.each(['PHYSICAL', 'ONLINE'] as const)('HTTPS payload for %s points of sale', (type) => {
+    it.each([
+      ['http://www.example.it', 'https://www.example.it'],
+      ['www.example.it', 'https://www.example.it'],
+      ['https://www.example.it', 'https://www.example.it'],
+      ['  http://www.example.it/path  ', 'https://www.example.it/path'],
+      ['  www.example.it/path  ', 'https://www.example.it/path'],
+      ['  https://www.example.it/path  ', 'https://www.example.it/path'],
+      ['', ''],
+      ['   ', ''],
+      [undefined, ''],
+    ])('normalizes %s to %s before sending', async (input, expected) => {
+      renderComponent({ pointOfSale: { ...basePointOfSale, type } });
+      updatePointOfSaleMock.mockResolvedValue({ ...basePointOfSale, type });
+      await setFormState({
+        ...changedPhysicalPointOfSale,
+        type,
+        website: input,
+        channelGeolink: input,
+      });
+
+      fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
+
+      const expectedPayload =
+        type === 'ONLINE'
+          ? { website: expected }
+          : expect.objectContaining({
+              website: expected,
+              channelGeolink: expected,
+              channelPhone: changedPhysicalPointOfSale.channelPhone,
+            });
+      await waitFor(() =>
+        expect(updatePointOfSaleMock).toHaveBeenCalledWith('merchant-1', 'pos-1', expectedPayload)
+      );
+    });
   });
 
   it('shows generic error alert when selected point-of-sale has no id', async () => {
@@ -578,6 +615,33 @@ describe('EditPointOfSaleModal with the real form', () => {
       },
     };
   };
+
+  it.each(['PHYSICAL', 'ONLINE'] as const)(
+    'validates an HTTP website and sends it as HTTPS for a %s point of sale',
+    async (type) => {
+      renderRealForm({ ...basePointOfSale, type });
+      updatePointOfSaleMock.mockResolvedValue({ ...basePointOfSale, type });
+      const websiteLabel = type === 'ONLINE' ? /Indirizzo completo/ : 'Sito web';
+      fireEvent.change(screen.getByRole('textbox', { name: websiteLabel }), {
+        target: { value: 'http://www.google.com' },
+      });
+
+      fireEvent.click(screen.getByTestId('update-point-of-sale-button'));
+
+      await waitFor(() =>
+        expect(updatePointOfSaleMock).toHaveBeenCalledWith(
+          'merchant-1',
+          'pos-1',
+          type === 'ONLINE'
+            ? { website: 'https://www.google.com' }
+            : expect.objectContaining({
+                website: 'https://www.google.com',
+                channelGeolink: 'https://maps.example.it',
+              })
+        )
+      );
+    }
+  );
 
   it.each(['PHYSICAL', 'ONLINE'] as const)(
     'shows Italian validation messages for the backend URL error on a %s point of sale',
