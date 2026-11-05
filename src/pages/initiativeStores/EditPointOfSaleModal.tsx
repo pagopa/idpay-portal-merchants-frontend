@@ -13,6 +13,7 @@ import PointsOfSaleForm, {
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { updatePointOfSale } from '../../services/merchantService';
 import { useAlert } from '../../hooks/useAlert';
+import { normalizeUrlHttps } from '../../utils/formatUtils';
 
 interface Props {
   open: boolean;
@@ -154,7 +155,7 @@ const EditPointOfSaleModal = ({
 
       const updatePayload: PointOfSaleUpdateDTO =
         updatedPoint.type === 'ONLINE'
-          ? { website: updatedPoint.website ?? '' }
+          ? { website: normalizeUrlHttps(updatedPoint.website) }
           : {
               region: updatedPoint.region ?? '',
               province: updatedPoint.province ?? '',
@@ -162,10 +163,10 @@ const EditPointOfSaleModal = ({
               zipCode: updatedPoint.zipCode ?? '',
               address: updatedPoint.address ?? '',
               streetNumber: updatedPoint.streetNumber ?? '',
-              website: updatedPoint.website ?? '',
+              website: normalizeUrlHttps(updatedPoint.website),
               channelEmail: updatedPoint.channelEmail ?? '',
               channelPhone: updatedPoint.channelPhone ?? '',
-              channelGeolink: updatedPoint.channelGeolink ?? '',
+              channelGeolink: normalizeUrlHttps(updatedPoint.channelGeolink),
             };
 
       result = await updatePointOfSale(merchantId, updatedPoint.id, updatePayload);
