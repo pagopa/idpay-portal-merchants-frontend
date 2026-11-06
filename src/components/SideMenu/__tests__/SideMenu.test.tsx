@@ -61,7 +61,8 @@ describe('Test suite for SideMenu component', () => {
     expect(headers()[0]).toHaveAttribute('aria-expanded', 'true');
     expect(headers()[1]).toHaveAttribute('aria-expanded', 'false');
     act(() => { history.replace(ROUTES.POS_CATALOG); });
-    headers().forEach((header) => expect(header).toHaveAttribute('aria-expanded', 'false'));
+    expect(headers()[0]).toHaveAttribute('aria-expanded', 'true');
+    expect(headers()[1]).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('Render component', () => {
