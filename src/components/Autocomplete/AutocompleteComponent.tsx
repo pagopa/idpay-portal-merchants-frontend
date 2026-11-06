@@ -34,14 +34,18 @@ export default function AutocompleteComponent({
 }>) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState(initialValue ?? '');
+  const [shouldSearch, setShouldSearch] = useState(false);
   const { t } = useScopedTranslation();
 
   useEffect(() => {
+    setShouldSearch(false);
     setInputValue(initialValue ?? '');
   }, [initialValue]);
 
   useEffect(() => {
-
+    if (!shouldSearch) {
+      return undefined;
+    }
     const timer = setTimeout(() => {
       if (onChangeDebounce) {
         onChangeDebounce(inputValue);
@@ -50,7 +54,7 @@ export default function AutocompleteComponent({
     return () => {
       clearTimeout(timer);
     };
-  }, [inputValue]);
+  }, [inputValue, shouldSearch]);
 
   const getHelperText = () => {
     if (!inputError) {
@@ -84,11 +88,15 @@ export default function AutocompleteComponent({
       noOptionsText={t('pages.pointOfSales.noOptionsText')}
       loadingText={t('pages.pointOfSales.loadingText')}
       onChange={(_, optionValue) => {
+        if (optionValue) {
+          setShouldSearch(false);
+        }
         if (onChange) {
           onChange(optionValue);
         }
       }}
       onInputChange={(_, newInputValue, reason) => {
+        setShouldSearch(reason === 'input' || reason === 'clear');
         if (reason === 'reset' && !newInputValue && initialValue) {
           return;
         }
