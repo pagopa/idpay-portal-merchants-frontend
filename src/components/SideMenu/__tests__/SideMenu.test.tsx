@@ -2,7 +2,8 @@ import { renderWithContext } from '../../../utils/__tests__/test-utils';
 import SideMenu from '../SideMenu';
 import { setInitiativesList } from '../../../redux/slices/initiativesSlice';
 import { mockedInitiativesList } from '../../../api/__mocks__/MerchantsApiClient';
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import userEvent from '@testing-library/user-event';
 import ROUTES, { BASE_ROUTE } from '../../../routes';
 
@@ -34,6 +35,35 @@ afterEach(() => {
 });
 
 describe('Test suite for SideMenu component', () => {
+  test('opens only the first initiative on landing without navigation and follows subsequent routes', async () => {
+    const history = createMemoryHistory({ initialEntries: [ROUTES.HOME] });
+    const replace = jest.spyOn(history, 'replace');
+    const push = jest.spyOn(history, 'push');
+    const { store } = renderWithContext(<SideMenu />, undefined, history);
+    const initiatives = [
+      mockedInitiativesList[0],
+      { ...mockedInitiativesList[0], initiativeId: 'second-id', initiativeName: 'Second initiative' },
+    ];
+    act(() => { store.dispatch(setInitiativesList(initiatives)); });
+    const headers = () => screen.getAllByTestId('accordion-click-test').map(
+      (accordion) => within(accordion).getAllByRole('button')[0]
+    );
+    expect(headers()[0]).toHaveAttribute('aria-expanded', 'true');
+    expect(headers()[1]).toHaveAttribute('aria-expanded', 'false');
+    expect(history.location.pathname).toBe(ROUTES.HOME);
+    expect(replace).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+
+    act(() => { history.replace(`${BASE_ROUTE}/second-id/${ROUTES.SIDE_MENU_STORES}`); });
+    await waitFor(() => expect(headers()[1]).toHaveAttribute('aria-expanded', 'true'));
+    expect(headers()[0]).toHaveAttribute('aria-expanded', 'false');
+    act(() => { history.replace(ROUTES.HOME); });
+    expect(headers()[0]).toHaveAttribute('aria-expanded', 'true');
+    expect(headers()[1]).toHaveAttribute('aria-expanded', 'false');
+    act(() => { history.replace(ROUTES.POS_CATALOG); });
+    headers().forEach((header) => expect(header).toHaveAttribute('aria-expanded', 'false'));
+  });
+
   test('Render component', () => {
     renderWithContext(<SideMenu />);
   });
@@ -397,16 +427,15 @@ describe('Test suite for SideMenu component', () => {
     });
   });
 
-  test('Accordion expands when handleChange is called with isExpanded=true (covers panel branch)', async () => {
+  test('Accordion header opens its initiative and navigates to its first page', async () => {
     const { store } = renderWithContext(<SideMenu />);
     store.dispatch(setInitiativesList(mockedInitiativesList));
 
     const accordions = await screen.findAllByTestId('accordion-click-test');
     const user = userEvent.setup();
 
-    await user.click(accordions[0]);
-
-    await user.click(accordions[0]);
+    await within(accordions[0]).findByText('pages.initiativeStores.title');
+    await user.click(within(accordions[0]).getAllByRole('button')[0]);
 
     await waitFor(() => {
       const summary = within(accordions[0]).getAllByRole('button')[0];
