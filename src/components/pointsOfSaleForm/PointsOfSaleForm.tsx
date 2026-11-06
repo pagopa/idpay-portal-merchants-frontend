@@ -65,26 +65,30 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
 }) => {
   const { t } = useScopedTranslation();
   const { options, loading, error, search } = usePlacesAutocomplete();
-  const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>([
-    {
-      type: PHYSICAL,
-      franchiseName: '',
-      id: generateUniqueId(),
-      address: '',
-      streetNumber: '',
-      city: '',
-      zipCode: '',
-      region: '',
-      province: '',
-      website: '',
-      contactEmail: '',
-      contactName: '',
-      contactSurname: '',
-      channelEmail: '',
-      channelPhone: '',
-      channelGeolink: '',
-    },
-  ]);
+  const [salesPoints, setSalesPoints] = useState<Array<PointOfSaleDTO>>(() =>
+    initialSalesPoints?.length
+      ? initialSalesPoints
+      : [
+          {
+            type: PHYSICAL,
+            franchiseName: '',
+            id: generateUniqueId(),
+            address: '',
+            streetNumber: '',
+            city: '',
+            zipCode: '',
+            region: '',
+            province: '',
+            website: '',
+            contactEmail: '',
+            contactName: '',
+            contactSurname: '',
+            channelEmail: '',
+            channelPhone: '',
+            channelGeolink: '',
+          },
+        ]
+  );
   const [errors, setErrors] = useState<FormErrors>({});
   const [contactEmailConfirm, setContactEmailConfirm] = useState<{ [index: number]: string }>({});
   const [showErrorAlert, setShowErrorAlert] = useState<Array<boolean>>([]);
@@ -305,6 +309,8 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
   useEffect(() => {
     if (pointsOfSaleLoaded) {
       const values = initialSalesPoints?.length ? initialSalesPoints : [defaultSalesPoint()];
+      setErrors({});
+      setShowErrorAlert([]);
       setSalesPoints(values);
       setContactEmailConfirm(
         values.reduce<{ [index: number]: string }>(
