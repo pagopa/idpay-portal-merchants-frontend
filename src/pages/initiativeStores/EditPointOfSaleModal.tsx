@@ -13,6 +13,7 @@ import PointsOfSaleForm, {
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { updatePointOfSale } from '../../services/merchantService';
 import { useAlert } from '../../hooks/useAlert';
+import { normalizeUrlHttps } from '../../utils/formatUtils';
 
 interface Props {
   open: boolean;
@@ -39,12 +40,13 @@ const EDITABLE_POS_FIELDS: Array<keyof PointOfSaleDTO> = [
 
 const FIELD_VALIDATION_CODES = new Set([
   'VALIDATION_ERROR',
+  'POINT_OF_SALE_INVALID_URL',
   'POS_ALREADY_REGISTERED_OTHER_INITIATIVE',
   'PHYSICAL_POS_ALREADY_REGISTERED',
   'ONLINE_POS_ALREADY_REGISTERED',
 ]);
 
-const getValidationMessage = (code?: string, fallback?: string) => {
+const getValidationMessage = (code: string | undefined, fallback: string) => {
   switch (code) {
     case 'POS_ALREADY_REGISTERED_OTHER_INITIATIVE':
       return 'Questo punto vendita è già registrato in un’altra iniziativa';
@@ -52,7 +54,7 @@ const getValidationMessage = (code?: string, fallback?: string) => {
     case 'ONLINE_POS_ALREADY_REGISTERED':
       return 'Questo punto vendita risulta già associato';
     default:
-      return fallback ?? 'Verifica i dati inseriti';
+      return fallback;
   }
 };
 
@@ -102,16 +104,21 @@ const EditPointOfSaleModal = ({
   };
 
   useEffect(() => {
-    if (open) {
-      setSalesPoints(initialSalesPoints);
-      setIsFormDirty(false);
-      setSubmitAttempt(0);
-      setErrors({});
-      setAlertMessages({});
+    setSalesPoints(initialSalesPoints);
+    setIsFormDirty(false);
+    setSubmitAttempt(0);
+    setErrors({});
+    setAlertMessages({});
+    if (!open) {
+      setIsFormValid(false);
     }
   }, [open, initialSalesPoints]);
 
   const handleClose = () => {
+    setSalesPoints(initialSalesPoints);
+    setIsFormValid(false);
+    setIsFormDirty(false);
+    setSubmitAttempt(0);
     setErrors({});
     setAlertMessages({});
     onClose();
@@ -148,7 +155,7 @@ const EditPointOfSaleModal = ({
 
       const updatePayload: PointOfSaleUpdateDTO =
         updatedPoint.type === 'ONLINE'
-          ? { website: updatedPoint.website ?? '' }
+          ? { website: normalizeUrlHttps(updatedPoint.website) }
           : {
               region: updatedPoint.region ?? '',
               province: updatedPoint.province ?? '',
@@ -156,10 +163,10 @@ const EditPointOfSaleModal = ({
               zipCode: updatedPoint.zipCode ?? '',
               address: updatedPoint.address ?? '',
               streetNumber: updatedPoint.streetNumber ?? '',
-              website: updatedPoint.website ?? '',
+              website: normalizeUrlHttps(updatedPoint.website),
               channelEmail: updatedPoint.channelEmail ?? '',
               channelPhone: updatedPoint.channelPhone ?? '',
-              channelGeolink: updatedPoint.channelGeolink ?? '',
+              channelGeolink: normalizeUrlHttps(updatedPoint.channelGeolink),
             };
 
       result = await updatePointOfSale(merchantId, updatedPoint.id, updatePayload);
@@ -194,16 +201,22 @@ const EditPointOfSaleModal = ({
         return;
       }
 
+      const defaultValidationMessage = t('errors.validationDescription');
       const nextErrors = details.reduce<FormErrors>((acc, detail) => {
         const field = detail.field ?? (salesPoints[0].type === 'ONLINE' ? 'website' : 'address');
         return {
           ...acc,
-          0: { ...acc[0], [field]: getValidationMessage(detail.code) },
+          0: { ...acc[0], [field]: getValidationMessage(detail.code, defaultValidationMessage) },
         };
       }, {});
       setErrors(nextErrors);
+      const hasInvalidUrlError =
+        validationResult.code === 'POINT_OF_SALE_INVALID_URL' ||
+        details.some((detail) => detail.code === 'POINT_OF_SALE_INVALID_URL');
       setAlertMessages({
-        0: getValidationMessage(validationResult.code, validationResult.message),
+        0: hasInvalidUrlError
+          ? 'Alcuni campi non sono validi. Consulta i dettagli per maggiori informazioni.'
+          : getValidationMessage(validationResult.code, defaultValidationMessage),
       });
       return;
     }

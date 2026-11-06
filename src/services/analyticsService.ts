@@ -7,6 +7,9 @@ import mixpanel, {
 import { browserConsole } from '../utils/consoleLogger';
 import { sanitizeAnalyticsPath } from '../utils/analyticsPath';
 
+const appDomain = process.env.REACT_APP_CDN_DOMAINS;
+const appName = 'Portale esercenti';
+
 const CLICKABLE_AUTOCAPTURE_SELECTOR = 'a, button, [role="button"], [role="link"]';
 
 const isAllowedAutocaptureClickTarget = (element: Element) => {
@@ -85,7 +88,11 @@ const MIXPANEL_CONFIG: Partial<Config> = {
     '$el_classes',
     '$target',
     '$elements',
-    'current_url_search'
+    'current_url_search',
+    '$referring_domain',
+    'current_domain',
+    '$initial_referring_domain',
+    '$host'
   ],
   hooks: MIXPANEL_HOOKS,
   record_sessions_percent: 0,
@@ -201,6 +208,12 @@ const resumeAnalytics = (instance: Mixpanel) => {
     instance.clear_opt_in_out_tracking();
     instance.set_config({ autocapture: AUTOCAPTURE_CONFIG });
   }
+  instance.register({
+    DOMAIN_NAME: {
+      name: appName,
+      domain_URL: appDomain
+    }
+  });
   analyticsActive = true;
 };
 
