@@ -43,7 +43,9 @@ export default function SideMenu() {
                 key={item?.initiativeId}
                 item={item}
                 isExpanded={expandedItem}
-                defaultExpanded={pathname === ROUTES.HOME && index === 0}
+                defaultExpanded={
+                  (pathname === ROUTES.HOME || pathname === ROUTES.POS_CATALOG) && index === 0
+                }
                 setIsExpanded={setExpandedItem}
               />
             ))}
