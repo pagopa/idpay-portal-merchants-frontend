@@ -96,19 +96,22 @@ describe('FileUploadAction', () => {
   };
   let setAlertMock: jest.Mock;
 
-  const renderComponent = (apiCall = jest.fn().mockResolvedValue(undefined)) =>
+  const renderComponent = (
+    apiCall = jest.fn().mockResolvedValue(undefined),
+    i18nBlockKey = 'modifyDocument'
+  ) =>
     render(
       <FileUploadAction
         apiCall={apiCall}
         successStateKey="success"
         breadcrumbsLabel="Breadcrumb"
         manualLink=""
-        i18nBlockKey="modifyDocument"
+        i18nBlockKey={i18nBlockKey}
       />
     );
 
-  const submitUpload = async (apiCall: jest.Mock) => {
-    const { getByTestId, getByRole } = renderComponent(apiCall);
+  const submitUpload = async (apiCall: jest.Mock, i18nBlockKey = 'modifyDocument') => {
+    const { getByTestId, getByRole } = renderComponent(apiCall, i18nBlockKey);
 
     fireEvent.click(getByTestId('select-valid-file'));
     fireEvent.change(getByRole('textbox'), {
@@ -388,6 +391,80 @@ describe('FileUploadAction', () => {
         severity: 'error',
       })
     );
+  });
+
+  it.each([
+    {
+      title: 'shows the already sent translation when the API rejects with the eligibility error',
+      apiCall: () =>
+        jest.fn().mockRejectedValue(
+          new ApiError(
+            400,
+            'The reward batch eligibility decision does not allow this operation',
+            'PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED'
+          )
+        ),
+    },
+    {
+      title: 'prioritizes the eligibility code over the HTTP status',
+      apiCall: () =>
+        jest.fn().mockRejectedValue(
+          new ApiError(404, '', 'PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED')
+        ),
+    },
+  ])('$title in a bottom-right toast', async ({ apiCall: createApiCall }) => {
+    const apiCall = createApiCall();
+
+    await submitUpload(apiCall);
+
+    await waitFor(() =>
+      expect(setAlertMock).toHaveBeenCalledWith({
+        text: 'modifyDocument.errors.alreadySentError',
+        isOpen: true,
+        severity: 'error',
+        timeout: 5000,
+        containerStyle: {
+          height: 'fit-content',
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          zIndex: '1300',
+        },
+        contentStyle: { position: 'unset', bottom: '0', right: '0' },
+      })
+    );
+    expect(historyMock.goBack).not.toHaveBeenCalled();
+    expect(historyMock.replace).not.toHaveBeenCalled();
+    expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('LOAD_INVOICE_ERROR', {
+      reason: 'PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED',
+    });
+    expect(mockTrackAnalyticsEvent).not.toHaveBeenCalledWith('LOAD_INVOICE_SUCCESS');
+  });
+
+  it('uses the reverse translation and keeps the form available for retry', async () => {
+    const apiCall = jest.fn().mockRejectedValue(
+      new ApiError(400, 'Service message', 'PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED')
+    );
+    const { getByTestId, getByRole } = await submitUpload(apiCall, 'reverse');
+
+    await waitFor(() =>
+      expect(setAlertMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'reverse.errors.alreadySentError',
+          timeout: 5000,
+          containerStyle: expect.objectContaining({
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+          }),
+        })
+      )
+    );
+    expect(getByTestId('loading')).toHaveTextContent('false');
+    expect(getByTestId('file-value')).toHaveTextContent('invoice.pdf');
+    expect(getByRole('textbox')).toHaveValue('DOC-123');
+    expect(historyMock.goBack).not.toHaveBeenCalled();
+    expect(historyMock.replace).not.toHaveBeenCalled();
   });
 
   it('does not show a specific alert when the API returns an unknown error code', async () => {
