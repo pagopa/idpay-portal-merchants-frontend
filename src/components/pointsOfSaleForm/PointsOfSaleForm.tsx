@@ -334,7 +334,9 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
               zipCode: '',
               province: '',
               region: '',
-              channelGeolink: ''
+              channelGeolink: '',
+              channelEmail: '',
+              channelPhone: ''
             }
           : salesPoint
       )
