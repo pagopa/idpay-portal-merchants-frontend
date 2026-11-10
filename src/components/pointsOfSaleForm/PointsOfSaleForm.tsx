@@ -328,12 +328,15 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
         i === index && type === 'ONLINE'
           ? {
               ...salesPoint,
-              ['address']: '',
-              ['streetNumber']: '',
-              ['city']: '',
-              ['zipCode']: '',
-              ['province']: '',
-              ['region']: '',
+              address: '',
+              streetNumber: '',
+              city: '',
+              zipCode: '',
+              province: '',
+              region: '',
+              channelGeolink: '',
+              channelEmail: '',
+              channelPhone: ''
             }
           : salesPoint
       )
