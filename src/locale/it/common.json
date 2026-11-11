@@ -330,9 +330,11 @@
       "website": "Sito web",
       "pointOfSale": "Punto vendita",
       "modalDescription": "Qui puoi modificare i dati del referente di questo punto vendita. Se procedi, il nuovo referente riceverà un’email di conferma all’indirizzo indicato. Le credenziali di accesso del vecchio referente non saranno più valide.",
+      "modalUpdatePosDescription": "Qui puoi modificare i dati del punto vendita. Se procedi, le informazioni del punto vendita visibili al cittadino cambieranno.",
       "contactEmailModal": "Indirizzo e-mail",
       "pointOfSalesUploadSuccess": "I puniti vendita sono stati caricati",
-      "referentChangeSuccess": "Dati modificati con successo"
+      "referentChangeSuccess": "Dati modificati con successo",
+      "pointOfSaleChangeSuccess": "I dati del punto vendita sono stati modificati."
     },
     "initiativeStoreDetail": {
       "transactionHistory": "Storico transazioni",
@@ -414,7 +416,7 @@
       "subtitle": "Esporta le transazioni del Bonus Elettrodomestici in base ai criteri selezionati.",
       "form": {
         "title": "Seleziona i parametri di esportazione",
-        "subtitle": "Imposta i criteri di ricerca per generare il report delle transazioni.",
+        "subtitle": "Imposta i criteri di ricerca per generare il report delle transazioni. Puoi selezionare le date a partire da ieri, con un range massimo consentito di 90 giorni.",
         "from": "Dal",
         "to": "Al",
         "submit": "Genera report"
@@ -456,7 +458,7 @@
     "errors": {
       "requiredFileError": "Selezionare un file da caricare",
       "deniedSentError": "Non puoi modificare questo documento.",
-      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "alreadySentError": "Non puoi procedere con il caricamento di questo documento perché la transazione è già stata inviata per il rimborso.",
       "notFoundError": "Non è stato possibile modificare il documento. Riprova più tardi.",
       "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
       "fileSizeError": "Il file supera la dimensione massima di 20MB",
@@ -483,7 +485,7 @@
     "errors": {
       "requiredFileError": "Selezionare un file da caricare",
       "deniedSentError": "Non puoi modificare questo documento.",
-      "alreadySentError": "Non puoi modificare questo documento perché è già stato inviato per il rimborso.",
+      "alreadySentError": "Non puoi procedere con il caricamento di questo documento perché la transazione è già stata inviata per il rimborso.",
       "notFoundError": "Riprova più tardi",
       "errorAlert": "Il caricamento del file non è andato a buon fine. Riprova.",
       "fileSizeError": "Il file supera la dimensione massima di 20MB",

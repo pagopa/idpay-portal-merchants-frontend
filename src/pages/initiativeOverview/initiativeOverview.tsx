@@ -59,7 +59,7 @@ const InitiativeOverview = () => {
       const response = await getMerchantDetail(initiativeId);
       setData({
         ...response,
-        onboardingDate: formatDate(response?.activationDate ? new Date(response.activationDate) : undefined)
+        onboardingDate: formatDate(response?.creationDate ? new Date(response.creationDate) : undefined)
       });
     } catch {
       setAlert({

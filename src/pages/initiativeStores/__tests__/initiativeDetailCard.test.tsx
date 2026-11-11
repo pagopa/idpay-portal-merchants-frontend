@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import InitiativeDetailCard from '../InitiativeDetailCard';
 
@@ -25,5 +24,27 @@ describe('InitiativeDetailCard', () => {
     render(<InitiativeDetailCard titleBox={title} />);
 
     expect(screen.getByText(title)).toBeInTheDocument();
+  });
+
+  test('renders edit button only when onEdit is provided and triggers callback', () => {
+    const onEdit = jest.fn();
+    render(<InitiativeDetailCard titleBox="Card" onEdit={onEdit} />);
+
+    const editButton = screen.getByTestId('edit-point-of-sale-button');
+    expect(editButton).toBeInTheDocument();
+
+    fireEvent.click(editButton);
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  test('disables edit button when editDisabled is true', () => {
+    const onEdit = jest.fn();
+    render(<InitiativeDetailCard titleBox="Card" onEdit={onEdit} editDisabled={true} />);
+
+    const editButton = screen.getByTestId('edit-point-of-sale-button');
+    expect(editButton).toBeDisabled();
+
+    fireEvent.click(editButton);
+    expect(onEdit).not.toHaveBeenCalled();
   });
 });

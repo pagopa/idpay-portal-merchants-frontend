@@ -30,7 +30,11 @@ const ModalReportedUser: React.FC<ModalReportedUserProps> = ({
   onConfirm,
   descriptionTwo,
 }) => (
-  <Dialog open={open} onClose={onCancel} PaperProps={{ style: { minWidth: 600, minHeight: 267 } }}>
+  <Dialog
+    open={open}
+    onClose={onCancel}
+    PaperProps={{ style: { minWidth: 600, minHeight: 267, borderRadius: 16 } }}
+  >
     <DialogTitle
       sx={{
         fontFamily: '"Titillium Web", sans-serif',
