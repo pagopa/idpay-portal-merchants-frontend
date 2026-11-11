@@ -310,7 +310,7 @@ const ShopDetails: React.FC = () => {
             data-testid="download-csv-button-test"
             disabled={
               !ENABLED_DOWNLOAD_STATUSES.includes(store?.status as StatusEnum) ||
-              batchDownloadIsLoading
+              batchDownloadIsLoading || !store?.numberOfTransactions
             }
           >
             {t('pages.refundRequests.storeDetails.exportCSV')}
@@ -321,7 +321,7 @@ const ShopDetails: React.FC = () => {
         </Box>
       </Box>
 
-      {store?.status === APPROVING_STATUS && (
+      {store?.status === APPROVING_STATUS && !!store?.numberOfTransactions && (
         <MuiAlert
           sx={{ mb: 3 }}
           variant="outlined"
