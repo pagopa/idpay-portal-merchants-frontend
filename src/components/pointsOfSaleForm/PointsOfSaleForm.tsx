@@ -204,6 +204,11 @@ const PointsOfSaleForm: FC<PointsOfSaleFormProps> = ({
       let fieldErrors: FieldErrors = {};
 
       if (!editMode) {
+        if (!sp.franchiseName?.trim()) {
+          fieldErrors = { ...fieldErrors, franchiseName: requiredFieldErrors.franchiseName };
+          isValid = false;
+        }
+
         const contactEmailValue = sp.contactEmail?.trim() ?? '';
         const confirmContactEmailValue = contactEmailConfirm[index]?.trim() ?? '';
 
