@@ -7,16 +7,21 @@ export const useOneTrustNotice = (
   setContentLoaded: Dispatch<SetStateAction<boolean>>,
   urlPrefix: string
 ) => {
+
   useEffect(() => {
-    OneTrust.NoticeApi.Initialized.then(function () {
-      OneTrust.NoticeApi.LoadNotices([url], false);
-    }).finally(() => {
-      setContentLoaded(true);
-    });
-  }, []);
+    const noticeApi = OneTrust?.NoticeApi;
+
+    if (noticeApi?.Initialized) {
+      noticeApi.Initialized
+        .then(() => noticeApi.LoadNotices([url], false))
+        .finally(() => {
+          setContentLoaded(true);
+        });
+    }
+  }, [url, setContentLoaded]);
 
   useLayoutEffect(() => {
-    setTimeout(() => {
+    if (contentLoaded) {
       const links = document.querySelectorAll('.otnotice-content a');
       links.forEach((l) => {
         const href = l.getAttribute('href');
@@ -28,6 +33,6 @@ export const useOneTrustNotice = (
 
       const sidebar = document.getElementsByClassName('otnotice-menu');
       sidebar[0]?.setAttribute('style', 'max-height: 65%');
-    }, 1000);
-  }, [contentLoaded]);
+    }
+  }, [contentLoaded, urlPrefix]);
 };
