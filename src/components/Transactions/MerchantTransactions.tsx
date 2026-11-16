@@ -54,7 +54,7 @@ const MerchantTransactions = ({
   dataTableIsLoading,
 }: MerchantTransactionsProps) => {
   const { alert, setAlert } = useAlert();
-  const { t, initiativeName } = useScopedTranslation();
+  const { t, initiativeNamespace } = useScopedTranslation();
   const [rows, setRows] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [rowDetail, setRowDetail] = useState<Array<PointOfSaleTransactionProcessedDTO>>([]);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
@@ -63,7 +63,7 @@ const MerchantTransactions = ({
     gtinError: '',
     trxCodeError: '',
   });
-  const productLabel = getInitiativeProductLabel(initiativeName);
+  const productLabel = getInitiativeProductLabel(initiativeNamespace);
   const listItemDetail = getDetailFieldList(productLabel);
 
   const infoStyles = {

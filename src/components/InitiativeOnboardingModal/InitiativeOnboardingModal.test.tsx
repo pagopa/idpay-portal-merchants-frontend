@@ -5,6 +5,18 @@ import bonusElettrodomestici2025Copy from '../../locale/it/bonusElettrodomestici
 import { renderWithContext } from '../../utils/__tests__/test-utils';
 import InitiativeOnboardingModal from './InitiativeOnboardingModal';
 
+jest.mock('../../locale/initiativeResources', () => ({
+  getInitiativeResourceFolder: (initiativeId: string) => {
+    if (initiativeId === 'configured-decoder-id') {
+      return 'bonusDecoder2026';
+    }
+    if (initiativeId === 'configured-appliances-id') {
+      return 'bonusElettrodomestici2025';
+    }
+    return undefined;
+  },
+}));
+
 describe('InitiativeOnboardingModal', () => {
   const defaultProps = {
     open: true,
@@ -22,8 +34,8 @@ describe('InitiativeOnboardingModal', () => {
       <InitiativeOnboardingModal
         {...defaultProps}
         initiative={{
-          initiativeId: 'bonus-decoder',
-          initiativeName: 'Bonus Decoder',
+          initiativeId: 'configured-decoder-id',
+          initiativeName: 'Nome modificato',
         }}
       />
     );
@@ -38,8 +50,8 @@ describe('InitiativeOnboardingModal', () => {
       <InitiativeOnboardingModal
         {...defaultProps}
         initiative={{
-          initiativeId: 'bonus-elettrodomestici',
-          initiativeName: 'Bonus Elettrodomestici',
+          initiativeId: 'configured-appliances-id',
+          initiativeName: 'Nome modificato',
         }}
       />
     );
