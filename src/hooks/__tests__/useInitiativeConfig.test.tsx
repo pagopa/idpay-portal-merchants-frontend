@@ -1,10 +1,12 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useInitiativeConfig } from '../useInitiativeConfig';
-import { buildNamespaceKey } from '../../utils/buildNamespaceKey';
+import { getInitiativeResourceFolder } from '../../locale/initiativeResources';
 
-jest.mock('../../utils/buildNamespaceKey');
+jest.mock('../../locale/initiativeResources', () => ({
+  getInitiativeResourceFolder: jest.fn(),
+}));
 
-const mockBuildNamespaceKey = buildNamespaceKey as jest.Mock;
+const mockGetInitiativeResourceFolder = getInitiativeResourceFolder as jest.Mock;
 
 describe('useInitiativeConfig', () => {
   beforeEach(() => {
@@ -12,7 +14,7 @@ describe('useInitiativeConfig', () => {
   });
 
   it('loads config from dynamic initiative folder when import succeeds', async () => {
-    mockBuildNamespaceKey.mockReturnValue('test-initiative');
+    mockGetInitiativeResourceFolder.mockReturnValue('test-initiative');
 
     jest.mock(
       '../../locale/it/test-initiative/config.json',
@@ -30,39 +32,39 @@ describe('useInitiativeConfig', () => {
     const config = await result.current.getConfig(
       'routes' as any,
       {
+        initiativeId: 'test-initiative-id',
         initiativeName: 'Test',
-        startDate: '2024-01-01',
+        startDate: '2028-01-01',
       } as any
     );
 
-    expect(mockBuildNamespaceKey).toHaveBeenCalledWith('Test', '2024-01-01');
+    expect(mockGetInitiativeResourceFolder).toHaveBeenCalledWith('test-initiative-id');
 
     expect(config).toEqual(['a', 'b']);
   });
 
   it('falls back to default config when dynamic import fails', async () => {
-    mockBuildNamespaceKey.mockReturnValue('non-existent');
+    mockGetInitiativeResourceFolder.mockReturnValue('non-existent');
 
     const { result } = renderHook(() => useInitiativeConfig<string[]>());
 
     const config = await result.current.getConfig(
       'routes' as any,
       {
+        initiativeId: 'unknown-id',
         initiativeName: 'X',
         startDate: 'Y',
       } as any
     );
 
-    expect(mockBuildNamespaceKey).toHaveBeenCalledWith('X', 'Y');
+    expect(mockGetInitiativeResourceFolder).toHaveBeenCalledWith('unknown-id');
     expect(config).toBeDefined();
   });
 
-  it('handles missing initiative fields using empty strings', async () => {
-    mockBuildNamespaceKey.mockReturnValue('empty');
-
+  it('uses the default config when initiative ID is missing', async () => {
     const { result } = renderHook(() => useInitiativeConfig<string[]>());
 
-    await result.current.getConfig(
+    const config = await result.current.getConfig(
       'routes' as any,
       {
         initiativeName: undefined,
@@ -70,6 +72,7 @@ describe('useInitiativeConfig', () => {
       } as any
     );
 
-    expect(mockBuildNamespaceKey).toHaveBeenCalledWith('', '');
+    expect(mockGetInitiativeResourceFolder).toHaveBeenCalledWith(undefined);
+    expect(config).toBeDefined();
   });
 });
