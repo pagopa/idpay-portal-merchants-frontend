@@ -229,8 +229,8 @@ describe('analyticsService', () => {
     })).toEqual({
       event: '$mp_web_page_view',
       properties: {
-        $pathname: '/portale-esercenti/punti-vendita',
-        current_url_path: '/portale-esercenti/punti-vendita',
+        $pathname: '/portale-esercenti/:initiativeId/punti-vendita/:pointOfSaleId',
+        current_url_path: '/portale-esercenti/:initiativeId/punti-vendita/:pointOfSaleId',
       },
     });
 
