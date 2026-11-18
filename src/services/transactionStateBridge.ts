@@ -346,9 +346,12 @@ export const reconcileProcessedTransactions = (
       return [row];
     }
 
+    const transactionRevision =
+      'transactionRevision' in row ? row.transactionRevision : undefined;
+
     if (
-      isSafeRevision(row.transactionRevision) &&
-      row.transactionRevision >= pendingState.expectedTransactionRevision
+      isSafeRevision(transactionRevision) &&
+      transactionRevision >= pendingState.expectedTransactionRevision
     ) {
       removePendingTransactionState(
         initiativeId,

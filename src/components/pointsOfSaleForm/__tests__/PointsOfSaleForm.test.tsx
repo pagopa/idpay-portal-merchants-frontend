@@ -558,6 +558,45 @@ describe('PointsOfSaleForm validation tests', () => {
     fireEvent.change(confirmEmailInput, { target: { value: 'valid@example.com' } });
   });
 
+  it('keeps email mismatch validation visible after submit attempt', async () => {
+    const props = createDefaultProps();
+    const { rerender } = render(<PointsOfSaleForm {...props} />);
+
+    const emailInput = screen.getByLabelText('E-mail');
+    const confirmEmailInput = screen.getByLabelText('Conferma e-mail');
+
+    fireEvent.change(emailInput, { target: { value: 'shop@example.com' } });
+    fireEvent.change(confirmEmailInput, { target: { value: 'different@example.com' } });
+
+    expect(await screen.findByText('Le email non coincidono')).toBeInTheDocument();
+
+    rerender(<PointsOfSaleForm {...props} submitAttempt={1} />);
+
+    expect(await screen.findByText('Le email non coincidono')).toBeInTheDocument();
+  });
+
+  it('validates email formats and mismatch during submit validation', async () => {
+    const props = createDefaultProps();
+    const { rerender } = render(<PointsOfSaleForm {...props} />);
+
+    const emailInput = screen.getByLabelText('E-mail');
+    const confirmEmailInput = screen.getByLabelText('Conferma e-mail');
+
+    (isValidRegex as jest.Mock).mockReturnValue(false);
+    fireEvent.change(emailInput, { target: { value: 'invalid' } });
+    fireEvent.change(confirmEmailInput, { target: { value: 'invalid-confirm' } });
+
+    rerender(<PointsOfSaleForm {...props} submitAttempt={1} />);
+    expect(await screen.findAllByText('Devi inserire una email valida')).toHaveLength(2);
+
+    (isValidRegex as jest.Mock).mockReturnValue(true);
+    fireEvent.change(emailInput, { target: { value: 'a@test.it' } });
+    fireEvent.change(confirmEmailInput, { target: { value: 'b@test.it' } });
+
+    rerender(<PointsOfSaleForm {...props} submitAttempt={2} />);
+    expect(await screen.findByText('Le email non coincidono')).toBeInTheDocument();
+  });
+
   it('handles channel inputs and Verifica URL click', () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const urlInput = screen.getByLabelText('Scheda Google MYBusiness');
@@ -1005,10 +1044,10 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
     const capInput = screen.getByLabelText('CAP');
     const regionInput = screen.getByLabelText('Regione');
     const provinceInput = screen.getByLabelText('Provincia');
-    cityInput.removeAttribute('disabled');
-    capInput.removeAttribute('disabled');
-    regionInput.removeAttribute('disabled');
-    provinceInput.removeAttribute('disabled');
+    Object.defineProperty(cityInput, 'disabled', { value: false, configurable: true });
+    Object.defineProperty(capInput, 'disabled', { value: false, configurable: true });
+    Object.defineProperty(regionInput, 'disabled', { value: false, configurable: true });
+    Object.defineProperty(provinceInput, 'disabled', { value: false, configurable: true });
     fireEvent.change(cityInput, { target: { name: 'city', value: 'Roma' } });
     fireEvent.change(capInput, { target: { name: 'zipCode', value: '00100' } });
     fireEvent.change(regionInput, { target: { name: 'region', value: 'Lazio' } });
@@ -1120,3 +1159,162 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
     expect(screen.getByText('autocomplete-error')).toBeInTheDocument();
   });
 });
+
+describe('PointsOfSaleForm missing new-code coverage', () => {
+  const mockedUsePlacesAutocomplete = usePlacesAutocomplete as jest.Mock;
+  let defaultProps: ReturnType<typeof createDefaultProps>;
+  let searchMock: jest.Mock;
+
+  const renderEditModeWithSalesPoint = (overrides: Record<string, unknown>) =>
+    render(
+      <PointsOfSaleForm
+        {...defaultProps}
+        editMode
+        pointsOfSaleLoaded={true}
+        initialSalesPoints={[
+          {
+            id: 'pos-1',
+            type: 'PHYSICAL',
+            franchiseName: 'Shop',
+            address: '',
+            streetNumber: '',
+            city: '',
+            zipCode: '',
+            region: '',
+            province: '',
+            website: '',
+            contactEmail: 'owner@test.it',
+            contactName: 'Mario',
+            contactSurname: 'Rossi',
+            channelEmail: '',
+            channelPhone: '',
+            channelGeolink: '',
+            ...overrides,
+          },
+        ]}
+      />
+    );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    defaultProps = createDefaultProps();
+    searchMock = mockAutocompleteHook(mockedUsePlacesAutocomplete);
+    mockSequentialUniqueIds('id-1', 'id-2', 'id-3', 'id-4');
+    setBooleanValidationMocks(true, true);
+  });
+
+  it('covers editMode PHYSICAL branches, address callbacks, phone guards and URL normalize', async () => {
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+
+    renderEditModeWithSalesPoint({});
+
+    expect(screen.getByText('INFORMAZIONI PUNTO VENDITA')).toBeInTheDocument();
+    expect(screen.getByText('CONTATTI PUNTO VENDITA')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Trigger onChange'));
+    fireEvent.click(screen.getByLabelText('Trigger onTextChange empty'));
+    expect(searchMock).toHaveBeenCalledWith('');
+
+    const cityInput = screen.getByLabelText('Città');
+    const capInput = screen.getByLabelText('CAP');
+    const regionInput = screen.getByLabelText('Regione');
+    const provinceInput = screen.getByLabelText('Provincia');
+    cityInput.removeAttribute('disabled');
+    capInput.removeAttribute('disabled');
+    regionInput.removeAttribute('disabled');
+    provinceInput.removeAttribute('disabled');
+
+    fireEvent.change(cityInput, { target: { name: 'city', value: 'Roma' } });
+    fireEvent.change(capInput, { target: { name: 'zipCode', value: '00100' } });
+    fireEvent.change(regionInput, { target: { name: 'region', value: 'Lazio' } });
+    fireEvent.change(provinceInput, { target: { name: 'province', value: 'RM' } });
+
+    const phoneInput = screen.getByLabelText('Numero di telefono');
+    fireEvent.keyDown(phoneInput, { key: 'e' });
+    fireEvent.change(phoneInput, { target: { name: 'channelPhone', value: '123' } });
+    fireEvent.blur(phoneInput);
+    expect(screen.getByText('Il numero deve avere tra 7 e 15 cifre')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Scheda Google MYBusiness'), {
+      target: { name: 'channelGeolink', value: '  http://example.com/shop  ' },
+    });
+    fireEvent.click(screen.getByText('Verifica URL'));
+    expect(openSpy).toHaveBeenCalledWith('https://example.com/shop', '_blank', 'noopener,noreferrer');
+
+    openSpy.mockRestore();
+  });
+
+  it('covers non-edit required/mismatch validation and submit reduce branches', async () => {
+    const props = createDefaultProps();
+    const { rerender } = render(<PointsOfSaleForm {...props} />);
+
+    fireEvent.change(screen.getByLabelText('E-mail'), {
+      target: { name: 'contactEmail', value: 'first@test.it' },
+    });
+    fireEvent.change(screen.getByLabelText('Conferma e-mail'), {
+      target: { name: 'confirmContactEmail', value: 'second@test.it' },
+    });
+    expect(await screen.findByText('Le email non coincidono')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Conferma e-mail'), {
+      target: { name: 'confirmContactEmail', value: 'first@test.it' },
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText('Le email non coincidono')).not.toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText('Nome'), { target: { name: 'contactName', value: 'Mario' } });
+    fireEvent.change(screen.getByLabelText('Nome'), { target: { name: 'contactName', value: '' } });
+    fireEvent.change(screen.getByLabelText('Cognome'), {
+      target: { name: 'contactSurname', value: 'Rossi' },
+    });
+    fireEvent.change(screen.getByLabelText('Cognome'), {
+      target: { name: 'contactSurname', value: '' },
+    });
+    fireEvent.change(screen.getByLabelText('Nome insegna'), {
+      target: { name: 'franchiseName', value: '' },
+    });
+    fireEvent.change(screen.getByLabelText('Numero di telefono'), {
+      target: { name: 'channelPhone', value: '1234567890123456' },
+    });
+
+    rerender(<PointsOfSaleForm {...props} submitAttempt={1} />);
+
+    await waitFor(() => {
+      expect(props.onValidationChange).toHaveBeenCalled();
+    });
+  });
+
+  it('covers pointsOfSaleLoaded reduce init in ONLINE editMode', () => {
+    renderEditModeWithSalesPoint({
+      id: 'pos-online',
+      type: 'ONLINE',
+      franchiseName: 'Shop Online',
+      website: 'shop.example.it',
+      contactEmail: 'online@test.it',
+    });
+
+    expect(screen.getByText('INDIRIZZO WEB')).toBeInTheDocument();
+    expect(screen.getByLabelText('Indirizzo completo')).toHaveValue('shop.example.it');
+  });
+
+  it('covers add branch and delete branch with pre-existing errors map', async () => {
+    render(<PointsOfSaleForm {...defaultProps} />);
+
+    fireEvent.click(screen.getByText('Aggiungi un altro punto vendita'));
+    await waitFor(() => {
+      expect(screen.getAllByLabelText('Nome insegna')).toHaveLength(2);
+    });
+    expect(searchMock).toHaveBeenCalledWith('');
+
+    const franchiseInputs = screen.getAllByLabelText('Nome insegna');
+    fireEvent.change(franchiseInputs[1], { target: { name: 'franchiseName', value: 'Tmp' } });
+    fireEvent.change(franchiseInputs[1], { target: { name: 'franchiseName', value: '' } });
+
+    fireEvent.click(screen.getAllByTestId('DeleteOutlineIcon')[0]);
+
+    expect(screen.getAllByLabelText('Nome insegna')).toHaveLength(1);
+  });
+});
+

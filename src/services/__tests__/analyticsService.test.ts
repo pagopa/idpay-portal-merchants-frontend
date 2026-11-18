@@ -47,6 +47,7 @@ describe('analyticsService', () => {
     delete process.env.REACT_APP_MIXPANEL_TOKEN;
     delete process.env.REACT_APP_MIXPANEL_API_HOST;
     delete process.env.REACT_APP_MIXPANEL_DEBUG;
+    process.env.REACT_APP_CDN_DOMAINS = 'welfare.dev.cstar.pagopa.it';
 
     mockMixpanelInstance.has_opted_out_tracking.mockReturnValue(false);
     mockMixpanel.init.mockReturnValue(mockMixpanelInstance);
@@ -109,6 +110,7 @@ describe('analyticsService', () => {
     process.env.REACT_APP_MIXPANEL_TOKEN = 'mixpanel-token';
     process.env.REACT_APP_MIXPANEL_API_HOST = 'https://custom.mixpanel.test';
     process.env.REACT_APP_MIXPANEL_DEBUG = 'true';
+    process.env.REACT_APP_CDN_DOMAINS = 'welfare.uat.cstar.pagopa.it';
 
     const {
       clearInitiativeAnalyticsProperties,
@@ -128,7 +130,13 @@ describe('analyticsService', () => {
         debug: true,
         persistence: 'localStorage',
         track_pageview: false,
-        property_blacklist: expect.arrayContaining(['$current_url']),
+        property_blacklist: expect.arrayContaining([
+          '$current_url',
+          '$referring_domain',
+          'current_domain',
+          '$initial_referring_domain',
+          '$host',
+        ]),
         hooks: expect.objectContaining({
           before_send_events: expect.any(Function),
         }),
@@ -161,6 +169,15 @@ describe('analyticsService', () => {
     expect(mockMixpanelInstance.track_pageview).toHaveBeenCalledWith({
       current_url_path: '/portale-esercenti/test',
     });
+    expect(mockMixpanelInstance.register).toHaveBeenNthCalledWith(1, {
+      DOMAIN_NAME: {
+        name: 'Portale esercenti',
+        domain_URL: 'welfare.uat.cstar.pagopa.it',
+      },
+    });
+    expect(mockMixpanelInstance.register.mock.invocationCallOrder[0]).toBeLessThan(
+      mockMixpanelInstance.track_pageview.mock.invocationCallOrder[0]
+    );
     expect(mockMixpanelInstance.track).toHaveBeenCalledWith(
       'IDPAY_LOAD_INVOICE_UX_SUCCESS',
       {
@@ -335,6 +352,13 @@ describe('analyticsService', () => {
 
     expect(mockMixpanel.init).toHaveBeenCalledTimes(1);
     expect(mockMixpanelInstance.clear_opt_in_out_tracking).toHaveBeenCalledTimes(1);
+    expect(mockMixpanelInstance.register).toHaveBeenCalledTimes(1);
+    expect(mockMixpanelInstance.clear_opt_in_out_tracking.mock.invocationCallOrder[0]).toBeLessThan(
+      mockMixpanelInstance.register.mock.invocationCallOrder[0]
+    );
+    expect(mockMixpanelInstance.set_config.mock.invocationCallOrder[0]).toBeLessThan(
+      mockMixpanelInstance.register.mock.invocationCallOrder[0]
+    );
     expect(mockMixpanelInstance.set_config).toHaveBeenCalledWith({
       autocapture: expect.objectContaining({
         click: true,
@@ -428,10 +452,24 @@ describe('analyticsService', () => {
     trackAnalyticsEvent('IDPAY_LOAD_INVOICE_UX_SUCCESS');
     expect(mockMixpanelInstance.track).not.toHaveBeenCalled();
 
+    mockMixpanelInstance.has_opted_out_tracking.mockReturnValue(true);
     initAnalytics();
 
     expect(mockMixpanel.init).toHaveBeenCalledTimes(1);
     expect(mockMixpanelInstance.has_opted_out_tracking).toHaveBeenCalledTimes(2);
+    expect(mockMixpanelInstance.register).toHaveBeenCalledTimes(2);
+    expect(mockMixpanelInstance.register).toHaveBeenLastCalledWith({
+      DOMAIN_NAME: {
+        name: 'Portale esercenti',
+        domain_URL: 'welfare.dev.cstar.pagopa.it',
+      },
+    });
+    expect(mockMixpanelInstance.clear_opt_in_out_tracking.mock.invocationCallOrder[0]).toBeLessThan(
+      mockMixpanelInstance.register.mock.invocationCallOrder[1]
+    );
+    expect(mockMixpanelInstance.set_config.mock.invocationCallOrder[0]).toBeLessThan(
+      mockMixpanelInstance.register.mock.invocationCallOrder[1]
+    );
   });
 
   it('does not disable analytics when it has not been initialized', () => {

@@ -13,7 +13,7 @@ import { RewardBatchTrxStatus } from '../../../api/generated/merchants/data-cont
 import { useAlert } from '../../../hooks/useAlert';
 import { useUserPermissions, PERMISSION_KEYS } from '../../../hooks/useUserPermissions';
 import ModalComponent from '../../../components/modal/ModalComponent';
-import { formatDate, isReversableOrEditable } from '../../../helpers';
+import { formatDateTime, isReversableOrEditable } from '../../../helpers';
 import { ReasonDTO } from '../../../api/generated/merchants/data-contracts';
 import DetailDrawer, { DetailDrawerProps } from '../../../components/Drawer/DetailDrawer';
 import {
@@ -21,7 +21,6 @@ import {
   DrawerLabeledValue,
   drawerTruncatedTextSx,
   getDetailValueText,
-  getDrawerTooltipTitle,
 } from '../../../components/Drawer/detailDrawerShared';
 import { RewardBatchDTO } from '../../../api/generated/merchants/data-contracts';
 
@@ -319,17 +318,15 @@ export default function InvoiceDetail({
                         fontWeight={theme.typography.fontWeightRegular}
                         color={theme.palette.text.secondary}
                       >
-                        {date ? formatDate(new Date(date)) : MISSING_DATA_PLACEHOLDER}
+                        {date ? formatDateTime(new Date(date)) : MISSING_DATA_PLACEHOLDER}
                       </Typography>
-                      <Tooltip title={getDrawerTooltipTitle(reason)}>
-                        <Typography
-                          variant="body2"
-                          fontWeight={theme.typography.fontWeightMedium}
-                          sx={drawerTruncatedTextSx}
-                        >
-                          {reason ?? MISSING_DATA_PLACEHOLDER}
-                        </Typography>
-                      </Tooltip>
+                      <Typography
+                        variant="body2"
+                        fontWeight={theme.typography.fontWeightMedium}
+                        sx={{ whiteSpace: 'pre-line', wordBreak: 'break-word' }}
+                      >
+                        {reason ?? MISSING_DATA_PLACEHOLDER}
+                      </Typography>
                     </Box>
                   )
                 )

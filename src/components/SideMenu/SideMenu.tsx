@@ -1,6 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 import { List, Box } from '@mui/material';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
@@ -16,6 +16,7 @@ export default function SideMenu() {
   const initiativesList = useAppSelector(intiativesListSelector);
   const { t } = useScopedTranslation();
   const history = useHistory();
+  const { pathname } = useLocation();
 
   return (
     <Box display="grid" mt={1}>
@@ -37,12 +38,14 @@ export default function SideMenu() {
             level={0}
           />
           {initiativesList &&
-            initiativesList.map((item) => (
+            initiativesList.map((item, index) => (
               <SidenavAccordion
                 key={item?.initiativeId}
                 item={item}
                 isExpanded={expandedItem}
-                defaultExpanded={!(initiativesList.length - 1)}
+                defaultExpanded={
+                  (pathname === ROUTES.HOME || pathname === ROUTES.POS_CATALOG) && index === 0
+                }
                 setIsExpanded={setExpandedItem}
               />
             ))}

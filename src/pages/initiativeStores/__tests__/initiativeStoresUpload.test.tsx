@@ -104,6 +104,24 @@ jest.mock('../../../components/pointsOfSaleForm/PointsOfSaleForm', () => (props:
         duplicates
       </button>
       <button
+        data-testid="set-email-mismatch"
+        onClick={() => {
+          props.onFormChange([
+            {
+              id: 'local-id',
+              type: 'PHYSICAL',
+              contactEmail: 'shop@example.com',
+              confirmContactEmail: 'mismatch@example.com',
+              website: 'example.com',
+              channelGeolink: 'maps.example.com',
+            },
+          ]);
+          props.onValidationChange(true);
+        }}
+      >
+        mismatch
+      </button>
+      <button
         data-testid="set-online-form"
         onClick={() => {
           props.onFormChange([
@@ -257,6 +275,21 @@ describe('InitiativeStoresUpload', () => {
     await waitFor(() =>
       expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
         reason: 'DUPLICATE_EMAIL',
+      })
+    );
+    expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();
+  });
+
+  it('does not submit when contact email and confirmation do not match', async () => {
+    renderComponent();
+    fireEvent.click(screen.getByTestId('set-email-mismatch'));
+
+    fireEvent.click(screen.getByTestId('confirm-stores-button'));
+
+    await waitFor(() => expect(mockLatestFormProps.submitAttempt).toBe(1));
+    await waitFor(() =>
+      expect(mockTrackAnalyticsEvent).toHaveBeenCalledWith('IDPAY_ADD_STORE_ERROR', {
+        reason: 'FORM_VALIDATION_ERROR',
       })
     );
     expect(updateMerchantPointOfSalesMock).not.toHaveBeenCalled();

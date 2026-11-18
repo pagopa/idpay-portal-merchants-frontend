@@ -237,7 +237,7 @@ describe('Render component', () => {
     expect(screen.getByText('Numero fattura')).toBeInTheDocument();
     expect(screen.getByText('Nota ufficiale')).toBeInTheDocument();
     expect(screen.getByText('Motivo di rifiuto')).toBeInTheDocument();
-    expect(screen.getByText('03/02/2026')).toBeInTheDocument();
+    expect(screen.getByText('03/02/2026 01:00')).toBeInTheDocument();
     expect(screen.getByTestId('btn-test')).toBeInTheDocument();
   });
   it('should handle undefined initiativesListSel (line 68 branch)', () => {

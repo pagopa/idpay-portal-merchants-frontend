@@ -87,6 +87,21 @@ const InitiativeStoresUpload: React.FC = () => {
     return 'VALIDATION_ERROR';
   };
 
+  const hasEmailConfirmationMismatch = (salesPoint: SalePointFormDTO): boolean => {
+    const contactEmail = String(salesPoint.contactEmail ?? '')
+      .trim()
+      .toLowerCase();
+    const confirmContactEmail = String(salesPoint.confirmContactEmail ?? '')
+      .trim()
+      .toLowerCase();
+
+    if (!contactEmail || !confirmContactEmail) {
+      return true;
+    }
+
+    return contactEmail !== confirmContactEmail;
+  };
+
   const mergeFormErrors = (first: FormErrors, second: FormErrors): FormErrors => {
     const indexes = new Set([...Object.keys(first), ...Object.keys(second)]);
 
@@ -232,13 +247,18 @@ const InitiativeStoresUpload: React.FC = () => {
 
       await new Promise((resolve) => setTimeout(resolve, 50));
 
+      const hasInvalidEmailConfirmation = salesPoints.some(hasEmailConfirmationMismatch);
+
       if (
         !isFormValid ||
+        hasInvalidEmailConfirmation ||
         Object.keys(duplicateEmailErrors).length > 0 ||
         Object.keys(apiValidationErrors).length > 0 ||
         Object.keys(apiValidationAlertMessages).length > 0
       ) {
-        trackAddStoreError(getValidationErrorReason());
+        trackAddStoreError(
+          hasInvalidEmailConfirmation ? 'FORM_VALIDATION_ERROR' : getValidationErrorReason()
+        );
         return;
       }
       const userJwt = parseJwt(storageTokenOps.read());

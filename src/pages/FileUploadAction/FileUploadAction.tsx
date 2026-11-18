@@ -12,6 +12,8 @@ import { useCurrentInitiativeId } from '../../hooks/useCurrentInitiativeId';
 import { MIXPANEL_EVENTS, trackAnalyticsEvent } from '../../services/analyticsService';
 import { resolveApiErrorStatus } from '../../utils/resolveApiErrorStatus';
 import { removePendingTransactionState } from '../../services/transactionStateBridge';
+import { trimFilename } from '../../helpers';
+import { ApiError } from '../../api/ApiError';
 
 interface FileUploadActionProps {
   apiCall:
@@ -38,6 +40,9 @@ interface FileUploadActionProps {
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
 const VALID_MIME_TYPES = ['application/pdf', 'application/xml', 'text/xml'];
 const MISSING_FILE_DOC_NUMBER_PLACEHOLDER = '-';
+const FILE_NAME_MAX_LENGTH = 40;
+const PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED =
+  'PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED';
 
 const FileUploadAction: React.FC<FileUploadActionProps> = ({
   apiCall,
@@ -68,6 +73,23 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const secondBreadcrumbLabel = scopedT(`${i18nBlockKey}.breadcrumbLabel`);
+
+  const showEligibilityError = () => {
+    setAlert({
+      text: scopedT(`${i18nBlockKey}.errors.alreadySentError`),
+      isOpen: true,
+      severity: 'error',
+      timeout: 5000,
+      containerStyle: {
+        height: 'fit-content',
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        zIndex: '1300',
+      },
+      contentStyle: { position: 'unset', bottom: '0', right: '0' },
+    });
+  };
 
   const { trxId, fileDocNumber } = useParams<{
     id: string;
@@ -225,17 +247,27 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
         removePendingTransactionState(initiativeId || '', trxId);
         const status = resolveApiErrorStatus(error);
         const isNotFoundError = status === 404;
+        const errorCode: unknown = error instanceof ApiError ? error.code : undefined;
+        const isEligibilityError = errorCode === PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED;
 
         trackAnalyticsEvent(MIXPANEL_EVENTS.LOAD_INVOICE_ERROR, {
-          reason: isNotFoundError ? 'RESOURCE_NOT_FOUND' : 'REQUEST_FAILED',
+          reason: isEligibilityError
+            ? PAYMENT_REWARD_BATCH_ELIGIBILITY_NOT_ALLOWED
+            : isNotFoundError
+              ? 'RESOURCE_NOT_FOUND'
+              : 'REQUEST_FAILED',
         });
-        setAlert({
-          text: isNotFoundError
-            ? scopedT(`${i18nBlockKey}.errors.notFoundError`)
-            : scopedT(`${i18nBlockKey}.errors.errorAlert`),
-          isOpen: true,
-          severity: 'error',
-        });
+        if (isEligibilityError) {
+          showEligibilityError();
+        } else {
+          setAlert({
+            text: isNotFoundError
+              ? scopedT(`${i18nBlockKey}.errors.notFoundError`)
+              : scopedT(`${i18nBlockKey}.errors.errorAlert`),
+            isOpen: true,
+            severity: 'error',
+          });
+        }
         setLoadingFile(false);
       }
     }
@@ -380,7 +412,7 @@ const FileUploadAction: React.FC<FileUploadActionProps> = ({
             <SingleFileInput
               onFileSelected={handleFileSelect}
               onFileRemoved={handleRemoveFile}
-              value={file}
+              value={file && new File([file], trimFilename(file.name, FILE_NAME_MAX_LENGTH))}
               dropzoneLabel={scopedT(`${i18nBlockKey}.uploadFile`)}
               dropzoneButton={scopedT(`${i18nBlockKey}.uploadFileButton`)}
               rejectedLabel={scopedT(`${i18nBlockKey}.errors.fileNotSupported`)}

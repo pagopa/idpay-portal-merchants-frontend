@@ -41,6 +41,7 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
               type="button"
               key={i}
               onClick={() => {
+                onInputChange?.({}, getOptionLabel?.(opt), 'selectOption');
                 getOptionLabel?.(opt);
                 onChange?.({}, opt);
                 onClose?.();
@@ -51,11 +52,29 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
           ))
         : null}
 
-      <button type="button" data-testid="type-abcde" onClick={() => onInputChange?.({}, 'abcde')}>
+      <button
+        type="button"
+        data-testid="type-abcde"
+        onClick={() => onInputChange?.({}, 'abcde', 'input')}
+      >
         type-abcde
       </button>
-      <button type="button" data-testid="type-spaces" onClick={() => onInputChange?.({}, '     ')}>
+      <button
+        type="button"
+        data-testid="type-reset-empty"
+        onClick={() => onInputChange?.({}, '', 'reset')}
+      >
+        type-reset-empty
+      </button>
+      <button
+        type="button"
+        data-testid="type-spaces"
+        onClick={() => onInputChange?.({}, '     ', 'input')}
+      >
         type-spaces
+      </button>
+      <button type="button" data-testid="clear" onClick={() => onInputChange?.({}, '', 'clear')}>
+        clear
       </button>
       <button
         type="button"
@@ -74,11 +93,7 @@ jest.mock('@mui/material/Autocomplete', () => (props: any) => {
       >
         compare-options
       </button>
-      <button
-        type="button"
-        data-testid="filter-options"
-        onClick={() => filterOptions?.(['one'])}
-      >
+      <button type="button" data-testid="filter-options" onClick={() => filterOptions?.(['one'])}>
         filter-options
       </button>
     </div>
@@ -149,6 +164,152 @@ describe('AutocompleteComponent', () => {
 
     fireEvent.click(screen.getByTestId('type-abcde'));
     expect(onTextChange).toHaveBeenCalledWith('abcde');
+  });
+
+  it('calls onChangeDebounce after 800ms with latest input value', () => {
+    const onChangeDebounce = jest.fn();
+    render(
+      <AutocompleteComponent
+        options={[]}
+        onChangeDebounce={onChangeDebounce}
+        label="Debounce test"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('type-abcde'));
+
+    act(() => {
+      jest.advanceTimersByTime(799);
+    });
+    expect(onChangeDebounce).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(onChangeDebounce).toHaveBeenCalledWith('abcde');
+  });
+
+  it('ignores reset input event when initialValue exists and new value is empty', () => {
+    const onTextChange = jest.fn();
+    render(
+      <AutocompleteComponent
+        options={[]}
+        initialValue="Via Roma"
+        onTextChange={onTextChange}
+        label="Reset test"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('type-reset-empty'));
+
+    expect(onTextChange).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Reset test')).toBeInTheDocument();
+  });
+
+  it('does not search again after selecting an address and resumes searching when typing', () => {
+    const onChangeDebounce = jest.fn();
+    const onChange = jest.fn();
+    const options = [{ Address: { Label: 'Via Roma 1' } }];
+    render(
+      <AutocompleteComponent
+        options={options}
+        onChange={onChange}
+        onChangeDebounce={onChangeDebounce}
+        label="Indirizzo"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('type-abcde'));
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+    expect(onChangeDebounce).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('open'));
+    fireEvent.click(screen.getByText('Via Roma 1'));
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+
+    expect(onChange).toHaveBeenCalledWith(options[0]);
+    expect(onChangeDebounce).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('type-abcde'));
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+    expect(onChangeDebounce).toHaveBeenCalledTimes(2);
+    expect(onChangeDebounce).toHaveBeenLastCalledWith('abcde');
+  });
+
+  it('cancels a pending search when the selected label matches the typed text', () => {
+    const onChangeDebounce = jest.fn();
+    render(
+      <AutocompleteComponent
+        options={[{ Address: { Label: 'abcde' } }]}
+        onChangeDebounce={onChangeDebounce}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('type-abcde'));
+    act(() => {
+      jest.advanceTimersByTime(400);
+    });
+    fireEvent.click(screen.getByTestId('open'));
+    fireEvent.click(screen.getByText('abcde'));
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+
+    expect(onChangeDebounce).not.toHaveBeenCalled();
+  });
+
+  it('does not search when initialValue is populated or updated after selection', () => {
+    const onChangeDebounce = jest.fn();
+    const { rerender } = render(
+      <AutocompleteComponent
+        options={[]}
+        initialValue="Via Roma"
+        onChangeDebounce={onChangeDebounce}
+      />
+    );
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+    fireEvent.click(screen.getByTestId('type-abcde'));
+    rerender(
+      <AutocompleteComponent
+        options={[]}
+        initialValue="Via Roma, 1"
+        onChangeDebounce={onChangeDebounce}
+      />
+    );
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+
+    expect(onChangeDebounce).not.toHaveBeenCalled();
+  });
+
+  it('preserves text and debounce callbacks when the input is cleared', () => {
+    const onChangeDebounce = jest.fn();
+    const onTextChange = jest.fn();
+    render(
+      <AutocompleteComponent
+        options={[]}
+        initialValue="Via Roma"
+        onChangeDebounce={onChangeDebounce}
+        onTextChange={onTextChange}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('clear'));
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+
+    expect(onTextChange).toHaveBeenCalledWith('');
+    expect(onChangeDebounce).toHaveBeenCalledWith('');
   });
 
   it('shows error message when inputError is true', () => {

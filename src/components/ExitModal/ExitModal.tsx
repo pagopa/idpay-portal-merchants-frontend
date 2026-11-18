@@ -40,7 +40,7 @@ const ExitModal = ({ title, subtitle, openExitModal, handleCloseExitModal, backR
             transform: 'translate(-50%, -50%)',
             width: 600,
             bgcolor: 'background.paper',
-            borderRadius: '4px',
+            borderRadius: '16px',
             boxShadow: 24,
             p: 4,
           }}

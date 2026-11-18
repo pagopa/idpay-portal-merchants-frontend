@@ -305,6 +305,15 @@ describe('InitiativeStoreDetail', () => {
     expect(await screen.findAllByText('Il campo è obbligatorio')).toHaveLength(4);
   });
 
+  test('keeps update button disabled when referent fields are unchanged', async () => {
+    const user = userEvent.setup({ delay: null });
+    renderWithProviders();
+
+    await openEditModal(user);
+
+    expect(screen.getByTestId('update-button')).toBeDisabled();
+  });
+
   test('handles successful update flow and refreshes detail', async () => {
     const user = userEvent.setup({ delay: null });
     mockPatchPointOfSaleReferent.mockResolvedValueOnce(undefined);
@@ -338,6 +347,28 @@ describe('InitiativeStoreDetail', () => {
     mockPatchPointOfSaleReferent.mockRejectedValueOnce({
       code: 'POINT_OF_SALE_ALREADY_REGISTERED',
       message: 'mail',
+    });
+
+    renderWithProviders();
+
+    await openEditModal(user);
+    await fillAndConfirmEmailsByIndex(user, 'different@test.it');
+    await user.click(screen.getByTestId('update-button'));
+
+    await waitFor(() => {
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        title: 'errors.duplicateEmailError',
+        text: 'different@test.it è già associata ad altro punto vendita',
+        isOpen: true,
+        severity: 'error',
+      });
+    });
+  });
+
+  test('handles duplicate email error when code comes from response payload', async () => {
+    const user = userEvent.setup({ delay: null });
+    mockPatchPointOfSaleReferent.mockRejectedValueOnce({
+      response: { data: { code: 'POINT_OF_SALE_ALREADY_REGISTERED' } },
     });
 
     renderWithProviders();

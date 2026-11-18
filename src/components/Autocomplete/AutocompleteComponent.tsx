@@ -18,6 +18,7 @@ export default function AutocompleteComponent({
   onTextChange,
   loading,
   name,
+  initialValue,
 }: Readonly<{
   options: Array<any>;
   onChangeDebounce?: (value: string) => void;
@@ -29,13 +30,22 @@ export default function AutocompleteComponent({
   onTextChange?: (value: string) => void;
   loading?: boolean;
   name?: string;
+  initialValue?: string;
 }>) {
   const [open, setOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(initialValue ?? '');
+  const [shouldSearch, setShouldSearch] = useState(false);
   const { t } = useScopedTranslation();
 
   useEffect(() => {
+    setShouldSearch(false);
+    setInputValue(initialValue ?? '');
+  }, [initialValue]);
 
+  useEffect(() => {
+    if (!shouldSearch) {
+      return undefined;
+    }
     const timer = setTimeout(() => {
       if (onChangeDebounce) {
         onChangeDebounce(inputValue);
@@ -44,7 +54,7 @@ export default function AutocompleteComponent({
     return () => {
       clearTimeout(timer);
     };
-  }, [inputValue]);
+  }, [inputValue, shouldSearch]);
 
   const getHelperText = () => {
     if (!inputError) {
@@ -78,16 +88,24 @@ export default function AutocompleteComponent({
       noOptionsText={t('pages.pointOfSales.noOptionsText')}
       loadingText={t('pages.pointOfSales.loadingText')}
       onChange={(_, optionValue) => {
+        if (optionValue) {
+          setShouldSearch(false);
+        }
         if (onChange) {
           onChange(optionValue);
         }
       }}
-      onInputChange={(_, newInputValue) => {
+      onInputChange={(_, newInputValue, reason) => {
+        setShouldSearch(reason === 'input' || reason === 'clear');
+        if (reason === 'reset' && !newInputValue && initialValue) {
+          return;
+        }
         setInputValue(newInputValue);
         if (onTextChange) {
           onTextChange(newInputValue);
         }
       }}
+      inputValue={inputValue}
       filterOptions={(x) => x}
       renderInput={(params) => (
         <TextField
@@ -98,7 +116,6 @@ export default function AutocompleteComponent({
           error={inputError}
           helperText={getHelperText()}
           sx={{
-            marginTop: 2,
             ...(required
               ? {
                   '& .MuiInputLabel-root::after': {

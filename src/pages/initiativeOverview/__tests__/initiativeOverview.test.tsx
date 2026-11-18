@@ -137,6 +137,7 @@ const expectEmailUpdateFlow = async ({
 };
 
 const mockMerchantDetail = {
+  creationDate: '2024-02-20T10:00:00Z',
   iban: 'IT60X0542811101000000123456',
   ibanHolder: 'Mario Rossi',
   activationDate: '2023-01-15T10:00:00Z',
@@ -181,6 +182,7 @@ describe('InitiativeOverview', () => {
     expect(screen.getByText('pages.initiativeOverview.stores')).toBeInTheDocument();
     expect(screen.getByText('initiative-overview-info')).toBeInTheDocument();
     expect(merchantService.getMerchantDetail).toHaveBeenCalledWith('initiative-123');
+    expect(helperFunctions.formatDate).toHaveBeenCalledWith(new Date(mockMerchantDetail.creationDate));
   });
 
   it('shows placeholder values when merchant details are missing', async () => {

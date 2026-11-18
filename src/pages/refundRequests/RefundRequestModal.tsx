@@ -39,7 +39,7 @@ export const RefundRequestsModal = ({
     data-testid="refund-requests-modal-test"
     open={isOpen}
     onClose={setIsOpen}
-    PaperProps={{ style: { minWidth: 600 } }}
+    PaperProps={{ style: { minWidth: 600, borderRadius: 16 } }}
   >
     <DialogTitle
       sx={{

@@ -30,7 +30,6 @@
   border: none;
   resize: none;
   font-weight: 600;
-  font-style: SemiBold;
   font-size: 18px;
   line-height: 24px;
   letter-spacing: 0;
@@ -44,7 +43,7 @@
 
 @media only screen and (max-width: 767px) {
   .otnotice-menu {
-    display: none !important;
+    display: none;
   }
 
   .otnotice-menu-mobile {
@@ -148,7 +147,7 @@
 
 .otnotice-menu > .otnotice-menu-section {
   margin-bottom: 30px;
-  list-style: none !important;
+  list-style: none;
   width: 225px;
   font-size: 14px;
   font-weight: bold;
@@ -156,8 +155,8 @@
 }
 
 .otnotice-menu > .otnotice-menu-section a {
-  text-decoration: none !important;
-  color: #696969 !important;
+  text-decoration: none;
+  color: #696969;
   margin-bottom: 10px;
 }
 

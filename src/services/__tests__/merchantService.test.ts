@@ -12,6 +12,7 @@ import {
   createTransaction,
   authPaymentBarCode,
   updateMerchantPointOfSales,
+  updatePointOfSale,
   getMerchantPointOfSales,
   getMerchantPointOfSalesCatalog,
   getMerchantPointOfSalesById,
@@ -55,6 +56,7 @@ const mockedApi = {
   createTransaction: jest.fn(),
   authPaymentBarCode: jest.fn(),
   updateMerchantPointOfSales: jest.fn(),
+  updatePointOfSale: jest.fn(),
   getMerchantPointOfSales: jest.fn(),
   getMerchantPointOfSalesCatalog: jest.fn(),
   getPointOfSaleInitiatives: jest.fn(),
@@ -91,6 +93,15 @@ const expectUpdateMerchantPointOfSalesError = async (
   await expect(updateMerchantPointOfSales('initiative', 'merchant', [])).resolves.toEqual(
     expectedResult
   );
+};
+
+const expectUpdatePointOfSaleError = async (
+  rejectedValue: unknown,
+  expectedResult: Record<string, any>
+) => {
+  mockedApi.updatePointOfSale.mockRejectedValue(rejectedValue);
+
+  await expect(updatePointOfSale('merchant', 'pos-1', {} as any)).resolves.toEqual(expectedResult);
 };
 
 describe('merchantService', () => {
@@ -167,6 +178,65 @@ describe('merchantService', () => {
   test('updateMerchantPointOfSales delegates correctly', async () => {
     await updateMerchantPointOfSales('initiative', 'merchant', []);
     expect(mockedApi.updateMerchantPointOfSales).toHaveBeenCalledWith('initiative', 'merchant', []);
+  });
+
+  test('updatePointOfSale delegates correctly', async () => {
+    mockedApi.updatePointOfSale.mockResolvedValue({ id: 'pos-1' });
+
+    await updatePointOfSale('merchant', 'pos-1', { website: 'https://example.it' } as any);
+
+    expect(mockedApi.updatePointOfSale).toHaveBeenCalledWith('merchant', 'pos-1', {
+      website: 'https://example.it',
+    });
+  });
+
+  test('updatePointOfSale maps ApiError details when request fails', async () => {
+    await expectUpdatePointOfSaleError(
+      new ApiError(400, 'validation failed', 'VALIDATION_ERROR' as any, {
+        code: 'VALIDATION_ERROR',
+        details: [{ code: 'ERR_1', message: 'invalid field' }],
+      } as any),
+      {
+        code: 'VALIDATION_ERROR',
+        message: 'validation failed',
+        details: [{ code: 'ERR_1', message: 'invalid field' }],
+        errors: [{ code: 'ERR_1', message: 'invalid field' }],
+      }
+    );
+  });
+
+  test('updatePointOfSale returns ApiError code and message when details are missing', async () => {
+    await expectUpdatePointOfSaleError(
+      new ApiError(405, 'Method Not Allowed', 'POINT_OF_SALE_GENERIC_ERROR' as any),
+      {
+        code: 'POINT_OF_SALE_GENERIC_ERROR',
+        message: 'Method Not Allowed',
+      }
+    );
+  });
+
+  test('updatePointOfSale returns API response payload for non ApiError failures', async () => {
+    await expectUpdatePointOfSaleError(
+      {
+        response: {
+          data: {
+            code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+            message: 'PointOfSales with the same functional key already exists',
+          },
+        },
+      },
+      {
+        code: 'POINT_OF_SALE_ALREADY_REGISTERED',
+        message: 'PointOfSales with the same functional key already exists',
+      }
+    );
+  });
+
+  test('updatePointOfSale returns generic error when payload is missing', async () => {
+    await expectUpdatePointOfSaleError(new Error('unexpected failure'), {
+      code: 'POINT_OF_SALE_GENERIC_ERROR',
+      message: '',
+    });
   });
 
   test('updateMerchantPointOfSales returns API error payload when request fails', async () => {
