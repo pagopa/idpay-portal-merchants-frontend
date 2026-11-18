@@ -1,4 +1,4 @@
-import { CompanyLinkType } from '@pagopa/mui-italia';
+import { CompanyLinkType } from '@pagopa/mui-italia/components/Footer';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
 
 export const pagoPALink: CompanyLinkType = {

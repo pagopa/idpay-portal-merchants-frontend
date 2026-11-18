@@ -1,10 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render as renderWithoutTheme, screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 jest.setTimeout(20000);
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { Tooltip } from '@mui/material';
+import { ThemeProvider, Tooltip } from '@mui/material';
+import { theme } from '@pagopa/mui-italia/theme';
 import MerchantTransactions from '../MerchantTransactions';
 import getStatus from '../useStatus';
 import CustomChip from '../../Chip/CustomChip';
@@ -38,6 +39,11 @@ jest.mock('../../../hooks/useAlert', () => ({
 
 jest.mock('../useStatus', () => jest.fn());
 jest.mock('../useDetailList', () => () => []);
+
+const render = (ui: React.ReactElement) =>
+  renderWithoutTheme(ui, {
+    wrapper: ({ children }) => <ThemeProvider theme={theme}>{children}</ThemeProvider>,
+  });
 
 jest.mock('../../Chip/CustomChip', () => {
   return jest.fn((props: any) => <div data-testid="custom-chip">{props.label}</div>);
@@ -903,6 +909,10 @@ describe('MerchantTransactions', () => {
 
       jest.doMock('../../../services/analyticsService', () => ({
         trackAnalyticsInputChange: mockTrackAnalyticsInputChange,
+      }));
+
+      jest.doMock('@pagopa/mui-italia/components/MIButton', () => ({
+        MIButton: ({ children, ...props }: any) => <button {...props}>{children}</button>,
       }));
 
       jest.doMock('@mui/material', () => {

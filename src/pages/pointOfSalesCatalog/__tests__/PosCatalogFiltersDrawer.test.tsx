@@ -1,5 +1,7 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material/styles';
+import { fireEvent, render as renderWithoutTheme, screen, waitFor, within } from '@testing-library/react';
+import { theme } from '@pagopa/mui-italia/theme';
 import { useFormik } from 'formik';
 import { GetPointOfSalesFilters } from '../../../types/types';
 import { PosCatalogDrawer, PosCatalogFilters } from '../PosCatalogFiltersDrawer';
@@ -11,6 +13,11 @@ import {
 } from '../../../services/merchantService';
 
 const mockSetAlert = jest.fn();
+
+const render = (ui: React.ReactElement) =>
+  renderWithoutTheme(ui, {
+    wrapper: ({ children }) => <ThemeProvider theme={theme}>{children}</ThemeProvider>,
+  });
 
 jest.mock('../../../hooks/useScopedTranslation', () => ({
   __esModule: true,

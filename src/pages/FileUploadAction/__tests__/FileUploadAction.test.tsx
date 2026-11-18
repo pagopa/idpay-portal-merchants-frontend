@@ -41,11 +41,14 @@ jest.mock('@pagopa/selfcare-common-frontend/lib', () => ({
   TitleBox: () => <div />,
 }));
 
-jest.mock('@pagopa/mui-italia', () => ({
+jest.mock('@pagopa/mui-italia/theme', () => ({
   theme: {
     palette: { background: { paper: '#fff' } },
     typography: { fontWeightBold: 700, fontWeightMedium: 500 },
   },
+}));
+
+jest.mock('@pagopa/mui-italia/components/SingleFileInput', () => ({
   SingleFileInput: ({ onFileSelected, onFileRemoved, value, loading }) => (
     <div>
       <button

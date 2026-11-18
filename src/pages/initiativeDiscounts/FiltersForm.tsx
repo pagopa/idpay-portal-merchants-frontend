@@ -1,6 +1,6 @@
-import { Button } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
-import { ButtonNaked } from '@pagopa/mui-italia/components';
+import Grid from '@mui/material/Grid';
+import { ButtonNaked } from '@pagopa/mui-italia/components/ButtonNaked';
+import { MIButton } from '@pagopa/mui-italia/components/MIButton';
 import React, { cloneElement, isValidElement } from 'react';
 import { FormikProps } from 'formik';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
@@ -63,7 +63,7 @@ const FiltersForm = <T extends Record<string, any>>({
     <Grid sx={{ my: 4, width: '100%' }} container spacing={2}>
       {enhancedChildren}
       <Grid item xs={12} sm={6} md={3} lg={1}>
-        <Button
+        <MIButton
           sx={{ height: '44.5px', gridColumn: 'span 1', width: '100%' }}
           variant="outlined"
           size="small"
@@ -72,7 +72,7 @@ const FiltersForm = <T extends Record<string, any>>({
           data-testid="apply-filters-test"
         >
           {t('actions.filterBtn')}
-        </Button>
+        </MIButton>
       </Grid>
       <Grid item xs={12} sm={6} md={3} lg={1}>
         <ButtonNaked

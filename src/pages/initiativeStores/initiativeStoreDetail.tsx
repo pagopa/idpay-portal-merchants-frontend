@@ -1,12 +1,12 @@
 import { Box, Button, Tooltip, Typography, TextField } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Prompt } from 'react-router-dom';
 import { theme } from '@pagopa/mui-italia/theme';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';
 import { Edit } from '@mui/icons-material';
 import { GridSortModel } from '@mui/x-data-grid';
-import { ButtonNaked } from '@pagopa/mui-italia';
+import { ButtonNaked } from '@pagopa/mui-italia/components/ButtonNaked';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import {
   getMerchantPointOfSalesById,

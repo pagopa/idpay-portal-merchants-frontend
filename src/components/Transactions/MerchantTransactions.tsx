@@ -10,7 +10,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import { useCallback, useEffect, useState } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
 import { useFormik } from 'formik';

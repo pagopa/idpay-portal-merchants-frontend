@@ -9,7 +9,7 @@ import {
   Radio,
   Link,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { storageTokenOps } from '@pagopa/selfcare-common-frontend/lib/utils/storage';

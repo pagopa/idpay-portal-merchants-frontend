@@ -2,6 +2,8 @@ import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material';
+import { theme } from '@pagopa/mui-italia/theme';
 import InitiativeOverview from '../initiativeOverview';
 import * as merchantService from '../../../services/merchantService';
 import * as helperFunctions from '../../../helpers';
@@ -95,9 +97,11 @@ const mockTrackAnalyticsEvent = trackAnalyticsEvent as jest.Mock;
 const renderComponent = () => {
   mockHistory.push('/overview/initiative-123');
   return render(
-    <Router history={mockHistory}>
-      <InitiativeOverview />
-    </Router>
+      <ThemeProvider theme={theme}>
+        <Router history={mockHistory}>
+          <InitiativeOverview />
+        </Router>
+      </ThemeProvider>
   );
 };
 

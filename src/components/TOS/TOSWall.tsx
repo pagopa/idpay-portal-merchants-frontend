@@ -1,5 +1,5 @@
 import { Box, Typography, Link } from '@mui/material';
-import { TOSAgreement } from '@pagopa/mui-italia';
+import { TOSAgreement } from '@pagopa/mui-italia/components/TOSAgreement';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 
 interface TOSWallProps {

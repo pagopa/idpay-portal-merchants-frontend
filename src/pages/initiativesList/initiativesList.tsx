@@ -1,6 +1,5 @@
 import {
   Box,
-  Chip,
   InputAdornment,
   Paper,
   Table,
@@ -15,6 +14,7 @@ import {
   Tab,
 } from '@mui/material';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
+import { MIChip } from '@pagopa/mui-italia/components/MIChip';
 import SearchIcon from '@mui/icons-material/Search';
 import { useEffect, useState, useCallback } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
@@ -336,7 +336,7 @@ const InitiativesList = () => {
     switch (status) {
       case PUBLISHED:
         return (
-          <Chip
+          <MIChip
             sx={{ fontSize: '14px' }}
             label={getInitiativeStatusLabel(status)}
             color="success"
@@ -344,7 +344,7 @@ const InitiativesList = () => {
         );
       case CLOSED:
         return (
-          <Chip
+          <MIChip
             sx={{ fontSize: '14px' }}
             label={getInitiativeStatusLabel(status)}
             color="default"
@@ -397,16 +397,14 @@ const InitiativesList = () => {
             onChange={(e) => {
               handleSearchInitiatives(e.target.value);
             }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              },
-              htmlInput: { 'data-testid': 'search-initiatives' },
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
             }}
+            inputProps={{ 'data-testid': 'search-initiatives' }}
           />
         </Box>
       </Box>

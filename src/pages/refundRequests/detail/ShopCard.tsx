@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { theme } from '@pagopa/mui-italia/theme';
 import { Box, Paper, Tooltip, Typography } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import useScopedTranslation from '../../../hooks/useScopedTranslation';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import CustomChip from '../../../components/Chip/CustomChip';

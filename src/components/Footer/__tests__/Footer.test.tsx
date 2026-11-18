@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import Footer from '../Footer';
-import { LangCode } from '@pagopa/mui-italia';
+import { LangCode } from '@pagopa/mui-italia/components/LangSwitch';
 import { pagoPALink } from '../FooterConfig';
 import { ReactI18NextChild } from 'react-i18next';
 import { useAppSelector } from '../../../redux/hooks';
@@ -24,7 +24,7 @@ jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
 
-jest.mock('@pagopa/mui-italia', () => ({
+jest.mock('@pagopa/mui-italia/components/Footer', () => ({
   Footer: (props: {
     loggedUser: {
       toString: () =>

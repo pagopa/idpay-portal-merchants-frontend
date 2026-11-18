@@ -1,5 +1,5 @@
-import { Box, Button, CircularProgress, Divider, IconButton, Tooltip, Typography } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import { Box, Tooltip, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useEffect, useMemo, useState } from 'react';
 import { generatePath, useHistory } from 'react-router-dom';
@@ -8,7 +8,11 @@ import { theme } from '@pagopa/mui-italia/theme';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { MIAlert } from '@pagopa/mui-italia';
+import { MIAlert } from '@pagopa/mui-italia/components/MIAlert';
+import { MIButton } from '@pagopa/mui-italia/components/MIButton';
+import { MIDivider } from '@pagopa/mui-italia/components/MIDivider';
+import { MIIconButton } from '@pagopa/mui-italia/components/MIIconButton';
+import { MISpinner } from '@pagopa/mui-italia/components/MISpinner';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import ROUTES from '../../routes';
 import InitiativeOverviewCard from '../components/initiativeOverviewCard';
@@ -127,24 +131,26 @@ const InitiativeOverview = () => {
               (!data?.iban ?
                 <MIAlert
                   severity='warning'
-                  description={t('pages.initiativeOverview.ibanBanner.description')}
                   action={isEditIbanDisabled ? undefined : {
                     label: t('pages.initiativeOverview.ibanBanner.action'),
                     onClick: () => {
                       setIsIbanModalOpen(true);
                     }
                   }}
-                /> :
+                  >
+                    {t('pages.initiativeOverview.ibanBanner.description')}
+                  </MIAlert> :
                 <MIAlert
                   severity='info'
-                  description={t('pages.initiativeOverview.emailBanner.description')}
                   action={isEditEmailDisabled ? undefined : {
                     label: t('pages.initiativeOverview.emailBanner.action'),
                     onClick: () => {
                       setIsEmailModalOpen(true);
                     }
                   }}
-                />)
+                  >
+                    {t('pages.initiativeOverview.emailBanner.description')}
+                  </MIAlert>)
             }
           </Box>
         </Grid>
@@ -153,7 +159,7 @@ const InitiativeOverview = () => {
             <Box
               sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
             >
-              <CircularProgress />
+              <MISpinner />
             </Box>
           </Grid> :
           <>
@@ -173,7 +179,7 @@ const InitiativeOverview = () => {
                           {data?.onboardingDate || MISSING_DATA_PLACEHOLDER}
                         </Typography>
                       </Box>
-                      <Divider />
+                      <MIDivider />
                       <Box display='flex' justifyContent='space-between' alignItems='center'>
                         <Box minWidth={0}>
                           <Typography variant='body1'>
@@ -185,29 +191,29 @@ const InitiativeOverview = () => {
                             </Typography>
                           </Tooltip>
                         </Box>
-                        <IconButton
+                        <MIIconButton
                           disabled={isEditEmailDisabled}
                           onClick={() => {
                             setIsEmailModalOpen(true);
                           }}
                         >
                           <EditOutlinedIcon />
-                        </IconButton>
+                        </MIIconButton>
                       </Box>
                       <Box display='flex' justifyContent='space-between' alignItems='center'>
                         <Typography variant='overline'>{t('commons.refundsDataTitle')}</Typography>
                         <Box>
-                          <IconButton onClick={() => setIsVisible(prev => !prev)}>
+                          <MIIconButton onClick={() => setIsVisible(prev => !prev)}>
                             {!isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
-                          </IconButton>
-                          <IconButton
+                          </MIIconButton>
+                          <MIIconButton
                             disabled={isEditIbanDisabled}
                             onClick={() => {
                               setIsIbanModalOpen(true);
                             }}
                           >
                             <EditOutlinedIcon />
-                          </IconButton>
+                          </MIIconButton>
                         </Box>
                       </Box>
                       <Box>
@@ -218,7 +224,7 @@ const InitiativeOverview = () => {
                           </Typography>
                         </Tooltip>
                       </Box>
-                      <Divider />
+                      <MIDivider />
                       <Box>
                         <Typography variant='body1'>{t('pages.initiativeOverview.iban')}</Typography>
                         <Tooltip title={isVisible && data?.iban}>
@@ -243,7 +249,7 @@ const InitiativeOverview = () => {
               >
                 <Box mb={1} sx={{ display: 'grid', gridColumn: 'span 12' }}>
                   <Box display='inline-block'>
-                    <Button
+                    <MIButton
                       variant='contained'
                       startIcon={<StorefrontOutlinedIcon />}
                       disabled={isUploadStoresDisabled}
@@ -257,7 +263,7 @@ const InitiativeOverview = () => {
                       data-testid='add-stores-button'
                     >
                       {t('pages.initiativeStores.uploadStores')}
-                    </Button>
+                    </MIButton>
                   </Box>
                 </Box>
               </InitiativeOverviewCard>

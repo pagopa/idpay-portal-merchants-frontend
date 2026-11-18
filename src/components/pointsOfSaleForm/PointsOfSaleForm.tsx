@@ -12,10 +12,10 @@ import {
   Slide,
   InputAdornment,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import { Report as ReportIcon, OpenInNew as OpenInNewIcon } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import { ButtonNaked } from '@pagopa/mui-italia/components';
+import { ButtonNaked } from '@pagopa/mui-italia/components/ButtonNaked';
 import { theme } from '@pagopa/mui-italia/theme';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { PointOfSaleDTO } from '../../api/generated/merchants/data-contracts';

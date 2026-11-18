@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import { FormikProps } from 'formik';
 import FiltersForm from '../../pages/initiativeDiscounts/FiltersForm';
 import { GetPointOfSalesFilters } from '../../types/types';

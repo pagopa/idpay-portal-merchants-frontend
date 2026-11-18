@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import { Box, Typography, Paper, Button, Breadcrumbs } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import { Trans } from 'react-i18next';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory, useLocation } from 'react-router-dom';
-import { ButtonNaked } from '@pagopa/mui-italia';
+import { ButtonNaked } from '@pagopa/mui-italia/components/ButtonNaked';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { GetReportedUsersFilters } from '../../types/types';
 import ROUTES from '../../routes';

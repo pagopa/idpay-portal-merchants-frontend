@@ -10,7 +10,7 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
-import { MIAlert } from '@pagopa/mui-italia';
+import { MIAlert } from '@pagopa/mui-italia/components/MIAlert';
 import { trackAnalyticsInputChange } from '../../services/analyticsService';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import DialogComponent from '../../components/Dialog/DialogComponent';
@@ -140,7 +140,7 @@ const AssociateSelectedPosModal: React.FC<Props> = ({
           </Select>
         </FormControl>
 
-        <MIAlert severity="info" description={t(`pages.posCatalog.${copyKey}.infoBanner`)} />
+        <MIAlert severity="info">{t(`pages.posCatalog.${copyKey}.infoBanner`)}</MIAlert>
       </DialogContent>
     </DialogComponent>
   );

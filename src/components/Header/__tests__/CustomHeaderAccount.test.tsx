@@ -9,7 +9,7 @@ jest.mock('@pagopa/mui-italia/components/ButtonNaked', () => ({
   ),
 }));
 
-jest.mock('@pagopa/mui-italia', () => ({
+jest.mock('@pagopa/mui-italia/components/AccountDropdown', () => ({
   AccountDropdown: ({ user }: any) => <div data-testid="account-dropdown">{user?.email}</div>,
 }));
 

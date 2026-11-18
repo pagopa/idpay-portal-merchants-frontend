@@ -1,6 +1,6 @@
 import { Box, Breadcrumbs, Tooltip, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { ButtonNaked } from '@pagopa/mui-italia';
+import { ButtonNaked } from '@pagopa/mui-italia/components/ButtonNaked';
 import { useHistory } from 'react-router-dom';
 
 interface Props {

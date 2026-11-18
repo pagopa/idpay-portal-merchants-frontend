@@ -1,9 +1,10 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render as renderWithoutTheme, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { Formik, useFormik } from 'formik';
-import { TextField } from '@mui/material';
+import { useFormik } from 'formik';
+import { TextField, ThemeProvider } from '@mui/material';
+import { theme } from '@pagopa/mui-italia/theme';
 import FiltersForm from '../FiltersForm';
 import { useAppSelector } from '../../../redux/hooks';
 
@@ -30,6 +31,11 @@ jest.mock('../../../redux/slices/initiativesSlice', () => ({
 jest.mock('../../../redux/hooks', () => ({
   useAppSelector: jest.fn(),
 }));
+
+const render = (ui: React.ReactElement) =>
+  renderWithoutTheme(ui, {
+    wrapper: ({ children }) => <ThemeProvider theme={theme}>{children}</ThemeProvider>,
+  });
 
 const TestFormWrapper = ({
   onApply,

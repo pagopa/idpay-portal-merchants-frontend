@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import { theme } from '@pagopa/mui-italia/theme';
-import { ButtonNaked } from '@pagopa/mui-italia';
+import { ButtonNaked } from '@pagopa/mui-italia/components/ButtonNaked';
 import { ReactNode } from 'react';
 
 interface Props {

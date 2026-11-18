@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, CircularProgress, DialogContent, Typography } from '@mui/material';
+import { CircularProgress, DialogContent, Typography } from '@mui/material';
+import { MIButton } from '@pagopa/mui-italia/components/MIButton';
 import DialogComponent from '../Dialog/DialogComponent';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { InitiativeForOnboarding } from '../../hooks/useInitiativeOnboarding';
@@ -59,15 +60,15 @@ const InitiativeOnboardingModal: React.FC<Props> = ({
       actionsSx={{ px: 3.5, pb: 2.5, pt: 1 }}
       actions={
         <>
-          <Button
+          <MIButton
             variant="outlined"
             onClick={onClose}
             disabled={isLoading}
             data-testid="onboarding-cancel-btn"
           >
             {t('actions.cancel')}
-          </Button>
-          <Button
+          </MIButton>
+          <MIButton
             variant="contained"
             onClick={onConfirm}
             disabled={isLoading}
@@ -75,7 +76,7 @@ const InitiativeOnboardingModal: React.FC<Props> = ({
             data-testid="onboarding-confirm-btn"
           >
             {t('actions.confirm')}
-          </Button>
+          </MIButton>
         </>
       }
     >

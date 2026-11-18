@@ -13,10 +13,10 @@ import {
   Alert as MuiAlert,
   TextField,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import { TitleBox } from '@pagopa/selfcare-common-frontend/lib';
 import { useHistory, useParams } from 'react-router-dom';
-import { ButtonNaked } from '@pagopa/mui-italia';
+import { ButtonNaked } from '@pagopa/mui-italia/components/ButtonNaked';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';

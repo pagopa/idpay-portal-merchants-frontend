@@ -85,7 +85,7 @@ jest.mock('../../../components/Header/CustomHeaderAccount', () => ({
   ),
 }));
 
-jest.mock('@pagopa/mui-italia', () => ({
+jest.mock('@pagopa/mui-italia/components/HeaderProduct', () => ({
   HeaderProduct: ({
     partyId,
     productId,

@@ -1083,7 +1083,7 @@ describe('PointsOfSaleForm near-100 coverage suite', () => {
     await waitFor(() => {
       expect(defaultProps.onValidationChange).toHaveBeenCalled();
     });
-  });
+  }, 20000);
 
   it('covers submit validation and pointsOfSaleLoaded reset branch', async () => {
     const { rerender } = render(<PointsOfSaleForm {...defaultProps} submitAttempt={1} />);

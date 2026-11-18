@@ -1,4 +1,4 @@
-import { HeaderProduct, ProductEntity, RootLinkType } from '@pagopa/mui-italia';
+import { HeaderProduct, ProductEntity } from '@pagopa/mui-italia/components/HeaderProduct';
 import { User } from '@pagopa/selfcare-common-frontend/lib/model/User';
 import { trackEvent } from '@pagopa/selfcare-common-frontend/lib/services/analyticsService';
 import { CONFIG } from '@pagopa/selfcare-common-frontend/lib/config/env';
@@ -13,7 +13,7 @@ import { browserConsole } from '../../utils/consoleLogger';
 import { cleanupOnLogout } from '../../utils/logoutCleanup';
 import useScopedTranslation from '../../hooks/useScopedTranslation';
 import { useUserPermissions } from '../../hooks/useUserPermissions';
-import { CustomHeaderAccount } from './CustomHeaderAccount';
+import { CustomHeaderAccount, RootLinkType } from './CustomHeaderAccount';
 
 type Props = WithPartiesProps & {
   withSecondHeader: boolean;
