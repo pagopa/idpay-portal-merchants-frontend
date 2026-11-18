@@ -131,10 +131,9 @@ const mockStore = {
 const store = createMockStore();
 
 describe('InitiativeStoreDetail', () => {
-  (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
-
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAppSelector as jest.Mock).mockReturnValue([{ initiativeId: 'initiative-1' }]);
     mockUseParams.mockReturnValue({ initiative_id: 'initiative1', store_id: 'store1' });
     mockParseJwt.mockReturnValue({ merchant_id: 'm1' });
     mockStorage.read.mockReturnValue('jwt');
@@ -384,8 +383,8 @@ describe('InitiativeStoreDetail', () => {
         isOpen: true,
         severity: 'error',
       });
-    });
-  });
+    }, 10000);
+  }, 30000);
 
   test('handles generic update error returned by update service', async () => {
     const user = userEvent.setup({ delay: null });

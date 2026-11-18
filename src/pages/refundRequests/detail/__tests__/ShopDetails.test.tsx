@@ -197,7 +197,7 @@ describe('ShopDetails', () => {
         iban: 'IT60X0542811101000000123456',
         ibanHolder: 'Mario Rossi',
       });
-      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
+      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED', numberOfTransactions: 1 });
       getMerchantPointOfSalesWithTransactions.mockResolvedValue([
         { franchiseName: 'Shop 1', pointOfSaleId: 'shop-1' },
       ]);
@@ -302,7 +302,7 @@ describe('ShopDetails', () => {
   });
 
   it('should show approving alert', async () => {
-    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVING' });
+    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVING', numberOfTransactions: 1 });
 
     renderComponent();
 
@@ -328,7 +328,7 @@ describe('ShopDetails', () => {
   it.each(['PENDING_REFUND', 'REFUNDED', 'NOT_REFUNDED'])(
     'should enable download button when status is %s',
     async (status: string) => {
-      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status });
+      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status, numberOfTransactions: 1  });
 
       renderComponent();
 
@@ -336,9 +336,18 @@ describe('ShopDetails', () => {
       expect(btn).toHaveProperty('disabled', false);
     }
   );
+  it('should disable download button when numberOfTransactions < 1', async () => {
+      getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
+
+      renderComponent();
+
+      const btn = await screen.findByTestId('download-csv-button-test');
+      expect(btn).toHaveProperty('disabled', true);
+    }
+  );
 
   it('should call handleDownloadCsv', async () => {
-    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
+    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED', numberOfTransactions: 1 });
 
     downloadBatchCsv.mockResolvedValue({
       approvedBatchUrl: 'http://csv',
@@ -355,7 +364,7 @@ describe('ShopDetails', () => {
   it('should handle handleDownloadCsv error', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const mockError = new Error('fail');
-    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED' });
+    getRewardBatchById.mockResolvedValue({ id: 'batch-1', name: 'Batch 1', status: 'APPROVED', numberOfTransactions: 1 });
 
     downloadBatchCsv.mockRejectedValue(mockError);
 

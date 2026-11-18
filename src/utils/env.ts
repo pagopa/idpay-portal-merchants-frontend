@@ -4,6 +4,13 @@ const PUBLIC_URL_INNER: string | undefined =
 export const ENV = {
   ENV: env.get('REACT_APP_ENV').required().asString(),
   PUBLIC_URL: PUBLIC_URL_INNER,
+  INITIATIVE_IDS: {
+    BONUS_ELETTRODOMESTICI: env
+      .get('REACT_APP_INITIATIVE_ID_BONUS_ELETTRODOMESTICI')
+      .default('')
+      .asString(),
+    BONUS_DECODER: env.get('REACT_APP_INITIATIVE_ID_BONUS_DECODER').default('').asString(),
+  },
   CONFIG: {
     HEADER: {
       OPERATION_MANUAL_LINK: env

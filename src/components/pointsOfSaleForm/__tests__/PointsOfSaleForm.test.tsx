@@ -208,6 +208,25 @@ describe('PointsOfSaleForm full coverage', () => {
     expect(defaultProps.onValidationChange).toHaveBeenCalled();
   });
 
+  it.each(['Fisico', 'Online'])('shows the untouched sign name error on submit for %s stores', (type) => {
+    const { rerender } = render(<PointsOfSaleForm {...defaultProps} />);
+    fireEvent.click(screen.getByLabelText(type));
+
+    const errorMessage = 'pages.pointOfSales.requiredErrors.franchiseName';
+    expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+
+    rerender(<PointsOfSaleForm {...defaultProps} submitAttempt={1} />);
+
+    expect(screen.getByText(errorMessage)).toBeVisible();
+    expect(screen.getByLabelText('Nome insegna')).toHaveAttribute('aria-invalid', 'true');
+
+    fireEvent.change(screen.getByLabelText('Nome insegna'), { target: { value: 'Shop' } });
+    expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Nome insegna'), { target: { value: '' } });
+    expect(screen.getByText(errorMessage)).toBeVisible();
+  });
+
   it('should add and remove sales points correctly', async () => {
     render(<PointsOfSaleForm {...defaultProps} />);
     const addButton = screen.getByText('Aggiungi un altro punto vendita');

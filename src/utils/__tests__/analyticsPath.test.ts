@@ -1,17 +1,33 @@
 import { sanitizeAnalyticsPath } from '../analyticsPath';
 
 describe('sanitizeAnalyticsPath', () => {
-  it('removes dynamic detail route parameters and initiative ids from known analytics routes', () => {
+  it('masks dynamic detail route parameters and initiative ids on known analytics routes', () => {
     expect(
       sanitizeAnalyticsPath(
         '/portale-esercenti/69e0fa95e21efa516c7b8dec/richieste-di-rimborso/7b198efa-3071-48b7-acb0-d166afb1b522'
       )
-    ).toBe('/portale-esercenti/richieste-di-rimborso');
+    ).toBe('/portale-esercenti/:initiativeId/richieste-di-rimborso/:batchId');
   });
 
-  it('removes the initiative id from initiative-scoped routes', () => {
+  it('masks initiative and point-of-sale ids while preserving the route structure', () => {
+    expect(sanitizeAnalyticsPath('/portale-esercenti/123456/punti-vendita/78910')).toBe(
+      '/portale-esercenti/:initiativeId/punti-vendita/:pointOfSaleId'
+    );
+  });
+
+  it('masks initiative ids from initiative-scoped routes', () => {
     expect(sanitizeAnalyticsPath('/portale-esercenti/69e0fa95e21efa516c7b8dec/panoramica')).toBe(
-      '/portale-esercenti/panoramica'
+      '/portale-esercenti/:initiativeId/panoramica'
+    );
+  });
+
+  it('masks all dynamic parameters from transaction routes', () => {
+    expect(
+      sanitizeAnalyticsPath(
+        '/portale-esercenti/initiative-1/store-2/modifica-documento/transaction-3/document-4'
+      )
+    ).toBe(
+      '/portale-esercenti/:initiativeId/:pointOfSaleId/modifica-documento/:trxId/:fileDocNumber'
     );
   });
 
@@ -58,7 +74,9 @@ describe('sanitizeAnalyticsPath', () => {
       jest.resetModules();
 
       jest.isolateModules(() => {
-        const { sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath } = require('../analyticsPath');
+        const {
+          sanitizeAnalyticsPath: isolatedSanitizeAnalyticsPath,
+        } = require('../analyticsPath');
 
         expect(isolatedSanitizeAnalyticsPath(inputPath)).toBe(expectedPath);
       });

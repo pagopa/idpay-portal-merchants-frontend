@@ -1,14 +1,15 @@
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useOneTrustNotice } from '../useOneTrustNotice';
-
 const mockOneTrust = {
   NoticeApi: {
     Initialized: Promise.resolve(),
-    LoadNotices: jest.fn(),
+    LoadNotices: jest.fn().mockReturnValue(Promise.resolve()),
   },
 };
 
+(window as any).OneTrust = mockOneTrust;
 (global as any).OneTrust = mockOneTrust;
+
+import { renderHook, act } from '@testing-library/react-hooks';
+import { useOneTrustNotice } from '../useOneTrustNotice';
 
 describe('useOneTrustNotice', () => {
   beforeAll(() => {
@@ -28,9 +29,9 @@ describe('useOneTrustNotice', () => {
     const setContentLoaded = jest.fn();
     const testUrl = 'https://example.com/notice';
 
-    renderHook(() => useOneTrustNotice(testUrl, false, setContentLoaded, ''));
-
     await act(async () => {
+      renderHook(() => useOneTrustNotice(testUrl, false, setContentLoaded, ''));
+      await Promise.resolve();
       await Promise.resolve();
     });
 
@@ -40,7 +41,7 @@ describe('useOneTrustNotice', () => {
     expect(setContentLoaded).toHaveBeenCalledTimes(1);
   });
 
-  test('should modify DOM elements after a delay when content is loaded', () => {
+  test('should modify DOM elements after a delay when content is loaded', async () => {
     document.body.innerHTML = `
       <div class="otnotice-content">
         <a href="#internal-section">Link Interno</a>
@@ -51,25 +52,12 @@ describe('useOneTrustNotice', () => {
 
     const setContentLoaded = jest.fn();
     const urlPrefix = '/prefix';
+    const testUrl = 'https://example.com/notice';
 
-    const { rerender } = renderHook(
-      (props) =>
-        useOneTrustNotice(props.url, props.contentLoaded, props.setContentLoaded, props.urlPrefix),
-      {
-        initialProps: {
-          url: 'test-url',
-          contentLoaded: false,
-          setContentLoaded,
-          urlPrefix,
-        },
-      }
-    );
-
-    rerender({
-      url: 'test-url',
-      contentLoaded: true,
-      setContentLoaded,
-      urlPrefix,
+    await act(async () => {
+      renderHook(() => useOneTrustNotice(testUrl, true, setContentLoaded, urlPrefix));
+      await Promise.resolve();
+      await Promise.resolve();
     });
 
     act(() => {
@@ -83,7 +71,7 @@ describe('useOneTrustNotice', () => {
     const externalLink = document.querySelector('a[href="https://www.google.com"]');
     expect(externalLink).not.toBeNull();
 
-    const sidebar = document.querySelector('.otnotice-menu');
+    const sidebar = document.getElementsByClassName('otnotice-menu')[0];
     expect(sidebar?.getAttribute('style')).toBe('max-height: 65%');
   });
 });

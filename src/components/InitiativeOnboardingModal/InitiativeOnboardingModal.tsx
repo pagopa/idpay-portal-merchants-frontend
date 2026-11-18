@@ -6,20 +6,22 @@ import { InitiativeForOnboarding } from '../../hooks/useInitiativeOnboarding';
 import bonusDecoder2026Copy from '../../locale/it/bonusDecoder2026/copy.json';
 import bonusElettrodomestici2025Copy from '../../locale/it/bonusElettrodomestici2025/copy.json';
 import bonusDefaultCopy from '../../locale/it/default/copy.json';
+import { getInitiativeResourceFolder } from '../../locale/initiativeResources';
 
 const ONBOARDING_BODY_MESSAGES: Record<string, string> = {
-  'bonus decoder': bonusDecoder2026Copy.pages.initiativesList.onboardingModal.description,
-  'bonus elettrodomestici': bonusElettrodomestici2025Copy.pages.initiativeOverview.info.description,
+  bonusDecoder2026: bonusDecoder2026Copy.pages.initiativesList.onboardingModal.description,
+  bonusElettrodomestici2025:
+    bonusElettrodomestici2025Copy.pages.initiativeOverview.info.description,
 };
 
 const getOnboardingBodyMessage = (initiative: InitiativeForOnboarding | null) => {
-  const normalizedInitiativeName = initiative?.initiativeName.trim().toLocaleLowerCase();
-
-  if (!normalizedInitiativeName) {
+  if (!initiative) {
     return '';
   }
 
-  return ONBOARDING_BODY_MESSAGES[normalizedInitiativeName] ??
+  const resourceFolder = getInitiativeResourceFolder(initiative.initiativeId);
+
+  return (resourceFolder && ONBOARDING_BODY_MESSAGES[resourceFolder]) ??
     initiative?.description ?? bonusDefaultCopy.pages.initiativesList.onboardingModal.description;
 };
 

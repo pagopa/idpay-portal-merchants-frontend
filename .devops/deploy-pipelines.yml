@@ -45,6 +45,8 @@ variables:
     react_app_url_api_merchants_portal: '$(UAT_REACT_APP_URL_API_MERCHANTS_PORTAL)'
 
     react_app_url_storage: '$(UAT_REACT_APP_URL_STORAGE)'
+    react_app_initiative_id_bonus_elettrodomestici: '$(BONUS_ELETTRODOMESTICI_2025_ID)'
+    react_app_initiative_id_bonus_decoder: '$(BONUS_DECODER_2026_ID)'
 
     react_app_one_trust_base_url: '$(REACT_APP_ONE_TRUST_BASE_URL_GLOBAL)'
     react_app_analytics_enabled: '$(UAT_ANALYTICS_ENABLED)'
@@ -90,6 +92,8 @@ variables:
     react_app_url_api_merchants_portal: '$(PROD_REACT_APP_URL_API_MERCHANTS_PORTAL)'
 
     react_app_url_storage: '$(PROD_REACT_APP_URL_STORAGE)'
+    react_app_initiative_id_bonus_elettrodomestici: '$(BONUS_ELETTRODOMESTICI_2025_ID)'
+    react_app_initiative_id_bonus_decoder: '$(BONUS_DECODER_2026_ID)'
 
     react_app_one_trust_base_url: '$(REACT_APP_ONE_TRUST_BASE_URL_GLOBAL)'
     react_app_analytics_enabled: '$(PROD_ANALYTICS_ENABLED)'
@@ -136,6 +140,8 @@ variables:
     react_app_url_api_merchants_portal: '$(DEV_REACT_APP_URL_API_MERCHANTS_PORTAL)'
 
     react_app_url_storage: '$(DEV_REACT_APP_URL_STORAGE)'
+    react_app_initiative_id_bonus_elettrodomestici: '$(BONUS_ELETTRODOMESTICI_2025_ID)'
+    react_app_initiative_id_bonus_decoder: '$(BONUS_DECODER_2026_ID)'
 
     react_app_one_trust_base_url: '$(REACT_APP_ONE_TRUST_BASE_URL_GLOBAL)'
     react_app_analytics_enabled: '$(DEV_ANALYTICS_ENABLED)'
@@ -251,6 +257,8 @@ stages:
               REACT_APP_URL_API_MERCHANTS_PORTAL: '$(react_app_url_api_merchants_portal)'
               REACT_APP_URL_API_ROLE_PERMISSION: '$(react_app_url_api_merchants)/authorization'
               REACT_APP_URL_API_EMAIL_NOTIFICATION: '$(react_app_url_api_merchants)/email-notification'
+              REACT_APP_INITIATIVE_ID_BONUS_ELETTRODOMESTICI: '$(react_app_initiative_id_bonus_elettrodomestici)'
+              REACT_APP_INITIATIVE_ID_BONUS_DECODER: '$(react_app_initiative_id_bonus_decoder)'
 
               REACT_APP_PAGOPA_HELP_EMAIL: '$(react_app_pagopa_help_email)'
               REACT_APP_PAGOPA_HELP_LINK: $(react_app_pagopa_help_link)
