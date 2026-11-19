@@ -2,7 +2,17 @@
     "routes": [
         "initiativeOverview",
         "initiativeStores",
-        "initiativeStoresUpload"
+        "initiativeStoresUpload",
+        "reportedUsers",
+        "insertReportedUser",
+        "reportExport",
+        "initiativeStoreDetail",
+        "newDiscount",
+        "acceptNewDiscount",
+        "refundRequests",
+        "refundRequestsStore",
+        "modifyDocument",
+        "reverse"
     ],
     "regex": {
         "iban": "^IT\\d{2}[A-Z]\\d{5}\\d{5}[A-Z0-9]{12}$",
