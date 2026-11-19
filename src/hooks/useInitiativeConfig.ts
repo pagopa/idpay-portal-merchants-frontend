@@ -13,7 +13,7 @@ export function useInitiativeConfig<T>() {
 
     try {
       const mod = await import(`../locale/it/${initiativeFolder}/config.json`);
-      return mod.default?.[key] as T;
+      return (mod.default?.[key] ?? config[key]) as T;
     } catch {
       return config?.[key] as T;
     }
