@@ -76,10 +76,12 @@ export const useScopedTranslation = (
           return initiativeValue;
         }
 
-        // Ensure keys like "pages.*" always resolve against common namespace
-        return rawT(key, { ns: 'common', ...options });
+        const commonValue = rawT(key, { ns: 'common', ...options });
+        return commonValue === key
+          ? rawT(key, { ns: `default/${fileName}`, ...options })
+          : commonValue;
       }) as TFunction,
-    [rawT, initiativeNamespace]
+    [rawT, initiativeNamespace, fileName]
   );
 
   const [isLoading, setIsLoading] = useState(false);
