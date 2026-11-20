@@ -61,6 +61,22 @@ describe('useScopedTranslation', () => {
     expect(result.current.initiativeNamespace).toBe('bonusElettrodomestici2025');
   });
 
+  it('resolves overview info from default copy for an unmapped initiative', () => {
+    const copy = require('../../locale/it/default/copy.json');
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: 'unmapped-test-initiative' });
+    mockUseTranslation.mockReturnValue({
+      t: (key: string, options?: { ns?: string }) => options?.ns === 'default/copy'
+        ? key.split('.').reduce((value: any, part: string) => value?.[part], copy) ?? key
+        : key,
+    });
+
+    const { result } = renderHook(() => useScopedTranslation({ enableNamespaceLoading: false }));
+
+    expect(result.current.t('pages.initiativeOverview.info.title')).toBe("Cos'è Bonus Default?");
+    expect(result.current.t('pages.initiativeOverview.info.button')).toBe('Scopri di più');
+    expect(result.current.t('pages.initiativeOverview.info.description')).toBe(copy.pages.initiativeOverview.info.description);
+  });
+
   it('should fallback to default copy if initiative key not found', () => {
     const mockT = jest
       .fn()
