@@ -1,6 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import DetailDrawer from '../DetailDrawer';
+import { getDetailValueText } from '../detailDrawerShared';
+import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../../utils/constants';
 
 const mockToggleDrawer = jest.fn();
 
@@ -78,5 +80,25 @@ describe('DetailDrawer', () => {
     );
 
     expect(screen.queryByTestId('buttons-box')).not.toBeInTheDocument();
+  });
+});
+
+describe('getDetailValueText', () => {
+  test('should resolve additionalProperties keys such as productGtin', () => {
+    const itemValues = { additionalProperties: { productGtin: '12345678901234' } };
+
+    expect(getDetailValueText(itemValues, 'additionalProperties.productGtin', TYPE_TEXT.Text)).toBe(
+      '12345678901234'
+    );
+  });
+
+  test('should show the placeholder when an additionalProperties key is missing', () => {
+    expect(
+      getDetailValueText(
+        { additionalProperties: {} },
+        'additionalProperties.productGtin',
+        TYPE_TEXT.Text
+      )
+    ).toBe(MISSING_DATA_PLACEHOLDER);
   });
 });

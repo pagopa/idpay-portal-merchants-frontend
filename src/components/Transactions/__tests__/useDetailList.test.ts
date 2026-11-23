@@ -19,6 +19,16 @@ describe('getDetailFieldList', () => {
     });
   });
 
+  test('should show the GTIN/EAN code right after the product', () => {
+    const list = getDetailFieldList();
+
+    expect(list[2]).toEqual({
+      label: 'Codice GTIN/EAN',
+      id: 'additionalProperties.productGtin',
+      type: TYPE_TEXT.Text,
+    });
+  });
+
   test('should use custom product label when provided', () => {
     const list = getDetailFieldList('Elettrodomestico');
 
