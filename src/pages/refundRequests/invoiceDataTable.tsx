@@ -18,7 +18,7 @@ import {
   getMerchantTransactionsProcessed,
   GetMerchantTransactionsProcessedParams,
 } from '../../services/merchantService';
-import { getMerchantsApi } from '../../api/MerchantsApiClient';
+import { openInvoiceFile } from '../../services/invoiceService';
 import { MISSING_DATA_PLACEHOLDER, TYPE_TEXT } from '../../utils/constants';
 import { safeFormatDate } from '../../utils/formatUtils';
 import { useAlert } from '../../hooks/useAlert';
@@ -101,45 +101,7 @@ const InvoiceDataTable = ({
   const downloadFile = async (selectedTransaction: any) => {
     try {
       setIsDownloading(true);
-
-      const response = await getMerchantsApi().downloadInvoiceFile(
-        initiative_id,
-        selectedTransaction?.pointOfSaleId,
-        selectedTransaction?.trxId
-      );
-      const invoiceUrl = response.invoiceUrl;
-
-      const res = await fetch(invoiceUrl, {
-        method: 'GET',
-      });
-
-      if (!res.ok) {
-        throw new Error('Errore nel recupero del file');
-      }
-
-      const ext = selectedTransaction?.invoiceData?.filename?.split('.').pop()?.toLowerCase() || '';
-
-      let mimeFromExt = '';
-      if (ext === 'pdf') {
-        mimeFromExt = 'application/pdf';
-      } else if (ext === 'xml') {
-        mimeFromExt = 'application/xml';
-      } else {
-        throw new Error('Errore nel recupero del file');
-      }
-
-      const blob = await res.blob();
-      const file = new Blob([blob], { type: mimeFromExt });
-
-      const url = URL.createObjectURL(file);
-
-      const pdfWindow = window.open(url, '_blank');
-      if (pdfWindow) {
-        setTimeout(() => {
-          // eslint-disable-next-line functional/immutable-data
-          pdfWindow.document.title = selectedTransaction?.invoiceData?.filename;
-        }, 100);
-      }
+      await openInvoiceFile(initiative_id, selectedTransaction);
     } catch (error) {
       setAlert({
         title: 'Errore download file',

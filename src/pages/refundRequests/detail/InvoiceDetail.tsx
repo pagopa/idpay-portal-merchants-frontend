@@ -5,7 +5,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import useScopedTranslation from '../../../hooks/useScopedTranslation';
 import routes from '../../../routes';
 import { postponeTransaction } from '../../../services/merchantService';
-import { getMerchantsApi } from '../../../api/MerchantsApiClient';
+import { openInvoiceFile } from '../../../services/invoiceService';
 import { MISSING_DATA_PLACEHOLDER } from '../../../utils/constants';
 import { getEndOfNextMonth } from '../../../utils/formatUtils';
 import StatusChipInvoice from '../../../components/Chip/StatusChipInvoice';
@@ -186,45 +186,7 @@ export default function InvoiceDetail({
   const handleDownloadFile = async (selectedTransaction: any) => {
     setLoading(true);
     try {
-      const response = await getMerchantsApi().downloadInvoiceFile(
-        initiative_id,
-        selectedTransaction?.pointOfSaleId,
-        selectedTransaction?.trxId
-      );
-      const invoiceUrl = response.invoiceUrl;
-
-      const res = await fetch(invoiceUrl, {
-        method: 'GET',
-      });
-
-      if (!res.ok) {
-        throw new Error('Errore nel recupero del file');
-      }
-
-      const ext = selectedTransaction?.invoiceData?.filename?.split('.').pop()?.toLowerCase() || '';
-
-      let mimeFromExt = '';
-      if (ext === 'pdf') {
-        mimeFromExt = 'application/pdf';
-      } else if (ext === 'xml') {
-        mimeFromExt = 'application/xml';
-      } else {
-        throw new Error('Errore nel recupero del file');
-      }
-
-      const blob = await res.blob();
-      const file = new Blob([blob], { type: mimeFromExt });
-
-      const url = URL.createObjectURL(file);
-
-      const pdfWindow = window.open(url, '_blank');
-      if (pdfWindow) {
-        setTimeout(() => {
-          // eslint-disable-next-line functional/immutable-data
-          pdfWindow.document.title = selectedTransaction?.invoiceData?.filename;
-        }, 100);
-      }
-
+      await openInvoiceFile(initiative_id, selectedTransaction);
       setLoading(false);
     } catch (error) {
       setAlert({
