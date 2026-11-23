@@ -395,6 +395,12 @@ const InvoiceDataTable = ({
               type: TYPE_TEXT.Text,
             },
             {
+              label: 'Codice GTIN/EAN',
+              id: 'additionalProperties.productGtin',
+              type: TYPE_TEXT.Text,
+              format: (val: any) => val || MISSING_DATA_PLACEHOLDER,
+            },
+            {
               label: 'Codice Fiscale Beneficiario',
               id: 'fiscalCode',
               type: TYPE_TEXT.Text,

@@ -110,14 +110,19 @@ jest.mock('../../../components/Chip/StatusChipInvoice', () => (props: any) => (
   <div data-testid="status-chip">{props.status}</div>
 ));
 
-jest.mock('../detail/InvoiceDetail', () => (props: any) => (
-  <div data-testid="detail-drawer" data-open={props.isOpen}>
-    {props.open && props.children}
-    <button type="button" data-testid="close-drawer" onClick={() => props.setIsOpen(false)}>
-      close
-    </button>
-  </div>
-));
+const mockInvoiceDetailProps: { current?: any } = {};
+
+jest.mock('../detail/InvoiceDetail', () => (props: any) => {
+  mockInvoiceDetailProps.current = props;
+  return (
+    <div data-testid="detail-drawer" data-open={props.isOpen}>
+      {props.open && props.children}
+      <button type="button" data-testid="close-drawer" onClick={() => props.setIsOpen(false)}>
+        close
+      </button>
+    </div>
+  );
+});
 
 jest.mock('../../../utils/constants', () => ({
   TYPE_TEXT: {
@@ -531,6 +536,22 @@ describe('InvoiceDataTable', () => {
     );
     await screen.findByTestId('data-table');
     expect(screen.getByTestId('status-chip')).toBeInTheDocument();
+  });
+
+  it('shows the GTIN/EAN code right after the product in the detail drawer', async () => {
+    renderComponent();
+    await screen.findByTestId('data-table');
+    fireEvent.click(screen.getByTestId('trx-1'));
+    await screen.findByTestId('detail-drawer');
+    const listItem = mockInvoiceDetailProps.current.listItem;
+    const productIndex = listItem.findIndex(
+      (item: any) => item.id === 'additionalProperties.productName'
+    );
+    expect(listItem[productIndex + 1]).toMatchObject({
+      label: 'Codice GTIN/EAN',
+      id: 'additionalProperties.productGtin',
+    });
+    expect(listItem[productIndex + 1].format('12345678901234')).toBe('12345678901234');
   });
 
   it('closes drawer when toggling with false', async () => {

@@ -26,8 +26,9 @@ export const getDetailValueText = (
   const index = Object.keys(itemValues).indexOf(driver);
   const val = Object.values(itemValues)[index] as string;
 
-  if (driver === 'additionalProperties.productName') {
-    return itemValues?.additionalProperties?.productName ?? MISSING_DATA_PLACEHOLDER;
+  if (driver.startsWith('additionalProperties.')) {
+    const key = driver.slice('additionalProperties.'.length);
+    return itemValues?.additionalProperties?.[key] ?? MISSING_DATA_PLACEHOLDER;
   }
 
   if (type === TYPE_TEXT.Text) {
