@@ -76,9 +76,9 @@ const InvoiceDataTable = ({
   ]);
   const { initiative_id, batch_id } = useParams<RouteParams>();
   const { alert, setAlert } = useAlert();
-  const { t, initiativeName } = useScopedTranslation();
+  const { t, initiativeNamespace } = useScopedTranslation();
   const [isDownloading, setIsDownloading] = useState(false);
-  const productLabel = getInitiativeProductLabel(initiativeName);
+  const productLabel = getInitiativeProductLabel(initiativeNamespace);
 
   const handleListButtonClick = (row: any) => {
     setRowDetail(row);

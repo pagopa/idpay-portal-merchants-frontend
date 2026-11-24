@@ -6,12 +6,8 @@ jest.mock('react-i18next', () => ({
   useTranslation: jest.fn(),
 }));
 
-jest.mock('../../redux/hooks', () => ({
-  useAppSelector: jest.fn(),
-}));
-
-jest.mock('../../redux/slices/initiativesSlice', () => ({
-  intiativesListSelector: jest.fn(),
+jest.mock('../../locale/initiativeResources', () => ({
+  getInitiativeResourceFolder: jest.fn(),
 }));
 
 jest.mock('../useCurrentInitiativeId', () => ({
@@ -32,7 +28,8 @@ jest.mock('../../locale/multiInitiativeI18n', () => ({
 }));
 
 const mockUseTranslation = require('react-i18next').useTranslation;
-const mockUseAppSelector = require('../../redux/hooks').useAppSelector;
+const mockGetInitiativeResourceFolder = require('../../locale/initiativeResources')
+  .getInitiativeResourceFolder;
 const mockUseCurrentInitiativeId = require('../useCurrentInitiativeId').useCurrentInitiativeId;
 
 describe('useScopedTranslation', () => {
@@ -43,36 +40,41 @@ describe('useScopedTranslation', () => {
       t: jest.fn((key: string) => key),
     });
 
-    mockUseAppSelector.mockReturnValue([]);
+    mockGetInitiativeResourceFolder.mockImplementation((initiativeId?: string) =>
+      initiativeId === 'configured-initiative-id' ? 'bonusElettrodomestici2025' : undefined
+    );
     mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: undefined });
   });
 
   it('should return common namespace translation when no initiative', () => {
     const { result } = renderHook(() => useScopedTranslation());
 
-    expect(result.current.initiativeName).toBeUndefined();
+    expect(result.current.initiativeNamespace).toBeUndefined();
     expect(result.current.t('test.key')).toBe('test.key');
   });
 
-  it('should resolve initiativeName from prop', () => {
-    const { result } = renderHook(() => useScopedTranslation({ initiativeName: 'myInitiative' }));
-
-    expect(result.current.initiativeName).toBe('myInitiative');
-  });
-
-  it('should resolve initiativeName from store initiatives', () => {
-    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: '1' });
-    mockUseAppSelector.mockReturnValue([
-      {
-        initiativeId: '1',
-        initiativeName: 'My Initiative',
-        startDate: '2024-01-01',
-      },
-    ]);
+  it('should resolve initiative resources from the route initiative ID', () => {
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: 'configured-initiative-id' });
 
     const { result } = renderHook(() => useScopedTranslation());
 
-    expect(result.current.initiativeName).toBe('myInitiative2024');
+    expect(result.current.initiativeNamespace).toBe('bonusElettrodomestici2025');
+  });
+
+  it('resolves overview info from default copy for an unmapped initiative', () => {
+    const copy = require('../../locale/it/default/copy.json');
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: 'unmapped-test-initiative' });
+    mockUseTranslation.mockReturnValue({
+      t: (key: string, options?: { ns?: string }) => options?.ns === 'default/copy'
+        ? key.split('.').reduce((value: any, part: string) => value?.[part], copy) ?? key
+        : key,
+    });
+
+    const { result } = renderHook(() => useScopedTranslation({ enableNamespaceLoading: false }));
+
+    expect(result.current.t('pages.initiativeOverview.info.title')).toBe("Cos'è Bonus Default?");
+    expect(result.current.t('pages.initiativeOverview.info.button')).toBe('Scopri di più');
+    expect(result.current.t('pages.initiativeOverview.info.description')).toBe(copy.pages.initiativeOverview.info.description);
   });
 
   it('should fallback to default copy if initiative key not found', () => {
@@ -83,7 +85,8 @@ describe('useScopedTranslation', () => {
 
     mockUseTranslation.mockReturnValue({ t: mockT });
 
-    const { result } = renderHook(() => useScopedTranslation({ initiativeName: 'myInitiative' }));
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: 'configured-initiative-id' });
+    const { result } = renderHook(() => useScopedTranslation());
 
     const value = result.current.t('missing.key');
 
@@ -114,9 +117,8 @@ describe('useScopedTranslation', () => {
 
     mockUseTranslation.mockReturnValue({ t: mockT });
 
-    const { result } = renderHook(() =>
-      useScopedTranslation({ initiativeName: 'myInitiative', fileName: 'config' })
-    );
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: 'configured-initiative-id' });
+    const { result } = renderHook(() => useScopedTranslation({ fileName: 'config' }));
 
     const value = result.current.t('missing.key');
 
@@ -144,7 +146,8 @@ describe('useScopedTranslation', () => {
     const locale = require('../../locale');
     locale.getResourceBundle.mockReturnValue({ key: 'value' });
 
-    const { result } = renderHook(() => useScopedTranslation({ initiativeName: 'myInitiative' }));
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: 'configured-initiative-id' });
+    const { result } = renderHook(() => useScopedTranslation());
 
     await act(async () => {
       await Promise.resolve();
@@ -160,7 +163,8 @@ describe('useScopedTranslation', () => {
     const locale = require('../../locale');
     locale.getResourceBundle.mockReturnValue(undefined);
 
-    const { result } = renderHook(() => useScopedTranslation({ initiativeName: 'myInitiative' }));
+    mockUseCurrentInitiativeId.mockReturnValue({ initiativeId: 'configured-initiative-id' });
+    const { result } = renderHook(() => useScopedTranslation());
 
     await act(async () => {
       await Promise.resolve();

@@ -35,6 +35,12 @@ const analyticsRoutes = [
   `${ANALYTICS_BASE_ROUTE}`,
 ] as const;
 
+const analyticsParameterNames: Record<string, string> = {
+  initiative_id: 'initiativeId',
+  store_id: 'pointOfSaleId',
+  batch_id: 'batchId',
+};
+
 export const sanitizeAnalyticsPath = (pathname: string) => {
   const matchedRoute = analyticsRoutes.find((routePath) =>
     Boolean(
@@ -50,9 +56,17 @@ export const sanitizeAnalyticsPath = (pathname: string) => {
     return pathname;
   }
 
-  const sanitizedSegments = matchedRoute
+  const maskedSegments = matchedRoute
     .split('/')
-    .filter((segment) => segment && !segment.startsWith(':'));
+    .filter(Boolean)
+    .map((segment) => {
+      if (!segment.startsWith(':')) {
+        return segment;
+      }
 
-  return `/${sanitizedSegments.join('/')}`;
+      const parameterName = segment.substring(1);
+      return `:${analyticsParameterNames[parameterName] ?? parameterName}`;
+    });
+
+  return `/${maskedSegments.join('/')}`;
 };

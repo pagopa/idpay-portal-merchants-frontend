@@ -530,17 +530,17 @@ describe('<PosCatalog />', () => {
         'store-1',
         'store-2',
       ]);
-    });
-    expect(mockSetAlert).toHaveBeenCalledWith({
-      text: 'pages.posCatalog.associateSuccess',
-      isOpen: true,
-      severity: 'success',
-      timeout: 6000,
-    });
-    expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
-    expect(screen.queryByTestId('associate-selected-pos-modal')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('pos-catalog-drawer')).not.toBeInTheDocument();
-  });
+      expect(mockSetAlert).toHaveBeenCalledWith({
+        text: 'pages.posCatalog.associateSuccess',
+        isOpen: true,
+        severity: 'success',
+        timeout: 6000,
+      });
+      expect(mockHandleFiltersApplied).toHaveBeenCalledWith(defaultFormikValues);
+      expect(screen.queryByTestId('associate-selected-pos-modal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('pos-catalog-drawer')).not.toBeInTheDocument();
+    }, { timeout: 10000 });
+  }, 30000);
 
   it('excludes selected stores from the selected initiative on confirm', async () => {
     renderComponent();

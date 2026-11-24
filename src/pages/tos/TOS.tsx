@@ -9,6 +9,6 @@ const TOS = () => {
 
   useOneTrustNotice(ENV.ONE_TRUST.TOS_JSON_URL, contentLoaded, setContentLoaded, routes.TOS);
 
-  return <OneTrustContentWrapper idSelector={ENV.ONE_TRUST.TOS_ID} />;
+  return <OneTrustContentWrapper idSelector={ENV.ONE_TRUST.TOS_ID} isContentLoaded={contentLoaded} />;
 };
 export default TOS;

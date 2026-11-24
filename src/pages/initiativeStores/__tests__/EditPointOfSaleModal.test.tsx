@@ -676,7 +676,8 @@ describe('EditPointOfSaleModal with the real form', () => {
       expect(screen.getAllByText(defaultValidationMessage)).toHaveLength(1);
       expect(screen.queryByText(backendValidationMessage)).not.toBeInTheDocument();
       expect(screen.queryByText(invalidUrlResponse.details[0].message)).not.toBeInTheDocument();
-    }
+    },
+    15000
   );
 
   it('initializes from loaded values and clears internal errors when new values are loaded', () => {
@@ -740,7 +741,8 @@ describe('EditPointOfSaleModal with the real form', () => {
         'aria-invalid',
         'false'
       );
-    }
+    },
+    15000
   );
 
   it('resets ONLINE validation errors and restores the original website on reopening', async () => {

@@ -3,15 +3,12 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import i18n from '../locale';
 import { buildScopedNamespaces } from '../locale/namespaces';
-import { buildNamespaceKey } from '../utils/buildNamespaceKey';
-import { useAppSelector } from '../redux/hooks';
-import { intiativesListSelector } from '../redux/slices/initiativesSlice';
+import { getInitiativeResourceFolder } from '../locale/initiativeResources';
 import { useCurrentInitiativeId } from './useCurrentInitiativeId';
 
 const failedNamespaceLoads = new Set<string>();
 
 export type UseScopedTranslationOptions = {
-  initiativeName?: string;
   enableNamespaceLoading?: boolean;
   fileName?: 'copy' | 'config';
 };
@@ -19,71 +16,41 @@ export type UseScopedTranslationOptions = {
 export type UseScopedTranslationResult = {
   t: TFunction;
   isLoading: boolean;
-  initiativeName?: string;
+  initiativeNamespace?: string;
 };
 
 const resolveInitiativeNamespace = (
-  initiativeNameProp: string | undefined,
-  initiativeId: string,
-  initiatives: Array<any> | undefined
-): string | undefined => {
-  if (initiativeNameProp) {
-    return initiativeNameProp;
-  }
-
-  const currentInitiative = initiatives?.find((i) => i.initiativeId === initiativeId);
-
-  if (!currentInitiative) {
-    return undefined;
-  }
-
-  const { initiativeName, startDate } = currentInitiative;
-
-  if (!initiativeName || !startDate) {
-    return undefined;
-  }
-
-  return buildNamespaceKey(initiativeName, startDate);
-};
+  initiativeId?: string
+): string | undefined => getInitiativeResourceFolder(initiativeId);
 
 export const useScopedTranslation = (
   options: UseScopedTranslationOptions = {}
 ): UseScopedTranslationResult => {
-  const {
-    initiativeName: initiativeNameProp,
-    enableNamespaceLoading = true,
-    fileName = 'copy',
-  } = options;
+  const { enableNamespaceLoading = true, fileName = 'copy' } = options;
 
   const { initiativeId } = useCurrentInitiativeId();
-  const initiatives = useAppSelector(intiativesListSelector);
-
-  const initiativeName = resolveInitiativeNamespace(
-    initiativeNameProp,
-    initiativeId ?? '',
-    initiatives
-  );
+  const initiativeNamespace = resolveInitiativeNamespace(initiativeId);
 
   const namespaces = useMemo(
-    () => buildScopedNamespaces(initiativeName ?? undefined),
-    [initiativeName]
+    () => buildScopedNamespaces(initiativeNamespace),
+    [initiativeNamespace]
   );
 
   const namespacesToLoad = useMemo(() => {
-    const list = initiativeName
+    const list = initiativeNamespace
       ? [...namespaces.common, ...namespaces.initiative]
       : [...namespaces.common, ...namespaces.default];
 
     return Array.from(new Set(list));
-  }, [namespaces, initiativeName]);
+  }, [namespaces, initiativeNamespace]);
 
   const namespacesForHook = useMemo((): Array<string> => {
-    if (initiativeName) {
-      return ['common', `${initiativeName}/copy`, `${initiativeName}/config`];
+    if (initiativeNamespace) {
+      return ['common', `${initiativeNamespace}/copy`, `${initiativeNamespace}/config`];
     }
 
     return ['common', 'default/copy', 'default/config'];
-  }, [initiativeName]);
+  }, [initiativeNamespace]);
 
   const translationHook = (useTranslation as any)(namespacesForHook);
   const { t: rawT } = translationHook;
@@ -91,8 +58,8 @@ export const useScopedTranslation = (
   const t = useMemo(
     () =>
       ((key: any, options?: any) => {
-        if (options?.nameSpace || initiativeName) {
-          const initiativeNs = `${options?.nameSpace || initiativeName}/${fileName}`;
+        if (initiativeNamespace) {
+          const initiativeNs = `${initiativeNamespace}/${fileName}`;
 
           const initiativeValue = rawT(key, {
             ns: initiativeNs,
@@ -109,10 +76,12 @@ export const useScopedTranslation = (
           return initiativeValue;
         }
 
-        // Ensure keys like "pages.*" always resolve against common namespace
-        return rawT(key, { ns: 'common', ...options });
+        const commonValue = rawT(key, { ns: 'common', ...options });
+        return commonValue === key
+          ? rawT(key, { ns: `default/${fileName}`, ...options })
+          : commonValue;
       }) as TFunction,
-    [rawT, initiativeName]
+    [rawT, initiativeNamespace, fileName]
   );
 
   const [isLoading, setIsLoading] = useState(false);
@@ -189,7 +158,7 @@ export const useScopedTranslation = (
     void load();
   }, [enableNamespaceLoading, namespacesToLoad]);
 
-  return { t, isLoading, initiativeName };
+  return { t, isLoading, initiativeNamespace };
 };
 
 export default useScopedTranslation;
