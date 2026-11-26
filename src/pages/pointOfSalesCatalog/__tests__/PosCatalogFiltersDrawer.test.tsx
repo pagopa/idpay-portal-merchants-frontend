@@ -1,9 +1,12 @@
+import '@testing-library/jest-dom';
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { ThemeProvider } from '@mui/material';
+import { theme } from '@pagopa/mui-italia/theme';
 import { useFormik } from 'formik';
 import { GetPointOfSalesFilters } from '../../../types/types';
 import { PosCatalogDrawer, PosCatalogFilters } from '../PosCatalogFiltersDrawer';
-import { MockPosCatalogStore } from '../mockPosCatalog';
+import { PointOfSaleDTO } from '../../../api/generated/merchants/data-contracts';
 import {
   associatePos,
   excludePos,
@@ -109,7 +112,7 @@ const TestFilters = ({
   );
 };
 
-const onlineStore: MockPosCatalogStore = {
+const onlineStore: PointOfSaleDTO = {
   id: '1',
   franchiseName: 'Negozio online',
   type: 'ONLINE',
@@ -119,23 +122,18 @@ const onlineStore: MockPosCatalogStore = {
   contactName: 'Mario',
   contactSurname: 'Rossi',
   contactEmail: 'mario.rossi@mail.it',
-  initiative: 'Iniziativa 1',
-  adhesions: [{ date: '01/01/2026', initiativeName: 'Iniziativa 1' }],
 };
 
-const physicalStore: MockPosCatalogStore = {
+const physicalStore: PointOfSaleDTO = {
   id: '2',
   franchiseName: 'Negozio fisico',
   type: 'PHYSICAL',
   address: 'Via Roma 1',
   website: '',
   city: 'Milano',
-  phone: '0612345678',
   contactName: 'Lucia',
   contactSurname: 'Bianchi',
   contactEmail: 'lucia.bianchi@mail.it',
-  initiative: 'Iniziativa 2',
-  adhesions: [{ date: '02/02/2026', initiativeName: 'Iniziativa 2' }],
 };
 
 const drawerInitiativeOptions = [
@@ -364,15 +362,17 @@ describe('PosCatalogFiltersDrawer', () => {
     const onOperationCompleted = jest.fn();
 
     render(
-      <PosCatalogDrawer
-        isOpen
-        onClose={jest.fn()}
-        onOperationCompleted={onOperationCompleted}
-        selectedStore={physicalStore}
-        initiativeOptions={drawerInitiativeOptions}
-        publishedInitiativeOptions={drawerInitiativeOptions}
-        merchantId="merchant-123"
-      />
+      <ThemeProvider theme={theme}>
+        <PosCatalogDrawer
+          isOpen
+          onClose={jest.fn()}
+          onOperationCompleted={onOperationCompleted}
+          selectedStore={physicalStore}
+          initiativeOptions={drawerInitiativeOptions}
+          publishedInitiativeOptions={drawerInitiativeOptions}
+          merchantId="merchant-123"
+        />
+      </ThemeProvider>
     );
 
     expect(screen.getByTestId('exclude-store-button')).toHaveTextContent(
@@ -412,15 +412,17 @@ describe('PosCatalogFiltersDrawer', () => {
     const onOperationCompleted = jest.fn();
 
     render(
-      <PosCatalogDrawer
-        isOpen
-        onClose={onClose}
-        onOperationCompleted={onOperationCompleted}
-        selectedStore={physicalStore}
-        initiativeOptions={drawerInitiativeOptions}
-        publishedInitiativeOptions={drawerInitiativeOptions}
-        merchantId="merchant-123"
-      />
+      <ThemeProvider theme={theme}>
+        <PosCatalogDrawer
+          isOpen
+          onClose={onClose}
+          onOperationCompleted={onOperationCompleted}
+          selectedStore={physicalStore}
+          initiativeOptions={drawerInitiativeOptions}
+          publishedInitiativeOptions={drawerInitiativeOptions}
+          merchantId="merchant-123"
+        />
+      </ThemeProvider>
     );
 
     fireEvent.click(screen.getByTestId('exclude-store-button'));
@@ -458,15 +460,17 @@ describe('PosCatalogFiltersDrawer', () => {
     const onOperationCompleted = jest.fn();
 
     render(
-      <PosCatalogDrawer
-        isOpen
-        onClose={jest.fn()}
-        onOperationCompleted={onOperationCompleted}
-        selectedStore={physicalStore}
-        initiativeOptions={drawerInitiativeOptions}
-        publishedInitiativeOptions={drawerInitiativeOptions}
-        merchantId="merchant-123"
-      />
+      <ThemeProvider theme={theme}>
+        <PosCatalogDrawer
+          isOpen
+          onClose={jest.fn()}
+          onOperationCompleted={onOperationCompleted}
+          selectedStore={physicalStore}
+          initiativeOptions={drawerInitiativeOptions}
+          publishedInitiativeOptions={drawerInitiativeOptions}
+          merchantId="merchant-123"
+        />
+      </ThemeProvider>
     );
 
     fireEvent.click(screen.getByTestId('exclude-store-button'));

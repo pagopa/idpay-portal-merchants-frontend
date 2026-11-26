@@ -127,24 +127,26 @@ const InitiativeOverview = () => {
               (!data?.iban ?
                 <MIAlert
                   severity='warning'
-                  description={t('pages.initiativeOverview.ibanBanner.description')}
                   action={isEditIbanDisabled ? undefined : {
                     label: t('pages.initiativeOverview.ibanBanner.action'),
                     onClick: () => {
                       setIsIbanModalOpen(true);
                     }
                   }}
-                /> :
+                >
+                  {t('pages.initiativeOverview.ibanBanner.description')}
+                </MIAlert> :
                 <MIAlert
                   severity='info'
-                  description={t('pages.initiativeOverview.emailBanner.description')}
                   action={isEditEmailDisabled ? undefined : {
                     label: t('pages.initiativeOverview.emailBanner.action'),
                     onClick: () => {
                       setIsEmailModalOpen(true);
                     }
                   }}
-                />)
+                >
+                  {t('pages.initiativeOverview.emailBanner.description')}
+                </MIAlert>)
             }
           </Box>
         </Grid>
