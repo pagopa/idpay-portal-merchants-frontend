@@ -140,7 +140,7 @@ const AssociateSelectedPosModal: React.FC<Props> = ({
           </Select>
         </FormControl>
 
-        <MIAlert severity="info" description={t(`pages.posCatalog.${copyKey}.infoBanner`)} />
+        <MIAlert severity="info">{t(`pages.posCatalog.${copyKey}.infoBanner`)}</MIAlert>
       </DialogContent>
     </DialogComponent>
   );
